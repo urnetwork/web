@@ -1,9 +1,80 @@
 <html>
 <head>
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@100;200;300;400;500;600;700;800&display=swap" rel="stylesheet">
+
 	<style>
+		body {
+			font-family: 'Noto Sans', sans-serif;
+			font-size: 12pt;
+		}
+
 		img {
 			height:  200px;
 		}
+
+		#header {
+			/*position: fixed;*/
+		}
+
+		#header-place {
+			height: 400px;
+		}
+
+		div.runner {
+			max-width: 800px;
+			margin-left: auto;
+			margin-right: auto;
+		}
+
+		div.leader {
+			font-size: 24pt;
+			font-weight: 100;
+			clear: both;
+			margin-top: 24px;
+			margin-bottom: 24px;
+		}
+
+		div.leader img {
+
+			
+		}
+
+		div.leader div {
+			display: inline-block;
+			max-width: 400px;
+		}
+
+		div.use-cases img {
+			width: 100%;
+			height: auto;
+		}
+
+		div.leader-left {
+			float: left;
+		}
+
+		div.leader-right {
+			float: right;
+		}
+
+		div.header {
+			font-size: 18pt;
+			font-weight: 200;
+			margin-top: 24px;
+			margin-bottom: 12px;
+		}
+
+		table.pricing-table {
+			margin-top: 12px;
+			margin-bottom: 12px;
+		}
+		table.pricing-table tr {
+			margin-top: 12px;
+		}
+
+
 	</style>
 </head>
 <body>
@@ -16,23 +87,28 @@
 	<div>Community</div>
 	<div id="start">Get Connected</div>
 </div>
-<div id="runner">
-	<div>
-		<div>Bring your internet anywhere. World Wide Access is a decentralized VPN built with modern web standards and crypto integration.</div>
-		<img src="res/images/pack.jpg"/>
+<!-- <div id="header-place"></div> -->
+<div class="runner">
+	<div class="leader">
+		Bring your internet anywhere.
+	</div>
+	<div class="leader">
+		<img src="res/images/pack.jpg" class="leader-right"/>
+		<div class="leader-left">A decentralized VPN built with modern web standards and crypto integration.</div>
+		
+	</div>
+	<div class="leader">
+		<img src="res/images/share-private.jpg" class="leader-left"/>
+		<div class="leader-right">Share your internet with yourself, friends, and family.</div>
+	</div>
+	<div class="leader">
+		<img src="res/images/share-public.jpg" class="leader-left"/>
+		<div class="leader-right">Share your internet with the world.</div>
 	</div>
 	<div>
-		<img src="res/images/share-private.jpg"/>
-		<div>Share your internet with yourself, friends, and family.</div>
-	</div>
-	<div>
-		<img src="res/images/share-public.jpg"/>
-		<div>Share your internet with the world.</div>
-	</div>
-	<div>
-		<div>Pricing</div>
+		<div class="header">Pricing</div>
 		<div>BringYour is committed to bring private networks to everyone with competitive, pay-per-usage pricing and a significant free mode. We believe pay-per-usage is more transparent and affordable than pay-per-user or bundle pricing. </div>
-		<table>
+		<table class="pricing-table">
 			<tr>
 				<td>Connect as many users and devices to your network as you want</td>
 				<td><span class="free">Unlimited, Free</span></td>
@@ -59,36 +135,36 @@
 			</tr>
 		</table>
 	</div>
-	<div>
+	<div class="use-cases">
 		<img src="res/images/use-cases.jpg"/>
 	</div>
 	<div>
-		<div>Matchmaking</div>
+		<div class="header">Matchmaking</div>
 		<div>Find providers with as much detail as you want. Star your favorite providers, or let the best option be automatically chosen. Use one hop or multiple hops to add extra layers of peer security.</div>
 	</div>
 	<div>
-		<div>Leases and validation</div>
+		<div class="header">Leases and validation</div>
 		<div>Providers are transparently validated by stability and performance. The best providers are chosen automatically. Incentivize providers with transparent long term leases to set up virtual second homes.</div>
 	</div>
 	<div>
-		<div>Bring it into your living room</div>
+		<div class="header">Bring it into your living room</div>
 		<div>Provide directly from your iOS, Android, or desktop. Seamlessly peer your media devices.</div>
 	</div>
 	<div>
-		<div>Open core and auditable</div>
-		<div>An open source network client that makes peer to peer connections with other clients. An open API coordinating the clients. We're following a business plan and technology outlined in our whitepaper.</div>
+		<div class="header">Open core and auditable</div>
+		<div>An <a href="">open source network client</a> that makes peer-to-peer, end-to-end encrypted connections with other clients. An <a href="">open API</a> to coordinate the clients. We're following a business plan and technology outlined in <a href="">our whitepaper</a>.</div>
 	</div>
 	<div>
-		<div>Statistics</div>
-		<div>Statistics pulled from the API using this code. Explore more statistics.</div>
-		<div>Free transfer curve
-	Fee Transfer and beacon demand curve (can expand to see by region)
-	Extender transfer curve
-	Number of high quality sites curve
-	Number of sites curve
-	Number of countries
-	Nuimber of citites
-	Number of users</div>
+		<div class="header">Statistics</div>
+		<div>Free transfer curve</div>
+		<div>Fee Transfer and beacon demand curve (can expand to see by region)</div>
+		<div>Extender transfer curve</div>
+		<div>Number of high quality sites curve</div>
+		<div>Number of sites curve</div>
+		<div>Number of countries</div>
+		<div>Nuimber of citites</div>
+		<div>Number of users</div>
+		<div><span id="explore">Explore more statistics</span></div>
 	</div>
 </div>
 <div>
@@ -96,7 +172,7 @@
 </div>
 <div id="footer">
 	About | GitHub | Whitepaper | Docker | Downloads | App store | Play Store | 
-	Community | Discord | Twitter | G2 ratings | Contact Us
+	Community | Discord | Twitter | YouTube | G2 ratings | Contact Us
 
 	Terms of Use | Privacy Policy | Legal
 </div>

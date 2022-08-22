@@ -1,9 +1,51 @@
 <html>
 <head>
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@100;200;300;400;500;600;700;800&display=swap" rel="stylesheet">
+
 	<style>
+		body {
+			font-family: 'Noto Sans', sans-serif;
+			font-size: 12pt;
+		}
+
 		img {
 			height:  200px;
 		}
+
+		div.container {
+			position: relative;
+			width: 100%;
+			height: 800px;
+			overflow: hidden;
+		}
+
+		div.leader {
+			font-size: 24pt;
+			font-weight: 100;
+			clear: both;
+			margin-top: 24px;
+			margin-bottom: 24px;
+		}
+
+		div.runner-box {
+			max-width: 400px;
+			margin-left: auto;
+			margin-right: auto;
+			padding: 64px;
+			background-color: rgb(255, 255, 255);
+			margin-top: 128px;
+		}
+
+		#bg {
+			position: absolute;
+			left: 0px;
+			top: 0px;
+			z-index: -1;
+
+		}
+
 	</style>
 	  <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -17,19 +59,24 @@
 <body>
 <div id="header">
 	<img src="res/images/by.svg"/>
-	<div>World Wide Access</div>
+	<div><a href="index.html">World Wide Access</a></div>
 	<div>Extra Room</div>
-	<div>Network</div>
-	<div>For Developers</div>
+	<div><a href="network.html">Network</a></div>
+	<div><a href="developers.html">For Developers</a></div>
 	<div>Community</div>
 	<div id="start">Get Connected</div>
 </div>
-<div id="runner-box">
-	<div>Setting up a second house or your parents' house should be the same as setting up an extra room in your house. We're working on integrations for popular router models to connect entire home networks. We're also working on a standard boosted router that can easily deploy for any home user.</div>
-	<div>We're working hard on our product roadmap. Get notified when this product launches.</div>
-	<div><input type="text"/></div>
+<div class="container">
+	
+	<div class="runner-box">
+		<div class="leader">When you set up an extra room in your house things just work. Setting up a second physical space should be just as easy.</div>
+		<div>We're working on integrations for popular router models to connect entire site networks. We're also working on a standard boosted router that can easily deploy for any home user.</div>
+		<div>We're working hard on our product roadmap. Get notified when this product launches.</div>
+		<div><input type="text"/></div>
+	</div>
+	
+	<div id="bg"></div>
 </div>
-<div id="bg"></div>
 <div>
 	<hr/>
 </div>
