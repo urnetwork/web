@@ -8,9 +8,10 @@
 		body {
 			font-family: 'Noto Sans', sans-serif;
 			font-size: 12pt;
+			margin: 0px;
 		}
 
-		img {
+		div.runner img {
 			height:  200px;
 		}
 
@@ -74,19 +75,310 @@
 			margin-top: 12px;
 		}
 
+		#header {
+			position: fixed;
+			/*height: 400px;*/
+			left: 0px;
+			right: 0px;
+			top: 0px;
+			/*clear: both;*/
+			/*display: table;*/
+			background-color: rgb(255, 255, 255);
+			/*box-shadow: 0px 5px 10px 0px rgba(0, 0, 0, 0.5); */
+		}
+
+
+		#header div.tab-container {
+			/*display: table-cell;*/
+			/*float: left;*/
+			/*max-width: 800px;
+			position: absolute;
+
+			left: 0px;
+			right: 0px;
+			bottom: 0px;
+			margin-left: auto;
+			margin-right: auto;*/
+		}
+
+
+		#header div.tab-container a {
+			color: rgb(0, 0, 0);
+			text-decoration: none;
+		}
+
+		#header a div.tab:hover {
+			border-bottom: 4px solid rgb(220, 220, 220);
+		}
+
+		#header div.tab {
+			display: inline-block;
+			padding: 12px;
+			margin: 0px;
+			border-width: 0px;
+			border-bottom: 4px solid rgb(255, 255, 255);
+			/*border-right: 1px solid rgb(220, 220, 220);*/
+		}
+
+		#header div.tab-selected {
+			border-bottom: 4px solid rgb(0, 0, 0);
+		}
+
+		#logo {
+			/*float: left;*/
+			/*display: table-cell;*/
+			/*vertical-align: bottom;*/
+			/*height: 100%;*/
+			height: 200px;
+		}
+
+		#start {
+			/*float: right;*/
+			/*display: table-cell;*/
+			/*float: left;*/
+			/*vertical-align: bottom;*/
+			display: inline-block;
+			white-space: nowrap;
+			background-color: rgb(0, 123, 255);
+			border-radius: 8px;
+			padding: 12px;
+			margin-right: 24px;
+			margin-top: 8px;
+			margin-bottom: 8px;
+			color: rgb(255, 255, 255);
+			font-weight: 600;
+		}
+
+		#start:hover {
+			background-color:  #0069d9;
+		}
+
+		#header-place {
+			height: 200px;
+		}
+
+		#header table {
+			width: 100%;
+			border-spacing: 0px;
+		}
+		#header td {
+
+			vertical-align: bottom;
+		}
+		#header td.logo {
+			min-width: 300px;
+		}
+		#header td.start {
+			min-width: 300px;
+			vertical-align: middle;
+			text-align: right;
+		}
+		#header td.expand {
+			width: 100%;
+			text-align: center;
+		}
+
+		#footer {
+			color: rgb(255, 255, 255);
+			background-color: rgb(64, 64, 64);
+			font-weight: 100;
+			padding: 24px;
+			text-align: center;
+			margin-top: 24px;
+		}
+
+		#footer div.link a {
+			color: rgb(255, 255, 255);
+			text-decoration: none;
+			background-color: rgba(255, 255, 255, 0.1);
+			padding: 4px;
+		}
+
+		#footer div.link a:hover {
+			background-color: rgba(255, 255, 255, 0.2);
+		}
+
+		#footer div.link {
+			margin-top: 12px;
+			margin-bottom: 12px;
+		}
+
+		#footer table {
+			border-spacing: 0px;
+		}
+
+		#footer td {
+			color: rgb(255, 255, 255);
+			min-width: 200px;
+			font-weight: 100;
+			vertical-align: top;
+		}
+
+		
+
+		#footer div.link-container {
+			display: inline-block;
+		}
+
+		#footer div.social-container {
+			margin-top: 24px;
+		}
+
+		#footer div.social-container div {
+			display: inline-block;
+			width: 32px;
+			height: 32px;
+			margin-right: 12px;
+		}
+
+		#footer div.social-container div img {
+			max-width: 32px;
+			max-height: 32px;
+		}
+
+		#footer div.store {
+			margin-top: 12px;
+			margin-bottom: 12px;
+		}
+
+		#footer div.store img {
+			max-height: 40px;
+		}
+
+		#footer div.g2 {
+			margin-top: 12px;
+			margin-bottom: 12px;
+		}
+
+		#footer div.g2 img {
+			max-height: 64px;
+		}
+
+
+		#footer div.copyline {
+			margin-top: 24px;
+		}
+
+
+		div.stats div.stat {
+			display: inline-block;
+			/*margin-right: 24px;
+			margin-top: 12px;*/
+		}
+
+		div.stats table {
+			border-spacing: 0px;
+		}
+
+		div.stats td.title {
+			font-size: 10pt;
+			font-weight: 100;
+		}
+
+		div.stats td.title {
+			font-size: 10pt;
+			font-weight: 600;
+		}
+
+		div.stats td.current {
+			font-size: 18pt;
+			font-weight: 100;
+			padding-left: 12px;
+			padding-right: 12px;
+			min-width: 100px;
+		}
 
 	</style>
+
+	<script src="libraries/d3.min.js"></script>
+
+	<script>
+		let lastKnownScrollPosition = 0;
+let ticking = false;
+
+function doSomething(scrollPos) {
+  // Do something with the scroll position
+  let e = document.getElementById('logo');
+  let h = document.getElementById('header');
+  if (e) {
+  	let height0 = 50;
+  	let height1 = 200;
+  	let u = Math.min(scrollPos / (height1 - height0), 1.0);
+  	let height = Math.round(height0 * u + height1 * (1 - u));
+  	console.log(u)
+  	e.style.height = height + 'px';
+
+  	let a = Math.round(10 * 0.5 * u) / 10.0;
+  	console.log(a);
+  	if (a <= 0) {
+  		h.style['box-shadow'] = 'none'
+  	} else {
+  		h.style['box-shadow'] = '0px 5px 10px 0px rgba(0, 0, 0, ' + a + ')';
+  		console.log(h.style['box-shadow']);
+  	}
+  }
+}
+
+window.addEventListener('scroll', (e) => {
+  lastKnownScrollPosition = window.scrollY;
+
+  if (!ticking) {
+    window.requestAnimationFrame(() => {
+      doSomething(lastKnownScrollPosition);
+      ticking = false;
+    });
+
+    ticking = true;
+  }
+});
+
+
+// import {
+//   range       as d3_range,
+//   select      as d3_select,
+//   scaleLinear as d3_scaleLinear
+// } from 'd3';
+
+let d3_range = d3.range;
+let d3_select = d3.select;
+let d3_scaleLinear = d3.scaleLinear;
+
+	function sparkPlot(containerId) {
+		
+const WIDTH      = 160;
+const HEIGHT     = 30;
+const DATA_COUNT = 40;
+const BAR_WIDTH  = (WIDTH - DATA_COUNT) / DATA_COUNT;
+const data = d3_range(DATA_COUNT).map( d => Math.random() );
+const x    = d3_scaleLinear().domain([0, DATA_COUNT]).range([0, WIDTH]);
+const y    = d3_scaleLinear().domain([0, 1]).range([HEIGHT, 0]);
+const svg = d3_select('#' + containerId).append('svg')
+  .attr('width', WIDTH)
+  .attr('height', HEIGHT)
+  .append('g');
+svg.selectAll('.bar').data(data)
+  .enter()
+  .append('rect')
+    .attr('class', 'bar')
+    .attr('x', (d, i) => x(i))
+    .attr('y', d => HEIGHT - y(d))
+    .attr('width', BAR_WIDTH)
+    .attr('height', d => y(d))
+    .attr('fill', 'rgb(220, 220, 220)');
+	}
+	</script>
 </head>
 <body>
 <div id="header">
-	<img src="res/images/by.svg"/>
-	<div>World Wide Access</div>
-	<div><a href="extra-room.html">Extra Room</a></div>
-	<div><a href="network.html">Network</a></div>
-	<div><a href="developers.html">For Developers</a></div>
-	<div>Community</div>
-	<div id="start">Get Connected</div>
+	<table>
+		<tr>
+		<td class="logo"><img id="logo" src="res/images/by.svg"/></td>
+		<td class="expand"><div class="tab-container"><div class="tab tab-selected">World Wide Access</div><a href="extra-room.html"><div class="tab">Extra Room</div></a><a href="network.html"><div class="tab">Network</div></a><a href="developers.html"><div class="tab">For Developers</div></a><a href="community.html"><div class="tab">Community</div></a></div></td>
+		<td class="start"><a href="start.html"><div id="start">Get Connected</div></a></td>
+	</tr>
+</table>
 </div>
+<div id="header-place"></div>
 <!-- <div id="header-place"></div> -->
 <div class="runner">
 	<div class="leader">
@@ -154,27 +446,48 @@
 		<div class="header">Open core and auditable</div>
 		<div>An <a href="">open source network client</a> that makes peer-to-peer, end-to-end encrypted connections with other clients. An <a href="">open API</a> to coordinate the clients. We're following a business plan and technology outlined in <a href="">our whitepaper</a>.</div>
 	</div>
-	<div>
+	<div class="stats">
 		<div class="header">Statistics</div>
-		<div>Free transfer curve</div>
-		<div>Fee Transfer and beacon demand curve (can expand to see by region)</div>
-		<div>Extender transfer curve</div>
-		<div>Number of high quality sites curve</div>
-		<div>Number of sites curve</div>
-		<div>Number of countries</div>
-		<div>Nuimber of citites</div>
-		<div>Number of users</div>
-		<div><span id="explore">Explore more statistics</span></div>
+		<div class="stat"><table><tr><td colspan="2" class="title">Daily Free Transfer (GB)</td></tr><tr><td id="free-transfer" class="plot"><script>sparkPlot('free-transfer')</script></td><td class="current">40GB</td></tr></table></div>
+		<div class="stat"><table><tr><td colspan="2" class="title">Daily Paid Transfer (GB)</td></tr><tr><td id="paid-transfer" class="plot"><script>sparkPlot('paid-transfer')</script></td><td class="current">100GB</td></tr></table></div>
+		<div class="stat"><table><tr><td colspan="2" class="title">Daily Extender Transfer (GB)</td></tr><tr><td id="extender-transfer" class="plot"><script>sparkPlot('extender-transfer')</script></td><td class="current">80GB</td></tr></table></div>
+		<div class="stat"><table><tr><td colspan="2" class="title">Daily Validated Providers</td></tr><tr><td id="validated-providers" class="plot"><script>sparkPlot('validated-providers')</script></td><td class="current">10</td></tr></table></div>
+		<div class="stat"><table><tr><td colspan="2" class="title">Daily Providers</td></tr><tr><td id="providers" class="plot"><script>sparkPlot('providers')</script></td><td class="current">38</td></tr></table></div>
+		<div class="stat"><table><tr><td colspan="2" class="title">Daily Countries</td></tr><tr><td id="countries" class="plot"><script>sparkPlot('countries')</script></td><td class="current">15</td></tr></table></div>
+		<div class="stat"><table><tr><td colspan="2" class="title">Daily Cities</td></tr><tr><td id="cities" class="plot"><script>sparkPlot('cities')</script></td><td class="current">15</td></tr></table></div>
+		<div class="stat"><table><tr><td colspan="2" class="title">Daily Networks</td></tr><tr><td id="networks" class="plot"><script>sparkPlot('networks')</script></td><td class="current">230</td></tr></table></div>
+		<div class="stat"><table><tr><td colspan="2" class="title">Daily Uptime</td></tr><tr><td id="uptime" class="plot"><script>sparkPlot('uptime')</script></td><td class="current">100%</td></tr></table></div>
+		<div><a href="explore">Explore more statistics</a></div>
 	</div>
 </div>
-<div>
-	<hr/>
-</div>
 <div id="footer">
-	About | GitHub | Whitepaper | Docker | Downloads | App store | Play Store | 
-	Community | Discord | Twitter | YouTube | G2 ratings | Contact Us
-
-	Terms of Use | Privacy Policy | Legal
+	<div class="link-container">
+		<table>
+			<tr>
+				<td>
+					<div class="link"><a href="">White Paper</a></div>
+					<div class="link"><a href="">About</a></div>
+					<div class="link"><a href="">GitHub</a></div>
+					<div class="link"><a href="">DockerHub</a></div>
+					<div class="social-container"><div><img src="res/images/s-discord.png"/></div><div><img src="res/images/s-twitter.png"/></div><div><img src="res/images/s-youtube.png"/></div><div><img src="res/images/s-linkedin.png"/></div></div>
+				</td>
+				<td>
+					<div class="store"><img src="res/images/store-app.svg"/></div>
+					<div class="store"><img src="res/images/store-play.png"/></div>
+					<div class="store"><img src="res/images/store-ms.svg"/></div>
+					<div class="link"><a href="">More Downloads</a></div>
+					
+				</td>
+				<td>
+					<div class="link"><a href="">Contact Us</a></div>
+					<div class="link"><a href="">Terms of Use</a></div>
+					<div class="link"><a href="">Privacy Policy</a></div>
+					<div class="g2"><img src="res/images/reviews-g2.png"/></div>
+				</td>
+			</tr>
+		</table>
+		<div class="copyline">Copyright 2022 BringYour, LLC</div>
+	</div>
 </div>
 
 
