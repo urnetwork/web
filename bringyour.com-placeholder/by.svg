@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="400px" height="400px" viewBox="0 0 400 400" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>Logo</title>
+    <g id="Logo" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Group" transform="translate(44.000000, 44.000000)" stroke="#000000">
+            <circle id="Oval" stroke-opacity="0.2" stroke-width="2" cx="156" cy="156" r="155"></circle>
+            <path d="M156,0 C69.843579,0 0,69.843579 0,156" id="Path" stroke-width="4"></path>
+            <circle id="Oval" stroke-opacity="0.2" stroke-width="2" cx="92.5" cy="92.5" r="63.5"></circle>
+            <circle id="Oval" stroke-width="4" cx="93.5" cy="61.5" r="30.5"></circle>
+            <circle id="Oval" stroke-width="4" cx="93.5" cy="124.5" r="30.5"></circle>
+            <circle id="Oval" stroke-width="4" cx="61.5" cy="89.5" r="30.5"></circle>
+            <circle id="Oval" stroke-width="4" cx="124.5" cy="89.5" r="30.5"></circle>
+            <circle id="Oval" stroke-opacity="0.2" stroke-width="2" cx="221.5" cy="90.5" r="63.5"></circle>
+            <circle id="Oval" stroke-opacity="0.2" stroke-width="2" cx="221.5" cy="219.5" r="63.5"></circle>
+            <circle id="Oval" stroke-opacity="0.2" stroke-width="2" cx="92.5" cy="219.5" r="63.5"></circle>
+        </g>
+    </g>
+</svg>

@@ -1,10 +1,35 @@
 <html>
 <head>
+	<title>BringYour</title>
+
+	<link rel="icon" href="favicon.svg">
+	<link rel=”mask-icon” href=”mask.svg” color=”#ffffff">
+
+
 	<link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@100;200;300;400;500;600;700;800&display=swap" rel="stylesheet">
 
 	<style>
+		@font-face {
+    font-family: 'Arkitech';
+    src: url('res/fonts/Arkitech-Light.woff2') format('woff2'),
+        url('res/fonts/Arkitech-Light.woff') format('woff');
+    font-weight: 300;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Arkitech';
+    src: url('res/fonts/Arkitech-Medium.woff2') format('woff2'),
+        url('res/fonts/Arkitech-Medium.woff') format('woff');
+    font-weight: 500;
+    font-style: normal;
+    font-display: swap;
+}
+
+
 		body {
 			font-family: 'Noto Sans', sans-serif;
 			font-size: 12pt;
@@ -29,23 +54,56 @@
 			margin-right: auto;
 		}
 
+		div.runner a {
+			color: rgb(0, 0, 0);
+			text-decoration: none;
+			border-bottom: 1px dotted rgb(0, 0, 0);
+		}
+
+		div.runner a:hover {
+			color: rgb(0, 105, 217);
+			border-bottom: 1px dotted rgb(0, 105, 217);
+		}
+
 		div.leader {
 			font-size: 24pt;
 			font-weight: 100;
-			clear: both;
 			margin-top: 24px;
 			margin-bottom: 24px;
 		}
 
-		div.leader img {
-
-			
+		div.leader div.main-message {
+			text-align: center;
+			margin-top: 48px;
+			margin-bottom: 48px;
 		}
 
+		div.leader table {
+			font-size: 24pt;
+			font-weight: 100;
+			border-spacing: 0px;
+			margin-top: 48px;
+			margin-bottom: 48px;
+		}
+
+		div.leader table td.graphic {
+			text-align: center;
+			padding: 0px;
+			min-width: 400px;
+		}
+
+		div.leader table td.text {
+			text-align: left;
+			padding: 8px;
+			vertical-align: middle;
+		}
+
+/*
 		div.leader div {
 			display: inline-block;
 			max-width: 400px;
 		}
+		*/
 
 		div.use-cases img {
 			width: 100%;
@@ -68,11 +126,30 @@
 		}
 
 		table.pricing-table {
-			margin-top: 12px;
-			margin-bottom: 12px;
+			margin-top: 24px;
+			margin-bottom: 24px;
+			border-spacing: 0px;
+			border-collapse: collapse; 
 		}
 		table.pricing-table tr {
-			margin-top: 12px;
+			border-bottom: 1px dotted rgb(220, 220, 220);
+		}
+		table.pricing-table td.item {
+			padding-top: 12px;
+			padding-bottom: 12px;
+			min-width: 400px;
+		}
+		table.pricing-table td.amount {
+			padding: 12px;
+		}
+
+		table.pricing-table span.free {
+			font-weight: 600;
+		}
+
+		div.use-cases {
+			margin-top: 24px;
+			margin-bottom: 24px;
 		}
 
 		#header {
@@ -124,13 +201,6 @@
 			border-bottom: 4px solid rgb(0, 0, 0);
 		}
 
-		#logo {
-			/*float: left;*/
-			/*display: table-cell;*/
-			/*vertical-align: bottom;*/
-			/*height: 100%;*/
-			height: 200px;
-		}
 
 		#start {
 			/*float: right;*/
@@ -150,7 +220,7 @@
 		}
 
 		#start:hover {
-			background-color:  #0069d9;
+			background-color: rgb(0, 105, 217); /* #0069d9 */
 		}
 
 		#header-place {
@@ -165,8 +235,9 @@
 
 			vertical-align: bottom;
 		}
-		#header td.logo {
+		#logo {
 			min-width: 300px;
+			vertical-align: top;
 		}
 		#header td.start {
 			min-width: 300px;
@@ -259,6 +330,10 @@
 			margin-top: 24px;
 		}
 
+		div.stats div.stats-container {
+			margin-top: 24px;
+			margin-bottom: 24px;
+		}
 
 		div.stats div.stat {
 			display: inline-block;
@@ -288,9 +363,18 @@
 			min-width: 100px;
 		}
 
+		div.stats div.substat {
+			display: inline-block;
+			font-size: 8pt;
+		}
+
 	</style>
 
 	<script src="libraries/d3.min.js"></script>
+
+	  <script language="javascript" type="text/javascript" src="libraries/p5.min.js"></script>
+  <script language="javascript" type="text/javascript" src="sketch_220824a.js"></script>
+  <script language="javascript" type="text/javascript">LOGO_S1=200; LOGO_S0=60; CONTAINER_ID='logo';</script>
 
 	<script>
 		let lastKnownScrollPosition = 0;
@@ -298,23 +382,27 @@ let ticking = false;
 
 function doSomething(scrollPos) {
   // Do something with the scroll position
-  let e = document.getElementById('logo');
+  // let e = document.getElementById('logo');
   let h = document.getElementById('header');
-  if (e) {
-  	let height0 = 50;
-  	let height1 = 200;
+  let c = document.getElementById('defaultCanvas0');
+  if (c) {
+  	let height0 = LOGO_S0;
+  	let height1 = LOGO_S1;
   	let u = Math.min(scrollPos / (height1 - height0), 1.0);
   	let height = Math.round(height0 * u + height1 * (1 - u));
-  	console.log(u)
-  	e.style.height = height + 'px';
+  	// console.log(u)
+  	// e.style.height = height + 'px';
+  	c.style.height = height + 'px';
+  	c.style.width = LOGO_S1 + 'px';
+  	resizeCanvas(LOGO_S1, height);
 
   	let a = Math.round(10 * 0.5 * u) / 10.0;
-  	console.log(a);
+  	// console.log(a);
   	if (a <= 0) {
   		h.style['box-shadow'] = 'none'
   	} else {
   		h.style['box-shadow'] = '0px 5px 10px 0px rgba(0, 0, 0, ' + a + ')';
-  		console.log(h.style['box-shadow']);
+  		// console.log(h.style['box-shadow']);
   	}
   }
 }
@@ -349,7 +437,9 @@ const WIDTH      = 160;
 const HEIGHT     = 30;
 const DATA_COUNT = 40;
 const BAR_WIDTH  = (WIDTH - DATA_COUNT) / DATA_COUNT;
-const data = d3_range(DATA_COUNT).map( d => Math.random() );
+const data = d3_range(DATA_COUNT).map( d => 0.3 + 0.7 * Math.random() );
+data.sort();
+data.reverse();
 const x    = d3_scaleLinear().domain([0, DATA_COUNT]).range([0, WIDTH]);
 const y    = d3_scaleLinear().domain([0, 1]).range([HEIGHT, 0]);
 const svg = d3_select('#' + containerId).append('svg')
@@ -372,60 +462,67 @@ svg.selectAll('.bar').data(data)
 <div id="header">
 	<table>
 		<tr>
-		<td class="logo"><img id="logo" src="res/images/by.svg"/></td>
-		<td class="expand"><div class="tab-container"><div class="tab tab-selected">World Wide Access</div><a href="extra-room.html"><div class="tab">Extra Room</div></a><a href="network.html"><div class="tab">Network</div></a><a href="developers.html"><div class="tab">For Developers</div></a><a href="community.html"><div class="tab">Community</div></a></div></td>
-		<td class="start"><a href="start.html"><div id="start">Get Connected</div></a></td>
-	</tr>
-</table>
+			<td id="logo"><!-- <img id="logo" src="res/images/by.svg"/> --></td>
+			<td class="expand"><div class="tab-container"><div class="tab tab-selected">World Wide Access</div><a href="extra-room.html"><div class="tab">Extra Room</div></a><a href="network.html"><div class="tab">Network</div></a><a href="developers.html"><div class="tab">For Developers</div></a><a href="community.html"><div class="tab">Community</div></a></div></td>
+			<td class="start"><a href="start.html"><div id="start">Get Connected</div></a></td>
+		</tr>
+	</table>
 </div>
 <div id="header-place"></div>
 <!-- <div id="header-place"></div> -->
 <div class="runner">
 	<div class="leader">
-		Bring your internet anywhere.
+		<div class="main-message">Bring your internet anywhere.</div>
+		<table>
+			<tr>
+				<td class="text">A decentralized VPN built with modern web standards and crypto integration.</td>
+				<td class="graphic"><img src="res/images/pack.jpg" class="leader-right"/></td>
+			</tr>
+		</table>
+		<table>
+			<tr>
+				<td class="graphic"><img src="res/images/share-private.jpg" class="leader-left"/></td>
+				<td class="text">Share your internet with yourself, friends, and family.</td>
+			</tr>
+		</table>
+		<table>
+			<tr>
+				<td class="graphic"><img src="res/images/share-public.jpg" class="leader-left"/></td>
+				<td class="text">Share your internet with the world.</td>
+			</tr>
+		</table>
 	</div>
-	<div class="leader">
-		<img src="res/images/pack.jpg" class="leader-right"/>
-		<div class="leader-left">A decentralized VPN built with modern web standards and crypto integration.</div>
-		
-	</div>
-	<div class="leader">
-		<img src="res/images/share-private.jpg" class="leader-left"/>
-		<div class="leader-right">Share your internet with yourself, friends, and family.</div>
-	</div>
-	<div class="leader">
-		<img src="res/images/share-public.jpg" class="leader-left"/>
-		<div class="leader-right">Share your internet with the world.</div>
-	</div>
+
 	<div>
 		<div class="header">Pricing</div>
 		<div>BringYour is committed to bring private networks to everyone with competitive, pay-per-usage pricing and a significant free mode. We believe pay-per-usage is more transparent and affordable than pay-per-user or bundle pricing. </div>
 		<table class="pricing-table">
 			<tr>
-				<td>Connect as many users and devices to your network as you want</td>
-				<td><span class="free">Unlimited, Free</span></td>
+				<td class="item">Connect users and devices</td>
+				<td class="amount"><span class="free">Unlimited, Free</span></td>
 			</tr>
 			<tr>
-				<td>Share your internet with yourself from anywhere</td>
-				<td><span class="free">Unlimited, Free</span></td>
+				<td class="item">Share your internet with yourself from anywhere</td>
+				<td class="amount"><span class="free">Unlimited, Free</span></td>
 			</tr>
 			<tr>
-				<td>Share your internet with friends and family from anywhere</td>
-				<td><span class="free">Unlimited, Free</span></td>
+				<td class="item">Share your internet with friends and family from anywhere</td>
+				<td class="amount"><span class="free">Unlimited, Free</span></td>
 			</tr>
 			<tr>
-				<td>Use someone else’s internet somewhere else in the world</td>
-				<td>$0.02/GiB of transfer up or down [pricing calculator]</td>
+				<td class="item">Use someone else’s internet somewhere else in the world</td>
+				<td class="amount"><div>$0.02/GB of transfer up or down</div><div><a href="">Cost calculator</a></div></td>
 			</tr>
 			<tr>
-				<td>Share your internet with someone else</td>
-				<td>Credit $0.01/GiB of transfer up or down. See payout details. [earnings calculator]</td>
+				<td class="item">Share your internet with someone else</td>
+				<td class="amount"><div>Credit $0.01/GB of transfer up or down</div><div><a href="">Payout details</a></div><div><a href="">Earnings calculator</a></div></td>
 			</tr>
 			<tr>
-				<td>Host a network extender</td>
-				<td>Credit $0.005/GiB of transfer up or down for assisted traffic. See payout details. [earnings calculator]</td>
+				<td class="item">Host a network extender</td>
+				<td class="amount"><div>Credit $0.005/GB of transfer up or down for assisted traffic</div><div><a href="">Payout details</a></div><div><a href="">Earnings calculator</a></div></td></td>
 			</tr>
 		</table>
+		<div><a href="">Learn about how we protect your security as a provider</a></div>
 	</div>
 	<div class="use-cases">
 		<img src="res/images/use-cases.jpg"/>
@@ -448,15 +545,18 @@ svg.selectAll('.bar').data(data)
 	</div>
 	<div class="stats">
 		<div class="header">Statistics</div>
-		<div class="stat"><table><tr><td colspan="2" class="title">Daily Free Transfer (GB)</td></tr><tr><td id="free-transfer" class="plot"><script>sparkPlot('free-transfer')</script></td><td class="current">40GB</td></tr></table></div>
-		<div class="stat"><table><tr><td colspan="2" class="title">Daily Paid Transfer (GB)</td></tr><tr><td id="paid-transfer" class="plot"><script>sparkPlot('paid-transfer')</script></td><td class="current">100GB</td></tr></table></div>
-		<div class="stat"><table><tr><td colspan="2" class="title">Daily Extender Transfer (GB)</td></tr><tr><td id="extender-transfer" class="plot"><script>sparkPlot('extender-transfer')</script></td><td class="current">80GB</td></tr></table></div>
-		<div class="stat"><table><tr><td colspan="2" class="title">Daily Validated Providers</td></tr><tr><td id="validated-providers" class="plot"><script>sparkPlot('validated-providers')</script></td><td class="current">10</td></tr></table></div>
-		<div class="stat"><table><tr><td colspan="2" class="title">Daily Providers</td></tr><tr><td id="providers" class="plot"><script>sparkPlot('providers')</script></td><td class="current">38</td></tr></table></div>
-		<div class="stat"><table><tr><td colspan="2" class="title">Daily Countries</td></tr><tr><td id="countries" class="plot"><script>sparkPlot('countries')</script></td><td class="current">15</td></tr></table></div>
-		<div class="stat"><table><tr><td colspan="2" class="title">Daily Cities</td></tr><tr><td id="cities" class="plot"><script>sparkPlot('cities')</script></td><td class="current">15</td></tr></table></div>
-		<div class="stat"><table><tr><td colspan="2" class="title">Daily Networks</td></tr><tr><td id="networks" class="plot"><script>sparkPlot('networks')</script></td><td class="current">230</td></tr></table></div>
-		<div class="stat"><table><tr><td colspan="2" class="title">Daily Uptime</td></tr><tr><td id="uptime" class="plot"><script>sparkPlot('uptime')</script></td><td class="current">100%</td></tr></table></div>
+		<div>Generated from the <a href="">statistics API</a>.</div>
+		<div class="stats-container">
+			<div class="stat"><table><tr><td colspan="2" class="title">Daily Free Transfer (TB)</td></tr><tr><td id="free-transfer" class="plot"><script>sparkPlot('free-transfer')</script></td><td class="current">40TB <div class="substat"><div>3.7gbps</div><div>average</div></div></span></td></tr></td></tr></table></div>
+			<div class="stat"><table><tr><td colspan="2" class="title">Daily Paid Transfer (TB)</td></tr><tr><td id="paid-transfer" class="plot"><script>sparkPlot('paid-transfer')</script></td><td class="current">100TB <div class="substat"><div>9.3gbps</div><div>average</div></div></span></td></tr></table></div>
+			<div class="stat"><table><tr><td colspan="2" class="title">Daily Extender Transfer (TB)</td></tr><tr><td id="extender-transfer" class="plot"><script>sparkPlot('extender-transfer')</script></td><td class="current">80TB <div class="substat"><div>7.4gbps</div><div>average</div></div></span></td></tr></td></tr></table></div>
+			<div class="stat"><table><tr><td colspan="2" class="title">Daily Validated Providers</td></tr><tr><td id="validated-providers" class="plot"><script>sparkPlot('validated-providers')</script></td><td class="current">10</td></tr></table></div>
+			<div class="stat"><table><tr><td colspan="2" class="title">Daily Providers</td></tr><tr><td id="providers" class="plot"><script>sparkPlot('providers')</script></td><td class="current">38</td></tr></table></div>
+			<div class="stat"><table><tr><td colspan="2" class="title">Daily Countries</td></tr><tr><td id="countries" class="plot"><script>sparkPlot('countries')</script></td><td class="current">15</td></tr></table></div>
+			<div class="stat"><table><tr><td colspan="2" class="title">Daily Cities</td></tr><tr><td id="cities" class="plot"><script>sparkPlot('cities')</script></td><td class="current">15</td></tr></table></div>
+			<div class="stat"><table><tr><td colspan="2" class="title">Daily Networks</td></tr><tr><td id="networks" class="plot"><script>sparkPlot('networks')</script></td><td class="current">230</td></tr></table></div>
+			<div class="stat"><table><tr><td colspan="2" class="title">Daily Uptime</td></tr><tr><td id="uptime" class="plot"><script>sparkPlot('uptime')</script></td><td class="current">100%</td></tr></table></div>
+		</div>
 		<div><a href="explore">Explore more statistics</a></div>
 	</div>
 </div>
