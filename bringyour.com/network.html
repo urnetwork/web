@@ -1,93 +1,369 @@
 <html>
 <head>
+	<title>BringYour</title>
+
+	<link rel="icon" href="favicon.svg">
+	<link rel="mask-icon" href="mask.svg" color="#ffffff">
+
 	<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@100;200;300;400;500;600;700;800&display=swap" rel="stylesheet">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@100;200;300;400;500;600;700;800&display=swap" rel="stylesheet">
+	<link href="res/css/bootstrap.min.css" rel="stylesheet">
 
 	<style>
+		@font-face {
+		    font-family: 'Arkitech';
+		    src: url('res/fonts/Arkitech-Light.woff2') format('woff2'),
+		        url('res/fonts/Arkitech-Light.woff') format('woff');
+		    font-weight: 300;
+		    font-style: normal;
+		    font-display: swap;
+		}
+		@font-face {
+		    font-family: 'Arkitech';
+		    src: url('res/fonts/Arkitech-Medium.woff2') format('woff2'),
+		        url('res/fonts/Arkitech-Medium.woff') format('woff');
+		    font-weight: 500;
+		    font-style: normal;
+		    font-display: swap;
+		}
+
 		body {
 			font-family: 'Noto Sans', sans-serif;
 			font-size: 12pt;
+			margin: 0px;
+			background-color: rgb(255, 255, 255);
+			min-height: 100%;
+			display: flex;
+			flex-direction: column;
 		}
 
-		img {
-			height:  200px;
+		#header-place {
+			/* this should match LOGO_S1 */
+			height: 200px;
 		}
 
-		div.container {
-			position: relative;
+		#header {
+			position: fixed;
+			left: 0px;
+			right: 0px;
+			top: 0px;
+			background-color: rgb(255, 255, 255);
+		}
+
+		#header table {
 			width: 100%;
-			height: 800px;
-			overflow: hidden;
+			border-spacing: 0px;
+		}
+		#header td {
+			vertical-align: bottom;
+		}
+		#logo {
+			min-width: 300px;
+			vertical-align: top !important;
+		}
+		#header td.start {
+			min-width: 300px;
+			vertical-align: middle;
+			text-align: right;
+		}
+		#header td.expand {
+			width: 100%;
+			text-align: center;
 		}
 
-		div.leader {
-			font-size: 24pt;
+		#header div.tab-container a {
+			color: rgb(0, 0, 0);
+			text-decoration: none;
+		}
+
+		#header a div.tab:hover {
+			border-bottom: 4px solid rgb(220, 220, 220);
+		}
+
+		#header div.tab {
+			display: inline-block;
+			padding: 12px;
+			margin: 0px;
+			border-width: 0px;
+			border-bottom: 4px solid rgb(255, 255, 255);
+		}
+
+		#header div.tab-selected {
+			border-bottom: 4px solid rgb(0, 0, 0);
+		}
+
+		#start {
+			margin-right: 24px;
+			margin-top: 8px;
+			margin-bottom: 8px;
+		}
+
+		#footer {
+			color: rgb(255, 255, 255);
 			font-weight: 100;
-			clear: both;
+			padding: 24px;
+			text-align: center;
+			background-color: rgb(64, 64, 64);
+		}
+
+		#footer div.link a {
+			color: rgb(255, 255, 255);
+			text-decoration: none;
+			background-color: rgba(255, 255, 255, 0.1);
+			padding: 4px;
+		}
+
+		#footer div.link a:hover {
+			background-color: rgba(255, 255, 255, 0.2);
+		}
+
+		#footer div.link {
+			margin-top: 12px;
+			margin-bottom: 12px;
+		}
+
+		#footer table {
+			border-spacing: 0px;
+		}
+
+		#footer td {
+			color: rgb(255, 255, 255);
+			min-width: 200px;
+			font-weight: 100;
+			vertical-align: top;
+		}
+
+		#footer div.link-container {
+			display: inline-block;
+		}
+
+		#footer div.social-container {
 			margin-top: 24px;
-			margin-bottom: 24px;
+		}
+
+		#footer div.social-container div {
+			display: inline-block;
+			width: 32px;
+			height: 32px;
+			margin-right: 12px;
+		}
+
+		#footer div.social-container div img {
+			max-width: 32px;
+			max-height: 32px;
+		}
+
+		#footer div.store {
+			margin-top: 12px;
+			margin-bottom: 12px;
+		}
+
+		#footer div.store img {
+			max-height: 40px;
+		}
+
+		#footer div.g2 {
+			margin-top: 12px;
+			margin-bottom: 12px;
+		}
+
+		#footer div.g2 img {
+			max-height: 64px;
+		}
+
+		#footer div.copyline {
+			margin-top: 24px;
+		}
+
+		div.runner-container {
+			
+			vertical-align: center;
+			background-image: url("res/images/bg-1.png");
+			background-repeat: repeat;
+			padding-top: 100px;
+			padding-bottom: 100px;
+			flex: 1;
 		}
 
 		div.runner-box {
-			max-width: 400px;
+			max-width: 528px;
 			margin-left: auto;
 			margin-right: auto;
 			padding: 64px;
 			background-color: rgb(255, 255, 255);
-			margin-top: 128px;
 		}
 
-		#bg {
-			position: absolute;
-			left: 0px;
-			top: 0px;
-			z-index: -1;
+		div.runner-box div.leader {
+			font-size: 24pt;
+			font-weight: 100;
+			margin-top: 24px;
+			margin-bottom: 24px;
+		}
+
+		div.runner-box div {
+			margin-bottom: 24px;
+		}
+
+		div.runner-box input[type=text] {
+			width: 100%;
+			padding: 4px;
+			font-size: 12pt;
+			border: none;
+			border-bottom: 4px solid rgb(220, 220, 220);
+			margin-bottom: 8px;
+		}
+
+		div.runner-box input[type=text]:focus {
+			outline: none;
+			border-bottom: 4px solid rgb(0, 0, 0);
+		}
+
+		div.runner-box button {
 
 		}
 
 	</style>
-	  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <script language="javascript" type="text/javascript" src="libraries/p5.min.js"></script>
-  <script language="javascript" type="text/javascript" src="sketch_220813c.js"></script>
-  <script language="javascript" type="text/javascript">A_MODE=1; CONTAINER_ID='bg';</script>
+	<script language="javascript" type="text/javascript" src="libraries/d3.min.js"></script>
+	<script language="javascript" type="text/javascript" src="libraries/p5.min.js"></script>
+    <script language="javascript" type="text/javascript" src="sketch_220824a.js"></script>
+    <script language="javascript" type="text/javascript">
+    	LOGO_S1=200;
+    	LOGO_S0=60;
+    	LOGO_CONTAINER_ID='logo';
+        LOGO_A_MODE=0;
+    </script>
+    <!-- <script language="javascript" type="text/javascript" src="sketch_220813c.js"></script>
+  	<script language="javascript" type="text/javascript">
+  		BG_CONTAINER_ID='bg';
+  		BG_A_MODE=0;
+  		BG_STATIC=true;
+  	</script> -->
 
+	<script language="javascript" type="text/javascript">
+		let lastKnownScrollPosition = 0;
+		let ticking = false;
+
+		function resizeLogo(scrollPos) {
+		  let h = document.getElementById('header');
+		  let c = document.getElementById('logo-canvas');
+		  if (c) {
+		  	let height0 = LOGO_S0;
+		  	let height1 = LOGO_S1;
+		  	let u = Math.min(scrollPos / (height1 - height0), 1.0);
+		  	let height = Math.round(height0 * u + height1 * (1 - u));
+		  	c.style.height = height + 'px';
+		  	c.style.width = LOGO_S1 + 'px';
+		  	logop5.resizeCanvas(LOGO_S1, height);
+
+		  	let a = Math.round(10 * 0.5 * u) / 10.0;
+		  	if (a <= 0) {
+		  		h.style['box-shadow'] = 'none'
+		  	} else {
+		  		h.style['box-shadow'] = '0px 5px 10px 0px rgba(0, 0, 0, ' + a + ')';
+		  	}
+		  }
+		}
+
+		function updateScroll() {
+		  lastKnownScrollPosition = window.scrollY;
+
+		  if (!ticking) {
+		    window.requestAnimationFrame(() => {
+		      resizeLogo(lastKnownScrollPosition);
+		      ticking = false;
+		    });
+
+		    ticking = true;
+		  }
+		}
+
+		window.addEventListener('scroll', (e) => {
+		  updateScroll();
+		});
+
+		window.addEventListener('load', (e) => {
+		  updateScroll();
+		});
+
+		function sparkPlot(containerId) {
+			const WIDTH      = 160;
+			const HEIGHT     = 30;
+			const DATA_COUNT = 40;
+			const BAR_WIDTH  = (WIDTH - DATA_COUNT) / DATA_COUNT;
+			const data = d3.range(DATA_COUNT).map( d => 0.3 + 0.7 * Math.random() );
+			data.sort();
+			data.reverse();
+			const x    = d3.scaleLinear().domain([0, DATA_COUNT]).range([0, WIDTH]);
+			const y    = d3.scaleLinear().domain([0, 1]).range([HEIGHT, 0]);
+			const svg = d3.select('#' + containerId).append('svg')
+			  .attr('width', WIDTH)
+			  .attr('height', HEIGHT)
+			  .append('g');
+			svg.selectAll('.bar').data(data)
+			  .enter()
+			  .append('rect')
+			    .attr('class', 'bar')
+			    .attr('x', (d, i) => x(i))
+			    .attr('y', d => HEIGHT - y(d))
+			    .attr('width', BAR_WIDTH)
+			    .attr('height', d => y(d))
+			    .attr('fill', 'rgb(220, 220, 220)');
+		}
+	</script>
 </head>
-
 <body>
 <div id="header">
-	<img src="res/images/by.svg"/>
-	<div><a href="index.html">World Wide Access</a></div>
-	<div><a href="extra-room.html">Extra Room</a></div>
-	<div>Network</div>
-	<div><a href="developers.html">For Developers</a></div>
-	<div>Community</div>
-	<div id="start">Get Connected</div>
+	<table>
+		<tr>
+			<td id="logo"></td>
+			<td class="expand"><div class="tab-container"><a href="index.html"><div class="tab">World Wide Access</div></a><a href="extra-room.html"><div class="tab">Extra Room</div></a><div class="tab  tab-selected">Network</div><a href="developers.html"><div class="tab">For Developers</div></a><a href="community.html"><div class="tab">Community</div></a></div></td>
+			<td class="start"><button type="button" id="start" class="btn btn-primary">Get Connected</div></td>
+		</tr>
+	</table>
 </div>
-<div class="container">
-	
+<div id="header-place"></div>
+<div class="runner-container">
 	<div class="runner-box">
 		<div class="leader">Business and prosumer needs to connect computers, services, and roles are part of our mission to bring private networks to everyone.</div>
 		<div>We believe in pay-per-usage and a significant free mode. We're working on combining ease of use with SSO, roles, compliance, and data auditing for businesses and prosumers.</div>
-	<div>We're working hard on our product roadmap. Get notified when this product launches.</div>
-	<div><input type="text"/></div>
+		<div>We're working hard on our product roadmap. Get notified about product updates.</div>
+		<div>
+			<input type="text" placeholder="your email"/>
+			<button type="button" class="btn btn-secondary">Subscribe to Updates</button>
+		</div>
 	</div>
-	
-	<div id="bg"></div>
-</div>
-<div>
-	<hr/>
 </div>
 <div id="footer">
-	About | GitHub | Whitepaper | Docker | Downloads | App store | Play Store | 
-	Community | Discord | Twitter | G2 ratings | Contact Us
-
-	Terms of Use | Privacy Policy | Legal
+	<div class="link-container">
+		<table> 
+			<tr>
+				<td>
+					<div class="link"><a href="">White Paper</a></div>
+					<div class="link"><a href="">About</a></div>
+					<div class="link"><a href="">GitHub</a></div>
+					<div class="link"><a href="">DockerHub</a></div>
+					<div class="social-container"><div><img src="res/images/s-discord.png"/></div><div><img src="res/images/s-twitter.png"/></div><div><img src="res/images/s-youtube.png"/></div><div><img src="res/images/s-linkedin.png"/></div></div>
+				</td>
+				<td>
+					<div class="store"><img src="res/images/store-app.svg"/></div>
+					<div class="store"><img src="res/images/store-play.png"/></div>
+					<div class="store"><img src="res/images/store-ms.svg"/></div>
+					<div class="link"><a href="">More Downloads</a></div>
+					
+				</td>
+				<td>
+					<div class="link"><a href="">Contact Us</a></div>
+					<div class="link"><a href="">Terms of Use</a></div>
+					<div class="link"><a href="">Privacy Policy</a></div>
+					<div class="g2"><img src="res/images/reviews-g2.png"/></div>
+				</td>
+			</tr>
+		</table>
+		<div class="copyline">Copyright 2022 BringYour, LLC</div>
+	</div>
 </div>
-
 
 </body>
 </html>
-

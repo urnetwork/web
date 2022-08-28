@@ -3,55 +3,49 @@
 	<title>BringYour</title>
 
 	<link rel="icon" href="favicon.svg">
-	<link rel=”mask-icon” href=”mask.svg” color=”#ffffff">
-
+	<link rel="mask-icon" href="mask.svg" color="#ffffff">
 
 	<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@100;200;300;400;500;600;700;800&display=swap" rel="stylesheet">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@100;200;300;400;500;600;700;800&display=swap" rel="stylesheet">
+	<link href="res/css/bootstrap.min.css" rel="stylesheet">
 
 	<style>
 		@font-face {
-    font-family: 'Arkitech';
-    src: url('res/fonts/Arkitech-Light.woff2') format('woff2'),
-        url('res/fonts/Arkitech-Light.woff') format('woff');
-    font-weight: 300;
-    font-style: normal;
-    font-display: swap;
-}
-
-@font-face {
-    font-family: 'Arkitech';
-    src: url('res/fonts/Arkitech-Medium.woff2') format('woff2'),
-        url('res/fonts/Arkitech-Medium.woff') format('woff');
-    font-weight: 500;
-    font-style: normal;
-    font-display: swap;
-}
-
+		    font-family: 'Arkitech';
+		    src: url('res/fonts/Arkitech-Light.woff2') format('woff2'),
+		        url('res/fonts/Arkitech-Light.woff') format('woff');
+		    font-weight: 300;
+		    font-style: normal;
+		    font-display: swap;
+		}
+		@font-face {
+		    font-family: 'Arkitech';
+		    src: url('res/fonts/Arkitech-Medium.woff2') format('woff2'),
+		        url('res/fonts/Arkitech-Medium.woff') format('woff');
+		    font-weight: 500;
+		    font-style: normal;
+		    font-display: swap;
+		}
 
 		body {
 			font-family: 'Noto Sans', sans-serif;
 			font-size: 12pt;
 			margin: 0px;
+			min-height: 100%;
+			display: flex;
+			flex-direction: column;
 		}
 
 		div.runner img {
 			height:  200px;
 		}
 
-		#header {
-			/*position: fixed;*/
-		}
-
-		#header-place {
-			height: 400px;
-		}
-
 		div.runner {
 			max-width: 800px;
 			margin-left: auto;
 			margin-right: auto;
+			flex: 1;
 		}
 
 		div.runner a {
@@ -97,13 +91,6 @@
 			padding: 8px;
 			vertical-align: middle;
 		}
-
-/*
-		div.leader div {
-			display: inline-block;
-			max-width: 400px;
-		}
-		*/
 
 		div.use-cases img {
 			width: 100%;
@@ -152,32 +139,39 @@
 			margin-bottom: 24px;
 		}
 
+		#header-place {
+			/* this should match LOGO_S1 */
+			height: 200px;
+		}
+
 		#header {
 			position: fixed;
-			/*height: 400px;*/
 			left: 0px;
 			right: 0px;
 			top: 0px;
-			/*clear: both;*/
-			/*display: table;*/
 			background-color: rgb(255, 255, 255);
-			/*box-shadow: 0px 5px 10px 0px rgba(0, 0, 0, 0.5); */
 		}
 
-
-		#header div.tab-container {
-			/*display: table-cell;*/
-			/*float: left;*/
-			/*max-width: 800px;
-			position: absolute;
-
-			left: 0px;
-			right: 0px;
-			bottom: 0px;
-			margin-left: auto;
-			margin-right: auto;*/
+		#header table {
+			width: 100%;
+			border-spacing: 0px;
 		}
-
+		#header td {
+			vertical-align: bottom;
+		}
+		#logo {
+			min-width: 300px;
+			vertical-align: top !important;
+		}
+		#header td.start {
+			min-width: 300px;
+			vertical-align: middle;
+			text-align: right;
+		}
+		#header td.expand {
+			width: 100%;
+			text-align: center;
+		}
 
 		#header div.tab-container a {
 			color: rgb(0, 0, 0);
@@ -194,59 +188,16 @@
 			margin: 0px;
 			border-width: 0px;
 			border-bottom: 4px solid rgb(255, 255, 255);
-			/*border-right: 1px solid rgb(220, 220, 220);*/
 		}
 
 		#header div.tab-selected {
 			border-bottom: 4px solid rgb(0, 0, 0);
 		}
 
-
 		#start {
-			/*float: right;*/
-			/*display: table-cell;*/
-			/*float: left;*/
-			/*vertical-align: bottom;*/
-			display: inline-block;
-			white-space: nowrap;
-			background-color: rgb(0, 123, 255);
-			border-radius: 8px;
-			padding: 12px;
 			margin-right: 24px;
 			margin-top: 8px;
 			margin-bottom: 8px;
-			color: rgb(255, 255, 255);
-			font-weight: 600;
-		}
-
-		#start:hover {
-			background-color: rgb(0, 105, 217); /* #0069d9 */
-		}
-
-		#header-place {
-			height: 200px;
-		}
-
-		#header table {
-			width: 100%;
-			border-spacing: 0px;
-		}
-		#header td {
-
-			vertical-align: bottom;
-		}
-		#logo {
-			min-width: 300px;
-			vertical-align: top !important;
-		}
-		#header td.start {
-			min-width: 300px;
-			vertical-align: middle;
-			text-align: right;
-		}
-		#header td.expand {
-			width: 100%;
-			text-align: center;
 		}
 
 		#footer {
@@ -284,8 +235,6 @@
 			font-weight: 100;
 			vertical-align: top;
 		}
-
-		
 
 		#footer div.link-container {
 			display: inline-block;
@@ -325,7 +274,6 @@
 			max-height: 64px;
 		}
 
-
 		#footer div.copyline {
 			margin-top: 24px;
 		}
@@ -360,116 +308,108 @@
 			font-weight: 100;
 			padding-left: 12px;
 			padding-right: 12px;
-			min-width: 100px;
+			min-width: 124px;
 		}
 
 		div.stats div.substat {
 			display: inline-block;
 			font-size: 8pt;
 		}
-
 	</style>
 
-	<script src="libraries/d3.min.js"></script>
+	<script language="javascript" type="text/javascript" src="libraries/d3.min.js"></script>
+	<script language="javascript" type="text/javascript" src="libraries/p5.min.js"></script>
+    <script language="javascript" type="text/javascript" src="sketch_220824a.js"></script>
+    <script language="javascript" type="text/javascript">
+    	LOGO_S1=200;
+    	LOGO_S0=60;
+    	LOGO_CONTAINER_ID='logo';
+        LOGO_A_MODE=0;
+    </script>
 
-	  <script language="javascript" type="text/javascript" src="libraries/p5.min.js"></script>
-  <script language="javascript" type="text/javascript" src="sketch_220824a.js"></script>
-  <script language="javascript" type="text/javascript">LOGO_S1=200; LOGO_S0=60; CONTAINER_ID='logo';</script>
-
-	<script>
+	<script language="javascript" type="text/javascript">
 		let lastKnownScrollPosition = 0;
-let ticking = false;
+		let ticking = false;
 
-function doSomething(scrollPos) {
-  // Do something with the scroll position
-  // let e = document.getElementById('logo');
-  let h = document.getElementById('header');
-  let c = document.getElementById('defaultCanvas0');
-  if (c) {
-  	let height0 = LOGO_S0;
-  	let height1 = LOGO_S1;
-  	let u = Math.min(scrollPos / (height1 - height0), 1.0);
-  	let height = Math.round(height0 * u + height1 * (1 - u));
-  	// console.log(u)
-  	// e.style.height = height + 'px';
-  	c.style.height = height + 'px';
-  	c.style.width = LOGO_S1 + 'px';
-  	resizeCanvas(LOGO_S1, height);
+		function resizeLogo(scrollPos) {
+		  let h = document.getElementById('header');
+		  let c = document.getElementById('logo-canvas');
+		  if (c) {
+		  	let height0 = LOGO_S0;
+		  	let height1 = LOGO_S1;
+		  	let u = Math.min(scrollPos / (height1 - height0), 1.0);
+		  	let height = Math.round(height0 * u + height1 * (1 - u));
+		  	c.style.height = height + 'px';
+		  	c.style.width = LOGO_S1 + 'px';
+		  	logop5.resizeCanvas(LOGO_S1, height);
 
-  	let a = Math.round(10 * 0.5 * u) / 10.0;
-  	// console.log(a);
-  	if (a <= 0) {
-  		h.style['box-shadow'] = 'none'
-  	} else {
-  		h.style['box-shadow'] = '0px 5px 10px 0px rgba(0, 0, 0, ' + a + ')';
-  		// console.log(h.style['box-shadow']);
-  	}
-  }
-}
+		  	let a = Math.round(10 * 0.5 * u) / 10.0;
+		  	if (a <= 0) {
+		  		h.style['box-shadow'] = 'none'
+		  	} else {
+		  		h.style['box-shadow'] = '0px 5px 10px 0px rgba(0, 0, 0, ' + a + ')';
+		  	}
+		  }
+		}
 
-window.addEventListener('scroll', (e) => {
-  lastKnownScrollPosition = window.scrollY;
+		function updateScroll() {
+		  lastKnownScrollPosition = window.scrollY;
 
-  if (!ticking) {
-    window.requestAnimationFrame(() => {
-      doSomething(lastKnownScrollPosition);
-      ticking = false;
-    });
+		  if (!ticking) {
+		    window.requestAnimationFrame(() => {
+		      resizeLogo(lastKnownScrollPosition);
+		      ticking = false;
+		    });
 
-    ticking = true;
-  }
-});
+		    ticking = true;
+		  }
+		}
 
+		window.addEventListener('scroll', (e) => {
+		  updateScroll();
+		});
 
-// import {
-//   range       as d3_range,
-//   select      as d3_select,
-//   scaleLinear as d3_scaleLinear
-// } from 'd3';
+		window.addEventListener('load', (e) => {
+		  updateScroll();
+		});
 
-let d3_range = d3.range;
-let d3_select = d3.select;
-let d3_scaleLinear = d3.scaleLinear;
-
-	function sparkPlot(containerId) {
-		
-const WIDTH      = 160;
-const HEIGHT     = 30;
-const DATA_COUNT = 40;
-const BAR_WIDTH  = (WIDTH - DATA_COUNT) / DATA_COUNT;
-const data = d3_range(DATA_COUNT).map( d => 0.3 + 0.7 * Math.random() );
-data.sort();
-data.reverse();
-const x    = d3_scaleLinear().domain([0, DATA_COUNT]).range([0, WIDTH]);
-const y    = d3_scaleLinear().domain([0, 1]).range([HEIGHT, 0]);
-const svg = d3_select('#' + containerId).append('svg')
-  .attr('width', WIDTH)
-  .attr('height', HEIGHT)
-  .append('g');
-svg.selectAll('.bar').data(data)
-  .enter()
-  .append('rect')
-    .attr('class', 'bar')
-    .attr('x', (d, i) => x(i))
-    .attr('y', d => HEIGHT - y(d))
-    .attr('width', BAR_WIDTH)
-    .attr('height', d => y(d))
-    .attr('fill', 'rgb(220, 220, 220)');
-	}
+		function sparkPlot(containerId) {
+			const WIDTH      = 160;
+			const HEIGHT     = 30;
+			const DATA_COUNT = 40;
+			const BAR_WIDTH  = (WIDTH - DATA_COUNT) / DATA_COUNT;
+			const data = d3.range(DATA_COUNT).map( d => 0.3 + 0.7 * Math.random() );
+			data.sort();
+			data.reverse();
+			const x    = d3.scaleLinear().domain([0, DATA_COUNT]).range([0, WIDTH]);
+			const y    = d3.scaleLinear().domain([0, 1]).range([HEIGHT, 0]);
+			const svg = d3.select('#' + containerId).append('svg')
+			  .attr('width', WIDTH)
+			  .attr('height', HEIGHT)
+			  .append('g');
+			svg.selectAll('.bar').data(data)
+			  .enter()
+			  .append('rect')
+			    .attr('class', 'bar')
+			    .attr('x', (d, i) => x(i))
+			    .attr('y', d => HEIGHT - y(d))
+			    .attr('width', BAR_WIDTH)
+			    .attr('height', d => y(d))
+			    .attr('fill', 'rgb(220, 220, 220)');
+		}
 	</script>
 </head>
 <body>
 <div id="header">
 	<table>
 		<tr>
-			<td id="logo"><!-- <img id="logo" src="res/images/by.svg"/> --></td>
+			<td id="logo"></td>
 			<td class="expand"><div class="tab-container"><div class="tab tab-selected">World Wide Access</div><a href="extra-room.html"><div class="tab">Extra Room</div></a><a href="network.html"><div class="tab">Network</div></a><a href="developers.html"><div class="tab">For Developers</div></a><a href="community.html"><div class="tab">Community</div></a></div></td>
-			<td class="start"><a href="start.html"><div id="start">Get Connected</div></a></td>
+			<td class="start"><button type="button" id="start" class="btn btn-primary">Get Connected</div></td>
 		</tr>
 	</table>
 </div>
 <div id="header-place"></div>
-<!-- <div id="header-place"></div> -->
 <div class="runner">
 	<div class="leader">
 		<div class="main-message">Bring your internet anywhere.</div>
@@ -589,7 +529,6 @@ svg.selectAll('.bar').data(data)
 		<div class="copyline">Copyright 2022 BringYour, LLC</div>
 	</div>
 </div>
-
 
 </body>
 </html>
