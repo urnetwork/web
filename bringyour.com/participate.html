@@ -1,0 +1,111 @@
+<html>
+<head>
+	<title>BringYour</title>
+
+	<link rel="icon" href="favicon.svg">
+	<link rel=”mask-icon” href=”mask.svg” color="#000000">
+	<link rel="apple-touch-icon" href="touch.png">
+
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@100;200;300;400;500;600;700;800&display=swap" rel="stylesheet">
+	<link href="res/css/bootstrap.min.css" rel="stylesheet">
+
+	<link href="res/css/main.css" rel="stylesheet">
+
+	<script language="javascript" type="text/javascript" src="libraries/d3.min.js"></script>
+	<script language="javascript" type="text/javascript" src="libraries/p5.min.js"></script>
+    <script language="javascript" type="text/javascript" src="sketch_220824a.js"></script>
+    <script language="javascript" type="text/javascript" src="logo.js"></script>
+    <script language="javascript" type="text/javascript" src="stats.js"></script>
+    
+</head>
+<body>
+	<div id="header">
+		<table>
+			<tr>
+				<td id="logo"></td>
+				<td class="expand"><div class="tab-container"><a href="index.html"><div class="tab">Network</div></a><a href="pricing.html"><div class="tab">Pricing</div></a><div class="tab tab-selected">Participate</div><a href="faq.html"><div class="tab">FAQ</div></a><a href="blog.html"><div class="tab">Blog</div></a><a href="about.html"><div class="tab">About</div></a></div></td>
+				<td class="start"><button type="button" id="start" class="btn btn-primary">Get Connected</div></td>
+			</tr>
+		</table>
+	</div>
+	<div id="header-place"></div>
+
+	<div class="runner">
+		<div>
+			<div class="header">Strength in decentralized</div>
+			<div>One of the primary challenges of a private network that promotes privacy and anonymity is that it can be identified and filtered. A malicious agent can join to map the platform hosts and egress points that a typical user would see, and then use that information to label users of the private network as second-class citizens or broken. This is a challenge to any private network that has a finite set of platform hosts and egress points, or a high cost to adding new ones.</div>
+			<div><br>However, BringYour is designed to have an extremely low cost to add new platform hosts and egress points. This design changes the equation by making it cheaper to add new platform hosts and egress points that it is to label them.</div>
+			<div><br>To label a platform host or egress point means to be able to tell from the internet which hostnames and IP addresses are part of the private network with a low probability of false positives. Relying a model with false positives means that the internet is broken for users who are not on private networks, which has a real cost. Fundamentally, the more that private networks comingle with regular traffic, the harder it is to minimize false positives. Bring Your achieves this by making it extremely easy for private networks and regular traffic to coexist.</div>
+		</div>
+
+		<div>
+			<div class="header">Providers</div>
+			<div>The ability to provide egress sites is built into BringYour. Because this opt-in feature is so simple and so powerful, there are a number of security guardrails and access control so that you are in control. To get started with providing, just turn it on in the provide section. There is no further setup or configuration of your environment needed.</div>
+			<div><br>The BringYour network is a revenue share where providers take a piece of the total income slice. See the <a href="pricing.html">income breakdown</a>.</div>
+		</div>
+
+		<div>
+			<div class="header">Provider security guardrails</div>
+			<div>The following rules are enforced in the sender and receiver side. Any detected abuse by the sender or receiver immediately raises a provider dispute as defined in the <a href="https://github.com/bringyour/product/whitepaper.md" target="_blank">whitepaper</a>.</div>
+			<table class="list-table">
+				<tr>
+					<td class="item"><img src="res/images/superfast.svg"></td>
+					<td class="amount">No access to non-public IPv4 and IPv6 subnets as defined by RFC 1918, RFC 4193, and other related RFCs. Only public addresses are allowed to be routed.</td>
+				</tr>
+				<tr>
+					<td class="item"><img src="res/images/superfast.svg"></td>
+					<td class="amount">Only end-to-end TLS and dTLS encrypted traffic is allowed. Unencypted traffic will not pass through a provider.</td>
+				</tr>
+				<tr>
+					<td class="item"><img src="res/images/superfast.svg"></td>
+					<td class="amount">Self-signed host TLS certificates are not allowed. There is no inspection or modification of packets allowed.</td>
+				</tr>
+				
+
+			</table>
+			<div>These rules do not apply when connecting between devices and services on the same network.</div>
+			<div><br>Our goal is to automate security and safety rules on the network. If there are rules you think would be beneficial, please <a href="https://github.com/bringyour/product/discussions" target="_blank">give us feedback</a>.</div>
+		</div>
+
+		<div>
+			<div class="header">Extenders</div>
+			<div>The platform hosts by default live at hostnames <code>*.bringyour.com</code>. Additional edges that help coordinate web traffic (WebRTC-related protocols) live at hostnames <code>edge-*.bringyour.network</code>. These are distributed all over the world to be as close to users as possible. The edges maintain a real-time latency map to help users orient themselves on the network, just like a constellation of stars for sailors.</div>
+			<div><br>An extender can join the network and provide platform hosts on a new domain and IP. The owner of the extender controls a domain and an IP, which map to their extender. For example, their <code>anydomain.com</code> could be part of the platform hosts for the entire BringYour network which has several benefits. Firstly, it decentralizes the hostnames and IPs associated with the private network making the network harder to label. Additionally, it puts the platform hosts closer to users in that area and builds a more accurate latency map.</div>
+			<div><br>The BringYour network is a revenue share where providers take a piece of the total income slice. See the <a href="pricing.html">income breakdown</a>.</div>
+		</div>
+
+	</div>
+
+	<div id="footer">
+		<div class="link-container">
+			<table>
+				<tr>
+					<td>
+						<div class="link"><a href="https://github.com/bringyour/product/whitepaper.md" target="_blank">Whitepaper</a></div>
+						<div class="link"><a href="https://status.bringyour.com/" target="_blank">Status</a></div>
+						<div class="link"><a href="https://github.com/bringyour" target="_blank"><img src="res/images/s2-github.svg" class="social"/> GitHub</a></div>
+						<div class="link"><a href="https://discord.gg/RUNZXMwPRK" target="_blank"><img src="res/images/s2-discord.svg" class="social"/> Discord Community</a></div>
+						<div class="social-container"><div><a href="https://www.reddit.com/r/bringyour/" target="_blank"><img src="res/images/s2-reddit.svg" class="social"/></a></div><div><a href="https://www.youtube.com/@bringyour" target="_blank"><img src="res/images/s2-youtube.svg" class="social"/></a></div><div><a href="https://www.linkedin.com/company/bringyour" target="_blank"><img src="res/images/s2-linkedin.svg" class="social"/></a></div></div>
+					</td>
+					<td>
+						<div class="store"><img src="res/images/store-play.png"/></div>
+						<div class="link"><a href="https://github.com/bringyour/product/roadmap.md" target="_blank">Platform Roadmap</a></div>
+						<div class="link"><a href="https://github.com/bringyour/product/discussions" target="_blank">Product Feedback</a></div>
+					</td>
+					<td>
+						
+						
+						<div class="link"><a href="">Terms of Service</a></div>
+						<div class="link"><a href="">Privacy Policy</a></div>
+						<div class="link"><a href="">Vulnerability Disclosure Program</a></div>
+					</td>
+				</tr>
+			</table>
+			<div class="copyline">Copyright 2023 BringYour, LLC<br>A California, USA company</div>
+		</div>
+	</div>
+
+</body>
+</html>
