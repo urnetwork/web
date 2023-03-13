@@ -1,0 +1,158 @@
+<html>
+<head>
+	<script src="https://accounts.google.com/gsi/client" async defer></script>
+	<script type="text/javascript" src="https://appleid.cdn-apple.com/appleauth/static/jsapi/appleid/1/en_US/appleid.auth.js"></script>
+
+	<style>
+		div.dialog {
+			display: inline-block;
+			border: 1px solid rgb(0, 0, 0);
+			width: 600px;
+			min-height: 400;
+			padding: 12px;
+			margin: 24px;
+		}
+	</style>
+</head>
+<body>
+	<h2>Initial</h2>
+	<div class="dialog">
+		<div><div>Login</div><div>or create a network</div></div>
+		<div>Continue with Google</div>
+		<div>
+			<div id="g_id_onload"
+     data-client_id="338638865390-cg4m0t700mq9073smhn9do81mr640ig1.apps.googleusercontent.com"
+     data-context="signin"
+     data-ux_mode="popup"
+     data-login_uri="https://bringyour.com/connect"
+     data-nonce=""
+     data-auto_select="true"
+     data-itp_support="true">
+</div>
+
+<div class="g_id_signin"
+     data-type="standard"
+     data-shape="rectangular"
+     data-theme="outline"
+     data-text="signin_with"
+     data-size="large"
+     data-logo_alignment="left">
+</div>
+		</div>
+		<div>Continue with Apple</div>
+		<div>
+			<div id="appleid-signin" data-color="black" data-border="true" data-type="sign in"></div>
+	        <script type="text/javascript">
+	            AppleID.auth.init({
+	                clientId : 'com.bringyour.service',
+	                scope : 'name email',
+	                redirectURI : 'https://bringyour.com/connect',
+	                state : 'sign up',
+	                nonce : 'create_network_id',
+	                usePopup : true
+	            });
+	        </script>
+	    </div>
+		<div>- or -</div>
+		<div>Email or Phone Number</div>
+		<div><input type="text"/></div>
+		<div>Password</div>
+		<div>Forgot your password?</div>
+		<div><input type="text"/></div>
+		<div>Continue</div>
+		
+	</div>
+	<h2>Initial, Error</h2>
+	<div class="dialog">
+		<div><div>Login</div><div>or create a network</div></div>
+		<div>Continue with Google</div>
+		<div>Continue with Apple</div>
+		<div>- or -</div>
+		<div>Email or Phone Number</div>
+		<div><input type="text"/></div>
+		<div>Invalid email or password</div>
+		<div>Password</div>
+		<div><input type="text"/></div>
+		<div>Continue</div>
+	</div>
+	<h2>Forgot password</h2>
+	<div class="dialog">
+		<div>Forgot your password?</div>
+		<div>Enter your email or phone number to reset your password.</div>
+		<div><input type="text"/></div>
+		<div>Submit</div>
+
+		<div>You may need to check your spam folder or unblock no-reply@bringyour.com.</div>
+	</div>
+	<h2>Forgot password, after send</h2>
+	<div class="dialog">
+		<div>Forgot your password?</div>
+		<div>Reset link sent to XXX</div>
+		<div>You may need to check your spam folder or unblock no-reply@bringyour.com.</div>
+		<div>Resend</div>
+	</div>
+	<h2>Continue with Google or Apple, No Network</h2>
+	<div class="dialog">
+		<div>Choose a network name</div>
+		<div><input type="text"/>.bringyour.network</div>
+		<div>Available</div>
+		<div>I agree to the BringYour terms. Learn about how we use and protect your data in our Privacy Policy</div>
+		<div>Create Network</div>
+	</div>
+	<h2>Create network</h2>
+	<div class="dialog">
+		
+		<div>Name</div>
+		<div><input type="text"></div>
+		<div>Email or Phone Number</div>
+		<div><input type="text"></div>
+		<div>Password</div>
+		<div><input type="text"/></div>
+		<div>Choose a network name</div>
+		<div><input type="text"/>.bringyour.network</div>
+		<div>Available</div>
+
+		<div>I agree to the BringYour terms. Learn about how we use and protect your data in our Privacy Policy</div>
+		<div>Create Network</div>
+	</div>
+	<h2>Create network, Error</h2>
+	<div class="dialog">
+		<div>Choose a network name</div>
+		<div><input type="text"/>.bringyour.network</div>
+		<div>Available</div>
+		<div>Email or Phone Number</div>
+		<div><input type="text"></div>
+		<div>This (email) or (phone number) is already taken. Sign in or reset your password.</div>
+		<div>Password</div>
+		<div><input type="text"/></div>
+		<div>I agree to the BringYour terms. Learn about how we use and protect your data in our Privacy Policy</div>
+		<div>Create Network</div>
+	</div>
+	<h2>Continue with Email or SMS, No Network, Validate</h2>
+	<div class="dialog">
+		<div>We sent a code to XXX. Please enter it below.</div>
+		<div><input type="text"/></div>
+		<div>Resend</div>
+		<div>Continue</div>
+	</div>
+	<h2>Continue with Email or SMS, No Network, Validate, Error</h2>
+	<div class="dialog">
+		<div>We sent a code to XXX. Please enter it below.</div>
+		<div><input type="text"/></div>
+		<div>Invalid code</div>
+		<div>Resend</div>
+		<div>Continue</div>
+	</div>
+	<h2>Complete</h2>
+	<div class="dialog">
+		<div>you.bringyour.network</div>
+		<div>Login to the app to use your network.</div>
+		<div>Play store link</div>
+		<div>We want to build the best network for you. Can you take a minute to give us some feedback?</div>
+		<div>I use my network for [] Personal [] Business [] A mix</div>
+		<div>Please tell us what you want to do with your network:</div>
+		<div><input type="text"></div>
+		<div>Continue</div>
+	</div>
+</body>
+</html>
