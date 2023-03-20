@@ -1,0 +1,700 @@
+<html>
+<head>
+     <script type="text/javascript" src="https://accounts.google.com/gsi/client"></script>
+     <script type="text/javascript" src="https://appleid.cdn-apple.com/appleauth/static/jsapi/appleid/1/en_US/appleid.auth.js"></script>
+
+     <link rel="preconnect" href="https://fonts.googleapis.com">
+     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@100;200;300;400;500;600;700;800&display=swap" rel="stylesheet">
+     <link href="../bringyour.com/res/css/bootstrap.min.css" rel="stylesheet">
+
+     <style>
+
+          @font-face {
+              font-family: 'Arkitech';
+              src: url('res/fonts/Arkitech-Light.woff2') format('woff2'),
+                  url('res/fonts/Arkitech-Light.woff') format('woff');
+              font-weight: 300;
+              font-style: normal;
+              font-display: swap;
+          }
+          @font-face {
+              font-family: 'Arkitech';
+              src: url('res/fonts/Arkitech-Medium.woff2') format('woff2'),
+                  url('res/fonts/Arkitech-Medium.woff') format('woff');
+              font-weight: 500;
+              font-style: normal;
+              font-display: swap;
+          }
+
+          body {
+               font-family: 'Noto Sans', sans-serif;
+          }
+
+
+          div.dialog {
+               display: inline-block;
+               border: 1px solid rgb(0, 0, 0);
+               width: 600px;
+               min-height: 400;
+               padding: 12px;
+               margin: 24px;
+          }
+
+          /*#appleid-signin svg text {
+               font-family: sans-serif;
+               font-size: 8pt;
+          }
+*/
+          /*#appleid-signin {
+               position: relative;
+          }
+
+          #appleid-signin div.signin-action {
+               display: inline-block;
+               position: relative;
+               right: -100px;
+          }*/
+
+
+
+          div.login-separator {
+               text-align: center;
+          }
+
+          div.login-option {
+               margin-top: 12px;
+               margin-bottom: 12px;
+               text-align: center;
+          }
+
+          div.login-option div.login-container {
+               display: inline-block;
+               text-align: left;
+               width: 300px;
+          }
+
+          #apple-container {
+               display: inline-block;
+               border: 1px solid rgb(218, 220, 224);
+               border-radius: 4px;
+               cursor: pointer;
+               padding: 0px;
+               transition: background-color .218s, border-color .218s;
+               user-select: none;
+          }
+
+          #apple-container:hover {
+/*             border-color: #d2e3fc*/
+               border-color: rgb(0, 0, 0);
+          }
+
+          div.title {
+               font-size: 18pt;
+               font-weight: 200;
+          }
+
+          div.info-title {
+               font-size: 12pt;
+               font-weight: 100;
+          }
+
+          
+
+          /*#apple-container:active {
+               background-color: rgb(250, 250, 250) !important;
+          }
+
+          #apple-container:active div {
+               background-color: inherit !important;
+          }*/
+
+          input[type=text], input[type=password] {
+               height: 39px;
+               border: 1px solid rgb(218, 220, 224);
+               border-radius: 4px;
+               width: 300px;
+          }
+
+          textarea {
+               height: 78px;
+               border: 1px solid rgb(218, 220, 224);
+               border-radius: 4px;
+               width: 300px;
+          }
+
+          div.login-header {
+               position: relative;
+               margin-top: 12px;
+               margin-bottom: 12px;
+          }
+
+          div.login-header div.header-right {
+               position: absolute;
+               bottom: 0px;
+               right: 0px;
+          }
+
+
+          div.password-header {
+               position: relative;
+               margin-top: 4px;
+               margin-bottom: 4px;
+          }
+
+          div.password-header div.header-right {
+               position: absolute;
+               bottom: 0px;
+               right: 0px;
+          }
+
+          img.store {
+               max-height: 40px;
+          }
+     </style>
+
+     <script type="text/javascript">
+
+          // parse current location to find the api
+
+          let clientVersion = '';
+
+          function serviceUrl(service, path) {
+               let hostname = window.location.hostname
+               // <env>-<service>.bringyour.com or <service>.bringyour.com
+               // if service == lb, 
+               //    if /sb/<serviceblock> and serviceblock == beta
+               //      use /sb/<service>/beta
+               //    else, use /by/<service>
+               // else, use <env>-<service> or <service>
+
+               // local-api.bringyour.com
+
+          }
+
+          // todo convert render functions to components with render and route methods
+          // route is called when a link is clicked that does not have an entry in the main routing table
+
+
+          // see https://bholmes.dev/blog/spas-clientside-routing/
+          function router(container) {
+               function isNested(e) {
+                    let parent = e
+                    while (parent) {
+                         if (container == parent) {
+                              return true
+                         }
+                         parent = parent.parentElement
+                    }
+                    return false
+               }
+               document.addEventListener('click', (event) => {
+                if (
+                  // if you clicked on an A-nchor tag (link)
+                  event.target.tagName === 'A' &&
+                  // and you're going to a page on this domain (like /desert)
+                  event.target.origin === location.origin &&
+                  !event.target.target &&
+                  isNested(event.target)
+                ) {
+                    event.preventDefault()
+                    href = event.target.href
+                    if (href.endsWith('/connect')) {
+                         render(container, renderInitial)
+                    }
+                    else if (href.endsWith('/connect/create')) {
+                         render(container, renderCreateNetwork)
+                    }
+                    else if (href.endsWith('/connect/reset')) {
+                         render(container, renderPasswordReset)
+                    }
+                }
+           })
+          }
+
+
+          // function router(container) {
+          //      navigation.addEventListener('navigate', navigateEvent => {
+          //           // Exit early if this navigation shouldn't be intercepted.
+          //           // The properties to look at are discussed later in the article.
+          //           if (shouldNotIntercept(navigateEvent)) return;
+
+          //           const url = new URL(navigateEvent.destination.url);
+
+          //           alert(url)
+
+          //           if (url.pathname.endsWith('/connect/create')) {
+          //                navigateEvent.intercept({handler: () => render(container, renderCreateNetwork)});
+          //           }
+          //      });
+          // }
+
+          // // see https://developer.chrome.com/docs/web-platform/navigation-api/
+          // function shouldNotIntercept(navigationEvent) {
+          //      return (
+          //           !navigationEvent.canIntercept ||
+          //           // If this is just a hashChange,
+          //           // just let the browser handle scrolling to the content.
+          //           navigationEvent.hashChange ||
+          //           // If this is a download,
+          //           // let the browser perform the download.
+          //           navigationEvent.downloadRequest ||
+          //           // If this is a form submission,
+          //           // let that go to the server.
+          //           navigationEvent.formData
+          //      );
+          // }
+
+
+          // fixme a mount object that has render and route
+          // mount tracks the last used component
+
+          function Mount(container) {
+               const self = this
+               self.activeComponent = null
+
+               this.render = (component) => {
+                    self.activeComponent = component
+                    // FIXME if component is undefined, check the query params for oauth jwts
+                    // use <api>/auth/login  jwt=X  
+                    component.render(container)
+               }
+
+               function isNested(e) {
+                    let parent = e
+                    while (parent) {
+                         if (container == parent) {
+                              return true
+                         }
+                         parent = parent.parentElement
+                    }
+                    return false
+               }
+
+               this.router = () => {
+                    document.addEventListener('click', (event) => {
+                if (
+                  // if you clicked on an A-nchor tag (link)
+                  event.target.tagName === 'A' &&
+                  // and you're going to a page on this domain (like /desert)
+                  event.target.origin === location.origin &&
+                  !event.target.target &&
+                  isNested(event.target)
+                ) {
+                    event.preventDefault()
+                    href = event.target.href
+                    if (href.endsWith('/connect')) {
+                         render(container, renderInitial)
+                    }
+                    else if (href.endsWith('/connect/create')) {
+                         render(container, renderCreateNetwork)
+                    }
+                    // else if (href.endsWith('/connect/reset')) {
+                    //      render(container, renderPasswordReset)
+                    // }
+                    else {
+                         self.activeComponent.router(event)
+                    }
+                }
+           })
+               }
+          }
+
+
+
+          function render(container, renderFn) {
+               // while (container.lastChild) {
+               //   container.removeChild(container.lastChild)
+               // }
+
+               // FIXME if renderFn is undefined, check the query params for oauth jwts
+               // use <api>/auth/login  jwt=X  
+               renderFn(container)
+          }
+
+
+
+          function DialogInitial() {
+               this.self = this
+               this.render = (container) => {
+                    renderInitial(container)
+               }
+               this.router = (event) => {
+
+               }
+          }
+
+
+
+
+          function renderInitial(container) {
+               let googleClientId = 'data-client_id="338638865390-cg4m0t700mq9073smhn9do81mr640ig1.apps.googleusercontent.com'
+               let html = `
+                    <div class="login-option">
+                         <div class="login-container">
+                              <div class="login-header"><div class="title">Login</div><div class="header-right"><a href="/connect/create">or create a network</a></div>
+                              </div>
+                         </div>
+                    </div>
+                    <div class="login-option">
+                         <div class="login-container">
+                              <div id="g_id_onload"
+                                   data-client_id="${googleClientId}"
+                                   data-context="signin"
+                                   data-ux_mode="popup"
+                                   data-login_uri="https://bringyour.com/connect"
+                                   data-nonce=""
+                                   data-auto_select="true"
+                                   data-itp_support="true"
+                                   data-width="300"
+                                   data-height="39"></div>
+
+                              <div id="g_id_button" class="g_id_signin"
+                                   data-type="standard"
+                                   data-shape="rectangular"
+                                   data-theme="outline"
+                                   data-text="continue_with"
+                                   data-size="large"
+                                   data-logo_alignment="center"
+                                   data-width="300"
+                                   data-height="39">
+                              </div>
+                         </div>
+                    </div>
+                    <div class="login-option">
+                         <div class="login-container">
+                              <div id="apple-container"><div id="appleid-signin" data-color="white" data-border="false" data-type="continue" data-width="300" data-height="39" data-mode="center-align" data-logo-size="large"></div></div>
+                         </div>
+                    </div>
+                    <div class="login-separator">- or -</div>
+                    <div class="login-option">
+                         <div class="login-container">
+                              <div class="info-title">Email or Phone Number</div>
+                              <div><input type="text"/></div>
+                              <div><input type="button" value="Continue"></div>
+                         </div>
+                    </div>
+               `
+               container.innerHTML = html
+
+               AppleID.auth.init({
+                    clientId : 'com.bringyour.service',
+                    scope : 'name email',
+                    redirectURI : 'https://bringyour.com/connect',
+                    state : 'continue',
+                    nonce : 'create_network_id',
+                    usePopup : true
+               });
+
+              //  google.accounts.id.initialize({
+              //   client_id: '338638865390-cg4m0t700mq9073smhn9do81mr640ig1.apps.googleusercontent.com',
+              //   callback: googleLogin
+              // });
+              // google.accounts.id.prompt();
+
+               window.google.accounts.id.initialize({
+      client_id: googleClientId,
+      callback: (res, error) => {
+        // This is the function that will be executed once the authentication with google is finished
+      },
+    });
+               google.accounts.id.prompt();
+    window.google.accounts.id.renderButton(document.getElementById('g_id_button'), {});
+
+               // <api>/auth/login  user=X
+
+          }
+
+          function renderLoginPassword(container, userAuth) {
+               let html = `
+                    <div class="login-option">
+                         <div class="login-container">
+                              <div class="login-header"><div class="title">Welcome back</div></div>
+                              <div>Log in using ${userAuth}</div>
+                         </div>
+                    </div>
+                    <div class="login-option">
+                         <div class="login-container">
+                              <div class="password-header"><div class="info-title">Password</div><div class="header-right"><a href="">Forgot your password?</a></div></div>
+                              <div><input type="password"/></div>
+                              <div><div id="login-error" class="text-danger">Invalid email or password</div></div>
+                              <div><input type="button" value="Continue"></div>
+                         </div>
+                    </div>
+               `
+
+               container.innerHTML = html
+
+          }
+
+          function renderPasswordReset(container, userAuth) {
+               let html = `
+                    <div class="login-option">
+                         <div class="login-container">
+                              <div class="login-header"><div class="title">Forgot your password?</div></div>
+                              <div>Enter your email or phone number to reset your password.</div>
+                         </div>
+                    </div>
+                    <div class="login-option">
+                         <div class="login-container">
+                              <div class="info-title">Email or Phone Number</div>
+                              <div><input type="text" value="${userAuth}"/></div>
+                              <div><input type="button" value="Submit"></div>
+                         </div>
+                    </div>
+                    <div class="login-option">
+                         <div class="login-container">
+                              <div>You may need to check your spam folder or unblock no-reply@bringyour.com</div>
+                         </div>
+                    </div>
+               `
+
+               container.innerHTML = html
+          }
+
+          function renderPasswordResetAfterSend(container, userAuth) {
+               let html = `
+                    <div class="login-option">
+                         <div class="login-container">
+                              <div class="login-header"><div class="title">Forgot your password?</div></div>
+                              <div>Reset link sent to ${userAuth}</div>
+                         </div>
+                    </div>
+                    <div class="login-option">
+                         <div class="login-container">
+                              <div>You may need to check your spam folder or unblock no-reply@bringyour.com</div>
+                              <div><a href="">Resend</a></div>
+                         </div>
+                    </div>
+               `
+
+               container.innerHTML = html
+          }
+
+          function renderPasswordResetComplete(container, resetCode) {
+               let html = `
+                    <div class="login-option">
+                         <div class="login-container">
+                              <div class="login-header"><div class="title">Reset your password</div></div>
+                         </div>
+                    </div>
+                    <div class="login-option">
+                         <div class="login-container">
+                              <div class="info-title">New Password</div>
+                              <div><input type="password"/></div>
+                              <div class="info-title">Re-enter New Password</div>
+                              <div><input type="password"/></div>
+                              <div><input type="button" value="Submit"></div>
+                         </div>
+                    </div>
+               `
+
+               container.innerHTML = html
+          }
+
+          function renderCreateNetworkAuthJwt(container, authJwt) {
+               let jwtType = 'Apple'
+               let html = `
+                    <div class="login-option">
+                         <div class="login-container">
+                              <div class="login-header"><div class="title">Create a network</div></div>
+                              <div>${jwtType} will be the primary login.</div>
+                         </div>
+                    </div>
+                    <div class="login-option">
+                         <div class="login-container">
+                              <div class="info-title">Choose a network name</div>
+                              <div><input type="text"/>.bringyour.network</div>
+                              <div><label><input type="checkbox" value="">I agree to the <a href="/terms.html" target="_blank">BringYour terms</a>. Learn about how we use and protect your data in our <a href="">Privacy Policy</a></label></div>
+                              <div><input type="button" value="Create Network"></div>
+                         </div>
+                    </div>
+               `
+
+               container.innerHTML = html
+          }
+
+          function renderCreateNetwork(container, userAuth) {
+               let html = `
+                    <div class="login-option">
+                         <div class="login-container">
+                              <div class="login-header"><div class="back"><a href="/connect">BACK</a></div><div class="title">Create a network</div></div>
+                         </div>
+                    </div>
+                    <div class="login-option">
+                         <div class="login-container">
+                              <div class="info-title">Your Name</div>
+                              <div><input type="text"></div>
+                              <div class="info-title">Email or Phone Number</div>
+                              <div><input type="text" value="${userAuth}"></div>
+                              <div id="create-error" class="text-danger">This email or phone number is already taken. <a href="/connect">Sign in</a> or <a href="/connect/reset">reset your password</a>.</div>
+                              <div class="info-title">Password</div>
+                              <div><input type="password"/></div>
+                              <div class="info-title">Choose a network name</div>
+                              <div><input type="text"/>.bringyour.network</div>
+                              <div><label><input type="checkbox" value="">I agree to the <a href="/terms.html" target="_blank">BringYour terms</a>. Learn about how we use and protect your data in our <a href="">Privacy Policy</a></label></div>
+                              <div><input type="button" value="Create Network"></div>
+                         </div>
+                    </div>
+               `
+
+               container.innerHTML = html
+          }
+
+          function renderCreateNetworkValidate(container, userAuth) {
+               let html = `
+                    <div class="login-option">
+                         <div class="login-container">
+                              <div class="login-header"><div class="title">Validate your email or phone number</div></div>
+                              <div>We sent a code to ${userAuth}. Please enter it below.</div>
+                         </div>
+                    </div>
+                    <div class="login-option">
+                         <div class="login-container">
+                              <div class="password-header"><div class="info-title">Code</div><div class="header-right"><a href="">Resend</a></div></div>
+                              <div><input type="text"></div>
+                              <div id="validate-error" class="text-danger">Invalid code</div>
+                              <div><input type="button" value="Continue"></div>
+                         </div>
+                    </div>
+               `
+
+               container.innerHTML = html
+          }
+
+          function renderCreateNetworkComplete(container, networkName) {
+               let html = `
+                    <div class="login-option">
+                         <div class="login-container">
+                              <div class="login-header"><div class="title">${networkName}.bringyour.network</div></div>
+                              <div>Log in to the app to use your network.</div>
+                         </div>
+                    </div>
+                    <div class="login-option">
+                         <div class="login-container">
+                              <img src="../bringyour.com/res/images/store-play.png" class="store">
+                         </div>
+                    </div>
+                    <div class="login-option">
+                         <div class="login-container">
+                              <label><input type="checkbox" value=""> You can send me occasional product updates</label>
+                         </div>
+                    </div>
+                    <div class="login-option">
+                         <div class="login-container">
+                              <div class="title">Can you take a minute to give us some feedback?</div>
+                              <div>I use my network for 
+                                   <div><label><input type="checkbox" value=""> Personal</label></div>
+                                   <div><label><input type="checkbox" value=""> Business</label></div>
+                              </div>
+                              <div>The following use cases are valuable to me 
+                                   <div><label><input type="checkbox" value=""> Stay anonymous and private on the internet</label></div>
+                                   <div><label><input type="checkbox" value=""> Have verified safe internet everywhere</label></div>
+                                   <div><label><input type="checkbox" value=""> Access regional and international networks</label></div>
+                                   <div><label><input type="checkbox" value=""> Connect with my homes, friends and family</label></div>
+                                   <div><label><input type="checkbox" value=""> Control the use of data and apps on my network</label></div>
+                                   <div><label><input type="checkbox" value=""> Block ads</label></div>
+                                   <div><label><input type="checkbox" value=""> Block personal data collection parties</label></div>
+                                   <div><label><input type="checkbox" value=""> Help stay focused by temporarily blocking overused sites and content</label></div>
+                                   <div><label><input type="checkbox" value=""> Access private servers from anywhere</label></div>
+                                   <div><label><input type="checkbox" value=""> Run custom code and servers</label></div>
+                                   <div><label><input type="checkbox" value=""> Prevent cyber attacks like phishing</label></div>
+                                   <div><label><input type="checkbox" value=""> Audit usage of my network for compliance</label></div>
+                                   <div><label><input type="checkbox" value=""> Implement a zero-trust or secure business environment</label></div>
+                                   <div><label><input type="checkbox" value=""> Visualize and understand my network data</label></div>
+                              </div>
+                              <div>What do you want to do with your network?</div>
+                              <div><textarea></textarea></div>
+                              <div><input type="button" value="Submit"></div>
+                         </div>
+                    </div>
+               `
+
+               container.innerHTML = html
+          }
+
+     </script>
+</head>
+<body>
+     <h2>Initial</h2>
+     <div class="dialog" id="dialog-initial">
+          <script type="text/javascript">
+               let mountInitial = new Mount(document.getElementById('dialog-initial'))
+               mountInitial.render(new DialogInitial())
+               mountInitial.router()
+
+               // render(document.getElementById('dialog-initial'), renderInitial)
+               // router(document.getElementById('dialog-initial'))
+
+               // see https://stackoverflow.com/questions/70993933/why-does-the-sign-in-with-google-button-disappear-after-i-render-it-the-second-t
+            // see https://developers.google.com/identity/gsi/web/reference/js-reference
+            //    window.onload = function () {
+            //   google.accounts.id.initialize({
+            //     client_id: '338638865390-cg4m0t700mq9073smhn9do81mr640ig1.apps.googleusercontent.com',
+            //     callback: handleCredentialResponse
+            //   });
+            //   google.accounts.id.prompt();
+            // };
+          </script>
+     </div>
+
+     <h2>Initial, Password</h2>
+     <div class="dialog" id="dialog-login-password">
+          <script type="text/javascript">
+               render(document.getElementById('dialog-login-password'), (container) => renderLoginPassword(container, '+1 510-340-8248'))
+          </script>
+     </div>
+
+     <h2>Forgot password</h2>
+     <div class="dialog" id="dialog-password-reset">
+          <script type="text/javascript">
+               render(document.getElementById('dialog-password-reset'), (container) => renderPasswordReset(container, '+1 510-340-8248'))
+          </script>
+     </div>
+
+     <h2>Forgot password, after send</h2>
+     <div class="dialog" id="dialog-password-reset-after-send">
+          <script type="text/javascript">
+               render(document.getElementById('dialog-password-reset-after-send'), (container) => renderPasswordResetAfterSend(container, '+1 510-340-8248'))
+          </script>
+     </div>
+
+     <h2>Forgot password, reset link landing</h2>
+     <div class="dialog" id="dialog-password-reset-complete">
+          <script type="text/javascript">
+               render(document.getElementById('dialog-password-reset-complete'), (container) => renderPasswordResetComplete(container, '12345'))
+          </script>
+
+     </div>
+
+     <h2>Continue with Google or Apple, No Network</h2>
+     <div class="dialog" id="dialog-create-network-auth-jwt">
+          <script type="text/javascript">
+               render(document.getElementById('dialog-create-network-auth-jwt'), (container) => renderCreateNetworkAuthJwt(container, '12345'))
+          </script>
+
+     </div>
+
+     <h2>Create network</h2>
+     <div class="dialog" id="dialog-create-network">
+          <script type="text/javascript">
+               render(document.getElementById('dialog-create-network'), (container) => renderCreateNetwork(container, '+1 510-340-8248'))
+          </script>
+     </div>
+
+     <h2>Continue with Email or SMS, No Network, Validate</h2>
+     <div class="dialog" id="dialog-create-network-validate">
+          <script type="text/javascript">
+               render(document.getElementById('dialog-create-network-validate'), (container) => renderCreateNetworkValidate(container, '+1 510-340-8248'))
+          </script>
+     </div>
+
+     <h2>Complete</h2>
+     <div class="dialog" id="dialog-create-network-complete">
+          <script type="text/javascript">
+               render(document.getElementById('dialog-create-network-complete'), (container) => renderCreateNetworkComplete(container, 'brien'))
+          </script>
+     </div>
+
+</body>
+</html>
