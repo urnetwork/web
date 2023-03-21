@@ -8,6 +8,8 @@
      <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@100;200;300;400;500;600;700;800&display=swap" rel="stylesheet">
      <link href="../bringyour.com/res/css/bootstrap.min.css" rel="stylesheet">
 
+     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,400,0,0" />
+
      <style>
 
           @font-face {
@@ -94,9 +96,20 @@
                font-weight: 200;
           }
 
+          div.title span.material-symbols-outlined {
+               font-size: 12pt;
+               padding: 4px;
+               color: rgb(0, 0, 0);
+          }
+
           div.info-title {
                font-size: 12pt;
                font-weight: 100;
+          }
+
+          button span.primary {
+               margin-left: 8px;
+               margin-right: 8px;
           }
 
           
@@ -157,7 +170,10 @@
 
           // parse current location to find the api
 
-          let clientVersion = '';
+          const clientVersion = '';
+          const googleClientId = 'data-client_id="338638865390-cg4m0t700mq9073smhn9do81mr640ig1.apps.googleusercontent.com'
+          const appleClientId = 'com.bringyour.service'
+          const authJwtRedirect = 'https://bringyour.com/connect'
 
           function serviceUrl(service, path) {
                let hostname = window.location.hostname
@@ -172,82 +188,26 @@
 
           }
 
-          // todo convert render functions to components with render and route methods
-          // route is called when a link is clicked that does not have an entry in the main routing table
-
-
-          // see https://bholmes.dev/blog/spas-clientside-routing/
-          function router(container) {
-               function isNested(e) {
-                    let parent = e
-                    while (parent) {
-                         if (container == parent) {
-                              return true
-                         }
-                         parent = parent.parentElement
-                    }
-                    return false
+          function userAuthType(userAuth) {
+               if (userAuth.startsWith('+')) {
+                    return 'phone'
                }
-               document.addEventListener('click', (event) => {
-                if (
-                  // if you clicked on an A-nchor tag (link)
-                  event.target.tagName === 'A' &&
-                  // and you're going to a page on this domain (like /desert)
-                  event.target.origin === location.origin &&
-                  !event.target.target &&
-                  isNested(event.target)
-                ) {
-                    event.preventDefault()
-                    href = event.target.href
-                    if (href.endsWith('/connect')) {
-                         render(container, renderInitial)
-                    }
-                    else if (href.endsWith('/connect/create')) {
-                         render(container, renderCreateNetwork)
-                    }
-                    else if (href.endsWith('/connect/reset')) {
-                         render(container, renderPasswordReset)
-                    }
-                }
-           })
+               else if (userAuth.includes('@')) {
+                    return 'email'
+               }
+               return 'unknown'
           }
 
 
-          // function router(container) {
-          //      navigation.addEventListener('navigate', navigateEvent => {
-          //           // Exit early if this navigation shouldn't be intercepted.
-          //           // The properties to look at are discussed later in the article.
-          //           if (shouldNotIntercept(navigateEvent)) return;
+          function Route(path, component) {
+               this.path = path
+               this.component = component
+          }
 
-          //           const url = new URL(navigateEvent.destination.url);
-
-          //           alert(url)
-
-          //           if (url.pathname.endsWith('/connect/create')) {
-          //                navigateEvent.intercept({handler: () => render(container, renderCreateNetwork)});
-          //           }
-          //      });
-          // }
-
-          // // see https://developer.chrome.com/docs/web-platform/navigation-api/
-          // function shouldNotIntercept(navigationEvent) {
-          //      return (
-          //           !navigationEvent.canIntercept ||
-          //           // If this is just a hashChange,
-          //           // just let the browser handle scrolling to the content.
-          //           navigationEvent.hashChange ||
-          //           // If this is a download,
-          //           // let the browser perform the download.
-          //           navigationEvent.downloadRequest ||
-          //           // If this is a form submission,
-          //           // let that go to the server.
-          //           navigationEvent.formData
-          //      );
-          // }
-
-
-          // fixme a mount object that has render and route
-          // mount tracks the last used component
+          const topLevelRoutes = [
+               new Route('/connect', new DialogInitial()),
+               new Route('/connect/create', new DialogCreateNetwork()),
+          ]
 
           function Mount(container) {
                const self = this
@@ -256,71 +216,353 @@
                this.render = (component) => {
                     self.activeComponent = component
                     // FIXME if component is undefined, check the query params for oauth jwts
-                    // use <api>/auth/login  jwt=X  
+                    // use <api>/auth/login  jwt=X
+                    component.mount = self
                     component.render(container)
                }
 
-               function isNested(e) {
-                    let parent = e
-                    while (parent) {
-                         if (container == parent) {
-                              return true
-                         }
-                         parent = parent.parentElement
-                    }
-                    return false
-               }
+               
 
+               // approach inspired by https://bholmes.dev/blog/spas-clientside-routing/
                this.router = () => {
-                    document.addEventListener('click', (event) => {
-                if (
-                  // if you clicked on an A-nchor tag (link)
-                  event.target.tagName === 'A' &&
-                  // and you're going to a page on this domain (like /desert)
-                  event.target.origin === location.origin &&
-                  !event.target.target &&
-                  isNested(event.target)
-                ) {
-                    event.preventDefault()
-                    href = event.target.href
-                    if (href.endsWith('/connect')) {
-                         render(container, renderInitial)
+                    function findLink(e) {
+                         let linkElement = null
+                         while (e) {
+                              if (container == e) {
+                                   return linkElement
+                              }
+                              if (e.tagName === 'A') {
+                                   linkElement = e
+                              }
+                              e = e.parentElement
+                         }
+                         return null
                     }
-                    else if (href.endsWith('/connect/create')) {
-                         render(container, renderCreateNetwork)
-                    }
-                    // else if (href.endsWith('/connect/reset')) {
-                    //      render(container, renderPasswordReset)
-                    // }
-                    else {
-                         self.activeComponent.router(event)
-                    }
-                }
-           })
+                    container.addEventListener('click', (event) => {
+                         const linkElement = findLink(event.target)
+                         // a link of same origin with no target (new tab)
+                         if (
+                              linkElement &&
+                              linkElement.origin === location.origin &&
+                              !linkElement.target
+                         ) {
+                              event.preventDefault()
+                              const url = new URL(linkElement.href)
+                              let handled = false
+                              for (const route of topLevelRoutes) {
+                                   if (url.pathname == route.path) {
+                                        self.render(route.component)
+                                        handled = true
+                                        break
+                                   }
+                              }
+                              if (!handled && self.activeComponent) {
+                                   self.activeComponent.router(url)
+                              }
+                         }
+                    })
                }
           }
-
-
-
-          function render(container, renderFn) {
-               // while (container.lastChild) {
-               //   container.removeChild(container.lastChild)
-               // }
-
-               // FIXME if renderFn is undefined, check the query params for oauth jwts
-               // use <api>/auth/login  jwt=X  
-               renderFn(container)
-          }
-
 
 
           function DialogInitial() {
-               this.self = this
+               const self = this
                this.render = (container) => {
                     renderInitial(container)
-               }
-               this.router = (event) => {
 
+                    const nonce = crypto.randomUUID()
+
+                    // connect with apple
+                    AppleID.auth.init({
+                         clientId : appleClientId,
+                         scope : 'name email',
+                         redirectURI : authJwtRedirect,
+                         state : 'continue',
+                         nonce : nonce,
+                         usePopup : true
+                    });
+                    document.addEventListener('AppleIDSignInOnSuccess', function(data) {
+                         // fixme
+                         alert('Apple auth')
+                    });
+                    document.addEventListener('AppleIDSignInOnFailure', (event) => {
+                         // fixme
+                         alert('Apple auth failure')
+                    });
+
+                    // connect with google
+                    window.google.accounts.id.initialize({
+                         client_id: googleClientId,
+                         callback: (res, error) => {
+                              // fixme
+                              alert('Google auth')
+                         },
+                    });
+                    google.accounts.id.prompt();
+                    window.google.accounts.id.renderButton(document.getElementById('g_id_button'), {
+                         type: 'standard',
+                         theme: 'outline',
+                         size: 'large',
+                         text: 'continue_with',
+                         shape: 'rectangular',
+                         logo_alignment: 'center',
+                         width: 300
+                    });
+
+                    document.getElementById('login-button').addEventListener("click", (event) => {
+                         self.submit()
+                    })
+
+                    document.getElementById("login-form").addEventListener("submit", (event) => {
+                         event.preventDefault()
+                         self.submit()
+                    })
+               }
+               this.router = (url) => {
+
+               }
+
+
+               // event handlers
+
+               this.submit = () => {
+                    const loginUserAuthElement = document.getElementById('login-user-auth')
+                    const loginButtonElement = document.getElementById('login-button') 
+                    const loginSpinnerElement = document.getElementById('login-form-spinner')
+
+                    loginUserAuthElement.disabled = true
+                    loginButtonElement.disabled = true
+                    loginSpinnerElement.classList.remove('visually-hidden')
+
+                    let userAuth = loginUserAuthElement.value
+                    let requestBody = {
+                         userAuth: userAuth
+                    }
+
+                    setTimeout(() => {
+                         let responseBody = MOCK_API_auth_login(requestBody)
+                         self.handleSubmitResponse(responseBody)
+                    }, 1000);
+               }
+
+               this.handleSubmitResponse = (responseBody) => {
+                    const loginUserAuthElement = document.getElementById('login-user-auth')
+                    const loginButtonElement = document.getElementById('login-button') 
+                    const loginSpinnerElement = document.getElementById('login-form-spinner')
+
+                    let userAuth = loginUserAuthElement.value
+
+                    if ('error' in responseBody) {
+                         let error = responseBody['error']
+                         let suggestedUserAuth = error['suggestedUserAuth'] || userAuth
+                         let message = error['message']
+
+                         let errorElement = document.getElementById('login-error')
+                         errorElement.textContent = message
+                         errorElement.classList.remove('visually-hidden')
+
+                         loginUserAuthElement.value = suggestedUserAuth
+
+                         loginUserAuthElement.disabled = false
+                         loginButtonElement.disabled = false
+                         loginSpinnerElement.classList.add('visually-hidden')
+                    }
+                    else if ('loginSessionId' in responseBody) {
+                         // an existing network
+                         userAuth = responseBody['userAuth'] || userAuth
+                         let authAllowed = responseBody['authAllowed']
+                         if (authAllowed.includes('password')) {
+                              let loginSessionId = responseBody['loginSessionId']
+                              self.mount.render(new DialogLoginPassword(userAuth, loginSessionId))
+                         } else {
+                              let message
+                              if (authAllowed.includes('apple') && authAllowed.includes('google')) {
+                                   message = 'Please login with Apple or Google'
+                              }
+                              else if (authAllowed.includes('apple')) {
+                                   message = 'Please login with Apple'
+                              }
+                              else if (authAllowed.includes('google')) {
+                                   message = 'Please login with Google'
+                              } else {
+                                   message = 'Something went wrong. Please try again later.'
+                              }
+                              let errorElement = document.getElementById('login-error')
+                              errorElement.textContent = message
+                              errorElement.classList.remove('visually-hidden')
+
+                              loginUserAuthElement.disabled = false
+                              loginButtonElement.disabled = false
+                              loginSpinnerElement.classList.add('visually-hidden')
+                         }
+                    }
+                    else {
+                         // a new network
+                         userAuth = responseBody['userAuth'] || userAuth
+                         self.mount.render(new DialogCreateNetwork(userAuth))
+                    }
+               }
+          }
+
+          function DialogLoginPassword(userAuth, loginSessionId) {
+               const self = this
+               this.render = (container) => {
+                    renderLoginPassword(container, userAuth)
+
+                    document.getElementById('login-button').addEventListener("click", (event) => {
+                         self.submit()
+                    })
+
+                    document.getElementById("login-form").addEventListener("submit", (event) => {
+                         event.preventDefault()
+                         self.submit()
+                    })
+               }
+               this.router = (url) => {
+               }
+
+
+               // event handlers
+
+               this.submit = () => {
+                    const loginPasswordElement = document.getElementById('login-password')
+                    const loginButtonElement = document.getElementById('login-button') 
+                    const loginSpinnerElement = document.getElementById('login-form-spinner')
+
+                    loginPasswordElement.disabled = true
+                    loginButtonElement.disabled = true
+                    loginSpinnerElement.classList.remove('visually-hidden')
+
+                    let password = loginPasswordElement.value
+                    let requestBody = {
+                         loginSessionId: loginSessionId,
+                         password: password
+                    }
+
+                    setTimeout(() => {
+                         let responseBody = MOCK_API_auth_login_password(requestBody)
+                         self.handleSubmitResponse(responseBody)
+                    }, 1000);
+               }
+
+               this.handleSubmitResponse = (responseBody) => {
+                    const loginPasswordElement = document.getElementById('login-password')
+                    const loginButtonElement = document.getElementById('login-button') 
+                    const loginSpinnerElement = document.getElementById('login-form-spinner')
+
+                    if ('error' in responseBody) {
+                         let error = responseBody['error']
+                         let message = error['message']
+
+                         let errorElement = document.getElementById('login-error')
+                         errorElement.textContent = message
+                         errorElement.classList.remove('visually-hidden')
+
+                         loginPasswordElement.disabled = false
+                         loginButtonElement.disabled = false
+                         loginSpinnerElement.classList.add('visually-hidden')
+                    }
+                    else if ('validationRequired' in responseBody) {
+                         let validationRequired = responseBody['validationRequired']
+                         let validationUserAuth = validationRequired['userAuth']
+
+                         self.mount.render(new DialogCreateNetworkValidate(validationUserAuth, loginSessionId))
+                    }
+                    else if ('network' in responseBody) {
+                         let network = responseBody['network']
+                         let networkName = network['name']
+
+                         self.mount.render(new DialogComplete(networkName))
+                    } else {
+                         let message = 'Something went wrong. Please try again later.'
+
+                         let errorElement = document.getElementById('login-error')
+                         errorElement.textContent = message
+                         errorElement.classList.remove('visually-hidden')
+
+                         loginUserAuthElement.disabled = false
+                         loginButtonElement.disabled = false
+                         loginSpinnerElement.classList.add('visually-hidden')
+                    }
+               }
+          }
+
+          
+
+          function DialogPasswordReset(userAuth) {
+               const self = this
+               this.render = (container) => {
+                    renderPasswordReset(container, userAuth)
+               }
+               this.router = (url) => {
+                    
+               }
+          }
+
+
+          function DialogPasswordResetAfterSend(userAuth) {
+               const self = this
+               this.render = (container) => {
+                    renderPasswordResetAfterSend(container, userAuth)
+               }
+               this.router = (url) => {
+                    
+               }
+          }
+
+
+          function DialogPasswordResetComplete(resetCode) {
+               const self = this
+               this.render = (container) => {
+                    renderPasswordResetComplete(container, resetCode)
+               }
+               this.router = (url) => {
+                    
+               }
+          }
+
+
+          function DialogCreateNetworkAuthJwt(authJwt) {
+               const self = this
+               this.render = (container) => {
+                    renderCreateNetworkAuthJwt(container, authJwt)
+               }
+               this.router = (url) => {
+                    
+               }
+          }
+
+
+          function DialogCreateNetwork(userAuth) {
+               const self = this
+               this.render = (container) => {
+                    renderCreateNetwork(container, userAuth)
+               }
+               this.router = (url) => {
+                    if ('/connect/reset' == url.pathname) {
+                         const userAuth = document.getElementById('create-user-auth').value
+                         self.mount.render(new DialogPasswordReset(userAuth))
+                    }
+               }
+          }
+
+
+          function DialogCreateNetworkValidate(userAuth) {
+               const self = this
+               this.render = (container) => {
+                    renderCreateNetworkValidate(container, userAuth)
+               }
+               this.router = (url) => {
+               }
+          }
+
+
+          function DialogComplete(networkName) {
+               const self = this
+               this.render = (container) => {
+                    renderComplete(container, networkName)
+               }
+               this.router = (url) => {
                }
           }
 
@@ -328,7 +570,6 @@
 
 
           function renderInitial(container) {
-               let googleClientId = 'data-client_id="338638865390-cg4m0t700mq9073smhn9do81mr640ig1.apps.googleusercontent.com'
                let html = `
                     <div class="login-option">
                          <div class="login-container">
@@ -342,7 +583,7 @@
                                    data-client_id="${googleClientId}"
                                    data-context="signin"
                                    data-ux_mode="popup"
-                                   data-login_uri="https://bringyour.com/connect"
+                                   data-login_uri="${authJwtRedirect}"
                                    data-nonce=""
                                    data-auto_select="true"
                                    data-itp_support="true"
@@ -363,45 +604,32 @@
                     </div>
                     <div class="login-option">
                          <div class="login-container">
-                              <div id="apple-container"><div id="appleid-signin" data-color="white" data-border="false" data-type="continue" data-width="300" data-height="39" data-mode="center-align" data-logo-size="large"></div></div>
+                              <div id="apple-container">
+                                   <div id="appleid-signin"
+                                        data-color="white"
+                                        data-border="false"
+                                        data-type="continue"
+                                        data-mode="center-align"
+                                        data-logo-size="large"
+                                        data-width="300"
+                                        data-height="39"></div>
+                                   </div>
                          </div>
                     </div>
                     <div class="login-separator">- or -</div>
                     <div class="login-option">
                          <div class="login-container">
-                              <div class="info-title">Email or Phone Number</div>
-                              <div><input type="text"/></div>
-                              <div><input type="button" value="Continue"></div>
+                              <form id="login-form">
+                                   <div class="info-title">Email or Phone Number</div>
+                                   <div><input id="login-user-auth" type="text"/></div>
+                                   <div id="login-error" class="text-danger visually-hidden"></div>
+                                   <div><button id="login-button" class="btn btn-primary" type="button"><span id="login-form-spinner" class="spinner-border spinner-border-sm visually-hidden" role="status" aria-hidden="true"></span><span class="primary">Continue</span></button></div>
+                              </form>
                          </div>
                     </div>
                `
                container.innerHTML = html
 
-               AppleID.auth.init({
-                    clientId : 'com.bringyour.service',
-                    scope : 'name email',
-                    redirectURI : 'https://bringyour.com/connect',
-                    state : 'continue',
-                    nonce : 'create_network_id',
-                    usePopup : true
-               });
-
-              //  google.accounts.id.initialize({
-              //   client_id: '338638865390-cg4m0t700mq9073smhn9do81mr640ig1.apps.googleusercontent.com',
-              //   callback: googleLogin
-              // });
-              // google.accounts.id.prompt();
-
-               window.google.accounts.id.initialize({
-      client_id: googleClientId,
-      callback: (res, error) => {
-        // This is the function that will be executed once the authentication with google is finished
-      },
-    });
-               google.accounts.id.prompt();
-    window.google.accounts.id.renderButton(document.getElementById('g_id_button'), {});
-
-               // <api>/auth/login  user=X
 
           }
 
@@ -409,16 +637,18 @@
                let html = `
                     <div class="login-option">
                          <div class="login-container">
-                              <div class="login-header"><div class="title">Welcome back</div></div>
+                              <div class="login-header"><div class="title"><a href="/connect"><span class="material-symbols-outlined">arrow_back_ios_new</span></a>Welcome back</div></div>
                               <div>Log in using ${userAuth}</div>
                          </div>
                     </div>
                     <div class="login-option">
                          <div class="login-container">
-                              <div class="password-header"><div class="info-title">Password</div><div class="header-right"><a href="">Forgot your password?</a></div></div>
-                              <div><input type="password"/></div>
-                              <div><div id="login-error" class="text-danger">Invalid email or password</div></div>
-                              <div><input type="button" value="Continue"></div>
+                              <form id="login-form">
+                                   <div class="password-header"><div class="info-title">Password</div><div class="header-right"><a href="">Forgot your password?</a></div></div>
+                                   <div><input id="login-password" type="password"/></div>
+                                   <div id="login-error" class="text-danger visually-hidden">Invalid email or password</div>
+                                   <div><button id="login-button" class="btn btn-primary" type="button"><span id="login-form-spinner" class="spinner-border spinner-border-sm visually-hidden" role="status" aria-hidden="true"></span><span class="primary">Continue</span></button></div>
+                              </form>
                          </div>
                     </div>
                `
@@ -431,7 +661,7 @@
                let html = `
                     <div class="login-option">
                          <div class="login-container">
-                              <div class="login-header"><div class="title">Forgot your password?</div></div>
+                              <div class="login-header"><div class="title"><a href="/connect"><span class="material-symbols-outlined">arrow_back_ios_new</span></a>Forgot your password?</div></div>
                               <div>Enter your email or phone number to reset your password.</div>
                          </div>
                     </div>
@@ -456,7 +686,7 @@
                let html = `
                     <div class="login-option">
                          <div class="login-container">
-                              <div class="login-header"><div class="title">Forgot your password?</div></div>
+                              <div class="login-header"><div class="title"><a href="/connect"><span class="material-symbols-outlined">arrow_back_ios_new</span></a>Forgot your password?</div></div>
                               <div>Reset link sent to ${userAuth}</div>
                          </div>
                     </div>
@@ -497,12 +727,14 @@
                let html = `
                     <div class="login-option">
                          <div class="login-container">
-                              <div class="login-header"><div class="title">Create a network</div></div>
+                              <div class="login-header"><div class="title"><a href="/connect"><span class="material-symbols-outlined">arrow_back_ios_new</span></a>Create a network</div></div>
                               <div>${jwtType} will be the primary login.</div>
                          </div>
                     </div>
                     <div class="login-option">
                          <div class="login-container">
+                              <div class="info-title">Your Name</div>
+                              <div><input type="text"></div>
                               <div class="info-title">Choose a network name</div>
                               <div><input type="text"/>.bringyour.network</div>
                               <div><label><input type="checkbox" value="">I agree to the <a href="/terms.html" target="_blank">BringYour terms</a>. Learn about how we use and protect your data in our <a href="">Privacy Policy</a></label></div>
@@ -515,10 +747,11 @@
           }
 
           function renderCreateNetwork(container, userAuth) {
+               let userAuthStr = userAuth ? userAuth : ''
                let html = `
                     <div class="login-option">
                          <div class="login-container">
-                              <div class="login-header"><div class="back"><a href="/connect">BACK</a></div><div class="title">Create a network</div></div>
+                              <div class="login-header"><div class="title"><a href="/connect"><span class="material-symbols-outlined">arrow_back_ios_new</span></a>Create a network</div></div>
                          </div>
                     </div>
                     <div class="login-option">
@@ -526,7 +759,7 @@
                               <div class="info-title">Your Name</div>
                               <div><input type="text"></div>
                               <div class="info-title">Email or Phone Number</div>
-                              <div><input type="text" value="${userAuth}"></div>
+                              <div><input id="create-user-auth" type="text" value="${userAuthStr}"></div>
                               <div id="create-error" class="text-danger">This email or phone number is already taken. <a href="/connect">Sign in</a> or <a href="/connect/reset">reset your password</a>.</div>
                               <div class="info-title">Password</div>
                               <div><input type="password"/></div>
@@ -542,10 +775,20 @@
           }
 
           function renderCreateNetworkValidate(container, userAuth) {
+               let title
+               if (userAuthType(userAuth) == 'email') {
+                    title = 'Validate your email'
+               }
+               else if (userAuthType(userAuth) == 'phone') {
+                    title = 'Validate your phone number'
+               }
+               else {
+                    title = 'Validate your email or phone number'
+               }
                let html = `
                     <div class="login-option">
                          <div class="login-container">
-                              <div class="login-header"><div class="title">Validate your email or phone number</div></div>
+                              <div class="login-header"><div class="title"><a href="/connect"><span class="material-symbols-outlined">arrow_back_ios_new</span></a>${title}</div></div>
                               <div>We sent a code to ${userAuth}. Please enter it below.</div>
                          </div>
                     </div>
@@ -562,7 +805,7 @@
                container.innerHTML = html
           }
 
-          function renderCreateNetworkComplete(container, networkName) {
+          function renderComplete(container, networkName) {
                let html = `
                     <div class="login-option">
                          <div class="login-container">
@@ -573,6 +816,9 @@
                     <div class="login-option">
                          <div class="login-container">
                               <img src="../bringyour.com/res/images/store-play.png" class="store">
+                         </div>
+                         <div class="login-container">
+                              <img src="../bringyour.com/res/images/store-app.svg" class="store">
                          </div>
                     </div>
                     <div class="login-option">
@@ -613,56 +859,149 @@
                container.innerHTML = html
           }
 
+
+          // API mocks
+
+          function MOCK_API_auth_login(requestBody) {
+               let userAuth = requestBody['userAuth']
+
+               // loginSessionId, userAuth, authAllowed=[], error={suggestedUserAuth, message}
+               let responseBody
+               if (userAuth == 'xcolwell@gmail.com') {
+                    responseBody = {
+                         loginSessionId: crypto.randomUUID(),
+                         userAuth: 'xcolwell@gmail.com',
+                         authAllowed: ['apple']
+                    }
+               }
+               else if (userAuth == 'brien@bringyour.com') {
+                    responseBody = {
+                         userAuth: 'brien@bringyour.com',
+                         authAllowed: ['password', 'apple', 'google']
+                    }
+               }
+               else if (userAuth == '5103408248') {
+                    responseBody = {
+                         loginSessionId: crypto.randomUUID(),
+                         userAuth: '+1 510-340-8248',
+                         authAllowed: ['password']
+                    }
+               }
+               else if (userAuth == '510') {
+                    responseBody = {
+                         error: {
+                              suggestedUserAuth: '+1 510',
+                              message: 'A full phone phone number with +x country code required. It looks like your country code is +1.'
+                         }
+                    }
+               }
+               else if (userAuth == 'xcolwell') {
+                    responseBody = {
+                         error: {
+                              suggestedUserAuth: 'xcolwell@',
+                              message: 'Invalid email.'
+                         }
+                    }
+               } else {
+                    responseBody = {
+                         error: {
+                              message: 'Invalid email or phone number.'
+                         }
+                    }
+               }
+
+               return responseBody
+          }
+
+
+          function MOCK_API_auth_login_password(requestBody) {
+               let loginSessionId = requestBody['loginSessionId']
+               let password = requestBody['password']
+
+               // loginSessionId, validationRequired={userAuth}, network={name}, error={message}
+               let responseBody
+               if (password == 'test') {
+                    responseBody = {
+                         loginSessionId: loginSessionId,
+                         network: {
+                              name: 'brien'
+                         }
+                    }
+               }
+               else if (password == 'test2') {
+                    responseBody = {
+                         loginSessionId: loginSessionId,
+                         validationRequired: {
+                              userAuth: '+1 510-340-8248'
+                         }
+                    }
+               }
+               else {
+                    responseBody = {
+                         loginSessionId: loginSessionId,
+                         error: {
+                              message: 'Invalid user or password.'
+                         }
+                    }
+               }
+
+               return responseBody
+          }
+
+
+
      </script>
 </head>
 <body>
      <h2>Initial</h2>
      <div class="dialog" id="dialog-initial">
           <script type="text/javascript">
-               let mountInitial = new Mount(document.getElementById('dialog-initial'))
-               mountInitial.render(new DialogInitial())
-               mountInitial.router()
-
-               // render(document.getElementById('dialog-initial'), renderInitial)
-               // router(document.getElementById('dialog-initial'))
-
-               // see https://stackoverflow.com/questions/70993933/why-does-the-sign-in-with-google-button-disappear-after-i-render-it-the-second-t
-            // see https://developers.google.com/identity/gsi/web/reference/js-reference
-            //    window.onload = function () {
-            //   google.accounts.id.initialize({
-            //     client_id: '338638865390-cg4m0t700mq9073smhn9do81mr640ig1.apps.googleusercontent.com',
-            //     callback: handleCredentialResponse
-            //   });
-            //   google.accounts.id.prompt();
-            // };
+               (() => {
+                    let mount = new Mount(document.getElementById('dialog-initial'))
+                    mount.render(new DialogInitial())
+                    mount.router()
+               })()
           </script>
      </div>
 
      <h2>Initial, Password</h2>
      <div class="dialog" id="dialog-login-password">
           <script type="text/javascript">
-               render(document.getElementById('dialog-login-password'), (container) => renderLoginPassword(container, '+1 510-340-8248'))
+               // fixme id overlap
+               // (() => {
+               //      let mount = new Mount(document.getElementById('dialog-login-password'))
+               //      mount.render(new DialogLoginPassword('+1 510-340-8248'))
+               // })()
           </script>
      </div>
 
      <h2>Forgot password</h2>
      <div class="dialog" id="dialog-password-reset">
           <script type="text/javascript">
-               render(document.getElementById('dialog-password-reset'), (container) => renderPasswordReset(container, '+1 510-340-8248'))
+               (() => {
+                    let mount = new Mount(document.getElementById('dialog-password-reset'))
+                    mount.render(new DialogPasswordReset('+1 510-340-8248'))
+               })()
           </script>
      </div>
 
      <h2>Forgot password, after send</h2>
      <div class="dialog" id="dialog-password-reset-after-send">
           <script type="text/javascript">
-               render(document.getElementById('dialog-password-reset-after-send'), (container) => renderPasswordResetAfterSend(container, '+1 510-340-8248'))
+               (() => {
+                    let mount = new Mount(document.getElementById('dialog-password-reset-after-send'))
+                    mount.render(new DialogPasswordResetAfterSend('+1 510-340-8248'))
+               })()
           </script>
      </div>
 
      <h2>Forgot password, reset link landing</h2>
      <div class="dialog" id="dialog-password-reset-complete">
           <script type="text/javascript">
-               render(document.getElementById('dialog-password-reset-complete'), (container) => renderPasswordResetComplete(container, '12345'))
+               (() => {
+                    let mount = new Mount(document.getElementById('dialog-password-reset-complete'))
+                    mount.render(new DialogPasswordResetComplete('aresetcode'))
+               })()
           </script>
 
      </div>
@@ -670,7 +1009,10 @@
      <h2>Continue with Google or Apple, No Network</h2>
      <div class="dialog" id="dialog-create-network-auth-jwt">
           <script type="text/javascript">
-               render(document.getElementById('dialog-create-network-auth-jwt'), (container) => renderCreateNetworkAuthJwt(container, '12345'))
+               (() => {
+                    let mount = new Mount(document.getElementById('dialog-create-network-auth-jwt'))
+                    mount.render(new DialogCreateNetworkAuthJwt('authjwt'))
+               })()
           </script>
 
      </div>
@@ -678,21 +1020,32 @@
      <h2>Create network</h2>
      <div class="dialog" id="dialog-create-network">
           <script type="text/javascript">
-               render(document.getElementById('dialog-create-network'), (container) => renderCreateNetwork(container, '+1 510-340-8248'))
+               (() => {
+                    let mount = new Mount(document.getElementById('dialog-create-network'))
+                    mount.render(new DialogCreateNetwork('+1 510-340-8248'))
+               })()
+
           </script>
      </div>
 
      <h2>Continue with Email or SMS, No Network, Validate</h2>
      <div class="dialog" id="dialog-create-network-validate">
           <script type="text/javascript">
-               render(document.getElementById('dialog-create-network-validate'), (container) => renderCreateNetworkValidate(container, '+1 510-340-8248'))
+               (() => {
+                    let mount = new Mount(document.getElementById('dialog-create-network-validate'))
+                    mount.render(new DialogCreateNetworkValidate('+1 510-340-8248'))
+               })()
+
           </script>
      </div>
 
      <h2>Complete</h2>
-     <div class="dialog" id="dialog-create-network-complete">
+     <div class="dialog" id="dialog-complete">
           <script type="text/javascript">
-               render(document.getElementById('dialog-create-network-complete'), (container) => renderCreateNetworkComplete(container, 'brien'))
+               (() => {
+                    let mount = new Mount(document.getElementById('dialog-complete'))
+                    mount.render(new DialogComplete('brien'))
+               })()
           </script>
      </div>
 
