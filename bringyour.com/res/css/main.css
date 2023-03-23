@@ -63,10 +63,23 @@ div.leader {
 	margin-bottom: 24px;
 }
 
+div.leader div.top-message {
+	text-align: center;
+	margin-top: 48px;
+	margin-bottom: 48px;
+	font-family: 'Pacifico', cursive;
+	font-size: 48pt;
+}
+
 div.leader div.main-message {
 	text-align: center;
 	margin-top: 48px;
 	margin-bottom: 48px;
+}
+
+div.leader div.main-message span.now {
+	font-family: 'Pacifico', cursive;
+	font-size: 32pt;
 }
 
 div.leader div.main-message input[type="checkbox"] {
