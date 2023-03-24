@@ -79,7 +79,7 @@ div.leader div.main-message {
 
 div.leader div.main-message span.now {
 	font-family: 'Pacifico', cursive;
-	font-size: 32pt;
+/*	font-size: 24pt;*/
 }
 
 div.leader div.main-message input[type="checkbox"] {

@@ -10,6 +10,7 @@
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 	<link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@100;200;300;400;500;600;700;800&display=swap" rel="stylesheet">
 	<link href="https://fonts.googleapis.com/css?family=Pacifico&amp;display=swap" rel="stylesheet">
+	<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,400,0,0" />
 
 	<link href="res/css/bootstrap.min.css" rel="stylesheet">
 	<link href="res/css/main.css" rel="stylesheet">
@@ -23,14 +24,15 @@
     <script language="javascript" type="text/javascript" src="sketch_220824a.js"></script>
     <script language="javascript" type="text/javascript" src="logo.js"></script>
     <script language="javascript" type="text/javascript" src="stats.js"></script>
+    <script language="javascript" type="text/javascript" src="connect.js"></script>
 
-    <script src="https://accounts.google.com/gsi/client" async defer></script>
-	<script type="text/javascript" src="https://appleid.cdn-apple.com/appleauth/static/jsapi/appleid/1/en_US/appleid.auth.js"></script>
+    <script type="text/javascript" src="https://accounts.google.com/gsi/client"></script>
+     <script type="text/javascript" src="https://appleid.cdn-apple.com/appleauth/static/jsapi/appleid/1/en_US/appleid.auth.js"></script>
     
 </head>
 <body>
 	<!-- Modal -->
-<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+<div class="modal fade" id="dialog-connect" tabindex="-1" aria-labelledby="dialog-connect" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
@@ -38,68 +40,16 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
-        <div class="dialog">
+        <div class="dialog" id="dialog-initial">
+	          <script type="text/javascript">
+	               (() => {
+	                    let mount = createMount('dialog-initial')
+	                    mount.render(new DialogInitial())
+	                    mount.router()
+	               })()
+	          </script>
+	      </div>
 		
-		<div class="login-option">
-					<div class="login-container">
-				<div class="login-header"><div class="title">Login</div><div class="header-right"><a href="">or create a network</a></div></div>
-			</div>
-		</div>
-		
-		<div class="login-option">
-
-			<div class="login-container">
-			<div id="g_id_onload"
-     data-client_id="338638865390-cg4m0t700mq9073smhn9do81mr640ig1.apps.googleusercontent.com"
-     data-context="signin"
-     data-ux_mode="popup"
-     data-login_uri="https://bringyour.com/connect"
-     data-nonce=""
-     data-auto_select="true"
-     data-itp_support="true"
-     data-width="300"
-     data-height="39">
-</div>
-
-<div class="g_id_signin"
-     data-type="standard"
-     data-shape="rectangular"
-     data-theme="outline"
-     data-text="continue_with"
-     data-size="large"
-     data-logo_alignment="center"
-     data-width="300"
-     data-height="39">
-</div>
-</div>
-		</div>
-		<div class="login-option">
-			<div class="login-container">
-			<div id="apple-container"><div id="appleid-signin" data-color="white" data-border="false" data-type="continue" data-width="300" data-height="39" data-mode="center-align" data-logo-size="large"></div></div>
-	        <script type="text/javascript">
-	            AppleID.auth.init({
-	                clientId : 'com.bringyour.service',
-	                scope : 'name email',
-	                redirectURI : 'https://bringyour.com/connect',
-	                state : 'continue',
-	                nonce : 'create_network_id',
-	                usePopup : true
-	            });
-	        </script>
-	        </div>
-	    </div>
-		<div class="login-separator">- or -</div>
-		<div class="login-option">
-			<div class="login-container">
-			<div class="info-title">Email or Phone Number</div>
-			<div><input type="text"/></div>
-			<!-- <div class="password-header"><div class="info-title">Password</div><div class="header-right"><a href="">Forgot your password?</a></div></div>
-			<div><input type="password"/></div> -->
-			<div><input type="button" value="Continue"></div>
-		</div>
-		</div>
-		
-	</div>
       </div>
       <!-- <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -115,7 +65,7 @@
 			<tr>
 				<td id="logo"></td>
 				<td class="expand"><div class="tab-container"><div class="tab tab-selected">Network</div><a href="pricing.html"><div class="tab">Pricing</div></a><a href="participate.html"><div class="tab">Participate</div></a><a href="faq.html"><div class="tab">FAQ</div></a><a href="blog.html"><div class="tab">Blog</div></a><a href="about.html"><div class="tab">About</div></a></div></td>
-				<td class="start"><button type="button" id="start" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">Get Connected</button></td>
+				<td class="start"><button type="button" id="start" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#dialog-connect">Get Connected</button></td>
 			</tr>
 		</table>
 	</div>
@@ -126,20 +76,20 @@
 			
 			<table>
 				<tr>
-					<td class="text"><span class="feature-point">Private, anonymous internet access.</span> Peer plus multi-hop routing gives global access without compromise.</td>
+					<td class="text"><span class="feature-point">Private, anonymous, global internet access.</span> Tap into the world with peer plus multi-hop routing.</td>
 					<td class="graphic"><img src="res/images/pack-2.png" class="leader-right"/></td>
 				</tr>
 			</table>
 			<table>
 				<tr>
 					<td class="graphic"><img src="res/images/share-private-2.png" class="leader-left"/></td>
-					<td class="text"><span class="feature-point">Collaborate.</span> Connect between your devices, physical addresses, friends and family with just an app.</td>
+					<td class="text"><span class="feature-point">Collaborate.</span> Connect between your devices, physical addresses, friends and family.</td>
 				</tr>
 			</table>
 			<table>
 				<tr>
 					<td class="graphic"><img src="res/images/share-public-2.png" class="leader-left"/></td>
-					<td class="text"><span class="feature-point">Own your data.</span> API and apps to see and control your data with a single tap.</td> <!-- See where your data goes. Automate your version of the internet. -->
+					<td class="text"><span class="feature-point">Own your data.</span> See where your data goes and control your digital footprint.</td> <!-- See where your data goes. Automate your version of the internet. -->
 				</tr>
 				<!-- <tr>
 					<td class="graphic"></td>
@@ -147,7 +97,7 @@
 				</tr> -->
 			</table>
 
-			<div class="main-message"><label><input type="checkbox" value="" data-bs-toggle="modal" data-bs-target="#exampleModal">I want to free my network and data <span class="now">now!</span></label></div>
+			<div class="main-message"><label><input type="checkbox" value="" data-bs-toggle="modal" data-bs-target="#dialog-connect">I want to free my network and data <span class="now">now!</span></label></div>
 		</div>
 
 		<div>
