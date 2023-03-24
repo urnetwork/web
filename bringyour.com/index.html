@@ -40,12 +40,58 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
-        <div class="dialog" id="dialog-initial">
-	          <script type="text/javascript">
+        <div class="dialog" id="dialog-mount">
+	          <script type="text/javascript">	          		 
 	               (() => {
-	                    let mount = createMount('dialog-initial')
-	                    mount.render(new DialogInitial())
+	                    let mount = createMount('dialog-mount')
+	                    // exported for connect
+	                    window.connectMount = mount
+	                    // exported for connect
+	                    window.showConnectDialog = () => {
+		                  		$('#dialog-connect').modal('show')
+		                  }
 	                    mount.router()
+
+	                    let byJwt = getByJwt()
+	                    let resetCode = new URLSearchParams(window.location.search).get('resetCode')
+	                    if (resetCode) {
+		                    	mount.render(new DialogPasswordResetComplete(resetCode))
+		                  }
+		                  else if (byJwt) {
+		                  		let networkName = byJwt['network']['name']
+		                  		mount.render(new DialogComplete(networkName))
+		                  }
+		                  else {
+		                  		mount.render(new DialogInitial(true))
+		                  }
+
+
+		                  function updateConnectButton() {
+		                  	let startElement = document.getElementById('start')
+
+		                  	let byJwt = getByJwt()
+		                  	if (byJwt) {
+		                  		let networkName = byJwt['network']['name']
+		                  		startElement.textContent = networkName + '.bringyour.network'
+		                  		startElement.classList.remove('btn-primary')
+		                  		startElement.classList.add('btn-light')
+		                  	}
+		                  	else {
+		                  		startElement.textContent = 'Get Connected'
+		                  		startElement.classList.add('btn-primary')
+		                  		startElement.classList.remove('btn-light')
+		                  	}
+		                  }
+
+		                  window.notifyByJwtChanged = updateConnectButton
+
+		                  window.addEventListener('load', (event) => {
+		                  	updateConnectButton()
+		                  	if (resetCode) {
+                    			$('#dialog-connect').modal('show')
+		                  	}
+                    	})
+	                    
 	               })()
 	          </script>
 	      </div>
@@ -100,6 +146,30 @@
 			<div class="main-message"><label><input type="checkbox" value="" data-bs-toggle="modal" data-bs-target="#dialog-connect">I want to free my network and data <span class="now">now!</span></label></div>
 		</div>
 
+		
+		<div class="stats">
+			<div class="header">Statistics</div>
+			<div>Daily trends from the last 90 days. Last update Februrary 2, 2023.</div>
+			<div class="stats-container">
+				<!-- <div class="stat"><table><tr><td colspan="2" class="title">Friends and Family Transfer (TiB)</td></tr><tr><td id="free-transfer" class="plot"><script>sparkPlot('free-transfer')</script></td><td class="current">40TiB <div class="substat"><div>3.7gbps</div><div>average</div></div></td></tr></td></tr></table></div> -->
+				<div class="stat"><table><tr><td colspan="2" class="title">Transfer (TiB)</td></tr><tr><td id="paid-transfer" class="plot"><script>sparkPlot('paid-transfer')</script></td><td class="current">100TiB <div class="substat"><div>9.3gbps</div><div>average</div></div></td></tr></table></div>
+				<div class="stat"><table><tr><td colspan="2" class="title">Packets</td></tr><tr><td id="free-transfer" class="plot"><script>sparkPlot('free-transfer')</script></td><td class="current">200m <div class="substat"><div>13.2pps</div><div>average</div></div></td></tr></td></tr></table></div>
+				
+				<div class="stat"><table><tr><td colspan="2" class="title">Providers</td></tr><tr><td id="providers" class="plot"><script>sparkPlot('providers')</script></td><td class="current">2060 <div class="substat"><div>1950</div><div>average</div></div></td></tr></table></div>
+
+
+
+				<div class="stat"><table><tr><td colspan="2" class="title">Countries</td></tr><tr><td id="countries" class="plot"><script>sparkPlot('countries')</script></td><td class="current">15</td></tr></table></div>
+				<div class="stat"><table><tr><td colspan="2" class="title">Cities</td></tr><tr><td id="cities" class="plot"><script>sparkPlot('cities')</script></td><td class="current">15</td></tr></table></div>
+				
+				<div class="stat"><table><tr><td colspan="2" class="title">Extender Transfer (TiB)</td></tr><tr><td id="extender-transfer" class="plot"><script>sparkPlot('extender-transfer')</script></td><td class="current">100TiB <div class="substat"><div>9.3gbps</div><div>average</div></div></td></tr></table></div>
+				<div class="stat"><table><tr><td colspan="2" class="title">Extenders</td></tr><tr><td id="extenders" class="plot"><script>sparkPlot('extenders')</script></td><td class="current">2060 <div class="substat"><div>1950</div><div>average</div></div></td></tr></table></div>
+
+				<div class="stat"><table><tr><td colspan="2" class="title">Networks</td></tr><tr><td id="validated-providers" class="plot"><script>sparkPlot('validated-providers')</script></td><td class="current">1.3m</td></tr></table></div>
+				<div class="stat"><table><tr><td colspan="2" class="title">Devices</td></tr><tr><td id="validated-devices" class="plot"><script>sparkPlot('validated-devices')</script></td><td class="current">40000</td></tr></table></div>
+			</div>
+		</div>
+
 		<div>
 			<div class="header">Fast</div>
 			<div>Designed to minimize latency using peer-to-peer connections and global edges. A novel latency map technique allows linear path multi-hop routing that is nearly identical in performance to single-hop.</div>
@@ -134,19 +204,6 @@
 			<img src="res/images/use-cases-2.png"/>
 		</div>
 		
-		<div class="stats">
-			<div class="header">Statistics</div>
-			<div>Daily trends from the last 90 days. Last update Februrary 2, 2023.</div>
-			<div class="stats-container">
-				<div class="stat"><table><tr><td colspan="2" class="title">Friends and Family Transfer (TiB)</td></tr><tr><td id="free-transfer" class="plot"><script>sparkPlot('free-transfer')</script></td><td class="current">40TiB <div class="substat"><div>3.7gbps</div><div>average</div></div></td></tr></td></tr></table></div>
-				<div class="stat"><table><tr><td colspan="2" class="title">Provider Transfer (TiB)</td></tr><tr><td id="paid-transfer" class="plot"><script>sparkPlot('paid-transfer')</script></td><td class="current">100TiB <div class="substat"><div>9.3gbps</div><div>average</div></div></td></tr></table></div>
-				<div class="stat"><table><tr><td colspan="2" class="title">Extender Transfer (TiB)</td></tr><tr><td id="extender-transfer" class="plot"><script>sparkPlot('extender-transfer')</script></td><td class="current">100TiB <div class="substat"><div>9.3gbps</div><div>average</div></div></td></tr></table></div>
-				<div class="stat"><table><tr><td colspan="2" class="title">Networks</td></tr><tr><td id="validated-providers" class="plot"><script>sparkPlot('validated-providers')</script></td><td class="current">1.3m</td></tr></table></div>
-				<div class="stat"><table><tr><td colspan="2" class="title">Providers</td></tr><tr><td id="providers" class="plot"><script>sparkPlot('providers')</script></td><td class="current">2060 <div class="substat"><div>1950</div><div>average</div></div></td></tr></table></div>
-				<div class="stat"><table><tr><td colspan="2" class="title">Countries</td></tr><tr><td id="countries" class="plot"><script>sparkPlot('countries')</script></td><td class="current">15</td></tr></table></div>
-				<div class="stat"><table><tr><td colspan="2" class="title">Cities</td></tr><tr><td id="cities" class="plot"><script>sparkPlot('cities')</script></td><td class="current">15</td></tr></table></div>
-			</div>
-		</div>
 
 		<div>
 			<div class="header"><img src="res/images/lagdev.svg"/>Test your latency</div>
@@ -167,6 +224,7 @@
 					</td>
 					<td>
 						<div class="store"><img src="res/images/store-play.png"/></div>
+						<div class="store"><img src="res/images/store-app.svg"/></div>
 						<div class="link"><a href="https://github.com/bringyour/product/roadmap.md" target="_blank">Platform Roadmap</a></div>
 						<div class="link"><a href="https://github.com/bringyour/product/discussions" target="_blank">Product Feedback</a></div>
 					</td>

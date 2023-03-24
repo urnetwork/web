@@ -2,9 +2,48 @@
 // parse current location to find the api
 
 const clientVersion = '';
-const googleClientId = 'data-client_id="338638865390-cg4m0t700mq9073smhn9do81mr640ig1.apps.googleusercontent.com'
+const googleClientId = '338638865390-cg4m0t700mq9073smhn9do81mr640ig1.apps.googleusercontent.com'
 const appleClientId = 'com.bringyour.service'
 const authJwtRedirect = 'https://bringyour.com/connect'
+
+// 
+
+
+// see https://developers.google.com/identity/gsi/web/guides/handle-credential-responses-js-functions
+function handleGoogleCredentialResponse(response) {
+     let authJwt = response.credential
+     if (window.connectMount) {
+          window.connectMount.activeComponent.submitAuthJwt('google', authJwt)
+     }
+     if (window.showConnectDialog) {
+          window.showConnectDialog()
+     }
+}
+
+
+function getByJwt() {
+     let byJwtStr = localStorage.getItem('byJwt')
+     return byJwtStr && JSON.parse(byJwtStr)
+}
+
+function setByJwt(byJwt) {
+     localStorage.setItem('byJwt', JSON.stringify(byJwt))
+     if (window.notifyByJwtChanged) {
+          window.notifyByJwtChanged()
+     }
+}
+
+function removeByJwt() {
+     localStorage.removeItem('byJwt')
+     if (window.notifyByJwtChanged) {
+          window.notifyByJwtChanged()
+     }
+}
+
+
+function escapeHtml(html) {
+     return html.replace(/[<>"]+/g, '')
+}
 
 
 // fixme
@@ -111,12 +150,13 @@ function Mount(container, idPrefix) {
 }
 
 
-function DialogInitial() {
+function DialogInitial(firstLoad) {
      const self = this
-     this.render = (container) => {
-          renderInitial(container, self.id)
 
+     self.render = (container) => {
           const nonce = crypto.randomUUID()
+
+          renderInitial(container, self.id, nonce)
 
           // connect with apple
           AppleID.auth.init({
@@ -127,33 +167,38 @@ function DialogInitial() {
                nonce : nonce,
                usePopup : true
           });
-          document.addEventListener('AppleIDSignInOnSuccess', function(data) {
-               // fixme
-               alert('Apple auth')
+          // see https://developer.apple.com/documentation/sign_in_with_apple/sign_in_with_apple_js/configuring_your_webpage_for_sign_in_with_apple
+          document.addEventListener('AppleIDSignInOnSuccess', function(event) {
+               let authJwt = event.detail.authorization
+               self.submitAuthJwt('apple', authJwt)
           });
           document.addEventListener('AppleIDSignInOnFailure', (event) => {
-               // fixme
-               alert('Apple auth failure')
+               // do nothing
           });
 
           // connect with google
           window.google.accounts.id.initialize({
                client_id: googleClientId,
-               callback: (res, error) => {
-                    // fixme
-                    alert('Google auth')
+               callback: (response, error) => {
+                    if (!error) {
+                         let authJwt = response.credential
+                         self.submitAuthJwt('google', authJwt)
+                    }
                },
           });
-          google.accounts.id.prompt();
-          window.google.accounts.id.renderButton(document.getElementById('g_id_button'), {
-               type: 'standard',
-               theme: 'outline',
-               size: 'large',
-               text: 'continue_with',
-               shape: 'rectangular',
-               logo_alignment: 'center',
-               width: 300
-          });
+          if (firstLoad) {
+               window.google.accounts.id.prompt();
+          } else {
+               window.google.accounts.id.renderButton(document.getElementById('g_id_button'), {
+                    type: 'standard',
+                    theme: 'outline',
+                    size: 'large',
+                    text: 'continue_with',
+                    shape: 'rectangular',
+                    logo_alignment: 'center',
+                    width: 300
+               });
+          }
 
           const loginButtonElement = self.element('login-button')
           const loginFormElement = self.element('login-form')
@@ -169,13 +214,78 @@ function DialogInitial() {
                }
           })
      }
-     this.router = (url) => {
+     self.router = (url) => {
      }
 
 
      // event handlers
 
-     this.submit = () => {
+     self.submitAuthJwt = (authJwtType, authJwt) => {
+          const loginUserAuthElement = self.element('login-user-auth')
+          const loginButtonElement = self.element('login-button') 
+          const loginSpinnerElement = self.element('login-spinner')
+
+          loginUserAuthElement.disabled = true
+          loginButtonElement.disabled = true
+          loginSpinnerElement.classList.remove('d-none')
+
+          let requestBody = {
+               authJwtType: authJwtType,
+               authJwt: authJwt
+          }
+
+          setTimeout(() => {
+               let responseBody = MOCK_API_auth_login(requestBody)
+               self.handleSubmitAuthJwtResponse(responseBody)
+          }, 1000);
+     }
+     self.handleSubmitAuthJwtResponse = (responseBody) => {
+          const loginUserAuthElement = self.element('login-user-auth')
+          const loginButtonElement = self.element('login-button') 
+          const loginSpinnerElement = self.element('login-spinner')
+
+          if ('network' in responseBody) {
+               let network = responseBody['network']
+               let networkName = network['name']
+
+               setByJwt({network: {name: networkName}})
+               self.mount.render(new DialogComplete(networkName))
+          }
+          else if ('authAllowed' in responseBody) {
+               // and existing network but different login
+               let message
+               if (authAllowed.includes('apple') && authAllowed.includes('google')) {
+                    message = 'Please login with Apple or Google'
+               }
+               else if (authAllowed.includes('apple')) {
+                    message = 'Please login with Apple'
+               }
+               else if (authAllowed.includes('google')) {
+                    message = 'Please login with Google'
+               }
+               else if (authAllowed.includes('password')) {
+                    message = 'Please login with email or phone number'
+               } else {
+                    message = 'Something went wrong. Please try again later.'
+               }
+               let errorElement = self.element('login-auth-jwt-error')
+               errorElement.textContent = message
+               errorElement.classList.remove('d-none')
+
+               loginUserAuthElement.disabled = false
+               loginButtonElement.disabled = false
+               loginSpinnerElement.classList.add('d-none')
+          }
+          else {
+               // a new network
+               let authJwtType = responseBody['authJwtType']
+               let authJwt = responseBody['authJwt']
+               let userName = responseBody['userName']
+               self.mount.render(new DialogCreateNetworkAuthJwt(authJwtType, authJwt, userName))
+          }
+     }
+
+     self.submit = () => {
           const loginUserAuthElement = self.element('login-user-auth')
           const loginButtonElement = self.element('login-button') 
           const loginSpinnerElement = self.element('login-spinner')
@@ -194,17 +304,14 @@ function DialogInitial() {
                self.handleSubmitResponse(responseBody)
           }, 1000);
      }
-
-     this.handleSubmitResponse = (responseBody) => {
+     self.handleSubmitResponse = (responseBody) => {
           const loginUserAuthElement = self.element('login-user-auth')
           const loginButtonElement = self.element('login-button') 
           const loginSpinnerElement = self.element('login-spinner')
 
-          let userAuth = loginUserAuthElement.value
-
           if ('error' in responseBody) {
                let error = responseBody['error']
-               let suggestedUserAuth = error['suggestedUserAuth'] || userAuth
+               let suggestedUserAuth = error['suggestedUserAuth'] || loginUserAuthElement.value
                let message = error['message']
 
                let errorElement = self.element('login-error')
@@ -217,13 +324,12 @@ function DialogInitial() {
                loginButtonElement.disabled = false
                loginSpinnerElement.classList.add('d-none')
           }
-          else if ('loginSessionId' in responseBody) {
+          else if ('authAllowed' in responseBody) {
                // an existing network
-               userAuth = responseBody['userAuth'] || userAuth
+               let userAuth = responseBody['userAuth'] || responseBody['userAuth']
                let authAllowed = responseBody['authAllowed']
                if (authAllowed.includes('password')) {
-                    let loginSessionId = responseBody['loginSessionId']
-                    self.mount.render(new DialogLoginPassword(userAuth, loginSessionId))
+                    self.mount.render(new DialogLoginPassword(userAuth))
                } else {
                     let message
                     if (authAllowed.includes('apple') && authAllowed.includes('google')) {
@@ -248,14 +354,15 @@ function DialogInitial() {
           }
           else {
                // a new network
-               userAuth = responseBody['userAuth'] || userAuth
+               let userAuth = responseBody['userAuth']
                self.mount.render(new DialogCreateNetwork(userAuth))
           }
      }
 }
 
-function DialogLoginPassword(userAuth, loginSessionId) {
+function DialogLoginPassword(userAuth) {
      const self = this
+
      self.render = (container) => {
           renderLoginPassword(container, self.id, userAuth)
 
@@ -296,7 +403,7 @@ function DialogLoginPassword(userAuth, loginSessionId) {
 
           let password = loginPasswordElement.value
           let requestBody = {
-               loginSessionId: loginSessionId,
+               userAuth: userAuth,
                password: password
           }
 
@@ -332,6 +439,7 @@ function DialogLoginPassword(userAuth, loginSessionId) {
                let network = responseBody['network']
                let networkName = network['name']
 
+               setByJwt({network: {name: networkName}})
                self.mount.render(new DialogComplete(networkName))
           } else {
                let message = 'Something went wrong. Please try again later.'
@@ -351,7 +459,8 @@ function DialogLoginPassword(userAuth, loginSessionId) {
 
 function DialogPasswordReset(userAuth) {
      const self = this
-     this.render = (container) => {
+
+     self.render = (container) => {
           renderPasswordReset(container, self.id, userAuth)
 
           const passwordResetButtonElement = self.element('password-reset-button')
@@ -371,7 +480,7 @@ function DialogPasswordReset(userAuth) {
 
           passwordResetUserAuthElement.focus()
      }
-     this.router = (url) => {
+     self.router = (url) => {
      }
 
 
@@ -435,10 +544,11 @@ function DialogPasswordReset(userAuth) {
 
 function DialogPasswordResetAfterSend(userAuth) {
      const self = this
-     this.render = (container) => {
+
+     self.render = (container) => {
           renderPasswordResetAfterSend(container, self.id, userAuth)
      }
-     this.router = (url) => {
+     self.router = (url) => {
           if (url.pathname == '/connect/password-reset/resend') {
                self.resend()
           }
@@ -482,7 +592,8 @@ function DialogPasswordResetAfterSend(userAuth) {
 
 function DialogPasswordResetComplete(resetCode) {
      const self = this
-     this.render = (container) => {
+
+     self.render = (container) => {
           renderPasswordResetComplete(container, self.id, resetCode)
 
           const passwordResetButtonElement = self.element('password-reset-button')
@@ -510,8 +621,10 @@ function DialogPasswordResetComplete(resetCode) {
 
           self.updateButton()
      }
-     this.router = (url) => {
-          
+     self.router = (url) => {
+          if ('/connect/password-reset' == url.pathname) {
+               self.mount.render(new DialogPasswordReset())
+          }
      }
 
 
@@ -561,21 +674,27 @@ function DialogPasswordResetComplete(resetCode) {
 
           if ('error' in responseBody) {
                let error = responseBody['error']
-               let message = error['message']
 
-               let errorElement = self.element('password-reset-error')
-               errorElement.textContent = message
-               errorElement.classList.remove('d-none')
+               if ('resetCodeError' in error) {
+                    let errorElement = self.element('password-reset-error')
+                    errorElement.innerHTML = 'Reset code expired. <a href="/connect/password-reset">Get a new code</a>.'
+                    errorElement.classList.remove('d-none')
+               }
+               else {
+                    let message = error['message']
+
+                    let errorElement = self.element('password-reset-error')
+                    errorElement.textContent = message
+                    errorElement.classList.remove('d-none')                    
+               }
 
                passwordResetPasswordElement.disabled = false
                passwordResetPasswordConfirmElement.disabled = false
                passwordResetButtonElement.disabled = false
                passwordResetSpinnerElement.classList.add('d-none')
           }
-          else if ('userAuth' in responseBody) {
-               let responseUserAuth = responseBody['userAuth']
-
-               self.mount.render(new DialogLoginPassword(responseUserAuth))
+          else if ('complete' in responseBody) {
+               self.mount.render(new DialogInitial(false))
           } else {
                let message = 'Something went wrong. Please try again later.'
 
@@ -742,15 +861,15 @@ function NetworkNameValidator(
 
 
 
-function DialogCreateNetworkAuthJwt(authJwt) {
+function DialogCreateNetworkAuthJwt(authJwtType, authJwt, userName) {
      const self = this
 
      self.networkNameValidator = null
 
      self.termsOk = false
 
-     this.render = (container) => {
-          renderCreateNetworkAuthJwt(container, self.id, authJwt)
+     self.render = (container) => {
+          renderCreateNetworkAuthJwt(container, self.id, authJwtType, authJwt, userName)
 
           const createButtonElement = self.element('create-button')
           const createFormElement = self.element('create-form')
@@ -794,7 +913,7 @@ function DialogCreateNetworkAuthJwt(authJwt) {
           }
           createUserNameElement.focus()
      }
-     this.router = (url) => {
+     self.router = (url) => {
      }
 
 
@@ -817,6 +936,7 @@ function DialogCreateNetworkAuthJwt(authJwt) {
           let networkName = createNetworkNameElement.value
           let terms = createAgreeTermsElement.checked
           let requestBody = {
+               authJwtType: authJwtType,
                authJwt: authJwt,
                userName: userName,
                networkName: networkName,
@@ -848,7 +968,11 @@ function DialogCreateNetworkAuthJwt(authJwt) {
                createButtonElement.disabled = false
                createSpinnerElement.classList.add('d-none')
 
-               if ('message' in error) {
+               if (error['userAuthConflict']) {
+                    createUserAuthErrorElement.innerHTML = 'This email or phone number is already taken. <a href="/connect">Sign in</a>.'
+                    createUserAuthErrorElement.classList.remove('d-none')
+               }
+               else if ('message' in error) {
                     createErrorElement.textContent = error['message']
                     createErrorElement.classList.remove('d-none')
                }
@@ -875,6 +999,7 @@ function DialogCreateNetworkAuthJwt(authJwt) {
                let network = responseBody['network']
                let networkName = network['name']
 
+               setByJwt({network: {name: networkName}})
                self.mount.render(new DialogComplete(networkName))
           } else {
                let message = 'Something went wrong. Please try again later.'
@@ -1111,6 +1236,7 @@ function DialogCreateNetwork(userAuth) {
                let network = responseBody['network']
                let networkName = network['name']
 
+               setByJwt({network: {name: networkName}})
                self.mount.render(new DialogComplete(networkName))
           } else {
                let message = 'Something went wrong. Please try again later.'
@@ -1233,6 +1359,7 @@ function DialogCreateNetworkValidate(userAuth) {
                let network = responseBody['network']
                let networkName = network['name']
 
+               setByJwt({network: {name: networkName}})
                self.mount.render(new DialogComplete(networkName))
           } else {
                let message = 'Something went wrong. Please try again later.'
@@ -1284,19 +1411,29 @@ function DialogCreateNetworkValidate(userAuth) {
 }
 
 
+
+// local storage:
+// byFeedback
+// byProductUpdates
+// product updates checkbox change
+// feedback form submit
 function DialogComplete(networkName) {
      const self = this
-     this.render = (container) => {
+     self.render = (container) => {
           renderComplete(container, self.id, networkName)
      }
-     this.router = (url) => {
+     self.router = (url) => {
+          if (url.pathname == '/connect/signout') {
+               removeByJwt()
+               self.mount.render(new DialogInitial(false))
+          }
      }
 }
 
 
 
 // fixme id, container
-function renderInitial(container, id) {
+function renderInitial(container, id, nonce) {
      let html = `
           <div class="login-option">
                <div class="login-container">
@@ -1311,7 +1448,8 @@ function renderInitial(container, id) {
                          data-context="signin"
                          data-ux_mode="popup"
                          data-login_uri="${authJwtRedirect}"
-                         data-nonce=""
+                         data-nonce="${nonce}"
+                         data-callback="handleGoogleCredentialResponse"
                          data-auto_select="true"
                          data-itp_support="true"
                          data-width="300"
@@ -1363,7 +1501,7 @@ function renderLoginPassword(container, id, userAuth) {
           <div class="login-option">
                <div class="login-container">
                     <div class="login-header"><div class="title"><a href="/connect"><span class="material-symbols-outlined">arrow_back_ios_new</span></a>Welcome back</div></div>
-                    <div>Log in using ${userAuth}</div>
+                    <div>Log in using ${escapeHtml(userAuth)}</div>
                </div>
           </div>
           <div class="login-option">
@@ -1382,6 +1520,7 @@ function renderLoginPassword(container, id, userAuth) {
 }
 
 function renderPasswordReset(container, id, userAuth) {
+     let userAuthStr = userAuth || ''
      let html = `
           <div class="login-option">
                <div class="login-container">
@@ -1393,7 +1532,7 @@ function renderPasswordReset(container, id, userAuth) {
                <div class="login-container">
                     <form id="${id('password-reset-form')}">
                          <div class="info-title">Email or Phone Number</div>
-                         <div><input id="${id('password-reset-user-auth')}" type="text" value="${userAuth}"/></div>
+                         <div><input id="${id('password-reset-user-auth')}" type="text" value="${escapeHtml(userAuthStr)}"/></div>
                          <div id="${id('password-reset-error')}" class="text-danger d-none">Invalid email or phone number</div>
                          <div><button id="${id('password-reset-button')}" class="btn btn-primary" type="button"><span id="${id('password-reset-spinner')}" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span><span class="primary">Continue</span></button></div>
                     </form>
@@ -1414,7 +1553,7 @@ function renderPasswordResetAfterSend(container, id, userAuth) {
           <div class="login-option">
                <div class="login-container">
                     <div class="login-header"><div class="title"><a href="/connect"><span class="material-symbols-outlined">arrow_back_ios_new</span></a>Forgot your password?</div></div>
-                    <div>Reset link sent to ${userAuth}</div>
+                    <div>Reset link sent to ${escapeHtml(userAuth)}</div>
                </div>
           </div>
           <div class="login-option">
@@ -1452,24 +1591,36 @@ function renderPasswordResetComplete(container, id, resetCode) {
      container.innerHTML = html
 }
 
-function renderCreateNetworkAuthJwt(container, id, authJwt) {
-     let jwtType = 'Apple'
+function renderCreateNetworkAuthJwt(container, id, authJwtType, authJwt, userName) {
+     let authName
+     if (authJwtType == 'google') {
+          authName = 'Google'
+     }
+     else if (authJwtType == 'apple') {
+          authName = 'Apple'
+     }
+     else {
+          authName = 'Something'
+     }
+
+     let userNameStr = userName || ''
+
      let html = `
           <div class="login-option">
                <div class="login-container">
                     <div class="login-header"><div class="title"><a href="/connect"><span class="material-symbols-outlined">arrow_back_ios_new</span></a>Create a network</div></div>
-                    <div>${jwtType} will be the primary login.</div>
+                    <div>${escapeHtml(authName)} will be the primary login.</div>
                </div>
           </div>
           <div class="login-option">
                <div class="login-container">
                     <form id="${id('create-form')}">
                          <div class="info-title">Your Name</div>
-                         <div><input id="${id('create-user-name')}" type="text"></div>
+                         <div><input id="${id('create-user-name')}" type="text" value="${escapeHtml(userNameStr)}"></div>
                          <div class="info-title">Choose a network name</div>
                          <div><input id="${id('create-network-name')}" type="text" placeholder="yournetworkname"/>.bringyour.network<span id="${id('create-network-name-spinner')}" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span></div>
                          <div id="${id('create-network-name-error')}" class="text-secondary d-none"></div>
-                         <div id="${id('create-network-name-available')}" class="d-none">Available!</div>
+                         <div id="${id('create-network-name-available')}" class="text-success d-none">Available!</div>
                          <div><label><input id="${id('create-agree-terms')}" type="checkbox" value="">I agree to the <a href="/terms.html" target="_blank">BringYour terms</a>. Learn about how we use and protect your data in our <a href="">Privacy Policy</a></label></div>
                          <div id="${id('create-error')}" class="text-secondary d-none"></div>
                          <div><button id="${id('create-button')}" class="btn btn-primary" type="button"><span id="${id('create-spinner')}" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span><span class="primary">Create Network</span></button></div>
@@ -1482,7 +1633,7 @@ function renderCreateNetworkAuthJwt(container, id, authJwt) {
 }
 
 function renderCreateNetwork(container, id, userAuth) {
-     let userAuthStr = userAuth ? userAuth : ''
+     let userAuthStr = userAuth || ''
      let html = `
           <div class="login-option">
                <div class="login-container">
@@ -1495,7 +1646,7 @@ function renderCreateNetwork(container, id, userAuth) {
                          <div class="info-title">Your Name</div>
                          <div><input id="${id('create-user-name')}" type="text"></div>
                          <div class="info-title">Email or Phone Number</div>
-                         <div><input id="${id('create-user-auth')}" type="text" value="${userAuthStr}"></div>
+                         <div><input id="${id('create-user-auth')}" type="text" value="${escapeHtml(userAuthStr)}"></div>
                          <div id="${id('create-user-auth-error')}" class="text-danger d-none"></div>
                          <div class="info-title">Password</div>
                          <div><input id="${id('create-password')}" type="password"/></div>
@@ -1503,7 +1654,7 @@ function renderCreateNetwork(container, id, userAuth) {
                          <div class="info-title">Choose a network name</div>
                          <div><input id="${id('create-network-name')}" type="text" placeholder="yournetworkname"/>.bringyour.network<span id="${id('create-network-name-spinner')}" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span></div>
                          <div id="${id('create-network-name-error')}" class="text-secondary d-none"></div>
-                         <div id="${id('create-network-name-available')}" class="d-none">Available!</div>
+                         <div id="${id('create-network-name-available')}" class="text-success d-none">Available!</div>
                          <div><label><input id="${id('create-agree-terms')}" type="checkbox" value="">I agree to the <a href="/terms.html" target="_blank">BringYour terms</a>. Learn about how we use and protect your data in our <a href="">Privacy Policy</a></label></div>
                          <div id="${id('create-error')}" class="text-secondary d-none"></div>
                          <div><button id="${id('create-button')}" class="btn btn-primary" type="button"><span id="${id('create-spinner')}" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span><span class="primary">Create Network</span></button></div>
@@ -1529,8 +1680,8 @@ function renderCreateNetworkValidate(container, id, userAuth) {
      let html = `
           <div class="login-option">
                <div class="login-container">
-                    <div class="login-header"><div class="title"><a href="/connect"><span class="material-symbols-outlined">arrow_back_ios_new</span></a>${title}</div></div>
-                    <div>We sent a code to ${userAuth}. Please enter it below.</div>
+                    <div class="login-header"><div class="title"><a href="/connect"><span class="material-symbols-outlined">arrow_back_ios_new</span></a>${escapeHtml(title)}</div></div>
+                    <div>We sent a code to ${escapeHtml(userAuth)}. Please enter it below.</div>
                </div>
           </div>
           <div class="login-option">
@@ -1552,16 +1703,15 @@ function renderComplete(container, id, networkName) {
      let html = `
           <div class="login-option">
                <div class="login-container">
-                    <div class="login-header"><div class="title">${networkName}.bringyour.network</div></div>
-                    <div>Log in to the app to use your network.</div>
+                    <div class="login-header"><div class="title">${escapeHtml(networkName)}.bringyour.network</div></div>
+                    <div>Your network is now live!</div>
+                    <div><br>Log in to the app to use your network.</div>
                </div>
           </div>
           <div class="login-option">
                <div class="login-container">
-                    <img src="../bringyour.com/res/images/store-play.png" class="store">
-               </div>
-               <div class="login-container">
-                    <img src="../bringyour.com/res/images/store-app.svg" class="store">
+                    <a href=""><img src="../bringyour.com/res/images/store-play.png" class="store"></a>
+                    <a href=""><img src="../bringyour.com/res/images/store-app.svg" class="store"></a>
                </div>
           </div>
           <div class="login-option">
@@ -1571,30 +1721,41 @@ function renderComplete(container, id, networkName) {
           </div>
           <div class="login-option">
                <div class="login-container">
-                    <div class="title">Can you take a minute to give us some feedback?</div>
-                    <div>I use my network for 
-                         <div><label><input type="checkbox" value=""> Personal</label></div>
-                         <div><label><input type="checkbox" value=""> Business</label></div>
-                    </div>
-                    <div>The following use cases are valuable to me 
-                         <div><label><input type="checkbox" value=""> Stay anonymous and private on the internet</label></div>
-                         <div><label><input type="checkbox" value=""> Have verified safe internet everywhere</label></div>
-                         <div><label><input type="checkbox" value=""> Access regional and international networks</label></div>
-                         <div><label><input type="checkbox" value=""> Connect with my homes, friends and family</label></div>
-                         <div><label><input type="checkbox" value=""> Control the use of data and apps on my network</label></div>
-                         <div><label><input type="checkbox" value=""> Block ads</label></div>
-                         <div><label><input type="checkbox" value=""> Block personal data collection parties</label></div>
-                         <div><label><input type="checkbox" value=""> Help stay focused by temporarily blocking overused sites and content</label></div>
-                         <div><label><input type="checkbox" value=""> Access private servers from anywhere</label></div>
-                         <div><label><input type="checkbox" value=""> Run custom code and servers</label></div>
-                         <div><label><input type="checkbox" value=""> Prevent cyber attacks like phishing</label></div>
-                         <div><label><input type="checkbox" value=""> Audit usage of my network for compliance</label></div>
-                         <div><label><input type="checkbox" value=""> Implement a zero-trust or secure business environment</label></div>
-                         <div><label><input type="checkbox" value=""> Visualize and understand my network data</label></div>
-                    </div>
-                    <div>What do you want to do with your network?</div>
-                    <div><textarea></textarea></div>
-                    <div><input type="button" value='submit'></div>
+                    <a href="/connect/signout">Sign out</a>
+               </div>
+          </div>
+          <div class="login-option">
+               <div id="feedback-input" class="login-container">
+                    <form id="feedback-form">
+                         <div class="title">Can you take a minute to give us some feedback?</div>
+                         <div>I use my network for 
+                              <div><label><input type="checkbox" value=""> Personal</label></div>
+                              <div><label><input type="checkbox" value=""> Business</label></div>
+                         </div>
+                         <div>The following use cases are valuable to me 
+                              <div><label><input type="checkbox" value=""> Stay anonymous and private on the internet</label></div>
+                              <div><label><input type="checkbox" value=""> Have verified safe internet everywhere</label></div>
+                              <div><label><input type="checkbox" value=""> Access regional and international networks</label></div>
+                              <div><label><input type="checkbox" value=""> Connect with my homes, friends and family</label></div>
+                              <div><label><input type="checkbox" value=""> Control the use of data and apps on my network</label></div>
+                              <div><label><input type="checkbox" value=""> Block ads</label></div>
+                              <div><label><input type="checkbox" value=""> Block personal data collection parties</label></div>
+                              <div><label><input type="checkbox" value=""> Help stay focused by temporarily blocking overused sites and content</label></div>
+                              <div><label><input type="checkbox" value=""> Access private servers from anywhere</label></div>
+                              <div><label><input type="checkbox" value=""> Run custom code and servers</label></div>
+                              <div><label><input type="checkbox" value=""> Prevent cyber attacks like phishing</label></div>
+                              <div><label><input type="checkbox" value=""> Audit usage of my network for compliance</label></div>
+                              <div><label><input type="checkbox" value=""> Implement a zero-trust or secure business environment</label></div>
+                              <div><label><input type="checkbox" value=""> Visualize and understand my network data</label></div>
+                         </div>
+                         <div>What do you want to do with your network?</div>
+                         <div><textarea placeholder="I want to ..."></textarea></div>
+                         <div><button id="${id('feedback-button')}" class="btn btn-primary" type="button"><span id="${id('feedback-spinner')}" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span><span class="primary">Submit</span></button></div>
+                    </form>
+               </div>
+               <div id="feedback-done" class="login-container">
+                    <div>&#128588; Thank you for the feedback! We value your input as we prioritize what to build next.
+                    <div><br><a href="https://github.com/bringyour/product/discussions" target="_blank">Give us more feedback</a></div>
                </div>
           </div>
      `
@@ -1607,12 +1768,24 @@ function renderComplete(container, id, networkName) {
 
 function MOCK_API_auth_login(requestBody) {
      let userAuth = requestBody['userAuth']
+     let authJwt = requestBody['authJwt']
+     let authJwtType = requestBody['authJwtType']
 
-     // loginSessionId, userAuth, authAllowed=[], error={suggestedUserAuth, message}
+     // userAuth, authJwtType, authJwt, authAllowed=[], error={suggestedUserAuth, message}
      let responseBody
-     if (userAuth == 'xcolwell@gmail.com') {
+     if (authJwt) {
           responseBody = {
-               loginSessionId: crypto.randomUUID(),
+               authJwt: authJwt,
+               authJwtType: authJwtType, 
+               userName: 'Brien Colwell'
+               // authAllowed: [authJwtType],
+               // network: {
+               //      name: 'brien'
+               // }
+          }
+     }
+     else if (userAuth == 'xcolwell@gmail.com') {
+          responseBody = {
                userAuth: 'xcolwell@gmail.com',
                authAllowed: ['apple']
           }
@@ -1625,7 +1798,6 @@ function MOCK_API_auth_login(requestBody) {
      }
      else if (userAuth == '5103408248') {
           responseBody = {
-               loginSessionId: crypto.randomUUID(),
                userAuth: '+1 510-340-8248',
                authAllowed: ['password']
           }
@@ -1658,14 +1830,14 @@ function MOCK_API_auth_login(requestBody) {
 
 
 function MOCK_API_auth_login_password(requestBody) {
-     let loginSessionId = requestBody['loginSessionId']
+     let userAuth = requestBody['userAuth']
      let password = requestBody['password']
 
-     // loginSessionId, validationRequired={userAuth}, network={name}, error={message}
+     // userAuth, validationRequired={userAuth}, network={name}, error={message}
      let responseBody
      if (password == 'test') {
           responseBody = {
-               loginSessionId: loginSessionId,
+               userAuth: userAuth,
                network: {
                     name: 'brien'
                }
@@ -1673,7 +1845,7 @@ function MOCK_API_auth_login_password(requestBody) {
      }
      else if (password == 'test2') {
           responseBody = {
-               loginSessionId: loginSessionId,
+               userAuth: userAuth,
                validationRequired: {
                     userAuth: '+1 510-340-8248'
                }
@@ -1681,7 +1853,7 @@ function MOCK_API_auth_login_password(requestBody) {
      }
      else {
           responseBody = {
-               loginSessionId: loginSessionId,
+               userAuth: userAuth,
                error: {
                     message: 'Invalid user or password.'
                }
@@ -1757,12 +1929,25 @@ function MOCK_API_auth_password_reset(requestBody) {
 }
 
 function MOCK_API_auth_password_set(requestBody) {
+     // note do not send userAuth back in this for security, in the case the reset link is leaked
+
      // resetCode, password
      let resetCode = requestBody['resetCode']
      let password = requestBody['password']
 
-     let responseBody = {
-          userAuth: '+1 510-340-8248'
+     let responseBody
+
+     if (resetCode == '123456') {
+          responseBody = {
+               error: {
+                    resetCodeError: true
+               }
+          }
+     }
+     else {
+          responseBody = {
+               complete: true
+          }
      }
 
      return responseBody
@@ -1772,7 +1957,7 @@ function MOCK_API_auth_network_check(requestBody) {
      let networkName = requestBody['networkName']
 
      let responseBody
-     if (networkName == 'ahellaname') {
+     if (['ahellaname', 'briencolwell'].includes(networkName)) {
           responseBody = {
                conflict: false
           }
