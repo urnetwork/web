@@ -1,7 +1,6 @@
 
 // parse current location to find the api
 
-const clientVersion = '';
 const googleClientId = '338638865390-cg4m0t700mq9073smhn9do81mr640ig1.apps.googleusercontent.com'
 const appleClientId = 'com.bringyour.service'
 const authJwtRedirect = 'https://bringyour.com/connect'
@@ -21,132 +20,13 @@ function handleGoogleCredentialResponse(response) {
 }
 
 
-function getByJwt() {
-     let byJwtStr = localStorage.getItem('byJwt')
-     return byJwtStr && JSON.parse(byJwtStr)
-}
-
-function setByJwt(byJwt) {
-     localStorage.setItem('byJwt', JSON.stringify(byJwt))
-     if (window.notifyByJwtChanged) {
-          window.notifyByJwtChanged()
-     }
-}
-
-function removeByJwt() {
-     localStorage.removeItem('byJwt')
-     if (window.notifyByJwtChanged) {
-          window.notifyByJwtChanged()
-     }
-}
-
-
-function escapeHtml(html) {
-     return html.replace(/[<>"]+/g, '')
-}
-
-
-// fixme
-function serviceUrl(service, path) {
-     let hostname = window.location.hostname
-     // <env>-<service>.bringyour.com or <service>.bringyour.com
-     // if service == lb, 
-     //    if /sb/<serviceblock> and serviceblock == beta
-     //      use /sb/<service>/beta
-     //    else, use /by/<service>
-     // else, use <env>-<service> or <service>
-
-     // local-api.bringyour.com
-
-}
-
-function userAuthType(userAuth) {
-     if (userAuth.startsWith('+')) {
-          return 'phone'
-     }
-     else if (userAuth.includes('@')) {
-          return 'email'
-     }
-     return 'unknown'
-}
-
-
-function Route(path, component) {
-     this.path = path
-     this.component = component
-}
-
-const topLevelRoutes = [
+const connectTopLevelRoutes = [
      new Route('/connect', new DialogInitial()),
      new Route('/connect/create', new DialogCreateNetwork()),
 ]
 
-function createMount(elementId) {
-     let container = document.getElementById(elementId)
-     let idPrefix = elementId + '-'
-     return new Mount(container, idPrefix)
-}
-
-function Mount(container, idPrefix) {
-     const self = this
-
-     self.activeComponent = null
-
-     self.id = (elementId) => {
-          return idPrefix + elementId
-     }
-
-     self.element = (elementId) => {
-          return document.getElementById(self.id(elementId))
-     }
-
-     self.render = (component) => {
-          self.activeComponent = component
-          component.mount = self
-          component.id = self.id
-          component.element = self.element
-          component.render(container)
-     }
-
-     // approach inspired by https://bholmes.dev/blog/spas-clientside-routing/
-     self.router = () => {
-          function findLink(e) {
-               let linkElement = null
-               while (e) {
-                    if (container == e) {
-                         return linkElement
-                    }
-                    if (e.tagName === 'A') {
-                         linkElement = e
-                    }
-                    e = e.parentElement
-               }
-               return null
-          }
-          container.addEventListener('click', (event) => {
-               const linkElement = findLink(event.target)
-               // a link of same origin with no target (new tab)
-               if (
-                    linkElement &&
-                    linkElement.origin === location.origin &&
-                    !linkElement.target
-               ) {
-                    event.preventDefault()
-                    const url = new URL(linkElement.href)
-                    let handled = false
-                    for (const route of topLevelRoutes) {
-                         if (url.pathname == route.path) {
-                              self.render(route.component)
-                              handled = true
-                              break
-                         }
-                    }
-                    if (!handled && self.activeComponent) {
-                         self.activeComponent.router(url)
-                    }
-               }
-          })
-     }
+function createConnectMount(elementId) {
+     return createMount(elementId, connectTopLevelRoutes)
 }
 
 
@@ -1421,12 +1301,145 @@ function DialogComplete(networkName) {
      const self = this
      self.render = (container) => {
           renderComplete(container, self.id, networkName)
+
+          const preferencesProductUpdateElement = self.element('preferences-product-updates')
+          const feedbackButtonElement = self.element('feedback-button')
+          const feedbackFormElement = self.element('feedback-form')
+
+          preferencesProductUpdateElement.addEventListener('change', (event) => {
+               self.submitPreferences()
+          })
+
+          feedbackButtonElement.addEventListener('click', (event) => {
+               self.submit()
+          })
+
+          feedbackFormElement.addEventListener('submit', (event) => {
+               event.preventDefault()
+               if (!feedbackButtonElement.disabled) {
+                    self.submit()
+               }
+          })
      }
      self.router = (url) => {
           if (url.pathname == '/connect/signout') {
                removeByJwt()
                self.mount.render(new DialogInitial(false))
           }
+     }
+
+
+     // event handlers
+
+     self.submitPreferences = () => {
+          const preferencesProductUpdateElement = self.element('preferences-product-updates')
+          const preferencesSavedElement = self.element('preferences-saved') 
+          const preferencesSpinnerElement = self.element('preferences-spinner')
+
+          preferencesProductUpdateElement.disabled = true
+          preferencesSavedElement.classList.add('d-none')
+          preferencesSpinnerElement.classList.remove('d-none')
+
+          let requestBody = {
+               byJwt: getByJwt(),
+               productUpdates: preferencesProductUpdateElement.checked
+          }
+
+          setTimeout(() => {
+               let responseBody = MOCK_API_preferences_set(requestBody)
+               self.handleSubmitPreferencesResponse(responseBody)
+          }, 1000);
+     }
+     self.handleSubmitPreferencesResponse = (responseBody) => {
+          const preferencesProductUpdateElement = self.element('preferences-product-updates')
+          const preferencesSavedElement = self.element('preferences-saved') 
+          const preferencesSpinnerElement = self.element('preferences-spinner')
+
+          preferencesProductUpdateElement.disabled = false
+          preferencesSavedElement.classList.remove('d-none')
+          preferencesSpinnerElement.classList.add('d-none')
+     }
+
+     self.submit = () => {
+          const feedbackButtonElement = self.element('feedback-button') 
+          const feedbackSpinnerElement = self.element('feedback-spinner')
+
+          const feedbackUsePersonalElement = self.element('feedback-use-personal')
+          const feedbackUseBusinessElement = self.element('feedback-use-business')
+          const feedbackNeedPrivateElement = self.element('feedback-need-private')
+          const feedbackNeedSafeElement = self.element('feedback-need-safe')
+          const feedbackNeedGlobalElement = self.element('feedback-need-global')
+          const feedbackNeedConnectElement = self.element('feedback-need-connect')
+          const feedbackNeedAppControlElement = self.element('feedback-need-app-control')
+          const feedbackNeedBlockDataBrokersElement = self.element('feedback-need-block-data-brokers')
+          const feedbackNeedBlockAdsElement = self.element('feedback-need-block-ads')
+          const feedbackNeedFocusElement = self.element('feedback-need-focus')
+          const feedbackNeedConnectServersElement = self.element('feedback-need-connect-servers')
+          const feedbackNeedRunServersElement = self.element('feedback-need-run-servers')
+          const feedbackNeedPreventCyberElement = self.element('feedback-need-prevent-cyber')
+          const feedbackNeedAuditElement = self.element('feedback-need-audit')
+          const feedbackNeedZeroTrustElement = self.element('feedback-need-zero-trust')
+          const feedbackNeedVisualizeElement = self.element('feedback-need-visualize')
+          const feedbackNeedsElement = self.element('feedback-needs')
+
+          feedbackButtonElement.disabled = true
+          feedbackSpinnerElement.classList.remove('d-none')
+
+          feedbackUsePersonalElement.disabled = true
+          feedbackUseBusinessElement.disabled = true
+          feedbackNeedPrivateElement.disabled = true
+          feedbackNeedSafeElement.disabled = true
+          feedbackNeedGlobalElement.disabled = true
+          feedbackNeedConnectElement.disabled = true
+          feedbackNeedAppControlElement.disabled = true
+          feedbackNeedBlockDataBrokersElement.disabled = true
+          feedbackNeedBlockAdsElement.disabled = true
+          feedbackNeedFocusElement.disabled = true
+          feedbackNeedConnectServersElement.disabled = true
+          feedbackNeedRunServersElement.disabled = true
+          feedbackNeedPreventCyberElement.disabled = true
+          feedbackNeedAuditElement.disabled = true
+          feedbackNeedZeroTrustElement.disabled = true
+          feedbackNeedVisualizeElement.disabled = true
+          feedbackNeedsElement.disabled = true
+
+          let requestBody = {
+               byJwt: getByJwt(),
+               uses: {
+                    personal: feedbackUsePersonalElement.checked,
+                    business: feedbackUseBusinessElement.checked
+               },
+               needs: {
+                    private: feedbackNeedPrivateElement.checked,
+                    safe: feedbackNeedSafeElement.checked,
+                    global: feedbackNeedGlobalElement.checked,
+                    connect: feedbackNeedConnectElement.checked,
+                    appControl: feedbackNeedAppControlElement.checked,
+                    blockDataBrokers: feedbackNeedBlockDataBrokersElement.checked,
+                    blockAds: feedbackNeedBlockAdsElement.checked,
+                    focus: feedbackNeedFocusElement.checked,
+                    connectServers: feedbackNeedConnectServersElement.checked,
+                    runServers: feedbackNeedRunServersElement.checked,
+                    preventCyber: feedbackNeedPreventCyberElement.checked,
+                    audit: feedbackNeedAuditElement.checked,
+                    zeroTrust: feedbackNeedZeroTrustElement.checked,
+                    visualize: feedbackNeedVisualizeElement.checked,
+                    needs: feedbackNeedsElement.value
+               }
+
+          }
+
+          setTimeout(() => {
+               let responseBody = MOCK_API_feedback_send(requestBody)
+               self.handleSubmitResponse(responseBody)
+          }, 1000);
+     }
+     self.handleSubmitResponse = (responseBody) => {
+          const feedbackInputElement = self.element('feedback-input') 
+          const feedbackDoneElement = self.element('feedback-done')
+
+          feedbackInputElement.classList.add('d-none')
+          feedbackDoneElement.classList.remove('d-none')
      }
 }
 
@@ -1486,9 +1499,9 @@ function renderInitial(container, id, nonce) {
                <div class="login-container">
                     <form id="${id('login-form')}">
                          <div class="info-title">Email or Phone Number</div>
-                         <div><input id="${id('login-user-auth')}" type="text"/></div>
+                         <div><input id="${id('login-user-auth')}" type="text" class="form-control"/></div>
                          <div id="${id('login-error')}" class="text-danger d-none"></div>
-                         <div><button id="${id('login-button')}" class="btn btn-primary" type="button"><span id="${id('login-spinner')}" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span><span class="primary">Continue</span></button></div>
+                         <div class="no-title"><button id="${id('login-button')}" class="btn btn-primary" type="button"><span id="${id('login-spinner')}" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span><span class="primary">Continue</span></button></div>
                     </form>
                </div>
           </div>
@@ -1508,9 +1521,9 @@ function renderLoginPassword(container, id, userAuth) {
                <div class="login-container">
                     <form id="${id('login-form')}">
                          <div class="password-header"><div class="info-title">Password</div><div class="header-right"><a href="/connect/password-reset">Forgot your password?</a></div></div>
-                         <div><input id="${id('login-password')}" type="password"/></div>
+                         <div><input id="${id('login-password')}" type="password" class="form-control"/></div>
                          <div id="${id('login-error')}" class="text-danger d-none">Invalid email or password</div>
-                         <div><button id="${id('login-button')}" class="btn btn-primary" type="button"><span id="${id('login-spinner')}" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span><span class="primary">Continue</span></button></div>
+                         <div class="no-title"><button id="${id('login-button')}" class="btn btn-primary" type="button"><span id="${id('login-spinner')}" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span><span class="primary">Continue</span></button></div>
                     </form>
                </div>
           </div>
@@ -1532,9 +1545,9 @@ function renderPasswordReset(container, id, userAuth) {
                <div class="login-container">
                     <form id="${id('password-reset-form')}">
                          <div class="info-title">Email or Phone Number</div>
-                         <div><input id="${id('password-reset-user-auth')}" type="text" value="${escapeHtml(userAuthStr)}"/></div>
+                         <div><input id="${id('password-reset-user-auth')}" type="text" value="${escapeHtml(userAuthStr)}" class="form-control"/></div>
                          <div id="${id('password-reset-error')}" class="text-danger d-none">Invalid email or phone number</div>
-                         <div><button id="${id('password-reset-button')}" class="btn btn-primary" type="button"><span id="${id('password-reset-spinner')}" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span><span class="primary">Continue</span></button></div>
+                         <div class="no-title"><button id="${id('password-reset-button')}" class="btn btn-primary" type="button"><span id="${id('password-reset-spinner')}" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span><span class="primary">Continue</span></button></div>
                     </form>
                </div>
           </div>
@@ -1578,11 +1591,11 @@ function renderPasswordResetComplete(container, id, resetCode) {
                <div class="login-container">
                     <form id="${id('password-reset-form')}">
                          <div class="info-title">New Password</div>
-                         <div><input id="${id('password-reset-password')}" type="password"/></div>
+                         <div><input id="${id('password-reset-password')}" type="password" class="form-control"/></div>
                          <div class="info-title">Re-enter New Password</div>
-                         <div><input id="${id('password-reset-password-confirm')}" type="password"/></div>
+                         <div><input id="${id('password-reset-password-confirm')}" type="password" class="form-control"/></div>
                          <div id="${id('password-reset-error')}" class="text-danger d-none">Invalid email or phone number</div>
-                         <div><button id="${id('password-reset-button')}" class="btn btn-primary" type="button"><span id="${id('password-reset-spinner')}" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span><span class="primary">Continue</span></button></div>
+                         <div class="no-title"><button id="${id('password-reset-button')}" class="btn btn-primary" type="button"><span id="${id('password-reset-spinner')}" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span><span class="primary">Continue</span></button></div>
                     </form>
                </div>
           </div>
@@ -1616,14 +1629,14 @@ function renderCreateNetworkAuthJwt(container, id, authJwtType, authJwt, userNam
                <div class="login-container">
                     <form id="${id('create-form')}">
                          <div class="info-title">Your Name</div>
-                         <div><input id="${id('create-user-name')}" type="text" value="${escapeHtml(userNameStr)}"></div>
+                         <div><input id="${id('create-user-name')}" type="text" value="${escapeHtml(userNameStr)}" class="form-control"></div>
                          <div class="info-title">Choose a network name</div>
-                         <div><input id="${id('create-network-name')}" type="text" placeholder="yournetworkname"/>.bringyour.network<span id="${id('create-network-name-spinner')}" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span></div>
+                         <div><div class="input-group"><input id="${id('create-network-name')}" type="text" placeholder="yournetworkname" class="form-control network-name" aria-describedby="${id('network-addon')}"/><span class="input-group-text" id="${id('network-addon')}">.bringyour.network<span id="${id('create-network-name-spinner')}" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span></span></div></div>
                          <div id="${id('create-network-name-error')}" class="text-secondary d-none"></div>
                          <div id="${id('create-network-name-available')}" class="text-success d-none">Available!</div>
-                         <div><label><input id="${id('create-agree-terms')}" type="checkbox" value="">I agree to the <a href="/terms.html" target="_blank">BringYour terms</a>. Learn about how we use and protect your data in our <a href="">Privacy Policy</a></label></div>
+                         <div class="no-title"><label class="form-check-label"><input id="${id('create-agree-terms')}" type="checkbox" class="form-check-input" value="">I agree to the <a href="/terms.html" target="_blank">BringYour terms</a>. Learn about how we use and protect your data in our <a href="">Privacy Policy</a></label></div>
                          <div id="${id('create-error')}" class="text-secondary d-none"></div>
-                         <div><button id="${id('create-button')}" class="btn btn-primary" type="button"><span id="${id('create-spinner')}" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span><span class="primary">Create Network</span></button></div>
+                         <div class="no-title"><button id="${id('create-button')}" class="btn btn-primary" type="button"><span id="${id('create-spinner')}" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span><span class="primary">Create Network</span></button></div>
                     </form>
                </div>
           </div>
@@ -1644,20 +1657,20 @@ function renderCreateNetwork(container, id, userAuth) {
                <div class="login-container">
                     <form id="${id('create-form')}">
                          <div class="info-title">Your Name</div>
-                         <div><input id="${id('create-user-name')}" type="text"></div>
+                         <div><input id="${id('create-user-name')}" type="text" class="form-control"></div>
                          <div class="info-title">Email or Phone Number</div>
-                         <div><input id="${id('create-user-auth')}" type="text" value="${escapeHtml(userAuthStr)}"></div>
+                         <div><input id="${id('create-user-auth')}" type="text" value="${escapeHtml(userAuthStr)}" class="form-control"></div>
                          <div id="${id('create-user-auth-error')}" class="text-danger d-none"></div>
                          <div class="info-title">Password</div>
-                         <div><input id="${id('create-password')}" type="password"/></div>
+                         <div><input id="${id('create-password')}" type="password" class="form-control"/></div>
                          <div id="${id('create-password-error')}" class="text-secondary d-none"></div>
                          <div class="info-title">Choose a network name</div>
-                         <div><input id="${id('create-network-name')}" type="text" placeholder="yournetworkname"/>.bringyour.network<span id="${id('create-network-name-spinner')}" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span></div>
+                         <div><div class="input-group"><input id="${id('create-network-name')}" type="text" placeholder="yournetworkname" class="form-control network-name" aria-describedby="${id('network-addon')}"/><span class="input-group-text" id="${id('network-addon')}">.bringyour.network<span id="${id('create-network-name-spinner')}" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span></span></div></div>
                          <div id="${id('create-network-name-error')}" class="text-secondary d-none"></div>
                          <div id="${id('create-network-name-available')}" class="text-success d-none">Available!</div>
-                         <div><label><input id="${id('create-agree-terms')}" type="checkbox" value="">I agree to the <a href="/terms.html" target="_blank">BringYour terms</a>. Learn about how we use and protect your data in our <a href="">Privacy Policy</a></label></div>
+                         <div class="no-title"><label class="form-check-label"><input id="${id('create-agree-terms')}" type="checkbox" class="form-check-input" value="">I agree to the <a href="/terms.html" target="_blank">BringYour terms</a>. Learn about how we use and protect your data in our <a href="">Privacy Policy</a></label></div>
                          <div id="${id('create-error')}" class="text-secondary d-none"></div>
-                         <div><button id="${id('create-button')}" class="btn btn-primary" type="button"><span id="${id('create-spinner')}" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span><span class="primary">Create Network</span></button></div>
+                         <div class="no-title"><button id="${id('create-button')}" class="btn btn-primary" type="button"><span id="${id('create-spinner')}" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span><span class="primary">Create Network</span></button></div>
                     </form>
                </div>
           </div>
@@ -1688,9 +1701,9 @@ function renderCreateNetworkValidate(container, id, userAuth) {
                <div class="login-container">
                     <form id="${id('validate-form')}">
                          <div class="password-header"><div class="info-title">Code</div><div class="header-right"><a id="${id('validate-resend-link')}" href="/connect/validate/resend">Resend</a><div id="${id('validate-resend-spinner')}" class="d-none"><span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>Resend</div><div id="${id('validate-resend-sent')}" class="d-none">Sent!</div></div></div>
-                         <div><input id="${id('validate-code')}" type="text"></div>
+                         <div><input id="${id('validate-code')}" type="text" class="form-control"></div>
                          <div id="${id('validate-error')}" class="text-danger d-none"></div>
-                         <div><button id="${id('validate-button')}" class="btn btn-primary" type="button"><span id="${id('validate-spinner')}" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span><span class="primary">Continue</span></button></div>
+                         <div class="no-title"><button id="${id('validate-button')}" class="btn btn-primary" type="button"><span id="${id('validate-spinner')}" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span><span class="primary">Continue</span></button></div>
                     </form>
                </div>
           </div>
@@ -1705,18 +1718,21 @@ function renderComplete(container, id, networkName) {
                <div class="login-container">
                     <div class="login-header"><div class="title">${escapeHtml(networkName)}.bringyour.network</div></div>
                     <div>Your network is now live!</div>
-                    <div><br>Log in to the app to use your network.</div>
                </div>
           </div>
           <div class="login-option">
                <div class="login-container">
-                    <a href=""><img src="../bringyour.com/res/images/store-play.png" class="store"></a>
-                    <a href=""><img src="../bringyour.com/res/images/store-app.svg" class="store"></a>
+                    <div>Log in to the app to use your network.</div>
+                    <div class="no-title">
+                         <a href=""><img src="res/images/store-play.png" class="store"></a>
+                         <a href=""><img src="res/images/store-app.svg" class="store"></a>
+                    </div>
                </div>
           </div>
           <div class="login-option">
                <div class="login-container">
-                    <label><input type="checkbox" value=""> You can send me occasional product updates</label>
+                    <label class="form-check-label"><input id="${id('preferences-product-updates')}" type="checkbox" value="" class="form-check-input"> You can send me occasional product updates</label>
+                    <div><span id="${id('preferences-spinner')}" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span><span id="${id('preferences-saved')}" class="text-success d-none">Preferences saved!</span></div>
                </div>
           </div>
           <div class="login-option">
@@ -1725,35 +1741,36 @@ function renderComplete(container, id, networkName) {
                </div>
           </div>
           <div class="login-option">
-               <div id="feedback-input" class="login-container">
-                    <form id="feedback-form">
+               <div id="${id('feedback-input')}" class="login-container feedback-container">
+                    <form id="${id('feedback-form')}">
                          <div class="title">Can you take a minute to give us some feedback?</div>
-                         <div>I use my network for 
-                              <div><label><input type="checkbox" value=""> Personal</label></div>
-                              <div><label><input type="checkbox" value=""> Business</label></div>
+                         <div class="no-title">I use my network for
+                              <div><label class="form-check-label"><input id="${id('feedback-use-personal')}" type="checkbox" value="" class="form-check-input"> Personal</label></div>
+                              <div><label class="form-check-label"><input id="${id('feedback-use-business')}" type="checkbox" value="" class="form-check-input"> Business</label></div>
                          </div>
-                         <div>The following use cases are valuable to me 
-                              <div><label><input type="checkbox" value=""> Stay anonymous and private on the internet</label></div>
-                              <div><label><input type="checkbox" value=""> Have verified safe internet everywhere</label></div>
-                              <div><label><input type="checkbox" value=""> Access regional and international networks</label></div>
-                              <div><label><input type="checkbox" value=""> Connect with my homes, friends and family</label></div>
-                              <div><label><input type="checkbox" value=""> Control the use of data and apps on my network</label></div>
-                              <div><label><input type="checkbox" value=""> Block ads</label></div>
-                              <div><label><input type="checkbox" value=""> Block personal data collection parties</label></div>
-                              <div><label><input type="checkbox" value=""> Help stay focused by temporarily blocking overused sites and content</label></div>
-                              <div><label><input type="checkbox" value=""> Access private servers from anywhere</label></div>
-                              <div><label><input type="checkbox" value=""> Run custom code and servers</label></div>
-                              <div><label><input type="checkbox" value=""> Prevent cyber attacks like phishing</label></div>
-                              <div><label><input type="checkbox" value=""> Audit usage of my network for compliance</label></div>
-                              <div><label><input type="checkbox" value=""> Implement a zero-trust or secure business environment</label></div>
-                              <div><label><input type="checkbox" value=""> Visualize and understand my network data</label></div>
+                         <div class="no-title">The following use cases are valuable to me 
+                              <div><label class="form-check-label"><input id="${id('feedback-need-private')}" type="checkbox" value="" class="form-check-input"> Stay anonymous and private on the internet</label></div>
+                              <div><label class="form-check-label"><input id="${id('feedback-need-safe')}" type="checkbox" value="" class="form-check-input"> Have verified safe internet everywhere</label></div>
+                              <div><label class="form-check-label"><input id="${id('feedback-need-global')}" type="checkbox" value="" class="form-check-input"> Access regional and international networks</label></div>
+                              <div><label class="form-check-label"><input id="${id('feedback-need-connect')}" type="checkbox" value="" class="form-check-input"> Connect with my homes, friends and family</label></div>
+                              <div><label class="form-check-label"><input id="${id('feedback-need-app-control')}" type="checkbox" value="" class="form-check-input"> Control the use of data and apps on my network</label></div>
+                              <div><label class="form-check-label"><input id="${id('feedback-need-block-data-brokers')}" type="checkbox" value="" class="form-check-input"> Block personal data collection</label></div>
+                              <div><label class="form-check-label"><input id="${id('feedback-need-block-ads')}" type="checkbox" value="" class="form-check-input"> Block ads</label></div>
+                              <div><label class="form-check-label"><input id="${id('feedback-need-focus')}" type="checkbox" value="" class="form-check-input"> Help stay focused by temporarily blocking overused sites and content</label></div>
+                              <div><label class="form-check-label"><input id="${id('feedback-need-connect-servers')}" type="checkbox" value="" class="form-check-input"> Access private servers from anywhere</label></div>
+                              <div><label class="form-check-label"><input id="${id('feedback-need-run-servers')}" type="checkbox" value="" class="form-check-input"> Run custom code and servers for a private group</label></div>
+                              <div><label class="form-check-label"><input id="${id('feedback-need-prevent-cyber')}" type="checkbox" value="" class="form-check-input"> Prevent cyber attacks like phishing</label></div>
+                              <div><label class="form-check-label"><input id="${id('feedback-need-audit')}" type="checkbox" value="" class="form-check-input"> Audit usage of my network for compliance</label></div>
+                              <div><label class="form-check-label"><input id="${id('feedback-need-zero-trust')}" type="checkbox" value="" class="form-check-input"> Implement a zero-trust or secure business environment</label></div>
+                              <div><label class="form-check-label"><input id="${id('feedback-need-visualize')}" type="checkbox" value="" class="form-check-input"> Visualize and understand my network data</label></div>
                          </div>
-                         <div>What do you want to do with your network?</div>
-                         <div><textarea placeholder="I want to ..."></textarea></div>
-                         <div><button id="${id('feedback-button')}" class="btn btn-primary" type="button"><span id="${id('feedback-spinner')}" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span><span class="primary">Submit</span></button></div>
+                         <div class="no-title">What do you want to do with your network?
+                              <div><textarea id="${id('feedback-needs')}" class="form-control" placeholder="I want to ..."></textarea></div>
+                         </div>
+                         <div class="no-title"><button id="${id('feedback-button')}" class="btn btn-primary" type="button"><span id="${id('feedback-spinner')}" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span><span class="primary">Submit</span></button></div>
                     </form>
                </div>
-               <div id="feedback-done" class="login-container">
+               <div id="${id('feedback-done')}" class="login-container d-none">
                     <div>&#128588; Thank you for the feedback! We value your input as we prioritize what to build next.
                     <div><br><a href="https://github.com/bringyour/product/discussions" target="_blank">Give us more feedback</a></div>
                </div>
@@ -2008,4 +2025,13 @@ function MOCK_API_auth_network_create(requestBody) {
      }
      
      return responseBody
+}
+
+function MOCK_API_preferences_set(requestBody) {
+     return {}
+}
+
+function MOCK_API_feedback_send(requestBody) {
+     console.log(requestBody)
+     return {}
 }

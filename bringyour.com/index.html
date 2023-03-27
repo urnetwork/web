@@ -14,6 +14,7 @@
 
 	<link href="res/css/bootstrap.min.css" rel="stylesheet">
 	<link href="res/css/main.css" rel="stylesheet">
+	<link href="res/css/stats.css" rel="stylesheet">
 	<link href="res/css/connect.css" rel="stylesheet">
 
 	<script language="javascript" type="text/javascript" src="lib/d3.min.js"></script>
@@ -23,14 +24,51 @@
 	<script language="javascript" type="text/javascript" src="lib/bootstrap.min.js"></script>
     <script language="javascript" type="text/javascript" src="sketch_220824a.js"></script>
     <script language="javascript" type="text/javascript" src="logo.js"></script>
+    <script language="javascript" type="text/javascript" src="client.js"></script>
     <script language="javascript" type="text/javascript" src="stats.js"></script>
     <script language="javascript" type="text/javascript" src="connect.js"></script>
 
     <script type="text/javascript" src="https://accounts.google.com/gsi/client"></script>
      <script type="text/javascript" src="https://appleid.cdn-apple.com/appleauth/static/jsapi/appleid/1/en_US/appleid.auth.js"></script>
+
+    <script>
+    	function updateConnectButton() {
+      	let startElement = document.getElementById('start')
+
+      	let byJwt = getByJwt()
+      	if (byJwt) {
+      		let networkName = byJwt['network']['name']
+      		startElement.textContent = networkName + '.bringyour.network'
+      		startElement.classList.remove('btn-primary')
+      		startElement.classList.add('btn-light')
+      	}
+      	else {
+      		startElement.textContent = 'Get Connected'
+      		startElement.classList.add('btn-primary')
+      		startElement.classList.remove('btn-light')
+      	}
+      }
+
+      window.notifyByJwtChanged = updateConnectButton
+
+      window.addEventListener('load', (event) => {
+      	let resetCode = new URLSearchParams(window.location.search).get('resetCode')
+
+      	updateConnectButton()
+      	if (resetCode) {
+    			$('#dialog-connect').modal('show')
+      	}
+
+      	
+    	})
+
+    </script>
     
 </head>
 <body>
+
+	
+
 	<!-- Modal -->
 <div class="modal fade" id="dialog-connect" tabindex="-1" aria-labelledby="dialog-connect" aria-hidden="true">
   <div class="modal-dialog">
@@ -43,7 +81,7 @@
         <div class="dialog" id="dialog-mount">
 	          <script type="text/javascript">	          		 
 	               (() => {
-	                    let mount = createMount('dialog-mount')
+	                    let mount = createConnectMount('dialog-mount')
 	                    // exported for connect
 	                    window.connectMount = mount
 	                    // exported for connect
@@ -66,31 +104,7 @@
 		                  }
 
 
-		                  function updateConnectButton() {
-		                  	let startElement = document.getElementById('start')
-
-		                  	let byJwt = getByJwt()
-		                  	if (byJwt) {
-		                  		let networkName = byJwt['network']['name']
-		                  		startElement.textContent = networkName + '.bringyour.network'
-		                  		startElement.classList.remove('btn-primary')
-		                  		startElement.classList.add('btn-light')
-		                  	}
-		                  	else {
-		                  		startElement.textContent = 'Get Connected'
-		                  		startElement.classList.add('btn-primary')
-		                  		startElement.classList.remove('btn-light')
-		                  	}
-		                  }
-
-		                  window.notifyByJwtChanged = updateConnectButton
-
-		                  window.addEventListener('load', (event) => {
-		                  	updateConnectButton()
-		                  	if (resetCode) {
-                    			$('#dialog-connect').modal('show')
-		                  	}
-                    	})
+		                  
 	                    
 	               })()
 	          </script>
@@ -135,7 +149,7 @@
 			<table>
 				<tr>
 					<td class="graphic"><img src="res/images/share-public-2.png" class="leader-left"/></td>
-					<td class="text"><span class="feature-point">Own your data.</span> See where your data goes and control your digital footprint.</td> <!-- See where your data goes. Automate your version of the internet. -->
+					<td class="text"><span class="feature-point">Own your data.</span> See where your data goes and control your digital footprint.</td> <!-- See where your data goes. Automate your version of the internet. -->	
 				</tr>
 				<!-- <tr>
 					<td class="graphic"></td>
@@ -149,25 +163,18 @@
 		
 		<div class="stats">
 			<div class="header">Statistics</div>
-			<div>Daily trends from the last 90 days. Last update Februrary 2, 2023.</div>
-			<div class="stats-container">
-				<!-- <div class="stat"><table><tr><td colspan="2" class="title">Friends and Family Transfer (TiB)</td></tr><tr><td id="free-transfer" class="plot"><script>sparkPlot('free-transfer')</script></td><td class="current">40TiB <div class="substat"><div>3.7gbps</div><div>average</div></div></td></tr></td></tr></table></div> -->
-				<div class="stat"><table><tr><td colspan="2" class="title">Transfer (TiB)</td></tr><tr><td id="paid-transfer" class="plot"><script>sparkPlot('paid-transfer')</script></td><td class="current">100TiB <div class="substat"><div>9.3gbps</div><div>average</div></div></td></tr></table></div>
-				<div class="stat"><table><tr><td colspan="2" class="title">Packets</td></tr><tr><td id="free-transfer" class="plot"><script>sparkPlot('free-transfer')</script></td><td class="current">200m <div class="substat"><div>13.2pps</div><div>average</div></div></td></tr></td></tr></table></div>
-				
-				<div class="stat"><table><tr><td colspan="2" class="title">Providers</td></tr><tr><td id="providers" class="plot"><script>sparkPlot('providers')</script></td><td class="current">2060 <div class="substat"><div>1950</div><div>average</div></div></td></tr></table></div>
+			<div id="stats-tooltip" class="d-none"></div>
+			<div id="stats-mount">
+	          <script type="text/javascript">	          		 
+	               (() => {
+	                    let mount = createStatsMount('stats-mount')
+	                    mount.router()
 
+	                    mount.render(new StatsPanel(true))
 
-
-				<div class="stat"><table><tr><td colspan="2" class="title">Countries</td></tr><tr><td id="countries" class="plot"><script>sparkPlot('countries')</script></td><td class="current">15</td></tr></table></div>
-				<div class="stat"><table><tr><td colspan="2" class="title">Cities</td></tr><tr><td id="cities" class="plot"><script>sparkPlot('cities')</script></td><td class="current">15</td></tr></table></div>
-				
-				<div class="stat"><table><tr><td colspan="2" class="title">Extender Transfer (TiB)</td></tr><tr><td id="extender-transfer" class="plot"><script>sparkPlot('extender-transfer')</script></td><td class="current">100TiB <div class="substat"><div>9.3gbps</div><div>average</div></div></td></tr></table></div>
-				<div class="stat"><table><tr><td colspan="2" class="title">Extenders</td></tr><tr><td id="extenders" class="plot"><script>sparkPlot('extenders')</script></td><td class="current">2060 <div class="substat"><div>1950</div><div>average</div></div></td></tr></table></div>
-
-				<div class="stat"><table><tr><td colspan="2" class="title">Networks</td></tr><tr><td id="validated-providers" class="plot"><script>sparkPlot('validated-providers')</script></td><td class="current">1.3m</td></tr></table></div>
-				<div class="stat"><table><tr><td colspan="2" class="title">Devices</td></tr><tr><td id="validated-devices" class="plot"><script>sparkPlot('validated-devices')</script></td><td class="current">40000</td></tr></table></div>
-			</div>
+	               })()
+	          </script>
+	      </div>
 		</div>
 
 		<div>
@@ -181,8 +188,13 @@
 		</div>
 
 		<div>
+			<div class="header">See the invisble</div>
+			<div>Asking questions about your network, data privacy and digital footprint is hard until you can see it. All your data is brought to the foreground, with a control panel to turn off aspects you don't like.</div>
+		</div>
+
+		<div>
 			<div class="header">Web standards</div>
-			<div>Built using the protocols that power the web. We believe in a developer vision where VPN can be embedded everywhere.</div>
+			<div>Built using the protocols that power the web. End to end encryption always. We believe in a developer vision where VPN can be embedded everywhere.</div>
 		</div>
 
 		<div>

@@ -383,4 +383,7 @@ div.stats td.current {
 div.stats div.substat {
 	display: inline-block;
 	font-size: 8pt;
+	margin-left: 8px;
 }
+
+

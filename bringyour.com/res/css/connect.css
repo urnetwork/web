@@ -68,7 +68,9 @@ div.title span.material-symbols-outlined {
 
 div.info-title {
    font-size: 12pt;
-   font-weight: 100;
+   font-weight: 200;
+   margin-top: 8px;
+   margin-bottom: 4px;
 }
 
 button span.primary {
@@ -86,14 +88,38 @@ button span.primary {
    background-color: inherit !important;
 }*/
 
-input[type=text], input[type=password] {
+div.login-option input[type=text], input[type=password] {
    height: 39px;
    border: 1px solid rgb(218, 220, 224);
    border-radius: 4px;
    width: 300px;
 }
 
-textarea {
+/*div.network-name {
+	width: 300px;
+}*/
+
+/*div.login-option input[type=text].network-name {
+   width: 100px !important;
+}*/
+
+div.login-option input[type=checkbox] {
+   margin-right: 8px;
+}
+
+/*div.login-option button {
+	margin-top: 12px;
+}*/
+
+div.login-option div.no-title {
+	margin-top: 12px;
+}
+
+/*div.login-option label {
+	margin-top: 12px;
+}*/
+
+div.login-option textarea {
    height: 78px;
    border: 1px solid rgb(218, 220, 224);
    border-radius: 4px;
@@ -127,4 +153,9 @@ div.password-header div.header-right {
 
 img.store {
    max-height: 40px;
+}
+
+div.login-option div.feedback-container {
+	margin-top: 2px;
+
 }
