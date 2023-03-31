@@ -1,14 +1,37 @@
 
-function sparkPlot(containerId, measureType, unit) {
+// xxx.x
+function humanRound(value) {
+    return (Math.round(10 * value) / 10) + ''
+}
+
+function humanUnits(value) {
+    if (1000 * 1000 < value) {
+        return (Math.round(10 * value / (1000 * 1000)) / 10) + 'm'
+    }
+    else if (1000 < value) {
+        return (Math.round(10 * value / (1000)) / 10) + 'k'
+    }
+    else {
+        return value + ''
+    }
+}
+
+
+function sparkPlot(containerId, data, measureType, unit) {
+    let keys = Object.keys(data)
+    keys.sort()
+    let values = keys.map((key) => data[key])
+
     const WIDTH      = 240;
     const HEIGHT     = 30;
-    const DATA_COUNT = 90;
+    const DATA_COUNT = keys.length
     const BAR_WIDTH  = (WIDTH - DATA_COUNT) / DATA_COUNT;
-    const data = d3.range(DATA_COUNT).map( d => 0.3 + 0.7 * Math.random() );
-    data.sort();
-    data.reverse();
+    // const data = d3.range(DATA_COUNT).map( d => 0.3 + 0.7 * Math.random() );
+    // data.sort();
+    // data.reverse();
     const x    = d3.scaleLinear().domain([0, DATA_COUNT]).range([0, WIDTH]);
-    const y    = d3.scaleLinear().domain([0, 1]).range([HEIGHT, 0]);
+    const y    = d3.scaleLinear().domain([0, d3.max(values)]).range([0, HEIGHT]);
+    
     d3.select('#' + containerId).selectAll('svg').remove()
     const svg = d3.select('#' + containerId).append('svg')
       .attr('width', WIDTH)
@@ -20,25 +43,29 @@ function sparkPlot(containerId, measureType, unit) {
     // .style("z-index", "10")
     // .style("visibility", "hidden")
     // .text("a simple tooltip");
-    svg.selectAll('.bar').data(data)
+
+    
+
+    svg.selectAll('.bar').data(keys)
       .enter()
       .append('rect')
         .attr('class', 'bar')
         .attr('x', (d, i) => x(i))
-        .attr('y', d => HEIGHT - y(d))
+        .attr('y', d => HEIGHT - y(data[d]))
         .attr('width', BAR_WIDTH)
-        .attr('height', d => y(d))
+        .attr('height', d => y(data[d]))
         .attr('fill', 'rgb(220, 220, 220)')
         .attr('stroke', 'rgb(255, 255, 255)')
         .attr('title', function(d) {
+            let value = data[d]
             if (measureType == 'unit') {
-                return '2023-02-25 10' + unit
+                return d + ' ' + humanRound(value) + '' + unit
             }
             else if (unit) {
-                return '2023-02-25 2.3k ' + unit
+                return d + ' ' + humanUnits(value) + ' ' + unit
             }
             else {
-                return '2023-02-25 2.3k'
+                return d + ' ' + humanUnits(value)
             }
         })
 
@@ -142,6 +169,7 @@ function StatsPanel(firstLoad) {
         sparkPlotPlaceholder(self.id('stats-all-packets'))
         sparkPlotPlaceholder(self.id('stats-providers'))
         sparkPlotPlaceholder(self.id('stats-countries'))
+        sparkPlotPlaceholder(self.id('stats-regions'))
         sparkPlotPlaceholder(self.id('stats-cities'))
         sparkPlotPlaceholder(self.id('stats-extender-transfer'))
         sparkPlotPlaceholder(self.id('stats-extenders'))
@@ -164,6 +192,8 @@ function StatsPanel(firstLoad) {
         let remainingMillis = self.nextUpdateTime - Date.now()
         if (remainingMillis <= 0) {
             updateNextTimeElement.textContent = 'now'
+
+            self.updateStats()
         }
         else if (remainingMillis < 60 * 1000) {
             // show each second
@@ -209,32 +239,34 @@ function StatsPanel(firstLoad) {
         let date = new Date()
         statsLastUpdateElement.textContent = 'Last update ' + date.toLocaleDateString() + ' ' + date.toLocaleTimeString() + '.'
 
-        sparkPlot(self.id('stats-all-transfer'), 'unit', 'TiB')
-        sparkPlot(self.id('stats-all-packets'), 'count', 'packets')
-        sparkPlot(self.id('stats-providers'), 'count', 'providers')
-        sparkPlot(self.id('stats-countries'), 'count', 'countries')
-        sparkPlot(self.id('stats-cities'), 'count', 'cities')
-        sparkPlot(self.id('stats-extender-transfer'), 'unit', 'TiB')
-        sparkPlot(self.id('stats-extenders'), 'count', 'edges')
-        sparkPlot(self.id('stats-networks'), 'count', 'networks')
-        sparkPlot(self.id('stats-devices'), 'count', 'devices')
+        sparkPlot(self.id('stats-all-transfer'), responseBody['allTransferData'], 'unit', 'TiB')
+        sparkPlot(self.id('stats-all-packets'), responseBody['allPacketsData'], 'count', 'packets')
+        sparkPlot(self.id('stats-providers'), responseBody['providersData'], 'count', 'providers')
+        sparkPlot(self.id('stats-countries'), responseBody['countriesData'], 'count', 'countries')
+        sparkPlot(self.id('stats-regions'), responseBody['regionsData'], 'count', 'regions')
+        sparkPlot(self.id('stats-cities'), responseBody['citiesData'], 'count', 'cities')
+        sparkPlot(self.id('stats-extender-transfer'), responseBody['extenderTransferData'], 'unit', 'TiB')
+        sparkPlot(self.id('stats-extenders'), responseBody['extendersData'], 'count', 'edges')
+        sparkPlot(self.id('stats-networks'), responseBody['networksData'], 'count', 'networks')
+        sparkPlot(self.id('stats-devices'), responseBody['devicesData'], 'count', 'devices')
 
         sparkPlotTooltips()
 
-        self.element('stats-all-transfer-summary').textContent = '10'
-        self.element('stats-all-transfer-summary-rate').textContent = '10'
-        self.element('stats-all-packets-summary').textContent = '10'
-        self.element('stats-all-packets-summary-rate').textContent = '10'
-        self.element('stats-providers-summary').textContent = '10'
-        self.element('stats-providers-summary-verified').textContent = '10'
-        self.element('stats-countries-summary').textContent = '10'
-        self.element('stats-cities-summary').textContent = '10'
-        self.element('stats-extender-transfer-summary').textContent = '10'
-        self.element('stats-extender-transfer-summary-rate').textContent = '10'
-        self.element('stats-extenders-summary').textContent = '10'
-        self.element('stats-extenders-summary-verified').textContent = '10'
-        self.element('stats-networks-summary').textContent = '10'
-        self.element('stats-devices-summary').textContent = '10'
+        self.element('stats-all-transfer-summary').textContent = humanRound(responseBody['allTransferSummary']),
+        self.element('stats-all-transfer-summary-rate').textContent = humanRound(responseBody['allTransferSummaryRate'])
+        self.element('stats-all-packets-summary').textContent = humanUnits(responseBody['allPacketsSummary'])
+        self.element('stats-all-packets-summary-rate').textContent = humanUnits(responseBody['allPacketsSummaryRate'])
+        self.element('stats-providers-summary').textContent = humanUnits(responseBody['providersSummary'])
+        self.element('stats-providers-summary-superspeed').textContent = humanUnits(responseBody['providersSummarySuperspeed'])
+        self.element('stats-countries-summary').textContent = humanUnits(responseBody['countriesSummary'])
+        self.element('stats-regions-summary').textContent = humanUnits(responseBody['regionsSummary'])
+        self.element('stats-cities-summary').textContent = humanUnits(responseBody['citiesSummary'])
+        self.element('stats-extender-transfer-summary').textContent = humanRound(responseBody['extenderTransferSummary'])
+        self.element('stats-extender-transfer-summary-rate').textContent = humanRound(responseBody['extenderTransferSummaryRate'])
+        self.element('stats-extenders-summary').textContent = humanUnits(responseBody['extendersSummary'])
+        self.element('stats-extenders-summary-superspeed').textContent = humanUnits(responseBody['extendersSummarySuperspeed'])
+        self.element('stats-networks-summary').textContent = humanUnits(responseBody['networksSummary'])
+        self.element('stats-devices-summary').textContent = humanUnits(responseBody['devicesSummary'])
 
         // 5 minutes
         let updateTimeoutMillis = 1000 * 60 * 5
@@ -258,11 +290,12 @@ function renderStats(container, id) {
         <div class="stats-container">
             <div class="stat"><table><tr><td colspan="2" class="title">Transfer (TiB)</td></tr><tr><td id="${id('stats-all-transfer')}" class="plot"></td><td class="current"><span id="${id('stats-all-transfer-summary')}">---</span>TiB<div class="substat"><div><span id="${id('stats-all-transfer-summary-rate')}">---</span>gbps</div><div>average</div></div></td></tr></table></div>
             <div class="stat"><table><tr><td colspan="2" class="title">Packets</td></tr><tr><td id="${id('stats-all-packets')}" class="plot"></td><td class="current"><span id="${id('stats-all-packets-summary')}">---</span><div class="substat"><div><span id="${id('stats-all-packets-summary-rate')}">---</span>pps</div><div>average</div></div></td></tr></td></tr></table></div>
-            <div class="stat"><table><tr><td colspan="2" class="title">Providers</td></tr><tr><td id="${id('stats-providers')}" class="plot"></td><td class="current"><span id="${id('stats-providers-summary')}">---</span><div class="substat"><div><span id="${id('stats-providers-summary-verified')}">---</span></div><div>verified</div></div></td></tr></table></div>
+            <div class="stat"><table><tr><td colspan="2" class="title">Providers</td></tr><tr><td id="${id('stats-providers')}" class="plot"></td><td class="current"><span id="${id('stats-providers-summary')}">---</span><div class="substat"><div><span id="${id('stats-providers-summary-superspeed')}">---</span></div><div><img src="res/images/superfast.svg" class="superfast">superfast</div></div></td></tr></table></div>
             <div class="stat"><table><tr><td colspan="2" class="title">Countries</td></tr><tr><td id="${id('stats-countries')}" class="plot"></td><td class="current"><span id="${id('stats-countries-summary')}">---</span></td></tr></table></div>
+            <div class="stat"><table><tr><td colspan="2" class="title">Regions</td></tr><tr><td id="${id('stats-regions')}" class="plot"></td><td class="current"><span id="${id('stats-regions-summary')}">---</span></td></tr></table></div>
             <div class="stat"><table><tr><td colspan="2" class="title">Cities</td></tr><tr><td id="${id('stats-cities')}" class="plot"></td><td class="current"><span id="${id('stats-cities-summary')}">---</span></td></tr></table></div>
             <div class="stat"><table><tr><td colspan="2" class="title">Extender Transfer (TiB)</td></tr><tr><td id="${id('stats-extender-transfer')}" class="plot"></td><td class="current"><span id="${id('stats-extender-transfer-summary')}">---</span>TiB<div class="substat"><div><span id="${id('stats-extender-transfer-summary-rate')}">---</span>gbps</div><div>average</div></div></td></tr></table></div>
-            <div class="stat"><table><tr><td colspan="2" class="title">Extenders</td></tr><tr><td id="${id('stats-extenders')}" class="plot"></td><td class="current"><span id="${id('stats-extenders-summary')}">---</span><div class="substat"><div><span id="${id('stats-extenders-summary-verified')}">---</span></div><div>verified</div></div></td></tr></table></div>
+            <div class="stat"><table><tr><td colspan="2" class="title">Extenders</td></tr><tr><td id="${id('stats-extenders')}" class="plot"></td><td class="current"><span id="${id('stats-extenders-summary')}">---</span><div class="substat"><div><span id="${id('stats-extenders-summary-superspeed')}">---</span></div><div><img src="res/images/superfast.svg" class="superfast">superfast</div></div></td></tr></table></div>
             <div class="stat"><table><tr><td colspan="2" class="title">Networks</td></tr><tr><td id="${id('stats-networks')}" class="plot"></td><td class="current"><span id="${id('stats-networks-summary')}">---</span></td></tr></table></div>
             <div class="stat"><table><tr><td colspan="2" class="title">Devices</td></tr><tr><td id="${id('stats-devices')}" class="plot"></td><td class="current"><span id="${id('stats-devices-summary')}">---</span></td></tr></table></div>
         </div>
@@ -271,18 +304,4 @@ function renderStats(container, id) {
     container.innerHTML = html
 }
 
-
-function MOCK_API_get_stats() {
-    // fixme return a map of date string to value
-    // fixme return a summary value or a summary object
-    return {
-        transfer: {
-            data: {
-                '2023-02-20': 10
-            },
-            summary: 10,
-            summaryRate: 10
-        }
-    }
-}
 

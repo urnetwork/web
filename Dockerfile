@@ -7,7 +7,6 @@ COPY nginx.conf /etc/nginx/nginx.conf
 COPY bringyour.com /www/bringyour.com
 COPY bringyour.com-placeholder /www/bringyour.com-placeholder
 EXPOSE 80
-EXPOSE 443
 # see https://ubuntu.com/blog/avoiding-dropped-connections-in-nginx-containers-with-stopsignal-sigquit
 STOPSIGNAL SIGQUIT
 CMD ["nginx", "-g", "daemon off;"]
