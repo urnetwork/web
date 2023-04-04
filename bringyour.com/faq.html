@@ -1,40 +1,125 @@
-<html>
+<html lang="en">
 <head>
 	<title>BringYour</title>
 
 	<link rel="icon" href="favicon.svg">
-	<link rel=”mask-icon” href=”mask.svg” color="#000000">
-	<link rel="apple-touch-icon" href="touch.png">
+    <link rel="mask-icon" href="mask.svg" color="#000000">
+    <link rel="apple-touch-icon" href="touch.png">
 
-	<link rel="preconnect" href="https://fonts.googleapis.com">
-	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-	<link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@100;200;300;400;500;600;700;800&display=swap" rel="stylesheet">
-	<link href="res/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@100;200;300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,400,0,0">
 
-	<link href="res/css/main.css" rel="stylesheet">
+    <link href="res/css/bootstrap.min.css" rel="stylesheet">
+    <link href="res/css/main.css" rel="stylesheet">
+    <link href="res/css/connect.css" rel="stylesheet">
 
-	<script language="javascript" type="text/javascript" src="libraries/d3.min.js"></script>
-	<script language="javascript" type="text/javascript" src="libraries/p5.min.js"></script>
-    <script language="javascript" type="text/javascript" src="sketch_220824a.js"></script>
-    <script language="javascript" type="text/javascript" src="logo.js"></script>
-    <script language="javascript" type="text/javascript" src="stats.js"></script>
-    
+    <script src="lib/d3.min.js"></script>
+    <script src="lib/p5.min.js"></script>
+    <script src="lib/jquery.min.js"></script>
+    <script src="lib/popper.min.js"></script>
+    <script src="lib/bootstrap.min.js"></script>
+    <script src="sketch_220824a.js"></script>
+    <script src="logo.js"></script>
+    <script src="client.js"></script>
+    <!-- <script src="connect_mock.js"></script> -->
+    <script src="connect.js"></script>
+
+    <script src="https://accounts.google.com/gsi/client"></script>
+    <script src="https://appleid.cdn-apple.com/appleauth/static/jsapi/appleid/1/en_US/appleid.auth.js"></script>
+
+    <script>
+        function updateConnectButton() {
+            let startElement = document.getElementById('start')
+
+            let byJwt = getByJwt()
+            if (byJwt) {
+                let networkName = byJwt['network']['name']
+                startElement.textContent = networkName + '.bringyour.network'
+                startElement.classList.remove('btn-primary')
+                startElement.classList.add('btn-light')
+            }
+            else {
+                startElement.textContent = 'Get Connected'
+                startElement.classList.add('btn-primary')
+                startElement.classList.remove('btn-light')
+            }
+        }
+
+        window.notifyByJwtChanged = updateConnectButton
+
+        window.addEventListener('load', (event) => {
+            let resetCode = new URLSearchParams(window.location.search).get('resetCode')
+
+            updateConnectButton()
+            if (resetCode) {
+                $('#dialog-connect').modal('show')
+            }
+
+
+        })
+    </script>
+
 </head>
 <body>
+	<div class="modal fade" id="dialog-connect" tabindex="-1" aria-labelledby="dialog-connect" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="dialog" id="dialog-mount">
+                        <script>                   
+                             (() => {
+                                let mount = createConnectMount('dialog-mount')
+                                // exported for connect
+                                window.connectMount = mount
+                                // exported for connect
+                                window.showConnectDialog = () => {
+                                    $('#dialog-connect').modal('show')
+                                }
+                                mount.router()
+
+                                let byJwt = getByJwt()
+                                let resetCode = new URLSearchParams(window.location.search).get('resetCode')
+                                if (resetCode) {
+                                    mount.render(new DialogPasswordResetComplete(resetCode))
+                                }
+                                else if (byJwt) {
+                                    let networkName = byJwt['network']['name']
+                                    mount.render(new DialogComplete(networkName))
+                                }
+                                else {
+                                    mount.render(new DialogInitial(true))
+                                }
+                            })()
+                        </script>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
 	<div id="header">
 		<table>
-			<tr>
-				<td id="logo"></td>
-				<td class="expand"><div class="tab-container"><a href="index.html"><div class="tab">Network</div></a><a href="pricing.html"><div class="tab">Pricing</div></a><a href="participate.html"><div class="tab">Participate</div></a><div class="tab tab-selected">FAQ</div><a href="blog.html"><div class="tab">Blog</div></a><a href="about.html"><div class="tab">About</div></a></div></td>
-				<td class="start"><button type="button" id="start" class="btn btn-primary">Get Connected</div></td>
-			</tr>
+			<tbody>
+				<tr>
+					<td id="logo"></td>
+					<td class="expand"><div class="tab-container"><a href="/"><div class="tab">Network</div></a><a href="pricing"><div class="tab">Pricing</div></a><div class="tab tab-selected">FAQ</div><a href="participate"><div class="tab">Participate</div></a><a href="about"><div class="tab">About</div></a></div></td>
+					<td class="start"><button type="button" id="start" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#dialog-connect">Get Connected</button></td>
+				</tr>
+			</tbody>
 		</table>
 	</div>
 	<div id="header-place"></div>
 	<div class="runner">
 
-		<div>Discuss in our Discord community</div>
-		<div>Give Product Feedback on Github</div>
+		<div class="community">
+			<div><a href="https://discord.gg/RUNZXMwPRK" target="_blank"><div class="link"><img src="res/images/s2-discord.svg" class="social" alt="discuss in Discord"> Discuss in our Discord community</div></a></div>
+			<div><a href="https://github.com/bringyour/product/discussions" target="_blank"><div class="link"><img src="res/images/s2-github.svg" class="social" alt="give feedback on Github"> Give Product Feedback on Github</div></a></div>
+		</div>
 
 		<div>
 			<div class="header">How are data encrypted?</div>
@@ -71,33 +156,34 @@
 	</div>
 
 	<div id="footer">
-		<div class="link-container">
-			<table>
-				<tr>
-					<td>
-						<div class="link"><a href="https://github.com/bringyour/product/whitepaper.md" target="_blank">Whitepaper</a></div>
-						<div class="link"><a href="https://status.bringyour.com/" target="_blank">Status</a></div>
-						<div class="link"><a href="https://github.com/bringyour" target="_blank"><img src="res/images/s2-github.svg" class="social"/> GitHub</a></div>
-						<div class="link"><a href="https://discord.gg/RUNZXMwPRK" target="_blank"><img src="res/images/s2-discord.svg" class="social"/> Discord Community</a></div>
-						<div class="social-container"><div><a href="https://www.reddit.com/r/bringyour/" target="_blank"><img src="res/images/s2-reddit.svg" class="social"/></a></div><div><a href="https://www.youtube.com/@bringyour" target="_blank"><img src="res/images/s2-youtube.svg" class="social"/></a></div><div><a href="https://www.linkedin.com/company/bringyour" target="_blank"><img src="res/images/s2-linkedin.svg" class="social"/></a></div></div>
-					</td>
-					<td>
-						<div class="store"><img src="res/images/store-play.png"/></div>
-						<div class="link"><a href="https://github.com/bringyour/product/roadmap.md" target="_blank">Platform Roadmap</a></div>
-						<div class="link"><a href="https://github.com/bringyour/product/discussions" target="_blank">Product Feedback</a></div>
-					</td>
-					<td>
-						
-						
-						<div class="link"><a href="">Terms of Service</a></div>
-						<div class="link"><a href="">Privacy Policy</a></div>
-						<div class="link"><a href="">Vulnerability Disclosure Program</a></div>
-					</td>
-				</tr>
-			</table>
-			<div class="copyline">Copyright 2023 BringYour, LLC<br>A California, USA company</div>
-		</div>
-	</div>
+        <div class="link-container">
+            <table>
+                <tbody>
+                    <tr>
+                        <td>
+                            <div class="link"><a href="https://github.com/bringyour/product/whitepaper.md" target="_blank">Whitepaper</a></div>
+                            <div class="link"><a href="https://status.bringyour.com" target="_blank">Status</a></div>
+                            <div class="link"><a href="https://github.com/bringyour" target="_blank"><img src="res/images/s2-github.svg" class="social" alt="github"> GitHub</a></div>
+                            <div class="link"><a href="https://discord.gg/RUNZXMwPRK" target="_blank"><img src="res/images/s2-discord.svg" class="social" alt="discord"> Discord Community</a></div>
+                            <div class="social-container"><div><a href="https://www.reddit.com/r/bringyour" target="_blank"><img src="res/images/s2-reddit.svg" class="social" alt="reddit"></a></div><div><a href="https://www.youtube.com/@bringyour" target="_blank"><img src="res/images/s2-youtube.svg" class="social" alt="youtube"></a></div><div><a href="https://www.linkedin.com/company/bringyour" target="_blank"><img src="res/images/s2-linkedin.svg" class="social" alt="linkedin"></a></div></div>
+                        </td>
+                        <td>
+                            <div class="store"><a href="https://play.google.com/store/apps/details?id=com.bringyour.network" target="_blank"><img src="res/images/store-play.png" alt="get the app on the Google Play store"></a></div>
+                            <div class="store"><a href="https://apps.apple.com/us/app/bringyour/id6446097114" target="_blank"><img src="res/images/store-app.svg" alt="get the app on the Apple App Store"></a></div>
+                            <div class="link"><a href="https://github.com/bringyour/product/roadmap.md" target="_blank">Platform Roadmap</a></div>
+                            <div class="link"><a href="https://github.com/bringyour/product/discussions" target="_blank">Product Feedback</a></div>
+                        </td>
+                        <td>
+                            <div class="link"><a href="terms">Terms of Service</a></div>
+                            <div class="link"><a href="privacy">Privacy Policy</a></div>
+                            <div class="link"><a href="vdp">Vulnerability Disclosure Policy</a></div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <div class="copyline">Copyright 2023 BringYour, LLC<br>A California, USA company</div>
+        </div>
+    </div>
 
 </body>
 </html>

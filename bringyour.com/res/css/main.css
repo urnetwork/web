@@ -391,3 +391,38 @@ h2 {
 	font-size: 14pt;
 }
 
+div.community {
+	margin-top: 24px;
+	margin-bottom: 24px;
+}
+
+div.community div.link {
+	display: inline-block;
+	margin-top: 12px;
+	padding: 12px;
+	background-color: rgb(108, 117, 125);
+	border-radius: 8px;
+	color: rgb(255, 255, 255);
+	font-weight: 400;
+}
+
+div.community div.link:hover {
+	background-color: rgb(90, 98, 104);
+}
+
+div.community a {
+	text-decoration: none;
+	border-bottom: none;
+}
+
+div.community a:hover {
+	text-decoration: none;
+	border-bottom: none;
+}
+
+
+div.community div.link img {
+	max-height: 24px;
+	margin-right: 12px;
+}
+

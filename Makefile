@@ -5,6 +5,9 @@
 
 # local dev:
 # nginx -c /Users/brien/bringyour/web/local-nginx.conf -g 'daemon off;'
+# add to /etc/hosts
+# 127.0.0.1  bringyour.com
+
 
 #  npm i -g html-validate
 # /Users/brien/.nvm/versions/node/v14.18.1/bin/html-validate bringyour.com/index.html

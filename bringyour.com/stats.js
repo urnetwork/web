@@ -1,4 +1,3 @@
-
 // xxx.x
 function humanRound(value) {
     return (Math.round(10 * value) / 10) + ''
@@ -7,11 +6,9 @@ function humanRound(value) {
 function humanUnits(value) {
     if (1000 * 1000 < value) {
         return (Math.round(10 * value / (1000 * 1000)) / 10) + 'm'
-    }
-    else if (1000 < value) {
+    } else if (1000 < value) {
         return (Math.round(10 * value / (1000)) / 10) + 'k'
-    }
-    else {
+    } else {
         return value + ''
     }
 }
@@ -22,21 +19,21 @@ function sparkPlot(containerId, data, measureType, unit) {
     keys.sort()
     let values = keys.map((key) => data[key])
 
-    const WIDTH      = 240;
-    const HEIGHT     = 30;
+    const WIDTH = 240;
+    const HEIGHT = 30;
     const DATA_COUNT = keys.length
-    const BAR_WIDTH  = (WIDTH - DATA_COUNT) / DATA_COUNT;
+    const BAR_WIDTH = (WIDTH - DATA_COUNT) / DATA_COUNT;
     // const data = d3.range(DATA_COUNT).map( d => 0.3 + 0.7 * Math.random() );
     // data.sort();
     // data.reverse();
-    const x    = d3.scaleLinear().domain([0, DATA_COUNT]).range([0, WIDTH]);
-    const y    = d3.scaleLinear().domain([0, d3.max(values)]).range([0, HEIGHT]);
-    
+    const x = d3.scaleLinear().domain([0, DATA_COUNT]).range([0, WIDTH]);
+    const y = d3.scaleLinear().domain([0, d3.max(values)]).range([0, HEIGHT]);
+
     d3.select('#' + containerId).selectAll('svg').remove()
     const svg = d3.select('#' + containerId).append('svg')
-      .attr('width', WIDTH)
-      .attr('height', HEIGHT)
-      .append('g');
+        .attr('width', WIDTH)
+        .attr('height', HEIGHT)
+        .append('g');
     // const tooltip = d3.select("body")
     // .append("div")
     // .style("position", "absolute")
@@ -44,11 +41,11 @@ function sparkPlot(containerId, data, measureType, unit) {
     // .style("visibility", "hidden")
     // .text("a simple tooltip");
 
-    
+
 
     svg.selectAll('.bar').data(keys)
-      .enter()
-      .append('rect')
+        .enter()
+        .append('rect')
         .attr('class', 'bar')
         .attr('x', (d, i) => x(i))
         .attr('y', d => HEIGHT - y(data[d]))
@@ -60,36 +57,34 @@ function sparkPlot(containerId, data, measureType, unit) {
             let value = data[d]
             if (measureType == 'unit') {
                 return d + ' ' + humanRound(value) + '' + unit
-            }
-            else if (unit) {
+            } else if (unit) {
                 return d + ' ' + humanUnits(value) + ' ' + unit
-            }
-            else {
+            } else {
                 return d + ' ' + humanUnits(value)
             }
         })
 
 
-        // .on("mouseover", function(d){console.log(d); tooltip.style("visibility", "visible"); tooltip.style('left', d.x); tooltip.style('top', d.y); })
+    // .on("mouseover", function(d){console.log(d); tooltip.style("visibility", "visible"); tooltip.style('left', d.x); tooltip.style('top', d.y); })
     // .on("mousemove", function(d){return tooltip.style("top", (event.pageY-10)+"px").style("left",(event.pageX+10)+"px");})
     // .on("mouseout", function(d){return tooltip.style("visibility", "hidden");});
 }
 
 
 function sparkPlotPlaceholder(containerId) {
-    const WIDTH      = 240;
-    const HEIGHT     = 30;
+    const WIDTH = 240;
+    const HEIGHT = 30;
     const DATA_COUNT = 90;
-    const BAR_WIDTH  = (WIDTH - DATA_COUNT) / DATA_COUNT;
-    const data = d3.range(DATA_COUNT).map( d => 0.3 + 0.7 * Math.random() );
+    const BAR_WIDTH = (WIDTH - DATA_COUNT) / DATA_COUNT;
+    const data = d3.range(DATA_COUNT).map(d => 0.3 + 0.7 * Math.random());
     data.sort();
     data.reverse();
-    const x    = d3.scaleLinear().domain([0, DATA_COUNT]).range([0, WIDTH]);
-    const y    = d3.scaleLinear().domain([0, 1]).range([HEIGHT, 0]);
+    const x = d3.scaleLinear().domain([0, DATA_COUNT]).range([0, WIDTH]);
+    const y = d3.scaleLinear().domain([0, 1]).range([HEIGHT, 0]);
     const svg = d3.select('#' + containerId).append('svg')
-      .attr('width', WIDTH)
-      .attr('height', HEIGHT)
-      .append('g');
+        .attr('width', WIDTH)
+        .attr('height', HEIGHT)
+        .append('g');
     // const tooltip = d3.select("body")
     // .append("div")
     // .style("position", "absolute")
@@ -97,8 +92,8 @@ function sparkPlotPlaceholder(containerId) {
     // .style("visibility", "hidden")
     // .text("a simple tooltip");
     svg.selectAll('.bar').data(data)
-      .enter()
-      .append('rect')
+        .enter()
+        .append('rect')
         .attr('class', 'bar')
         .attr('x', (d, i) => x(i))
         .attr('y', d => HEIGHT - y(d))
@@ -108,7 +103,7 @@ function sparkPlotPlaceholder(containerId) {
         .attr('stroke', 'rgb(255, 255, 255)')
 
 
-        // .on("mouseover", function(d){console.log(d); tooltip.style("visibility", "visible"); tooltip.style('left', d.x); tooltip.style('top', d.y); })
+    // .on("mouseover", function(d){console.log(d); tooltip.style("visibility", "visible"); tooltip.style('left', d.x); tooltip.style('top', d.y); })
     // .on("mousemove", function(d){return tooltip.style("top", (event.pageY-10)+"px").style("left",(event.pageX+10)+"px");})
     // .on("mouseout", function(d){return tooltip.style("visibility", "hidden");});
 }
@@ -150,9 +145,8 @@ function sparkPlotTooltips() {
 
 
 function createStatsMount(elementId) {
-     return createMount(elementId, [])
+    return createMount(elementId, [])
 }
-
 
 
 
@@ -177,40 +171,38 @@ function StatsPanel(firstLoad) {
         sparkPlotPlaceholder(self.id('stats-devices'))
 
         self.updateStats()
-     }
-     self.router = (url) => {
+    }
+    self.router = (url) => {
         if (url.pathname == '/stats/update') {
             self.updateStats()
         }
-     }
+    }
 
 
-     // event handlers
+    // event handlers
 
-     self.updateCountdown = () => {
+    self.updateCountdown = () => {
         let updateNextTimeElement = self.element('stats-update-next-time')
         let remainingMillis = self.nextUpdateTime - Date.now()
         if (remainingMillis <= 0) {
             updateNextTimeElement.textContent = 'now'
 
             self.updateStats()
-        }
-        else if (remainingMillis < 60 * 1000) {
+        } else if (remainingMillis < 60 * 1000) {
             // show each second
             let seconds = Math.ceil(remainingMillis / 1000)
             updateNextTimeElement.textContent = 'in ' + seconds + ' seconds'
-        }
-        else {
+        } else {
             // show x.x minutes
             let seconds = Math.ceil(remainingMillis / 1000)
             let minutes = Math.floor(seconds / 60)
             let remainingSecondsF = Math.floor(10 * (seconds - 60 * minutes) / 60)
-            
+
             updateNextTimeElement.textContent = 'in ' + minutes + '.' + remainingSecondsF + ' minutes'
         }
-     }
+    }
 
-     self.updateStats = () => {
+    self.updateStats = () => {
         if (self.countdownInterval) {
             clearInterval(self.countdownInterval)
         }
@@ -222,12 +214,20 @@ function StatsPanel(firstLoad) {
         statsUpdateNextElement.classList.add('d-none')
         statsUpdateInProgressElement.classList.remove('d-none')
 
-        setTimeout(() => {
-            let responseBody = MOCK_API_get_stats()
-            self.handleUpdateStatsResponse(responseBody)
-        }, 1000)
-     }
-     self.handleUpdateStatsResponse = (responseBody) => {
+        apiRequest('GET', '/stats/last-90')
+            .catch((err) => {
+                self.handleUpdateStatsResponse(null)
+            })
+            .then((responseBody) => {
+                self.handleUpdateStatsResponse(responseBody)
+            })
+
+        // setTimeout(() => {
+        //     let responseBody = MOCK_API_get_stats()
+        //     self.handleUpdateStatsResponse(responseBody)
+        // }, 1000)
+    }
+    self.handleUpdateStatsResponse = (responseBody) => {
         let statsUpdateNextElement = self.element('stats-update-next')
         let statsLastUpdateElement = self.element('stats-last-update')
         let statsUpdateInProgressElement = self.element('stats-update-in-progress')
@@ -236,45 +236,47 @@ function StatsPanel(firstLoad) {
         statsLastUpdateElement.classList.remove('d-none')
         statsUpdateInProgressElement.classList.add('d-none')
 
-        let date = new Date()
-        statsLastUpdateElement.textContent = 'Last update ' + date.toLocaleDateString() + ' ' + date.toLocaleTimeString() + '.'
+        if (responseBody) {
+            let date = new Date()
+            statsLastUpdateElement.textContent = 'Last update ' + date.toLocaleDateString() + ' ' + date.toLocaleTimeString() + '.'
 
-        sparkPlot(self.id('stats-all-transfer'), responseBody['allTransferData'], 'unit', 'TiB')
-        sparkPlot(self.id('stats-all-packets'), responseBody['allPacketsData'], 'count', 'packets')
-        sparkPlot(self.id('stats-providers'), responseBody['providersData'], 'count', 'providers')
-        sparkPlot(self.id('stats-countries'), responseBody['countriesData'], 'count', 'countries')
-        sparkPlot(self.id('stats-regions'), responseBody['regionsData'], 'count', 'regions')
-        sparkPlot(self.id('stats-cities'), responseBody['citiesData'], 'count', 'cities')
-        sparkPlot(self.id('stats-extender-transfer'), responseBody['extenderTransferData'], 'unit', 'TiB')
-        sparkPlot(self.id('stats-extenders'), responseBody['extendersData'], 'count', 'edges')
-        sparkPlot(self.id('stats-networks'), responseBody['networksData'], 'count', 'networks')
-        sparkPlot(self.id('stats-devices'), responseBody['devicesData'], 'count', 'devices')
+            sparkPlot(self.id('stats-all-transfer'), responseBody['allTransferData'], 'unit', 'TiB')
+            sparkPlot(self.id('stats-all-packets'), responseBody['allPacketsData'], 'count', 'packets')
+            sparkPlot(self.id('stats-providers'), responseBody['providersData'], 'count', 'providers')
+            sparkPlot(self.id('stats-countries'), responseBody['countriesData'], 'count', 'countries')
+            sparkPlot(self.id('stats-regions'), responseBody['regionsData'], 'count', 'regions')
+            sparkPlot(self.id('stats-cities'), responseBody['citiesData'], 'count', 'cities')
+            sparkPlot(self.id('stats-extender-transfer'), responseBody['extenderTransferData'], 'unit', 'TiB')
+            sparkPlot(self.id('stats-extenders'), responseBody['extendersData'], 'count', 'edges')
+            sparkPlot(self.id('stats-networks'), responseBody['networksData'], 'count', 'networks')
+            sparkPlot(self.id('stats-devices'), responseBody['devicesData'], 'count', 'devices')
 
-        sparkPlotTooltips()
+            sparkPlotTooltips()
 
-        self.element('stats-all-transfer-summary').textContent = humanRound(responseBody['allTransferSummary']),
-        self.element('stats-all-transfer-summary-rate').textContent = humanRound(responseBody['allTransferSummaryRate'])
-        self.element('stats-all-packets-summary').textContent = humanUnits(responseBody['allPacketsSummary'])
-        self.element('stats-all-packets-summary-rate').textContent = humanUnits(responseBody['allPacketsSummaryRate'])
-        self.element('stats-providers-summary').textContent = humanUnits(responseBody['providersSummary'])
-        self.element('stats-providers-summary-superspeed').textContent = humanUnits(responseBody['providersSummarySuperspeed'])
-        self.element('stats-countries-summary').textContent = humanUnits(responseBody['countriesSummary'])
-        self.element('stats-regions-summary').textContent = humanUnits(responseBody['regionsSummary'])
-        self.element('stats-cities-summary').textContent = humanUnits(responseBody['citiesSummary'])
-        self.element('stats-extender-transfer-summary').textContent = humanRound(responseBody['extenderTransferSummary'])
-        self.element('stats-extender-transfer-summary-rate').textContent = humanRound(responseBody['extenderTransferSummaryRate'])
-        self.element('stats-extenders-summary').textContent = humanUnits(responseBody['extendersSummary'])
-        self.element('stats-extenders-summary-superspeed').textContent = humanUnits(responseBody['extendersSummarySuperspeed'])
-        self.element('stats-networks-summary').textContent = humanUnits(responseBody['networksSummary'])
-        self.element('stats-devices-summary').textContent = humanUnits(responseBody['devicesSummary'])
+            self.element('stats-all-transfer-summary').textContent = humanRound(responseBody['allTransferSummary'])
+            self.element('stats-all-transfer-summary-rate').textContent = humanRound(responseBody['allTransferSummaryRate'])
+            self.element('stats-all-packets-summary').textContent = humanUnits(responseBody['allPacketsSummary'])
+            self.element('stats-all-packets-summary-rate').textContent = humanUnits(responseBody['allPacketsSummaryRate'])
+            self.element('stats-providers-summary').textContent = humanUnits(responseBody['providersSummary'])
+            self.element('stats-providers-summary-superspeed').textContent = humanUnits(responseBody['providersSummarySuperspeed'])
+            self.element('stats-countries-summary').textContent = humanUnits(responseBody['countriesSummary'])
+            self.element('stats-regions-summary').textContent = humanUnits(responseBody['regionsSummary'])
+            self.element('stats-cities-summary').textContent = humanUnits(responseBody['citiesSummary'])
+            self.element('stats-extender-transfer-summary').textContent = humanRound(responseBody['extenderTransferSummary'])
+            self.element('stats-extender-transfer-summary-rate').textContent = humanRound(responseBody['extenderTransferSummaryRate'])
+            self.element('stats-extenders-summary').textContent = humanUnits(responseBody['extendersSummary'])
+            self.element('stats-extenders-summary-superspeed').textContent = humanUnits(responseBody['extendersSummarySuperspeed'])
+            self.element('stats-networks-summary').textContent = humanUnits(responseBody['networksSummary'])
+            self.element('stats-devices-summary').textContent = humanUnits(responseBody['devicesSummary'])
+        }
 
         // 5 minutes
         let updateTimeoutMillis = 1000 * 60 * 5
         self.nextUpdateTime = Date.now() + updateTimeoutMillis
         self.countdownInterval = setInterval(self.updateCountdown, 1000)
         self.updateCountdown()
-     }
-     
+    }
+
 }
 
 
@@ -303,5 +305,3 @@ function renderStats(container, id) {
 
     container.innerHTML = html
 }
-
-
