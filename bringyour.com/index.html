@@ -54,6 +54,8 @@
         window.notifyByJwtChanged = updateConnectButton
 
         window.addEventListener('load', (event) => {
+            updateScroll()
+
             let resetCode = new URLSearchParams(window.location.search).get('resetCode')
 
             updateConnectButton()
@@ -109,7 +111,7 @@
         <table>
             <tbody>
                 <tr>
-                    <td id="logo"></td>
+                    <td id="logo"><img id="logo-placeholder" src="res/images/logo-placeholder.png"></div></td>
                     <td class="expand"><div class="tab-container"><div class="tab tab-selected">Network</div><a href="pricing"><div class="tab">Pricing</div></a><a href="faq"><div class="tab">FAQ</div></a><a href="participate"><div class="tab">Participate</div></a><a href="about"><div class="tab">About</div></a></div></td>
                     <td class="start"><button type="button" id="start" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#dialog-connect">Get Connected</button></td>
                 </tr>

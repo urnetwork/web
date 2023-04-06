@@ -232,6 +232,11 @@ div.use-cases {
 	min-width: 300px;
 	vertical-align: top !important;
 }
+#logo-placeholder {
+	display: inline-block;
+	width: 200px;
+	height: 200px;
+}
 #header td.start {
 	min-width: 300px;
 	vertical-align: middle;

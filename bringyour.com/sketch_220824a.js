@@ -47,6 +47,8 @@ let logop5 = new p5((sketch) => {
     canvas.id('logo-canvas');
     //sketch.frameRate(60);
     
+    let placeholderElement = document.getElementById('logo-placeholder')
+    placeholderElement.parentNode.removeChild(placeholderElement)
   }
   
   

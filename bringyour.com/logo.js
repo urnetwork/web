@@ -44,6 +44,6 @@ window.addEventListener('scroll', (e) => {
   updateScroll();
 });
 
-window.addEventListener('load', (e) => {
-  updateScroll();
-});
+// window.addEventListener('load', (e) => {
+//   updateScroll();
+// });
