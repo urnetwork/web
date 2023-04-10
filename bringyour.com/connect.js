@@ -1493,7 +1493,7 @@ function DialogComplete(networkName) {
         const feedbackNeedPrivateElement = self.element('feedback-need-private')
         const feedbackNeedSafeElement = self.element('feedback-need-safe')
         const feedbackNeedGlobalElement = self.element('feedback-need-global')
-        const feedbackNeedConnectElement = self.element('feedback-need-connect')
+        const feedbackNeedCollaborateElement = self.element('feedback-need-collaborate')
         const feedbackNeedAppControlElement = self.element('feedback-need-app-control')
         const feedbackNeedBlockDataBrokersElement = self.element('feedback-need-block-data-brokers')
         const feedbackNeedBlockAdsElement = self.element('feedback-need-block-ads')
@@ -1504,7 +1504,7 @@ function DialogComplete(networkName) {
         const feedbackNeedAuditElement = self.element('feedback-need-audit')
         const feedbackNeedZeroTrustElement = self.element('feedback-need-zero-trust')
         const feedbackNeedVisualizeElement = self.element('feedback-need-visualize')
-        const feedbackNeedsElement = self.element('feedback-needs')
+        const feedbackNeedOtherElement = self.element('feedback-need-other')
 
         feedbackButtonElement.disabled = true
         feedbackSpinnerElement.classList.remove('d-none')
@@ -1514,7 +1514,7 @@ function DialogComplete(networkName) {
         feedbackNeedPrivateElement.disabled = true
         feedbackNeedSafeElement.disabled = true
         feedbackNeedGlobalElement.disabled = true
-        feedbackNeedConnectElement.disabled = true
+        feedbackNeedCollaborateElement.disabled = true
         feedbackNeedAppControlElement.disabled = true
         feedbackNeedBlockDataBrokersElement.disabled = true
         feedbackNeedBlockAdsElement.disabled = true
@@ -1525,7 +1525,7 @@ function DialogComplete(networkName) {
         feedbackNeedAuditElement.disabled = true
         feedbackNeedZeroTrustElement.disabled = true
         feedbackNeedVisualizeElement.disabled = true
-        feedbackNeedsElement.disabled = true
+        feedbackNeedOtherElement.disabled = true
 
         let requestBody = {
             auth: getByJwt(),
@@ -1537,7 +1537,7 @@ function DialogComplete(networkName) {
                 private: feedbackNeedPrivateElement.checked,
                 safe: feedbackNeedSafeElement.checked,
                 global: feedbackNeedGlobalElement.checked,
-                connect: feedbackNeedConnectElement.checked,
+                collaborate: feedbackNeedCollaborateElement.checked,
                 appControl: feedbackNeedAppControlElement.checked,
                 blockDataBrokers: feedbackNeedBlockDataBrokersElement.checked,
                 blockAds: feedbackNeedBlockAdsElement.checked,
@@ -1548,7 +1548,7 @@ function DialogComplete(networkName) {
                 audit: feedbackNeedAuditElement.checked,
                 zeroTrust: feedbackNeedZeroTrustElement.checked,
                 visualize: feedbackNeedVisualizeElement.checked,
-                needs: feedbackNeedsElement.value
+                other: feedbackNeedOtherElement.value
             }
         }
 
@@ -1879,7 +1879,7 @@ function renderComplete(container, id, networkName) {
                               <div><label class="form-check-label"><input id="${id('feedback-need-private')}" type="checkbox" value="" class="form-check-input"> Stay anonymous and private on the internet</label></div>
                               <div><label class="form-check-label"><input id="${id('feedback-need-safe')}" type="checkbox" value="" class="form-check-input"> Have verified safe internet everywhere</label></div>
                               <div><label class="form-check-label"><input id="${id('feedback-need-global')}" type="checkbox" value="" class="form-check-input"> Access regional and international networks</label></div>
-                              <div><label class="form-check-label"><input id="${id('feedback-need-connect')}" type="checkbox" value="" class="form-check-input"> Connect with my homes, friends and family</label></div>
+                              <div><label class="form-check-label"><input id="${id('feedback-need-collaborate')}" type="checkbox" value="" class="form-check-input"> Connect with my homes, friends and family</label></div>
                               <div><label class="form-check-label"><input id="${id('feedback-need-app-control')}" type="checkbox" value="" class="form-check-input"> Control the use of data and apps on my network</label></div>
                               <div><label class="form-check-label"><input id="${id('feedback-need-block-data-brokers')}" type="checkbox" value="" class="form-check-input"> Block personal data collection</label></div>
                               <div><label class="form-check-label"><input id="${id('feedback-need-block-ads')}" type="checkbox" value="" class="form-check-input"> Block ads</label></div>
@@ -1892,7 +1892,7 @@ function renderComplete(container, id, networkName) {
                               <div><label class="form-check-label"><input id="${id('feedback-need-visualize')}" type="checkbox" value="" class="form-check-input"> Visualize and understand my network data</label></div>
                          </div>
                          <div class="no-title">What do you want to do with your network?
-                              <div><textarea id="${id('feedback-needs')}" class="form-control" placeholder="I want to ..."></textarea></div>
+                              <div><textarea id="${id('feedback-need-other')}" class="form-control" placeholder="I want to ..."></textarea></div>
                          </div>
                          <div class="no-title"><button id="${id('feedback-button')}" class="btn btn-primary" type="button"><span id="${id('feedback-spinner')}" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span><span class="primary">Submit</span></button></div>
                     </form>
