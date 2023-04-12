@@ -98,6 +98,8 @@ function DialogInitial(firstLoad) {
     // event handlers
 
     self.submitAuthJwt = (authJwtType, authJwt) => {
+        console.log(authJwt)
+
         const loginUserAuthElement = self.element('login-user-auth')
         const loginButtonElement = self.element('login-button')
         const loginSpinnerElement = self.element('login-spinner')
@@ -116,7 +118,7 @@ function DialogInitial(firstLoad) {
                 self.handleSubmitAuthJwtResponse(null)
             })
             .then((responseBody) => {
-                self.handleSubmitAuthJwtResponse(responseBody)
+                self.handleSubmitAuthJwtResponse(responseBody, authJwtType, authJwt)
             })
 
         // setTimeout(() => {
@@ -124,7 +126,7 @@ function DialogInitial(firstLoad) {
         //      self.handleSubmitAuthJwtResponse(responseBody)
         // }, 1000)
     }
-    self.handleSubmitAuthJwtResponse = (responseBody) => {
+    self.handleSubmitAuthJwtResponse = (responseBody, authJwtType, authJwt) => {
         const loginUserAuthElement = self.element('login-user-auth')
         const loginButtonElement = self.element('login-button')
         const loginSpinnerElement = self.element('login-spinner')
@@ -134,16 +136,12 @@ function DialogInitial(firstLoad) {
         loginSpinnerElement.classList.add('d-none')
 
         if (responseBody) {
-            if ('network' in responseBody) {
+            if ('netork' in responseBody) {
                 let network = responseBody['network']
-                let networkName = network['name']
+                let byJwt = network['byJwt']
 
-                setByJwt({
-                    network: {
-                        name: networkName
-                    }
-                })
-                self.mount.render(new DialogComplete(networkName))
+                setByJwt(byJwt)
+                self.mount.render(new DialogComplete())
             } else if ('authAllowed' in responseBody) {
                 // and existing network but different login
                 let message
@@ -167,8 +165,8 @@ function DialogInitial(firstLoad) {
                 loginSpinnerElement.classList.add('d-none')
             } else {
                 // a new network
-                let authJwtType = responseBody['authJwtType']
-                let authJwt = responseBody['authJwt']
+                // let authJwtType = responseBody['authJwtType']
+                // let authJwt = responseBody['authJwt']
                 let userName = responseBody['userName']
                 self.mount.render(new DialogCreateNetworkAuthJwt(authJwtType, authJwt, userName))
             }
@@ -348,14 +346,10 @@ function DialogLoginPassword(userAuth) {
                 self.mount.render(new DialogCreateNetworkValidate(validationUserAuth))
             } else if ('network' in responseBody) {
                 let network = responseBody['network']
-                let networkName = network['name']
+                let byJwt = network['byJwt']
 
-                setByJwt({
-                    network: {
-                        name: networkName
-                    }
-                })
-                self.mount.render(new DialogComplete(networkName))
+                setByJwt(byJwt)
+                self.mount.render(new DialogComplete())
             } else {
                 let message = 'Something went wrong. Please try again later.'
 
@@ -898,10 +892,10 @@ function DialogCreateNetworkAuthJwt(authJwtType, authJwt, userName) {
 
         apiRequest('POST', '/auth/network-create', requestBody)
             .catch((err) => {
-                handleSubmitResponse(null)
+                self.handleSubmitResponse(null)
             })
             .then((responseBody) => {
-                handleSubmitResponse(responseBody)
+                self.handleSubmitResponse(responseBody)
             })
 
         // setTimeout(() => {
@@ -959,14 +953,10 @@ function DialogCreateNetworkAuthJwt(authJwtType, authJwt, userName) {
                 self.mount.render(new DialogCreateNetworkValidate(validationUserAuth))
             } else if ('network' in responseBody) {
                 let network = responseBody['network']
-                let networkName = network['name']
+                let byJwt = network['byJwt']
 
-                setByJwt({
-                    network: {
-                        name: networkName
-                    }
-                })
-                self.mount.render(new DialogComplete(networkName))
+                setByJwt(byJwt)
+                self.mount.render(new DialogComplete())
             } else {
                 let message = 'Something went wrong. Please try again later.'
 
@@ -1129,10 +1119,10 @@ function DialogCreateNetwork(userAuth) {
 
         apiRequest('POST', '/auth/network-create', requestBody)
             .catch((err) => {
-                handleSubmitResponse(null)
+                self.handleSubmitResponse(null)
             })
             .then((responseBody) => {
-                handleSubmitResponse(responseBody)
+                self.handleSubmitResponse(responseBody)
             })
 
         // setTimeout(() => {
@@ -1210,14 +1200,10 @@ function DialogCreateNetwork(userAuth) {
                 self.mount.render(new DialogCreateNetworkValidate(validationUserAuth))
             } else if ('network' in responseBody) {
                 let network = responseBody['network']
-                let networkName = network['name']
+                let byJwt = network['byJwt']
 
-                setByJwt({
-                    network: {
-                        name: networkName
-                    }
-                })
-                self.mount.render(new DialogComplete(networkName))
+                setByJwt(byJwt)
+                self.mount.render(new DialogComplete())
             } else {
                 let message = 'Something went wrong. Please try again later.'
 
@@ -1316,10 +1302,10 @@ function DialogCreateNetworkValidate(userAuth) {
 
         apiRequest('POST', '/auth/validate', requestBody)
             .catch((err) => {
-                handleSubmitResponse(null)
+                self.handleSubmitResponse(null)
             })
             .then((responseBody) => {
-                handleSubmitResponse(responseBody)
+                self.handleSubmitResponse(responseBody)
             })
 
         // setTimeout(() => {
@@ -1347,14 +1333,10 @@ function DialogCreateNetworkValidate(userAuth) {
                 validateErrorElement.classList.remove('d-none')
             } else if ('network' in responseBody) {
                 let network = responseBody['network']
-                let networkName = network['name']
+                let byJwt = network['byJwt']
 
-                setByJwt({
-                    network: {
-                        name: networkName
-                    }
-                })
-                self.mount.render(new DialogComplete(networkName))
+                setByJwt(byJwt)
+                self.mount.render(new DialogComplete())
             } else {
                 let message = 'Something went wrong. Please try again later.'
 
@@ -1379,10 +1361,10 @@ function DialogCreateNetworkValidate(userAuth) {
 
         apiRequest('POST', '/auth/validate-send', requestBody)
             .catch((err) => {
-                handleResendResponse(null)
+                self.handleResendResponse(null)
             })
             .then((responseBody) => {
-                handleResendResponse(responseBody)
+                self.handleResendResponse(responseBody)
             })
 
         // setTimeout(() => {
@@ -1413,9 +1395,12 @@ function DialogCreateNetworkValidate(userAuth) {
 // byProductUpdates
 // product updates checkbox change
 // feedback form submit
-function DialogComplete(networkName) {
+function DialogComplete() {
     const self = this
     self.render = (container) => {
+        byJwtData = parseByJwt()
+        let networkName = byJwtData['networkName']
+
         renderComplete(container, self.id, networkName)
 
         const preferencesProductUpdateElement = self.element('preferences-product-updates')
@@ -1457,16 +1442,16 @@ function DialogComplete(networkName) {
         preferencesSpinnerElement.classList.remove('d-none')
 
         let requestBody = {
-            auth: getByJwt(),
+            byJwt: getByJwt(),
             productUpdates: preferencesProductUpdateElement.checked
         }
 
         apiRequest('POST', '/preferences/set-preferences', requestBody)
             .catch((err) => {
-                handleSubmitPreferencesResponse(null)
+                self.handleSubmitPreferencesResponse(null)
             })
             .then((responseBody) => {
-                handleSubmitPreferencesResponse(responseBody)
+                self.handleSubmitPreferencesResponse(responseBody)
             })
 
         // setTimeout(() => {
@@ -1528,7 +1513,7 @@ function DialogComplete(networkName) {
         feedbackNeedOtherElement.disabled = true
 
         let requestBody = {
-            auth: getByJwt(),
+            byJwt: getByJwt(),
             uses: {
                 personal: feedbackUsePersonalElement.checked,
                 business: feedbackUseBusinessElement.checked
@@ -1554,10 +1539,10 @@ function DialogComplete(networkName) {
 
         apiRequest('POST', '/feedback/send-feedback', requestBody)
             .catch((err) => {
-                handleSubmitResponse(null)
+                self.handleSubmitResponse(null)
             })
             .then((responseBody) => {
-                handleSubmitResponse(responseBody)
+                self.handleSubmitResponse(responseBody)
             })
 
         // setTimeout(() => {

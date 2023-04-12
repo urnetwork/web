@@ -37,9 +37,9 @@
         function updateConnectButton() {
             let startElement = document.getElementById('start')
 
-            let byJwt = getByJwt()
-            if (byJwt) {
-                let networkName = byJwt['network']['name']
+            let byJwtData = parseByJwt()
+            if (byJwtData) {
+                let networkName = byJwtData['networkName']
                 startElement.textContent = networkName + '.bringyour.network'
                 startElement.classList.remove('btn-primary')
                 startElement.classList.add('btn-light')
@@ -87,13 +87,13 @@
                                 }
                                 mount.router()
 
-                                let byJwt = getByJwt()
+                                let byJwtData = parseByJwt()
                                 let resetCode = new URLSearchParams(window.location.search).get('resetCode')
                                 if (resetCode) {
                                     mount.render(new DialogPasswordResetComplete(resetCode))
                                 }
-                                else if (byJwt) {
-                                    let networkName = byJwt['network']['name']
+                                else if (byJwtData) {
+                                    let networkName = byJwtData['networkName']
                                     mount.render(new DialogComplete(networkName))
                                 }
                                 else {

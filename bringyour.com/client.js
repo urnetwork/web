@@ -6,11 +6,33 @@ const clientVersion = '';
 
 function getByJwt() {
     let byJwtStr = localStorage.getItem('byJwt')
-    return byJwtStr && JSON.parse(byJwtStr)
+    return byJwtStr
 }
 
+
+function parseByJwt() {
+    let byJwtStr = localStorage.getItem('byJwt')
+    // fixme use correct jwt parsing
+    return byJwtStr && parseJwt(byJwtStr)
+}
+
+
+// see https://stackoverflow.com/questions/38552003/how-to-decode-jwt-token-in-javascript-without-using-a-library
+function parseJwt(jwt) {
+    console.log(jwt)
+    var base64Url = jwt.split('.')[1]
+    var base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/')
+    var jsonPayload = decodeURIComponent(window.atob(base64).split('').map(function(c) {
+        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)
+    }).join(''))
+
+    return JSON.parse(jsonPayload)
+}
+
+
+
 function setByJwt(byJwt) {
-    localStorage.setItem('byJwt', JSON.stringify(byJwt))
+    localStorage.setItem('byJwt', byJwt)
     if (window.notifyByJwtChanged) {
         window.notifyByJwtChanged()
     }
@@ -25,7 +47,7 @@ function removeByJwt() {
 
 
 function escapeHtml(html) {
-    return html.replace(/[<>"]+/g, '')
+    return html && html.replace(/[<>"]+/g, '')
 }
 
 
