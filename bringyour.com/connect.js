@@ -98,7 +98,7 @@ function DialogInitial(firstLoad) {
     // event handlers
 
     self.submitAuthJwt = (authJwtType, authJwt) => {
-        console.log(authJwt)
+        // console.log(authJwt)
 
         const loginUserAuthElement = self.element('login-user-auth')
         const loginButtonElement = self.element('login-button')
@@ -115,7 +115,7 @@ function DialogInitial(firstLoad) {
 
         apiRequest('POST', '/auth/login', requestBody)
             .catch((err) => {
-                self.handleSubmitAuthJwtResponse(null)
+                self.handleSubmitAuthJwtResponse(null, authJwtType, authJwt)
             })
             .then((responseBody) => {
                 self.handleSubmitAuthJwtResponse(responseBody, authJwtType, authJwt)
@@ -136,7 +136,7 @@ function DialogInitial(firstLoad) {
         loginSpinnerElement.classList.add('d-none')
 
         if (responseBody) {
-            if ('netork' in responseBody) {
+            if ('network' in responseBody) {
                 let network = responseBody['network']
                 let byJwt = network['byJwt']
 
@@ -144,19 +144,20 @@ function DialogInitial(firstLoad) {
                 self.mount.render(new DialogComplete())
             } else if ('authAllowed' in responseBody) {
                 // and existing network but different login
+                let authAllowed = responseBody['authAllowed']
                 let message
                 if (authAllowed.includes('apple') && authAllowed.includes('google')) {
-                    message = 'Please login with Apple or Google'
+                    message = 'Please continue with Apple or Google'
                 } else if (authAllowed.includes('apple')) {
-                    message = 'Please login with Apple'
+                    message = 'Please continue with Apple'
                 } else if (authAllowed.includes('google')) {
-                    message = 'Please login with Google'
+                    message = 'Please continue with Google'
                 } else if (authAllowed.includes('password')) {
-                    message = 'Please login with email or phone number'
+                    message = 'Please continue with email or phone number'
                 } else {
                     message = 'Something went wrong. Please try again later.'
                 }
-                let errorElement = self.element('login-auth-jwt-error')
+                let errorElement = self.element('login-error')
                 errorElement.textContent = message
                 errorElement.classList.remove('d-none')
 
@@ -226,18 +227,18 @@ function DialogInitial(firstLoad) {
                 loginSpinnerElement.classList.add('d-none')
             } else if ('authAllowed' in responseBody) {
                 // an existing network
-                let userAuth = responseBody['userAuth'] || responseBody['userAuth']
+                let userAuth = responseBody['userAuth']
                 let authAllowed = responseBody['authAllowed']
                 if (authAllowed.includes('password')) {
                     self.mount.render(new DialogLoginPassword(userAuth))
                 } else {
                     let message
                     if (authAllowed.includes('apple') && authAllowed.includes('google')) {
-                        message = 'Please login with Apple or Google'
+                        message = 'Please continue with Apple or Google'
                     } else if (authAllowed.includes('apple')) {
-                        message = 'Please login with Apple'
+                        message = 'Please continue with Apple'
                     } else if (authAllowed.includes('google')) {
-                        message = 'Please login with Google'
+                        message = 'Please continue with Google'
                     } else {
                         message = 'Something went wrong. Please try again later.'
                     }
@@ -492,10 +493,10 @@ function DialogPasswordResetAfterSend(userAuth) {
 
         apiRequest('POST', '/auth/password-reset', requestBody)
             .catch((err) => {
-                self.handleSubmitResponse(null)
+                self.handleResendResponse(null)
             })
             .then((responseBody) => {
-                self.handleSubmitResponse(responseBody)
+                self.handleResendResponse(responseBody)
             })
 
         // setTimeout(() => {
@@ -783,7 +784,7 @@ function NetworkNameValidator(
         }
     }
     self.handleValidateNetworkNameResponse = (responseBody) => {
-        console.log(responseBody)
+        // console.log(responseBody)
         let validateError
         if (!responseBody) {
             validateError = 'Something went wrong. Please try again later.'
@@ -1243,7 +1244,7 @@ function DialogCreateNetworkValidate(userAuth) {
     const self = this
 
     function normalizeValidateCode(networkName) {
-        return networkName.replace(/[^\d]+/gi, '')
+        return networkName.replace(/[^\da-z]+/gi, '')
     }
 
     self.render = (container) => {
