@@ -789,8 +789,8 @@ function NetworkNameValidator(
         if (!responseBody) {
             validateError = 'Something went wrong. Please try again later.'
         }
-        else if (responseBody['conflict']) {
-            validateError = 'Must be at least 3 characters different than an existing network. Make it unique or longer.'
+        else if (!responseBody['available']) {
+            validateError = 'Not available. Must be at least 3 characters different than an existing network. Make it unique or longer.'
         }
 
         if (validateError) {
@@ -1750,7 +1750,7 @@ function renderCreateNetworkAuthJwt(container, id, authJwtType, authJwt, userNam
                          <div id="${id('create-network-name-error')}" class="text-secondary d-none"></div>
                          <div id="${id('create-network-name-available')}" class="text-success d-none">Available!</div>
                          <div class="no-title"><label class="form-check-label"><input id="${id('create-agree-terms')}" type="checkbox" class="form-check-input" value="">I agree to the <a href="/terms" target="_blank">BringYour terms</a>. Learn about how we use and protect your data in our <a href="/privacy">Privacy Policy</a></label></div>
-                         <div id="${id('create-error')}" class="text-secondary d-none"></div>
+                         <div id="${id('create-error')}" class="text-danger d-none"></div>
                          <div class="no-title"><button id="${id('create-button')}" class="btn btn-primary" type="button"><span id="${id('create-spinner')}" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span><span class="primary">Create Network</span></button></div>
                     </form>
                </div>
@@ -1784,7 +1784,7 @@ function renderCreateNetwork(container, id, userAuth) {
                          <div id="${id('create-network-name-error')}" class="text-secondary d-none"></div>
                          <div id="${id('create-network-name-available')}" class="text-success d-none">Available!</div>
                          <div class="no-title"><label class="form-check-label"><input id="${id('create-agree-terms')}" type="checkbox" class="form-check-input" value="">I agree to the <a href="/terms" target="_blank">BringYour terms</a>. Learn about how we use and protect your data in our <a href="/privacy">Privacy Policy</a></label></div>
-                         <div id="${id('create-error')}" class="text-secondary d-none"></div>
+                         <div id="${id('create-error')}" class="text-danger d-none"></div>
                          <div class="no-title"><button id="${id('create-button')}" class="btn btn-primary" type="button"><span id="${id('create-spinner')}" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span><span class="primary">Create Network</span></button></div>
                     </form>
                </div>
@@ -1797,11 +1797,11 @@ function renderCreateNetwork(container, id, userAuth) {
 function renderCreateNetworkValidate(container, id, userAuth) {
     let title
     if (userAuthType(userAuth) == 'email') {
-        title = 'Validate your email'
+        title = 'Verify your email'
     } else if (userAuthType(userAuth) == 'phone') {
-        title = 'Validate your phone number'
+        title = 'Verify your phone number'
     } else {
-        title = 'Validate your email or phone number'
+        title = 'Verify your email or phone number'
     }
     let html = `
           <div class="login-option">
