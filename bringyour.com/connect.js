@@ -636,20 +636,20 @@ function DialogPasswordResetComplete(resetCode) {
                 passwordResetPasswordConfirmElement.disabled = false
                 passwordResetButtonElement.disabled = false
                 passwordResetSpinnerElement.classList.add('d-none')
-            } else if ('complete' in responseBody) {
-                self.mount.render(new DialogInitial(false))
             } else {
-                let message = 'Something went wrong. Please try again later.'
-
-                let errorElement = self.element('password-reset-error')
-                errorElement.textContent = message
-                errorElement.classList.remove('d-none')
-
-                passwordResetPasswordElement.disabled = false
-                passwordResetPasswordConfirmElement.disabled = false
-                passwordResetButtonElement.disabled = false
-                passwordResetSpinnerElement.classList.add('d-none')
+                self.mount.render(new DialogInitial(false))
             }
+        } else {
+            let message = 'Something went wrong. Please try again later.'
+
+            let errorElement = self.element('password-reset-error')
+            errorElement.textContent = message
+            errorElement.classList.remove('d-none')
+
+            passwordResetPasswordElement.disabled = false
+            passwordResetPasswordConfirmElement.disabled = false
+            passwordResetButtonElement.disabled = false
+            passwordResetSpinnerElement.classList.add('d-none')
         }
     }
 }
@@ -1701,7 +1701,7 @@ function renderPasswordResetComplete(container, id, resetCode) {
     let html = `
           <div class="login-option">
                <div class="login-container">
-                    <div class="login-header"><div class="title">Reset your password</div></div>
+                    <div class="login-header"><div class="title"><a href="/connect"><span class="material-symbols-outlined">arrow_back_ios_new</span></a>Reset your password</div></div>
                </div>
           </div>
           <div class="login-option">
