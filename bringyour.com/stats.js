@@ -27,7 +27,7 @@ function sparkPlot(containerId, data, measureType, unit) {
     // data.sort();
     // data.reverse();
     const x = d3.scaleLinear().domain([0, DATA_COUNT]).range([0, WIDTH]);
-    const y = d3.scaleLinear().domain([0, d3.max(values)]).range([0, HEIGHT]);
+    const y = d3.scaleLinear().domain([0, Math.max(d3.max(values), 1)]).range([0, HEIGHT]);
 
     d3.select('#' + containerId).selectAll('svg').remove()
     const svg = d3.select('#' + containerId).append('svg')
@@ -240,13 +240,13 @@ function StatsPanel(firstLoad) {
             let date = new Date()
             statsLastUpdateElement.textContent = 'Last update ' + date.toLocaleDateString() + ' ' + date.toLocaleTimeString() + '.'
 
-            sparkPlot(self.id('stats-all-transfer'), responseBody['allTransferData'], 'unit', 'TiB')
+            sparkPlot(self.id('stats-all-transfer'), responseBody['allTransferData'], 'unit', 'GiB')
             sparkPlot(self.id('stats-all-packets'), responseBody['allPacketsData'], 'count', 'packets')
             sparkPlot(self.id('stats-providers'), responseBody['providersData'], 'count', 'providers')
             sparkPlot(self.id('stats-countries'), responseBody['countriesData'], 'count', 'countries')
             sparkPlot(self.id('stats-regions'), responseBody['regionsData'], 'count', 'regions')
             sparkPlot(self.id('stats-cities'), responseBody['citiesData'], 'count', 'cities')
-            sparkPlot(self.id('stats-extender-transfer'), responseBody['extenderTransferData'], 'unit', 'TiB')
+            sparkPlot(self.id('stats-extender-transfer'), responseBody['extenderTransferData'], 'unit', 'GiB')
             sparkPlot(self.id('stats-extenders'), responseBody['extendersData'], 'count', 'edges')
             sparkPlot(self.id('stats-networks'), responseBody['networksData'], 'count', 'networks')
             sparkPlot(self.id('stats-devices'), responseBody['devicesData'], 'count', 'devices')
@@ -290,13 +290,13 @@ function renderStats(container, id) {
             <span id="${id('stats-update-in-progress')}"><span id="${id('update-spinner')}" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>Updating</span>
         </div>
         <div class="stats-container">
-            <div class="stat"><table><tr><td colspan="2" class="title">Transfer (TiB)</td></tr><tr><td id="${id('stats-all-transfer')}" class="plot"></td><td class="current"><span id="${id('stats-all-transfer-summary')}">---</span>TiB<div class="substat"><div><span id="${id('stats-all-transfer-summary-rate')}">---</span>gbps</div><div>average</div></div></td></tr></table></div>
+            <div class="stat"><table><tr><td colspan="2" class="title">Transfer (GiB)</td></tr><tr><td id="${id('stats-all-transfer')}" class="plot"></td><td class="current"><span id="${id('stats-all-transfer-summary')}">---</span>GiB<div class="substat"><div><span id="${id('stats-all-transfer-summary-rate')}">---</span>gbps</div><div>average</div></div></td></tr></table></div>
             <div class="stat"><table><tr><td colspan="2" class="title">Packets</td></tr><tr><td id="${id('stats-all-packets')}" class="plot"></td><td class="current"><span id="${id('stats-all-packets-summary')}">---</span><div class="substat"><div><span id="${id('stats-all-packets-summary-rate')}">---</span>pps</div><div>average</div></div></td></tr></td></tr></table></div>
             <div class="stat"><table><tr><td colspan="2" class="title">Providers</td></tr><tr><td id="${id('stats-providers')}" class="plot"></td><td class="current"><span id="${id('stats-providers-summary')}">---</span><div class="substat"><div><span id="${id('stats-providers-summary-superspeed')}">---</span></div><div><img src="res/images/superfast.svg" class="superfast">superfast</div></div></td></tr></table></div>
             <div class="stat"><table><tr><td colspan="2" class="title">Countries</td></tr><tr><td id="${id('stats-countries')}" class="plot"></td><td class="current"><span id="${id('stats-countries-summary')}">---</span></td></tr></table></div>
             <div class="stat"><table><tr><td colspan="2" class="title">Regions</td></tr><tr><td id="${id('stats-regions')}" class="plot"></td><td class="current"><span id="${id('stats-regions-summary')}">---</span></td></tr></table></div>
             <div class="stat"><table><tr><td colspan="2" class="title">Cities</td></tr><tr><td id="${id('stats-cities')}" class="plot"></td><td class="current"><span id="${id('stats-cities-summary')}">---</span></td></tr></table></div>
-            <div class="stat"><table><tr><td colspan="2" class="title">Extender Transfer (TiB)</td></tr><tr><td id="${id('stats-extender-transfer')}" class="plot"></td><td class="current"><span id="${id('stats-extender-transfer-summary')}">---</span>TiB<div class="substat"><div><span id="${id('stats-extender-transfer-summary-rate')}">---</span>gbps</div><div>average</div></div></td></tr></table></div>
+            <div class="stat"><table><tr><td colspan="2" class="title">Extender Transfer (GiB)</td></tr><tr><td id="${id('stats-extender-transfer')}" class="plot"></td><td class="current"><span id="${id('stats-extender-transfer-summary')}">---</span>GiB<div class="substat"><div><span id="${id('stats-extender-transfer-summary-rate')}">---</span>gbps</div><div>average</div></div></td></tr></table></div>
             <div class="stat"><table><tr><td colspan="2" class="title">Extenders</td></tr><tr><td id="${id('stats-extenders')}" class="plot"></td><td class="current"><span id="${id('stats-extenders-summary')}">---</span><div class="substat"><div><span id="${id('stats-extenders-summary-superspeed')}">---</span></div><div><img src="res/images/superfast.svg" class="superfast">superfast</div></div></td></tr></table></div>
             <div class="stat"><table><tr><td colspan="2" class="title">Networks</td></tr><tr><td id="${id('stats-networks')}" class="plot"></td><td class="current"><span id="${id('stats-networks-summary')}">---</span></td></tr></table></div>
             <div class="stat"><table><tr><td colspan="2" class="title">Devices</td></tr><tr><td id="${id('stats-devices')}" class="plot"></td><td class="current"><span id="${id('stats-devices-summary')}">---</span></td></tr></table></div>

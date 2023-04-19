@@ -58,6 +58,7 @@ div.login-option div.login-container {
 div.title {
    font-size: 18pt;
    font-weight: 200;
+   overflow-wrap: break-word;
 }
 
 div.title span.material-symbols-outlined {
