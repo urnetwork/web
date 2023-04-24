@@ -8,6 +8,7 @@
 # add to /etc/hosts
 # 127.0.0.1  bringyour.com
 
+# export BRINGYOUR_REDIS_HOSTNAME=192.168.208.135; export BRINGYOUR_POSTGRES_HOSTNAME=192.168.208.135; ./api
 
 #  npm i -g html-validate
 # /Users/brien/.nvm/versions/node/v14.18.1/bin/html-validate bringyour.com/index.html
