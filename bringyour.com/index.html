@@ -1,534 +1,243 @@
-<html>
+<html lang="en">
 <head>
-	<title>BringYour</title>
+    <title>BringYour</title>
 
-	<link rel="icon" href="favicon.svg">
-	<link rel="mask-icon" href="mask.svg" color="#ffffff">
+    <link rel="icon" href="favicon.svg">
+    <link rel="mask-icon" href="mask.svg" color="#000000">
+    <link rel="apple-touch-icon" href="touch.png">
 
-	<link rel="preconnect" href="https://fonts.googleapis.com">
-	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-	<link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@100;200;300;400;500;600;700;800&display=swap" rel="stylesheet">
-	<link href="res/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@100;200;300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Pacifico&amp;display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,400,0,0">
 
-	<style>
-		@font-face {
-		    font-family: 'Arkitech';
-		    src: url('res/fonts/Arkitech-Light.woff2') format('woff2'),
-		        url('res/fonts/Arkitech-Light.woff') format('woff');
-		    font-weight: 300;
-		    font-style: normal;
-		    font-display: swap;
-		}
-		@font-face {
-		    font-family: 'Arkitech';
-		    src: url('res/fonts/Arkitech-Medium.woff2') format('woff2'),
-		        url('res/fonts/Arkitech-Medium.woff') format('woff');
-		    font-weight: 500;
-		    font-style: normal;
-		    font-display: swap;
-		}
+    <link href="res/css/bootstrap.min.css" rel="stylesheet">
+    <link href="res/css/main.css" rel="stylesheet">
+    <link href="res/css/stats.css" rel="stylesheet">
+    <link href="res/css/connect.css" rel="stylesheet">
 
-		body {
-			font-family: 'Noto Sans', sans-serif;
-			font-size: 12pt;
-			margin: 0px;
-			min-height: 100%;
-			display: flex;
-			flex-direction: column;
-		}
+    <script src="lib/d3.min.js"></script>
+    <script src="lib/p5.min.js"></script>
+    <script src="lib/jquery.min.js"></script>
+    <script src="lib/popper.min.js"></script>
+    <script src="lib/bootstrap.min.js"></script>
+    <script src="sketch_220824a.js"></script>
+    <script src="logo.js"></script>
+    <script src="client.js"></script>
+    <!-- <script src="stats_mock.js"></script> -->
+    <script src="stats.js"></script>
+    <!-- <script src="connect_mock.js"></script> -->
+    <script src="connect.js"></script>
 
-		div.runner img {
-			height:  200px;
-		}
+    <script src="https://accounts.google.com/gsi/client"></script>
+    <script src="https://appleid.cdn-apple.com/appleauth/static/jsapi/appleid/1/en_US/appleid.auth.js"></script>
 
-		div.runner {
-			max-width: 800px;
-			margin-left: auto;
-			margin-right: auto;
-			flex: 1;
-		}
+    <script>
+        function updateConnectButton() {
+            let startElement = document.getElementById('start')
 
-		div.runner a {
-			color: rgb(0, 0, 0);
-			text-decoration: none;
-			border-bottom: 1px dotted rgb(0, 0, 0);
-		}
+            let byJwtData = parseByJwt()
+            if (byJwtData) {
+                let networkName = byJwtData['networkName']
+                startElement.textContent = networkName + '.bringyour.network'
+                startElement.classList.remove('btn-primary')
+                startElement.classList.add('btn-light')
+            }
+            else {
+                startElement.textContent = 'Get Connected'
+                startElement.classList.add('btn-primary')
+                startElement.classList.remove('btn-light')
+            }
+        }
 
-		div.runner a:hover {
-			color: rgb(0, 105, 217);
-			border-bottom: 1px dotted rgb(0, 105, 217);
-		}
+        window.notifyByJwtChanged = updateConnectButton
 
-		div.leader {
-			font-size: 24pt;
-			font-weight: 100;
-			margin-top: 24px;
-			margin-bottom: 24px;
-		}
+        window.addEventListener('load', (event) => {
+            updateScroll()
 
-		div.leader div.main-message {
-			text-align: center;
-			margin-top: 48px;
-			margin-bottom: 48px;
-		}
+            let resetCode = new URLSearchParams(window.location.search).get('resetCode')
 
-		div.leader table {
-			font-size: 24pt;
-			font-weight: 100;
-			border-spacing: 0px;
-			margin-top: 48px;
-			margin-bottom: 48px;
-		}
+            updateConnectButton()
+            if (resetCode) {
+                $('#dialog-connect').modal('show')
+            }
 
-		div.leader table td.graphic {
-			text-align: center;
-			padding: 0px;
-			min-width: 400px;
-		}
 
-		div.leader table td.text {
-			text-align: left;
-			padding: 8px;
-			vertical-align: middle;
-		}
-
-		div.use-cases img {
-			width: 100%;
-			height: auto;
-		}
-
-		div.leader-left {
-			float: left;
-		}
-
-		div.leader-right {
-			float: right;
-		}
-
-		div.header {
-			font-size: 18pt;
-			font-weight: 200;
-			margin-top: 24px;
-			margin-bottom: 12px;
-		}
-
-		table.pricing-table {
-			margin-top: 24px;
-			margin-bottom: 24px;
-			border-spacing: 0px;
-			border-collapse: collapse; 
-		}
-		table.pricing-table tr {
-			border-bottom: 1px dotted rgb(220, 220, 220);
-		}
-		table.pricing-table td.item {
-			padding-top: 12px;
-			padding-bottom: 12px;
-			min-width: 400px;
-		}
-		table.pricing-table td.amount {
-			padding: 12px;
-		}
-
-		table.pricing-table span.free {
-			font-weight: 600;
-		}
-
-		div.use-cases {
-			margin-top: 24px;
-			margin-bottom: 24px;
-		}
-
-		#header-place {
-			/* this should match LOGO_S1 */
-			height: 200px;
-		}
-
-		#header {
-			position: fixed;
-			left: 0px;
-			right: 0px;
-			top: 0px;
-			background-color: rgb(255, 255, 255);
-		}
-
-		#header table {
-			width: 100%;
-			border-spacing: 0px;
-		}
-		#header td {
-			vertical-align: bottom;
-		}
-		#logo {
-			min-width: 300px;
-			vertical-align: top !important;
-		}
-		#header td.start {
-			min-width: 300px;
-			vertical-align: middle;
-			text-align: right;
-		}
-		#header td.expand {
-			width: 100%;
-			text-align: center;
-		}
-
-		#header div.tab-container a {
-			color: rgb(0, 0, 0);
-			text-decoration: none;
-		}
-
-		#header a div.tab:hover {
-			border-bottom: 4px solid rgb(220, 220, 220);
-		}
-
-		#header div.tab {
-			display: inline-block;
-			padding: 12px;
-			margin: 0px;
-			border-width: 0px;
-			border-bottom: 4px solid rgb(255, 255, 255);
-		}
-
-		#header div.tab-selected {
-			border-bottom: 4px solid rgb(0, 0, 0);
-		}
-
-		#start {
-			margin-right: 24px;
-			margin-top: 8px;
-			margin-bottom: 8px;
-		}
-
-		#footer {
-			color: rgb(255, 255, 255);
-			background-color: rgb(64, 64, 64);
-			font-weight: 100;
-			padding: 24px;
-			text-align: center;
-			margin-top: 24px;
-		}
-
-		#footer div.link a {
-			color: rgb(255, 255, 255);
-			text-decoration: none;
-			background-color: rgba(255, 255, 255, 0.1);
-			padding: 4px;
-		}
-
-		#footer div.link a:hover {
-			background-color: rgba(255, 255, 255, 0.2);
-		}
-
-		#footer div.link {
-			margin-top: 12px;
-			margin-bottom: 12px;
-		}
-
-		#footer table {
-			border-spacing: 0px;
-		}
-
-		#footer td {
-			color: rgb(255, 255, 255);
-			min-width: 200px;
-			font-weight: 100;
-			vertical-align: top;
-		}
-
-		#footer div.link-container {
-			display: inline-block;
-		}
-
-		#footer div.social-container {
-			margin-top: 24px;
-		}
-
-		#footer div.social-container div {
-			display: inline-block;
-			width: 32px;
-			height: 32px;
-			margin-right: 12px;
-		}
-
-		#footer div.social-container div img {
-			max-width: 32px;
-			max-height: 32px;
-		}
-
-		#footer div.store {
-			margin-top: 12px;
-			margin-bottom: 12px;
-		}
-
-		#footer div.store img {
-			max-height: 40px;
-		}
-
-		#footer div.g2 {
-			margin-top: 12px;
-			margin-bottom: 12px;
-		}
-
-		#footer div.g2 img {
-			max-height: 64px;
-		}
-
-		#footer div.copyline {
-			margin-top: 24px;
-		}
-
-		div.stats div.stats-container {
-			margin-top: 24px;
-			margin-bottom: 24px;
-		}
-
-		div.stats div.stat {
-			display: inline-block;
-			/*margin-right: 24px;
-			margin-top: 12px;*/
-		}
-
-		div.stats table {
-			border-spacing: 0px;
-		}
-
-		div.stats td.title {
-			font-size: 10pt;
-			font-weight: 100;
-		}
-
-		div.stats td.title {
-			font-size: 10pt;
-			font-weight: 600;
-		}
-
-		div.stats td.current {
-			font-size: 18pt;
-			font-weight: 100;
-			padding-left: 12px;
-			padding-right: 12px;
-			min-width: 124px;
-		}
-
-		div.stats div.substat {
-			display: inline-block;
-			font-size: 8pt;
-		}
-	</style>
-
-	<script language="javascript" type="text/javascript" src="libraries/d3.min.js"></script>
-	<script language="javascript" type="text/javascript" src="libraries/p5.min.js"></script>
-    <script language="javascript" type="text/javascript" src="sketch_220824a.js"></script>
-    <script language="javascript" type="text/javascript">
-    	LOGO_S1=200;
-    	LOGO_S0=60;
-    	LOGO_CONTAINER_ID='logo';
-        LOGO_A_MODE=0;
+        })
     </script>
-
-	<script language="javascript" type="text/javascript">
-		let lastKnownScrollPosition = 0;
-		let ticking = false;
-
-		function resizeLogo(scrollPos) {
-		  let h = document.getElementById('header');
-		  let c = document.getElementById('logo-canvas');
-		  if (c) {
-		  	let height0 = LOGO_S0;
-		  	let height1 = LOGO_S1;
-		  	let u = Math.min(scrollPos / (height1 - height0), 1.0);
-		  	let height = Math.round(height0 * u + height1 * (1 - u));
-		  	c.style.height = height + 'px';
-		  	c.style.width = LOGO_S1 + 'px';
-		  	logop5.resizeCanvas(LOGO_S1, height);
-
-		  	let a = Math.round(10 * 0.5 * u) / 10.0;
-		  	if (a <= 0) {
-		  		h.style['box-shadow'] = 'none'
-		  	} else {
-		  		h.style['box-shadow'] = '0px 5px 10px 0px rgba(0, 0, 0, ' + a + ')';
-		  	}
-		  }
-		}
-
-		function updateScroll() {
-		  lastKnownScrollPosition = window.scrollY;
-
-		  if (!ticking) {
-		    window.requestAnimationFrame(() => {
-		      resizeLogo(lastKnownScrollPosition);
-		      ticking = false;
-		    });
-
-		    ticking = true;
-		  }
-		}
-
-		window.addEventListener('scroll', (e) => {
-		  updateScroll();
-		});
-
-		window.addEventListener('load', (e) => {
-		  updateScroll();
-		});
-
-		function sparkPlot(containerId) {
-			const WIDTH      = 160;
-			const HEIGHT     = 30;
-			const DATA_COUNT = 40;
-			const BAR_WIDTH  = (WIDTH - DATA_COUNT) / DATA_COUNT;
-			const data = d3.range(DATA_COUNT).map( d => 0.3 + 0.7 * Math.random() );
-			data.sort();
-			data.reverse();
-			const x    = d3.scaleLinear().domain([0, DATA_COUNT]).range([0, WIDTH]);
-			const y    = d3.scaleLinear().domain([0, 1]).range([HEIGHT, 0]);
-			const svg = d3.select('#' + containerId).append('svg')
-			  .attr('width', WIDTH)
-			  .attr('height', HEIGHT)
-			  .append('g');
-			svg.selectAll('.bar').data(data)
-			  .enter()
-			  .append('rect')
-			    .attr('class', 'bar')
-			    .attr('x', (d, i) => x(i))
-			    .attr('y', d => HEIGHT - y(d))
-			    .attr('width', BAR_WIDTH)
-			    .attr('height', d => y(d))
-			    .attr('fill', 'rgb(220, 220, 220)');
-		}
-	</script>
 </head>
 <body>
-<div id="header">
-	<table>
-		<tr>
-			<td id="logo"></td>
-			<td class="expand"><div class="tab-container"><div class="tab tab-selected">World Wide Access</div><a href="extra-room.html"><div class="tab">Extra Room</div></a><a href="network.html"><div class="tab">Network</div></a><a href="developers.html"><div class="tab">For Developers</div></a><a href="community.html"><div class="tab">Community</div></a></div></td>
-			<td class="start"><button type="button" id="start" class="btn btn-primary">Get Connected</div></td>
-		</tr>
-	</table>
-</div>
-<div id="header-place"></div>
-<div class="runner">
-	<div class="leader">
-		<div class="main-message">Bring your internet anywhere.</div>
-		<table>
-			<tr>
-				<td class="text">A decentralized VPN built with modern web standards and crypto integration.</td>
-				<td class="graphic"><img src="res/images/pack.jpg" class="leader-right"/></td>
-			</tr>
-		</table>
-		<table>
-			<tr>
-				<td class="graphic"><img src="res/images/share-private.jpg" class="leader-left"/></td>
-				<td class="text">Share your internet with yourself, friends, and family.</td>
-			</tr>
-		</table>
-		<table>
-			<tr>
-				<td class="graphic"><img src="res/images/share-public.jpg" class="leader-left"/></td>
-				<td class="text">Share your internet with the world.</td>
-			</tr>
-		</table>
-	</div>
+    <div class="modal fade" id="dialog-connect" tabindex="-1" aria-labelledby="dialog-connect" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="dialog" id="dialog-mount">
+                        <script>                   
+                             (() => {
+                                let mount = createConnectMount('dialog-mount')
+                                // exported for connect
+                                window.connectMount = mount
+                                // exported for connect
+                                window.showConnectDialog = () => {
+                                    $('#dialog-connect').modal('show')
+                                }
+                                mount.router()
 
-	<div>
-		<div class="header">Pricing</div>
-		<div>BringYour is committed to bring private networks to everyone with competitive, pay-per-usage pricing and a significant free mode. We believe pay-per-usage is more transparent and affordable than pay-per-user or bundle pricing. </div>
-		<table class="pricing-table">
-			<tr>
-				<td class="item">Connect users and devices</td>
-				<td class="amount"><span class="free">Unlimited, Free</span></td>
-			</tr>
-			<tr>
-				<td class="item">Share your internet with yourself from anywhere</td>
-				<td class="amount"><span class="free">Unlimited, Free</span></td>
-			</tr>
-			<tr>
-				<td class="item">Share your internet with friends and family from anywhere</td>
-				<td class="amount"><span class="free">Unlimited, Free</span></td>
-			</tr>
-			<tr>
-				<td class="item">Use someone else's internet somewhere else in the world</td>
-				<td class="amount"><div>$0.02/GB of transfer up or down</div><div><a href="">Cost calculator</a></div></td>
-			</tr>
-			<tr>
-				<td class="item">Share your internet with someone else</td>
-				<td class="amount"><div>Credit $0.01/GB of transfer up or down</div><div><a href="">Payout details</a></div><div><a href="">Earnings calculator</a></div></td>
-			</tr>
-			<tr>
-				<td class="item">Host a network extender</td>
-				<td class="amount"><div>Credit $0.005/GB of transfer up or down for assisted traffic</div><div><a href="">Payout details</a></div><div><a href="">Earnings calculator</a></div></td></td>
-			</tr>
-		</table>
-		<div><a href="">Learn about how we protect your security as a provider</a></div>
-	</div>
-	<div class="use-cases">
-		<img src="res/images/use-cases.jpg"/>
-	</div>
-	<div>
-		<div class="header">Matchmaking</div>
-		<div>Find providers with as much detail as you want. Star your favorite providers, or let the best option be automatically chosen. Use one hop or multiple hops to add extra layers of peer security.</div>
-	</div>
-	<div>
-		<div class="header">Leases and validation</div>
-		<div>Providers are transparently validated by stability and performance. The best providers are chosen automatically. Incentivize providers with transparent long term leases to set up virtual second homes.</div>
-	</div>
-	<div>
-		<div class="header">Bring it into your living room</div>
-		<div>Provide directly from your iOS, Android, or desktop. Seamlessly peer your media devices.</div>
-	</div>
-	<div>
-		<div class="header">Open core and auditable</div>
-		<div>An <a href="">open source network client</a> that makes peer-to-peer, end-to-end encrypted connections with other clients. An <a href="">open API</a> to coordinate the clients. We're following a business plan and technology outlined in <a href="">our whitepaper</a>.</div>
-	</div>
-	<div class="stats">
-		<div class="header">Statistics</div>
-		<div>Generated from the <a href="">statistics API</a>.</div>
-		<div class="stats-container">
-			<div class="stat"><table><tr><td colspan="2" class="title">Daily Free Transfer (TB)</td></tr><tr><td id="free-transfer" class="plot"><script>sparkPlot('free-transfer')</script></td><td class="current">40TB <div class="substat"><div>3.7gbps</div><div>average</div></div></span></td></tr></td></tr></table></div>
-			<div class="stat"><table><tr><td colspan="2" class="title">Daily Paid Transfer (TB)</td></tr><tr><td id="paid-transfer" class="plot"><script>sparkPlot('paid-transfer')</script></td><td class="current">100TB <div class="substat"><div>9.3gbps</div><div>average</div></div></span></td></tr></table></div>
-			<div class="stat"><table><tr><td colspan="2" class="title">Daily Extender Transfer (TB)</td></tr><tr><td id="extender-transfer" class="plot"><script>sparkPlot('extender-transfer')</script></td><td class="current">80TB <div class="substat"><div>7.4gbps</div><div>average</div></div></span></td></tr></td></tr></table></div>
-			<div class="stat"><table><tr><td colspan="2" class="title">Daily Validated Providers</td></tr><tr><td id="validated-providers" class="plot"><script>sparkPlot('validated-providers')</script></td><td class="current">10</td></tr></table></div>
-			<div class="stat"><table><tr><td colspan="2" class="title">Daily Providers</td></tr><tr><td id="providers" class="plot"><script>sparkPlot('providers')</script></td><td class="current">38</td></tr></table></div>
-			<div class="stat"><table><tr><td colspan="2" class="title">Daily Countries</td></tr><tr><td id="countries" class="plot"><script>sparkPlot('countries')</script></td><td class="current">15</td></tr></table></div>
-			<div class="stat"><table><tr><td colspan="2" class="title">Daily Cities</td></tr><tr><td id="cities" class="plot"><script>sparkPlot('cities')</script></td><td class="current">15</td></tr></table></div>
-			<div class="stat"><table><tr><td colspan="2" class="title">Daily Networks</td></tr><tr><td id="networks" class="plot"><script>sparkPlot('networks')</script></td><td class="current">230</td></tr></table></div>
-			<div class="stat"><table><tr><td colspan="2" class="title">Daily Uptime</td></tr><tr><td id="uptime" class="plot"><script>sparkPlot('uptime')</script></td><td class="current">100%</td></tr></table></div>
-		</div>
-		<div><a href="explore">Explore more statistics</a></div>
-	</div>
-</div>
-<div id="footer">
-	<div class="link-container">
-		<table>
-			<tr>
-				<td>
-					<div class="link"><a href="">White Paper</a></div>
-					<div class="link"><a href="">About</a></div>
-					<div class="link"><a href="">GitHub</a></div>
-					<div class="link"><a href="">DockerHub</a></div>
-					<div class="social-container"><div><img src="res/images/s-discord.png"/></div><div><img src="res/images/s-twitter.png"/></div><div><img src="res/images/s-youtube.png"/></div><div><img src="res/images/s-linkedin.png"/></div></div>
-				</td>
-				<td>
-					<div class="store"><img src="res/images/store-app.svg"/></div>
-					<div class="store"><img src="res/images/store-play.png"/></div>
-					<div class="store"><img src="res/images/store-ms.svg"/></div>
-					<div class="link"><a href="">More Downloads</a></div>
-					
-				</td>
-				<td>
-					<div class="link"><a href="">Contact Us</a></div>
-					<div class="link"><a href="">Terms of Use</a></div>
-					<div class="link"><a href="">Privacy Policy</a></div>
-					<div class="g2"><img src="res/images/reviews-g2.png"/></div>
-				</td>
-			</tr>
-		</table>
-		<div class="copyline">Copyright 2022 BringYour, LLC</div>
-	</div>
-</div>
+                                let byJwtData = parseByJwt()
+                                let resetCode = new URLSearchParams(window.location.search).get('resetCode')
+                                if (resetCode) {
+                                    mount.render(new DialogPasswordResetComplete(resetCode))
+                                }
+                                else if (byJwtData) {
+                                    let networkName = byJwtData['networkName']
+                                    mount.render(new DialogComplete(networkName))
+                                }
+                                else {
+                                    mount.render(new DialogInitial(true))
+                                }
+                            })()
+                        </script>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="header">
+        <table>
+            <tbody>
+                <tr>
+                    <td id="logo"><img id="logo-placeholder" src="res/images/logo-placeholder.png"></div></td>
+                    <td class="expand"><div class="tab-container"><div class="tab tab-selected">Network</div><a href="pricing"><div class="tab">Pricing</div></a><a href="faq"><div class="tab">FAQ</div></a><a href="participate"><div class="tab">Participate</div></a><a href="about"><div class="tab">About</div></a></div></td>
+                    <td class="start"><button type="button" id="start" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#dialog-connect">Get Connected</button></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <div id="header-place"></div>
+
+    <div class="runner">
+        <div class="leader">
+            <div class="top-message">Instant VPN</div>
+                <table>
+                    <tbody>
+                        <tr>
+                            <td class="text"><span class="feature-point">Private, anonymous, global internet access.</span> Tap into the world with peer plus multi-hop routing.</td>
+                            <td class="graphic"><img src="res/images/pack-2.png" class="leader-right" alt="private, anonymous, global internet access"></td>
+                        </tr>
+                    </tbody>
+                </table>
+                <table>
+                    <tbody>
+                        <tr>
+                            <td class="graphic"><img src="res/images/share-private-2.png" class="leader-left" alt="collaborate"></td>
+                            <td class="text"><span class="feature-point">Collaborate.</span> Connect between your devices, physical addresses, friends and family.</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <table>
+                    <tbody>
+                        <tr>
+                            <td class="graphic"><img src="res/images/share-public-2.png" class="leader-left" alt="own your data"></td>
+                            <td class="text"><span class="feature-point">Own your data.</span> See where your data goes and control your digital footprint.</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="main-message"><label><input type="checkbox" value="" data-bs-toggle="modal" data-bs-target="#dialog-connect">I want to free my network and data <span class="now">now!</span></label></div>
+            </div>
+
+            <div class="stats">
+                <div class="header">Statistics</div>
+                <div id="stats-tooltip" class="d-none"></div>
+                <div id="stats-mount">
+                  <script>                   
+                     (() => {
+                        let mount = createStatsMount('stats-mount')
+                        mount.router()
+                        mount.render(new StatsPanel(true))
+                    })()
+                </script>
+            </div>
+        </div>
+
+        <div>
+            <div class="header">Fast</div>
+            <div>Designed to minimize latency using peer-to-peer connections and global edges. A novel latency map technique allows linear path multi-hop routing for data anonymity that is nearly identical in performance to single-hop.</div>
+        </div>
+
+        <div>
+            <div class="header">Collaborate</div>
+            <div>Your network is your own globally unique IPv6 subnet with an unlimited number of devices. Connecting to other networks and services is as easy as sharing a link.</div>
+        </div>
+
+        <div>
+            <div class="header">See the invisble</div>
+            <div>Asking questions about your network, data privacy and digital footprint is hard until you can see it. All your data is brought to the foreground, with a control panel to turn off aspects you don't like.</div>
+        </div>
+
+        <div>
+            <div class="header">Web standards</div>
+            <div>Built using the protocols that power the web. End-to-end encryption always. We believe in a developer vision where VPN can be embedded everywhere.</div>
+        </div>
+
+        <div>
+            <div class="header">Open core</div>
+            <div>An <a href="https://github.com/bringyour" target="_blank">open source Go library</a> that implements the core functionality. An <a href="https://github.com/bringyour" target="_blank">open API</a> to coordinate the clients. We're following a business plan and technology outlined in <a href="https://github.com/bringyour/product/whitepaper.md" target="_blank">our whitepaper</a>.</div>
+        </div>
+
+        <div>
+            <div class="header">Built for you</div>
+            <div>We believe in private networks for everyone. What do you want from your network? We want to hear from you. Please submit product feedback on our <a href="https://github.com/bringyour/product/discussions" target="_blank">feedback page</a>. Join us in our <a href="https://discord.gg/RUNZXMwPRK" target="_blank">Discord community</a>.</div>
+        </div>
+
+        <div>
+            <div class="header">No leaks</div>
+            <div>Our <a href="">terms of service</a> and <a href="">privacy policy</a> are easy to understand. We don't keep logs and we don't sell your data.</div>
+        </div>
+
+        <div class="use-cases">
+            <img src="res/images/use-cases-2.png" alt="use cases">
+        </div>
+
+        <div>
+            <div class="header"><img src="res/images/lagdev.svg" alt="lag.dev global latency test">Test your latency</div>
+            <div>Visit <a href="https://lag.dev" target="_blank">lag.dev</a> to test your latency against the global latency map.</div>
+        </div>
+    </div>
+
+    <div id="footer">
+        <div class="link-container">
+            <table>
+                <tbody>
+                    <tr>
+                        <td>
+                            <div class="link"><a href="https://github.com/bringyour/product/whitepaper.md" target="_blank">Whitepaper</a></div>
+                            <div class="link"><a href="https://status.bringyour.com" target="_blank">Status</a></div>
+                            <div class="link"><a href="https://github.com/bringyour" target="_blank"><img src="res/images/s2-github.svg" class="social" alt="github"> GitHub</a></div>
+                            <div class="link"><a href="https://discord.gg/RUNZXMwPRK" target="_blank"><img src="res/images/s2-discord.svg" class="social" alt="discord"> Discord Community</a></div>
+                            <div class="social-container"><div><a href="https://www.reddit.com/r/bringyour" target="_blank"><img src="res/images/s2-reddit.svg" class="social" alt="reddit"></a></div><div><a href="https://www.youtube.com/@bringyour" target="_blank"><img src="res/images/s2-youtube.svg" class="social" alt="youtube"></a></div><div><a href="https://www.linkedin.com/company/bringyour" target="_blank"><img src="res/images/s2-linkedin.svg" class="social" alt="linkedin"></a></div></div>
+                        </td>
+                        <td>
+                            <div class="store"><a href="https://play.google.com/store/apps/details?id=com.bringyour.network" target="_blank"><img src="res/images/store-play.png" alt="get the app on the Google Play store"></a></div>
+                            <div class="store"><a href="https://apps.apple.com/us/app/bringyour/id6446097114" target="_blank"><img src="res/images/store-app.svg" alt="get the app on the Apple App Store"></a></div>
+                            <div class="link"><a href="https://github.com/bringyour/product/roadmap.md" target="_blank">Platform Roadmap</a></div>
+                            <div class="link"><a href="https://github.com/bringyour/product/discussions" target="_blank">Product Feedback</a></div>
+                        </td>
+                        <td>
+                            <div class="link"><a href="terms">Terms of Service</a></div>
+                            <div class="link"><a href="privacy">Privacy Policy</a></div>
+                            <div class="link"><a href="vdp">Vulnerability Disclosure Policy</a></div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <div class="copyline">Copyright 2023 BringYour, LLC<br>A California, USA company</div>
+        </div>
+    </div>
 
 </body>
 </html>

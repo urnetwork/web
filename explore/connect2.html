@@ -1,0 +1,133 @@
+<html>
+<head>
+     <script type="text/javascript" src="https://accounts.google.com/gsi/client"></script>
+     <script type="text/javascript" src="https://appleid.cdn-apple.com/appleauth/static/jsapi/appleid/1/en_US/appleid.auth.js"></script>
+
+     <link rel="preconnect" href="https://fonts.googleapis.com">
+     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@100;200;300;400;500;600;700;800&display=swap" rel="stylesheet">
+     <link href="../bringyour.com/res/css/bootstrap.min.css" rel="stylesheet">
+
+     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,400,0,0" />
+
+     <link href="../bringyour.com/res/css/connect.css" rel="stylesheet">
+     <script language="javascript" type="text/javascript" src="../bringyour.com/connect.js"></script>
+
+     <style>
+          div.dialog {
+               display: inline-block;
+               border: 1px solid rgb(0, 0, 0);
+               width: 600px;
+               min-height: 400;
+               padding: 12px;
+               margin: 24px;
+          }
+     </style>
+
+</head>
+<body>
+     <h2>Initial</h2>
+     <div class="dialog" id="dialog-initial">
+          <script type="text/javascript">
+               (() => {
+                    let mount = createMount('dialog-initial')
+                    mount.render(new DialogInitial(true))
+                    mount.router()
+               })()
+          </script>
+     </div>
+
+     <h2>Initial, Password</h2>
+     <div class="dialog" id="dialog-login-password">
+          <script type="text/javascript">
+               (() => {
+                    let mount = createMount('dialog-login-password')
+                    mount.render(new DialogLoginPassword('+1 510-340-8248'))
+                    mount.router()
+               })()
+          </script>
+     </div>
+
+     <h2>Forgot password</h2>
+     <div class="dialog" id="dialog-password-reset">
+          <script type="text/javascript">
+               (() => {
+                    let mount = createMount('dialog-password-reset')
+                    mount.render(new DialogPasswordReset('+1 510-340-8248'))
+                    mount.router()
+               })()
+          </script>
+     </div>
+
+     <h2>Forgot password, after send</h2>
+     <div class="dialog" id="dialog-password-reset-after-send">
+          <script type="text/javascript">
+               (() => {
+                    let mount = createMount('dialog-password-reset-after-send')
+                    mount.render(new DialogPasswordResetAfterSend('+1 510-340-8248'))
+                    mount.router()
+               })()
+          </script>
+     </div>
+
+     <h2>Forgot password, reset link landing</h2>
+     <div class="dialog" id="dialog-password-reset-complete">
+          <script type="text/javascript">
+               (() => {
+                    let mount = createMount('dialog-password-reset-complete')
+                    mount.render(new DialogPasswordResetComplete('aresetcode'))
+                    mount.router()
+               })()
+          </script>
+
+     </div>
+
+     <h2>Continue with Google or Apple, No Network</h2>
+     <div class="dialog" id="dialog-create-network-auth-jwt">
+          <script type="text/javascript">
+               (() => {
+                    let mount = createMount('dialog-create-network-auth-jwt')
+                    mount.render(new DialogCreateNetworkAuthJwt('authjwt'))
+                    mount.router()
+               })()
+          </script>
+
+     </div>
+
+     <h2>Create network</h2>
+     <div class="dialog" id="dialog-create-network">
+          <script type="text/javascript">
+               (() => {
+                    let mount = createMount('dialog-create-network')
+                    mount.render(new DialogCreateNetwork('+1 510-340-8248'))
+                    mount.router()
+               })()
+
+          </script>
+     </div>
+
+     <h2>Continue with Email or SMS, No Network, Validate</h2>
+     <div class="dialog" id="dialog-create-network-validate">
+          <script type="text/javascript">
+               (() => {
+                    let mount = createMount('dialog-create-network-validate')
+                    mount.render(new DialogCreateNetworkValidate('+1 510-340-8248'))
+                    mount.router()
+               })()
+
+          </script>
+     </div>
+
+     <h2>Complete</h2>
+     <div class="dialog" id="dialog-complete">
+          <script type="text/javascript">
+               (() => {
+                    let mount = createMount('dialog-complete')
+                    mount.render(new DialogComplete('brien'))
+                    mount.router()
+               })()
+          </script>
+     </div>
+
+</body>
+</html>

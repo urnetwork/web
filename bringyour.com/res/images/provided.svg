@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="600px" height="200px" viewBox="0 0 600 200" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>Provided</title>
+    <g id="Provided" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <rect id="Rectangle" fill="#4148CD" x="50" y="105" width="250" height="35"></rect>
+        <rect id="Rectangle" fill="#B77B58" x="300" y="105" width="250" height="35"></rect>
+        <line x1="50.5" y1="72.5" x2="550.5" y2="72.5" id="Line" stroke="#979797" stroke-linecap="square"></line>
+        <line x1="50.5" y1="72.5" x2="50.5" y2="82.5" id="Line-2" stroke="#979797" stroke-linecap="square"></line>
+        <line x1="550.5" y1="72.5" x2="550.5" y2="82.5" id="Line-2" stroke="#979797" stroke-linecap="square"></line>
+        <text id="net-income-per-GiB" font-family="NotoSans-ExtraLight, Noto Sans" font-size="24" font-weight="300" letter-spacing="1" fill="#000000">
+            <tspan x="188" y="57">net income per GiB</tspan>
+        </text>
+        <text id="BringYour" font-family="NotoSans-ExtraLight, Noto Sans" font-size="18" font-weight="300" letter-spacing="0.75" fill="#000000">
+            <tspan x="132" y="164">BringYour</tspan>
+        </text>
+        <text id="provider" font-family="NotoSans-ExtraLight, Noto Sans" font-size="18" font-weight="300" letter-spacing="0.75" fill="#000000">
+            <tspan x="389" y="164">provider</tspan>
+        </text>
+        <text id="50%" font-family="NotoSans-Medium, Noto Sans" font-size="18" font-weight="400" letter-spacing="0.75" fill="#FFFFFF">
+            <tspan x="156" y="130">50%</tspan>
+        </text>
+        <text id="50%" font-family="NotoSans-Medium, Noto Sans" font-size="18" font-weight="400" letter-spacing="0.75" fill="#FFFFFF">
+            <tspan x="406" y="130">50%</tspan>
+        </text>
+    </g>
+</svg>
