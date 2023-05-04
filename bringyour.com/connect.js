@@ -145,25 +145,32 @@ function DialogInitial(firstLoad) {
             } else if ('authAllowed' in responseBody) {
                 // and existing network but different login
                 let authAllowed = responseBody['authAllowed']
-                let message
-                if (authAllowed.includes('apple') && authAllowed.includes('google')) {
-                    message = 'Please continue with Apple or Google'
-                } else if (authAllowed.includes('apple')) {
-                    message = 'Please continue with Apple'
-                } else if (authAllowed.includes('google')) {
-                    message = 'Please continue with Google'
-                } else if (authAllowed.includes('password')) {
-                    message = 'Please continue with email or phone number'
-                } else {
-                    message = 'Something went wrong. Please try again later.'
-                }
-                let errorElement = self.element('login-error')
-                errorElement.textContent = message
-                errorElement.classList.remove('d-none')
 
-                loginUserAuthElement.disabled = false
-                loginButtonElement.disabled = false
-                loginSpinnerElement.classList.add('d-none')
+                let userAuth = responseBody['userAuth']
+                if (authAllowed.includes('password') && userAuth) {
+                    // just take to password login instead of showing the "please continue with email ..." message
+                    self.mount.render(new DialogLoginPassword(userAuth))
+                } else {
+                    let message
+                    if (authAllowed.includes('apple') && authAllowed.includes('google')) {
+                        message = 'Please continue with Apple or Google'
+                    } else if (authAllowed.includes('apple')) {
+                        message = 'Please continue with Apple'
+                    } else if (authAllowed.includes('google')) {
+                        message = 'Please continue with Google'
+                    } else if (authAllowed.includes('password')) {
+                        message = 'Please continue with email or phone number'
+                    } else {
+                        message = 'Something went wrong. Please try again later.'
+                    }
+                    let errorElement = self.element('login-error')
+                    errorElement.textContent = message
+                    errorElement.classList.remove('d-none')
+
+                    loginUserAuthElement.disabled = false
+                    loginButtonElement.disabled = false
+                    loginSpinnerElement.classList.add('d-none')
+                }
             } else {
                 // a new network
                 // let authJwtType = responseBody['authJwtType']
@@ -1749,7 +1756,7 @@ function renderCreateNetworkAuthJwt(container, id, authJwtType, authJwt, userNam
                          <div><div class="input-group"><input id="${id('create-network-name')}" type="text" placeholder="yournetworkname" class="form-control network-name" aria-describedby="${id('network-addon')}"/><span class="input-group-text" id="${id('network-addon')}">.bringyour.network<span id="${id('create-network-name-spinner')}" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span></span></div></div>
                          <div id="${id('create-network-name-error')}" class="text-secondary d-none"></div>
                          <div id="${id('create-network-name-available')}" class="text-success d-none">Available!</div>
-                         <div class="no-title"><label class="form-check-label"><input id="${id('create-agree-terms')}" type="checkbox" class="form-check-input" value="">I agree to the <a href="/terms" target="_blank">BringYour terms</a>. Learn about how we use and protect your data in our <a href="/privacy">Privacy Policy</a></label></div>
+                         <div class="no-title"><label class="form-check-label"><input id="${id('create-agree-terms')}" type="checkbox" class="form-check-input" value="">I agree to the <a href="/terms" target="_blank">BringYour terms</a>. Learn about how we use and protect your data in our <a href="/privacy" target="_blank">Privacy Policy</a></label></div>
                          <div id="${id('create-error')}" class="text-danger d-none"></div>
                          <div class="no-title"><button id="${id('create-button')}" class="btn btn-primary" type="button"><span id="${id('create-spinner')}" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span><span class="primary">Create Network</span></button></div>
                     </form>
@@ -1783,7 +1790,7 @@ function renderCreateNetwork(container, id, userAuth) {
                          <div><div class="input-group"><input id="${id('create-network-name')}" type="text" placeholder="yournetworkname" class="form-control network-name" aria-describedby="${id('network-addon')}"/><span class="input-group-text" id="${id('network-addon')}">.bringyour.network<span id="${id('create-network-name-spinner')}" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span></span></div></div>
                          <div id="${id('create-network-name-error')}" class="text-secondary d-none"></div>
                          <div id="${id('create-network-name-available')}" class="text-success d-none">Available!</div>
-                         <div class="no-title"><label class="form-check-label"><input id="${id('create-agree-terms')}" type="checkbox" class="form-check-input" value="">I agree to the <a href="/terms" target="_blank">BringYour terms</a>. Learn about how we use and protect your data in our <a href="/privacy">Privacy Policy</a></label></div>
+                         <div class="no-title"><label class="form-check-label"><input id="${id('create-agree-terms')}" type="checkbox" class="form-check-input" value="">I agree to the <a href="/terms" target="_blank">BringYour terms</a>. Learn about how we use and protect your data in our <a href="/privacy" target="_blank">Privacy Policy</a></label></div>
                          <div id="${id('create-error')}" class="text-danger d-none"></div>
                          <div class="no-title"><button id="${id('create-button')}" class="btn btn-primary" type="button"><span id="${id('create-spinner')}" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span><span class="primary">Create Network</span></button></div>
                     </form>
