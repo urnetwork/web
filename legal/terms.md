@@ -266,9 +266,9 @@ Customer and Provider enter into an agreement, (the "Agreement") as follows:
 
         with Copy to:
         
-        Egan Nelson, LLP
-        221 West Sixth Street, Suite 900
-        Austin, Texas 78701
+        Bring Your, LLC
+        2261 Market Street #5245
+        San Francisco, CA 94114
 
     b.  A party may change the address or phone numbers set out above for
         purposes of notice under this contract by giving written notice to
