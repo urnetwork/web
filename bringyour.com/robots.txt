@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://bringyour.com/sitemap.xml
+Sitemap: https://bringyour.com/sitemap.txt

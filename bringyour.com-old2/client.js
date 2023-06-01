@@ -1,6 +1,7 @@
 // parse current location to find the api
 
-const clientVersion = '1.0.0';
+const clientVersion = '';
+
 
 
 function getByJwt() {
@@ -101,12 +102,8 @@ function serviceUrl(service, path) {
 
 
 function apiRequest(method, path, body) {
-    let headers = new Headers()
-    headers.append('X-Client-Version', clientVersion)
-
     let requestOptions = {
-        method: method,
-        headers: headers
+        method: method
     }
     if (body) {
         requestOptions.body = JSON.stringify(body)

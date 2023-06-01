@@ -4,7 +4,6 @@ const appleClientId = 'com.bringyour.service'
 const authJwtRedirect = 'https://bringyour.com/connect'
 
 
-
 // see https://developers.google.com/identity/gsi/web/guides/handle-credential-responses-js-functions
 function handleGoogleCredentialResponse(response) {
     // console.log(response)
