@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="32px" height="32px" viewBox="0 0 32 32" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>Favicon</title>
+    <g id="Favicon" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Android-1024-Square">
+            <rect id="Rectangle" fill="#FFFFFF" fill-rule="nonzero" x="0" y="0" width="32" height="32" rx="16"></rect>
+            <circle id="Oval" stroke="#FF8027" cx="16.000227" cy="11.4640182" r="4.94063137"></circle>
+            <circle id="Oval" stroke="#20B24C" cx="16.000227" cy="21.4170409" r="4.94063137"></circle>
+            <circle id="Oval" stroke="#4148CD" transform="translate(20.754651, 16.662554) rotate(90.000000) translate(-20.754651, -16.662554) " cx="20.754651" cy="16.6625544" r="4.94063137"></circle>
+            <circle id="Oval" stroke="#B77B58" transform="translate(10.801472, 16.662523) rotate(90.000000) translate(-10.801472, -16.662523) " cx="10.8014722" cy="16.6625232" r="4.94063137"></circle>
+        </g>
+    </g>
+</svg>

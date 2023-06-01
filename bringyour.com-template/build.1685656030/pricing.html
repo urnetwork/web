@@ -1,0 +1,199 @@
+<html lang="en">
+<head>
+    
+	<title>BringYour VPN Everywhere</title>
+	<link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link rel="icon" type="image/png" size="32x32" href="favicon-32.png">
+    <link rel="icon" type="image/png" size="128x128" href="favicon-128.png">
+    <link rel="icon" type="image/png" size="180x180" href="favicon-180.png">
+    <link rel="icon" type="image/png" size="192x192" href="favicon.png">
+    <link rel="apple-touch-icon" size="192x192" href="apple-touch-icon.png">
+
+    <meta name="description" content="Instant worldwide VPN everywhere. Let's build the best privacy, security, and personal data control network with just our phones and tablets."/>
+	
+
+    
+	<link rel="stylesheet" href="res/fonts/material-symbols-outlined.css">
+	<link rel="stylesheet" href="res/fonts/noto-sans.css">
+	<link rel="stylesheet" href="res/fonts/arkitech.css">
+	<link rel="stylesheet" href="res/fonts/pacifico.css">
+	
+
+    
+	<link rel="stylesheet" href="res/css/bootstrap.min.css">
+    <link rel="stylesheet" href="res/css/main.css">
+    <link rel="stylesheet" href="res/css/stats.css">
+    <link rel="stylesheet" href="res/css/connect.css">
+
+    <script src="lib/d3.min.js"></script>
+    <script src="lib/p5.min.js"></script>
+    <script src="lib/jquery.min.js"></script>
+    <script src="lib/popper.min.js"></script>
+    <script src="lib/bootstrap.min.js"></script>
+
+    <script src="lib/apple-auth.min.js"></script>
+	<script src="lib/google-auth.min.js"></script>
+
+    <script src="sketch_220824a.js"></script>
+    <script src="logo.js"></script>
+    <script src="client.js"></script>
+    <script src="stats.js"></script>
+    <script src="connect.js"></script>
+    <script src="window.js"></script>
+	
+</head>
+<body>
+    
+	<div class="modal fade" id="dialog-connect" tabindex="-1" aria-labelledby="dialog-connect" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="dialog" id="dialog-mount">
+                        <script>                   
+                             (() => {
+                                let mount = createConnectMount('dialog-mount')
+                                // exported for connect
+                                window.connectMount = mount
+                                // exported for connect
+                                window.showConnectDialog = () => {
+                                    $('#dialog-connect').modal('show')
+                                }
+                                mount.router()
+
+                                let byJwtData = parseByJwt()
+                                let resetCode = new URLSearchParams(window.location.search).get('resetCode')
+                                if (resetCode) {
+                                    mount.render(new DialogPasswordResetComplete(resetCode))
+                                }
+                                else if (byJwtData) {
+                                    let networkName = byJwtData['networkName']
+                                    mount.render(new DialogComplete(networkName))
+                                }
+                                else {
+                                    mount.render(new DialogInitial(false))
+                                }
+                            })()
+                        </script>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+	
+
+    
+	<div id="header">
+        <table>
+            <tbody>
+                <tr>
+                    <td id="logo"><img id="logo-placeholder" src="res/images/logo-placeholder.png"></div></td>
+                    <td class="expand"><div class="tab-container"><a href="index"><div class="tab">Network</div></a><div class="tab tab-selected">Pricing</div><a href="faq"><div class="tab">FAQ</div></a><a href="participate"><div class="tab">Participate</div></a><a href="about"><div class="tab">About</div></a></div></td>
+                    <td class="start"><button type="button" id="start" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#dialog-connect">Get Connected</button></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <div id="header-place"></div>
+	
+
+	<div class="runner">
+		<div>
+			<div class="header">Pricing</div>
+			<div>We are committed to bring private networks to everyone with competitive, pay-per-usage pricing and a significant free mode. We believe pay-per-usage is more transparent, affordable, and scalable than pay-per-user or flat-rate pricing.</div>
+
+			<table class="pricing-table">
+				<tbody>
+					<tr>
+						<td class="item"><div>Connect devices and services to your network</div></td>
+						<td class="amount"><div><span class="free">Unlimited, Free</span></div></td>
+					</tr>
+					<tr>
+						<td class="item"><div>Share your network with friends and family</div></td>
+						<td class="amount"><div><span class="free">Unlimited, Free</span></div></td>
+					</tr>
+					<tr>
+						<td class="item"><div>Connect to a provided network</div></td>
+						<td class="amount"><div>$0.01/GiB of transfer up or down per month</div><div>Example data usage costs</div><div>100GiB &#8594; $1</div><div>250GiB &#8594; $2.50</div><div>1TiB &#8594; $10</div><div>2TiB &#8594; $20</div></td>
+					</tr>
+					<tr>
+						<td class="item"><div>Provide your network</div></td>
+						<td class="amount"><div>Earn 50% of net income of transfer up or down</div></td>
+					</tr>
+					<tr>
+						<td class="item"><div>Host a network extender</div></td>
+						<td class="amount"><div>Earn 25% of net income of transfer up or down for assisted traffic</div></td>
+					</tr>
+				</tbody>
+			</table>
+
+			<div><br>Plans are currently purchased through the Google Play Store as a monthly subscription. Prices are converted from USD to local currencies. As we <a href="https://github.com/bringyour/product/roadmap.md">add more platforms</a> we will continue to work with the app stores to offer plans as monthly subscriptions.</div>
+
+			<div><br><a href="participate.html">Learn about how we protect your security as a provider</a></div>
+		</div>
+
+		<div class="income">
+			<div class="header">Income breakdown</div>
+
+			<table class="pricing-table">
+				<tbody>
+					<tr>
+						<td class="item"><div>Provided traffic</div></td>
+						<td class="amount"><img src="res/images/provided.svg" alt="net income goes 50% to the provider"></td>
+					</tr>
+					<tr>
+						<td class="item"><div>Provided traffic with extender</div></td>
+						<td class="amount"><img src="res/images/provided-extended.svg" alt="net income goes 25% to the extender"></td>
+					</tr>
+					<tr>
+						<td class="item"><div>Friends and family traffic with extender.</div><div>This is used when there is quota on the network and an extender is needed.</div></td>
+						<td class="amount"><img src="res/images/ff-extended.svg" alt="when an extender is needed, 25% of the transfer rate is charged and given to the extender"></td>
+					</tr>
+				</tbody>
+			</table>
+
+		</div>
+
+		<div>
+			<div class="header">Payout details</div>
+			<div>Payment of balances is made within 30 days of services rendered. The balance is converted to a digital asset at fair market value and sent to the wallet in the app. The current digital asset supported is XCH. Please see the <a href="">terms of service</a> for additional details.</div>
+		</div>
+
+	</div>
+
+	
+	<div id="footer">
+        <div class="link-container">
+            <table>
+                <tbody>
+                    <tr>
+                        <td>
+                            <div class="link"><a href="whitepaper" target="_blank">Whitepaper</a></div>
+                            <div class="link"><a href="https://status.bringyour.com" target="_blank">Status</a></div>
+                            <div class="link"><a href="https://github.com/bringyour" target="_blank"><img src="res/images/s2-github.svg" class="social" alt="github"> GitHub</a></div>
+                            <div class="link"><a href="discord" target="_blank"><img src="res/images/s2-discord.svg" class="social" alt="discord"> Discord Community</a></div>
+                            <div class="social-container"><div><a href="https://www.reddit.com/r/bringyour" target="_blank"><img src="res/images/s2-reddit.svg" class="social" alt="reddit"></a></div><div><a href="https://www.youtube.com/@bringyour" target="_blank"><img src="res/images/s2-youtube.svg" class="social" alt="youtube"></a></div><div><a href="https://www.linkedin.com/company/bringyour" target="_blank"><img src="res/images/s2-linkedin.svg" class="social" alt="linkedin"></a></div></div>
+                        </td>
+                        <td>
+                            <div class="store"><a href="https://play.google.com/store/apps/details?id=com.bringyour.network" target="_blank"><img src="res/images/store-play.png" alt="get the app on the Google Play store"></a></div>
+                            <div class="store"><a href="https://apps.apple.com/us/app/bringyour/id6446097114" target="_blank"><img src="res/images/store-app.svg" alt="get the app on the Apple App Store"></a></div>
+                            <div class="link"><a href="roadmap" target="_blank">Platform Roadmap</a></div>
+                            <div class="link"><a href="https://github.com/bringyour/product/discussions" target="_blank">Product Feedback</a></div>
+                        </td>
+                        <td>
+                            <div class="link"><a href="terms">Terms of Service</a></div>
+                            <div class="link"><a href="privacy">Privacy Policy</a></div>
+                            <div class="link"><a href="vdp">Vulnerability Disclosure Policy</a></div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <div class="copyline">Copyright 2023 Bring Your, LLC</div>
+        </div>
+    </div>
+	
+
+</body>
+</html>

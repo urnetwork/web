@@ -1,0 +1,226 @@
+<html lang="en">
+<head>
+    
+	<title>BringYour VPN Everywhere</title>
+	<link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link rel="icon" type="image/png" size="32x32" href="favicon-32.png">
+    <link rel="icon" type="image/png" size="128x128" href="favicon-128.png">
+    <link rel="icon" type="image/png" size="180x180" href="favicon-180.png">
+    <link rel="icon" type="image/png" size="192x192" href="favicon.png">
+    <link rel="apple-touch-icon" size="192x192" href="apple-touch-icon.png">
+
+    <meta name="description" content="Instant worldwide VPN everywhere. Let's build the best privacy, security, and personal data control network with just our phones and tablets."/>
+	
+
+    <link rel="canonical" href="https://bringyour.com/" />
+
+    
+	<link rel="stylesheet" href="res/fonts/material-symbols-outlined.css">
+	<link rel="stylesheet" href="res/fonts/noto-sans.css">
+	<link rel="stylesheet" href="res/fonts/arkitech.css">
+	<link rel="stylesheet" href="res/fonts/pacifico.css">
+	
+
+    
+	<link rel="stylesheet" href="res/css/bootstrap.min.css">
+    <link rel="stylesheet" href="res/css/main.css">
+    <link rel="stylesheet" href="res/css/stats.css">
+    <link rel="stylesheet" href="res/css/connect.css">
+
+    <script src="lib/d3.min.js"></script>
+    <script src="lib/p5.min.js"></script>
+    <script src="lib/jquery.min.js"></script>
+    <script src="lib/popper.min.js"></script>
+    <script src="lib/bootstrap.min.js"></script>
+
+    <script src="lib/apple-auth.min.js"></script>
+	<script src="lib/google-auth.min.js"></script>
+
+    <script src="sketch_220824a.js"></script>
+    <script src="logo.js"></script>
+    <script src="client.js"></script>
+    <script src="stats.js"></script>
+    <script src="connect.js"></script>
+    <script src="window.js"></script>
+	
+</head>
+<body>
+    
+	<div class="modal fade" id="dialog-connect" tabindex="-1" aria-labelledby="dialog-connect" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="dialog" id="dialog-mount">
+                        <script>                   
+                             (() => {
+                                let mount = createConnectMount('dialog-mount')
+                                // exported for connect
+                                window.connectMount = mount
+                                // exported for connect
+                                window.showConnectDialog = () => {
+                                    $('#dialog-connect').modal('show')
+                                }
+                                mount.router()
+
+                                let byJwtData = parseByJwt()
+                                let resetCode = new URLSearchParams(window.location.search).get('resetCode')
+                                if (resetCode) {
+                                    mount.render(new DialogPasswordResetComplete(resetCode))
+                                }
+                                else if (byJwtData) {
+                                    let networkName = byJwtData['networkName']
+                                    mount.render(new DialogComplete(networkName))
+                                }
+                                else {
+                                    mount.render(new DialogInitial(true))
+                                }
+                            })()
+                        </script>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+	
+
+    
+	<div id="header">
+        <table>
+            <tbody>
+                <tr>
+                    <td id="logo"><img id="logo-placeholder" src="res/images/logo-placeholder.png"></div></td>
+                    <td class="expand"><div class="tab-container"><div class="tab tab-selected">Network</div><a href="pricing"><div class="tab">Pricing</div></a><a href="faq"><div class="tab">FAQ</div></a><a href="participate"><div class="tab">Participate</div></a><a href="about"><div class="tab">About</div></a></div></td>
+                    <td class="start"><button type="button" id="start" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#dialog-connect">Get Connected</button></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <div id="header-place"></div>
+	
+
+    <div class="runner">
+        <div class="leader">
+            <div class="top-message">VPN Everywhere</div>
+                <table>
+                    <tbody>
+                        <tr>
+                            <td class="text"><span class="feature-point">Private, anonymous, global internet access.</span> Tap into the world with peer plus multi-hop routing.</td>
+                            <td class="graphic"><img src="res/images/pack-2.png" class="leader-right" alt="private, anonymous, global internet access"></td>
+                        </tr>
+                    </tbody>
+                </table>
+                <table>
+                    <tbody>
+                        <tr>
+                            <td class="graphic"><img src="res/images/share-private-2.png" class="leader-left" alt="collaborate"></td>
+                            <td class="text"><span class="feature-point">Collaborate.</span> Connect between your devices, physical addresses, friends and family.</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <table>
+                    <tbody>
+                        <tr>
+                            <td class="graphic"><img src="res/images/share-public-2.png" class="leader-left" alt="own your data"></td>
+                            <td class="text"><span class="feature-point">Own your data.</span> See where your data goes and control your digital footprint.</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="main-message"><label><input type="checkbox" value="" data-bs-toggle="modal" data-bs-target="#dialog-connect">I want to free my network and data <span class="now">now!</span></label></div>
+            </div>
+
+            <div class="stats">
+                <div class="header">Statistics</div>
+                <div id="stats-tooltip" class="d-none"></div>
+                <div id="stats-mount">
+                  <script>                   
+                     (() => {
+                        let mount = createStatsMount('stats-mount')
+                        mount.router()
+                        mount.render(new StatsPanel(true))
+                    })()
+                </script>
+            </div>
+        </div>
+
+        <div>
+            <div class="header">Fast</div>
+            <div>Designed to minimize latency using peer-to-peer connections and global edges. A novel latency map technique allows linear path multi-hop routing for data anonymity that is nearly identical in performance to single-hop.</div>
+        </div>
+
+        <div>
+            <div class="header">Collaborate</div>
+            <div>Your network is your own globally unique IPv6 subnet with an unlimited number of devices. Connecting to other networks and services is as easy as sharing a link.</div>
+        </div>
+
+        <div>
+            <div class="header">See the invisble</div>
+            <div>Asking questions about your network, data privacy and digital footprint is hard until you can see it. All your data is brought to the foreground, with a control panel to turn off aspects you don't like.</div>
+        </div>
+
+        <div>
+            <div class="header">Web standards</div>
+            <div>Built using the protocols that power the web. End-to-end encryption always. We believe in a developer vision where VPN can be embedded everywhere.</div>
+        </div>
+
+        <div>
+            <div class="header">Open core</div>
+            <div>An <a href="https://github.com/bringyour" target="_blank">open source Go library</a> that implements the core functionality. An <a href="https://github.com/bringyour" target="_blank">open API</a> to coordinate the clients. We're following a business plan and technology outlined in <a href="whitepaper" target="_blank">our whitepaper</a>.</div>
+        </div>
+
+        <div>
+            <div class="header">Built for you</div>
+            <div>We believe in private networks for everyone. What do you want from your network? We want to hear from you. Please submit product feedback on our <a href="https://github.com/bringyour/product/discussions" target="_blank">feedback page</a>. Join us in our <a href="discord" target="_blank">Discord community</a>.</div>
+        </div>
+
+        <div>
+            <div class="header">No leaks</div>
+            <div>Our <a href="">terms of service</a> and <a href="">privacy policy</a> are easy to understand. We don't keep logs and we don't sell your data.</div>
+        </div>
+
+        <div class="use-cases">
+            <img src="res/images/use-cases-2.png" alt="use cases">
+        </div>
+
+        <div>
+            <div class="header"><img src="res/images/lagdev.svg" alt="lag.dev global latency test">Test your latency</div>
+            <div>Visit <a href="https://lag.dev" target="_blank">lag.dev</a> to test your latency against the global latency map.</div>
+        </div>
+    </div>
+
+    
+	<div id="footer">
+        <div class="link-container">
+            <table>
+                <tbody>
+                    <tr>
+                        <td>
+                            <div class="link"><a href="whitepaper" target="_blank">Whitepaper</a></div>
+                            <div class="link"><a href="https://status.bringyour.com" target="_blank">Status</a></div>
+                            <div class="link"><a href="https://github.com/bringyour" target="_blank"><img src="res/images/s2-github.svg" class="social" alt="github"> GitHub</a></div>
+                            <div class="link"><a href="discord" target="_blank"><img src="res/images/s2-discord.svg" class="social" alt="discord"> Discord Community</a></div>
+                            <div class="social-container"><div><a href="https://www.reddit.com/r/bringyour" target="_blank"><img src="res/images/s2-reddit.svg" class="social" alt="reddit"></a></div><div><a href="https://www.youtube.com/@bringyour" target="_blank"><img src="res/images/s2-youtube.svg" class="social" alt="youtube"></a></div><div><a href="https://www.linkedin.com/company/bringyour" target="_blank"><img src="res/images/s2-linkedin.svg" class="social" alt="linkedin"></a></div></div>
+                        </td>
+                        <td>
+                            <div class="store"><a href="https://play.google.com/store/apps/details?id=com.bringyour.network" target="_blank"><img src="res/images/store-play.png" alt="get the app on the Google Play store"></a></div>
+                            <div class="store"><a href="https://apps.apple.com/us/app/bringyour/id6446097114" target="_blank"><img src="res/images/store-app.svg" alt="get the app on the Apple App Store"></a></div>
+                            <div class="link"><a href="roadmap" target="_blank">Platform Roadmap</a></div>
+                            <div class="link"><a href="https://github.com/bringyour/product/discussions" target="_blank">Product Feedback</a></div>
+                        </td>
+                        <td>
+                            <div class="link"><a href="terms">Terms of Service</a></div>
+                            <div class="link"><a href="privacy">Privacy Policy</a></div>
+                            <div class="link"><a href="vdp">Vulnerability Disclosure Policy</a></div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <div class="copyline">Copyright 2023 Bring Your, LLC</div>
+        </div>
+    </div>
+	
+
+</body>
+</html>.tmp

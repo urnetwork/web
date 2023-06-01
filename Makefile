@@ -13,3 +13,4 @@
 #  npm i -g html-validate
 # /Users/brien/.nvm/versions/node/v14.18.1/bin/html-validate bringyour.com/index.html
 
+# sudo docker run --name web-beta -p 7441:80 --network warpsbs --add-host warpsbs:172.18.0.1 bringyour/canary-web:2023.01.1

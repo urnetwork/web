@@ -1,0 +1,176 @@
+<html lang="en">
+<head>
+    
+	<title>BringYour VPN Everywhere</title>
+	<link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link rel="icon" type="image/png" size="32x32" href="favicon-32.png">
+    <link rel="icon" type="image/png" size="128x128" href="favicon-128.png">
+    <link rel="icon" type="image/png" size="180x180" href="favicon-180.png">
+    <link rel="icon" type="image/png" size="192x192" href="favicon.png">
+    <link rel="apple-touch-icon" size="192x192" href="apple-touch-icon.png">
+
+    <meta name="description" content="Instant worldwide VPN everywhere. Let's build the best privacy, security, and personal data control network with just our phones and tablets."/>
+	
+
+    
+	<link rel="stylesheet" href="res/fonts/material-symbols-outlined.css">
+	<link rel="stylesheet" href="res/fonts/noto-sans.css">
+	<link rel="stylesheet" href="res/fonts/arkitech.css">
+	<link rel="stylesheet" href="res/fonts/pacifico.css">
+	
+
+    
+	<link rel="stylesheet" href="res/css/bootstrap.min.css">
+    <link rel="stylesheet" href="res/css/main.css">
+    <link rel="stylesheet" href="res/css/stats.css">
+    <link rel="stylesheet" href="res/css/connect.css">
+
+    <script src="lib/d3.min.js"></script>
+    <script src="lib/p5.min.js"></script>
+    <script src="lib/jquery.min.js"></script>
+    <script src="lib/popper.min.js"></script>
+    <script src="lib/bootstrap.min.js"></script>
+
+    <script src="lib/apple-auth.min.js"></script>
+	<script src="lib/google-auth.min.js"></script>
+
+    <script src="sketch_220824a.js"></script>
+    <script src="logo.js"></script>
+    <script src="client.js"></script>
+    <script src="stats.js"></script>
+    <script src="connect.js"></script>
+    <script src="window.js"></script>
+	
+</head>
+<body>
+    
+	<div class="modal fade" id="dialog-connect" tabindex="-1" aria-labelledby="dialog-connect" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="dialog" id="dialog-mount">
+                        <script>                   
+                             (() => {
+                                let mount = createConnectMount('dialog-mount')
+                                // exported for connect
+                                window.connectMount = mount
+                                // exported for connect
+                                window.showConnectDialog = () => {
+                                    $('#dialog-connect').modal('show')
+                                }
+                                mount.router()
+
+                                let byJwtData = parseByJwt()
+                                let resetCode = new URLSearchParams(window.location.search).get('resetCode')
+                                if (resetCode) {
+                                    mount.render(new DialogPasswordResetComplete(resetCode))
+                                }
+                                else if (byJwtData) {
+                                    let networkName = byJwtData['networkName']
+                                    mount.render(new DialogComplete(networkName))
+                                }
+                                else {
+                                    mount.render(new DialogInitial(false))
+                                }
+                            })()
+                        </script>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+	
+
+    
+	<div id="header">
+        <table>
+            <tbody>
+                <tr>
+                    <td id="logo"><img id="logo-placeholder" src="res/images/logo-placeholder.png"></div></td>
+                    <td class="expand"><div class="tab-container"><a href="index"><div class="tab">Network</div></a><a href="pricing"><div class="tab">Pricing</div></a><div class="tab tab-selected">FAQ</div><a href="participate"><div class="tab">Participate</div></a><a href="about"><div class="tab">About</div></a></div></td>
+                    <td class="start"><button type="button" id="start" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#dialog-connect">Get Connected</button></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <div id="header-place"></div>
+	
+
+	<div class="runner">
+
+		<div class="community">
+			<div><a href="https://discord.gg/RUNZXMwPRK" target="_blank"><div class="link"><img src="res/images/s2-discord.svg" class="social" alt="discuss in Discord"> Discuss in our Discord community</div></a></div>
+			<div><a href="https://github.com/bringyour/product/discussions" target="_blank"><div class="link"><img src="res/images/s2-github.svg" class="social" alt="give feedback on Github"> Give Product Feedback on Github</div></a></div>
+		</div>
+
+		<div>
+			<div class="header">How are data encrypted?</div>
+			<div>Data are encrypted end-to-end from sender to receiver using TLS. Connections are attempted peer-to-peer directly from sender to receiver to minimize latency. In the case where peer-to-peer connections are not possible (for firewall or other technical reasons), encrypted data are routed through the nearest extender. In all cases no matter the transport, only the receiver can decrypt the traffic. The platform hosts never decrypt or analyze your network traffic.</div>
+		</div>
+
+		<div>
+			<div class="header">How is my network configuration secured?</div>
+			<div>BringYour uses client encryption for the network configuration. The network configuration is signed by an admin key, which is stored client side and never shared with the platform hosts. Additionally the access keys to the network are signed by the admin key. Every change to the configuration must be signed by an admin device in order to be recognized by the devices and services on your network. This means that if the BringYour platform is ever compromised, rogue devices and services could not join your network.</div>
+		</div>
+
+		<div>
+			<div class="header">How does the platform API work to let me own my data?</div>
+			<div>The API is applied on the sender side, not the receiver. Every device or service that sends data first consults the list of platform API apps in its configuration before sending the data. The sender connects to the platform API apps using the network routing, which if the app is running on the private network will form a peer-to-peer connection to minimize latency. The platform API allows packets to be inspected, filtered, and modified. Because the app is written in a programming language, arbitrarily advanced rules can be applied, including data-driven decisions. Only the meta data of each packet is sent to a platform API app unless the app subscribes to additional data from that source.</div>
+			<div><br>A reference app is provided in <a href="https://github.com/bringyour" target="_blank">Go</a> and <a href="https://github.com/bringyour" target="_blank">Python</a>, but apps can be written in any language.</div>
+		</div>
+
+		<div>
+			<div class="header">What does it mean to be a provider or extender?</div>
+			<div>BringYour allows you to participate in promoting private and anonymous internet access. The purpose of the network is to give private and anonymous internet access to every user. Because only encrypted traffic is allowed in the network, you faciliate the network as a "hop" of encrypted traffic. It is not possible to read or access the content of the traffic because of the encryption. Please see our <a href="">terms of service</a>.</div>
+		</div>
+
+		<div>
+			<div class="header">What do I do with XCH?</div>
+			<div>XCH is a decentralized digital asset. <a href="https://chialinks.com/exchanges/" target="_blank">This page</a> maintains a list of decenralized exchanges (DEX) and centralized exchanges (CEX) that can convert XCH to other digital assets or fiat.</div>
+			<div><br>The app has a decentralized wallet built in, or you can use your own wallet address. BringYour does not custody your assets - your keys your coins.</div>
+		</div>
+
+		<div>
+			<div class="header">Discuss</div>
+			<div>This section is continually updating as common questions surface. Join us in our <a href="https://discord.gg/RUNZXMwPRK">Discord community</a>.</div>
+		</div>
+
+	</div>
+
+	
+	<div id="footer">
+        <div class="link-container">
+            <table>
+                <tbody>
+                    <tr>
+                        <td>
+                            <div class="link"><a href="whitepaper" target="_blank">Whitepaper</a></div>
+                            <div class="link"><a href="https://status.bringyour.com" target="_blank">Status</a></div>
+                            <div class="link"><a href="https://github.com/bringyour" target="_blank"><img src="res/images/s2-github.svg" class="social" alt="github"> GitHub</a></div>
+                            <div class="link"><a href="discord" target="_blank"><img src="res/images/s2-discord.svg" class="social" alt="discord"> Discord Community</a></div>
+                            <div class="social-container"><div><a href="https://www.reddit.com/r/bringyour" target="_blank"><img src="res/images/s2-reddit.svg" class="social" alt="reddit"></a></div><div><a href="https://www.youtube.com/@bringyour" target="_blank"><img src="res/images/s2-youtube.svg" class="social" alt="youtube"></a></div><div><a href="https://www.linkedin.com/company/bringyour" target="_blank"><img src="res/images/s2-linkedin.svg" class="social" alt="linkedin"></a></div></div>
+                        </td>
+                        <td>
+                            <div class="store"><a href="https://play.google.com/store/apps/details?id=com.bringyour.network" target="_blank"><img src="res/images/store-play.png" alt="get the app on the Google Play store"></a></div>
+                            <div class="store"><a href="https://apps.apple.com/us/app/bringyour/id6446097114" target="_blank"><img src="res/images/store-app.svg" alt="get the app on the Apple App Store"></a></div>
+                            <div class="link"><a href="roadmap" target="_blank">Platform Roadmap</a></div>
+                            <div class="link"><a href="https://github.com/bringyour/product/discussions" target="_blank">Product Feedback</a></div>
+                        </td>
+                        <td>
+                            <div class="link"><a href="terms">Terms of Service</a></div>
+                            <div class="link"><a href="privacy">Privacy Policy</a></div>
+                            <div class="link"><a href="vdp">Vulnerability Disclosure Policy</a></div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <div class="copyline">Copyright 2023 Bring Your, LLC</div>
+        </div>
+    </div>
+	
+
+</body>
+</html>

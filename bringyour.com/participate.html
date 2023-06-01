@@ -116,6 +116,81 @@
 	<div id="header-place"></div>
 
 	<div class="runner">
+
+        <div>
+            <div class="header">Let's Build the Best Privacy, Security, and Personal Data Control Network With Just Our Phones</div>
+            <div>We're building a privacy network so large and ubiquitous it works everywhere.</div>
+            <div><br/>But we are doing it with a peer-to-peer model to provide a better VPN that costs less money, and works in more places.</div>
+            <div><br/>BringYour always works on a mobile phone. Anyone with a mobile phone can help build the network just by enabling the provide mode that runs in background when your phone is on (which it almost always is!). You get paid a part of how much the network is used that shows up automatically in your app wallet.</div>
+            <div><br/>You get to see the activity on your node in the provide section of the app. You're not just a user, but all you have to do is use the app.</div>
+        </div>
+
+        <div>
+            <div class="header">Estimated Monthly Income Calculator</div>
+            <div>Limit upload speed:   [xx]mbps
+This is at most your ISP upload speed
+Use fast.com to test yours now
+Limit to certain hours every day: [12am]-[4pm]
+Limit total data month: [xx]GiB
+---
+Max income per month: $xxx
+Actual income depends on usage of the network
+
+
+Uncapped sample (this would be a typical fiber connection):
+100mbps
+-- to --
+10000GiB
+Earn up to $50/month
+
+Capped sample:
+30mbps
+-- to --
+1000GiB
+Earn up to $5/month</div>
+        </div>
+
+        <div>
+            <div class="header">Other Ways to Participate</div>
+            <div>Sometimes your phone is maxed out with something else and you still want to help build the network. You might have an existing server somewhere or want some small hardware to stash next to your main internet router.</div>
+        </div>
+
+        <div>
+            <div class="header">Docker Container</div>
+            <div>Follow these steps to run a BringYour provider inside of a Docker container:
+            <pre>
+            docker pull bringyour/provider:latest
+            docker run bringyour/provider
+            Add this device: a-b-c-d
+            </pre>
+
+            From the app, add the container as a device using the <code>a-b-c-d</code> key that was printed to the terminal. This only needs to be done on the first run of the container. After the container is added as a device, you can control it from the app.
+
+            To run the container in the background with auto-updates, use the WARP loader.
+
+            <pre>
+            warpctl init hsm
+            warpctl install main bringyour/provider --use-global-auth
+            warpctl log main bringyour/provider
+            Add this device: a-b-c-d
+            </pre>
+
+            Note <code>--use-global-auth</code> means the container credentials are stored in the HSM storage area and shared across all provider containers on the same host, so that auto updates will not need to re-add the container as a device to the network. 
+
+            You can tail the logs of the container using:
+
+            <pre>
+            journalctl -u bringyour-provider-main -f
+            </pre>
+            </div>
+            <div><a href="">GitHub documentation on running a BringYour provider docker container.</a></div>
+        </div>
+
+        <div>
+            <div class="header">EdgeMax Router</div>
+            <div>EdgeMax is a popular hackable router platform because it is cheap, stable, and globally available. <div><a href="">GitHub documentation on running a BringYour provider on an EdgeMax router.</a></div>
+        </div>
+
 		<div>
 			<div class="header">Strength in decentralized</div>
 			<div>One of the primary challenges of a private network that promotes privacy and anonymity is that it can be identified and filtered. A malicious agent can join to map the platform hosts and egress points that a typical user would see, and then use that information to label users of the private network as second-class citizens or broken. This is a challenge to any private network that has a finite set of platform hosts and egress points, or a high cost to adding new ones.</div>
