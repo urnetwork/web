@@ -1,31 +1,31 @@
 
 
 def title_icons_meta():
-	return """
-	<title>BringYour VPN Everywhere</title>
-	<link rel="icon" type="image/svg+xml" href="favicon.svg">
+    return """
+    <title>BringYour VPN Everywhere</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <link rel="icon" type="image/png" size="32x32" href="favicon-32.png">
     <link rel="icon" type="image/png" size="128x128" href="favicon-128.png">
     <link rel="icon" type="image/png" size="180x180" href="favicon-180.png">
     <link rel="icon" type="image/png" size="192x192" href="favicon.png">
     <link rel="apple-touch-icon" size="192x192" href="apple-touch-icon.png">
 
-    <meta name="description" content="Instant worldwide VPN everywhere. Let's build the best privacy, security, and personal data control network with just our phones and tablets."/>
-	"""
+    <meta name="description" content="Instant worldwide VPN everywhere. Let's build the best privacy, security, and personal data control network with just our phones and tablets.">
+    """
 
 
 def fonts():
-	return """
-	<link rel="stylesheet" href="res/fonts/material-symbols-outlined.css">
-	<link rel="stylesheet" href="res/fonts/noto-sans.css">
-	<link rel="stylesheet" href="res/fonts/arkitech.css">
-	<link rel="stylesheet" href="res/fonts/pacifico.css">
-	"""
+    return """
+    <link rel="stylesheet" href="res/fonts/material-symbols-outlined.css">
+    <link rel="stylesheet" href="res/fonts/noto-sans.css">
+    <link rel="stylesheet" href="res/fonts/arkitech.css">
+    <link rel="stylesheet" href="res/fonts/pacifico.css">
+    """
 
 
 def app_js_css():
-	return """
-	<link rel="stylesheet" href="res/css/bootstrap.min.css">
+    return """
+    <link rel="stylesheet" href="res/css/bootstrap.min.css">
     <link rel="stylesheet" href="res/css/main.css">
     <link rel="stylesheet" href="res/css/stats.css">
     <link rel="stylesheet" href="res/css/connect.css">
@@ -37,7 +37,7 @@ def app_js_css():
     <script src="lib/bootstrap.min.js"></script>
 
     <script src="lib/apple-auth.min.js"></script>
-	<script src="lib/google-auth.min.js"></script>
+    <script src="lib/google-auth.min.js"></script>
 
     <script src="sketch_220824a.js"></script>
     <script src="logo.js"></script>
@@ -45,22 +45,22 @@ def app_js_css():
     <script src="stats.js"></script>
     <script src="connect.js"></script>
     <script src="window.js"></script>
-	"""
+    """
 
 
 def dialog_connect(page_name):
-	if page_name in ['index']:
-		auth_auto_prompt = 'true'
-	else:
-		auth_auto_prompt = 'false'
+    if page_name in ['index']:
+        auth_auto_prompt = 'true'
+    else:
+        auth_auto_prompt = 'false'
 
-	return """
-	<div class="modal fade" id="dialog-connect" tabindex="-1" aria-labelledby="dialog-connect" aria-hidden="true">
+    return """
+    <div class="modal fade" id="dialog-connect" tabindex="-1" aria-labelledby="dialog-connect" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
+                </div>f
                 <div class="modal-body">
                     <div class="dialog" id="dialog-mount">
                         <script>                   
@@ -93,32 +93,37 @@ def dialog_connect(page_name):
             </div>
         </div>
     </div>
-	"""
+    """
 
 
 def tab_header(page_name):
-	tabs = [
-		('index', 'Network'),
-		('pricing', 'Pricing'),
-		('faq', 'FAQ'),
-		('participate', 'Participate'),
-		('about', 'About')
-	]
+    if page_name == 'index':
+        canonical_page_name = '/'
+    else:
+        canonical_page_name = page_name
 
-	tab_html_parts = []
-	for tab_page_name, tab_title in tabs:
-		if tab_page_name == page_name:
-			tab_html_part = f"""<div class="tab tab-selected">{tab_title}</div>"""
-		else:
-			tab_html_part = f"""<a href="{tab_page_name}"><div class="tab">{tab_title}</div></a>"""
-		tab_html_parts.append(tab_html_part)
+    tabs = [
+        ('/', 'Network'),
+        ('pricing', 'Pricing'),
+        ('faq', 'FAQ'),
+        ('participate', 'Participate'),
+        ('about', 'About')
+    ]
 
-	return """
-	<div id="header">
+    tab_html_parts = []
+    for tab_page_name, tab_title in tabs:
+        if tab_page_name == canonical_page_name:
+            tab_html_part = f"""<div class="tab tab-selected">{tab_title}</div>"""
+        else:
+            tab_html_part = f"""<a href="{tab_page_name}"><div class="tab">{tab_title}</div></a>"""
+        tab_html_parts.append(tab_html_part)
+
+    return """
+    <div id="header">
         <table>
             <tbody>
                 <tr>
-                    <td id="logo"><img id="logo-placeholder" src="res/images/logo-placeholder.png"></div></td>
+                    <td id="logo"><img id="logo-placeholder" src="res/images/logo-placeholder.png" alt="BringYour"></td>
                     <td class="expand"><div class="tab-container">{tab_html}</div></td>
                     <td class="start"><button type="button" id="start" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#dialog-connect">Get Connected</button></td>
                 </tr>
@@ -126,14 +131,14 @@ def tab_header(page_name):
         </table>
     </div>
     <div id="header-place"></div>
-	""".format(
-		tab_html=''.join(tab_html_parts)
-	)
+    """.format(
+        tab_html=''.join(tab_html_parts)
+    )
 
 
 def footer():
-	return """
-	<div id="footer">
+    return """
+    <div id="footer">
         <div class="link-container">
             <table>
                 <tbody>
@@ -162,5 +167,5 @@ def footer():
             <div class="copyline">Copyright 2023 Bring Your, LLC</div>
         </div>
     </div>
-	"""
+    """
 

@@ -55,7 +55,7 @@ def clean(dirpath):
     pass
 
 
-def build(dirpath):
+def build(dirpath, minify=True):
     # target = d/build.<timestamp>
     # rm d/build
     # ln -s d/build.<timestamp> d/build
@@ -86,7 +86,7 @@ def build(dirpath):
     import shutil
 
     timestamp = int(time.time())
-    build_path = os.path.join(dirpath, f'build.{timestamp}')
+    build_dirpath = os.path.join(dirpath, f'build.{timestamp}')
 
     # os.makedirs(build_path)
 
@@ -107,46 +107,87 @@ def build(dirpath):
     }
     jinja_env.globals.update(exported_symbols)
 
-    def process_page(parent_dirpath, process_filename, build_dirpath):
+    def process_page(parent_dirpath, process_filename):
         page_name = process_filename[:-len(page_suffix)]
-        sys.stdout.write(f'Processing {os.path.join(build_dirpath, process_filename)} ...')
+        sys.stdout.write(f'Processing {os.path.join(build_dirpath, parent_dirpath, process_filename)} ...')
         sys.stdout.flush()
         template = jinja_env.get_template(os.path.join(parent_dirpath, process_filename))
         page_html = template.render(page_name=page_name)
-        with open(os.path.join(build_dirpath, f'{page_name}.html.tmp'), 'w') as f:
-            f.write(page_html)
-        sys.stdout.write(f'...')
-        sys.stdout.flush()
-        p = subprocess.run([
-            'html-minifier',
-            '--minify-css', 'true',
-            '--minify-js', 'true',
-            '--minify-urls', 'true',
-            '--collapse-whitespace',
-            '--conservative-collapse',
-            '--remove-comments',
-            '--decode-entities',
-            '--case-sensitive',
-            '--remove-optional-tags',
-            '--sort-attributes',
-            '--sort-class-name',
-            '--trim-custom-fragments',
-            '--use-short-doctype',
-            '--remove-empty-attributes',
-            '--remove-attribute-quotes',
-            '-o', os.path.join(build_dirpath, f'{page_name}.html'),
-            os.path.join(build_dirpath, f'{page_name}.html.tmp')
-        ])
-        os.remove(os.path.join(build_dirpath, f'{page_name}.html.tmp'))
+
+        if minify:
+            with open(os.path.join(build_dirpath, parent_dirpath, f'{page_name}.html.tmp'), 'w') as f:
+                f.write(page_html)
+            # FIXME html-validate the html before running the minifier
+
+            sys.stdout.write(f'...')
+            sys.stdout.flush()
+            p = subprocess.run([
+                'html-minifier',
+                '--minify-css', 'true',
+                '--minify-js', 'true',
+                '--minify-urls', 'true',
+                '--collapse-whitespace',
+                '--conservative-collapse',
+                '--remove-comments',
+                # '--decode-entities',
+                '--case-sensitive',
+                # '--remove-optional-tags',
+                '--sort-attributes',
+                '--sort-class-name',
+                '--trim-custom-fragments',
+                '--use-short-doctype',
+                # '--remove-empty-attributes',
+                # '--remove-attribute-quotes',
+                '-o', os.path.join(build_dirpath, parent_dirpath, f'{page_name}.html'),
+                os.path.join(build_dirpath, parent_dirpath, f'{page_name}.html.tmp')
+            ])
+            os.remove(os.path.join(build_dirpath, parent_dirpath, f'{page_name}.html.tmp'))
+        else:
+            with open(os.path.join(build_dirpath, parent_dirpath, f'{page_name}.html'), 'w') as f:
+                f.write(page_html)
         sys.stdout.write(' done.\n')
 
-    def process_css(parent_dirpath, process_filename, build_dirpath):
-        process_file(parent_dirpath, process_filename, build_dirpath)
+    def process_css(parent_dirpath, process_filename):
+        if not minify or process_filename.endswith('.min.css'):
+            process_file(parent_dirpath, process_filename)
+            return
 
-    def process_js(parent_dirpath, process_filename, build_dirpath):
-        process_file(parent_dirpath, process_filename, build_dirpath)
+        sys.stdout.write(f'Processing {os.path.join(build_dirpath, parent_dirpath, process_filename)} ...')
+        sys.stdout.flush()
+        shutil.copyfile(
+            os.path.join(dirpath, parent_dirpath, process_filename),
+            os.path.join(build_dirpath, parent_dirpath, f'{process_filename}.tmp')
+        )
+        p = subprocess.run([
+            'cleancss',
+            '-o', os.path.join(build_dirpath, parent_dirpath, process_filename),
+            os.path.join(build_dirpath, parent_dirpath, f'{process_filename}.tmp')
+        ])
+        os.remove(os.path.join(build_dirpath, parent_dirpath, f'{process_filename}.tmp'))
+        sys.stdout.write(' done.\n')
 
-    def process_file(parent_dirpath, process_filename, build_dirpath):
+    def process_js(parent_dirpath, process_filename):
+        if not minify or process_filename.endswith('.min.js'):
+            process_file(parent_dirpath, process_filename)
+            return
+
+        sys.stdout.write(f'Processing {os.path.join(build_dirpath, parent_dirpath, process_filename)} ...')
+        sys.stdout.flush()
+        shutil.copyfile(
+            os.path.join(dirpath, parent_dirpath, process_filename),
+            os.path.join(build_dirpath, parent_dirpath, f'{process_filename}.tmp')
+        )
+        p = subprocess.run([
+            'uglifyjs',
+            '--validate',
+            '-o', os.path.join(build_dirpath, parent_dirpath, process_filename),
+            os.path.join(build_dirpath, parent_dirpath, f'{process_filename}.tmp')
+        ])
+        os.remove(os.path.join(build_dirpath, parent_dirpath, f'{process_filename}.tmp'))
+        sys.stdout.write(' done.\n')
+
+    def process_file(parent_dirpath, process_filename):
+        sys.stdout.write(f'Copy {os.path.join(build_dirpath, parent_dirpath, process_filename)}\n')
         shutil.copyfile(
             os.path.join(dirpath, parent_dirpath, process_filename),
             os.path.join(build_dirpath, parent_dirpath, process_filename)
@@ -173,12 +214,12 @@ def build(dirpath):
 
 
         parent_dirpath = process_dirpath[len(os.path.commonpath([dirpath, process_dirpath]))+1:]
-        build_dirpath = os.path.join(build_path, parent_dirpath)
-        os.makedirs(build_dirpath)
+        # build_dirpath = os.path.join(build_path, parent_dirpath)
+        os.makedirs(os.path.join(build_dirpath, parent_dirpath))
         
-        target = (parent_dirpath, process_filename, build_dirpath)
-
         for process_filename in process_filenames:
+            target = (parent_dirpath, process_filename)
+
             if process_filename.endswith(page_suffix):
                 process_page(*target)
             elif process_filename.endswith('.css'):
@@ -188,7 +229,7 @@ def build(dirpath):
             else:
                 process_file(*target)
 
-    sys.stdout.write(f'Done building "{build_path}"\n')
+    sys.stdout.write(f'Done building "{build_dirpath}"\n')
 
     """
     html-minifier --minify-css true --minify-js true --minify-urls true --collapse-whitespace --conservative-collapse --remove-comments --decode-entities --case-sensitive --remove-optional-tags --sort-attributes --sort-class-name --trim-custom-fragments --use-short-doctype --remove-empty-attributes --remove-attribute-quotes index.html
@@ -198,7 +239,12 @@ def build(dirpath):
     #     gen_py = f.read()
     # eval(gen_py)
 
+    build_linkpath = os.path.join(dirpath, 'build')
+    if os.path.islink(build_linkpath):
+        os.remove(build_linkpath)
+    os.symlink(build_dirpath, build_linkpath, target_is_directory=True)
 
+    sys.stdout.write(f'Linked to "{build_linkpath}"\n')
 
 
 
