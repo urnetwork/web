@@ -17,87 +17,40 @@ import os
 from docopt import docopt
 
 
-# webgen </path/to/gen.py>
-# outputs to /path/to/build.<timestamp>
-
-# eval gen.py
-# scan for all j2 and convert to html with jinja template
-# validate html
-# recursively copy all other resources and apply minify rules as appropriate
-# create robots.txt and sitemap.xml
-
-
-
-# @page('index')
-# def  index_html():
-#   return ""
-
-
-# sitemap('foobar')
-# def foobar_sitemap():
-#   return {
-#       prop: True
-#   }
-
-
-# generates a sitemap
-# https://www.sitemaps.org/protocol.html
-
-# generates a robots.txt
-# User-agent: *
-# Allow: /
-
-# Sitemap: https://bringyour.com/sitemap.xml
-
-# GET https://www.google.com/ping?sitemap=https://bringyour.com/sitemap.txt
-
 def clean(dirpath):
-    pass
+    import shutil
+
+    build_dirnames = [
+        filename
+        for filename in os.listdir(dirpath)
+        if filename in ['build'] or filename.startswith('build.')
+    ]
+
+    for build_dirname in build_dirnames:
+        build_dirpath = os.path.join(dirpath, build_dirname)
+        sys.stdout.write(f'rm {build_dirpath}\n')
+        
+        if os.path.islink(build_dirpath):
+            os.remove(build_dirpath)
+        elif os.path.isdir(build_dirpath):
+            shutil.rmtree(build_dirpath)
 
 
-def build(dirpath, minify=True):
-    # target = d/build.<timestamp>
-    # rm d/build
-    # ln -s d/build.<timestamp> d/build
-
-    # eval d/gen.py
-    # for each j2, eval template
-
-    # (dirpath, dirnames, filenames)
-    # for (process_dirpath, process_dirnames, process_filenames) in os.walk(dirpath):
-    #     if dirpath == process_dirpath:
-    #         for i, process_dirname in enumerate(process_dirnames):
-    #             if process_dirname.startswith('build'):
-    #                 del process_dirnames[i]
-    #         for i, process_filename in enumerate(process_filenames):
-    #             if process_filename == 'gen.py':
-    #                 del process_filenames[i]
-
-    #     p = os.path.commonpath(dirpath, process_dirpath)
-    #     build_dirpath = os.path.join(build_path, process_dirpath[len(p):])
-    #     os.makedirs(build_dirpath)
-
-
-
-
+def build(dirpath, minify=True, validate=True):
     import subprocess
     import time
     from jinja2 import Environment, FileSystemLoader, select_autoescape
     import shutil
 
     timestamp = int(time.time())
-    build_dirpath = os.path.join(dirpath, f'build.{timestamp}')
-
-    # os.makedirs(build_path)
-
-    
+    build_dirname = f'build.{timestamp}'
+    build_dirpath = os.path.join(dirpath, build_dirname)
 
     jinja_env = Environment(
         loader=FileSystemLoader(dirpath),
         autoescape=select_autoescape()
     )
 
-    # gen_py_path = os.path.join(dirname, 'gen.py')
     sys.path.append(dirpath)
     import gen
     exported_symbols = {
@@ -114,16 +67,13 @@ def build(dirpath, minify=True):
         sys.stdout.write(f'Processing {out_path} ...')
         sys.stdout.flush()
         
-
         template = jinja_env.get_template(os.path.join(parent_dirpath, process_filename))
         page_html = template.render(page_name=page_name)
-
         
         if minify:
             with open(os.path.join(build_dirpath, parent_dirpath, f'{page_name}.html.tmp'), 'w') as f:
                 f.write(page_html)
-            # FIXME html-validate the html before running the minifier
-
+            
             sys.stdout.write(f'...')
             sys.stdout.flush()
             p = subprocess.run([
@@ -151,18 +101,19 @@ def build(dirpath, minify=True):
             with open(out_path, 'w') as f:
                 f.write(page_html)
 
-        sys.stdout.write(f'...')
-        sys.stdout.flush()
-        p = subprocess.run([
-            'html-validate',
-            out_path
-        ])
-        if p.returncode == 0:
-            sys.stdout.write(' valid')
+        if validate:
+            sys.stdout.write(f'...')
             sys.stdout.flush()
-        else:
-            print(f'Error: "{out_path}" is not valid\n', file=sys.stderr)
-            sys.exit(1)
+            p = subprocess.run([
+                'html-validate',
+                out_path
+            ])
+            if p.returncode == 0:
+                sys.stdout.write(' valid')
+                sys.stdout.flush()
+            else:
+                print(f'Error: "{out_path}" is not valid\n', file=sys.stderr)
+                sys.exit(1)
 
         sys.stdout.write(' done.\n')
 
@@ -260,25 +211,12 @@ def build(dirpath, minify=True):
 
     sys.stdout.write(f'Done building "{build_dirpath}"\n')
 
-    """
-    html-minifier --minify-css true --minify-js true --minify-urls true --collapse-whitespace --conservative-collapse --remove-comments --decode-entities --case-sensitive --remove-optional-tags --sort-attributes --sort-class-name --trim-custom-fragments --use-short-doctype --remove-empty-attributes --remove-attribute-quotes index.html
-    """
-
-    # with open(os.path.join(dirname, 'gen.py'), 'r') as f:
-    #     gen_py = f.read()
-    # eval(gen_py)
-
     build_linkpath = os.path.join(dirpath, 'build')
     if os.path.islink(build_linkpath):
         os.remove(build_linkpath)
-    os.symlink(build_dirpath, build_linkpath, target_is_directory=True)
+    os.symlink(build_dirname, build_linkpath, target_is_directory=True)
 
     sys.stdout.write(f'Linked to "{build_linkpath}"\n')
-
-
-
-    pass
-
 
 
 def webgen(args):

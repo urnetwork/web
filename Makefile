@@ -1,6 +1,15 @@
 
 
-# docker buildx build --platform linux/arm64/v8,linux/amd64 . -t bringyour/canary-web:2023.01.1 --no-cache --push
+all: clean build
+
+
+clean:
+	python webgen/webgen.py clean bringyour.com/gen.py
+
+build:
+	python webgen/webgen.py build bringyour.com/gen.py
+	docker buildx build --platform linux/arm64/v8,linux/amd64 . -t bringyour/canary-web:2023.01.1 --no-cache --push
+
 # docker run -p 7441:80 --network warpsbs bringyour/canary-web:2023.01.1
 
 # local dev:
