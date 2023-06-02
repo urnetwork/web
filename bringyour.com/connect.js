@@ -128,13 +128,7 @@ function DialogInitial(firstLoad) {
         // }, 1000)
     }
     self.handleSubmitAuthJwtResponse = (responseBody, authJwtType, authJwt) => {
-        const loginUserAuthElement = self.element('login-user-auth')
-        const loginButtonElement = self.element('login-button')
-        const loginSpinnerElement = self.element('login-spinner')
-
-        loginUserAuthElement.disabled = false
-        loginButtonElement.disabled = false
-        loginSpinnerElement.classList.add('d-none')
+        
 
         if (responseBody) {
             if ('network' in responseBody) {
@@ -167,6 +161,10 @@ function DialogInitial(firstLoad) {
                     let errorElement = self.element('login-error')
                     errorElement.textContent = message
                     errorElement.classList.remove('d-none')
+
+                    const loginUserAuthElement = self.element('login-user-auth')
+                    const loginButtonElement = self.element('login-button')
+                    const loginSpinnerElement = self.element('login-spinner')
 
                     loginUserAuthElement.disabled = false
                     loginButtonElement.disabled = false

@@ -36,15 +36,15 @@ def app_js_css():
     <script src="lib/popper.min.js"></script>
     <script src="lib/bootstrap.min.js"></script>
 
-    <script src="lib/apple-auth.min.js"></script>
-    <script src="lib/google-auth.min.js"></script>
-
     <script src="sketch_220824a.js"></script>
     <script src="logo.js"></script>
     <script src="client.js"></script>
     <script src="stats.js"></script>
     <script src="connect.js"></script>
     <script src="window.js"></script>
+
+    <script src="https://accounts.google.com/gsi/client"></script>
+    <script src="https://appleid.cdn-apple.com/appleauth/static/jsapi/appleid/1/en_US/appleid.auth.js"></script>
     """
 
 
@@ -60,7 +60,7 @@ def dialog_connect(page_name):
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>f
+                </div>
                 <div class="modal-body">
                     <div class="dialog" id="dialog-mount">
                         <script>                   

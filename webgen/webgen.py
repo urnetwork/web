@@ -109,11 +109,16 @@ def build(dirpath, minify=True):
 
     def process_page(parent_dirpath, process_filename):
         page_name = process_filename[:-len(page_suffix)]
-        sys.stdout.write(f'Processing {os.path.join(build_dirpath, parent_dirpath, process_filename)} ...')
+        out_path = os.path.join(build_dirpath, parent_dirpath, f'{page_name}.html')
+
+        sys.stdout.write(f'Processing {out_path} ...')
         sys.stdout.flush()
+        
+
         template = jinja_env.get_template(os.path.join(parent_dirpath, process_filename))
         page_html = template.render(page_name=page_name)
 
+        
         if minify:
             with open(os.path.join(build_dirpath, parent_dirpath, f'{page_name}.html.tmp'), 'w') as f:
                 f.write(page_html)
@@ -138,19 +143,35 @@ def build(dirpath, minify=True):
                 '--use-short-doctype',
                 # '--remove-empty-attributes',
                 # '--remove-attribute-quotes',
-                '-o', os.path.join(build_dirpath, parent_dirpath, f'{page_name}.html'),
+                '-o', out_path,
                 os.path.join(build_dirpath, parent_dirpath, f'{page_name}.html.tmp')
             ])
             os.remove(os.path.join(build_dirpath, parent_dirpath, f'{page_name}.html.tmp'))
         else:
-            with open(os.path.join(build_dirpath, parent_dirpath, f'{page_name}.html'), 'w') as f:
+            with open(out_path, 'w') as f:
                 f.write(page_html)
+
+        sys.stdout.write(f'...')
+        sys.stdout.flush()
+        p = subprocess.run([
+            'html-validate',
+            out_path
+        ])
+        if p.returncode == 0:
+            sys.stdout.write(' valid')
+            sys.stdout.flush()
+        else:
+            print(f'Error: "{out_path}" is not valid\n', file=sys.stderr)
+            sys.exit(1)
+
         sys.stdout.write(' done.\n')
 
     def process_css(parent_dirpath, process_filename):
         if not minify or process_filename.endswith('.min.css'):
             process_file(parent_dirpath, process_filename)
             return
+
+        out_path = os.path.join(build_dirpath, parent_dirpath, process_filename)
 
         sys.stdout.write(f'Processing {os.path.join(build_dirpath, parent_dirpath, process_filename)} ...')
         sys.stdout.flush()
@@ -160,9 +181,12 @@ def build(dirpath, minify=True):
         )
         p = subprocess.run([
             'cleancss',
-            '-o', os.path.join(build_dirpath, parent_dirpath, process_filename),
+            '-o', out_path,
             os.path.join(build_dirpath, parent_dirpath, f'{process_filename}.tmp')
         ])
+        if p.returncode != 0:
+            print(f'Error: "{out_path}" is not valid\n', file=sys.stderr)
+            sys.exit(1)
         os.remove(os.path.join(build_dirpath, parent_dirpath, f'{process_filename}.tmp'))
         sys.stdout.write(' done.\n')
 
@@ -170,6 +194,8 @@ def build(dirpath, minify=True):
         if not minify or process_filename.endswith('.min.js'):
             process_file(parent_dirpath, process_filename)
             return
+
+        out_path = os.path.join(build_dirpath, parent_dirpath, process_filename)
 
         sys.stdout.write(f'Processing {os.path.join(build_dirpath, parent_dirpath, process_filename)} ...')
         sys.stdout.flush()
@@ -180,9 +206,12 @@ def build(dirpath, minify=True):
         p = subprocess.run([
             'uglifyjs',
             '--validate',
-            '-o', os.path.join(build_dirpath, parent_dirpath, process_filename),
+            '-o', out_path,
             os.path.join(build_dirpath, parent_dirpath, f'{process_filename}.tmp')
         ])
+        if p.returncode != 0:
+            print(f'Error: "{out_path}" is not valid\n', file=sys.stderr)
+            sys.exit(1)
         os.remove(os.path.join(build_dirpath, parent_dirpath, f'{process_filename}.tmp'))
         sys.stdout.write(' done.\n')
 

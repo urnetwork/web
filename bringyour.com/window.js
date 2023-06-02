@@ -2,9 +2,10 @@
 function updateConnectButton() {
     let startElement = document.getElementById('start')
 
-    let byJwt = getByJwt()
+    let byJwt = parseByJwt()
+    // console.log(byJwt)
     if (byJwt) {
-        let networkName = byJwt['network']['name']
+        let networkName = byJwt['networkName']
         startElement.textContent = networkName + '.bringyour.network'
         startElement.classList.remove('btn-primary')
         startElement.classList.add('btn-light')
@@ -25,6 +26,4 @@ window.addEventListener('load', (event) => {
     if (resetCode) {
         $('#dialog-connect').modal('show')
     }
-
-
 })
