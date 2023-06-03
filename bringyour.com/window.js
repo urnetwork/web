@@ -3,7 +3,6 @@ function updateConnectButton() {
     let startElement = document.getElementById('start')
 
     let byJwt = parseByJwt()
-    // console.log(byJwt)
     if (byJwt) {
         let networkName = byJwt['networkName']
         startElement.textContent = networkName + '.bringyour.network'

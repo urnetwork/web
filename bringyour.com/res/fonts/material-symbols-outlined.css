@@ -5,6 +5,7 @@
   font-style: normal;
   font-weight: 400;
   src: url('Material-Symbols-Outlined-400.woff2') format('woff2');
+  font-display: block;
 }
 
 .material-symbols-outlined {

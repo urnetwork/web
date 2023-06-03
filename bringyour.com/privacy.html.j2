@@ -1,14 +1,11 @@
+<!DOCTYPE html>
 <html lang="en">
 <head>
-    {{ title_meta_favicons() }}
+    {{ title_icons_meta() }}
 
     {{ fonts() }}
 
-    {{ auth_google_js() }}
-    {{ auth_apple_js() }}
-
     {{ app_js_css() }}
-    {{ window_js() }}
 </head>
 <body>
     {{ dialog_connect(page_name=page_name) }}

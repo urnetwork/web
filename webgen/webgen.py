@@ -29,7 +29,7 @@ def clean(dirpath):
     for build_dirname in build_dirnames:
         build_dirpath = os.path.join(dirpath, build_dirname)
         sys.stdout.write(f'rm {build_dirpath}\n')
-        
+
         if os.path.islink(build_dirpath):
             os.remove(build_dirpath)
         elif os.path.isdir(build_dirpath):
@@ -106,6 +106,7 @@ def build(dirpath, minify=True, validate=True):
             sys.stdout.flush()
             p = subprocess.run([
                 'html-validate',
+                '--rule=doctype-style:"off"',
                 out_path
             ])
             if p.returncode == 0:

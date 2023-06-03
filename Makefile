@@ -2,13 +2,26 @@
 
 all: clean build
 
-
 clean:
 	python webgen/webgen.py clean bringyour.com/gen.py
 
 build:
 	python webgen/webgen.py build bringyour.com/gen.py
 	docker buildx build --platform linux/arm64/v8,linux/amd64 . -t bringyour/canary-web:2023.01.1 --no-cache --push
+
+local_routing_on:
+	sudo hostctl add domains bringyour_web_local bringyour.com api.bringyour.com
+
+local_routing_off:
+	sudo hostctl remove bringyour_web_local
+
+run_local:
+	$(MAKE) local_routing_on
+	trap "$(MAKE) local_routing_off" EXIT && $(MAKE) run_local_nginx
+
+run_local_nginx:
+	nginx -c ${BRINGYOUR_HOME}/web/local-nginx.conf -g 'daemon off;'
+
 
 # docker run -p 7441:80 --network warpsbs bringyour/canary-web:2023.01.1
 

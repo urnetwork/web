@@ -1,7 +1,7 @@
 
-
 def title_icons_meta():
     return """
+    <meta charset="UTF-8">
     <title>BringYour VPN Everywhere</title>
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <link rel="icon" type="image/png" size="32x32" href="favicon-32.png">
@@ -10,6 +10,7 @@ def title_icons_meta():
     <link rel="icon" type="image/png" size="192x192" href="favicon.png">
     <link rel="apple-touch-icon" size="192x192" href="apple-touch-icon.png">
 
+    <meta name="viewport" content="width=device-width, initial-scale=0.4">
     <meta name="description" content="Instant worldwide VPN everywhere. Let's build the best privacy, security, and personal data control network with just our phones and tablets.">
     """
 
@@ -33,8 +34,7 @@ def app_js_css():
     <script src="lib/d3.min.js"></script>
     <script src="lib/p5.min.js"></script>
     <script src="lib/jquery.min.js"></script>
-    <script src="lib/popper.min.js"></script>
-    <script src="lib/bootstrap.min.js"></script>
+    <script src="lib/bootstrap.bundle.min.js"></script>
 
     <script src="sketch_220824a.js"></script>
     <script src="logo.js"></script>
