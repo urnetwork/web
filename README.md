@@ -4,7 +4,7 @@
 See https://developers.google.com/speed/docs/insights/MinifyResources
 
 ```
-npm iinstall html-validate -g
+npm install html-validate -g
 npm install html-minifier -g
 npm install uglify-js -g
 npm install clean-css-cli -g

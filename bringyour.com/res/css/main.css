@@ -156,6 +156,10 @@ table.pricing-table td.item {
 table.pricing-table td.amount {
 	padding: 12px;
 }
+table.pricing-table td.amount img {
+	width: 450px;
+	aspect-ratio: auto 300 / 100;
+}
 
 table.pricing-table span.free {
 	font-weight: 600;
@@ -296,6 +300,7 @@ div.use-cases {
 	min-width: 200px;
 	font-weight: 100;
 	vertical-align: top;
+	text-align: left;
 }
 
 #footer div.link-container {

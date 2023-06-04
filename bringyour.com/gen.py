@@ -125,7 +125,7 @@ def tab_header(page_name):
                 <tr>
                     <td id="logo"><img id="logo-placeholder" src="res/images/logo-placeholder.png" alt="BringYour"></td>
                     <td class="expand"><div class="tab-container">{tab_html}</div></td>
-                    <td class="start"><button type="button" id="start" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#dialog-connect">Get Connected</button></td>
+                    <td class="start"><button type="button" id="start" class="btn btn-primary d-none" data-bs-toggle="modal" data-bs-target="#dialog-connect">Get Connected</button></td>
                 </tr>
             </tbody>
         </table>
@@ -167,5 +167,6 @@ def footer():
             <div class="copyline">Copyright 2023 Bring Your, LLC</div>
         </div>
     </div>
+    <script src="footer.js"></script>
     """
 
