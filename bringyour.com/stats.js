@@ -126,8 +126,10 @@ function sparkPlotTooltips() {
 
             statsTooltipElement.classList.remove('d-none')
             statsTooltipElement.textContent = title
-            statsTooltipElement.style.left = window.scrollX + clientRect.left
-            statsTooltipElement.style.top = window.scrollY + clientRect.top + clientRect.height + 8
+            let left = window.scrollX + clientRect.left
+            let top = window.scrollY + clientRect.top + clientRect.height + 8
+            statsTooltipElement.style.left = left + 'px'
+            statsTooltipElement.style.top = top + 'px'
         }
     })
 

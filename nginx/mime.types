@@ -27,6 +27,7 @@ types {
 
     font/woff                                        woff;
     font/woff2                                       woff2;
+    font/ttf                                         ttf;
 
     application/java-archive                         jar war ear;
     application/json                                 json;
