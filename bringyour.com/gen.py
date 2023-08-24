@@ -168,5 +168,11 @@ def footer():
         </div>
     </div>
     <script src="footer.js"></script>
+    <script src="lib/widgetbot.min.js" async defer>
+      new Crate({
+        server: '807713145006850048',
+        channel: '807713145006850051',
+      })
+    </script>
     """
 
