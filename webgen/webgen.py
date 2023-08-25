@@ -189,7 +189,7 @@ def build(dirpath, minify=True, validate=True):
             filtered_filenames = [
                 process_filename
                 for process_filename in process_filenames
-                if process_filename not in ['build', 'gen.py']
+                if process_filename not in ['build', 'gen.py', '.DS_Store']
             ]
             process_filenames[:] = filtered_filenames
 
