@@ -51,8 +51,15 @@ div.leader div.top-message {
 	text-align: center;
 	margin-top: 48px;
 	margin-bottom: 48px;
-	font-family: 'Pacifico', cursive;
-	font-size: 48pt;
+	font-family: 'Barlow', cursive;
+	font-size: 36pt;
+}
+
+div.leader div.sub-message {
+/*	text-align: center;*/
+	margin-top: 48px;
+	margin-bottom: 48px;
+	font-size: 24pt;
 }
 
 div.leader div.main-message {

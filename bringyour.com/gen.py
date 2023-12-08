@@ -164,15 +164,9 @@ def footer():
                     </tr>
                 </tbody>
             </table>
-            <div class="copyline">Copyright 2023 Bring Your, LLC</div>
+            <div class="copyline">Copyright 2023 BringYour, Inc.</div>
         </div>
     </div>
     <script src="footer.js"></script>
-    <script src="lib/widgetbot.min.js" async defer>
-      new Crate({
-        server: '807713145006850048',
-        channel: '807713145006850051',
-      })
-    </script>
     """
 

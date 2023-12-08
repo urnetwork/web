@@ -5,7 +5,7 @@ function updateConnectButton() {
 
     let byJwt = parseByJwt()
     if (byJwt) {
-        let networkName = byJwt['networkName']
+        let networkName = byJwt['network_name']
         startElement.textContent = networkName + '.bringyour.network'
         startElement.classList.remove('btn-primary')
         startElement.classList.add('btn-light')

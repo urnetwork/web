@@ -104,6 +104,12 @@ function apiRequest(method, path, body) {
     let headers = new Headers()
     headers.append('X-Client-Version', clientVersion)
 
+    // add authorization if present
+    let byJwt = getByJwt()
+    if (byJwt != null) {
+        headers.append('Authorization', 'Bearer ' + byJwt)
+    }
+
     let requestOptions = {
         method: method,
         headers: headers
@@ -123,7 +129,6 @@ function apiRequest(method, path, body) {
         })
     return withTimeout(p)
 }
-
 
 
 function userAuthType(userAuth) {

@@ -110,8 +110,8 @@ function DialogInitial(firstLoad) {
         loginSpinnerElement.classList.remove('d-none')
 
         let requestBody = {
-            authJwtType: authJwtType,
-            authJwt: authJwt
+            'auth_jwt_type': authJwtType,
+            'auth_jwt': authJwt
         }
 
         apiRequest('POST', '/auth/login', requestBody)
@@ -131,15 +131,15 @@ function DialogInitial(firstLoad) {
         if (responseBody) {
             if ('network' in responseBody) {
                 let network = responseBody['network']
-                let byJwt = network['byJwt']
+                let byJwt = network['by_jwt']
 
                 setByJwt(byJwt)
                 self.mount.render(new DialogComplete())
-            } else if ('authAllowed' in responseBody) {
+            } else if ('auth_allowed' in responseBody) {
                 // and existing network but different login
-                let authAllowed = responseBody['authAllowed']
+                let authAllowed = responseBody['auth_allowed']
 
-                let userAuth = responseBody['userAuth']
+                let userAuth = responseBody['user_auth']
                 if (authAllowed.includes('password') && userAuth) {
                     // just take to password login instead of showing the "please continue with email ..." message
                     self.mount.render(new DialogLoginPassword(userAuth))
@@ -170,9 +170,7 @@ function DialogInitial(firstLoad) {
                 }
             } else {
                 // a new network
-                // let authJwtType = responseBody['authJwtType']
-                // let authJwt = responseBody['authJwt']
-                let userName = responseBody['userName']
+                let userName = responseBody['user_name']
                 self.mount.render(new DialogCreateNetworkAuthJwt(authJwtType, authJwt, userName))
             }
         }
@@ -189,7 +187,7 @@ function DialogInitial(firstLoad) {
 
         let userAuth = loginUserAuthElement.value
         let requestBody = {
-            userAuth: userAuth
+            'user_auth': userAuth
         }
 
         apiRequest('POST', '/auth/login', requestBody)
@@ -217,7 +215,7 @@ function DialogInitial(firstLoad) {
         if (responseBody) {
             if ('error' in responseBody) {
                 let error = responseBody['error']
-                let suggestedUserAuth = error['suggestedUserAuth'] || loginUserAuthElement.value
+                let suggestedUserAuth = error['suggested_user_auth'] || loginUserAuthElement.value
                 let message = error['message']
 
                 let errorElement = self.element('login-error')
@@ -229,10 +227,10 @@ function DialogInitial(firstLoad) {
                 loginUserAuthElement.disabled = false
                 loginButtonElement.disabled = false
                 loginSpinnerElement.classList.add('d-none')
-            } else if ('authAllowed' in responseBody) {
+            } else if ('auth_allowed' in responseBody) {
                 // an existing network
-                let userAuth = responseBody['userAuth']
-                let authAllowed = responseBody['authAllowed']
+                let userAuth = responseBody['user_auth']
+                let authAllowed = responseBody['auth_allowed']
                 if (authAllowed.includes('password')) {
                     self.mount.render(new DialogLoginPassword(userAuth))
                 } else {
@@ -256,7 +254,7 @@ function DialogInitial(firstLoad) {
                 }
             } else {
                 // a new network
-                let userAuth = responseBody['userAuth']
+                let userAuth = responseBody['user_auth']
                 self.mount.render(new DialogCreateNetwork(userAuth))
             }
         }
@@ -306,8 +304,8 @@ function DialogLoginPassword(userAuth) {
 
         let password = loginPasswordElement.value
         let requestBody = {
-            userAuth: userAuth,
-            password: password
+            'user_auth': userAuth,
+            'password': password
         }
 
         apiRequest('POST', '/auth/login-with-password', requestBody)
@@ -344,14 +342,14 @@ function DialogLoginPassword(userAuth) {
                 loginPasswordElement.disabled = false
                 loginButtonElement.disabled = false
                 loginSpinnerElement.classList.add('d-none')
-            } else if ('verificationRequired' in responseBody) {
-                let verificationRequired = responseBody['verificationRequired']
-                let verificationUserAuth = verificationRequired['userAuth']
+            } else if ('verification_required' in responseBody) {
+                let verificationRequired = responseBody['verification_required']
+                let verificationUserAuth = verificationRequired['user_auth']
 
                 self.mount.render(new DialogCreateNetworkVerify(verificationUserAuth))
             } else if ('network' in responseBody) {
                 let network = responseBody['network']
-                let byJwt = network['byJwt']
+                let byJwt = network['by_jwt']
 
                 setByJwt(byJwt)
                 self.mount.render(new DialogComplete())
@@ -411,7 +409,7 @@ function DialogPasswordReset(userAuth) {
 
         let userAuth = passwordResetUserAuthElement.value
         let requestBody = {
-            userAuth: userAuth
+            'user_auth': userAuth
         }
 
         apiRequest('POST', '/auth/password-reset', requestBody)
@@ -449,8 +447,8 @@ function DialogPasswordReset(userAuth) {
                 passwordResetUserAuthElement.disabled = false
                 passwordResetButtonElement.disabled = false
                 passwordResetSpinnerElement.classList.add('d-none')
-            } else if ('userAuth' in responseBody) {
-                let responseUserAuth = responseBody['userAuth']
+            } else if ('user_auth' in responseBody) {
+                let responseUserAuth = responseBody['user_auth']
 
                 self.mount.render(new DialogPasswordResetAfterSend(responseUserAuth))
             } else {
@@ -492,7 +490,7 @@ function DialogPasswordResetAfterSend(userAuth) {
         passwordResetResendSpinnerElement.classList.remove('d-none')
 
         let requestBody = {
-            userAuth: userAuth
+            'user_auth': userAuth
         }
 
         apiRequest('POST', '/auth/password-reset', requestBody)
@@ -591,8 +589,8 @@ function DialogPasswordResetComplete(resetCode) {
 
         let password = passwordResetPasswordElement.value
         let requestBody = {
-            resetCode: resetCode,
-            password: password
+            'reset_code': resetCode,
+            'password': password
         }
 
         apiRequest('POST', '/auth/password-set', requestBody)
@@ -624,7 +622,7 @@ function DialogPasswordResetComplete(resetCode) {
             if ('error' in responseBody) {
                 let error = responseBody['error']
 
-                if ('resetCodeError' in error) {
+                if ('reset_code_error' in error) {
                     let errorElement = self.element('password-reset-error')
                     errorElement.innerHTML = 'Reset code expired. <a href="/connect/password-reset">Get a new code</a>.'
                     errorElement.classList.remove('d-none')
@@ -775,7 +773,7 @@ function NetworkNameValidator(
             }
 
             let requestBody = {
-                networkName: networkName
+                'network_name': networkName
             }
 
             apiRequest('POST', '/auth/network-check', requestBody)
@@ -888,11 +886,11 @@ function DialogCreateNetworkAuthJwt(authJwtType, authJwt, userName) {
         let networkName = createNetworkNameElement.value
         let terms = createAgreeTermsElement.checked
         let requestBody = {
-            authJwtType: authJwtType,
-            authJwt: authJwt,
-            userName: userName,
-            networkName: networkName,
-            terms: terms
+            'auth_jwt_type': authJwtType,
+            'auth_jwt': authJwt,
+            'user_name': userName,
+            'network_name': networkName,
+            'terms': terms,
         }
 
         apiRequest('POST', '/auth/network-create', requestBody)
@@ -934,7 +932,7 @@ function DialogCreateNetworkAuthJwt(authJwtType, authJwt, userName) {
                 createButtonElement.disabled = false
                 createSpinnerElement.classList.add('d-none')
 
-                if (error['userAuthConflict']) {
+                if (error['user_auth_conflict']) {
                     createUserAuthErrorElement.innerHTML = 'This email or phone number is already taken. <a href="/connect">Sign in</a>.'
                     createUserAuthErrorElement.classList.remove('d-none')
                 } else if ('message' in error) {
@@ -944,21 +942,21 @@ function DialogCreateNetworkAuthJwt(authJwtType, authJwt, userName) {
                     createErrorElement.classList.add('d-none')
                 }
 
-                if ('networkNameMessage' in error) {
-                    createNetworkNameErrorElement.textContent = error['networkNameMessage']
+                if ('network_name_message' in error) {
+                    createNetworkNameErrorElement.textContent = error['network_name_message']
                     createNetworkNameErrorElement.classList.remove('d-none')
                 } else {
                     createNetworkNameErrorElement.classList.add('d-none')
                 }
 
-            } else if ('verificationRequired' in responseBody) {
-                let verificationRequired = responseBody['verificationRequired']
-                let verificationUserAuth = verificationRequired['userAuth']
+            } else if ('verification_required' in responseBody) {
+                let verificationRequired = responseBody['verification_required']
+                let verificationUserAuth = verificationRequired['user_auth']
 
                 self.mount.render(new DialogCreateNetworkVerify(verificationUserAuth))
             } else if ('network' in responseBody) {
                 let network = responseBody['network']
-                let byJwt = network['byJwt']
+                let byJwt = network['by_jwt']
 
                 setByJwt(byJwt)
                 self.mount.render(new DialogComplete())
@@ -1115,11 +1113,11 @@ function DialogCreateNetwork(userAuth) {
         let networkName = createNetworkNameElement.value
         let terms = createAgreeTermsElement.checked
         let requestBody = {
-            userName: userName,
-            userAuth: userAuth,
-            password: password,
-            networkName: networkName,
-            terms: terms
+            'user_name': userName,
+            'user_auth': userAuth,
+            'password': password,
+            'network_name': networkName,
+            'terms': terms
         }
 
         apiRequest('POST', '/auth/network-create', requestBody)
@@ -1176,36 +1174,36 @@ function DialogCreateNetwork(userAuth) {
                     createErrorElement.classList.add('d-none')
                 }
 
-                if (error['userAuthConflict']) {
+                if (error['user_auth_conflict']) {
                     createUserAuthErrorElement.innerHTML = 'This email or phone number is already taken. <a href="/connect">Sign in</a> or <a href="/connect/password-reset">reset your password</a>.'
                     createUserAuthErrorElement.classList.remove('d-none')
-                } else if ('userAuthMessage' in error) {
-                    createUserAuthErrorElement.textContent = error['userAuthMessage']
+                } else if ('user_auth_message' in error) {
+                    createUserAuthErrorElement.textContent = error['user_auth_message']
                     createUserAuthErrorElement.classList.remove('d-none')
                 } else {
                     createUserAuthErrorElement.classList.add('d-none')
                 }
-                if ('passwordMessage' in error) {
-                    createPasswordErrorElement.textContent = error['passwordMessage']
+                if ('password_message' in error) {
+                    createPasswordErrorElement.textContent = error['password_message']
                     createPasswordErrorElement.classList.remove('d-none')
                 } else {
                     createPasswordErrorElement.classList.add('d-none')
                 }
-                if ('networkNameMessage' in error) {
-                    createNetworkNameErrorElement.textContent = error['networkNameMessage']
+                if ('network_name_message' in error) {
+                    createNetworkNameErrorElement.textContent = error['network_name_message']
                     createNetworkNameErrorElement.classList.remove('d-none')
                 } else {
                     createNetworkNameErrorElement.classList.add('d-none')
                 }
 
-            } else if ('verificationRequired' in responseBody) {
-                let verificationRequired = responseBody['verificationRequired']
-                let verificationUserAuth = verificationRequired['userAuth']
+            } else if ('verification_required' in responseBody) {
+                let verificationRequired = responseBody['verification_required']
+                let verificationUserAuth = verificationRequired['user_auth']
 
                 self.mount.render(new DialogCreateNetworkVerify(verificationUserAuth))
             } else if ('network' in responseBody) {
                 let network = responseBody['network']
-                let byJwt = network['byJwt']
+                let byJwt = network['by_jwt']
 
                 setByJwt(byJwt)
                 self.mount.render(new DialogComplete())
@@ -1301,8 +1299,8 @@ function DialogCreateNetworkVerify(userAuth) {
 
         let verifyCode = normalizeVerifyCode(verifyCodeElement.value)
         let requestBody = {
-            userAuth: userAuth,
-            verifyCode: verifyCode
+            'user_auth': userAuth,
+            'verify_code': verifyCode
         }
 
         apiRequest('POST', '/auth/verify', requestBody)
@@ -1338,7 +1336,7 @@ function DialogCreateNetworkVerify(userAuth) {
                 verifyErrorElement.classList.remove('d-none')
             } else if ('network' in responseBody) {
                 let network = responseBody['network']
-                let byJwt = network['byJwt']
+                let byJwt = network['by_jwt']
 
                 setByJwt(byJwt)
                 self.mount.render(new DialogComplete())
@@ -1361,7 +1359,7 @@ function DialogCreateNetworkVerify(userAuth) {
         verifyResendSpinnerElement.classList.remove('d-none')
 
         let requestBody = {
-            userAuth: userAuth
+            'user_auth': userAuth
         }
 
         apiRequest('POST', '/auth/verify-send', requestBody)
@@ -1404,7 +1402,7 @@ function DialogComplete() {
     const self = this
     self.render = (container) => {
         byJwtData = parseByJwt()
-        let networkName = byJwtData['networkName']
+        let networkName = byJwtData['network_name']
 
         renderComplete(container, self.id, networkName)
 
@@ -1447,8 +1445,7 @@ function DialogComplete() {
         preferencesSpinnerElement.classList.remove('d-none')
 
         let requestBody = {
-            byJwt: getByJwt(),
-            productUpdates: preferencesProductUpdateElement.checked
+            'product_updates': preferencesProductUpdateElement.checked
         }
 
         apiRequest('POST', '/preferences/set-preferences', requestBody)
@@ -1518,27 +1515,27 @@ function DialogComplete() {
         feedbackNeedOtherElement.disabled = true
 
         let requestBody = {
-            byJwt: getByJwt(),
-            uses: {
-                personal: feedbackUsePersonalElement.checked,
-                business: feedbackUseBusinessElement.checked
+            // byJwt: getByJwt(),
+            'uses': {
+                'personal': feedbackUsePersonalElement.checked,
+                'business': feedbackUseBusinessElement.checked
             },
-            needs: {
-                private: feedbackNeedPrivateElement.checked,
-                safe: feedbackNeedSafeElement.checked,
-                global: feedbackNeedGlobalElement.checked,
-                collaborate: feedbackNeedCollaborateElement.checked,
-                appControl: feedbackNeedAppControlElement.checked,
-                blockDataBrokers: feedbackNeedBlockDataBrokersElement.checked,
-                blockAds: feedbackNeedBlockAdsElement.checked,
-                focus: feedbackNeedFocusElement.checked,
-                connectServers: feedbackNeedConnectServersElement.checked,
-                runServers: feedbackNeedRunServersElement.checked,
-                preventCyber: feedbackNeedPreventCyberElement.checked,
-                audit: feedbackNeedAuditElement.checked,
-                zeroTrust: feedbackNeedZeroTrustElement.checked,
-                visualize: feedbackNeedVisualizeElement.checked,
-                other: feedbackNeedOtherElement.value
+            'needs': {
+                'private': feedbackNeedPrivateElement.checked,
+                'safe': feedbackNeedSafeElement.checked,
+                'global': feedbackNeedGlobalElement.checked,
+                'collaborate': feedbackNeedCollaborateElement.checked,
+                'app_control': feedbackNeedAppControlElement.checked,
+                'block_data_brokers': feedbackNeedBlockDataBrokersElement.checked,
+                'block_ads': feedbackNeedBlockAdsElement.checked,
+                'focus': feedbackNeedFocusElement.checked,
+                'connect_servers': feedbackNeedConnectServersElement.checked,
+                'run_servers': feedbackNeedRunServersElement.checked,
+                'prevent_cyber': feedbackNeedPreventCyberElement.checked,
+                'audit': feedbackNeedAuditElement.checked,
+                'zero_trust': feedbackNeedZeroTrustElement.checked,
+                'visualize': feedbackNeedVisualizeElement.checked,
+                'other': feedbackNeedOtherElement.value
             }
         }
 
