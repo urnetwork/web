@@ -6,7 +6,7 @@ clean:
 	rm -rf build
 
 build:
-	# TODO run webpack to generate assets into ./build
+	npm install && npm run build  # Outputs build artifacts to ./build
 	mkdir -p build/${WARP_ENV}
 	echo "{\"version\":\"${WARP_VERSION}\",\"status\":\"ok\"}" > build/${WARP_ENV}/status.json
 	docker buildx build --progress plain \
