@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="32px" height="32px" viewBox="0 0 32 32" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>Mask</title>
+    <g id="Mask" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <rect id="Rectangle" fill="#1D3150" fill-rule="nonzero" x="0" y="0" width="32" height="32" rx="16"></rect>
+        <g id="Group" transform="translate(3.860841, 3.523387)" stroke="#FFFFFF" stroke-width="1.5">
+            <circle id="Oval" cx="12.1987548" cy="6" r="6"></circle>
+            <circle id="Oval" cx="12.1987548" cy="17.9530227" r="6"></circle>
+            <circle id="Oval" transform="translate(17.953179, 12.198536) rotate(90.000000) translate(-17.953179, -12.198536) " cx="17.9531788" cy="12.1985362" r="6"></circle>
+            <circle id="Oval" transform="translate(6.000000, 12.198505) rotate(90.000000) translate(-6.000000, -12.198505) " cx="6" cy="12.198505" r="6"></circle>
+        </g>
+    </g>
+</svg>

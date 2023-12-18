@@ -126,8 +126,10 @@ function sparkPlotTooltips() {
 
             statsTooltipElement.classList.remove('d-none')
             statsTooltipElement.textContent = title
-            statsTooltipElement.style.left = window.scrollX + clientRect.left
-            statsTooltipElement.style.top = window.scrollY + clientRect.top + clientRect.height + 8
+            let left = window.scrollX + clientRect.left
+            let top = window.scrollY + clientRect.top + clientRect.height + 8
+            statsTooltipElement.style.left = left + 'px'
+            statsTooltipElement.style.top = top + 'px'
         }
     })
 
@@ -240,34 +242,34 @@ function StatsPanel(firstLoad) {
             let date = new Date()
             statsLastUpdateElement.textContent = 'Last update ' + date.toLocaleDateString() + ' ' + date.toLocaleTimeString() + '.'
 
-            sparkPlot(self.id('stats-all-transfer'), responseBody['allTransferData'], 'unit', 'GiB')
-            sparkPlot(self.id('stats-all-packets'), responseBody['allPacketsData'], 'count', 'packets')
-            sparkPlot(self.id('stats-providers'), responseBody['providersData'], 'count', 'providers')
-            sparkPlot(self.id('stats-countries'), responseBody['countriesData'], 'count', 'countries')
-            sparkPlot(self.id('stats-regions'), responseBody['regionsData'], 'count', 'regions')
-            sparkPlot(self.id('stats-cities'), responseBody['citiesData'], 'count', 'cities')
-            sparkPlot(self.id('stats-extender-transfer'), responseBody['extenderTransferData'], 'unit', 'GiB')
-            sparkPlot(self.id('stats-extenders'), responseBody['extendersData'], 'count', 'edges')
-            sparkPlot(self.id('stats-networks'), responseBody['networksData'], 'count', 'networks')
-            sparkPlot(self.id('stats-devices'), responseBody['devicesData'], 'count', 'devices')
+            sparkPlot(self.id('stats-all-transfer'), responseBody['all_transfer_data'], 'unit', 'GiB')
+            sparkPlot(self.id('stats-all-packets'), responseBody['all_packets_data'], 'count', 'packets')
+            sparkPlot(self.id('stats-providers'), responseBody['providers_data'], 'count', 'providers')
+            sparkPlot(self.id('stats-countries'), responseBody['countries_data'], 'count', 'countries')
+            sparkPlot(self.id('stats-regions'), responseBody['regions_data'], 'count', 'regions')
+            sparkPlot(self.id('stats-cities'), responseBody['cities_data'], 'count', 'cities')
+            sparkPlot(self.id('stats-extender-transfer'), responseBody['extender_transfer_data'], 'unit', 'GiB')
+            sparkPlot(self.id('stats-extenders'), responseBody['extenders_data'], 'count', 'edges')
+            sparkPlot(self.id('stats-networks'), responseBody['networks_data'], 'count', 'networks')
+            sparkPlot(self.id('stats-devices'), responseBody['devices_data'], 'count', 'devices')
 
             sparkPlotTooltips()
 
-            self.element('stats-all-transfer-summary').textContent = humanRound(responseBody['allTransferSummary'])
-            self.element('stats-all-transfer-summary-rate').textContent = humanRound(responseBody['allTransferSummaryRate'])
-            self.element('stats-all-packets-summary').textContent = humanUnits(responseBody['allPacketsSummary'])
-            self.element('stats-all-packets-summary-rate').textContent = humanUnits(responseBody['allPacketsSummaryRate'])
-            self.element('stats-providers-summary').textContent = humanUnits(responseBody['providersSummary'])
-            self.element('stats-providers-summary-superspeed').textContent = humanUnits(responseBody['providersSummarySuperspeed'])
-            self.element('stats-countries-summary').textContent = humanUnits(responseBody['countriesSummary'])
-            self.element('stats-regions-summary').textContent = humanUnits(responseBody['regionsSummary'])
-            self.element('stats-cities-summary').textContent = humanUnits(responseBody['citiesSummary'])
-            self.element('stats-extender-transfer-summary').textContent = humanRound(responseBody['extenderTransferSummary'])
-            self.element('stats-extender-transfer-summary-rate').textContent = humanRound(responseBody['extenderTransferSummaryRate'])
-            self.element('stats-extenders-summary').textContent = humanUnits(responseBody['extendersSummary'])
-            self.element('stats-extenders-summary-superspeed').textContent = humanUnits(responseBody['extendersSummarySuperspeed'])
-            self.element('stats-networks-summary').textContent = humanUnits(responseBody['networksSummary'])
-            self.element('stats-devices-summary').textContent = humanUnits(responseBody['devicesSummary'])
+            self.element('stats-all-transfer-summary').textContent = humanRound(responseBody['all_transfer_summary'])
+            self.element('stats-all-transfer-summary-rate').textContent = humanRound(responseBody['all_transfer_summary_rate'])
+            self.element('stats-all-packets-summary').textContent = humanUnits(responseBody['all_packets_summary'])
+            self.element('stats-all-packets-summary-rate').textContent = humanUnits(responseBody['all_packets_summary_rate'])
+            self.element('stats-providers-summary').textContent = humanUnits(responseBody['providers_summary'])
+            self.element('stats-providers-summary-superspeed').textContent = humanUnits(responseBody['providers_summary_superspeed'])
+            self.element('stats-countries-summary').textContent = humanUnits(responseBody['countries_summary'])
+            self.element('stats-regions-summary').textContent = humanUnits(responseBody['regions_summary'])
+            self.element('stats-cities-summary').textContent = humanUnits(responseBody['cities_summary'])
+            self.element('stats-extender-transfer-summary').textContent = humanRound(responseBody['extender_transfer_summary'])
+            self.element('stats-extender-transfer-summary-rate').textContent = humanRound(responseBody['extender_transfer_summary_rate'])
+            self.element('stats-extenders-summary').textContent = humanUnits(responseBody['extenders_summary'])
+            self.element('stats-extenders-summary-superspeed').textContent = humanUnits(responseBody['extenders_summary_superspeed'])
+            self.element('stats-networks-summary').textContent = humanUnits(responseBody['networks_summary'])
+            self.element('stats-devices-summary').textContent = humanUnits(responseBody['devices_summary'])
         }
 
         // 5 minutes
@@ -292,12 +294,12 @@ function renderStats(container, id) {
         <div class="stats-container">
             <div class="stat"><table><tr><td colspan="2" class="title">Transfer (GiB)</td></tr><tr><td id="${id('stats-all-transfer')}" class="plot"></td><td class="current"><span id="${id('stats-all-transfer-summary')}">---</span>GiB<div class="substat"><div><span id="${id('stats-all-transfer-summary-rate')}">---</span>gbps</div><div>average</div></div></td></tr></table></div>
             <div class="stat"><table><tr><td colspan="2" class="title">Packets</td></tr><tr><td id="${id('stats-all-packets')}" class="plot"></td><td class="current"><span id="${id('stats-all-packets-summary')}">---</span><div class="substat"><div><span id="${id('stats-all-packets-summary-rate')}">---</span>pps</div><div>average</div></div></td></tr></td></tr></table></div>
-            <div class="stat"><table><tr><td colspan="2" class="title">Providers</td></tr><tr><td id="${id('stats-providers')}" class="plot"></td><td class="current"><span id="${id('stats-providers-summary')}">---</span><div class="substat"><div><span id="${id('stats-providers-summary-superspeed')}">---</span></div><div><img src="res/images/superfast.svg" class="superfast">superfast</div></div></td></tr></table></div>
+            <div class="stat"><table><tr><td colspan="2" class="title">Providers</td></tr><tr><td id="${id('stats-providers')}" class="plot"></td><td class="current"><span id="${id('stats-providers-summary')}">---</span><div class="substat"><div><span id="${id('stats-providers-summary-superspeed')}">---</span></div><div><img src="res/images/superfast.svg" class="superfast" alt="Superfast">superfast</div></div></td></tr></table></div>
             <div class="stat"><table><tr><td colspan="2" class="title">Countries</td></tr><tr><td id="${id('stats-countries')}" class="plot"></td><td class="current"><span id="${id('stats-countries-summary')}">---</span></td></tr></table></div>
             <div class="stat"><table><tr><td colspan="2" class="title">Regions</td></tr><tr><td id="${id('stats-regions')}" class="plot"></td><td class="current"><span id="${id('stats-regions-summary')}">---</span></td></tr></table></div>
             <div class="stat"><table><tr><td colspan="2" class="title">Cities</td></tr><tr><td id="${id('stats-cities')}" class="plot"></td><td class="current"><span id="${id('stats-cities-summary')}">---</span></td></tr></table></div>
             <div class="stat"><table><tr><td colspan="2" class="title">Extender Transfer (GiB)</td></tr><tr><td id="${id('stats-extender-transfer')}" class="plot"></td><td class="current"><span id="${id('stats-extender-transfer-summary')}">---</span>GiB<div class="substat"><div><span id="${id('stats-extender-transfer-summary-rate')}">---</span>gbps</div><div>average</div></div></td></tr></table></div>
-            <div class="stat"><table><tr><td colspan="2" class="title">Extenders</td></tr><tr><td id="${id('stats-extenders')}" class="plot"></td><td class="current"><span id="${id('stats-extenders-summary')}">---</span><div class="substat"><div><span id="${id('stats-extenders-summary-superspeed')}">---</span></div><div><img src="res/images/superfast.svg" class="superfast">superfast</div></div></td></tr></table></div>
+            <div class="stat"><table><tr><td colspan="2" class="title">Extenders</td></tr><tr><td id="${id('stats-extenders')}" class="plot"></td><td class="current"><span id="${id('stats-extenders-summary')}">---</span><div class="substat"><div><span id="${id('stats-extenders-summary-superspeed')}">---</span></div><div><img src="res/images/superfast.svg" class="superfast" alt="Superfast">superfast</div></div></td></tr></table></div>
             <div class="stat"><table><tr><td colspan="2" class="title">Networks</td></tr><tr><td id="${id('stats-networks')}" class="plot"></td><td class="current"><span id="${id('stats-networks-summary')}">---</span></td></tr></table></div>
             <div class="stat"><table><tr><td colspan="2" class="title">Devices</td></tr><tr><td id="${id('stats-devices')}" class="plot"></td><td class="current"><span id="${id('stats-devices-summary')}">---</span></td></tr></table></div>
         </div>

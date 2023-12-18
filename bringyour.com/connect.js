@@ -4,6 +4,7 @@ const appleClientId = 'com.bringyour.service'
 const authJwtRedirect = 'https://bringyour.com/connect'
 
 
+
 // see https://developers.google.com/identity/gsi/web/guides/handle-credential-responses-js-functions
 function handleGoogleCredentialResponse(response) {
     // console.log(response)
@@ -109,8 +110,8 @@ function DialogInitial(firstLoad) {
         loginSpinnerElement.classList.remove('d-none')
 
         let requestBody = {
-            authJwtType: authJwtType,
-            authJwt: authJwt
+            'auth_jwt_type': authJwtType,
+            'auth_jwt': authJwt
         }
 
         apiRequest('POST', '/auth/login', requestBody)
@@ -127,48 +128,49 @@ function DialogInitial(firstLoad) {
         // }, 1000)
     }
     self.handleSubmitAuthJwtResponse = (responseBody, authJwtType, authJwt) => {
-        const loginUserAuthElement = self.element('login-user-auth')
-        const loginButtonElement = self.element('login-button')
-        const loginSpinnerElement = self.element('login-spinner')
-
-        loginUserAuthElement.disabled = false
-        loginButtonElement.disabled = false
-        loginSpinnerElement.classList.add('d-none')
-
         if (responseBody) {
             if ('network' in responseBody) {
                 let network = responseBody['network']
-                let byJwt = network['byJwt']
+                let byJwt = network['by_jwt']
 
                 setByJwt(byJwt)
                 self.mount.render(new DialogComplete())
-            } else if ('authAllowed' in responseBody) {
+            } else if ('auth_allowed' in responseBody) {
                 // and existing network but different login
-                let authAllowed = responseBody['authAllowed']
-                let message
-                if (authAllowed.includes('apple') && authAllowed.includes('google')) {
-                    message = 'Please continue with Apple or Google'
-                } else if (authAllowed.includes('apple')) {
-                    message = 'Please continue with Apple'
-                } else if (authAllowed.includes('google')) {
-                    message = 'Please continue with Google'
-                } else if (authAllowed.includes('password')) {
-                    message = 'Please continue with email or phone number'
-                } else {
-                    message = 'Something went wrong. Please try again later.'
-                }
-                let errorElement = self.element('login-error')
-                errorElement.textContent = message
-                errorElement.classList.remove('d-none')
+                let authAllowed = responseBody['auth_allowed']
 
-                loginUserAuthElement.disabled = false
-                loginButtonElement.disabled = false
-                loginSpinnerElement.classList.add('d-none')
+                let userAuth = responseBody['user_auth']
+                if (authAllowed.includes('password') && userAuth) {
+                    // just take to password login instead of showing the "please continue with email ..." message
+                    self.mount.render(new DialogLoginPassword(userAuth))
+                } else {
+                    let message
+                    if (authAllowed.includes('apple') && authAllowed.includes('google')) {
+                        message = 'Please continue with Apple or Google'
+                    } else if (authAllowed.includes('apple')) {
+                        message = 'Please continue with Apple'
+                    } else if (authAllowed.includes('google')) {
+                        message = 'Please continue with Google'
+                    } else if (authAllowed.includes('password')) {
+                        message = 'Please continue with email or phone number'
+                    } else {
+                        message = 'Something went wrong. Please try again later.'
+                    }
+                    let errorElement = self.element('login-error')
+                    errorElement.textContent = message
+                    errorElement.classList.remove('d-none')
+
+                    const loginUserAuthElement = self.element('login-user-auth')
+                    const loginButtonElement = self.element('login-button')
+                    const loginSpinnerElement = self.element('login-spinner')
+
+                    loginUserAuthElement.disabled = false
+                    loginButtonElement.disabled = false
+                    loginSpinnerElement.classList.add('d-none')
+                }
             } else {
                 // a new network
-                // let authJwtType = responseBody['authJwtType']
-                // let authJwt = responseBody['authJwt']
-                let userName = responseBody['userName']
+                let userName = responseBody['user_name']
                 self.mount.render(new DialogCreateNetworkAuthJwt(authJwtType, authJwt, userName))
             }
         }
@@ -185,7 +187,7 @@ function DialogInitial(firstLoad) {
 
         let userAuth = loginUserAuthElement.value
         let requestBody = {
-            userAuth: userAuth
+            'user_auth': userAuth
         }
 
         apiRequest('POST', '/auth/login', requestBody)
@@ -213,7 +215,7 @@ function DialogInitial(firstLoad) {
         if (responseBody) {
             if ('error' in responseBody) {
                 let error = responseBody['error']
-                let suggestedUserAuth = error['suggestedUserAuth'] || loginUserAuthElement.value
+                let suggestedUserAuth = error['suggested_user_auth'] || loginUserAuthElement.value
                 let message = error['message']
 
                 let errorElement = self.element('login-error')
@@ -225,10 +227,10 @@ function DialogInitial(firstLoad) {
                 loginUserAuthElement.disabled = false
                 loginButtonElement.disabled = false
                 loginSpinnerElement.classList.add('d-none')
-            } else if ('authAllowed' in responseBody) {
+            } else if ('auth_allowed' in responseBody) {
                 // an existing network
-                let userAuth = responseBody['userAuth']
-                let authAllowed = responseBody['authAllowed']
+                let userAuth = responseBody['user_auth']
+                let authAllowed = responseBody['auth_allowed']
                 if (authAllowed.includes('password')) {
                     self.mount.render(new DialogLoginPassword(userAuth))
                 } else {
@@ -252,7 +254,7 @@ function DialogInitial(firstLoad) {
                 }
             } else {
                 // a new network
-                let userAuth = responseBody['userAuth']
+                let userAuth = responseBody['user_auth']
                 self.mount.render(new DialogCreateNetwork(userAuth))
             }
         }
@@ -302,8 +304,8 @@ function DialogLoginPassword(userAuth) {
 
         let password = loginPasswordElement.value
         let requestBody = {
-            userAuth: userAuth,
-            password: password
+            'user_auth': userAuth,
+            'password': password
         }
 
         apiRequest('POST', '/auth/login-with-password', requestBody)
@@ -340,14 +342,14 @@ function DialogLoginPassword(userAuth) {
                 loginPasswordElement.disabled = false
                 loginButtonElement.disabled = false
                 loginSpinnerElement.classList.add('d-none')
-            } else if ('validationRequired' in responseBody) {
-                let validationRequired = responseBody['validationRequired']
-                let validationUserAuth = validationRequired['userAuth']
+            } else if ('verification_required' in responseBody) {
+                let verificationRequired = responseBody['verification_required']
+                let verificationUserAuth = verificationRequired['user_auth']
 
-                self.mount.render(new DialogCreateNetworkValidate(validationUserAuth))
+                self.mount.render(new DialogCreateNetworkVerify(verificationUserAuth))
             } else if ('network' in responseBody) {
                 let network = responseBody['network']
-                let byJwt = network['byJwt']
+                let byJwt = network['by_jwt']
 
                 setByJwt(byJwt)
                 self.mount.render(new DialogComplete())
@@ -407,7 +409,7 @@ function DialogPasswordReset(userAuth) {
 
         let userAuth = passwordResetUserAuthElement.value
         let requestBody = {
-            userAuth: userAuth
+            'user_auth': userAuth
         }
 
         apiRequest('POST', '/auth/password-reset', requestBody)
@@ -445,8 +447,8 @@ function DialogPasswordReset(userAuth) {
                 passwordResetUserAuthElement.disabled = false
                 passwordResetButtonElement.disabled = false
                 passwordResetSpinnerElement.classList.add('d-none')
-            } else if ('userAuth' in responseBody) {
-                let responseUserAuth = responseBody['userAuth']
+            } else if ('user_auth' in responseBody) {
+                let responseUserAuth = responseBody['user_auth']
 
                 self.mount.render(new DialogPasswordResetAfterSend(responseUserAuth))
             } else {
@@ -488,7 +490,7 @@ function DialogPasswordResetAfterSend(userAuth) {
         passwordResetResendSpinnerElement.classList.remove('d-none')
 
         let requestBody = {
-            userAuth: userAuth
+            'user_auth': userAuth
         }
 
         apiRequest('POST', '/auth/password-reset', requestBody)
@@ -587,8 +589,8 @@ function DialogPasswordResetComplete(resetCode) {
 
         let password = passwordResetPasswordElement.value
         let requestBody = {
-            resetCode: resetCode,
-            password: password
+            'reset_code': resetCode,
+            'password': password
         }
 
         apiRequest('POST', '/auth/password-set', requestBody)
@@ -620,7 +622,7 @@ function DialogPasswordResetComplete(resetCode) {
             if ('error' in responseBody) {
                 let error = responseBody['error']
 
-                if ('resetCodeError' in error) {
+                if ('reset_code_error' in error) {
                     let errorElement = self.element('password-reset-error')
                     errorElement.innerHTML = 'Reset code expired. <a href="/connect/password-reset">Get a new code</a>.'
                     errorElement.classList.remove('d-none')
@@ -771,7 +773,7 @@ function NetworkNameValidator(
             }
 
             let requestBody = {
-                networkName: networkName
+                'network_name': networkName
             }
 
             apiRequest('POST', '/auth/network-check', requestBody)
@@ -884,11 +886,11 @@ function DialogCreateNetworkAuthJwt(authJwtType, authJwt, userName) {
         let networkName = createNetworkNameElement.value
         let terms = createAgreeTermsElement.checked
         let requestBody = {
-            authJwtType: authJwtType,
-            authJwt: authJwt,
-            userName: userName,
-            networkName: networkName,
-            terms: terms
+            'auth_jwt_type': authJwtType,
+            'auth_jwt': authJwt,
+            'user_name': userName,
+            'network_name': networkName,
+            'terms': terms,
         }
 
         apiRequest('POST', '/auth/network-create', requestBody)
@@ -930,7 +932,7 @@ function DialogCreateNetworkAuthJwt(authJwtType, authJwt, userName) {
                 createButtonElement.disabled = false
                 createSpinnerElement.classList.add('d-none')
 
-                if (error['userAuthConflict']) {
+                if (error['user_auth_conflict']) {
                     createUserAuthErrorElement.innerHTML = 'This email or phone number is already taken. <a href="/connect">Sign in</a>.'
                     createUserAuthErrorElement.classList.remove('d-none')
                 } else if ('message' in error) {
@@ -940,21 +942,21 @@ function DialogCreateNetworkAuthJwt(authJwtType, authJwt, userName) {
                     createErrorElement.classList.add('d-none')
                 }
 
-                if ('networkNameMessage' in error) {
-                    createNetworkNameErrorElement.textContent = error['networkNameMessage']
+                if ('network_name_message' in error) {
+                    createNetworkNameErrorElement.textContent = error['network_name_message']
                     createNetworkNameErrorElement.classList.remove('d-none')
                 } else {
                     createNetworkNameErrorElement.classList.add('d-none')
                 }
 
-            } else if ('validationRequired' in responseBody) {
-                let validationRequired = responseBody['validationRequired']
-                let validationUserAuth = validationRequired['userAuth']
+            } else if ('verification_required' in responseBody) {
+                let verificationRequired = responseBody['verification_required']
+                let verificationUserAuth = verificationRequired['user_auth']
 
-                self.mount.render(new DialogCreateNetworkValidate(validationUserAuth))
+                self.mount.render(new DialogCreateNetworkVerify(verificationUserAuth))
             } else if ('network' in responseBody) {
                 let network = responseBody['network']
-                let byJwt = network['byJwt']
+                let byJwt = network['by_jwt']
 
                 setByJwt(byJwt)
                 self.mount.render(new DialogComplete())
@@ -1111,11 +1113,11 @@ function DialogCreateNetwork(userAuth) {
         let networkName = createNetworkNameElement.value
         let terms = createAgreeTermsElement.checked
         let requestBody = {
-            userName: userName,
-            userAuth: userAuth,
-            password: password,
-            networkName: networkName,
-            terms: terms
+            'user_name': userName,
+            'user_auth': userAuth,
+            'password': password,
+            'network_name': networkName,
+            'terms': terms
         }
 
         apiRequest('POST', '/auth/network-create', requestBody)
@@ -1172,36 +1174,36 @@ function DialogCreateNetwork(userAuth) {
                     createErrorElement.classList.add('d-none')
                 }
 
-                if (error['userAuthConflict']) {
+                if (error['user_auth_conflict']) {
                     createUserAuthErrorElement.innerHTML = 'This email or phone number is already taken. <a href="/connect">Sign in</a> or <a href="/connect/password-reset">reset your password</a>.'
                     createUserAuthErrorElement.classList.remove('d-none')
-                } else if ('userAuthMessage' in error) {
-                    createUserAuthErrorElement.textContent = error['userAuthMessage']
+                } else if ('user_auth_message' in error) {
+                    createUserAuthErrorElement.textContent = error['user_auth_message']
                     createUserAuthErrorElement.classList.remove('d-none')
                 } else {
                     createUserAuthErrorElement.classList.add('d-none')
                 }
-                if ('passwordMessage' in error) {
-                    createPasswordErrorElement.textContent = error['passwordMessage']
+                if ('password_message' in error) {
+                    createPasswordErrorElement.textContent = error['password_message']
                     createPasswordErrorElement.classList.remove('d-none')
                 } else {
                     createPasswordErrorElement.classList.add('d-none')
                 }
-                if ('networkNameMessage' in error) {
-                    createNetworkNameErrorElement.textContent = error['networkNameMessage']
+                if ('network_name_message' in error) {
+                    createNetworkNameErrorElement.textContent = error['network_name_message']
                     createNetworkNameErrorElement.classList.remove('d-none')
                 } else {
                     createNetworkNameErrorElement.classList.add('d-none')
                 }
 
-            } else if ('validationRequired' in responseBody) {
-                let validationRequired = responseBody['validationRequired']
-                let validationUserAuth = validationRequired['userAuth']
+            } else if ('verification_required' in responseBody) {
+                let verificationRequired = responseBody['verification_required']
+                let verificationUserAuth = verificationRequired['user_auth']
 
-                self.mount.render(new DialogCreateNetworkValidate(validationUserAuth))
+                self.mount.render(new DialogCreateNetworkVerify(verificationUserAuth))
             } else if ('network' in responseBody) {
                 let network = responseBody['network']
-                let byJwt = network['byJwt']
+                let byJwt = network['by_jwt']
 
                 setByJwt(byJwt)
                 self.mount.render(new DialogComplete())
@@ -1240,45 +1242,45 @@ function DialogCreateNetwork(userAuth) {
 }
 
 
-function DialogCreateNetworkValidate(userAuth) {
+function DialogCreateNetworkVerify(userAuth) {
     const self = this
 
-    function normalizeValidateCode(networkName) {
+    function normalizeVerifyCode(networkName) {
         return networkName.replace(/[^\da-z]+/gi, '')
     }
 
     self.render = (container) => {
-        renderCreateNetworkValidate(container, self.id, userAuth)
+        renderCreateNetworkVerify(container, self.id, userAuth)
 
-        const validateButtonElement = self.element('validate-button')
-        const validateFormElement = self.element('validate-form')
-        let validateCodeElement = self.element('validate-code')
+        const verifyButtonElement = self.element('verify-button')
+        const verifyFormElement = self.element('verify-form')
+        let verifyCodeElement = self.element('verify-code')
 
-        validateButtonElement.addEventListener('click', (event) => {
+        verifyButtonElement.addEventListener('click', (event) => {
             self.submit()
         })
 
-        validateFormElement.addEventListener('submit', (event) => {
+        verifyFormElement.addEventListener('submit', (event) => {
             event.preventDefault()
-            if (!validateButtonElement.disabled) {
+            if (!verifyButtonElement.disabled) {
                 self.submit()
             }
         })
 
-        validateCodeElement.addEventListener('input', (event) => {
-            let normalValidateCode = normalizeValidateCode(validateCodeElement.value)
-            if (normalValidateCode != validateCodeElement.value) {
-                let selectionStart = validateCodeElement.selectionStart
-                let selectionEnd = validateCodeElement.selectionEnd
-                validateCodeElement.value = normalValidateCode
-                validateCodeElement.setSelectionRange(selectionStart, selectionEnd)
+        verifyCodeElement.addEventListener('input', (event) => {
+            let normalVerifyCode = normalizeVerifyCode(verifyCodeElement.value)
+            if (normalVerifyCode != verifyCodeElement.value) {
+                let selectionStart = verifyCodeElement.selectionStart
+                let selectionEnd = verifyCodeElement.selectionEnd
+                verifyCodeElement.value = normalVerifyCode
+                verifyCodeElement.setSelectionRange(selectionStart, selectionEnd)
             }
         })
 
-        validateCodeElement.focus()
+        verifyCodeElement.focus()
     }
     self.router = (url) => {
-        if (url.pathname == '/connect/validate/resend') {
+        if (url.pathname == '/connect/verify/resend') {
             self.resend()
         }
     }
@@ -1287,21 +1289,21 @@ function DialogCreateNetworkValidate(userAuth) {
     // event handlers
 
     self.submit = () => {
-        const validateCodeElement = self.element('validate-code')
-        const validateButtonElement = self.element('validate-button')
-        const validateSpinnerElement = self.element('validate-spinner')
+        const verifyCodeElement = self.element('verify-code')
+        const verifyButtonElement = self.element('verify-button')
+        const verifySpinnerElement = self.element('verify-spinner')
 
-        validateCodeElement.disabled = true
-        validateButtonElement.disabled = true
-        validateSpinnerElement.classList.remove('d-none')
+        verifyCodeElement.disabled = true
+        verifyButtonElement.disabled = true
+        verifySpinnerElement.classList.remove('d-none')
 
-        let validateCode = normalizeValidateCode(validateCodeElement.value)
+        let verifyCode = normalizeVerifyCode(verifyCodeElement.value)
         let requestBody = {
-            userAuth: userAuth,
-            validateCode: validateCode
+            'user_auth': userAuth,
+            'verify_code': verifyCode
         }
 
-        apiRequest('POST', '/auth/validate', requestBody)
+        apiRequest('POST', '/auth/verify', requestBody)
             .catch((err) => {
                 self.handleSubmitResponse(null)
             })
@@ -1310,57 +1312,57 @@ function DialogCreateNetworkValidate(userAuth) {
             })
 
         // setTimeout(() => {
-        //     let responseBody = MOCK_API_auth_validate(requestBody)
+        //     let responseBody = MOCK_API_auth_verify(requestBody)
         //     self.handleSubmitResponse(responseBody)
         // }, 1000)
     }
     self.handleSubmitResponse = (responseBody) => {
-        const validateCodeElement = self.element('validate-code')
-        const validateButtonElement = self.element('validate-button')
-        const validateSpinnerElement = self.element('validate-spinner')
+        const verifyCodeElement = self.element('verify-code')
+        const verifyButtonElement = self.element('verify-button')
+        const verifySpinnerElement = self.element('verify-spinner')
 
-        validateCodeElement.disabled = false
-        validateButtonElement.disabled = false
-        validateSpinnerElement.classList.add('d-none')
+        verifyCodeElement.disabled = false
+        verifyButtonElement.disabled = false
+        verifySpinnerElement.classList.add('d-none')
 
         if (responseBody) {
             if ('error' in responseBody) {
                 let error = responseBody['error']
                 let message = error['message']
 
-                const validateErrorElement = self.element('validate-error')
+                const verifyErrorElement = self.element('verify-error')
 
-                validateErrorElement.textContent = message
-                validateErrorElement.classList.remove('d-none')
+                verifyErrorElement.textContent = message
+                verifyErrorElement.classList.remove('d-none')
             } else if ('network' in responseBody) {
                 let network = responseBody['network']
-                let byJwt = network['byJwt']
+                let byJwt = network['by_jwt']
 
                 setByJwt(byJwt)
                 self.mount.render(new DialogComplete())
             } else {
                 let message = 'Something went wrong. Please try again later.'
 
-                const validateErrorElement = self.element('validate-error')
+                const verifyErrorElement = self.element('verify-error')
 
-                validateErrorElement.textContent = message
-                validateErrorElement.classList.remove('d-none')
+                verifyErrorElement.textContent = message
+                verifyErrorElement.classList.remove('d-none')
             }
         }
     }
 
     self.resend = () => {
-        let validateResendLinkElement = self.element('validate-resend-link')
-        let validateResendSpinnerElement = self.element('validate-resend-spinner')
+        let verifyResendLinkElement = self.element('verify-resend-link')
+        let verifyResendSpinnerElement = self.element('verify-resend-spinner')
 
-        validateResendLinkElement.classList.add('d-none')
-        validateResendSpinnerElement.classList.remove('d-none')
+        verifyResendLinkElement.classList.add('d-none')
+        verifyResendSpinnerElement.classList.remove('d-none')
 
         let requestBody = {
-            userAuth: userAuth
+            'user_auth': userAuth
         }
 
-        apiRequest('POST', '/auth/validate-send', requestBody)
+        apiRequest('POST', '/auth/verify-send', requestBody)
             .catch((err) => {
                 self.handleResendResponse(null)
             })
@@ -1369,22 +1371,22 @@ function DialogCreateNetworkValidate(userAuth) {
             })
 
         // setTimeout(() => {
-        //     let responseBody = MOCK_API_auth_validate_send(requestBody)
+        //     let responseBody = MOCK_API_auth_verify_send(requestBody)
         //     self.handleResendResponse(responseBody)
         // }, 1000)
     }
     self.handleResendResponse = (responseBody) => {
-        let validateResendLinkElement = self.element('validate-resend-link')
-        let validateResendSpinnerElement = self.element('validate-resend-spinner')
-        let validateResendSentElement = self.element('validate-resend-sent')
+        let verifyResendLinkElement = self.element('verify-resend-link')
+        let verifyResendSpinnerElement = self.element('verify-resend-spinner')
+        let verifyResendSentElement = self.element('verify-resend-sent')
 
-        validateResendLinkElement.classList.add('d-none')
-        validateResendSpinnerElement.classList.add('d-none')
-        validateResendSentElement.classList.remove('d-none')
+        verifyResendLinkElement.classList.add('d-none')
+        verifyResendSpinnerElement.classList.add('d-none')
+        verifyResendSentElement.classList.remove('d-none')
 
         setTimeout(() => {
-            validateResendLinkElement.classList.remove('d-none')
-            validateResendSentElement.classList.add('d-none')
+            verifyResendLinkElement.classList.remove('d-none')
+            verifyResendSentElement.classList.add('d-none')
         }, 10000)
     }
 }
@@ -1400,7 +1402,7 @@ function DialogComplete() {
     const self = this
     self.render = (container) => {
         byJwtData = parseByJwt()
-        let networkName = byJwtData['networkName']
+        let networkName = byJwtData['network_name']
 
         renderComplete(container, self.id, networkName)
 
@@ -1443,8 +1445,7 @@ function DialogComplete() {
         preferencesSpinnerElement.classList.remove('d-none')
 
         let requestBody = {
-            byJwt: getByJwt(),
-            productUpdates: preferencesProductUpdateElement.checked
+            'product_updates': preferencesProductUpdateElement.checked
         }
 
         apiRequest('POST', '/preferences/set-preferences', requestBody)
@@ -1514,27 +1515,27 @@ function DialogComplete() {
         feedbackNeedOtherElement.disabled = true
 
         let requestBody = {
-            byJwt: getByJwt(),
-            uses: {
-                personal: feedbackUsePersonalElement.checked,
-                business: feedbackUseBusinessElement.checked
+            // byJwt: getByJwt(),
+            'uses': {
+                'personal': feedbackUsePersonalElement.checked,
+                'business': feedbackUseBusinessElement.checked
             },
-            needs: {
-                private: feedbackNeedPrivateElement.checked,
-                safe: feedbackNeedSafeElement.checked,
-                global: feedbackNeedGlobalElement.checked,
-                collaborate: feedbackNeedCollaborateElement.checked,
-                appControl: feedbackNeedAppControlElement.checked,
-                blockDataBrokers: feedbackNeedBlockDataBrokersElement.checked,
-                blockAds: feedbackNeedBlockAdsElement.checked,
-                focus: feedbackNeedFocusElement.checked,
-                connectServers: feedbackNeedConnectServersElement.checked,
-                runServers: feedbackNeedRunServersElement.checked,
-                preventCyber: feedbackNeedPreventCyberElement.checked,
-                audit: feedbackNeedAuditElement.checked,
-                zeroTrust: feedbackNeedZeroTrustElement.checked,
-                visualize: feedbackNeedVisualizeElement.checked,
-                other: feedbackNeedOtherElement.value
+            'needs': {
+                'private': feedbackNeedPrivateElement.checked,
+                'safe': feedbackNeedSafeElement.checked,
+                'global': feedbackNeedGlobalElement.checked,
+                'collaborate': feedbackNeedCollaborateElement.checked,
+                'app_control': feedbackNeedAppControlElement.checked,
+                'block_data_brokers': feedbackNeedBlockDataBrokersElement.checked,
+                'block_ads': feedbackNeedBlockAdsElement.checked,
+                'focus': feedbackNeedFocusElement.checked,
+                'connect_servers': feedbackNeedConnectServersElement.checked,
+                'run_servers': feedbackNeedRunServersElement.checked,
+                'prevent_cyber': feedbackNeedPreventCyberElement.checked,
+                'audit': feedbackNeedAuditElement.checked,
+                'zero_trust': feedbackNeedZeroTrustElement.checked,
+                'visualize': feedbackNeedVisualizeElement.checked,
+                'other': feedbackNeedOtherElement.value
             }
         }
 
@@ -1749,7 +1750,7 @@ function renderCreateNetworkAuthJwt(container, id, authJwtType, authJwt, userNam
                          <div><div class="input-group"><input id="${id('create-network-name')}" type="text" placeholder="yournetworkname" class="form-control network-name" aria-describedby="${id('network-addon')}"/><span class="input-group-text" id="${id('network-addon')}">.bringyour.network<span id="${id('create-network-name-spinner')}" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span></span></div></div>
                          <div id="${id('create-network-name-error')}" class="text-secondary d-none"></div>
                          <div id="${id('create-network-name-available')}" class="text-success d-none">Available!</div>
-                         <div class="no-title"><label class="form-check-label"><input id="${id('create-agree-terms')}" type="checkbox" class="form-check-input" value="">I agree to the <a href="/terms" target="_blank">BringYour terms</a>. Learn about how we use and protect your data in our <a href="/privacy">Privacy Policy</a></label></div>
+                         <div class="no-title"><label class="form-check-label"><input id="${id('create-agree-terms')}" type="checkbox" class="form-check-input" value="">I agree to the <a href="/terms" target="_blank">BringYour terms</a>. Learn about how we use and protect your data in our <a href="/privacy" target="_blank">Privacy Policy</a></label></div>
                          <div id="${id('create-error')}" class="text-danger d-none"></div>
                          <div class="no-title"><button id="${id('create-button')}" class="btn btn-primary" type="button"><span id="${id('create-spinner')}" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span><span class="primary">Create Network</span></button></div>
                     </form>
@@ -1783,7 +1784,7 @@ function renderCreateNetwork(container, id, userAuth) {
                          <div><div class="input-group"><input id="${id('create-network-name')}" type="text" placeholder="yournetworkname" class="form-control network-name" aria-describedby="${id('network-addon')}"/><span class="input-group-text" id="${id('network-addon')}">.bringyour.network<span id="${id('create-network-name-spinner')}" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span></span></div></div>
                          <div id="${id('create-network-name-error')}" class="text-secondary d-none"></div>
                          <div id="${id('create-network-name-available')}" class="text-success d-none">Available!</div>
-                         <div class="no-title"><label class="form-check-label"><input id="${id('create-agree-terms')}" type="checkbox" class="form-check-input" value="">I agree to the <a href="/terms" target="_blank">BringYour terms</a>. Learn about how we use and protect your data in our <a href="/privacy">Privacy Policy</a></label></div>
+                         <div class="no-title"><label class="form-check-label"><input id="${id('create-agree-terms')}" type="checkbox" class="form-check-input" value="">A one-time message to establish your identity will be sent to you. Message and data rates may apply. I agree to the <a href="/terms" target="_blank">BringYour terms</a>. Learn about how we use and protect your data in our <a href="/privacy" target="_blank">Privacy Policy</a></label></div>
                          <div id="${id('create-error')}" class="text-danger d-none"></div>
                          <div class="no-title"><button id="${id('create-button')}" class="btn btn-primary" type="button"><span id="${id('create-spinner')}" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span><span class="primary">Create Network</span></button></div>
                     </form>
@@ -1794,7 +1795,7 @@ function renderCreateNetwork(container, id, userAuth) {
     container.innerHTML = html
 }
 
-function renderCreateNetworkValidate(container, id, userAuth) {
+function renderCreateNetworkVerify(container, id, userAuth) {
     let title
     if (userAuthType(userAuth) == 'email') {
         title = 'Verify your email'
@@ -1812,11 +1813,11 @@ function renderCreateNetworkValidate(container, id, userAuth) {
           </div>
           <div class="login-option">
                <div class="login-container">
-                    <form id="${id('validate-form')}">
-                         <div class="password-header"><div class="info-title">Code</div><div class="header-right"><a id="${id('validate-resend-link')}" href="/connect/validate/resend">Resend</a><div id="${id('validate-resend-spinner')}" class="d-none"><span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>Resend</div><div id="${id('validate-resend-sent')}" class="d-none">Sent!</div></div></div>
-                         <div><input id="${id('validate-code')}" type="text" class="form-control"></div>
-                         <div id="${id('validate-error')}" class="text-danger d-none"></div>
-                         <div class="no-title"><button id="${id('validate-button')}" class="btn btn-primary" type="button"><span id="${id('validate-spinner')}" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span><span class="primary">Continue</span></button></div>
+                    <form id="${id('verify-form')}">
+                         <div class="password-header"><div class="info-title">Code</div><div class="header-right"><a id="${id('verify-resend-link')}" href="/connect/verify/resend">Resend</a><div id="${id('verify-resend-spinner')}" class="d-none"><span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>Resend</div><div id="${id('verify-resend-sent')}" class="d-none">Sent!</div></div></div>
+                         <div><input id="${id('verify-code')}" type="text" class="form-control"></div>
+                         <div id="${id('verify-error')}" class="text-danger d-none"></div>
+                         <div class="no-title"><button id="${id('verify-button')}" class="btn btn-primary" type="button"><span id="${id('verify-spinner')}" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span><span class="primary">Continue</span></button></div>
                     </form>
                </div>
           </div>
