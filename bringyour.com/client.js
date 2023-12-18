@@ -29,7 +29,7 @@ function parseJwt(jwt) {
 }
 
 
-
+// TODO can localStorage be accessed from app.bringyour.com?
 function setByJwt(byJwt) {
     localStorage.setItem('byJwt', byJwt)
     if (window.notifyByJwtChanged) {
