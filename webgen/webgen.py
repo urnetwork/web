@@ -106,7 +106,7 @@ def build(dirpath, minify=True, validate=True):
             sys.stdout.flush()
             p = subprocess.run([
                 'html-validate',
-                '--rule=doctype-style:"off"',
+                '--rule=doctype-style:off',
                 out_path
             ])
             if p.returncode == 0:
