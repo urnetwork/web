@@ -23,3 +23,7 @@ body {
 h1 {
   @apply text-4xl font-semibold;
 }
+
+.button {
+  @apply bg-indigo-600 hover:bg-indigo-700 border border-indigo-700 cursor-pointer text-white py-2 px-6 rounded-md active:translate-y-0.5;
+}

@@ -1,8 +1,13 @@
+import Link from "next/link";
+
 export default function Page() {
   return (
     <>
-      <div>
-        <h1>Hello, world!</h1>
+      <div className="max-w-lg mx-auto mt-24 text-center">
+        <h1>You&apos;re not logged in</h1>
+        <Link href="https://bringyour.com">
+          <button className="button mt-6">Log in here</button>
+        </Link>
       </div>
     </>
   );
