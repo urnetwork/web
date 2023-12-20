@@ -56,8 +56,8 @@ export default function RootLayout({
                         href={item.href}
                         className={classNames(
                           pathname == item.href
-                            ? "bg-indigo-700 text-white"
-                            : "text-indigo-200 hover:text-white hover:bg-indigo-700",
+                            ? "bg-indigo-700 text-white shadow-inner"
+                            : "text-indigo-200 hover:text-white hover:bg-indigo-700 hover:shadow-inner",
                           "group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold"
                         )}
                       >
