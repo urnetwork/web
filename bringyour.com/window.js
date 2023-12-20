@@ -21,7 +21,7 @@ function updateConnectButton() {
  * LocalStorage data cannot be accessed by a subdomain. So, the JWT saved by https://bringyour.com is not accessible to
  * the user when they visit https://app.bringyour.com. We don't want to force them to re-authenticate.
  *
- * The solution is to use (cross-origin communication)[https://developer.mozilla.org/en-US/docs/Web/API/Window/postMessage]
+ * The solution is to use [cross-origin communication](https://developer.mozilla.org/en-US/docs/Web/API/Window/postMessage)
  * to send the JWT via an invisible iframe. The iframe handles storing the JWT in localstorage.
  */
 function sendJwtToSubdomain() {
