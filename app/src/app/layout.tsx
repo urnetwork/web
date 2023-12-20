@@ -8,6 +8,7 @@ import {
   UsersIcon,
 } from "@heroicons/react/24/outline";
 import { redirect, usePathname } from "next/navigation";
+import { useEffect } from "react";
 
 const navigation = [
   {
@@ -38,6 +39,20 @@ export default function RootLayout({
   if (pathname == "/") {
     redirect(navigation[0].href);
   }
+
+  // Receive the JWT from bringyour.com
+  useEffect(() => {
+    window.addEventListener("message", (event: MessageEvent) => {
+      if (event.origin == "https://bringyour.com") {
+        const jwtToken = JSON.parse(event.data);
+        if (jwtToken.byJwt) {
+          localStorage.setItem("byJwt", jwtToken.byJwt);
+        } else {
+          localStorage.removeItem("byJwt");
+        }
+      }
+    });
+  }, []);
 
   return (
     <html lang="en" className="h-full text-gray-900">
