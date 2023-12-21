@@ -2,7 +2,7 @@
 
 import { redirect, usePathname } from "next/navigation";
 import "./globals.css";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 export default function RootLayout({
   children,
@@ -10,7 +10,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname().split("?")[0];
-  const isLoggedIn = true;
+
+  let isLoggedIn = true;
 
   if (!isLoggedIn && pathname != "/") {
     redirect("/");

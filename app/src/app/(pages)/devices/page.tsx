@@ -1,23 +1,24 @@
+"use client";
+
 import { DevicePhoneMobileIcon } from "@heroicons/react/24/outline";
 import { PlusIcon } from "@heroicons/react/24/solid";
+import { useEffect, useState } from "react";
 
 async function getData() {
-  const result = await fetch("https://api.bringyour.com/network/clients", {
+  let byJwt = null;
+  if (typeof window != "undefined") {
+    byJwt = localStorage.getItem("byJwt");
+  }
+
+  if (!byJwt) {
+    return;
+  }
+
+  const result = await fetch("http://test.bringyour.com/network/clients", {
     headers: {
-      Authorization:
-        "Bearer eyJhbGciOiJSUzUxMiIsInR5cCI6IkpXVCJ9.eyJuZXR3b3JrX2lkIjoiMDE4YzdlODUtNjJkZC01MmI2LTM5OGEtOTQ0NjRmZjUwM2I3IiwibmV0d29ya19uYW1lIjoiYXdhaXN0ZXN0IiwidXNlcl9pZCI6IjAxOGM3ZTg1LTYyZGQtNTJiNi0zOThhLTk0NDVkYzJhZTNiYiJ9.aLp9tJ35AprU3BbbnAFyKJlr1GMrDb_dtYC2prggFK29SewzzKw3PYIcRJ0EZf60vGMYIjlDiDfICPXJXYCczyuvIflkM9KIFWplZwlGF1tCD6DHAG-cJXdU2f3hHPjMTYN7GltiZGiDnC4CfyyEZQUpXthQNKhzUYXO2AG1FTCbVIHjs5eBh4DP4RqQaav7G_f85UaAm56WyOFoC6HslLJ7d4_kz7hc8mCu2TxoeeyVBdrir8Mb8JZ2U-BwKpWYMwgjmhV5e3S8xP43MwtTdCUe95K6RbSh7633wEkjTIetVmUfh235jEE9uLhYsrDkKcYNTNhRBjA5piGeQcunQA",
+      Authorization: `Bearer ${byJwt}`,
     },
   });
-  // const result = await fetch(
-  //   "https://api.bringyour.com/network/provider-locations",
-  //   {
-  //     headers: {
-  //       Authorization:
-  //         "Bearer eyJhbGciOiJSUzUxMiIsInR5cCI6IkpXVCJ9.eyJuZXR3b3JrX2lkIjoiMDE4YzdlODUtNjJkZC01MmI2LTM5OGEtOTQ0NjRmZjUwM2I3IiwibmV0d29ya19uYW1lIjoiYXdhaXN0ZXN0IiwidXNlcl9pZCI6IjAxOGM3ZTg1LTYyZGQtNTJiNi0zOThhLTk0NDVkYzJhZTNiYiJ9.aLp9tJ35AprU3BbbnAFyKJlr1GMrDb_dtYC2prggFK29SewzzKw3PYIcRJ0EZf60vGMYIjlDiDfICPXJXYCczyuvIflkM9KIFWplZwlGF1tCD6DHAG-cJXdU2f3hHPjMTYN7GltiZGiDnC4CfyyEZQUpXthQNKhzUYXO2AG1FTCbVIHjs5eBh4DP4RqQaav7G_f85UaAm56WyOFoC6HslLJ7d4_kz7hc8mCu2TxoeeyVBdrir8Mb8JZ2U-BwKpWYMwgjmhV5e3S8xP43MwtTdCUe95K6RbSh7633wEkjTIetVmUfh235jEE9uLhYsrDkKcYNTNhRBjA5piGeQcunQA",
-  //     },
-  //   }
-  // );
-  console.log(result);
 
   if (!result.ok) {
     throw new Error("Failed to fetch");
@@ -25,11 +26,16 @@ async function getData() {
   return result.json();
 }
 
-export default async function Page() {
-  const data = await getData();
-  console.log("Response: ", data);
+export default function Page() {
+  const [clients, setClients] = useState([]);
 
-  const clients = data.clients;
+  useEffect(() => {
+    getData().then((data) => {
+      if (data) {
+        setClients(data.clients);
+      }
+    });
+  }, []);
 
   return (
     <>
@@ -38,7 +44,7 @@ export default async function Page() {
           <h1>Your Devices</h1>
           <button className="button btn-primary">
             <div className="flex flex-row gap-2 items-center">
-              <PlusIcon className="w-5 h-5 text-white font-semibold" />
+              <PlusIcon className="w-5 h-4 text-white font-semibold" />
               <p className="font-light">Add device</p>
             </div>
           </button>
