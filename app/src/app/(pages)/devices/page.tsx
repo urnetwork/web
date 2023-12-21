@@ -1,3 +1,5 @@
+import { DevicePhoneMobileIcon } from "@heroicons/react/24/outline";
+
 async function getData() {
   const result = await fetch("https://api.bringyour.com/network/clients", {
     headers: {
@@ -30,12 +32,45 @@ export default async function Page() {
 
   return (
     <>
-      <div className="mt-12 p-4">
-        <h1>Your Devices</h1>
+      <div className="mt-12 p-4 max-w-3xl">
+        <h1 className="mb-8">Your Devices</h1>
 
-        {clients.map((client) => {
-          return <p key={client.client_id}>{client.client_id}</p>;
-        })}
+        <div className="flex flex-col gap-4">
+          {clients.map((client) => {
+            return (
+              <div
+                key={client.client_id}
+                className="border border-gray-300 bg-gray-100 rounded-md p-4 flex flex-row gap-4 items-center"
+              >
+                <div className="w-8 h-8">
+                  <DevicePhoneMobileIcon className="text-gray-400" />
+                </div>
+                <div className="flex flex-col">
+                  <p className="text-gray-800 font-semibold">
+                    {client.client_id}
+                  </p>
+                  <p className="text-sm text-gray-600">{client.description}</p>
+                </div>
+
+                <div className="flex-grow" />
+                <div className="flex flex-row gap-2 items-center">
+                  {client.connections && client.connections.length > 0 && (
+                    <>
+                      <div className="w-3 h-3 rounded-full bg-ok"></div>
+                      <div className="text-xs text-gray-500">Connected</div>
+                    </>
+                  )}
+                  {!client.connections && (
+                    <>
+                      <div className="w-3 h-3 rounded-full bg-gray-400"></div>
+                      <div className="text-xs text-gray-500">Disonnected</div>
+                    </>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
       </div>
     </>
   );
