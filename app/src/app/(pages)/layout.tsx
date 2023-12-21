@@ -80,7 +80,7 @@ export default function RootLayout({
           </nav>
         </div>
       </section>
-      <main className="min-h-full py-10 pl-72">{children}</main>
+      <main className="py-10 pl-72">{children}</main>
     </>
   );
 }

@@ -25,7 +25,7 @@ h1 {
 }
 
 .button {
-  @apply cursor-pointer py-2 px-6 rounded-md active:translate-y-0.5;
+  @apply cursor-pointer py-2 px-4 rounded-md active:translate-y-0.5;
 }
 
 .btn-primary {

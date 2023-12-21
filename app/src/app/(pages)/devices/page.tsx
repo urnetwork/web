@@ -1,4 +1,5 @@
 import { DevicePhoneMobileIcon } from "@heroicons/react/24/outline";
+import { PlusIcon } from "@heroicons/react/24/solid";
 
 async function getData() {
   const result = await fetch("https://api.bringyour.com/network/clients", {
@@ -33,7 +34,15 @@ export default async function Page() {
   return (
     <>
       <div className="mt-12 p-4 max-w-3xl">
-        <h1 className="mb-8">Your Devices</h1>
+        <div className="flex flex-row justify-between items-end mb-8">
+          <h1>Your Devices</h1>
+          <button className="button btn-primary">
+            <div className="flex flex-row gap-2 items-center">
+              <PlusIcon className="w-5 h-5 text-white font-semibold" />
+              <p className="font-light">Add device</p>
+            </div>
+          </button>
+        </div>
 
         <div className="flex flex-col gap-4">
           {clients.map((client) => {
