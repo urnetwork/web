@@ -40,7 +40,7 @@ export default async function Page() {
             return (
               <div
                 key={client.client_id}
-                className="border border-gray-300 bg-gray-100 rounded-md p-4 flex flex-row gap-4 items-center"
+                className="border border-gray-300 bg-gray-100 rounded-md p-4 flex flex-row gap-4 items-center cursor-pointer hover:border-primary"
               >
                 <div className="w-8 h-8">
                   <DevicePhoneMobileIcon className="text-gray-400" />
