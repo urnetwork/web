@@ -13,6 +13,7 @@ const config: Config = {
         'danger': '#CD4439',
         'primary': {
           DEFAULT: '#4148CD',
+          'semidark': '#363CA8', 
           'dark': '#292D80'
         },
         'secondary': {

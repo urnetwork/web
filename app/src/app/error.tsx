@@ -19,7 +19,7 @@ export default function Error({
     <div>
       <h2>Sorry, something went wrong!</h2>
       <button
-        className="button"
+        className="button btn-primary"
         onClick={
           // Attempt to recover by trying to re-render the segment
           () => reset()
