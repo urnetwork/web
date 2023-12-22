@@ -29,5 +29,5 @@ h1 {
 }
 
 .btn-primary {
-  @apply bg-indigo-600 hover:bg-indigo-700 border border-indigo-700 text-white;
+  @apply bg-primary hover:bg-primary-semidark border border-primary-semidark text-white;
 }
