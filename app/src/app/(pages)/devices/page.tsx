@@ -30,6 +30,10 @@ export default function Page() {
         {!isPending && (
           <>
             <div className="flex flex-col gap-4">
+              {clients.length == 0 && (
+                <div className="text-gray-600">No devices found</div>
+              )}
+
               {clients.map((client: Client) => {
                 return (
                   <div

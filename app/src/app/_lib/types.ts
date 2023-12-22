@@ -5,4 +5,5 @@ type Client = {
     device_spec: string,
     network_id: string,
     connections: object[],
+    provide_mode: number
 }
