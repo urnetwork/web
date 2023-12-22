@@ -1,12 +1,10 @@
+
 /**
  * All code that makes calls to the BringYour API lives in this file.
  */
 
 export function getJwt() {
-    if (typeof localStorage !== 'undefined') {
-        return localStorage.getItem('byJwt')
-    }
-    return null
+    return localStorage.getItem('byJwt')
 }
 
 const API_URL = "http://test.bringyour.com/"
