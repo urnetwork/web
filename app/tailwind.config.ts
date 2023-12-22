@@ -12,9 +12,9 @@ const config: Config = {
         'ok': '#15cd72',
         'danger': '#CD4439',
         'primary': {
-          DEFAULT: '#4148CD',
-          'semidark': '#363CA8', 
-          'dark': '#292D80'
+          DEFAULT: '#1D3150',
+          'semidark': '#1a2c48', 
+          'dark': '#172740'
         },
         'secondary': {
           DEFAULT: '#A5ACB9'
