@@ -14,7 +14,7 @@ export default function Page() {
 
   return (
     <>
-      <div className="mt-12 p-4 max-w-3xl">
+      <div className="md:mt-12 p-4 max-w-3xl">
         <div className="flex flex-row justify-between items-end mb-8">
           <h1>Your Devices</h1>
           <button className="button btn-primary">
