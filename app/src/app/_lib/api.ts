@@ -7,7 +7,7 @@ export function getJwt() {
     return localStorage.getItem('byJwt')
 }
 
-const API_URL = "http://test.bringyour.com/"
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://api.bringyour.com/";
 
 async function makeGetRequest(endpoint: string) {
     const byJwt = getJwt();
