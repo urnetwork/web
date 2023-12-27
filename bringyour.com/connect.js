@@ -1834,6 +1834,18 @@ function renderComplete(container, id, networkName) {
                     <div>Your network is now live!</div>
                </div>
           </div>
+    `
+
+    if (new URLSearchParams(window.location.search).get("app-beta") != null) {
+        html += `
+          <div class="login-option">
+               <div class="login-container">
+                    <div><button type="button" class="btn btn-primary" onclick="launchApp()">Manage Your Network</button></div>
+               </div>
+          </div>
+        `
+    } else {
+        html += `
           <div class="login-option">
                <div class="login-container">
                     <div>Log in to the app to use your network.</div>
@@ -1843,6 +1855,10 @@ function renderComplete(container, id, networkName) {
                     </div>
                </div>
           </div>
+        `
+      }
+
+      html += `
           <div class="login-option">
                <div class="login-container">
                     <label class="form-check-label"><input id="${id('preferences-product-updates')}" type="checkbox" value="" class="form-check-input"> You can send me occasional product updates</label>
