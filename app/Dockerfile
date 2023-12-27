@@ -31,7 +31,7 @@ RUN nginx -V
 
 COPY nginx/mime.types /etc/nginx/mime.types
 COPY nginx/nginx.conf /etc/nginx/nginx.conf
-ADD build /www/app.bringyour.com
+ADD build/app /www/app.bringyour.com
 
 COPY build/${WARP_ENV}/status.json /srv/warp/status/status.json
 
