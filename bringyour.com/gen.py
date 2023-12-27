@@ -17,6 +17,7 @@ def title_icons_meta():
 
 def fonts():
     return """
+    <link rel="stylesheet" href="res/fonts/barlow.css">
     <link rel="stylesheet" href="res/fonts/material-symbols-outlined.css">
     <link rel="stylesheet" href="res/fonts/noto-sans.css">
     <link rel="stylesheet" href="res/fonts/arkitech.css">
