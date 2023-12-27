@@ -4,6 +4,9 @@
  */
 
 export function getJwt() {
+    if (typeof localStorage == 'undefined') {
+        return "no token" // Important that this is not null, because otherwise the app thinks the user is not logged in, and flashes the 'logged out' page.
+    }
     return localStorage.getItem('byJwt')
 }
 
