@@ -3,7 +3,7 @@
 import { redirect, usePathname, useSearchParams } from "next/navigation";
 import "./globals.css";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { getJwt, postAuthCodeLogin, removeJwt } from "@lib/api";
+import { LOGIN_URL, getJwt, postAuthCodeLogin, removeJwt } from "@lib/api";
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 
@@ -25,7 +25,7 @@ export default function RootLayout({
   useEffect(() => {
     if (!authParam && !isLoggedIn) {
       // User needs to log in
-      redirect("https://bringyour.com?auth");
+      redirect(LOGIN_URL);
     }
 
     async function handleAuth() {
@@ -38,12 +38,10 @@ export default function RootLayout({
         localStorage.setItem("byJwt", result.auth_jwt);
       } catch (e: any) {
         removeJwt();
-        router.push("https://bringyour.com?auth");
+        router.push(LOGIN_URL);
       }
     }
-
     handleAuth();
-    // Redirect to URL without ?auth param
     router.push(`${pathname}?${queryParamsWithoutAuth}`);
   }, [authParam]);
 

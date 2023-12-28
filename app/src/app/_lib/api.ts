@@ -1,15 +1,16 @@
-
 /**
  * All code that makes calls to the BringYour API lives in this file.
  */
 
+import { redirect } from "next/navigation";
 import {AuthCodeLoginResult, NetworkClientsResult, SubscriptionBalanceResult} from "./types";
 
-
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://api.bringyour.com/";
+export const LOGIN_URL = "https://bringyour.com?auth"
 
 export function getJwt() {
     if (typeof localStorage == 'undefined') {
-        return "no token" // Important that this is not null, because otherwise the app thinks the user is not logged in, and flashes the 'logged out' page.
+        return null
     }
     return localStorage.getItem('byJwt')
 }
@@ -22,8 +23,6 @@ export function removeJwt() {
     localStorage.removeItem("byJwt")
 }
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://api.bringyour.com/";
-
 async function makeGetRequest(endpoint: string) {
     const byJwt = getJwt();
     const response = await fetch(`${API_URL}${endpoint}`, {
@@ -33,6 +32,13 @@ async function makeGetRequest(endpoint: string) {
         });
    
     if (!response.ok) {
+        if ([401, 403].includes(response.status)) {
+            // Unauthorized. User needs to refresh JWT token
+            removeJwt()
+            redirect(LOGIN_URL)
+        }
+
+        // Todo(awais): Improve error handling on network requests
         throw new Error("Failed to fetch");
     }
       
@@ -47,8 +53,11 @@ export async function postAuthCodeLogin(auth: string): Promise<AuthCodeLoginResu
           body: JSON.stringify({ auth_code: auth }),
         }
       );
+
       if (!response.ok) {
-        new Error("API rejected access token");
+        if (response.status >= 400 && response.status < 500) {
+            throw new Error("API rejected access token");
+        }
       }
       return await response.json();
 }
