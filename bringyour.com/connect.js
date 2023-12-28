@@ -1830,7 +1830,7 @@ function renderComplete(container, id, networkName) {
     let html = `
           <div class="login-option">
                <div class="login-container">
-                    <div class="login-header"><div class="title">${escapeHtml(networkName)}.bringyour.network</div></div>
+                    <div class="login-header"><div class="title">${escapeHtml(networkName)}</div><div class="title">.bringyour.network</div></div>
                     <div>Your network is now live!</div>
                </div>
           </div>
