@@ -30,15 +30,15 @@ export default function Page() {
         {!isPending && (
           <>
             <div className="flex flex-col gap-4">
-              {clients.length == 0 && (
+              {clients?.length == 0 && (
                 <div className="text-gray-600">No devices found</div>
               )}
 
-              {clients.map((client: Client) => {
+              {clients?.map((client) => {
                 return (
                   <div
                     key={client.client_id}
-                    className="border border-gray-300 bg-gray-100 rounded-md p-4 flex flex-row gap-4 items-center cursor-pointer hover:border-primary transition-all duration-150 hover:scale-[1.02]"
+                    className="card flex flex-row gap-4 items-center"
                   >
                     <div className="w-8 h-8">
                       <DevicePhoneMobileIcon className="text-gray-400" />

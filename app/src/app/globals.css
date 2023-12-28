@@ -24,6 +24,14 @@ h1 {
   @apply text-4xl font-semibold;
 }
 
+h2 {
+  @apply text-xl font-semibold;
+}
+
+.card {
+  @apply border border-gray-300 bg-gray-100 rounded-md p-4 cursor-pointer hover:border-primary transition-all duration-150 hover:scale-[1.02];
+}
+
 .button {
   @apply cursor-pointer py-2 px-4 rounded-md active:translate-y-0.5;
 }

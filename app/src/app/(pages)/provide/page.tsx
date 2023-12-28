@@ -24,11 +24,11 @@ export default function Page() {
         {!isPending && (
           <>
             <div className="flex flex-row flex-wrap gap-4">
-              {clients.length == 0 && (
+              {clients?.length == 0 && (
                 <div className="text-gray-600">No devices found</div>
               )}
 
-              {clients.map((client: Client) => (
+              {clients?.map((client) => (
                 <div className="border border-gray-300 bg-gray-100 rounded-md w-40 h-96 p-4 flex flex-col gap-4 items-center cursor-pointer hover:border-primary transition-all duration-150 hover:scale-[1.02] text-center">
                   <div className="mt-4 flex-flex-col gap-2">
                     <div className="flex flex-row gap-2 items-center justify-end">

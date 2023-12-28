@@ -3,6 +3,10 @@
  * All code that makes calls to the BringYour API lives in this file.
  */
 
+import { NetworkClientsResult, SubscriptionBalanceResult } from "./types";
+
+
+
 export function getJwt() {
     if (typeof localStorage == 'undefined') {
         return "no token" // Important that this is not null, because otherwise the app thinks the user is not logged in, and flashes the 'logged out' page.
@@ -27,6 +31,10 @@ async function makeGetRequest(endpoint: string) {
     return response.json();
 }
 
-export async function getNetworkClients() {
+export async function getNetworkClients(): Promise<NetworkClientsResult> {
     return makeGetRequest("network/clients")
+}
+
+export async function getSubscriptionBalance(): Promise<SubscriptionBalanceResult> {
+    return makeGetRequest("subscription/balance")
 }

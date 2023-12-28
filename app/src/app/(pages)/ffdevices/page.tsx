@@ -10,7 +10,7 @@ export default function Page() {
     queryKey: ["network", "ffclients"],
     queryFn: async () => {
       const allClients = (await getNetworkClients()).clients;
-      return allClients.filter((client: Client) => client.provide_mode == 2);
+      return allClients.filter((client) => client.provide_mode == 2);
     },
   });
 
@@ -26,11 +26,11 @@ export default function Page() {
         {!isPending && (
           <>
             <div className="flex flex-col gap-4">
-              {clients.length == 0 && (
+              {clients?.length == 0 && (
                 <div className="text-gray-600">No devices found</div>
               )}
 
-              {clients.map((client: Client) => {
+              {clients?.map((client) => {
                 return (
                   <div
                     key={client.client_id}
