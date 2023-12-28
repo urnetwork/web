@@ -60,6 +60,21 @@ def build(dirpath, minify=True, validate=True):
     }
     jinja_env.globals.update(exported_symbols)
 
+    def process_j2(parent_dirpath, process_filename):
+        file_name = process_filename[:-len(j2_suffix)]
+        out_path = os.path.join(build_dirpath, parent_dirpath, f'{file_name}')
+
+        sys.stdout.write(f'Processing {out_path} ...')
+        sys.stdout.flush()
+        
+        template = jinja_env.get_template(os.path.join(parent_dirpath, process_filename))
+        file_content = template.render(file_name=file_name)
+
+        with open(out_path, 'w') as f:
+            f.write(file_content)
+        
+        sys.stdout.write(' done.\n')
+
     def process_page(parent_dirpath, process_filename):
         page_name = process_filename[:-len(page_suffix)]
         out_path = os.path.join(build_dirpath, parent_dirpath, f'{page_name}.html')
@@ -106,7 +121,7 @@ def build(dirpath, minify=True, validate=True):
             sys.stdout.flush()
             p = subprocess.run([
                 'html-validate',
-                '--rule=doctype-style:"off"',
+                '--rule=doctype-style:off',
                 out_path
             ])
             if p.returncode == 0:
@@ -176,6 +191,7 @@ def build(dirpath, minify=True, validate=True):
 
     # j2_files = [f for f in os.listdir(dirpath) if os.path.isfile(os.path.join(dirpath, f)) and f.endswith('.j2')]
 
+    j2_suffix = '.j2'
     page_suffix = '.html.j2'
 
     for process_dirpath, process_dirnames, process_filenames in os.walk(dirpath, topdown=True):
@@ -203,6 +219,8 @@ def build(dirpath, minify=True, validate=True):
 
             if process_filename.endswith(page_suffix):
                 process_page(*target)
+            elif process_filename.endswith(j2_suffix):
+                process_j2(*target)
             elif process_filename.endswith('.css'):
                 process_css(*target)
             elif process_filename.endswith('.js'):

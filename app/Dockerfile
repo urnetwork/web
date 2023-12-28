@@ -29,8 +29,7 @@ RUN apt-get update && apt-get install -y \
 # print the nginx version
 RUN nginx -V
 
-COPY nginx/mime.types /etc/nginx/mime.types
-COPY nginx/nginx.conf /etc/nginx/nginx.conf
+ADD nginx/build/ /etc/nginx/
 ADD build /www/app.bringyour.com
 
 COPY build/${WARP_ENV}/status.json /srv/warp/status/status.json

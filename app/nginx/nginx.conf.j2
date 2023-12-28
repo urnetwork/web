@@ -51,18 +51,12 @@ http {
         }
         location / {
             try_files $uri $uri.html $uri/ =404;
-            alias /www/bringyour.com/;
+            alias /www/app.bringyour.com/;
 
-            add_header 'Cache-Control' 'max-age=86400' always;
-        }
-        location =/discord {
-            return 307 https://discord.gg/RUNZXMwPRK;
-        }
-        location =/whitepaper {
-            return 307 https://github.com/bringyour/product/blob/main/whitepaper.md;
-        }
-        location =/roadmap {
-            return 307 https://github.com/bringyour/product/blob/main/roadmap.md;
+            # always check for updates in the background
+            add_header 'Cache-Control' 'max-age=0, stale-while-revalidate=86400' always;
+            add_header 'Last-Modified' '{{ http_last_modified }}' always;
+            add_header 'ETag' '"{{ http_etag }}"' always;
         }
     }
 }
