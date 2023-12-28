@@ -1,4 +1,5 @@
 
+NODE_VERSION := v20.10.0
 
 all: clean build
 
@@ -7,7 +8,8 @@ clean:
 	python ../webgen/webgen.py clean nginx/gen.py
 
 build:
-	npm install && npm run build  # Outputs build artifacts to ./build
+	# Outputs build artifacts to ./build
+	. ${NVM_DIR}/nvm.sh && nvm exec ${NODE_VERSION} npm install && nvm exec ${NODE_VERSION} npm run build
 	python ../webgen/webgen.py build nginx/gen.py
 	mkdir -p build/${WARP_ENV}
 	echo "{\"version\":\"${WARP_VERSION}\",\"status\":\"ok\"}" > build/${WARP_ENV}/status.json
