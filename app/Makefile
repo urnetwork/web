@@ -4,8 +4,10 @@ all: clean build
 
 clean:
 	rm -rf build
+	python ../webgen/webgen.py clean nginx/gen.py
 
 build:
+	python ../webgen/webgen.py build nginx/gen.py
 	# TODO run webpack to generate assets into ./build
 	mkdir -p build/${WARP_ENV}
 	echo "{\"version\":\"${WARP_VERSION}\",\"status\":\"ok\"}" > build/${WARP_ENV}/status.json
