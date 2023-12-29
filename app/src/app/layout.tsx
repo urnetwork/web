@@ -1,7 +1,7 @@
 "use client";
 
-import { redirect, usePathname, useSearchParams } from "next/navigation";
 import "./globals.css";
+import { redirect, usePathname, useSearchParams } from "next/navigation";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { LOGIN_URL, getJwt, postAuthCodeLogin, removeJwt } from "@lib/api";
 import { useEffect } from "react";
@@ -23,16 +23,26 @@ export default function RootLayout({
   queryParamsWithoutAuth.delete("auth");
 
   useEffect(() => {
+    /**
+     * Route the user to the correct place, depending on whether they are logged in (i.e. have a
+     * JWT token in localstorage), or have provided an ?auth= URL parameter.
+     *
+     * If the user has a JWT token, and provides a new ?auth= code, use the code to fetch a new JWT.
+     */
     if (!authParam && !isLoggedIn) {
       // User needs to log in
       redirect(LOGIN_URL);
     }
 
-    async function handleAuth() {
-      if (!authParam) {
-        return;
-      }
+    if (!authParam && isLoggedIn && pathname == "/") {
+      redirect("/devices");
+    }
 
+    if (!authParam) {
+      return;
+    }
+
+    async function handleAuthParam(authParam: string) {
       try {
         const result = await postAuthCodeLogin(authParam);
         localStorage.setItem("byJwt", result.auth_jwt);
@@ -41,16 +51,10 @@ export default function RootLayout({
         router.push(LOGIN_URL);
       }
     }
-    handleAuth();
+    handleAuthParam(authParam);
+
     router.push(`${pathname}?${queryParamsWithoutAuth}`);
   }, [authParam]);
-
-  if (isLoggedIn && pathname == "/") {
-    // Hard refresh to /devices page
-    if (typeof window !== "undefined") {
-      window.location.href = "/devices";
-    }
-  }
 
   // Set up Tanstack Query
   const queryClient = new QueryClient();

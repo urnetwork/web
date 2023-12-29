@@ -45,6 +45,9 @@ async function makeGetRequest(endpoint: string) {
     return response.json();
 }
 
+/**
+ * Swap authorization code for an access token (JWT)
+ */
 export async function postAuthCodeLogin(auth: string): Promise<AuthCodeLoginResult> {
     const response = await fetch(
         `${API_URL}auth/code-login`,
@@ -56,7 +59,7 @@ export async function postAuthCodeLogin(auth: string): Promise<AuthCodeLoginResu
 
       if (!response.ok) {
         if (response.status >= 400 && response.status < 500) {
-            throw new Error("API rejected access token");
+            throw new Error("API rejected the access token");
         }
       }
       return await response.json();
