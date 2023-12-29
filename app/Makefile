@@ -9,7 +9,10 @@ clean:
 
 build:
 	# Outputs build artifacts to ./build
-	. ${NVM_DIR}/nvm.sh && nvm exec ${NODE_VERSION} npm install && nvm exec ${NODE_VERSION} npm run build
+	. ${NVM_DIR}/nvm.sh && \
+		nvm exec ${NODE_VERSION} npm ci && \
+		nvm exec ${NODE_VERSION} npm audit &&\
+		nvm exec ${NODE_VERSION} npm run build
 	python ../webgen/webgen.py build nginx/gen.py
 	mkdir -p build/${WARP_ENV}
 	echo "{\"version\":\"${WARP_VERSION}\",\"status\":\"ok\"}" > build/${WARP_ENV}/status.json
