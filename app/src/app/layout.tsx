@@ -1,10 +1,11 @@
 "use client";
 
-import { redirect, usePathname } from "next/navigation";
 import "./globals.css";
-import { useEffect } from "react";
+import { redirect, usePathname, useSearchParams } from "next/navigation";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { getJwt } from "./_lib/api";
+import { LOGIN_URL, getJwt, postAuthCodeLogin, removeJwt } from "@lib/api";
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 
 export default function RootLayout({
   children,
@@ -12,15 +13,48 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname().split("?")[0];
-  let isLoggedIn = Boolean(getJwt());
+  const queryParams = useSearchParams();
+  const authParam = queryParams.get("auth");
+  const isLoggedIn = Boolean(getJwt());
+  const router = useRouter();
 
-  if (!isLoggedIn && pathname != "/") {
-    redirect("/");
-  }
+  // Remove "auth" query paramter if it exists
+  const queryParamsWithoutAuth = new URLSearchParams(queryParams);
+  queryParamsWithoutAuth.delete("auth");
 
-  if (isLoggedIn && pathname == "/") {
-    redirect("/devices");
-  }
+  useEffect(() => {
+    /**
+     * Route the user to the correct place, depending on whether they are logged in (i.e. have a
+     * JWT token in localstorage), or have provided an ?auth= URL parameter.
+     *
+     * If the user has a JWT token, and provides a new ?auth= code, use the code to fetch a new JWT.
+     */
+    if (!authParam && !isLoggedIn) {
+      // User needs to log in
+      redirect(LOGIN_URL);
+    }
+
+    if (!authParam && isLoggedIn && pathname == "/") {
+      redirect("/devices");
+    }
+
+    if (!authParam) {
+      return;
+    }
+
+    async function handleAuthParam(authParam: string) {
+      try {
+        const result = await postAuthCodeLogin(authParam);
+        localStorage.setItem("byJwt", result.auth_jwt);
+      } catch (e: any) {
+        removeJwt();
+        router.push(LOGIN_URL);
+      }
+    }
+    handleAuthParam(authParam);
+
+    router.push(`${pathname}?${queryParamsWithoutAuth}`);
+  }, [authParam]);
 
   // Set up Tanstack Query
   const queryClient = new QueryClient();

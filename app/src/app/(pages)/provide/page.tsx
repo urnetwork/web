@@ -29,7 +29,10 @@ export default function Page() {
               )}
 
               {clients?.map((client) => (
-                <div className="border border-gray-300 bg-gray-100 rounded-md w-40 h-96 p-4 flex flex-col gap-4 items-center cursor-pointer hover:border-primary transition-all duration-150 hover:scale-[1.02] text-center">
+                <div
+                  key={client.client_id}
+                  className="border border-gray-300 bg-gray-100 rounded-md w-40 h-96 p-4 flex flex-col gap-4 items-center cursor-pointer hover:border-primary transition-all duration-150 hover:scale-[1.02] text-center"
+                >
                   <div className="mt-4 flex-flex-col gap-2">
                     <div className="flex flex-row gap-2 items-center justify-end">
                       <p className="text-xs text-gray-500">Interest</p>

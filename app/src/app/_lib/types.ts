@@ -1,3 +1,7 @@
+export type AuthCodeLoginResult = {
+    auth_jwt: string,
+}
+
 export type Client = {
     client_id: string,
     description: string,
