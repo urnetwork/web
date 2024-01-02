@@ -61,6 +61,7 @@ export async function postAuthCodeLogin(auth: string): Promise<AuthCodeLoginResu
         if (response.status >= 400 && response.status < 500) {
             throw new Error("API rejected the access token");
         }
+        throw new Error("Failed to log in.")
       }
       return await response.json();
 }

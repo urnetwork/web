@@ -47,6 +47,7 @@ export default function RootLayout({
         const result = await postAuthCodeLogin(authParam);
         localStorage.setItem("byJwt", result.auth_jwt);
       } catch (e: any) {
+        alert("Failed to log in. Please try again.");
         removeJwt();
         router.push(LOGIN_URL);
       }
