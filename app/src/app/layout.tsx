@@ -45,7 +45,7 @@ export default function RootLayout({
     async function handleAuthParam(authParam: string) {
       try {
         const result = await postAuthCodeLogin(authParam);
-        localStorage.setItem("byJwt", result.auth_jwt);
+        localStorage.setItem("byJwt", result.by_jwt);
       } catch (e: any) {
         alert("Failed to log in. Please try again.");
         removeJwt();
