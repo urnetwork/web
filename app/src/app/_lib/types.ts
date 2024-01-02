@@ -1,5 +1,8 @@
 export type AuthCodeLoginResult = {
-    auth_jwt: string,
+    by_jwt: string,
+    error?: {
+        message: string,
+    }
 }
 
 export type Client = {
