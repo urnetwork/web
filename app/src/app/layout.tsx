@@ -14,20 +14,20 @@ export default function RootLayout({
 }) {
   const pathname = usePathname().split("?")[0];
   const queryParams = useSearchParams();
-  const authParam = queryParams.get("auth");
+  const authParam = queryParams.get("auth_code");
   const isLoggedIn = Boolean(getJwt());
   const router = useRouter();
 
-  // Remove "auth" query paramter if it exists
+  // Remove "auth_code" query paramter if it exists
   const queryParamsWithoutAuth = new URLSearchParams(queryParams);
-  queryParamsWithoutAuth.delete("auth");
+  queryParamsWithoutAuth.delete("auth_code");
 
   useEffect(() => {
     /**
      * Route the user to the correct place, depending on whether they are logged in (i.e. have a
-     * JWT token in localstorage), or have provided an ?auth= URL parameter.
+     * JWT token in localstorage), or have provided an ?auth_code= URL parameter.
      *
-     * If the user has a JWT token, and provides a new ?auth= code, use the code to fetch a new JWT.
+     * If the user has a JWT token, and provides a new ?auth_code=, use the code to fetch a new JWT.
      */
     if (!authParam && !isLoggedIn) {
       // User needs to log in
