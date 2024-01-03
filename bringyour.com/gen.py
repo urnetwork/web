@@ -79,12 +79,10 @@ def dialog_connect(page_name):
                                 let resetCode = new URLSearchParams(window.location.search).get('resetCode')
                                 if (resetCode) {
                                     mount.render(new DialogPasswordResetComplete(resetCode))
-                                }
-                                else if (byJwtData) {
+                                } else if (byJwtData) {
                                     let networkName = byJwtData['networkName']
                                     mount.render(new DialogComplete(networkName))
-                                }
-                                else {
+                                } else {
                                     mount.render(new DialogInitial(""" + auth_auto_prompt + """))
                                 }
                             })()

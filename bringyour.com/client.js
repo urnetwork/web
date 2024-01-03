@@ -107,7 +107,7 @@ function apiRequest(method, path, body) {
     // add authorization if present
     let byJwt = getByJwt()
     if (byJwt != null) {
-        headers.append('Authorization', 'Bearer ' + byJwt)
+        headers.append('Authorization', `Bearer ${byJwt}`)
     }
 
     let requestOptions = {
