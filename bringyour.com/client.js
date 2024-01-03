@@ -213,14 +213,3 @@ function Mount(container, idPrefix, topLevelRoutes) {
         })
     }
 }
-
-// launch the web app
-function launchApp() {
-    // TODO how to pass JWT?
-    // TODO getByJwt()
-    window.open(
-        serviceUrl('app', '/'),
-        // open a new tab
-        '_blank'
-    )
-}

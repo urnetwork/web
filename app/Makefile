@@ -1,4 +1,5 @@
 
+NODE_VERSION := v20.10.0
 
 all: clean build
 
@@ -7,12 +8,14 @@ clean:
 	python ../webgen/webgen.py clean nginx/gen.py
 
 build:
+	# Outputs build artifacts to ./build
+	. ${NVM_DIR}/nvm.sh && \
+		nvm exec ${NODE_VERSION} npm ci && \
+		nvm exec ${NODE_VERSION} npm audit &&\
+		nvm exec ${NODE_VERSION} npm run build
 	python ../webgen/webgen.py build nginx/gen.py
-	# TODO run webpack to generate assets into ./build
 	mkdir -p build/${WARP_ENV}
 	echo "{\"version\":\"${WARP_VERSION}\",\"status\":\"ok\"}" > build/${WARP_ENV}/status.json
-	mkdir -p build/app
-	cp index.html build/app/
 	docker buildx build --progress plain \
 		--build-arg warp_env=${WARP_ENV} \
 		--platform linux/arm64/v8,linux/amd64 \

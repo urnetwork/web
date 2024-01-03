@@ -1406,9 +1406,16 @@ function DialogComplete() {
 
         renderComplete(container, self.id, networkName)
 
+        const launchAppButtonElement = self.element('launch-app-button')
         const preferencesProductUpdateElement = self.element('preferences-product-updates')
         const feedbackButtonElement = self.element('feedback-button')
         const feedbackFormElement = self.element('feedback-form')
+
+        if (launchAppButtonElement) {
+            launchAppButtonElement.addEventListener('click', (event) => {
+                self.launchApp()
+            })
+        }
 
         preferencesProductUpdateElement.addEventListener('change', (event) => {
             self.submitPreferences()
@@ -1434,6 +1441,55 @@ function DialogComplete() {
 
 
     // event handlers
+
+    self.launchApp = () => {
+        const launchAppButtonElement = self.element('launch-app-button')
+        const launchAppSpinnerElement = self.element('launch-app-spinner')
+        const launchAppErrorElement = self.element('launch-app-error')
+        
+        launchAppButtonElement.disabled = true
+        launchAppSpinnerElement.classList.remove('d-none')
+        launchAppErrorElement.classList.add('d-none')
+
+        let requestBody = {
+            'uses': 1,
+            'duration_minutes': 1.0
+        }
+
+        apiRequest('POST', '/auth/code-create', requestBody)
+            .catch((err) => {
+                self.handleLaunchAppResponse(null)
+            })
+            .then((responseBody) => {
+                self.handleLaunchAppResponse(responseBody)
+            })
+    }
+
+    self.handleLaunchAppResponse = (responseBody) => {
+        const launchAppButtonElement = self.element('launch-app-button')
+        const launchAppSpinnerElement = self.element('launch-app-spinner')
+        const launchAppErrorElement = self.element('launch-app-error')
+        
+        launchAppButtonElement.disabled = false
+        launchAppSpinnerElement.classList.add('d-none')
+
+        if (!responseBody) {
+            launchAppErrorElement.textContent = 'Something unexpected happened.'
+            launchAppErrorElement.classList.remove('d-none')
+        } else if ('auth_code' in responseBody) {
+            window.open(
+                serviceUrl('app', `/?auth_code=${responseBody['auth_code']}`),
+                // open a new tab
+                '_blank'
+            )
+        } else if ('error' in responseBody) {
+            launchAppErrorElement.textContent = responseBody['error']['message']
+            launchAppErrorElement.classList.remove('d-none')
+        } else {
+            launchAppErrorElement.textContent = 'Something unexpected happened.'
+            launchAppErrorElement.classList.remove('d-none')
+        }
+    }
 
     self.submitPreferences = () => {
         const preferencesProductUpdateElement = self.element('preferences-product-updates')
@@ -1836,11 +1892,12 @@ function renderComplete(container, id, networkName) {
           </div>
     `
 
-    if (new URLSearchParams(window.location.search).get("app-beta") != null) {
+    if (new URLSearchParams(window.location.search).get("app-preview") != null) {
         html += `
           <div class="login-option">
                <div class="login-container">
-                    <div><button type="button" class="btn btn-primary" onclick="launchApp()">Manage Your Network</button></div>
+                    <div><button id="${id('launch-app-button')}" type="button" class="btn btn-primary" onclick="launchApp()">Manage Your Network<span id="${id('launch-app-spinner')}" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span></button></div>
+                    <div id="${id('launch-app-error')}" class="text-danger d-none"></div>
                </div>
           </div>
         `

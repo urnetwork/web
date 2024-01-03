@@ -30,7 +30,7 @@ RUN apt-get update && apt-get install -y \
 RUN nginx -V
 
 ADD nginx/build/ /etc/nginx/
-ADD build/app /www/app.bringyour.com
+ADD build /www/app.bringyour.com
 
 COPY build/${WARP_ENV}/status.json /srv/warp/status/status.json
 
