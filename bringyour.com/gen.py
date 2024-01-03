@@ -136,6 +136,8 @@ def tab_header(page_name):
 
 
 def footer():
+    from datetime import datetime
+
     return """
     <div id="footer">
         <div class="link-container">
@@ -163,9 +165,11 @@ def footer():
                     </tr>
                 </tbody>
             </table>
-            <div class="copyline">Copyright 2023 BringYour, Inc.</div>
+            <div class="copyline">Copyright {year} BringYour, Inc.</div>
         </div>
     </div>
     <script src="footer.js"></script>
-    """
+    """.format(
+        year=datetime.now().year
+    )
 
