@@ -9,6 +9,7 @@ import { use, useState } from "react";
 import { ChevronDownIcon } from "@heroicons/react/20/solid";
 import { Listbox } from "@headlessui/react";
 import { it } from "node:test";
+import Chart from "./components/chart";
 
 type HeaderItem = {
   name: string;
@@ -127,6 +128,7 @@ export default function Page() {
 
             {/* 90 Day chart */}
             <div className="statsChart">
+              <Chart />
               <p className="text-sm text-gray-400 font-semibold mb-2">
                 Past 90 days
               </p>
