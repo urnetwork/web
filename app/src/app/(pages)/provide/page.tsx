@@ -153,11 +153,6 @@ export default function Page() {
                     ))}
                   </Listbox.Options>
                 </Listbox>
-
-                {/* <div className="absolute cursor-pointer top-4 left-4 bg-gray-200 flex flex-row gap-2 items-center px-2 py-1 rounded-full text-gray-600 hover:text-gray-800 border border-gray-200 hover:border-gray-300">
-                  <p className="text-sm">{selectedStat?.name}</p>
-                  <ChevronDownIcon className="w-5 h-5" />
-                </div> */}
               </div>
             </div>
             <div className="devices">
