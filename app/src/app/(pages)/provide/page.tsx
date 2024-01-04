@@ -128,11 +128,11 @@ export default function Page() {
 
             {/* 90 Day chart */}
             <div className="statsChart">
-              <Chart />
               <p className="text-sm text-gray-400 font-semibold mb-2">
                 Past 90 days
               </p>
-              <div className="w-full h-64 relative bg-gray-100 rounded-md">
+              <div className="w-full h-72 p-4 pt-16 relative bg-gray-100 rounded-md">
+                <Chart data={stats[selectedStat.key]} />
                 {/* Select item to choose graph type */}
                 <Listbox value={selectedStat} onChange={setSelectedStat}>
                   <Listbox.Button className="absolute cursor-pointer top-4 left-4 bg-gray-200 flex flex-row gap-2 items-center pl-3 pr-2 py-1 rounded-full text-gray-600 hover:text-gray-800 border border-gray-200 hover:border-gray-300">
