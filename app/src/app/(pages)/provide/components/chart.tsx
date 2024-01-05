@@ -1,25 +1,22 @@
 import {
-  LineChart,
-  Line,
-  CartesianGrid,
   ResponsiveContainer,
   XAxis,
-  YAxis,
-  Rectangle,
-  BarChart,
+  BarChart as ReBarChart,
+  AreaChart,
+  Area,
   Bar,
   Tooltip,
 } from "recharts";
 import moment from "moment";
 import { useState } from "react";
 
-type ChartProps = {
+type BarChartProps = {
   name: string;
-  unit: string;
+  unit?: string;
   data: Array<any>;
 };
 
-export default function Chart({ name, unit, data }: ChartProps) {
+export function BarChart({ name, unit, data }: BarChartProps) {
   const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
 
   const formattedData = Object.entries(data)
@@ -72,7 +69,7 @@ export default function Chart({ name, unit, data }: ChartProps) {
   return (
     <>
       <ResponsiveContainer width="100%">
-        <BarChart data={formattedData}>
+        <ReBarChart data={formattedData}>
           <Tooltip
             cursor={false}
             position={tooltipPosition}
@@ -89,7 +86,51 @@ export default function Chart({ name, unit, data }: ChartProps) {
             cursor="pointer"
           />
           <XAxis dataKey="date" tickFormatter={formatDate} />
-        </BarChart>
+        </ReBarChart>
+      </ResponsiveContainer>
+    </>
+  );
+}
+type SparkChartProps = {
+  data: Array<any>;
+  color?: string;
+};
+
+export function SparkChart({ data, color = "#d1d5db" }: SparkChartProps) {
+  const formattedData = Object.entries(data)
+    .map(([key, value]) => ({
+      date: key,
+      value: value,
+    }))
+    .toSorted((a, b) => {
+      const dateA = Date.parse(a.date);
+      const dateB = Date.parse(b.date);
+
+      if (dateA == dateB) {
+        return 0;
+      } else if (dateA > dateB) {
+        return 1;
+      } else {
+        return -1;
+      }
+    });
+
+  return (
+    <>
+      <ResponsiveContainer width="100%" height="100%">
+        <AreaChart
+          data={formattedData}
+          barCategoryGap={2}
+          margin={{ top: 0, right: 0, bottom: 0, left: 0 }}
+        >
+          <Area
+            dataKey="value"
+            fill={color}
+            fillOpacity={0.7}
+            stroke="false"
+            cursor={"pointer"}
+          />
+        </AreaChart>
       </ResponsiveContainer>
     </>
   );

@@ -1,15 +1,12 @@
 "use client";
 
-import { DevicePhoneMobileIcon } from "@heroicons/react/24/outline";
-import { PlusIcon } from "@heroicons/react/24/solid";
 import { useQuery } from "@tanstack/react-query";
 import Loading from "./loading";
 import { getStatsProvidersOverviewLast90 } from "@lib/api";
-import { use, useState } from "react";
+import { useState } from "react";
 import { ChevronDownIcon } from "@heroicons/react/20/solid";
 import { Listbox } from "@headlessui/react";
-import { it } from "node:test";
-import Chart from "./components/chart";
+import { BarChart, SparkChart } from "./components/chart";
 
 type HeaderItem = {
   name: string;
@@ -60,6 +57,13 @@ export default function Page() {
     return "";
   };
 
+  const getStatAllTime = (key: string) => {
+    if (stats && stats[key]) {
+      return stats[key];
+    }
+    return [];
+  };
+
   return (
     <>
       <div className="md:mt-12 p-4 max-w-5xl">
@@ -84,42 +88,52 @@ export default function Page() {
                       onClick={() => {
                         setSelectedStat(item);
                       }}
-                      className={`w-1/5 flex flex-col gap-y-2 justify-between items-start border py-2 px-3 rounded-md cursor-pointer hover:border-indigo-600 shadow-md ${
+                      className={`w-1/5 flex flex-col gap-0 border rounded-md overflow-hidden cursor-pointer hover:border-indigo-600 shadow-md ${
                         selectedStat.key == item.key
                           ? "border-indigo-600 border-2"
                           : "border-gray-300"
                       }`}
                     >
-                      <h3
-                        className={`text-sm text-gray-500 ${
-                          selectedStat.key == item.key
-                            ? "font-semibold text-indigo-600"
-                            : ""
-                        }`}
-                      >
-                        {item.name}
-                      </h3>
-                      <p>
-                        <span
-                          className={`text-2xl font-semibold ${
+                      <div className="z-10 relative flex flex-col grow gap-y-2 justify-between items-start py-2 px-3">
+                        <h3
+                          className={`text-sm text-gray-500 ${
                             selectedStat.key == item.key
-                              ? "text-indigo-600"
-                              : "text-gray-800"
+                              ? "font-semibold text-indigo-600"
+                              : ""
                           }`}
                         >
-                          {item.pre_unit}
-                          {getStatToday(item.key)}
-                        </span>{" "}
-                        <span
-                          className={`text-sm ${
-                            selectedStat.key == item.key
-                              ? "text-indigo-600"
-                              : "text-gray-500"
-                          }`}
-                        >
-                          {item.unit}
-                        </span>
-                      </p>
+                          {item.name}
+                        </h3>
+                        <p>
+                          <span
+                            className={`text-2xl font-semibold ${
+                              selectedStat.key == item.key
+                                ? "text-indigo-600"
+                                : "text-gray-800"
+                            }`}
+                          >
+                            {item.pre_unit}
+                            {getStatToday(item.key)}
+                          </span>{" "}
+                          <span
+                            className={`text-sm ${
+                              selectedStat.key == item.key
+                                ? "text-indigo-600"
+                                : "text-gray-500"
+                            }`}
+                          >
+                            {item.unit}
+                          </span>
+                        </p>
+                      </div>
+                      <div className="z-1 relative h-12 -mt-4 w-full">
+                        <SparkChart
+                          data={getStatAllTime(item.key)}
+                          color={
+                            selectedStat.key == item.key ? "#c7d2fe" : undefined
+                          }
+                        />
+                      </div>
                     </div>
                   );
                 })}
@@ -132,10 +146,10 @@ export default function Page() {
                 Past 90 days
               </p>
               <div className="w-full h-72 p-4 pt-16 relative bg-gray-100 rounded-md">
-                <Chart
+                <BarChart
                   name={selectedStat.name}
                   unit={selectedStat.unit}
-                  data={stats[selectedStat.key]}
+                  data={getStatAllTime(selectedStat.key)}
                 />
                 {/* Select item to choose graph type */}
                 <Listbox value={selectedStat} onChange={setSelectedStat}>
