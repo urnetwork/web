@@ -75,16 +75,16 @@ export async function getSubscriptionBalance(): Promise<SubscriptionBalanceResul
 }
 
 export async function getStatsProvidersOverviewLast90(): Promise<StatsProvidersOverviewLast90Result> {
-    return {
-        lookback: 0,
-        created_time: "2024-01-04",
-        uptime: {"2024-01-04": 22, "2024-01-03": 20, "2024-01-02": 16, "2024-01-01": 26},
-        transfer_data: {"2024-01-04": 24.6, "2024-01-03": 16.9, "2024-01-02": 20.2, "2024-01-01": 13.6},
-        payout: {"2024-01-04": 0.66, "2024-01-03": 0.98, "2024-01-02": 1.33, "2024-01-01": 2.21},
-        search_interest: {"2024-01-04": 96, "2024-01-03": 84, "2024-01-02": 17, "2024-01-01": 73},
-        contracts: {"2024-01-04": 10, "2024-01-03": 9, "2024-01-02": 8, "2024-01-01": 11},
-        clients: {"2024-01-04": 12, "2024-01-03": 9, "2024-01-02": 8, "2024-01-01": 11},
-    } as StatsProvidersOverviewLast90Result
+    // return {
+    //     lookback: 0,
+    //     created_time: "2024-01-04",
+    //     uptime: {"2024-01-04": 22, "2024-01-03": 20, "2024-01-02": 16, "2024-01-01": 26},
+    //     transfer_data: {"2024-01-04": 24.6, "2024-01-03": 16.9, "2024-01-02": 20.2, "2024-01-01": 13.6},
+    //     payout: {"2024-01-04": 0.66, "2024-01-03": 0.98, "2024-01-02": 1.33, "2024-01-01": 2.21},
+    //     search_interest: {"2024-01-04": 96, "2024-01-03": 84, "2024-01-02": 17, "2024-01-01": 73},
+    //     contracts: {"2024-01-04": 10, "2024-01-03": 9, "2024-01-02": 8, "2024-01-01": 11},
+    //     clients: {"2024-01-04": 12, "2024-01-03": 9, "2024-01-02": 8, "2024-01-01": 11},
+    // } as StatsProvidersOverviewLast90Result
 
     return makeGetRequest("stats/providers-overview-last-90")
 }
