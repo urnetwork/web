@@ -132,10 +132,14 @@ export default function Page() {
                 Past 90 days
               </p>
               <div className="w-full h-72 p-4 pt-16 relative bg-gray-100 rounded-md">
-                <Chart data={stats[selectedStat.key]} />
+                <Chart
+                  name={selectedStat.name}
+                  unit={selectedStat.unit}
+                  data={stats[selectedStat.key]}
+                />
                 {/* Select item to choose graph type */}
                 <Listbox value={selectedStat} onChange={setSelectedStat}>
-                  <Listbox.Button className="absolute cursor-pointer top-4 left-4 bg-gray-200 flex flex-row gap-2 items-center pl-3 pr-2 py-1 rounded-full text-gray-600 hover:text-gray-800 border border-gray-200 hover:border-gray-300">
+                  <Listbox.Button className="z-10 absolute cursor-pointer top-4 left-4 bg-gray-200 flex flex-row gap-2 items-center pl-3 pr-2 py-1 rounded-full text-gray-600 hover:text-gray-800 border border-gray-200 hover:border-gray-300">
                     <p className="text-sm">{selectedStat.name}</p>
                     <ChevronDownIcon className="w-5 h-5" />
                   </Listbox.Button>
@@ -159,7 +163,7 @@ export default function Page() {
             </div>
             <div className="devices">
               <h2 className="mb-2">Devices</h2>
-              <div className="w-full h-64 bg-gray-100"></div>
+              <div className="w-full h-64 bg-gray-100 rounded-md"></div>
             </div>
           </div>
         )}
