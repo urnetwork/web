@@ -107,8 +107,8 @@ export function BarChart({ name, unit, data }: BarChartProps) {
             dataKey="value"
             fill="#818cf8"
             activeBar={{ fill: "#4f46e5" }}
-            onMouseOver={(data) => {
-              setTooltipPosition({ x: data.x, y: data.y - 85 });
+            onMouseEnter={(event) => {
+              setTooltipPosition({ x: event.x, y: event.y - 85 });
             }}
             cursor="pointer"
           />
