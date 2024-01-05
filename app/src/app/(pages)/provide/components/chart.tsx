@@ -6,20 +6,41 @@ import {
   Area,
   Bar,
   Tooltip,
+  TooltipProps,
 } from "recharts";
+import {
+  ValueType,
+  NameType,
+} from "recharts/types/component/DefaultTooltipContent";
 import moment from "moment";
 import { useState } from "react";
+import { Timeseries } from "@/app/_lib/types";
 
 type BarChartProps = {
   name: string;
   unit?: string;
-  data: Array<any>;
+  data: Timeseries;
 };
 
-export function BarChart({ name, unit, data }: BarChartProps) {
-  const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
-
-  const formattedData = Object.entries(data)
+/**
+ * Take timeseries data as it arrives from the API:
+ * {
+ *  "yyyy-mm-dd1": 0,
+ *  "yyyy-mm-dd2": 0,
+ * }
+ *
+ * and convert it into the format required by the charting library:
+ * [
+ *  {
+ *     date: "yyyy-mm-dd",
+ *     value: 0,
+ *  },
+ * ]
+ *
+ * This function also sorts the data chronologically by date.
+ */
+function formatData(data: Timeseries) {
+  return Object.entries(data)
     .map(([key, value]) => ({
       date: key,
       value: value,
@@ -36,12 +57,21 @@ export function BarChart({ name, unit, data }: BarChartProps) {
         return -1;
       }
     });
+}
+
+export function BarChart({ name, unit, data }: BarChartProps) {
+  const [tooltipPostion, setTooltipPosition] = useState({ x: 0, y: 0 });
+  const formattedData = formatData(data);
 
   const formatDate = (date: string): string => {
     return moment(date).format("MMM Do");
   };
 
-  const CustomTooltip = ({ active, payload, label }) => {
+  const CustomTooltip = ({
+    active,
+    payload,
+    label,
+  }: TooltipProps<ValueType, NameType>) => {
     if (active && payload && payload.length) {
       return (
         <div className=" bg-gray-600 rounded-md p-2 border border-gray-700 shadow-sm">
@@ -61,18 +91,13 @@ export function BarChart({ name, unit, data }: BarChartProps) {
     }
   };
 
-  const onMouseEnter = (e) => {
-    const tooltipHeight = 85; // assumes height of tooltip is fixed
-    setTooltipPosition({ x: e.x, y: e.y - tooltipHeight });
-  };
-
   return (
     <>
       <ResponsiveContainer width="100%">
         <ReBarChart data={formattedData}>
           <Tooltip
             cursor={false}
-            position={tooltipPosition}
+            position={tooltipPostion}
             wrapperStyle={{ zIndex: 99 }}
             content={<CustomTooltip />}
             isAnimationActive={false}
@@ -82,7 +107,9 @@ export function BarChart({ name, unit, data }: BarChartProps) {
             dataKey="value"
             fill="#818cf8"
             activeBar={{ fill: "#4f46e5" }}
-            onMouseEnter={onMouseEnter}
+            onMouseOver={(data) => {
+              setTooltipPosition({ x: data.x, y: data.y - 85 });
+            }}
             cursor="pointer"
           />
           <XAxis dataKey="date" tickFormatter={formatDate} />
@@ -91,29 +118,16 @@ export function BarChart({ name, unit, data }: BarChartProps) {
     </>
   );
 }
-type SparkChartProps = {
-  data: Array<any>;
+type PlainAreaChartProps = {
+  data: Timeseries;
   color?: string;
 };
 
-export function SparkChart({ data, color = "#d1d5db" }: SparkChartProps) {
-  const formattedData = Object.entries(data)
-    .map(([key, value]) => ({
-      date: key,
-      value: value,
-    }))
-    .toSorted((a, b) => {
-      const dateA = Date.parse(a.date);
-      const dateB = Date.parse(b.date);
-
-      if (dateA == dateB) {
-        return 0;
-      } else if (dateA > dateB) {
-        return 1;
-      } else {
-        return -1;
-      }
-    });
+export function PlainAreaChart({
+  data,
+  color = "#d1d5db",
+}: PlainAreaChartProps) {
+  const formattedData = formatData(data);
 
   return (
     <>

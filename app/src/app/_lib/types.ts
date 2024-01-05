@@ -43,14 +43,17 @@ export type SubscriptionBalanceResult = {
   update_time: string;
 };
 
+// The key is technically a string representing a date, but can't type that.
+export type Timeseries = { [key: string]: string | number }
+
 export type StatsProvidersOverviewLast90Result = {
   [index: string]: any;
   lookback: number;
   created_time: string;
-  uptime: { [key: string]: number };
-  transfer_data: { [key: string]: number };
-  payout: { [key: string]: number };
-  search_interest: { [key: string]: number };
-  contracts: { [key: string]: number };
-  clients: { [key: string]: number };
+  uptime: Timeseries;
+  transfer_data: Timeseries;
+  payout: Timeseries;
+  search_interest: Timeseries;
+  contracts: Timeseries;
+  clients: Timeseries;
 };

@@ -6,7 +6,7 @@ import { getStatsProvidersOverviewLast90 } from "@lib/api";
 import { useState } from "react";
 import { ChevronDownIcon } from "@heroicons/react/20/solid";
 import { Listbox } from "@headlessui/react";
-import { BarChart, SparkChart } from "./components/chart";
+import { BarChart, PlainAreaChart } from "./components/chart";
 
 type HeaderItem = {
   name: string;
@@ -127,7 +127,7 @@ export default function Page() {
                         </p>
                       </div>
                       <div className="z-1 relative h-12 -mt-4 w-full">
-                        <SparkChart
+                        <PlainAreaChart
                           data={getStatAllTime(item.key)}
                           color={
                             selectedStat.key == item.key ? "#c7d2fe" : undefined
