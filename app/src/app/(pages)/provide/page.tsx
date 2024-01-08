@@ -51,6 +51,7 @@ export default function Page() {
     queryFn: getStatsProvidersOverviewLast90,
   });
 
+  // Todo(awais): Move this into DevicesTable.tsx?
   const { isPending: isDevicesPending, data: devices } = useQuery({
     queryKey: ["stats", "providers"],
     queryFn: getStatsProviders,
