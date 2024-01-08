@@ -10,6 +10,7 @@ import {
 import { usePathname } from "next/navigation";
 import { Fragment, useState } from "react";
 import { Dialog, Transition } from "@headlessui/react";
+import { classNames } from "@/app/_lib/utils";
 
 const navigation = [
   {
@@ -25,10 +26,6 @@ const navigation = [
   { name: "Provide", href: "/provide", icon: GlobeAltIcon },
   { name: "Account", href: "/account", icon: UserIcon },
 ];
-
-function classNames(...classes: string[]) {
-  return classes.filter(Boolean).join(" ");
-}
 
 export default function Sidebar() {
   const pathname = usePathname().split("?")[0];
