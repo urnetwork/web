@@ -1,16 +1,16 @@
-import { Provider } from "@/app/_lib/types";
+import { Provider24h } from "@/app/_lib/types";
 import { classNames } from "@/app/_lib/utils";
 import { Switch } from "@headlessui/react";
 import DeviceDetailSidebar from "./DeviceDetailSidebar";
 import { useState } from "react";
 
 type DevicesTableProps = {
-  providers: Provider[];
+  providers: Provider24h[];
 };
 
 export default function DevicesTable({ providers }: DevicesTableProps) {
   const [selectedProvider, setSelectedProvider] = useState<
-    Provider | undefined
+    Provider24h | undefined
   >();
 
   return (

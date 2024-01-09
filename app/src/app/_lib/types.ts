@@ -46,7 +46,7 @@ export type SubscriptionBalanceResult = {
 // The key is technically a string representing a date, but can't type that.
 export type Timeseries = { [key: string]: string | number };
 
-export type Provider = {
+export type Provider24h = {
   client_id: string;
   connected: boolean;
   connected_events_last_24h: {
@@ -63,7 +63,7 @@ export type Provider = {
 
 export type StatsProviders = {
   created_time: string;
-  providers: Provider[];
+  providers: Provider24h[];
 };
 
 export type StatsProvidersOverviewLast90Result = {
@@ -76,4 +76,20 @@ export type StatsProvidersOverviewLast90Result = {
   search_interest: Timeseries;
   contracts: Timeseries;
   clients: Timeseries;
+};
+
+export type StatsProviderLast90 = {
+  [index: string]: any;
+  lookback: number;
+  created_time: string;
+  uptime: Timeseries;
+  transfer_data: Timeseries;
+  payout: Timeseries;
+  search_interest: Timeseries;
+  contracts: Timeseries;
+  clients: Timeseries;
+  client_details: {
+    client_id: string;
+    transfer_data: Timeseries;
+  }[];
 };
