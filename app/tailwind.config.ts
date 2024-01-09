@@ -20,6 +20,9 @@ const config: Config = {
           DEFAULT: "#A5ACB9",
         },
       },
+      width: {
+        "128": "32rem",
+      },
     },
   },
   plugins: [require("@headlessui/tailwindcss")],

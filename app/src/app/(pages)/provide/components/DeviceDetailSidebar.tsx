@@ -63,7 +63,7 @@ export default function DeviceDetailSidebar({
         <Popover>
           <Popover.Panel
             static
-            className="fixed z-20 top-0 right-0 h-full w-96 bg-white border border-gray-200 shadow-[-2px_0_15px_rgba(0,0,0,0.3)] overflow-y-scroll"
+            className="fixed z-20 top-0 right-0 h-full w-128 bg-white border border-gray-200 shadow-[-2px_0_15px_rgba(0,0,0,0.3)] overflow-y-scroll focus:outline-none"
           >
             <div className="mt-6 p-4">
               <div className="flex flex-row justify-end items-start mb-4">
@@ -146,7 +146,35 @@ export default function DeviceDetailSidebar({
                       {/* Connections tab */}
                       <Tab.Panel>
                         {/* Connections table */}
-                        <div className="flex flex-col gap-6 mt-2"></div>
+                        <div className="w-full mt-2">
+                          <p className="text-sm text-gray-400 font-semibold mb-2">
+                            Connected devices
+                          </p>
+                          <table className="w-full mt-2">
+                            <thead></thead>
+                            <tbody className="divide-y divide-gray-200">
+                              {provider.client_details?.length == 0 && (
+                                <tr>
+                                  <td className="text-center">
+                                    No devices found
+                                  </td>
+                                </tr>
+                              )}
+                              {provider?.client_details.map((client) => (
+                                <tr
+                                  key={`connections-table-${client.client_id}`}
+                                >
+                                  <td className="py-2 px-1 text-gray-600 text-xs">
+                                    {client.client_id}
+                                  </td>
+                                  <td>
+                                    <div className="w-36 bg-gray-400 h-5"></div>
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
                       </Tab.Panel>
                     </Tab.Panels>
                   </Tab.Group>
