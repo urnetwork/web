@@ -1,10 +1,11 @@
 import { postStatsProviderLast90 } from "@/app/_lib/api";
 import { Provider24h } from "@/app/_lib/types";
-import { Dialog, Popover, Transition } from "@headlessui/react";
-import { XMarkIcon } from "@heroicons/react/24/outline";
+import { Dialog, Popover, Tab, Transition } from "@headlessui/react";
+import { DevicePhoneMobileIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import { useQuery } from "@tanstack/react-query";
 import { Fragment, useState } from "react";
 import { BarChart } from "./Chart";
+import { ChartBarIcon } from "@heroicons/react/24/solid";
 
 type ChartItem = {
   name: string;
@@ -62,7 +63,7 @@ export default function DeviceDetailSidebar({
         <Popover>
           <Popover.Panel
             static
-            className="fixed z-20 top-0 right-0 h-full w-96 bg-white border border-gray-200 shadow-[-2px_0_15px_rgba(0,0,0,0.3)] overflow-y-auto"
+            className="fixed z-20 top-0 right-0 h-full w-96 bg-white border border-gray-200 shadow-[-2px_0_15px_rgba(0,0,0,0.3)] overflow-y-scroll"
           >
             <div className="mt-6 p-4">
               <div className="flex flex-row justify-end items-start mb-4">
@@ -79,7 +80,7 @@ export default function DeviceDetailSidebar({
               )}
 
               {!isPending && provider && (
-                <div className="flex flex-col gap-6">
+                <div className="flex flex-col gap-4">
                   {/* Title (device name) */}
                   <div>
                     <p className="text-gray-800 font-semibold">
@@ -89,40 +90,66 @@ export default function DeviceDetailSidebar({
                       Created on {provider?.created_time}
                     </p>
                   </div>
-
                   {/* Tab bar */}
                   <div></div>
-
-                  {/* Uptime graphic */}
-                  <div className="">
-                    <p className="text-sm text-gray-400 font-semibold mb-2">
-                      Uptime (past 24 hours)
-                    </p>
-                    <div className="w-full h-8 bg-primary" />
-                  </div>
-
-                  {/* Charts */}
-                  <div className="">
-                    <p className="text-sm text-gray-400 font-semibold mb-2">
-                      Past 90 days
-                    </p>
-                    <div className="flex flex-col gap-2 mt-4">
-                      {charts.map((chart) => (
-                        <>
-                          <div className="relative bg-gray-100 w-full rounded-md h-40 pt-6">
-                            <div className="z-10 absolute top-2 left-2 text-sm font-semibold text-gray-400">
-                              {chart.name}
-                            </div>
-                            <BarChart
-                              name={chart.name}
-                              unit={chart.unit}
-                              data={provider[chart.key]}
-                            />
+                  <Tab.Group>
+                    <Tab.List className="flex w-64 mx-auto space-x-1 rounded-xl bg-blue-900/10 p-1">
+                      <Tab className="w-full rounded-lg py-2.5 text-sm font-medium leading-5 focus:outline-none text-gray-400 hover:bg-white/[0.12] hover:text-indigo-400 ui-selected:bg-white ui-selected:text-indigo-600 ui-selected:shadow">
+                        <div className="flex flex-col items-center gap-1">
+                          <ChartBarIcon className="h-8 w-8" />
+                          <p>Charts</p>
+                        </div>
+                      </Tab>
+                      <Tab className="w-full rounded-lg py-2.5 text-sm font-medium leading-5 focus:outline-none text-gray-400 hover:bg-white/[0.12] hover:text-indigo-400 ui-selected:bg-white ui-selected:text-blue-700 ui-selected:shadow">
+                        <div className="flex flex-col items-center gap-1">
+                          <DevicePhoneMobileIcon className="h-8 w-8" />
+                          <p>Connections</p>
+                        </div>
+                      </Tab>
+                    </Tab.List>
+                    <Tab.Panels>
+                      {/* Charts tab */}
+                      <Tab.Panel>
+                        <div className="flex flex-col gap-6 mt-2">
+                          {/* Uptime graphic */}
+                          <div className="">
+                            <p className="text-sm text-gray-400 font-semibold mb-2">
+                              Uptime (past 24 hours)
+                            </p>
+                            <div className="w-full h-8 bg-primary" />
                           </div>
-                        </>
-                      ))}
-                    </div>
-                  </div>
+                          {/* Charts */}
+                          <div className="">
+                            <p className="text-sm text-gray-400 font-semibold mb-2">
+                              Past 90 days
+                            </p>
+                            <div className="flex flex-col gap-2 mt-4">
+                              {charts.map((chart) => (
+                                <>
+                                  <div className="relative bg-gray-100 w-full rounded-md h-40 pt-6">
+                                    <div className="z-10 absolute top-2 left-2 text-sm font-semibold text-gray-400">
+                                      {chart.name}
+                                    </div>
+                                    <BarChart
+                                      name={chart.name}
+                                      unit={chart.unit}
+                                      data={provider[chart.key]}
+                                    />
+                                  </div>
+                                </>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                      </Tab.Panel>
+
+                      {/* Connections tab */}
+                      <Tab.Panel>
+                        {/* Connections table */}
+                        <div className="flex flex-col gap-6 mt-2"></div>
+                      </Tab.Panel>
+                    </Tab.Panels>
+                  </Tab.Group>
                 </div>
               )}
             </div>
