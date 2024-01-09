@@ -215,7 +215,20 @@ export async function postStatsProviderLast90(
       "2024-01-02": 8,
       "2024-01-01": 11,
     },
-    client_details: [],
+    client_details: [
+      {
+        client_id: "0c5a0b3c-b54d-4ec4-9749-360a11d2de59",
+        transfer_data: {},
+      },
+      {
+        client_id: "5e1ad27d-1b14-478c-ad66-097a006c1def",
+        transfer_data: {},
+      },
+      {
+        client_id: "e5542838-ede3-4bf5-8730-d109cc2b5247",
+        transfer_data: {},
+      },
+    ],
   } as StatsProviderLast90;
 
   return makePostRequest("stats/provider-last-90", body);

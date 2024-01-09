@@ -26,6 +26,9 @@ const config: Config = {
       spacing: {
         "76": "19rem",
       },
+      width: {
+        "128": "32rem",
+      },
     },
   },
   plugins: [require("@headlessui/tailwindcss")],
