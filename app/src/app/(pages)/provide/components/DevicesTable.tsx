@@ -1,14 +1,24 @@
 import { Provider } from "@/app/_lib/types";
 import { classNames } from "@/app/_lib/utils";
 import { Switch } from "@headlessui/react";
+import DeviceDetailSidebar from "./DeviceDetailSidebar";
+import { useState } from "react";
 
 type DevicesTableProps = {
   providers: Provider[];
 };
 
 export default function DevicesTable({ providers }: DevicesTableProps) {
+  const [selectedProvider, setSelectedProvider] = useState<
+    Provider | undefined
+  >();
+
   return (
     <>
+      <DeviceDetailSidebar
+        selectedProvider={selectedProvider}
+        setSelectedProvider={setSelectedProvider}
+      />
       <div className="overflow-x-auto w-full">
         <table className="w-full divide-y divide-gray-300">
           <thead>
@@ -34,6 +44,7 @@ export default function DevicesTable({ providers }: DevicesTableProps) {
               <tr
                 key={`device-row-${provider.client_id}`}
                 className="whitespace-nowrap text-sm text-gray-800 cursor-pointer hover:bg-gray-100"
+                onClick={() => setSelectedProvider(provider)}
               >
                 <td className="py-2 px-1 font-semibold text-gray-800 overflow-ellipsis">
                   {provider.client_id}
