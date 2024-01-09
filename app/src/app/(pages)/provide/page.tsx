@@ -189,7 +189,9 @@ export default function Page() {
               )}
 
               {!isDevicesPending && devices?.providers && (
-                <DevicesTable providers={devices?.providers} />
+                <>
+                  <DevicesTable providers={devices?.providers} />
+                </>
               )}
             </div>
           </div>
