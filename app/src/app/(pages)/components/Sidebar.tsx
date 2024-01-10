@@ -1,15 +1,12 @@
+"use client";
+
 import Link from "next/link";
-import {
-  Bars3Icon,
-  DevicePhoneMobileIcon,
-  GlobeAltIcon,
-  UserIcon,
-  UsersIcon,
-  XMarkIcon,
-} from "@heroicons/react/24/outline";
+import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
 import { usePathname } from "next/navigation";
-import { Fragment, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { Dialog, Transition } from "@headlessui/react";
+import { useQuery } from "@tanstack/react-query";
+import { getJwt, getSubscriptionBalance } from "@/app/_lib/api";
 
 const navigation = [
   {
@@ -36,9 +33,42 @@ function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(" ");
 }
 
+// Copied from web/bringyour.com/client.js
+// see https://stackoverflow.com/questions/38552003/how-to-decode-jwt-token-in-javascript-without-using-a-library
+function parseJwt(jwt: string) {
+  // console.log(jwt)
+  var base64Url = jwt.split(".")[1];
+  var base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+  var jsonPayload = decodeURIComponent(
+    window
+      .atob(base64)
+      .split("")
+      .map(function (c) {
+        return "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2);
+      })
+      .join("")
+  );
+
+  return JSON.parse(jsonPayload);
+}
+
 export default function Sidebar() {
   const pathname = usePathname().split("?")[0];
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [networkName, setNetworkName] = useState<string | null>(null);
+
+  const { isPending, data: subscriptionBalanceResult } = useQuery({
+    queryKey: ["subscription", "balance"],
+    queryFn: async () => await getSubscriptionBalance(),
+  });
+
+  const wallet = subscriptionBalanceResult?.wallet_info;
+
+  useEffect(() => {
+    const jwt = getJwt();
+    const networkAddon = jwt ? parseJwt(jwt)?.network_name : null;
+    setNetworkName(networkAddon ? `${networkAddon}.bringyour.network` : null);
+  }, []);
 
   return (
     <>
@@ -146,7 +176,7 @@ export default function Sidebar() {
 
       {/* Desktop sidebar */}
       <section id="sidebar" className="h-full hidden lg:fixed z-50 lg:flex">
-        <div className="w-76 flex flex-col gap-y-4 overflow-y-auto bg-primary text-gray-200">
+        <div className="w-76 flex flex-col gap-y-2 overflow-y-auto bg-primary text-gray-200">
           <div className="p-4">
             <img
               className="w-64"
@@ -156,23 +186,60 @@ export default function Sidebar() {
           </div>
 
           <div className="p-4 text-sm tracking-widest font-extralight break-all">
-            <p>awaishussain.bringyour.network</p>
+            {networkName && <p>{networkName}</p>}
+            {
+              !networkName && (
+                <div className="h-[1.4em]" />
+              ) /* Stops subsequent content from jumping up and down */
+            }
           </div>
 
           <div className="p-4">
-            <p className="text-5xl tracking-wider font-light">30 GiB</p>
-            <Link href="#">
-              <p className="mt-1 text-sm tracking-widest font-extralight">
-                add balance
-              </p>
-            </Link>
+            {isPending && (
+              <div className="w-full bg-slate-700 rounded-md h-[4.5em]" />
+            )}
+
+            {!isPending && (
+              <>
+                <p className="text-5xl tracking-wider font-light">
+                  {subscriptionBalanceResult?.balance_byte_count ||
+                    0 / 1_000_000_000}{" "}
+                  GiB
+                </p>
+                <Link href="#">
+                  <p className="mt-1 text-sm tracking-widest font-extralight">
+                    add balance
+                  </p>
+                </Link>
+              </>
+            )}
           </div>
 
           <div className="p-4">
-            <p className="text-5xl tracking-wider font-light">0 USDC</p>
-            <p className="mt-1 text-sm tracking-widest font-extralight">
-              earn by providing
-            </p>
+            {isPending && (
+              <div className="w-full bg-slate-700 rounded-md h-[4.5em]" />
+            )}
+
+            {!isPending && (
+              <>
+                <p className="text-5xl tracking-wider font-light">
+                  {(
+                    wallet && wallet.balance_usdc_nano_cents / 1_000_000_000
+                  )?.toPrecision(3) || "-"}{" "}
+                  USDC
+                </p>
+                {!wallet && (
+                  <p className="mt-1 text-sm tracking-widest font-extralight">
+                    No wallet found
+                  </p>
+                )}
+                {wallet && (
+                  <p className="mt-1 text-sm tracking-widest font-extralight">
+                    earn by providing
+                  </p>
+                )}
+              </>
+            )}
           </div>
 
           <div>
