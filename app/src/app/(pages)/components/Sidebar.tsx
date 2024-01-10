@@ -2,11 +2,16 @@
 
 import Link from "next/link";
 import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
-import { usePathname } from "next/navigation";
+import { redirect, usePathname } from "next/navigation";
 import { Fragment, useEffect, useState } from "react";
 import { Dialog, Transition } from "@headlessui/react";
 import { useQuery } from "@tanstack/react-query";
-import { getJwt, getSubscriptionBalance } from "@/app/_lib/api";
+import {
+  LOGIN_URL,
+  getJwt,
+  getSubscriptionBalance,
+  removeJwt,
+} from "@/app/_lib/api";
 
 const navigation = [
   {
@@ -67,6 +72,11 @@ function SidebarContent() {
     const networkAddon = jwt ? parseJwt(jwt)?.network_name : null;
     setNetworkName(networkAddon ? `${networkAddon}.bringyour.network` : null);
   }, []);
+
+  const signOut = () => {
+    removeJwt();
+    redirect(LOGIN_URL);
+  };
 
   return (
     <div className="w-76 flex flex-col gap-y-2 overflow-y-auto bg-primary text-gray-200">
@@ -163,7 +173,9 @@ function SidebarContent() {
       <div id="spacer" className="grow" />
 
       <div className="p-4 flex flex-col gap-4 font-extralight text-gray-300 tracking-wider">
-        <Link href="">Sign out</Link>
+        <Link href="" onClick={() => signOut()}>
+          Sign out
+        </Link>
         <p>
           <Link href="https://bringyour.com/terms" target="_blank">
             Terms
