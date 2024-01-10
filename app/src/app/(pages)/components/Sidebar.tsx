@@ -16,19 +16,19 @@ const navigation = [
     name: "Devices",
     href: "/devices",
     icon: "/devices_icon.svg",
-    bg_color: "bg-[#2B3A82]",
+    bg_color: "bg-[#2B3A82] hover:bg-[#2E3E9F]",
   },
   {
     name: "Provide",
     href: "/provide",
     icon: "/provide_icon.svg",
-    bg_color: "bg-[#1E644E]",
+    bg_color: "bg-[#1E644E] hover:bg-[#24775B]",
   },
   {
     name: "Account",
     href: "/account",
     icon: "/account_icon.svg",
-    bg_color: "bg-[#5A4E53]",
+    bg_color: "bg-[#5A4E53] hover:bg-[#73636A]",
   },
 ];
 
@@ -146,8 +146,8 @@ export default function Sidebar() {
 
       {/* Desktop sidebar */}
       <section id="sidebar" className="h-full hidden lg:fixed z-50 lg:flex">
-        <div className="flex grow flex-col gap-y-5 overflow-y-auto bg-primary pl-4 pr-8 py-4 text-gray-100">
-          <div>
+        <div className="w-76 flex flex-col gap-y-4 overflow-y-auto bg-primary text-gray-200">
+          <div className="p-4">
             <img
               className="w-64"
               src="/bringyour_logo_full.png"
@@ -155,36 +155,43 @@ export default function Sidebar() {
             />
           </div>
 
-          <div className="text-sm tracking-widest font-extralight">
+          <div className="p-4 text-sm tracking-widest font-extralight break-all">
             <p>awaishussain.bringyour.network</p>
           </div>
 
-          <div>
+          <div className="p-4">
             <p className="text-5xl tracking-wider font-light">30 GiB</p>
-            <p className="text-sm tracking-widest font-extralight">
-              add balance
-            </p>
+            <Link href="#">
+              <p className="mt-1 text-sm tracking-widest font-extralight">
+                add balance
+              </p>
+            </Link>
           </div>
 
-          <div>
+          <div className="p-4">
             <p className="text-5xl tracking-wider font-light">0 USDC</p>
-            <p className="text-sm tracking-widest font-extralight">
+            <p className="mt-1 text-sm tracking-widest font-extralight">
               earn by providing
             </p>
           </div>
 
           <div>
-            <p className="tracking-widest font-light">Manage your network</p>
-            <nav className="flex flex-col">
-              <ul role="list" className="-mx-2 flex flex-1 flex-col space-y-2">
+            <p className="p-4 pb-2 tracking-widest font-light">
+              Manage your network
+            </p>
+            <nav>
+              <ul role="list" className="flex flex-1 flex-col">
                 {navigation.map((item) => (
                   <li key={`nav-menu-${item.href}`}>
-                    <Link href={item.href} className="">
+                    <Link
+                      href={item.href}
+                      className="font-extralight tracking-wider hover:no-underline hover:font-normal"
+                    >
                       <div
-                        className={`${item.bg_color} flex flex-row gap-2 p-2`}
+                        className={`${item.bg_color} flex flex-row items-center gap-4 p-2`}
                       >
-                        <img src={item.icon} className="h-8 w-8" />
-                        <div>{item.name}</div>
+                        <img src={item.icon} className="ml-2 h-16 w-14" />
+                        <p>{item.name}</p>
                       </div>
                     </Link>
                   </li>
@@ -195,9 +202,21 @@ export default function Sidebar() {
 
           <div id="spacer" className="grow" />
 
-          <div className="flex flex-col gap-4 font-extralight text-gray-300 tracking-wider">
-            <a href="">Sign out</a>
-            <p>Terms | Privacy | VDP</p>
+          <div className="p-4 flex flex-col gap-4 font-extralight text-gray-300 tracking-wider">
+            <Link href="">Sign out</Link>
+            <p>
+              <Link href="https://bringyour.com/terms" target="_blank">
+                Terms
+              </Link>
+              &nbsp;|&nbsp;
+              <Link href="https://bringyour.com/privacy" target="_blank">
+                Privacy
+              </Link>
+              &nbsp;|&nbsp;
+              <Link href="https://bringyour.com/vdp" target="_blank">
+                VDP
+              </Link>
+            </p>
             <p>Copyright 2024 BringYour, Inc.</p>
           </div>
 

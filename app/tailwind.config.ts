@@ -23,6 +23,9 @@ const config: Config = {
         provideGreen: "#1E644E",
         accountBrown: "#5A4E53",
       },
+      spacing: {
+        "76": "19rem",
+      },
     },
   },
   plugins: [],
