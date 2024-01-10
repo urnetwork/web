@@ -10,7 +10,7 @@ export default function RootLayout({
   return (
     <>
       <Sidebar />
-      <main className="py-10 px-4 md:pl-16 lg:pl-80">{children}</main>
+      <main className="py-10 px-4 md:pl-80">{children}</main>
     </>
   );
 }
