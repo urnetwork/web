@@ -13,17 +13,23 @@ import { Dialog, Transition } from "@headlessui/react";
 
 const navigation = [
   {
-    name: "Your Devices",
+    name: "Devices",
     href: "/devices",
-    icon: DevicePhoneMobileIcon,
+    icon: "/devices_icon.svg",
+    bg_color: "bg-[#2B3A82]",
   },
   {
-    name: "Friends and Family Devices",
-    href: "/ffdevices",
-    icon: UsersIcon,
+    name: "Provide",
+    href: "/provide",
+    icon: "/provide_icon.svg",
+    bg_color: "bg-[#1E644E]",
   },
-  { name: "Provide", href: "/provide", icon: GlobeAltIcon },
-  { name: "Account", href: "/account", icon: UserIcon },
+  {
+    name: "Account",
+    href: "/account",
+    icon: "/account_icon.svg",
+    bg_color: "bg-[#5A4E53]",
+  },
 ];
 
 function classNames(...classes: string[]) {
@@ -140,8 +146,62 @@ export default function Sidebar() {
 
       {/* Desktop sidebar */}
       <section id="sidebar" className="h-full hidden lg:fixed z-50 lg:flex">
-        <div className="flex grow flex-col gap-y-5 overflow-y-auto bg-primary pl-4 pr-8 pb-2">
-          <div className="-ml-1 flex flex-row h-16 shrink-0 items-center gap-x-4">
+        <div className="flex grow flex-col gap-y-5 overflow-y-auto bg-primary pl-4 pr-8 py-4 text-gray-100">
+          <div>
+            <img
+              className="w-64"
+              src="/bringyour_logo_full.png"
+              alt="BringYour logo"
+            />
+          </div>
+
+          <div className="text-sm tracking-widest font-extralight">
+            <p>awaishussain.bringyour.network</p>
+          </div>
+
+          <div>
+            <p className="text-5xl tracking-wider font-light">30 GiB</p>
+            <p className="text-sm tracking-widest font-extralight">
+              add balance
+            </p>
+          </div>
+
+          <div>
+            <p className="text-5xl tracking-wider font-light">0 USDC</p>
+            <p className="text-sm tracking-widest font-extralight">
+              earn by providing
+            </p>
+          </div>
+
+          <div>
+            <p className="tracking-widest font-light">Manage your network</p>
+            <nav className="flex flex-col">
+              <ul role="list" className="-mx-2 flex flex-1 flex-col space-y-2">
+                {navigation.map((item) => (
+                  <li key={`nav-menu-${item.href}`}>
+                    <Link href={item.href} className="">
+                      <div
+                        className={`${item.bg_color} flex flex-row gap-2 p-2`}
+                      >
+                        <img src={item.icon} className="h-8 w-8" />
+                        <div>{item.name}</div>
+                      </div>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </nav>
+          </div>
+
+          <div id="spacer" className="grow" />
+
+          <div className="flex flex-col gap-4 font-extralight text-gray-300 tracking-wider">
+            <a href="">Sign out</a>
+            <p>Terms | Privacy | VDP</p>
+            <p>Copyright 2024 BringYour, Inc.</p>
+          </div>
+
+          {/* <div className="-ml-1 flex flex-row h-16 shrink-0 items-center gap-x-4">
             <img
               className="h-8 w-auto"
               src="/bringyour-logo.webp"
@@ -180,12 +240,12 @@ export default function Sidebar() {
                 </li>
               ))}
             </ul>
-          </nav>
+          </nav> */}
         </div>
       </section>
 
       {/* Narrow desktop sidebar */}
-      <section
+      {/* <section
         id="sidebar"
         className="h-full hidden md:fixed lg:hidden z-99 md:flex"
       >
@@ -217,7 +277,7 @@ export default function Sidebar() {
             </ul>
           </nav>
         </div>
-      </section>
+      </section> */}
 
       {/* Collapsed mobile sidebar */}
       <section className="w-full top-0 z-40 flex items-center gap-x-4 bg-primary px-4 py-4 shadow-sm sm:px-6 md:hidden">
