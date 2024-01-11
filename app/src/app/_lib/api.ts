@@ -148,7 +148,36 @@ export async function getStatsProviders(): Promise<StatsProviders> {
       {
         client_id: "018c1ccd-c1b5-36bb-b8ae-963599ed7531",
         connected: true,
-        connected_events_last_24h: [],
+        connected_events_last_24h: [
+          {
+            event_time: "2024-01-03 00:00",
+            connected: true,
+          },
+          {
+            event_time: "2024-01-03 04:17",
+            connected: false,
+          },
+          {
+            event_time: "2024-01-03 05:54",
+            connected: true,
+          },
+          {
+            event_time: "2024-01-03 12:16",
+            connected: false,
+          },
+          {
+            event_time: "2024-01-03 15:31",
+            connected: true,
+          },
+          {
+            event_time: "2024-01-03 21:00",
+            connected: false,
+          },
+          {
+            event_time: "2024-01-03 22:35",
+            connected: true,
+          },
+        ],
         uptime_last_24h: 22,
         transfer_data_last_24h: 16.1,
         payout_last_24h: 0.554,
