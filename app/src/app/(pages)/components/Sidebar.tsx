@@ -82,7 +82,7 @@ function SidebarContent() {
     <div className="w-76 flex flex-col gap-y-2 overflow-y-auto bg-primary text-gray-200">
       <div className="p-4">
         <img
-          className="w-64"
+          className="w-64 pointer-events-none select-none"
           src="/bringyour_logo_full.png"
           alt="BringYour logo"
         />
