@@ -6,8 +6,9 @@ import { getStatsProviders, getStatsProvidersOverviewLast90 } from "@lib/api";
 import { useState } from "react";
 import { ChevronDownIcon } from "@heroicons/react/20/solid";
 import { Listbox } from "@headlessui/react";
-import { BarChart, PlainAreaChart } from "./components/Chart";
+import { BarChart, PlainAreaChart } from "./components/Chart.tsx";
 import DevicesTable from "./components/DevicesTable";
+import UptimeWidget from "./components/UptimeWidget";
 
 type HeaderItem = {
   name: string;

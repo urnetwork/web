@@ -3,6 +3,7 @@ import { classNames } from "@/app/_lib/utils";
 import { Switch } from "@headlessui/react";
 import DeviceDetailSidebar from "./DeviceDetailSidebar";
 import { useState } from "react";
+import UptimeWidget from "./UptimeWidget";
 
 type DevicesTableProps = {
   providers: Provider24h[];
@@ -82,7 +83,7 @@ export default function DevicesTable({ providers }: DevicesTableProps) {
                 </td>
                 <td className="py-2 px-1">${provider.payout_last_24h}</td>
                 <td className="py-2 px-1">
-                  <div className="h-4 w-32 bg-primary"></div>
+                  <UptimeWidget data={provider.connected_events_last_24h} />
                 </td>
                 <td className="py-2 px-1">
                   {provider.search_interest_last_24h}
