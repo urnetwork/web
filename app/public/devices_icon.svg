@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="100px" height="100px" viewBox="0 0 100 100" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>Container</title>
+    <defs>
+        <rect id="path-1" x="0" y="0" width="50" height="40.3501968"></rect>
+    </defs>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Container">
+            <rect id="Frame-Background" fill="#4148CD" fill-rule="nonzero" x="0" y="0" width="100" height="100" rx="15"></rect>
+            <g id="laptop-mobile-duotone-1" transform="translate(25, 30)">
+                <mask id="mask-2" fill="white">
+                    <use xlink:href="#path-1"></use>
+                </mask>
+                <g id="Clip" fill-rule="nonzero"></g>
+                <g id="Group-3" mask="url(#mask-2)" fill="#FFFFFF" fill-rule="nonzero">
+                    <path d="M47.1874904,9.92975413 L32.8124899,9.92975413 C31.2578024,9.92975413 29.9999898,11.2578793 29.9999898,12.8125668 L29.9999898,37.187567 C29.9999898,38.7422546 31.2578024,40.0000671 32.8124899,40.0000671 L47.1874904,40.0000671 C48.742178,40.0000671 49.9999898,38.7422546 49.9999898,37.187567 L49.9999898,12.8125668 C49.9999898,11.2578793 48.742178,9.92975413 47.1874904,9.92975413 Z M44.9999898,35.000067 L34.9999898,35.000067 L34.9999898,15.0000669 L44.9999898,15.0000669 L44.9999898,35.000067 Z" id="Vector" fill-opacity="0.300000012"></path>
+                    <path d="M35,15 L35,35 L45,35 L45,15 L35,15 Z M10,5 L35,5 L35,7.5 L40,7.5 L40,3.7499997 C40,1.67968736 38.3203127,0.00937499903 36.2593752,0 L8.74218777,0 C6.67968776,0.00976562421 5,1.67968736 5,3.7499997 L5,22.5 L1.25000002,22.5 C0.556640634,22.5 0,23.0546857 0,23.7499981 L0,25 C0.00976562516,27.753904 2.23671887,29.9906226 4.99062517,30 L27.5,30 L27.5,22.5 L10,22.5 L10,5 Z" id="Vector"></path>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>
