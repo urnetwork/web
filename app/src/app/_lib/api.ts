@@ -101,63 +101,6 @@ export async function getStatsProvidersOverviewLast90(): Promise<StatsProvidersO
 }
 
 export async function getStatsProviders(): Promise<StatsProviders> {
-  return {
-    created_time: "2024-01-04",
-    providers: [
-      {
-        client_id: "018c1ccd-c1b5-36bb-b8ae-963599ed7531",
-        connected: true,
-        connected_events_last_24h: [
-          {
-            event_time: "2024-01-11 00:00",
-            connected: true,
-          },
-          {
-            event_time: "2024-01-11 04:17",
-            connected: false,
-          },
-          {
-            event_time: "2024-01-11 05:54",
-            connected: true,
-          },
-          {
-            event_time: "2024-01-11 12:16",
-            connected: false,
-          },
-          {
-            event_time: "2024-01-11 15:31",
-            connected: true,
-          },
-          {
-            event_time: "2024-01-11 21:00",
-            connected: false,
-          },
-          {
-            event_time: "2024-01-11 22:35",
-            connected: true,
-          },
-        ],
-        uptime_last_24h: 22,
-        transfer_data_last_24h: 16.1,
-        payout_last_24h: 0.554,
-        search_interest_last_24h: 71,
-        contracts_last_24h: 5,
-        clients_last_24h: 17,
-      },
-      {
-        client_id: "018bab71-1f15-a845-1ca1-b17a61c72c4c",
-        connected: false,
-        connected_events_last_24h: [],
-        uptime_last_24h: 18,
-        transfer_data_last_24h: 8.1,
-        payout_last_24h: 0.215,
-        search_interest_last_24h: 52,
-        contracts_last_24h: 3,
-        clients_last_24h: 9,
-      },
-    ],
-  };
-
   return makeGetRequest("stats/providers");
 }
 
