@@ -18,8 +18,10 @@ import { Timeseries } from "@/app/_lib/types";
 
 type BarChartProps = {
   name: string;
+  pre_unit?: string;
   unit?: string;
   data: Timeseries;
+  tooltipStyle?: "normal" | "simple";
 };
 
 /**
@@ -59,8 +61,15 @@ function formatData(data: Timeseries) {
     });
 }
 
-export function BarChart({ name, unit, data }: BarChartProps) {
+export function BarChart({
+  name,
+  pre_unit,
+  unit,
+  data,
+  tooltipStyle = "normal",
+}: BarChartProps) {
   const [tooltipPostion, setTooltipPosition] = useState({ x: 0, y: 0 });
+  const [isTooltipVisible, setIsTooltipVisible] = useState(false);
   const formattedData = formatData(data);
 
   const formatDate = (date: string): string => {
@@ -81,7 +90,37 @@ export function BarChart({ name, unit, data }: BarChartProps) {
               <p>
                 {name}
                 &emsp;
-                <span className="font-semibold">{payload[0].value}</span>{" "}
+                <span className="font-semibold">
+                  {pre_unit}
+                  {payload[0].value}
+                </span>{" "}
+                <span className="text-xs">{unit}</span>
+              </p>
+            </div>
+          </div>
+        </div>
+      );
+    }
+  };
+
+  const SimpleTooltip = ({
+    active,
+    payload,
+    label,
+  }: TooltipProps<ValueType, NameType>) => {
+    if (active && payload && payload.length) {
+      return (
+        <div className="bg-gray-50 rounded-md p-2 border border-gray-300 shadow-sm">
+          <div className="flex flex-col gap-y-1 items-stretch">
+            <p className="text-gray-500 text-xs pl-1">{label}</p>
+            <div className="bg-gray-200 shadow-inner rounded-md p-1 text-gray-600 text-sm">
+              <p>
+                {name}
+                &emsp;
+                <span className="font-semibold">
+                  {pre_unit}
+                  {payload[0].value}
+                </span>{" "}
                 <span className="text-xs">{unit}</span>
               </p>
             </div>
@@ -97,9 +136,12 @@ export function BarChart({ name, unit, data }: BarChartProps) {
         <ReBarChart data={formattedData}>
           <Tooltip
             cursor={false}
+            active={isTooltipVisible}
             position={tooltipPostion}
             wrapperStyle={{ zIndex: 15 }}
-            content={<CustomTooltip />}
+            content={
+              tooltipStyle == "simple" ? <SimpleTooltip /> : <CustomTooltip />
+            }
             isAnimationActive={false}
             allowEscapeViewBox={{ x: true, y: true }}
           />
@@ -108,8 +150,13 @@ export function BarChart({ name, unit, data }: BarChartProps) {
             fill="#818cf8"
             activeBar={{ fill: "#4f46e5" }}
             onMouseEnter={(event) => {
-              setTooltipPosition({ x: event.x, y: event.y - 85 });
+              setTooltipPosition({
+                x: event.x,
+                y: tooltipStyle == "simple" ? event.y - 70 : event.y - 85,
+              });
+              setIsTooltipVisible(true);
             }}
+            onMouseLeave={() => setIsTooltipVisible(false)}
             cursor="pointer"
           />
           <XAxis
