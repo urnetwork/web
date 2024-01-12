@@ -1,5 +1,5 @@
 import { zip } from "@/app/_lib/utils";
-import * as d3 from "d3";
+import moment from "moment";
 import { useEffect, useRef, useState } from "react";
 
 type UptimeWidgetProps = {
@@ -9,6 +9,14 @@ type UptimeWidgetProps = {
   }[];
 };
 
+type UptimeSegment = {
+  start_string: string;
+  end_string: string;
+  start_date: number;
+  end_date: number;
+  connected: boolean;
+};
+
 export default function UptimeWidget({ data }: UptimeWidgetProps) {
   if (!data || data.length == 0) {
     return <div className="h-4 w-32 bg-gray-200" />;
@@ -16,6 +24,8 @@ export default function UptimeWidget({ data }: UptimeWidgetProps) {
 
   // Scale factor to convert between dates, and pixel widths
   const [scaleFactor, setScaleFactor] = useState<number>();
+  const [svgHeight, setSvgHeight] = useState<number>();
+  const [tooltipSegment, setTooltipSegment] = useState<UptimeSegment>();
 
   const divRef = useRef<HTMLDivElement>(null);
   const segments = zip(
@@ -39,10 +49,55 @@ export default function UptimeWidget({ data }: UptimeWidgetProps) {
     if (width) {
       setScaleFactor(width / (lastEntry.end_date - firstEntry.start_date));
     }
+    setSvgHeight(divRef.current?.clientHeight);
   }, []);
 
+  const showTooltip = (event, segment) => {
+    setTooltipSegment(segment);
+  };
+  const hideTooltip = (event, segment) => {
+    setTooltipSegment(undefined);
+  };
+
   return (
-    <div className="h-4 w-32" ref={divRef}>
+    <div className="relative h-4 w-32 overflow-visible" ref={divRef}>
+      <div
+        id="tooltip"
+        className={`${
+          tooltipSegment ? "absolute" : "hidden"
+        } z-20 bg-gray-600 text-gray-100 border border-gray-800 p-2 rounded-md left-0`}
+        style={{ bottom: (svgHeight || 16) + 2 }}
+      >
+        {tooltipSegment && (
+          <div className="text-xs flex flex-col gap-1">
+            <p>
+              {moment(tooltipSegment.start_string).format("YYYY-MM-DD H:mm")}
+              {" - "}
+              {moment(tooltipSegment.end_string).format("H:mm")}
+            </p>
+            {tooltipSegment.connected && (
+              <p>
+                Connected for{" "}
+                {moment(tooltipSegment.end_string).diff(
+                  moment(tooltipSegment.start_string),
+                  "minutes"
+                )}{" "}
+                minutes.
+              </p>
+            )}
+            {!tooltipSegment.connected && (
+              <p>
+                Disconnected for{" "}
+                {moment(tooltipSegment.end_string).diff(
+                  moment(tooltipSegment.start_string),
+                  "minutes"
+                )}{" "}
+                minutes.
+              </p>
+            )}
+          </div>
+        )}
+      </div>
       <svg height="100%">
         {scaleFactor &&
           segments.map((segment) => (
@@ -54,6 +109,8 @@ export default function UptimeWidget({ data }: UptimeWidgetProps) {
               height="100%"
               fill={segment.connected ? "#1D3150" : "#e5e7eb"}
               strokeWidth={2}
+              onMouseEnter={(event) => showTooltip(event, segment)}
+              onMouseLeave={(event) => hideTooltip(event, segment)}
             />
           ))}
       </svg>

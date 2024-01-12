@@ -21,7 +21,7 @@ export default function DevicesTable({ providers }: DevicesTableProps) {
         setSelectedProvider={setSelectedProvider}
       />
       <div className="overflow-x-auto w-full">
-        <table className="w-full divide-y divide-gray-300">
+        <table className="w-full divide-y overflow-visible divide-gray-300">
           <thead>
             <tr className="text-left text-xs font-light text-gray-500">
               <th scope="col" className="py-3 px-1" />
