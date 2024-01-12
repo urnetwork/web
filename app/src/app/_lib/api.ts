@@ -150,31 +150,31 @@ export async function getStatsProviders(): Promise<StatsProviders> {
         connected: true,
         connected_events_last_24h: [
           {
-            event_time: "2024-01-03 00:00",
+            event_time: "2024-01-11 00:00",
             connected: true,
           },
           {
-            event_time: "2024-01-03 04:17",
+            event_time: "2024-01-11 04:17",
             connected: false,
           },
           {
-            event_time: "2024-01-03 05:54",
+            event_time: "2024-01-11 05:54",
             connected: true,
           },
           {
-            event_time: "2024-01-03 12:16",
+            event_time: "2024-01-11 12:16",
             connected: false,
           },
           {
-            event_time: "2024-01-03 15:31",
+            event_time: "2024-01-11 15:31",
             connected: true,
           },
           {
-            event_time: "2024-01-03 21:00",
+            event_time: "2024-01-11 21:00",
             connected: false,
           },
           {
-            event_time: "2024-01-03 22:35",
+            event_time: "2024-01-11 22:35",
             connected: true,
           },
         ],
