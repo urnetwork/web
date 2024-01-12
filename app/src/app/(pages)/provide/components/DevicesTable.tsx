@@ -21,7 +21,7 @@ export default function DevicesTable({ providers }: DevicesTableProps) {
         setSelectedProvider={setSelectedProvider}
       />
       <div className="overflow-x-auto w-full">
-        <table className="w-full divide-y overflow-visible divide-gray-300">
+        <table className="w-full divide-y divide-gray-300">
           <thead>
             <tr className="text-left text-xs font-light text-gray-500">
               <th scope="col" className="py-3 px-1" />
@@ -83,7 +83,9 @@ export default function DevicesTable({ providers }: DevicesTableProps) {
                 </td>
                 <td className="py-2 px-1">${provider.payout_last_24h}</td>
                 <td className="py-2 px-1">
-                  <UptimeWidget data={provider.connected_events_last_24h} />
+                  <div className="h-4 w-32">
+                    <UptimeWidget data={provider.connected_events_last_24h} />
+                  </div>
                 </td>
                 <td className="py-2 px-1">
                   {provider.search_interest_last_24h}
