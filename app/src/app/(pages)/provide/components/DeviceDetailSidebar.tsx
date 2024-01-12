@@ -17,7 +17,7 @@ type ChartItem = {
 
 const charts: Array<ChartItem> = [
   {
-    name: "Data transferred",
+    name: "Data",
     key: "transfer_data",
     unit: "GiB",
   },
@@ -140,8 +140,10 @@ export default function DeviceDetailSidebar({
                                     </div>
                                     <BarChart
                                       name={chart.name}
+                                      pre_unit={chart.pre_unit}
                                       unit={chart.unit}
                                       data={provider[chart.key]}
+                                      tooltipStyle={"simple"}
                                     />
                                   </div>
                                 </>

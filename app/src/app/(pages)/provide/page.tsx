@@ -156,6 +156,7 @@ export default function Page() {
               <div className="w-full h-72 p-4 pt-16 relative bg-gray-100 rounded-md">
                 <BarChart
                   name={selectedStat.name}
+                  pre_unit={selectedStat.pre_unit}
                   unit={selectedStat.unit}
                   data={getStatAllTime(selectedStat.key)}
                 />
