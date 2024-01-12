@@ -12,6 +12,7 @@ import {
   getSubscriptionBalance,
   removeJwt,
 } from "@/app/_lib/api";
+import { classNames } from "@/app/_lib/utils";
 
 const navigation = [
   {
@@ -33,10 +34,6 @@ const navigation = [
     bg_color: "bg-[#5A4E53] hover:bg-[#73636A]",
   },
 ];
-
-function classNames(...classes: string[]) {
-  return classes.filter(Boolean).join(" ");
-}
 
 // Copied from web/bringyour.com/client.js
 // see https://stackoverflow.com/questions/38552003/how-to-decode-jwt-token-in-javascript-without-using-a-library

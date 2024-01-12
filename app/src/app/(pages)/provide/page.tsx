@@ -2,11 +2,12 @@
 
 import { useQuery } from "@tanstack/react-query";
 import Loading from "./loading";
-import { getStatsProvidersOverviewLast90 } from "@lib/api";
+import { getStatsProviders, getStatsProvidersOverviewLast90 } from "@lib/api";
 import { useState } from "react";
 import { ChevronDownIcon } from "@heroicons/react/20/solid";
 import { Listbox } from "@headlessui/react";
-import { BarChart, PlainAreaChart } from "./components/chart";
+import { BarChart, PlainAreaChart } from "./components/Chart";
+import DevicesTable from "./components/DevicesTable";
 
 type HeaderItem = {
   name: string;
@@ -45,14 +46,20 @@ const headerItems: Array<HeaderItem> = [
 export default function Page() {
   const [selectedStat, setSelectedStat] = useState(headerItems[0]);
 
-  const { isPending, data: stats } = useQuery({
+  const { isPending: isOverviewPending, data: stats } = useQuery({
     queryKey: ["stats", "providers", "overviewLast90"],
-    queryFn: async () => await getStatsProvidersOverviewLast90(),
+    queryFn: getStatsProvidersOverviewLast90,
+  });
+
+  // Todo(awais): Move this into DevicesTable.tsx?
+  const { isPending: isDevicesPending, data: devices } = useQuery({
+    queryKey: ["stats", "providers"],
+    queryFn: getStatsProviders,
   });
 
   const getStatToday = (key: string) => {
     if (stats && stats[key]) {
-      return stats[key]["2024-01-04"];
+      return stats[key]["2024-01-04"]; // Todo(awais): Don't hardcode this
     }
     return "";
   };
@@ -71,9 +78,9 @@ export default function Page() {
           <h1>Provide</h1>
         </div>
 
-        {isPending && <Loading />}
+        {isOverviewPending && <Loading />}
 
-        {!isPending && (
+        {!isOverviewPending && (
           <div className="flex flex-col gap-y-8">
             {/* Header showing stats */}
             <div className="statsBar">
@@ -151,7 +158,7 @@ export default function Page() {
                   unit={selectedStat.unit}
                   data={getStatAllTime(selectedStat.key)}
                 />
-                {/* Select item to choose graph type */}
+                {/* Dropdown in the top left of the chart */}
                 <Listbox value={selectedStat} onChange={setSelectedStat}>
                   <Listbox.Button className="z-10 absolute cursor-pointer top-4 left-4 bg-gray-200 flex flex-row gap-2 items-center pl-3 pr-2 py-1 rounded-full text-gray-600 hover:text-gray-800 border border-gray-200 hover:border-gray-300">
                     <p className="text-sm">{selectedStat.name}</p>
@@ -177,7 +184,15 @@ export default function Page() {
             </div>
             <div className="devices">
               <h2 className="mb-2">Devices</h2>
-              <div className="w-full h-64 bg-gray-100 rounded-md"></div>
+              {isDevicesPending && (
+                <div className="w-full h-64 bg-gray-100 rounded-md"></div>
+              )}
+
+              {!isDevicesPending && devices?.providers && (
+                <>
+                  <DevicesTable providers={devices?.providers} />
+                </>
+              )}
             </div>
           </div>
         )}

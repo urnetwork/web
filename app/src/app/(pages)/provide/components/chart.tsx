@@ -98,7 +98,7 @@ export function BarChart({ name, unit, data }: BarChartProps) {
           <Tooltip
             cursor={false}
             position={tooltipPostion}
-            wrapperStyle={{ zIndex: 99 }}
+            wrapperStyle={{ zIndex: 15 }}
             content={<CustomTooltip />}
             isAnimationActive={false}
             allowEscapeViewBox={{ x: true, y: true }}
@@ -112,7 +112,11 @@ export function BarChart({ name, unit, data }: BarChartProps) {
             }}
             cursor="pointer"
           />
-          <XAxis dataKey="date" tickFormatter={formatDate} />
+          <XAxis
+            dataKey="date"
+            tickFormatter={formatDate}
+            fontSize={"0.8rem"}
+          />
         </ReBarChart>
       </ResponsiveContainer>
     </>

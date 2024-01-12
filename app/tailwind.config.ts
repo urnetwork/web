@@ -26,8 +26,11 @@ const config: Config = {
       spacing: {
         "76": "19rem",
       },
+      width: {
+        "128": "32rem",
+      },
     },
   },
-  plugins: [],
+  plugins: [require("@headlessui/tailwindcss")],
 };
 export default config;
