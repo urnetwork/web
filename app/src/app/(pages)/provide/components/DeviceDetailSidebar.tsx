@@ -1,9 +1,8 @@
 import { postStatsProviderLast90 } from "@/app/_lib/api";
 import { Provider24h } from "@/app/_lib/types";
-import { Dialog, Popover, Tab, Transition } from "@headlessui/react";
+import { Popover, Tab, Transition } from "@headlessui/react";
 import { DevicePhoneMobileIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import { useQuery } from "@tanstack/react-query";
-import { Fragment, useState } from "react";
 import { BarChart } from "./Chart";
 import { ChartBarIcon } from "@heroicons/react/24/solid";
 import UptimeWidget from "./UptimeWidget";
