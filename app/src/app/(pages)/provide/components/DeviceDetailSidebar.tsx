@@ -1,11 +1,11 @@
 import { postStatsProviderLast90 } from "@/app/_lib/api";
 import { Provider24h } from "@/app/_lib/types";
-import { Dialog, Popover, Tab, Transition } from "@headlessui/react";
+import { Popover, Tab, Transition } from "@headlessui/react";
 import { DevicePhoneMobileIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import { useQuery } from "@tanstack/react-query";
-import { Fragment, useState } from "react";
 import { BarChart } from "./Chart";
 import { ChartBarIcon } from "@heroicons/react/24/solid";
+import UptimeWidget from "./UptimeWidget";
 
 type ChartItem = {
   name: string;
@@ -16,7 +16,7 @@ type ChartItem = {
 
 const charts: Array<ChartItem> = [
   {
-    name: "Data transferred",
+    name: "Data",
     key: "transfer_data",
     unit: "GiB",
   },
@@ -116,7 +116,14 @@ export default function DeviceDetailSidebar({
                             <p className="text-sm text-gray-400 font-semibold mb-2">
                               Uptime (past 24 hours)
                             </p>
-                            <div className="w-full h-8 bg-primary" />
+                            <div className="w-full h-8">
+                              <UptimeWidget
+                                data={
+                                  selectedProvider?.connected_events_last_24h ||
+                                  []
+                                }
+                              />
+                            </div>
                           </div>
                           {/* Charts */}
                           <div className="">
@@ -132,8 +139,10 @@ export default function DeviceDetailSidebar({
                                     </div>
                                     <BarChart
                                       name={chart.name}
+                                      pre_unit={chart.pre_unit}
                                       unit={chart.unit}
                                       data={provider[chart.key]}
+                                      tooltipStyle={"simple"}
                                     />
                                   </div>
                                 </>

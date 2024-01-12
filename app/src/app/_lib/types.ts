@@ -51,7 +51,7 @@ export type Provider24h = {
   connected: boolean;
   connected_events_last_24h: {
     event_time: string;
-    connected: true;
+    connected: boolean;
   }[];
   uptime_last_24h: number;
   transfer_data_last_24h: number;
