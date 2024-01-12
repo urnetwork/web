@@ -6,6 +6,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Fragment, useState } from "react";
 import { BarChart } from "./Chart";
 import { ChartBarIcon } from "@heroicons/react/24/solid";
+import UptimeWidget from "./UptimeWidget";
 
 type ChartItem = {
   name: string;
@@ -116,7 +117,14 @@ export default function DeviceDetailSidebar({
                             <p className="text-sm text-gray-400 font-semibold mb-2">
                               Uptime (past 24 hours)
                             </p>
-                            <div className="w-full h-8 bg-primary" />
+                            <div className="w-full h-8">
+                              <UptimeWidget
+                                data={
+                                  selectedProvider?.connected_events_last_24h ||
+                                  []
+                                }
+                              />
+                            </div>
                           </div>
                           {/* Charts */}
                           <div className="">

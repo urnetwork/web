@@ -18,14 +18,12 @@ type UptimeSegment = {
 };
 
 export default function UptimeWidget({ data }: UptimeWidgetProps) {
-  if (!data || data.length == 0) {
-    return <div className="h-4 w-32 bg-gray-200" />;
-  }
-
   // Scale factor to convert between dates, and pixel widths
   const [scaleFactor, setScaleFactor] = useState<number>();
+  const [svgWidth, setSvgWidth] = useState<number>();
   const [svgHeight, setSvgHeight] = useState<number>();
   const [tooltipSegment, setTooltipSegment] = useState<UptimeSegment>();
+  const [showNullTooltip, setShowNullTooltip] = useState(false);
 
   const divRef = useRef<HTMLDivElement>(null);
   const segments = zip(
@@ -47,58 +45,93 @@ export default function UptimeWidget({ data }: UptimeWidgetProps) {
   useEffect(() => {
     const width = divRef.current?.clientWidth;
     if (width) {
+      setSvgWidth(width);
       setScaleFactor(width / (lastEntry.end_date - firstEntry.start_date));
     }
     setSvgHeight(divRef.current?.clientHeight);
   }, []);
 
-  const showTooltip = (event, segment) => {
+  if (!data || data.length == 0) {
+    return (
+      <div
+        className="h-full w-full relative bg-gray-200 cursor-pointer"
+        onMouseEnter={() => setShowNullTooltip(true)}
+        onMouseLeave={() => setShowNullTooltip(false)}
+      >
+        <div
+          id="tooltip"
+          className={`
+            ${showNullTooltip ? "absolute" : "hidden"}
+            z-20 bg-gray-600 text-gray-100 border border-gray-800 p-2 rounded-md
+          `}
+          style={{
+            bottom: (svgHeight || 16) + 2,
+            left: 0,
+          }}
+        >
+          <div className="text-xs flex flex-col gap-1">
+            <p>No uptime data found.</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  const showTooltip = (segment: UptimeSegment) => {
     setTooltipSegment(segment);
   };
-  const hideTooltip = (event, segment) => {
+  const hideTooltip = () => {
     setTooltipSegment(undefined);
   };
 
   return (
-    <div className="relative h-4 w-32 overflow-visible" ref={divRef}>
-      <div
-        id="tooltip"
-        className={`${
-          tooltipSegment ? "absolute" : "hidden"
-        } z-20 bg-gray-600 text-gray-100 border border-gray-800 p-2 rounded-md left-0`}
-        style={{ bottom: (svgHeight || 16) + 2 }}
-      >
-        {tooltipSegment && (
-          <div className="text-xs flex flex-col gap-1">
-            <p>
-              {moment(tooltipSegment.start_string).format("YYYY-MM-DD H:mm")}
-              {" - "}
-              {moment(tooltipSegment.end_string).format("H:mm")}
-            </p>
-            {tooltipSegment.connected && (
+    <div className="relative h-full w-full" ref={divRef}>
+      {tooltipSegment && scaleFactor && (
+        <div
+          id="tooltip"
+          className={
+            "absolute z-20 bg-gray-600 text-gray-100 border border-gray-800 p-2 rounded-md"
+          }
+          style={{
+            bottom: (svgHeight || 16) + 2,
+            left: Math.min(
+              (tooltipSegment.start_date - firstEntry.start_date) * scaleFactor,
+              (svgWidth || 180) - 180
+            ),
+          }}
+        >
+          {tooltipSegment && (
+            <div className="text-xs flex flex-col gap-1">
               <p>
-                Connected for{" "}
-                {moment(tooltipSegment.end_string).diff(
-                  moment(tooltipSegment.start_string),
-                  "minutes"
-                )}{" "}
-                minutes.
+                {moment(tooltipSegment.start_string).format("YYYY-MM-DD H:mm")}
+                {" - "}
+                {moment(tooltipSegment.end_string).format("H:mm")}
               </p>
-            )}
-            {!tooltipSegment.connected && (
-              <p>
-                Disconnected for{" "}
-                {moment(tooltipSegment.end_string).diff(
-                  moment(tooltipSegment.start_string),
-                  "minutes"
-                )}{" "}
-                minutes.
-              </p>
-            )}
-          </div>
-        )}
-      </div>
-      <svg height="100%">
+              {tooltipSegment.connected && (
+                <p>
+                  Connected for{" "}
+                  {moment(tooltipSegment.end_string).diff(
+                    moment(tooltipSegment.start_string),
+                    "minutes"
+                  )}{" "}
+                  minutes.
+                </p>
+              )}
+              {!tooltipSegment.connected && (
+                <p>
+                  Disconnected for{" "}
+                  {moment(tooltipSegment.end_string).diff(
+                    moment(tooltipSegment.start_string),
+                    "minutes"
+                  )}{" "}
+                  minutes.
+                </p>
+              )}
+            </div>
+          )}
+        </div>
+      )}
+      <svg height="100%" width="100%">
         {scaleFactor &&
           segments.map((segment) => (
             <rect
@@ -109,13 +142,11 @@ export default function UptimeWidget({ data }: UptimeWidgetProps) {
               height="100%"
               fill={segment.connected ? "#1D3150" : "#e5e7eb"}
               strokeWidth={2}
-              onMouseEnter={(event) => showTooltip(event, segment)}
-              onMouseLeave={(event) => hideTooltip(event, segment)}
+              onMouseEnter={() => showTooltip(segment)}
+              onMouseLeave={() => hideTooltip()}
             />
           ))}
       </svg>
     </div>
   );
-
-  <div className="h-4 w-32 bg-primary" />;
 }
