@@ -15,6 +15,7 @@ import {
 import moment from "moment";
 import { useState } from "react";
 import { Timeseries } from "@/app/_lib/types";
+import { formatTimeseriesData } from "@/app/_lib/utils";
 
 type BarChartProps = {
   name: string;
@@ -23,43 +24,6 @@ type BarChartProps = {
   data: Timeseries;
   tooltipStyle?: "normal" | "simple";
 };
-
-/**
- * Take timeseries data as it arrives from the API:
- * {
- *  "yyyy-mm-dd1": 0,
- *  "yyyy-mm-dd2": 0,
- * }
- *
- * and convert it into the format required by the charting library:
- * [
- *  {
- *     date: "yyyy-mm-dd",
- *     value: 0,
- *  },
- * ]
- *
- * This function also sorts the data chronologically by date.
- */
-function formatData(data: Timeseries) {
-  return Object.entries(data)
-    .map(([key, value]) => ({
-      date: key,
-      value: value,
-    }))
-    .toSorted((a, b) => {
-      const dateA = Date.parse(a.date);
-      const dateB = Date.parse(b.date);
-
-      if (dateA == dateB) {
-        return 0;
-      } else if (dateA > dateB) {
-        return 1;
-      } else {
-        return -1;
-      }
-    });
-}
 
 export function BarChart({
   name,
@@ -70,7 +34,7 @@ export function BarChart({
 }: BarChartProps) {
   const [tooltipPostion, setTooltipPosition] = useState({ x: 0, y: 0 });
   const [isTooltipVisible, setIsTooltipVisible] = useState(false);
-  const formattedData = formatData(data);
+  const formattedData = formatTimeseriesData(data);
 
   const formatDate = (date: string): string => {
     return moment(date).format("MMM Do");
@@ -178,7 +142,7 @@ export function PlainAreaChart({
   data,
   color = "#d1d5db",
 }: PlainAreaChartProps) {
-  const formattedData = formatData(data);
+  const formattedData = formatTimeseriesData(data);
 
   return (
     <>

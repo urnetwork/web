@@ -6,6 +6,8 @@ import { useQuery } from "@tanstack/react-query";
 import { BarChart } from "./Chart";
 import { ChartBarIcon } from "@heroicons/react/24/solid";
 import UptimeWidget from "./UptimeWidget";
+import ActivityWidget from "./ActivityWidget";
+import { formatTimeseriesData } from "@/app/_lib/utils";
 
 type ChartItem = {
   name: string;
@@ -56,6 +58,17 @@ export default function DeviceDetailSidebar({
   });
 
   const isOpen = selectedProvider != null;
+
+  const getMaxValueAcrossAllClients = () => {
+    const localMaxes = provider?.client_details.map((client) => {
+      const localMax = Math.max(
+        ...Object.values(client.transfer_data).map((value) => Number(value))
+      );
+      return localMax;
+    });
+
+    return localMaxes ? Math.max(...localMaxes) : undefined;
+  };
 
   return (
     <Transition show={isOpen} as={Popover}>
@@ -177,7 +190,10 @@ export default function DeviceDetailSidebar({
                                     {client.client_id}
                                   </td>
                                   <td>
-                                    <div className="w-36 bg-gray-400 h-5"></div>
+                                    <ActivityWidget
+                                      data={client}
+                                      maxValue={getMaxValueAcrossAllClients()}
+                                    />
                                   </td>
                                 </tr>
                               ))}

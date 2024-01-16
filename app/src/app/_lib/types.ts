@@ -46,6 +46,11 @@ export type SubscriptionBalanceResult = {
 // The key is technically a string representing a date, but can't type that.
 export type Timeseries = { [key: string]: string | number };
 
+export type TimeseriesEntry = {
+  date: string;
+  value: string | number;
+};
+
 export type Provider24h = {
   client_id: string;
   connected: boolean;
