@@ -15,7 +15,7 @@ type ActivityWidgetProps = {
     client_id: string;
     transfer_data: Timeseries;
   };
-  maxValue: number; // Use this to set the 'max' value across multiple ActivityWidget instances
+  maxValue?: number; // Use this to set the 'max' value across multiple ActivityWidget instances
 };
 
 export default function ActivityWidget({
