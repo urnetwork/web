@@ -7,7 +7,7 @@
 
 import { Timeseries, TimeseriesEntry } from "@/app/_lib/types";
 import { formatTimeseriesData } from "@/app/_lib/utils";
-import moment, { min } from "moment";
+import moment from "moment";
 import { useState } from "react";
 
 type ActivityWidgetProps = {
@@ -22,7 +22,6 @@ export default function ActivityWidget({
   data,
   maxValue,
 }: ActivityWidgetProps) {
-  // Scale factor to convert between dates, and pixel widths
   const [tooltipEntry, setTooltipEntry] = useState<TimeseriesEntry>();
 
   if (
@@ -46,13 +45,13 @@ export default function ActivityWidget({
     maxValue || Math.max(...formattedData.map((entry) => Number(entry.value)));
 
   const calculateColor = (value: number) => {
-    const percent = value / max;
-    const maxLightness = 0.9;
-    const minLightness = 0.4;
-    const lightness =
-      100 * (percent * (maxLightness - minLightness) + minLightness);
+    const normedValue = value / max;
+    const maxLightness = 0.4; // lightness for the largest value
+    const minLightness = 0.9; // lightness for the smallest value
+    const lightnessPercentage =
+      100 * (normedValue * (maxLightness - minLightness) + minLightness);
 
-    return `hsl(225, 70%, ${lightness}%)`;
+    return `hsl(225, 70%, ${lightnessPercentage}%)`;
   };
 
   return (
