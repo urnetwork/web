@@ -178,7 +178,7 @@ export default function DeviceDetailSidebar({
                                     {client.client_id}
                                   </td>
                                   <td>
-                                    <ActivityWidget />
+                                    <ActivityWidget data={client} />
                                   </td>
                                 </tr>
                               ))}
