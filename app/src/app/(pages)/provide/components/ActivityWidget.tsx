@@ -5,7 +5,7 @@
  * on that day.
  */
 
-import { Timeseries } from "@/app/_lib/types";
+import { Timeseries, TimeseriesEntry } from "@/app/_lib/types";
 import { formatTimeseriesData } from "@/app/_lib/utils";
 import moment, { min } from "moment";
 import { useState } from "react";
@@ -23,9 +23,7 @@ export default function ActivityWidget({
   maxValue,
 }: ActivityWidgetProps) {
   // Scale factor to convert between dates, and pixel widths
-  const [showTooltip, setShowTooltip] = useState(false);
-  const handleShowTooltip = () => {};
-  const hideTooltip = () => {};
+  const [tooltipEntry, setTooltipEntry] = useState<TimeseriesEntry>();
 
   if (
     !data ||
@@ -61,9 +59,25 @@ export default function ActivityWidget({
     <div className="w-36 h-5 flex flex-row gap-1 justify-end">
       {formattedData.map((entry) => (
         <div
-          className="w-4 h-full cursor-pointer rounded-sm"
+          className="relative w-4 h-full cursor-pointer rounded-sm hover:border-2 border-indigo-900"
           style={{ backgroundColor: calculateColor(Number(entry.value)) }}
-        ></div>
+          onMouseEnter={() => setTooltipEntry(entry)}
+          onMouseLeave={() => setTooltipEntry(undefined)}
+        >
+          {tooltipEntry && tooltipEntry.date === entry.date && (
+            <div
+              id="tooltip"
+              className={
+                "absolute whitespace-nowrap min-w-20 z-20 bg-gray-600 text-gray-100 border border-gray-800 p-2 rounded-md bottom-6 -left-8"
+              }
+            >
+              <div className="text-xs flex flex-col gap-1">
+                <p>{moment(tooltipEntry.date).format("YYYY-MM-DD")}</p>
+                <p className="font-medium">Data: {tooltipEntry.value} GiB</p>
+              </div>
+            </div>
+          )}
+        </div>
       ))}
     </div>
   );

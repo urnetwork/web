@@ -1,4 +1,4 @@
-import { Timeseries } from "./types";
+import { Timeseries, TimeseriesEntry } from "./types";
 
 export function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(" ");
@@ -29,7 +29,7 @@ export function zip(a: Array<any>, b: Array<any>) {
  *
  * This function also sorts the data chronologically by date.
  */
-export function formatTimeseriesData(data: Timeseries) {
+export function formatTimeseriesData(data: Timeseries): TimeseriesEntry[] {
   return Object.entries(data)
     .map(([key, value]) => ({
       date: key,
