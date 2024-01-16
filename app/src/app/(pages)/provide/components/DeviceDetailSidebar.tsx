@@ -6,6 +6,7 @@ import { useQuery } from "@tanstack/react-query";
 import { BarChart } from "./Chart";
 import { ChartBarIcon } from "@heroicons/react/24/solid";
 import UptimeWidget from "./UptimeWidget";
+import ActivityWidget from "./ActivityWidget";
 
 type ChartItem = {
   name: string;
@@ -177,7 +178,7 @@ export default function DeviceDetailSidebar({
                                     {client.client_id}
                                   </td>
                                   <td>
-                                    <div className="w-36 bg-gray-400 h-5"></div>
+                                    <ActivityWidget />
                                   </td>
                                 </tr>
                               ))}
