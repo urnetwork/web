@@ -104,8 +104,15 @@ export async function getStatsProviders(): Promise<StatsProviders> {
   return makeGetRequest("stats/providers");
 }
 
-export async function postStatsProviderLast90(
-  body: object
-): Promise<StatsProviderLast90> {
+export async function postStatsProviderLast90(body: {
+  client_id: string;
+}): Promise<StatsProviderLast90> {
   return makePostRequest("stats/provider-last-90", body);
+}
+
+export async function postDeviceSetProvide(body: {
+  client_id: string;
+  provide_mode: number;
+}) {
+  return makePostRequest("devices/set-provide", body);
 }
