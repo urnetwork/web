@@ -1,10 +1,10 @@
-import { Provider24h } from "@/app/_lib/types";
+import { NetworkClientsResult, Provider24h } from "@/app/_lib/types";
 import { classNames } from "@/app/_lib/utils";
 import { Switch } from "@headlessui/react";
 import DeviceDetailSidebar from "./DeviceDetailSidebar";
 import { useState } from "react";
 import UptimeWidget from "./UptimeWidget";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   getNetworkClients,
   getStatsProviders,
@@ -15,8 +15,13 @@ const PROVIDE_MODE_FRIENDS_AND_FAMILY = 2;
 const PROVIDE_MODE_PUBLIC = 3;
 
 type DevicesTableProps = {};
+type DeviceSetPayload = {
+  client_id: string;
+  provide_mode: number;
+};
 
 export default function DevicesTable({}: DevicesTableProps) {
+  const queryClient = useQueryClient();
   const [selectedProvider, setSelectedProvider] = useState<
     Provider24h | undefined
   >();
@@ -34,46 +39,72 @@ export default function DevicesTable({}: DevicesTableProps) {
   });
 
   const mutation = useMutation({
-    mutationFn: ({
-      client_id,
-      provide_mode,
-    }: {
-      client_id: string;
-      provide_mode: number;
-    }) =>
+    mutationFn: ({ client_id, provide_mode }: DeviceSetPayload) =>
       postDeviceSetProvide({
         client_id: client_id,
         provide_mode: provide_mode,
       }),
-    onMutate: async ({
-      client_id,
-      provide_mode,
-    }: {
-      client_id: string;
-      provide_mode: number;
-    }) => {
-      console.log("On mutate was called with: ", { client_id, provide_mode });
-      // Todo: Use setQueryData to optimistically update networkDevices
+    onMutate: async ({ client_id, provide_mode }: DeviceSetPayload) => {
+      // Implement optimistic updates for 'provide' toggle
+      // https://tanstack.com/query/v4/docs/react/guides/optimistic-updates
+      await queryClient.cancelQueries({ queryKey: ["network", "clients"] });
+      const previousNetworkClientsResult = queryClient.getQueryData([
+        "network",
+        "clients",
+      ]);
+      queryClient.setQueryData(
+        ["network", "clients"],
+        (oldResult: NetworkClientsResult) => {
+          const clients = oldResult.clients;
+          const index = clients.findIndex(
+            (client) => client.client_id == client_id
+          );
+
+          if (~index) {
+            clients[index] = {
+              ...clients[index],
+              provide_mode: provide_mode,
+            };
+          }
+
+          return { clients: clients };
+        }
+      );
+      return { previousNetworkClientsResult };
+    },
+    onError: (err, newClient, context) => {
+      // Fallback to previous result on error
+      queryClient.setQueryData(
+        ["network", "clients"],
+        context?.previousNetworkClientsResult
+      );
+      alert(
+        `Sorry, can't turn provide ${
+          newClient.provide_mode == PROVIDE_MODE_PUBLIC ? "on" : "off"
+        } for device: ${newClient.client_id}`
+      );
     },
     onSettled: () => {
-      console.log("On settled called");
-      // Todo: invalidate network devices query
+      // Trigger a refetch of the network devices query
+      queryClient.invalidateQueries({ queryKey: ["network", "clients"] });
     },
   });
 
-  const handleProvideToggle = (provider: Provider24h, isProvideOn: boolean) => {
-    console.log(provider.client_id, "; Changed toggle to: ", isProvideOn);
-    const provideMode = isProvideOn
+  const handleProvideToggle = (
+    provider: Provider24h,
+    setProvideOn: boolean
+  ) => {
+    const newProvideMode = setProvideOn
       ? PROVIDE_MODE_PUBLIC
       : PROVIDE_MODE_FRIENDS_AND_FAMILY;
     mutation.mutate({
       client_id: provider.client_id,
-      provide_mode: provideMode,
+      provide_mode: newProvideMode,
     });
   };
 
   const getClient = (clientId: string) => {
-    const client = clients?.clients.find(
+    const client = clients?.clients?.find(
       (client) => clientId == client.client_id
     );
     if (!client) {
@@ -82,13 +113,9 @@ export default function DevicesTable({}: DevicesTableProps) {
     return client;
   };
 
-  const getProvideMode = (clientId: string) => {
-    const client = getClient(clientId);
-    return client?.provide_mode;
-  };
-
   const isProviding = (clientId: string) => {
-    return getProvideMode(clientId) == PROVIDE_MODE_PUBLIC;
+    const client = getClient(clientId);
+    return client?.provide_mode == PROVIDE_MODE_PUBLIC;
   };
 
   const getNumConnections = (clientId: string) => {
