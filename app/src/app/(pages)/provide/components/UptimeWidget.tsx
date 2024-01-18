@@ -135,6 +135,7 @@ export default function UptimeWidget({ data }: UptimeWidgetProps) {
         {scaleFactor &&
           segments.map((segment) => (
             <rect
+              key={segment.start_string} // not guaranteed to be globally unique :(
               className="hover:stroke-slate-300 cursor-pointer"
               x={(segment.start_date - firstEntry.start_date) * scaleFactor}
               y="0"

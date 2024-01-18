@@ -145,20 +145,21 @@ export default function DeviceDetailSidebar({
                             </p>
                             <div className="flex flex-col gap-2 mt-4">
                               {charts.map((chart) => (
-                                <>
-                                  <div className="relative bg-gray-100 w-full rounded-md h-40 pt-6">
-                                    <div className="z-10 absolute top-2 left-2 text-sm font-semibold text-gray-400">
-                                      {chart.name}
-                                    </div>
-                                    <BarChart
-                                      name={chart.name}
-                                      pre_unit={chart.pre_unit}
-                                      unit={chart.unit}
-                                      data={provider[chart.key]}
-                                      tooltipStyle={"simple"}
-                                    />
+                                <div
+                                  key={`chart-${chart.key}`}
+                                  className="relative bg-gray-100 w-full rounded-md h-40 pt-6"
+                                >
+                                  <div className="z-10 absolute top-2 left-2 text-sm font-semibold text-gray-400">
+                                    {chart.name}
                                   </div>
-                                </>
+                                  <BarChart
+                                    name={chart.name}
+                                    pre_unit={chart.pre_unit}
+                                    unit={chart.unit}
+                                    data={provider[chart.key]}
+                                    tooltipStyle={"simple"}
+                                  />
+                                </div>
                               ))}
                             </div>
                           </div>
