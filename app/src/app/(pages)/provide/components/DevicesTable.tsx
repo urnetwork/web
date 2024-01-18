@@ -4,15 +4,35 @@ import { Switch } from "@headlessui/react";
 import DeviceDetailSidebar from "./DeviceDetailSidebar";
 import { useState } from "react";
 import UptimeWidget from "./UptimeWidget";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { getStatsProviders, postDeviceSetProvide } from "@/app/_lib/api";
 
-type DevicesTableProps = {
-  providers: Provider24h[];
-};
+type DevicesTableProps = {};
 
-export default function DevicesTable({ providers }: DevicesTableProps) {
+export default function DevicesTable({}: DevicesTableProps) {
+  // Todo(awais): Move this into DevicesTable.tsx?
+  const { isPending: isDevicesPending, data: devices } = useQuery({
+    queryKey: ["stats", "providers"],
+    queryFn: getStatsProviders,
+  });
+  const providers = devices?.providers;
+
   const [selectedProvider, setSelectedProvider] = useState<
     Provider24h | undefined
   >();
+
+  const mutation = useMutation({
+    mutationFn: () =>
+      postDeviceSetProvide({ client_id: "lalala", provide_mode: 0 }),
+  });
+
+  const handleProvideToggle = (provider: Provider24h, newState: boolean) => {
+    console.log(provider.client_id, "; Changed toggle to: ", newState);
+  };
+
+  if (isDevicesPending) {
+    return <div className="w-full h-64 bg-gray-100 rounded-md" />;
+  }
 
   return (
     <>
@@ -54,7 +74,9 @@ export default function DevicesTable({ providers }: DevicesTableProps) {
                   <div className="flex flex-row items-center gap-x-2 whitespace-nowrap">
                     <Switch
                       checked={provider.connected}
-                      onChange={() => {}}
+                      onChange={(newState) =>
+                        handleProvideToggle(provider, newState)
+                      }
                       className={classNames(
                         provider.connected ? "bg-green-600" : "bg-gray-200",
                         "relative inline-flex h-4 w-7 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none"

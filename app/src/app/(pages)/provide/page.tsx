@@ -51,12 +51,6 @@ export default function Page() {
     queryFn: getStatsProvidersOverviewLast90,
   });
 
-  // Todo(awais): Move this into DevicesTable.tsx?
-  const { isPending: isDevicesPending, data: devices } = useQuery({
-    queryKey: ["stats", "providers"],
-    queryFn: getStatsProviders,
-  });
-
   const getStatToday = (key: string) => {
     if (stats && stats[key]) {
       return stats[key]["2024-01-04"]; // Todo(awais): Don't hardcode this
@@ -185,15 +179,7 @@ export default function Page() {
             </div>
             <div className="devices">
               <h2 className="mb-2">Devices</h2>
-              {isDevicesPending && (
-                <div className="w-full h-64 bg-gray-100 rounded-md"></div>
-              )}
-
-              {!isDevicesPending && devices?.providers && (
-                <>
-                  <DevicesTable providers={devices?.providers} />
-                </>
-              )}
+              <DevicesTable />
             </div>
           </div>
         )}
