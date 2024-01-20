@@ -33,7 +33,7 @@ let logop5 = new p5((sketch) => {
   
   sketch.setup = () => {
     
-    sketch.loadFont('res/fonts/Arkitech-Light.ttf', (font) => {
+    sketch.loadFont('/res/fonts/Arkitech-Light.ttf', (font) => {
       arkitechFont = font;
     },
     () => {

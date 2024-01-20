@@ -77,13 +77,17 @@ def build(dirpath, minify=True, validate=True):
 
     def process_page(parent_dirpath, process_filename):
         page_name = process_filename[:-len(page_suffix)]
+        page_path = os.path.join(parent_dirpath, process_filename)
         out_path = os.path.join(build_dirpath, parent_dirpath, f'{page_name}.html')
 
         sys.stdout.write(f'Processing {out_path} ...')
         sys.stdout.flush()
         
         template = jinja_env.get_template(os.path.join(parent_dirpath, process_filename))
-        page_html = template.render(page_name=page_name)
+        page_html = template.render(
+            page_name=page_name,
+            page_path=page_path
+        )
         
         if minify:
             with open(os.path.join(build_dirpath, parent_dirpath, f'{page_name}.html.tmp'), 'w') as f:
@@ -194,7 +198,7 @@ def build(dirpath, minify=True, validate=True):
     j2_suffix = '.j2'
     page_suffix = '.html.j2'
 
-    for process_dirpath, process_dirnames, process_filenames in os.walk(dirpath, topdown=True):
+    for process_dirpath, process_dirnames, process_filenames in os.walk(dirpath, topdown=True, followlinks=True):
         if dirpath == process_dirpath:
             filtered_dirnames = [
                 process_dirname

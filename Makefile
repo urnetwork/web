@@ -2,6 +2,12 @@
 
 all: clean build
 
+deps:
+	npm install html-validate -g
+	npm install html-minifier -g
+	npm install uglify-js -g
+	npm install clean-css-cli -g
+
 clean:
 	python webgen/webgen.py clean bringyour.com/gen.py
 	python webgen/webgen.py clean nginx/gen.py
