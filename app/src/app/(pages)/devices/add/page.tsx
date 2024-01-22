@@ -2,11 +2,13 @@
 
 import { Breadcrumbs } from "@/app/_lib/components/Breadcrumbs";
 import { ChevronLeftIcon, HomeIcon } from "@heroicons/react/24/outline";
+import { useSearchParams } from "next/navigation";
 import React, { useEffect, useState } from "react";
 
 export default function Page() {
-  // If there were more fields, I would use a library like Formik for error handling
-  const [code, setCode] = useState<string>("");
+  // If there were moore fields, I would use a library like Formik for error handling
+  const queryParams = useSearchParams();
+  const [code, setCode] = useState<string>(queryParams.get("code") || "");
   const [isCodeTouched, setIsCodeTouched] = useState(false);
   const [codeErrorMessage, setCodeErrorMessage] = useState<string>();
 
