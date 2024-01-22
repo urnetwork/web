@@ -45,5 +45,5 @@ th {
 }
 
 .btn-primary {
-  @apply bg-primary hover:bg-primary-semidark border border-primary-semidark text-white;
+  @apply bg-primary hover:bg-primary-semidark border border-primary-semidark text-white disabled:bg-gray-400 disabled:border-none;
 }

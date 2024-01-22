@@ -5,6 +5,7 @@ import { PlusIcon } from "@heroicons/react/24/solid";
 import { useQuery } from "@tanstack/react-query";
 import Loading from "./loading";
 import { getNetworkClients } from "@lib/api";
+import Link from "next/link";
 
 export default function Page() {
   const { isPending, data: clients } = useQuery({
@@ -20,7 +21,9 @@ export default function Page() {
           <button className="button btn-primary">
             <div className="flex flex-row gap-2 items-center">
               <PlusIcon className="w-5 h-4 text-white font-semibold" />
-              <p className="font-light">Add device</p>
+              <Link href="/devices/add">
+                <p className="font-light">Add device</p>
+              </Link>
             </div>
           </button>
         </div>
