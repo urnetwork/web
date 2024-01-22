@@ -1,7 +1,9 @@
 "use client";
 
+import { postDeviceAdd } from "@/app/_lib/api";
 import { Breadcrumbs } from "@/app/_lib/components/Breadcrumbs";
-import { ChevronLeftIcon, HomeIcon } from "@heroicons/react/24/outline";
+import Button from "@/app/_lib/components/Button";
+import { time } from "console";
 import { useSearchParams } from "next/navigation";
 import React, { useEffect, useState } from "react";
 
@@ -25,8 +27,12 @@ export default function Page() {
     validateCode(event.target.value);
   };
 
-  const handleFormSubmit = () => {
-    // Send post request to backend
+  const handleFormSubmit = async (
+    event: React.MouseEvent<HTMLButtonElement>
+  ): Promise<void> => {
+    event.preventDefault();
+    await new Promise((r) => setTimeout(r, 2000));
+    await postDeviceAdd({ code: code });
   };
 
   const hasError = codeErrorMessage !== undefined;
@@ -76,13 +82,13 @@ export default function Page() {
                 </div>
               )}
             </div>
-            <button
+            <Button
               className="button btn-primary self-end"
               disabled={hasError}
-              onClick={() => {}}
+              onClick={handleFormSubmit}
             >
               Add device
-            </button>
+            </Button>
           </div>
         </form>
       </div>

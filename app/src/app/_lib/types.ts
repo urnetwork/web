@@ -98,3 +98,20 @@ export type StatsProviderLast90 = {
     transfer_data: Timeseries;
   }[];
 };
+
+export type DeviceSetProvideResult = {
+  provide_mode: number;
+  error?: {
+    message: string;
+  };
+};
+
+export type DeviceAddResult = {
+  code_type: string; // share | adopt
+  code: string;
+  network_name: string;
+  client_id: string;
+  error?: {
+    message: string;
+  };
+};

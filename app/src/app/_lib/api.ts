@@ -5,6 +5,8 @@
 import { redirect } from "next/navigation";
 import {
   AuthCodeLoginResult,
+  DeviceAddResult,
+  DeviceSetProvideResult,
   NetworkClientsResult,
   StatsProviderLast90,
   StatsProviders,
@@ -113,6 +115,19 @@ export async function postStatsProviderLast90(body: {
 export async function postDeviceSetProvide(body: {
   client_id: string;
   provide_mode: number;
-}) {
+}): Promise<DeviceSetProvideResult> {
   return makePostRequest("devices/set-provide", body);
+}
+
+export async function postDeviceAdd(body: {
+  code: string;
+}): Promise<DeviceAddResult> {
+  return {
+    code_type: "string",
+    code: body.code,
+    network_name: "test.bringyour.network",
+    client_id: "test_client_id",
+  };
+
+  return makePostRequest("/device/add", body);
 }
