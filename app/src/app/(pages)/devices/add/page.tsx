@@ -1,6 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Breadcrumbs } from "@/app/_lib/components/Breadcrumbs";
+import { ChevronLeftIcon, HomeIcon } from "@heroicons/react/24/outline";
+import React, { useEffect, useState } from "react";
 
 export default function Page() {
   // If there were more fields, I would use a library like Formik for error handling
@@ -34,8 +36,15 @@ export default function Page() {
 
   return (
     <>
-      {/* Todo: Add breadcrumbs */}
-      <div className="md:mt-12 p-4 max-w-lg">
+      <div className="md:mt-10 p-4 max-w-lg">
+        <Breadcrumbs
+          items={[
+            {
+              title: "Devices",
+              url: "/devices",
+            },
+          ]}
+        />
         <h1>Add a new device</h1>
 
         <form onSubmit={() => {}}>
