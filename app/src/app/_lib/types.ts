@@ -115,3 +115,19 @@ export type DeviceAddResult = {
     message: string;
   };
 };
+
+export type DeviceShareStatusResult = {
+  pending: boolean;
+  associated_network_name: string;
+  error?: {
+    message: string;
+  };
+};
+
+export type DeviceAdoptStatusResult = {
+  pending: boolean;
+  associated_network_name: string;
+  error?: {
+    message: string;
+  };
+};
