@@ -140,7 +140,7 @@ export async function postDeviceShareStatus(body: {
   share_code: string;
 }): Promise<DeviceShareStatusResult> {
   return {
-    pending: true,
+    pending: false,
     associated_network_name: "test.bringyour.network",
   };
   return makePostRequest("/device/share-status", body);
@@ -153,5 +153,5 @@ export async function postDeviceAdoptStatus(body: {
     pending: true,
     associated_network_name: "test.bringyour.network",
   };
-  return makePostRequest("/device/share-status", body);
+  return makePostRequest("/device/adopt-status", body);
 }
