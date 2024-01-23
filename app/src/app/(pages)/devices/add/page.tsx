@@ -5,9 +5,10 @@ import { Breadcrumbs } from "@/app/_lib/components/Breadcrumbs";
 import Button from "@/app/_lib/components/Button";
 import PulseLoader from "@/app/_lib/components/LoadingSpinner";
 import { CheckBadgeIcon } from "@heroicons/react/24/solid";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "next/navigation";
 import React, { useEffect, useState } from "react";
+import Poll from "./components/Poll";
 
 export default function Page() {
   // If there were moore fields, I would use a library like Formik for error handling
@@ -16,7 +17,6 @@ export default function Page() {
   const [isCodeTouched, setIsCodeTouched] = useState<boolean>(false);
   const [codeErrorMessage, setCodeErrorMessage] = useState<string>();
   const [isPolling, setIsPolling] = useState<boolean>(false);
-  const [codeType, setCodeType] = useState<string>();
 
   const validateCode = (code: string | undefined) => {
     if (!code || code == "" || code == undefined) {
@@ -31,14 +31,22 @@ export default function Page() {
     validateCode(event.target.value);
   };
 
-  const handleFormSubmit = async (
+  const {
+    data: deviceAddResult,
+    isError,
+    mutateAsync,
+  } = useMutation({
+    mutationFn: async (code: string) => {
+      await new Promise((r) => setTimeout(r, 1000));
+      return await postDeviceAdd({ code: code });
+    },
+  });
+
+  const handleAddDevice = async (
     event: React.MouseEvent<HTMLButtonElement>
   ): Promise<void> => {
     event.preventDefault();
-    await new Promise((r) => setTimeout(r, 1000));
-    const result = await postDeviceAdd({ code: code });
-    setCodeType(result.code_type);
-    setIsPolling(true);
+    await mutateAsync(code);
   };
 
   const hasError = codeErrorMessage !== undefined;
@@ -47,34 +55,6 @@ export default function Page() {
   useEffect(() => {
     validateCode(code);
   }, []);
-
-  const {
-    isLoading,
-    data: deviceShareStatus,
-    isError,
-  } = useQuery({
-    queryKey: ["device", "add"],
-    queryFn: async () => postDeviceShareStatus({ share_code: code }),
-    enabled: isPolling != false,
-    refetchInterval: (query) => {
-      console.log(
-        "Refetch interval; what's pending",
-        query.state.data?.pending
-      );
-      console.log("Refetch interval, are we polling?", isPolling);
-      if ((!query.state.data || query.state.data?.pending) && isPolling) {
-        return 2000;
-      }
-      console.log("Setting polling to false");
-      setIsPolling(false);
-      return false;
-    },
-  });
-
-  const pollForDeviceStatus = isLoading || isPolling;
-  console.log("isLoading", isLoading);
-  console.log("isPolling?", isPolling);
-  console.log("poll for status?", pollForDeviceStatus);
 
   return (
     <>
@@ -89,37 +69,15 @@ export default function Page() {
         />
         <h1>Add a new device</h1>
 
-        {/* {!isRefetching && <p>Device added!</p>} */}
         {isError && (
-          <div className="mt-6 w-full">
-            <p>Sorry, something went wrong</p>
+          <div>
+            <p>Sorry, something went wrong...</p>
           </div>
         )}
 
-        {pollForDeviceStatus && (
-          <div className="w-full flex flex-col mt-8 items-center text-center px-8">
-            <p>{`Waiting for ${codeType} confirmation`}</p>
-            <PulseLoader className="my-12" />
-            <p className="text-sm text-gray-500">
-              You may leave this page. The device will show as pending in your
-              devices list until it is confirmed.
-            </p>
-          </div>
-        )}
+        {deviceAddResult && <Poll result={deviceAddResult} />}
 
-        {deviceShareStatus && !deviceShareStatus.pending && (
-          <div className="w-full flex flex-col mt-8 items-center text-center px-8">
-            <p className="text-lg">Success!</p>
-            <p className="text-lg">New device added</p>
-            <CheckBadgeIcon className=" text-green-600 w-12 h-12 m-4" />
-            <p className="text-sm text-gray-500">
-              Your new device is viewable in the{" "}
-              <a href="/devices">device list</a>
-            </p>
-          </div>
-        )}
-
-        {!pollForDeviceStatus && !deviceShareStatus && (
+        {!deviceAddResult && (
           <form onSubmit={() => {}}>
             <div className="mt-6 flex flex-col gap-6 items-start">
               <div className="w-full flex flex-col gap-2">
@@ -150,7 +108,7 @@ export default function Page() {
               <Button
                 className="button btn-primary self-end"
                 disabled={hasError}
-                onClick={handleFormSubmit}
+                onClick={handleAddDevice}
               >
                 Add device
               </Button>

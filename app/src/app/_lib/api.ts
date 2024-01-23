@@ -6,6 +6,7 @@ import { redirect } from "next/navigation";
 import {
   AuthCodeLoginResult,
   DeviceAddResult,
+  DeviceAdoptStatusResult,
   DeviceSetProvideResult,
   DeviceShareStatusResult,
   NetworkClientsResult,
@@ -123,8 +124,10 @@ export async function postDeviceSetProvide(body: {
 export async function postDeviceAdd(body: {
   code: string;
 }): Promise<DeviceAddResult> {
+  const codeType = body.code.startsWith("s") ? "share" : "adopt";
+
   return {
-    code_type: "share",
+    code_type: codeType,
     code: body.code,
     network_name: "test.bringyour.network",
     client_id: "test_client_id",
@@ -137,7 +140,17 @@ export async function postDeviceShareStatus(body: {
   share_code: string;
 }): Promise<DeviceShareStatusResult> {
   return {
-    pending: false,
+    pending: true,
+    associated_network_name: "test.bringyour.network",
+  };
+  return makePostRequest("/device/share-status", body);
+}
+
+export async function postDeviceAdoptStatus(body: {
+  share_code: string;
+}): Promise<DeviceAdoptStatusResult> {
+  return {
+    pending: true,
     associated_network_name: "test.bringyour.network",
   };
   return makePostRequest("/device/share-status", body);

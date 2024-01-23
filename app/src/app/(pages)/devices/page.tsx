@@ -18,14 +18,15 @@ export default function Page() {
       <div className="md:mt-12 p-4 max-w-3xl">
         <div className="flex flex-row justify-between items-end mb-8">
           <h1>Your Devices</h1>
-          <button className="button btn-primary">
-            <div className="flex flex-row gap-2 items-center">
-              <PlusIcon className="w-5 h-4 text-white font-semibold" />
-              <Link href="/devices/add">
+          <Link href="/devices/add">
+            <button className="button btn-primary">
+              <div className="flex flex-row gap-2 items-center">
+                <PlusIcon className="w-5 h-4 text-white font-semibold" />
+
                 <p className="font-light">Add device</p>
-              </Link>
-            </div>
-          </button>
+              </div>
+            </button>
+          </Link>
         </div>
 
         {isPending && <Loading />}

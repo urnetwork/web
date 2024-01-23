@@ -37,7 +37,7 @@ const pulse = createAnimation(
   "pulse"
 );
 
-function PulseLoader({ className }): JSX.Element | null {
+function PulseLoader({ className }: { className: string }): JSX.Element | null {
   const style = (i: number): React.CSSProperties => {
     return {
       animation: `${pulse} ${1.5}s ${
