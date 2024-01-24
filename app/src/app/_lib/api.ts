@@ -7,6 +7,7 @@ import {
   AuthCodeLoginResult,
   DeviceAddResult,
   DeviceAdoptStatusResult,
+  DeviceConfirmShareResult,
   DeviceCreateShareCodeResult,
   DeviceSetProvideResult,
   DeviceShareStatusResult,
@@ -158,28 +159,6 @@ export async function postDeviceAdd(body: {
   return makePostRequest("/device/add", body);
 }
 
-export async function postDeviceShareStatus(body: {
-  share_code: string;
-}): Promise<DeviceShareStatusResult> {
-  await new Promise((r) => setTimeout(r, 2000));
-  return {
-    pending: false,
-    associated_network_name: "test.bringyour.network",
-  };
-  return makePostRequest("/device/share-status", body);
-}
-
-export async function postDeviceAdoptStatus(body: {
-  share_code: string;
-}): Promise<DeviceAdoptStatusResult> {
-  await new Promise((r) => setTimeout(r, 1000));
-  return {
-    pending: true,
-    associated_network_name: "test.bringyour.network",
-  };
-  return makePostRequest("/device/adopt-status", body);
-}
-
 export async function postDeviceCreateShareCode(body: {
   client_id: string;
   device_name: string;
@@ -197,4 +176,38 @@ export async function getDeviceShareCodeQR(share_code: string) {
     `/device/share-code/${share_code}/qr.png`
   );
   return URL.createObjectURL(imgData);
+}
+
+export async function postDeviceShareStatus(body: {
+  share_code: string;
+}): Promise<DeviceShareStatusResult> {
+  await new Promise((r) => setTimeout(r, 5000));
+  return {
+    pending: false,
+    associated_network_name: "test.bringyour.network",
+  };
+  return makePostRequest("/device/share-status", body);
+}
+
+export async function postDeviceConfirmShare(body: {
+  share_code: string;
+  confirm: boolean;
+}): Promise<DeviceConfirmShareResult> {
+  await new Promise((r) => setTimeout(r, 2000));
+  return {
+    complete: true,
+    associated_network_name: "test.bringyour.network",
+  };
+  return makePostRequest("/device/confirm-share", body);
+}
+
+export async function postDeviceAdoptStatus(body: {
+  share_code: string;
+}): Promise<DeviceAdoptStatusResult> {
+  await new Promise((r) => setTimeout(r, 1000));
+  return {
+    pending: true,
+    associated_network_name: "test.bringyour.network",
+  };
+  return makePostRequest("/device/adopt-status", body);
 }

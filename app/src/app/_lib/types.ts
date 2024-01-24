@@ -116,8 +116,23 @@ export type DeviceAddResult = {
   };
 };
 
+export type DeviceCreateShareCodeResult = {
+  share_code: string;
+  error?: {
+    message: string;
+  };
+};
+
 export type DeviceShareStatusResult = {
   pending: boolean;
+  associated_network_name: string;
+  error?: {
+    message: string;
+  };
+};
+
+export type DeviceConfirmShareResult = {
+  complete: boolean;
   associated_network_name: string;
   error?: {
     message: string;
@@ -127,13 +142,6 @@ export type DeviceShareStatusResult = {
 export type DeviceAdoptStatusResult = {
   pending: boolean;
   associated_network_name: string;
-  error?: {
-    message: string;
-  };
-};
-
-export type DeviceCreateShareCodeResult = {
-  share_code: string;
   error?: {
     message: string;
   };
