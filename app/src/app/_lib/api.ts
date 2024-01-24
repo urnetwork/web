@@ -161,7 +161,7 @@ export async function postDeviceAdd(body: {
 export async function postDeviceShareStatus(body: {
   share_code: string;
 }): Promise<DeviceShareStatusResult> {
-  await new Promise((r) => setTimeout(r, 1000));
+  await new Promise((r) => setTimeout(r, 2000));
   return {
     pending: false,
     associated_network_name: "test.bringyour.network",

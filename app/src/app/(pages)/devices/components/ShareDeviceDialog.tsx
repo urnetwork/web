@@ -7,6 +7,7 @@ import { Dialog } from "@headlessui/react";
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useEffect } from "react";
+import PollShare from "./PollShare";
 
 type ShareDeviceDialogProps = {
   device: Client;
@@ -33,11 +34,7 @@ export default function ShareDeviceDialog({
     },
   });
 
-  const {
-    data: qrCodeURL,
-    isPending: isQrImagePending,
-    status,
-  } = useQuery({
+  const { data: qrCodeURL, isPending: isQrImagePending } = useQuery({
     queryKey: ["share", "code", "qr", shareCodeResult?.share_code],
     queryFn: async () =>
       await getDeviceShareCodeQR(shareCodeResult?.share_code || ""),
@@ -58,9 +55,9 @@ export default function ShareDeviceDialog({
       <div className="fixed md:ml-76 inset-0 bg-black/30" aria-hidden="true" />
 
       {/* Full-screen container to center the panel */}
-      <div className="fixed md:ml-76 inset-0 flex items-center justify-center p-4">
+      <div className="fixed md:ml-76 inset-0 flex items-start justify-center p-4">
         {/* The actual dialog panel  */}
-        <Dialog.Panel className="w-96 rounded bg-white p-4">
+        <Dialog.Panel className="w-96 mt-12 md:mt-40 rounded bg-white p-4">
           <div className="w-full flex justify-end">
             <XMarkIcon
               className="h-8 w-8 cursor-pointer text-gray-600"
@@ -96,7 +93,11 @@ export default function ShareDeviceDialog({
                   </p>
                 </div>
                 <div>
-                  <p className="text-sm">Waiting for code to be shared...</p>
+                  {/* <p className="text-sm">Waiting for code to be shared...</p> */}
+                  <PollShare
+                    code={shareCodeResult.share_code}
+                    setIsModalOpen={setIsOpen}
+                  />
                 </div>
               </div>
             )}
