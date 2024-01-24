@@ -6,8 +6,13 @@ import { useQuery } from "@tanstack/react-query";
 import Loading from "./loading";
 import { getNetworkClients } from "@lib/api";
 import Link from "next/link";
+import ShareDeviceDialog from "./components/ShareDeviceDialog";
+import { useState } from "react";
+import { Client } from "@/app/_lib/types";
 
 export default function Page() {
+  const [selectedClient, setSelectedClient] = useState<Client>();
+
   const { isPending, data: clients } = useQuery({
     queryKey: ["network", "clients"],
     queryFn: async () => (await getNetworkClients()).clients,
@@ -15,6 +20,18 @@ export default function Page() {
 
   return (
     <>
+      {selectedClient && (
+        <ShareDeviceDialog
+          device={selectedClient}
+          isOpen={selectedClient != undefined}
+          setIsOpen={(value: boolean) => {
+            if (!value) {
+              setSelectedClient(undefined);
+            }
+          }}
+        />
+      )}
+
       <div className="md:mt-12 p-4 max-w-3xl">
         <div className="flex flex-row justify-between items-end mb-8">
           <h1>Your Devices</h1>
@@ -55,23 +72,14 @@ export default function Page() {
                         {client.description}
                       </p>
                     </div>
-
                     <div className="flex-grow" />
-                    <div className="flex flex-row gap-2 items-center">
-                      {client.connections && client.connections.length > 0 && (
-                        <>
-                          <div className="w-3 h-3 rounded-full bg-ok"></div>
-                          <div className="text-xs text-gray-500">Connected</div>
-                        </>
-                      )}
-                      {!client.connections && (
-                        <>
-                          <div className="w-3 h-3 rounded-full bg-gray-400"></div>
-                          <div className="text-xs text-gray-500">
-                            Disconnected
-                          </div>
-                        </>
-                      )}
+                    <div>
+                      <button
+                        className="button btn-primary"
+                        onClick={() => setSelectedClient(client)}
+                      >
+                        Share device
+                      </button>
                     </div>
                   </div>
                 );

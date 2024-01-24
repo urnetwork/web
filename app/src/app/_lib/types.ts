@@ -131,3 +131,10 @@ export type DeviceAdoptStatusResult = {
     message: string;
   };
 };
+
+export type DeviceCreateShareCodeResult = {
+  share_code: string;
+  error?: {
+    message: string;
+  };
+};

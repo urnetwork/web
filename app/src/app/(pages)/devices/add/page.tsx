@@ -37,7 +37,6 @@ export default function Page() {
     mutateAsync,
   } = useMutation({
     mutationFn: async (code: string) => {
-      await new Promise((r) => setTimeout(r, 1000));
       return await postDeviceAdd({ code: code });
     },
   });

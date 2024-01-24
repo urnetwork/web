@@ -7,6 +7,7 @@ import {
   AuthCodeLoginResult,
   DeviceAddResult,
   DeviceAdoptStatusResult,
+  DeviceCreateShareCodeResult,
   DeviceSetProvideResult,
   DeviceShareStatusResult,
   NetworkClientsResult,
@@ -125,7 +126,7 @@ export async function postDeviceAdd(body: {
   code: string;
 }): Promise<DeviceAddResult> {
   const codeType = body.code.startsWith("s") ? "share" : "adopt";
-
+  await new Promise((r) => setTimeout(r, 1000));
   return {
     code_type: codeType,
     code: body.code,
@@ -139,6 +140,7 @@ export async function postDeviceAdd(body: {
 export async function postDeviceShareStatus(body: {
   share_code: string;
 }): Promise<DeviceShareStatusResult> {
+  await new Promise((r) => setTimeout(r, 1000));
   return {
     pending: false,
     associated_network_name: "test.bringyour.network",
@@ -149,9 +151,22 @@ export async function postDeviceShareStatus(body: {
 export async function postDeviceAdoptStatus(body: {
   share_code: string;
 }): Promise<DeviceAdoptStatusResult> {
+  await new Promise((r) => setTimeout(r, 1000));
   return {
     pending: true,
     associated_network_name: "test.bringyour.network",
   };
   return makePostRequest("/device/adopt-status", body);
+}
+
+export async function postDeviceCreateShareCode(body: {
+  client_id: string;
+  device_name: string;
+}): Promise<DeviceCreateShareCodeResult> {
+  await new Promise((r) => setTimeout(r, 1000));
+  return {
+    share_code: "s19023hioj1n3jlk2n1l3kn912",
+  };
+
+  return makePostRequest("/device/create-share-code", body);
 }
