@@ -35,6 +35,9 @@ export function removeJwt() {
   localStorage.removeItem("byJwt");
 }
 
+/**
+ * A GET request with authentication and error handling
+ */
 async function makeGetRequest(endpoint: string) {
   const byJwt = getJwt();
   const response = await fetch(`${API_URL}${endpoint}`, {
@@ -57,6 +60,9 @@ async function makeGetRequest(endpoint: string) {
   return response.json();
 }
 
+/**
+ * A POST request with authentication and error handling
+ */
 async function makePostRequest(endpoint: string, body: object) {
   const byJwt = getJwt();
   const response = await fetch(`${API_URL}${endpoint}`, {
@@ -71,6 +77,21 @@ async function makePostRequest(endpoint: string, body: object) {
     throw new Error("Post request failed");
   }
   return response.json();
+}
+
+/**
+ * Similar to a GET request, however this doesn't parse the response as json
+ * and instead returns a Blob() object.
+ */
+async function makeResourceRequest(endpoint: string) {
+  const byJwt = getJwt();
+  const response = await fetch(`${API_URL}${endpoint}`, {
+    headers: {
+      Authorization: `Bearer ${byJwt}`,
+    },
+  });
+
+  return response.blob();
 }
 
 /**
@@ -169,4 +190,11 @@ export async function postDeviceCreateShareCode(body: {
   };
 
   return makePostRequest("/device/create-share-code", body);
+}
+
+export async function getDeviceShareCodeQR(share_code: string) {
+  const imgData = await makeResourceRequest(
+    `/device/share-code/${share_code}/qr.png`
+  );
+  return URL.createObjectURL(imgData);
 }
