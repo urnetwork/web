@@ -54,7 +54,10 @@ export default function DeviceDetailSidebar({
   const { isPending, data: provider } = useQuery({
     queryKey: ["stats", "provider-last-90", selectedProvider?.client_id],
     queryFn: async () =>
-      await postStatsProviderLast90({ client_id: selectedProvider?.client_id }),
+      await postStatsProviderLast90({
+        client_id: selectedProvider?.client_id || "",
+      }),
+    enabled: !!selectedProvider,
   });
 
   const isOpen = selectedProvider != null;
