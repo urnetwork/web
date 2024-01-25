@@ -23,32 +23,36 @@ export default function Page() {
   const validateCode = async (code: string) => {
     try {
       const result = await getSubscriptionCheckBalanceCode(code);
-      setIsCodeValid(result.valid);
+
       if (result.valid) {
+        setIsCodeValid(true);
         setCodeErrorMessage(undefined);
         setAmountToAdd(result.transfer_data);
       } else {
+        setIsCodeValid(false);
         setCodeErrorMessage("This code is not valid, or has expired");
         setAmountToAdd(undefined);
       }
     } catch (error) {
+      setIsCodeValid(false);
       setCodeErrorMessage("Sorry, we're unable to check if the code is valid");
       setAmountToAdd(undefined);
     }
   };
 
   const handleOnChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    setCode(event.target.value);
+    const code = event.target.value;
+    setCode(code);
+    setIsCodeValid(false);
+    setAmountToAdd(undefined);
 
     if (!code || code == "" || code == undefined) {
       setCodeErrorMessage("Please enter a code");
       return;
     }
 
-    if (event.target.value.length > 3) {
-      setCodeErrorMessage(undefined);
-      await validateCode(event.target.value);
-    }
+    // Todo(awais): I don't want to be hitting the API on every keystroke...
+    await validateCode(code);
   };
 
   const shouldShowError = codeErrorMessage && isCodeTouched;
@@ -98,6 +102,7 @@ export default function Page() {
                   id="code"
                   value={code}
                   onChange={handleOnChange}
+                  onFocus={handleOnChange}
                   onBlur={() => setIsCodeTouched(true)}
                   placeholder="e.g. 249384883cf27ff2d844f379610da79e"
                   className={`w-full block rounded-md bg-transparent py-2 px-2 text-gray-900 placeholder:text-gray-400 ring-1 ring-gray-400 sm:text-sm sm:leading-6 ${
