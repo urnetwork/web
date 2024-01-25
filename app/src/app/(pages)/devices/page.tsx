@@ -5,6 +5,7 @@ import { PlusIcon } from "@heroicons/react/24/solid";
 import { useQuery } from "@tanstack/react-query";
 import Loading from "./loading";
 import { getNetworkClients } from "@lib/api";
+import Link from "next/link";
 
 export default function Page() {
   const { isPending, data: clients } = useQuery({
@@ -17,12 +18,15 @@ export default function Page() {
       <div className="md:mt-12 p-4 max-w-3xl">
         <div className="flex flex-row justify-between items-end mb-8">
           <h1>Your Devices</h1>
-          <button className="button btn-primary">
-            <div className="flex flex-row gap-2 items-center">
-              <PlusIcon className="w-5 h-4 text-white font-semibold" />
-              <p className="font-light">Add device</p>
-            </div>
-          </button>
+          <Link href="/devices/add">
+            <button className="button btn-primary">
+              <div className="flex flex-row gap-2 items-center">
+                <PlusIcon className="w-5 h-4 text-white font-semibold" />
+
+                <p className="font-light">Add device</p>
+              </div>
+            </button>
+          </Link>
         </div>
 
         {isPending && <Loading />}
