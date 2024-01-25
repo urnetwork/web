@@ -25,7 +25,7 @@ function SmallSpinner() {
 export type ButtonProps = {
   onClick: (event: React.MouseEvent<HTMLButtonElement>) => Promise<void>;
   className: string;
-  disabled: boolean;
+  disabled?: boolean;
   children: React.ReactNode;
 };
 
@@ -35,7 +35,7 @@ export default function Button({
   disabled = false,
   children,
 }: ButtonProps) {
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const handleClick = async (event: React.MouseEvent<HTMLButtonElement>) => {
     setIsLoading(true);

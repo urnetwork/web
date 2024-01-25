@@ -1,5 +1,8 @@
 /**
- * Function to poll an endpoint every
+ * Function to poll an endpoint every 2 seconds
+ *
+ * Todo(Awais): This can probably be factored out into a separate, reusable polling
+ * component.
  */
 
 import { postDeviceAdoptStatus, postDeviceShareStatus } from "@/app/_lib/api";
@@ -32,7 +35,7 @@ export default function Poll({ result }: PollProps) {
     data: deviceShareStatus,
     isError,
   } = useQuery({
-    queryKey: ["device", "add", code],
+    queryKey: ["device", codeType, "status", code],
     queryFn: async () => pollingFunction()({ share_code: code }),
     enabled: isPolling,
     refetchInterval: (query) => {

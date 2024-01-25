@@ -47,7 +47,7 @@ function PulseLoader({ className }: { className: string }): JSX.Element | null {
     };
   };
 
-  const dotClassName = "bg-[#2B3A82] w-5 h-5 mx-1 rounded-full inline-block";
+  const dotClassName = "bg-[#2B3A82] w-4 h-4 mx-1 rounded-full inline-block";
 
   return (
     <div className={className}>
