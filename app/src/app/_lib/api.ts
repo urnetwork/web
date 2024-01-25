@@ -7,6 +7,7 @@ import {
   AuthCodeLoginResult,
   DeviceAddResult,
   DeviceAdoptStatusResult,
+  DeviceAssociationsResult,
   DeviceConfirmShareResult,
   DeviceCreateShareCodeResult,
   DeviceSetProvideResult,
@@ -210,4 +211,43 @@ export async function postDeviceAdoptStatus(body: {
     associated_network_name: "test.bringyour.network",
   };
   return makePostRequest("/device/adopt-status", body);
+}
+
+export async function getDeviceAssociations(): Promise<DeviceAssociationsResult> {
+  return {
+    pending_adoption_devices: [
+      {
+        code: "4a6f373254ff802590a75ec030ac57e7",
+        device_name: "test_pending_adoption",
+        client_id: "c48b43c2-6629-4cb2-9bb1-882c21f5b2b2",
+      },
+    ],
+    incoming_shared_devices: [
+      {
+        pending: true,
+        code: "f62f82bd648e013366227af68d5ae512",
+        device_name: "test_incoming_shared_device",
+        client_id: "829ce7df-0522-47c7-84ad-e48117b3f16f",
+        network_name: "test.bringyour.network",
+      },
+    ],
+    outgoing_shared_devices: [
+      {
+        pending: true,
+        code: "7ad2747fc5ca767577493f923a217aeb",
+        device_name: "Awais second test device",
+        client_id: "018c889e-ca43-a44d-1242-e8d9163b940b",
+        network_name: "test.bringyour.network",
+      },
+      {
+        pending: false,
+        code: "7ad2747fc5ca767577493f923a217aeb",
+        device_name: "Awais second test device",
+        client_id: "018c889e-ca43-a44d-1242-e8d9163b940b",
+        network_name: "test2.bringyour.network",
+      },
+    ],
+  };
+
+  return makeGetRequest("/device/associations");
 }
