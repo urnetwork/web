@@ -57,7 +57,7 @@ export default function ShareDeviceDialog({
       {/* Full-screen container to center the panel */}
       <div className="fixed md:ml-76 inset-0 flex items-start justify-center p-4">
         {/* The actual dialog panel  */}
-        <Dialog.Panel className="w-96 mt-12 md:mt-40 rounded bg-white p-4">
+        <Dialog.Panel className="w-112 mt-12 md:mt-40 rounded-lg bg-white p-4">
           <div className="w-full flex justify-end">
             <XMarkIcon
               className="h-8 w-8 cursor-pointer text-gray-600"

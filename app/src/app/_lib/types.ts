@@ -146,3 +146,33 @@ export type DeviceAdoptStatusResult = {
     message: string;
   };
 };
+
+export type DeviceAssociationsResult = {
+  pending_adoption_devices: {
+    code: string;
+    device_name: string;
+    client_id: string;
+  }[];
+  incoming_shared_devices: {
+    pending: boolean;
+    code: string;
+    device_name: string;
+    client_id: string;
+    network_name: string;
+  }[];
+  outgoing_shared_devices: {
+    pending: boolean;
+    code: string;
+    device_name: string;
+    client_id: string;
+    network_name: string;
+  }[];
+};
+
+export type DeviceRemoveAssociationResult = {
+  client_id: string;
+  network_name: string;
+  error?: {
+    message: string;
+  };
+};
