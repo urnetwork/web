@@ -7,7 +7,7 @@ function SmallSpinner() {
     <div className="inline-block text-center h-6 w-6 mt-1 -mb-2" role="status">
       <svg
         aria-hidden="true"
-        className="w-5 h-5 text-gray-200 animate-spin dark:text-neutral-700 fill-white"
+        className="w-5 h-5 text-gray-200 animate-spin dark:text-neutral-700 fill-white dark:fill-gray-600"
         viewBox="0 0 100 100"
         fill="none"
         xmlns="https://www.w3.org/2000/svg"

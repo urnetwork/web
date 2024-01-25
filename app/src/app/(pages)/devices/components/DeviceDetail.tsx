@@ -1,16 +1,23 @@
 "use client";
 
-import { getDeviceAssociations, getNetworkClients } from "@/app/_lib/api";
+import {
+  getDeviceAssociations,
+  getNetworkClients,
+  postDeviceConfirmShare,
+  postDeviceRemoveAssociation,
+} from "@/app/_lib/api";
 import { Breadcrumbs } from "@/app/_lib/components/Breadcrumbs";
-import { DevicePhoneMobileIcon } from "@heroicons/react/24/outline";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import Loading from "../loading";
+import Button from "@/app/_lib/components/Button";
 
 type DeviceDetailProps = {
   clientId: string;
 };
 
 export default function DeviceDetail({ clientId }: DeviceDetailProps) {
+  const queryClient = useQueryClient();
+
   const { isPending: isClientsPending, data: clients } = useQuery({
     queryKey: ["network", "clients"],
     queryFn: async () => (await getNetworkClients()).clients,
@@ -48,6 +55,37 @@ export default function DeviceDetail({ clientId }: DeviceDetailProps) {
     return outgoingSharedDevices?.filter(
       (device) => device.client_id == clientId
     );
+  };
+
+  const { data: confirmShareResult, mutateAsync } = useMutation({
+    mutationKey: ["device", "confirm", "share"],
+    mutationFn: async ({ code, confirm }: { code: string; confirm: boolean }) =>
+      await postDeviceConfirmShare({ share_code: code, confirm: confirm }),
+    onSettled: (data) =>
+      queryClient.invalidateQueries({ queryKey: ["device", "associations"] }),
+  });
+
+  const {
+    data: removeAssociationResult,
+    mutateAsync: mutateRemoveAssociationAsync,
+  } = useMutation({
+    mutationKey: ["device", "remove", "association"],
+    mutationFn: async (code: string) =>
+      await postDeviceRemoveAssociation({ code }),
+    onSettled: (data) =>
+      queryClient.invalidateQueries({ queryKey: ["device", "associations"] }),
+  });
+
+  const handleConfirmShare = async (code: string) => {
+    await mutateAsync({ code: code, confirm: true });
+  };
+
+  const handleConfirmCancel = async (code: string) => {
+    await mutateAsync({ code: code, confirm: false });
+  };
+
+  const handleRemoveAssociation = async (code: string) => {
+    await mutateRemoveAssociationAsync(code);
   };
 
   return (
@@ -95,19 +133,28 @@ export default function DeviceDetail({ clientId }: DeviceDetailProps) {
                     <div className="grow" />
                     {network.pending && (
                       <div className="flex flex-row gap-2">
-                        <button className="button bg-green-600 text-white">
+                        <Button
+                          className="button bg-green-600 text-white"
+                          onClick={() => handleConfirmShare(network.code)}
+                        >
                           Confirm
-                        </button>
-                        <button className="button border border-gray-400 text-gray-500">
+                        </Button>
+                        <Button
+                          className="button border border-gray-400 text-gray-500 dark"
+                          onClick={() => handleConfirmCancel(network.code)}
+                        >
                           Cancel
-                        </button>
+                        </Button>
                       </div>
                     )}
                     {!network.pending && (
                       <div className="flex flex-row gap-2">
-                        <button className="button border border-red-400 text-red-500">
+                        <Button
+                          className="button border border-red-400 text-red-500 dark"
+                          onClick={() => handleRemoveAssociation(network.code)}
+                        >
                           Remove
-                        </button>
+                        </Button>
                       </div>
                     )}
                   </div>

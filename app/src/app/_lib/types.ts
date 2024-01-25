@@ -168,3 +168,11 @@ export type DeviceAssociationsResult = {
     network_name: string;
   }[];
 };
+
+export type DeviceRemoveAssociationResult = {
+  client_id: string;
+  network_name: string;
+  error?: {
+    message: string;
+  };
+};

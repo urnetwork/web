@@ -10,6 +10,7 @@ import {
   DeviceAssociationsResult,
   DeviceConfirmShareResult,
   DeviceCreateShareCodeResult,
+  DeviceRemoveAssociationResult,
   DeviceSetProvideResult,
   DeviceShareStatusResult,
   NetworkClientsResult,
@@ -214,6 +215,7 @@ export async function postDeviceAdoptStatus(body: {
 }
 
 export async function getDeviceAssociations(): Promise<DeviceAssociationsResult> {
+  await new Promise((r) => setTimeout(r, 1000));
   return {
     pending_adoption_devices: [
       {
@@ -257,4 +259,16 @@ export async function getDeviceAssociations(): Promise<DeviceAssociationsResult>
   };
 
   return makeGetRequest("/device/associations");
+}
+
+export async function postDeviceRemoveAssociation(body: {
+  code: string;
+}): Promise<DeviceRemoveAssociationResult> {
+  await new Promise((r) => setTimeout(r, 1000));
+  return {
+    client_id: "temp_client_id",
+    network_name: "test.bringyour.network",
+  };
+
+  return makePostRequest("/device/remove-association", body);
 }
