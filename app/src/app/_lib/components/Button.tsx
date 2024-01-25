@@ -39,7 +39,9 @@ export default function Button({
 
   const handleClick = async (event: React.MouseEvent<HTMLButtonElement>) => {
     setIsLoading(true);
-    await onClick(event);
+    if (!!onClick) {
+      await onClick(event);
+    }
     setIsLoading(false);
   };
 
