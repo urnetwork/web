@@ -10,10 +10,13 @@ import {
   CheckCircleIcon,
   ExclamationCircleIcon,
 } from "@heroicons/react/24/solid";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { redirect } from "next/navigation";
 import { useState } from "react";
 
 export default function Page() {
+  const queryClient = useQueryClient();
+
   const [code, setCode] = useState<string>();
   const [isCodeTouched, setIsCodeTouched] = useState<boolean>(false);
   const [isCodeValid, setIsCodeValid] = useState<boolean>(false);
@@ -62,6 +65,10 @@ export default function Page() {
     mutationKey: ["subscription", "redeem", "code", code],
     mutationFn: (code: string) =>
       postSubscriptionRedeemBalanceCode({ balance_code: code }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["subscription", "balance"] });
+      redirect("/account");
+    },
   });
 
   const handleSubmitCode = async (
