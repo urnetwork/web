@@ -2,18 +2,29 @@
 
 import { DevicePhoneMobileIcon } from "@heroicons/react/24/outline";
 import { PlusIcon } from "@heroicons/react/24/solid";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import Loading from "../loading";
-import { getDeviceAssociations, getNetworkClients } from "@lib/api";
+import {
+  getDeviceAssociations,
+  getNetworkClients,
+  postDeviceRemoveAssociation,
+} from "@lib/api";
 import Link from "next/link";
 import ShareDeviceDialog from "./ShareDeviceDialog";
 import { useState } from "react";
 import { Client } from "@/app/_lib/types";
+import { ConfirmDeleteModal } from "@/app/_lib/components/ConfirmDeleteModal";
 
 const PAGE_SIZE = 3;
 
 export default function DeviceList() {
+  const queryClient = useQueryClient();
+
   const [selectedClient, setSelectedClient] = useState<Client>();
+  const [deviceToRemove, setDeviceToRemove] = useState<{
+    code: string;
+    client_id: string;
+  }>();
   const [numItemsToShow, setNumItemsToShow] = useState(PAGE_SIZE);
 
   const { isPending: isClientsPending, data: clients } = useQuery({
@@ -49,6 +60,21 @@ export default function DeviceList() {
     return `${numNetworks} networks`;
   };
 
+  const {
+    data: removeAssociationResult,
+    mutateAsync: mutateRemoveAssociationAsync,
+  } = useMutation({
+    mutationKey: ["device", "remove", "association"],
+    mutationFn: async (code: string) =>
+      await postDeviceRemoveAssociation({ code }),
+    onSettled: (data) =>
+      queryClient.invalidateQueries({ queryKey: ["device", "associations"] }),
+  });
+
+  const handleRemoveAssociation = async (code: string) => {
+    await mutateRemoveAssociationAsync(code);
+  };
+
   return (
     <>
       {selectedClient && (
@@ -61,6 +87,26 @@ export default function DeviceList() {
             }
           }}
         />
+      )}
+
+      {deviceToRemove && (
+        <ConfirmDeleteModal
+          isOpen={Boolean(deviceToRemove)}
+          setIsOpen={(value: boolean) => {
+            if (!value) {
+              setDeviceToRemove(undefined);
+            }
+          }}
+          onConfirm={async () =>
+            await handleRemoveAssociation(deviceToRemove.code)
+          }
+        >
+          <p>
+            Are you sure you want to remove device{" "}
+            <span className="font-semibold">{deviceToRemove.client_id}</span>?
+          </p>
+          <p className="mt-4">You won't be able to undo this action.</p>
+        </ConfirmDeleteModal>
       )}
 
       <div className="md:mt-12 p-4 max-w-3xl">
@@ -141,7 +187,10 @@ export default function DeviceList() {
                         </div>
                         <div className="flex-grow" />
                         <div>
-                          <button className="button border border-red-400 text-red-500">
+                          <button
+                            className="button border border-red-400 text-red-500"
+                            onClick={() => setDeviceToRemove(device)}
+                          >
                             Remove
                           </button>
                         </div>
@@ -191,7 +240,10 @@ export default function DeviceList() {
                   </div>
                   <div className="flex-grow" />
                   <div>
-                    <button className="button border border-red-400 text-red-500">
+                    <button
+                      className="button border border-red-400 text-red-500"
+                      onClick={() => setDeviceToRemove(device)}
+                    >
                       Remove
                     </button>
                   </div>

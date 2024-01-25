@@ -43,7 +43,7 @@ export function ConfirmDeleteModal({
       {/* Full-screen container to center the panel */}
       <div className="fixed md:ml-76 inset-0 flex items-start justify-center p-4">
         <div className="flex min-h-full items-start justify-center p-4 text-center sm:items-center sm:p-0">
-          <Dialog.Panel className="relative transform overflow-hidden rounded-lg bg-white shadow-xl transition-all mx-4 mt-24 mb-auto w-96">
+          <Dialog.Panel className="relative transform overflow-hidden rounded-lg bg-white shadow-xl transition-all mx-4 mt-12 md:mt-40 mb-auto w-96">
             <div className="w-full bg-white px-8 py-8">
               <div className="w-full flex justify-end">
                 <XMarkIcon
@@ -55,7 +55,7 @@ export function ConfirmDeleteModal({
               {children}
               <div className="mt-4 flex flex-row gap-4 mx-auto justify-center">
                 <Button
-                  className="button border-gray-400 text-gray-600"
+                  className="button border border-gray-400 text-gray-600"
                   onClick={handleCancelClicked}
                 >
                   Cancel

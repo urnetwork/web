@@ -137,9 +137,9 @@ export default function DeviceDetail({ clientId }: DeviceDetailProps) {
         </div>
         <h2 className="mt-12 mb-2">Shared with</h2>
 
-        {isClientsPending && <Loading />}
+        {(isClientsPending || isAssociationsPending) && <Loading />}
 
-        {!isClientsPending && (
+        {!isClientsPending && !isAssociationsPending && (
           <>
             {(!getOutgoingNetworks(clientId) ||
               getOutgoingNetworks(clientId)?.length == 0) && (
