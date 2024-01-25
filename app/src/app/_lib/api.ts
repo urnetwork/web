@@ -230,6 +230,13 @@ export async function getDeviceAssociations(): Promise<DeviceAssociationsResult>
         client_id: "829ce7df-0522-47c7-84ad-e48117b3f16f",
         network_name: "test.bringyour.network",
       },
+      {
+        pending: false,
+        code: "asdj1213ae013366227af68d5ae512",
+        device_name: "test_incoming_shared_device_confirmed",
+        client_id: "0808e61f-84a8-4844-ac04-dc6a4847ad39",
+        network_name: "test.bringyour.network",
+      },
     ],
     outgoing_shared_devices: [
       {

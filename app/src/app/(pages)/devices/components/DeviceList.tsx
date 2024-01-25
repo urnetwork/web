@@ -36,10 +36,17 @@ export default function DeviceList() {
     return (clients?.length || 0) + (pendingAdoptionDevices?.length || 0);
   };
 
-  const getOutgoingNetworks = (client_id: string) => {
-    return outgoingSharedDevices?.filter(
-      (device) => device.client_id == client_id
+  const getNumOutgoingNetworks = (clientId: string) => {
+    const networks = outgoingSharedDevices?.filter(
+      (device) => device.client_id == clientId
     );
+    const numNetworks = networks?.length || 0;
+
+    if (numNetworks == 1) {
+      return "1 network";
+    }
+
+    return `${numNetworks} networks`;
   };
 
   return (
@@ -99,7 +106,7 @@ export default function DeviceList() {
                       <div className="flex-grow" />
                       <div>
                         <button
-                          className="button btn-primary"
+                          className="button border border-primary text-primary"
                           onClick={() => setSelectedClient(client)}
                         >
                           Share device
@@ -108,26 +115,12 @@ export default function DeviceList() {
                     </div>
 
                     {/* Outoing shared devices */}
-                    {(getOutgoingNetworks(client.client_id)?.length || 0) >
-                      0 && (
-                      <div className="flex flex-col gap-2 ml-12 mt-4">
-                        {getOutgoingNetworks(client.client_id)?.map(
-                          (network) => (
-                            <div className="border border-gray-300 rounded-md w-full flex flex-row text-sm text-gray-500 p-1">
-                              <p>Shared with {network.network_name}</p>
-                              <div className="grow" />
-                              {network.pending && (
-                                <div>
-                                  <button>Confirm</button> |{" "}
-                                  <button>Cancel</button>
-                                </div>
-                              )}
-                              {!network.pending && <button>Remove</button>}
-                            </div>
-                          )
-                        )}
-                      </div>
-                    )}
+                    <div className="ml-12 mt-2 text-sm text-gray-500">
+                      <p>
+                        Shared with <span className="font-semibold"></span>
+                        {getNumOutgoingNetworks(client.client_id)}
+                      </p>
+                    </div>
                   </div>
                 );
               })}
@@ -136,21 +129,25 @@ export default function DeviceList() {
                 ?.slice(0, numItemsToShow - (clients?.length || 0))
                 ?.map((device) => {
                   return (
-                    <div
-                      key={device.client_id}
-                      className="card w-full flex flex-row gap-4 items-center"
-                    >
-                      <div className="w-8 h-8">
-                        <DevicePhoneMobileIcon className="text-gray-400" />
+                    <div key={device.client_id} className="card w-full">
+                      <div className="flex flex-row gap-4 items-center">
+                        <div className="w-8 h-8">
+                          <DevicePhoneMobileIcon className="text-gray-400" />
+                        </div>
+                        <div className="flex flex-col">
+                          <p className="text-gray-800 font-semibold">
+                            {device.client_id}
+                          </p>
+                        </div>
+                        <div className="flex-grow" />
+                        <div>
+                          <button className="button border border-red-400 text-red-500">
+                            Remove
+                          </button>
+                        </div>
                       </div>
-                      <div className="flex flex-col">
-                        <p className="text-gray-800 font-semibold">
-                          {device.client_id}
-                        </p>
-                      </div>
-                      <div className="flex-grow" />
-                      <div>
-                        <button className="button">Remove</button>
+                      <div className="ml-12 mt-2 text-sm text-gray-500">
+                        <p>Waiting for confirmation</p>
                       </div>
                     </div>
                   );
@@ -182,21 +179,28 @@ export default function DeviceList() {
         {!isAssociationsPending && (
           <div className="flex flex-col gap-4">
             {incomingSharedDevices?.map((device) => (
-              <div
-                key={device.client_id}
-                className="card flex flex-row gap-4 items-center"
-              >
-                <div className="w-8 h-8">
-                  <DevicePhoneMobileIcon className="text-gray-400" />
+              <div key={device.client_id} className="card">
+                <div className="flex flex-row gap-4 items-center">
+                  <div className="w-8 h-8">
+                    <DevicePhoneMobileIcon className="text-gray-400" />
+                  </div>
+                  <div className="flex flex-col">
+                    <p className="text-gray-800 font-semibold">
+                      {device.client_id}
+                    </p>
+                  </div>
+                  <div className="flex-grow" />
+                  <div>
+                    <button className="button border border-red-400 text-red-500">
+                      Remove
+                    </button>
+                  </div>
                 </div>
-                <div className="flex flex-col">
-                  <p className="text-gray-800 font-semibold">
-                    {device.client_id}
-                  </p>
-                </div>
-                <div className="flex-grow" />
-                <div>
-                  <button className="button">Remove</button>
+                <div className="ml-12 mt-2 text-sm text-gray-500">
+                  {device.pending && (
+                    <p>Waiting for confirmation from {device.network_name}</p>
+                  )}
+                  {!device.pending && <p>Shared by {device.network_name}</p>}
                 </div>
               </div>
             ))}
