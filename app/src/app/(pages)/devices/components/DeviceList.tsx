@@ -47,6 +47,9 @@ export default function DeviceList() {
     return (clients?.length || 0) + (pendingAdoptionDevices?.length || 0);
   };
 
+  /**
+   * The number of networks this device is shared with
+   */
   const getNumOutgoingNetworks = (clientId: string) => {
     const networks = outgoingSharedDevices?.filter(
       (device) => device.client_id == clientId

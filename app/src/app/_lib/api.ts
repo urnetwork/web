@@ -18,6 +18,8 @@ import {
   StatsProviders,
   StatsProvidersOverviewLast90Result,
   SubscriptionBalanceResult,
+  SubscriptionCheckBalanceCodeResult,
+  SubscriptionRedeemBalanceCodeResult,
 } from "./types";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://api.bringyour.com/";
@@ -271,4 +273,22 @@ export async function postDeviceRemoveAssociation(body: {
   };
 
   return makePostRequest("/device/remove-association", body);
+}
+
+export async function getSubscriptionCheckBalanceCode(
+  balance_code: string
+): Promise<SubscriptionCheckBalanceCodeResult> {
+  return {
+    valid: true,
+    transfer_data: 1,
+  };
+  return makeGetRequest(
+    `/subscription/check-balance-code?balance_code=${balance_code}`
+  );
+}
+
+export async function postSubscriptionRedeemBalanceCode(body: {
+  balance_code: string;
+}): Promise<SubscriptionRedeemBalanceCodeResult> {
+  return makePostRequest("/subscription/redeem-balance-code", body);
 }
