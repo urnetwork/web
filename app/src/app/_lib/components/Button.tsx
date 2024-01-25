@@ -23,8 +23,8 @@ function SmallSpinner() {
 }
 
 export type ButtonProps = {
-  onClick: (event: React.MouseEvent<HTMLButtonElement>) => Promise<void>;
-  className: string;
+  onClick?: (event: React.MouseEvent<HTMLButtonElement>) => Promise<void>;
+  className?: string;
   disabled?: boolean;
   children: React.ReactNode;
 };

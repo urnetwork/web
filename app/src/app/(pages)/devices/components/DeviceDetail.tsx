@@ -10,6 +10,8 @@ import { Breadcrumbs } from "@/app/_lib/components/Breadcrumbs";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import Loading from "../loading";
 import Button from "@/app/_lib/components/Button";
+import { useState } from "react";
+import { ConfirmDeleteModal } from "@/app/_lib/components/ConfirmDeleteModal";
 
 type DeviceDetailProps = {
   clientId: string;
@@ -17,6 +19,10 @@ type DeviceDetailProps = {
 
 export default function DeviceDetail({ clientId }: DeviceDetailProps) {
   const queryClient = useQueryClient();
+  const [networkToRemove, setNetworkToRemove] = useState<{
+    code: string;
+    network_name: string;
+  }>();
 
   const { isPending: isClientsPending, data: clients } = useQuery({
     queryKey: ["network", "clients"],
@@ -90,6 +96,26 @@ export default function DeviceDetail({ clientId }: DeviceDetailProps) {
 
   return (
     <>
+      {networkToRemove && (
+        <ConfirmDeleteModal
+          isOpen={Boolean(networkToRemove)}
+          setIsOpen={(value: boolean) => {
+            if (!value) {
+              setNetworkToRemove(undefined);
+            }
+          }}
+          onConfirm={async () =>
+            await handleRemoveAssociation(networkToRemove.code)
+          }
+        >
+          <p className="font-semibold">
+            Are you sure you want to stop sharing with{" "}
+            <span className="font-medium">{networkToRemove.network_name}</span>?
+          </p>
+          <p className="mt-4">You won't be able to undo this action.</p>
+        </ConfirmDeleteModal>
+      )}
+
       <div className="md:mt-10 p-4 max-w-3xl">
         <Breadcrumbs
           items={[
@@ -129,7 +155,10 @@ export default function DeviceDetail({ clientId }: DeviceDetailProps) {
                     key={`${clientId}-${network.network_name}`}
                     className="flex flex-row items-center w-full text-sm text-gray-600 py-2"
                   >
-                    <p>Shared with {network.network_name}</p>
+                    <p>
+                      Shared with {network.network_name}{" "}
+                      {network.pending && "(awaiting confirmation)"}
+                    </p>
                     <div className="grow" />
                     {network.pending && (
                       <div className="flex flex-row gap-2">
@@ -151,7 +180,7 @@ export default function DeviceDetail({ clientId }: DeviceDetailProps) {
                       <div className="flex flex-row gap-2">
                         <Button
                           className="button border border-red-400 text-red-500 dark"
-                          onClick={() => handleRemoveAssociation(network.code)}
+                          onClick={async () => setNetworkToRemove(network)}
                         >
                           Remove
                         </Button>
