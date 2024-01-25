@@ -18,10 +18,7 @@ type ActivityWidgetProps = {
   maxValue?: number; // Use this to set the 'max' value across multiple ActivityWidget instances
 };
 
-export default function ActivityWidget({
-  data,
-  maxValue,
-}: ActivityWidgetProps) {
+export default function ActivityWidget({ data }: ActivityWidgetProps) {
   const [tooltipEntry, setTooltipEntry] = useState<TimeseriesEntry>();
 
   if (
@@ -40,9 +37,8 @@ export default function ActivityWidget({
     );
   }
 
-  const formattedData = formatTimeseriesData(data.transfer_data);
-  const max =
-    maxValue || Math.max(...formattedData.map((entry) => Number(entry.value)));
+  const formattedData = formatTimeseriesData(data.transfer_data).slice(-7);
+  const max = Math.max(...formattedData.map((entry) => Number(entry.value)));
 
   const calculateColor = (value: number) => {
     const normedValue = value / max;
@@ -72,7 +68,13 @@ export default function ActivityWidget({
             >
               <div className="text-xs flex flex-col gap-1">
                 <p>{moment(tooltipEntry.date).format("YYYY-MM-DD")}</p>
-                <p className="font-medium">Data: {tooltipEntry.value} GiB</p>
+                <p className="font-medium">
+                  Data:{" "}
+                  {typeof tooltipEntry.value == "number"
+                    ? tooltipEntry.value.toPrecision(4)
+                    : tooltipEntry.value}{" "}
+                  GiB
+                </p>
               </div>
             </div>
           )}

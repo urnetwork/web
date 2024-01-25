@@ -56,7 +56,9 @@ export function BarChart({
                 &emsp;
                 <span className="font-semibold">
                   {pre_unit}
-                  {payload[0].value}
+                  {typeof payload[0].value == "number"
+                    ? payload[0].value.toPrecision(4)
+                    : payload[0].value}
                 </span>{" "}
                 <span className="text-xs">{unit}</span>
               </p>
@@ -83,7 +85,9 @@ export function BarChart({
                 &emsp;
                 <span className="font-semibold">
                   {pre_unit}
-                  {payload[0].value}
+                  {typeof payload[0].value == "number"
+                    ? payload[0].value.toPrecision(4)
+                    : payload[0].value}
                 </span>{" "}
                 <span className="text-xs">{unit}</span>
               </p>

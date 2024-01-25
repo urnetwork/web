@@ -209,10 +209,12 @@ export default function DevicesTable({}: DevicesTableProps) {
                   </div>
                 </td>
                 <td className="py-2 px-1">
-                  {provider.transfer_data_last_24h}{" "}
+                  {provider.transfer_data_last_24h.toPrecision(4)}{" "}
                   <span className="text-xs">GiB</span>
                 </td>
-                <td className="py-2 px-1">${provider.payout_last_24h}</td>
+                <td className="py-2 px-1">
+                  ${provider.payout_last_24h.toPrecision(4)}
+                </td>
                 <td className="py-2 px-1">
                   <div className="h-4 w-32">
                     <UptimeWidget data={provider.connected_events_last_24h} />

@@ -8,6 +8,7 @@ import { ChevronDownIcon } from "@heroicons/react/20/solid";
 import { Listbox } from "@headlessui/react";
 import { BarChart, PlainAreaChart } from "./components/Chart";
 import DevicesTable from "./components/DevicesTable";
+import { debug } from "console";
 
 type HeaderItem = {
   name: string;
@@ -53,7 +54,8 @@ export default function Page() {
 
   const getStatToday = (key: string) => {
     if (stats && stats[key]) {
-      return stats[key]["2024-01-04"]; // Todo(awais): Don't hardcode this
+      const mostRecentDate = Object.keys(stats[key]).toReversed()[0];
+      return stats[key][mostRecentDate]?.toPrecision(4);
     }
     return "";
   };

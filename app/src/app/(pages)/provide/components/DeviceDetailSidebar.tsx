@@ -59,17 +59,6 @@ export default function DeviceDetailSidebar({
 
   const isOpen = selectedProvider != null;
 
-  const getMaxValueAcrossAllClients = () => {
-    const localMaxes = provider?.client_details.map((client) => {
-      const localMax = Math.max(
-        ...Object.values(client.transfer_data).map((value) => Number(value))
-      );
-      return localMax;
-    });
-
-    return localMaxes ? Math.max(...localMaxes) : undefined;
-  };
-
   return (
     <Transition show={isOpen} as={Popover}>
       <Transition.Child>
@@ -191,10 +180,7 @@ export default function DeviceDetailSidebar({
                                     {client.client_id}
                                   </td>
                                   <td>
-                                    <ActivityWidget
-                                      data={client}
-                                      maxValue={getMaxValueAcrossAllClients()}
-                                    />
+                                    <ActivityWidget data={client} />
                                   </td>
                                 </tr>
                               ))}
