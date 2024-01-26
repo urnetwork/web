@@ -99,6 +99,12 @@ export type StatsProviderLast90 = {
   }[];
 };
 
+export type RemoveNetworkClientResult = {
+  error?: {
+    message: string;
+  };
+};
+
 export type DeviceSetProvideResult = {
   provide_mode: number;
   error?: {

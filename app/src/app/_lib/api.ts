@@ -14,6 +14,7 @@ import {
   DeviceSetProvideResult,
   DeviceShareStatusResult,
   NetworkClientsResult,
+  RemoveNetworkClientResult,
   StatsProviderLast90,
   StatsProviders,
   StatsProvidersOverviewLast90Result,
@@ -139,6 +140,13 @@ export async function postStatsProviderLast90(body: {
   return makePostRequest("stats/provider-last-90", body);
 }
 
+export async function postRemoveNetworkClient(body: {
+  client_id: string;
+}): Promise<RemoveNetworkClientResult> {
+  return {};
+  return makePostRequest("network/remove-client", body);
+}
+
 export async function postDeviceSetProvide(body: {
   client_id: string;
   provide_mode: number;
@@ -245,14 +253,14 @@ export async function getDeviceAssociations(): Promise<DeviceAssociationsResult>
         pending: true,
         code: "7ad2747fc5ca767577493f923a217aeb",
         device_name: "Awais second test device",
-        client_id: "018c889e-ca43-a44d-1242-e8d9163b940b",
+        client_id: "018d46d0-1ec7-f740-9248-28ab9cae20cd",
         network_name: "test.bringyour.network",
       },
       {
         pending: false,
         code: "7ad2747fc5ca767577493f923a217aeb",
         device_name: "Awais second test device",
-        client_id: "018c889e-ca43-a44d-1242-e8d9163b940b",
+        client_id: "018d46d0-1ec7-f740-9248-28ab9cae20cd",
         network_name: "test2.bringyour.network",
       },
     ],

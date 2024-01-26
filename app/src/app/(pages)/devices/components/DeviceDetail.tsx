@@ -5,6 +5,7 @@ import {
   getNetworkClients,
   postDeviceConfirmShare,
   postDeviceRemoveAssociation,
+  postRemoveNetworkClient,
 } from "@/app/_lib/api";
 import { Breadcrumbs } from "@/app/_lib/components/Breadcrumbs";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -12,6 +13,7 @@ import Loading from "../loading";
 import Button from "@/app/_lib/components/Button";
 import { useState } from "react";
 import { ConfirmDeleteModal } from "@/app/_lib/components/ConfirmDeleteModal";
+import { redirect, useRouter } from "next/navigation";
 
 type DeviceDetailProps = {
   clientId: string;
@@ -19,10 +21,13 @@ type DeviceDetailProps = {
 
 export default function DeviceDetail({ clientId }: DeviceDetailProps) {
   const queryClient = useQueryClient();
+  const router = useRouter();
+
   const [networkToRemove, setNetworkToRemove] = useState<{
     code: string;
     network_name: string;
   }>();
+  const [showDeleteDeviceModal, setShowDeleteDeviceModal] = useState(false);
 
   const { isPending: isClientsPending, data: clients } = useQuery({
     queryKey: ["network", "clients"],
@@ -63,7 +68,7 @@ export default function DeviceDetail({ clientId }: DeviceDetailProps) {
     );
   };
 
-  const { data: confirmShareResult, mutateAsync } = useMutation({
+  const { mutateAsync: mutateConfirmShareAsync } = useMutation({
     mutationKey: ["device", "confirm", "share"],
     mutationFn: async ({ code, confirm }: { code: string; confirm: boolean }) =>
       await postDeviceConfirmShare({ share_code: code, confirm: confirm }),
@@ -71,10 +76,7 @@ export default function DeviceDetail({ clientId }: DeviceDetailProps) {
       queryClient.invalidateQueries({ queryKey: ["device", "associations"] }),
   });
 
-  const {
-    data: removeAssociationResult,
-    mutateAsync: mutateRemoveAssociationAsync,
-  } = useMutation({
+  const { mutateAsync: mutateRemoveAssociationAsync } = useMutation({
     mutationKey: ["device", "remove", "association"],
     mutationFn: async (code: string) =>
       await postDeviceRemoveAssociation({ code }),
@@ -82,16 +84,28 @@ export default function DeviceDetail({ clientId }: DeviceDetailProps) {
       queryClient.invalidateQueries({ queryKey: ["device", "associations"] }),
   });
 
+  const { mutateAsync: mutateRemoveNetworkClientAsync } = useMutation({
+    mutationKey: ["remove", "network", "client"],
+    mutationFn: async (clientId: string) =>
+      await postRemoveNetworkClient({ client_id: clientId }),
+    onSettled: () =>
+      queryClient.invalidateQueries({ queryKey: ["network", "clients"] }),
+  });
+
   const handleConfirmShare = async (code: string) => {
-    await mutateAsync({ code: code, confirm: true });
+    await mutateConfirmShareAsync({ code: code, confirm: true });
   };
 
   const handleConfirmCancel = async (code: string) => {
-    await mutateAsync({ code: code, confirm: false });
+    await mutateConfirmShareAsync({ code: code, confirm: false });
   };
 
   const handleRemoveAssociation = async (code: string) => {
     await mutateRemoveAssociationAsync(code);
+  };
+
+  const handleRemoveNetworkClient = async (clientId: string) => {
+    await mutateRemoveNetworkClientAsync(clientId);
   };
 
   return (
@@ -116,7 +130,22 @@ export default function DeviceDetail({ clientId }: DeviceDetailProps) {
         </ConfirmDeleteModal>
       )}
 
-      <div className="md:mt-10 p-4 max-w-3xl">
+      <ConfirmDeleteModal
+        isOpen={showDeleteDeviceModal}
+        setIsOpen={setShowDeleteDeviceModal}
+        onConfirm={async () => {
+          await handleRemoveNetworkClient(clientId);
+          router.push("/devices");
+        }}
+      >
+        <p className="font-semibold">
+          Are you sure you want to delete{" "}
+          <span className="font-medium">{clientId}</span>?
+        </p>
+        <p className="mt-4">You won't be able to undo this action.</p>
+      </ConfirmDeleteModal>
+
+      <div className="md:mt-10 p-4 max-w-3xl min-h-full">
         <Breadcrumbs
           items={[
             {
@@ -190,6 +219,15 @@ export default function DeviceDetail({ clientId }: DeviceDetailProps) {
                 ))}
               </div>
             )}
+
+            <div className="mt-24">
+              <button
+                className="button border border-red-400 text-red-500 dark"
+                onClick={() => setShowDeleteDeviceModal(true)}
+              >
+                Delete device
+              </button>
+            </div>
           </>
         )}
       </div>
