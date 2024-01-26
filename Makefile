@@ -16,7 +16,7 @@ clean:
 build:
 	python webgen/webgen.py build bringyour.com/gen.py
 	# generate the api docs into the latest build
-	npx @redocly/cli build-docs ${BRINGYOUR_HOME}/connect/api/bringyour.yml -o bringyour.com/build/api.html
+	npx -y @redocly/cli build-docs ${BRINGYOUR_HOME}/connect/api/bringyour.yml -o bringyour.com/build/api.html
 	# include the legal documents verbatim as per privacytxt.dev
 	pandoc -f markdown -t plain legal/privacy.md -o bringyour.com/build/privacy.txt
 	pandoc -f markdown -t plain legal/terms.md -o bringyour.com/build/terms.txt
