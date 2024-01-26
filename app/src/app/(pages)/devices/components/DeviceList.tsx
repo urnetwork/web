@@ -215,6 +215,10 @@ export default function DeviceList() {
         {isAssociationsPending && <Loading />}
         {!isAssociationsPending && (
           <div className="flex flex-col gap-4">
+            {!incomingSharedDevices ||
+              (incomingSharedDevices.length == 0 && (
+                <p className="text-sm text-gray-600">No shared devices found</p>
+              ))}
             {incomingSharedDevices?.map((device) => (
               <div key={device.client_id} className="card">
                 <div className="flex flex-row gap-4 items-center">
