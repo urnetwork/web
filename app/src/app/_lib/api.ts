@@ -158,19 +158,19 @@ export async function postDeviceSetProvide(body: {
 export async function postDeviceAdd(body: {
   code: string;
 }): Promise<DeviceAddResult> {
-  return makePostRequest("/device/add", body);
+  return makePostRequest("device/add", body);
 }
 
 export async function postDeviceCreateShareCode(body: {
   client_id: string;
   device_name: string;
 }): Promise<DeviceCreateShareCodeResult> {
-  return makePostRequest("/device/create-share-code", body);
+  return makePostRequest("device/create-share-code", body);
 }
 
 export async function getDeviceShareCodeQR(share_code: string) {
   const imgData = await makeResourceRequest(
-    `/device/share-code/${share_code}/qr.png`
+    `device/share-code/${share_code}/qr.png`
   );
   return URL.createObjectURL(imgData);
 }
@@ -178,42 +178,42 @@ export async function getDeviceShareCodeQR(share_code: string) {
 export async function postDeviceShareStatus(body: {
   share_code: string;
 }): Promise<DeviceShareStatusResult> {
-  return makePostRequest("/device/share-status", body);
+  return makePostRequest("device/share-status", body);
 }
 
 export async function postDeviceConfirmShare(body: {
   share_code: string;
   confirm: boolean;
 }): Promise<DeviceConfirmShareResult> {
-  return makePostRequest("/device/confirm-share", body);
+  return makePostRequest("device/confirm-share", body);
 }
 
 export async function postDeviceAdoptStatus(body: {
   share_code: string;
 }): Promise<DeviceAdoptStatusResult> {
-  return makePostRequest("/device/adopt-status", body);
+  return makePostRequest("device/adopt-status", body);
 }
 
 export async function getDeviceAssociations(): Promise<DeviceAssociationsResult> {
-  return makeGetRequest("/device/associations");
+  return makeGetRequest("device/associations");
 }
 
 export async function postDeviceRemoveAssociation(body: {
   code: string;
 }): Promise<DeviceRemoveAssociationResult> {
-  return makePostRequest("/device/remove-association", body);
+  return makePostRequest("device/remove-association", body);
 }
 
 export async function getSubscriptionCheckBalanceCode(
   balance_code: string
 ): Promise<SubscriptionCheckBalanceCodeResult> {
   return makeGetRequest(
-    `/subscription/check-balance-code?balance_code=${balance_code}`
+    `subscription/check-balance-code?balance_code=${balance_code}`
   );
 }
 
 export async function postSubscriptionRedeemBalanceCode(body: {
   balance_code: string;
 }): Promise<SubscriptionRedeemBalanceCodeResult> {
-  return makePostRequest("/subscription/redeem-balance-code", body);
+  return makePostRequest("subscription/redeem-balance-code", body);
 }
