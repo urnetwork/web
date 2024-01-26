@@ -79,12 +79,10 @@ def dialog_connect(page_name):
                                 let resetCode = new URLSearchParams(window.location.search).get('resetCode')
                                 if (resetCode) {
                                     mount.render(new DialogPasswordResetComplete(resetCode))
-                                }
-                                else if (byJwtData) {
+                                } else if (byJwtData) {
                                     let networkName = byJwtData['networkName']
                                     mount.render(new DialogComplete(networkName))
-                                }
-                                else {
+                                } else {
                                     mount.render(new DialogInitial(""" + auth_auto_prompt + """))
                                 }
                             })()
@@ -138,6 +136,8 @@ def tab_header(page_name):
 
 
 def footer():
+    from datetime import datetime
+
     return """
     <div id="footer">
         <div class="link-container">
@@ -165,9 +165,11 @@ def footer():
                     </tr>
                 </tbody>
             </table>
-            <div class="copyline">Copyright 2023 BringYour, Inc.</div>
+            <div class="copyline">Copyright {year} BringYour, Inc.</div>
         </div>
     </div>
     <script src="footer.js"></script>
-    """
+    """.format(
+        year=datetime.now().year
+    )
 

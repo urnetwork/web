@@ -52,7 +52,6 @@ http {
         location / {
             try_files $uri $uri.html $uri/ =404;
             alias /www/bringyour.com/;
-
             # always check for updates in the background
             add_header 'Cache-Control' 'max-age=0, stale-while-revalidate=86400' always;
             add_header 'Last-Modified' '{{ http_last_modified }}' always;

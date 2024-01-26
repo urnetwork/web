@@ -28,6 +28,14 @@ h2 {
   @apply text-xl font-semibold;
 }
 
+a {
+  @apply hover:underline;
+}
+
+th {
+  font-weight: inherit;
+}
+
 .card {
   @apply border border-gray-300 bg-gray-100 rounded-md p-4 cursor-pointer hover:border-primary transition-all duration-150 hover:scale-[1.02];
 }
