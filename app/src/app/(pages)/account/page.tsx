@@ -3,6 +3,7 @@
 import { getSubscriptionBalance } from "@/app/_lib/api";
 import { useQuery } from "@tanstack/react-query";
 import Loading from "./loading";
+import Link from "next/link";
 
 export default function Page() {
   const { isPending, data: result } = useQuery({
@@ -25,7 +26,13 @@ export default function Page() {
         {!isPending && (
           <div className="flex flex-col gap-y-4">
             <div className="card flex flex-col gap-2">
-              <h2>Subscriptions</h2>
+              <div className="flex flex-row">
+                <h2>Subscriptions</h2>
+                <div className="grow" />
+                <Link href="/account/add-balance">
+                  <button className="button btn-primary">Add balance</button>
+                </Link>
+              </div>
               <p>
                 <span className="font-semibold">Transfer balance:</span>{" "}
                 {result?.balance_byte_count || 0 / 1_000_000_000} GB

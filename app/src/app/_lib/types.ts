@@ -182,3 +182,16 @@ export type DeviceRemoveAssociationResult = {
     message: string;
   };
 };
+
+export type SubscriptionCheckBalanceCodeResult = {
+  valid: boolean;
+  transfer_data: number;
+};
+
+export type SubscriptionRedeemBalanceCodeResult = {
+  valid: boolean;
+  transfer_data: number;
+  error?: {
+    message: string;
+  };
+};

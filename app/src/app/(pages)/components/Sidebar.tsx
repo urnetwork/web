@@ -106,7 +106,7 @@ function SidebarContent() {
                 0 / 1_000_000_000}{" "}
               GiB
             </p>
-            <Link href="#">
+            <Link href="/account/add-balance">
               <p className="mt-1 text-sm tracking-widest font-extralight">
                 add balance
               </p>
