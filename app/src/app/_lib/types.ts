@@ -98,3 +98,87 @@ export type StatsProviderLast90 = {
     transfer_data: Timeseries;
   }[];
 };
+
+export type RemoveNetworkClientResult = {
+  error?: {
+    message: string;
+  };
+};
+
+export type DeviceSetProvideResult = {
+  provide_mode: number;
+  error?: {
+    message: string;
+  };
+};
+
+export type DeviceAddResult = {
+  code_type: string; // share | adopt
+  code: string;
+  network_name: string;
+  client_id: string;
+  error?: {
+    message: string;
+  };
+};
+
+export type DeviceCreateShareCodeResult = {
+  share_code: string;
+  error?: {
+    message: string;
+  };
+};
+
+export type DeviceShareStatusResult = {
+  pending: boolean;
+  associated_network_name: string;
+  error?: {
+    message: string;
+  };
+};
+
+export type DeviceConfirmShareResult = {
+  complete: boolean;
+  associated_network_name: string;
+  error?: {
+    message: string;
+  };
+};
+
+export type DeviceAdoptStatusResult = {
+  pending: boolean;
+  associated_network_name: string;
+  error?: {
+    message: string;
+  };
+};
+
+export type DeviceAssociationsResult = {
+  pending_adoption_devices: {
+    code: string;
+    device_name: string;
+    client_id: string;
+  }[];
+  incoming_shared_devices: {
+    pending: boolean;
+    code: string;
+    device_name: string;
+    client_id: string;
+    network_name: string;
+  }[];
+  outgoing_shared_devices: {
+    pending: boolean;
+    code: string;
+    device_name: string;
+    client_id: string;
+    network_name: string;
+  }[];
+};
+
+export type DeviceRemoveAssociationResult = {
+  client_id: string;
+  network_name: string;
+  error?: {
+    message: string;
+  };
+};

@@ -6,6 +6,7 @@ const config: Config = {
     "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
   ],
+  darkMode: "class",
   theme: {
     extend: {
       colors: {
@@ -27,6 +28,7 @@ const config: Config = {
         "76": "19rem",
       },
       width: {
+        "112": "28rem",
         "128": "32rem",
       },
     },
