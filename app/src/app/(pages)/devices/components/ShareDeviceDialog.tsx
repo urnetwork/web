@@ -45,6 +45,10 @@ export default function ShareDeviceDialog({
     mutateDeviceCreateShareCode();
   }, []);
 
+  const encodeURI = (text: string) => {
+    return text.replaceAll(" ", "+");
+  };
+
   return (
     <Dialog
       open={isOpen}
@@ -89,7 +93,7 @@ export default function ShareDeviceDialog({
                 <div className="text-sm text-center border border-gray-400 rounded-md p-2">
                   <p className="text-clip whitespace-pre-wrap">
                     https://app.bringyour.com/devices/add?code=
-                    {shareCodeResult.share_code}
+                    {encodeURI(shareCodeResult.share_code)}
                   </p>
                 </div>
                 <div>

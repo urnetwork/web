@@ -126,10 +126,11 @@ export default function DeviceList() {
               {clients?.slice(0, numItemsToShow)?.map((client) => {
                 return (
                   <Link
+                    key={client.client_id}
                     className="w-full"
                     href={`/devices?client_id=${client.client_id}`}
                   >
-                    <div key={client.client_id} className="card w-full">
+                    <div className="card w-full">
                       <div className="flex flex-row gap-4 items-center">
                         <div className="w-8 h-8">
                           <DevicePhoneMobileIcon className="text-gray-400" />

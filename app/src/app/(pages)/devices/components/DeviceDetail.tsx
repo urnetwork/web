@@ -132,7 +132,7 @@ export default function DeviceDetail({ clientId }: DeviceDetailProps) {
         </ConfirmDeleteModal>
       )}
 
-      {client && (
+      {client && showShareDeviceModal && (
         <ShareDeviceDialog
           device={client}
           isOpen={showShareDeviceModal}
