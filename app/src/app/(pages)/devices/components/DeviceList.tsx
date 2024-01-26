@@ -77,18 +77,6 @@ export default function DeviceList() {
 
   return (
     <>
-      {selectedClient && (
-        <ShareDeviceDialog
-          device={selectedClient}
-          isOpen={selectedClient != undefined}
-          setIsOpen={(value: boolean) => {
-            if (!value) {
-              setSelectedClient(undefined);
-            }
-          }}
-        />
-      )}
-
       {deviceToRemove && (
         <ConfirmDeleteModal
           isOpen={Boolean(deviceToRemove)}
@@ -134,12 +122,16 @@ export default function DeviceList() {
 
               {clients?.slice(0, numItemsToShow)?.map((client) => {
                 return (
-                  <div key={client.client_id} className="card w-full">
-                    <div className="flex flex-row gap-4 items-center">
-                      <div className="w-8 h-8">
-                        <DevicePhoneMobileIcon className="text-gray-400" />
-                      </div>
-                      <Link href={`/devices?client_id=${client.client_id}`}>
+                  <Link
+                    className="w-full"
+                    href={`/devices?client_id=${client.client_id}`}
+                  >
+                    <div key={client.client_id} className="card w-full">
+                      <div className="flex flex-row gap-4 items-center">
+                        <div className="w-8 h-8">
+                          <DevicePhoneMobileIcon className="text-gray-400" />
+                        </div>
+
                         <div className="flex flex-col">
                           <p className="text-gray-800 font-semibold">
                             {client.client_id}
@@ -148,26 +140,19 @@ export default function DeviceList() {
                             {client.description}
                           </p>
                         </div>
-                      </Link>
-                      <div className="flex-grow" />
-                      <div>
-                        <button
-                          className="button border border-primary text-primary"
-                          onClick={() => setSelectedClient(client)}
-                        >
-                          Share device
-                        </button>
+                        <div className="flex-grow" />
+                        <div></div>
+                      </div>
+
+                      {/* Outoing shared devices */}
+                      <div className="ml-12 mt-2 text-sm text-gray-500">
+                        <p>
+                          Shared with <span className="font-semibold"></span>
+                          {getNumOutgoingNetworks(client.client_id)}
+                        </p>
                       </div>
                     </div>
-
-                    {/* Outoing shared devices */}
-                    <div className="ml-12 mt-2 text-sm text-gray-500">
-                      <p>
-                        Shared with <span className="font-semibold"></span>
-                        {getNumOutgoingNetworks(client.client_id)}
-                      </p>
-                    </div>
-                  </div>
+                  </Link>
                 );
               })}
 

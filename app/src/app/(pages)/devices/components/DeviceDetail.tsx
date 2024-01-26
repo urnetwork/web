@@ -14,6 +14,7 @@ import Button from "@/app/_lib/components/Button";
 import { useState } from "react";
 import { ConfirmDeleteModal } from "@/app/_lib/components/ConfirmDeleteModal";
 import { redirect, useRouter } from "next/navigation";
+import ShareDeviceDialog from "./ShareDeviceDialog";
 
 type DeviceDetailProps = {
   clientId: string;
@@ -28,6 +29,7 @@ export default function DeviceDetail({ clientId }: DeviceDetailProps) {
     network_name: string;
   }>();
   const [showDeleteDeviceModal, setShowDeleteDeviceModal] = useState(false);
+  const [showShareDeviceModal, setShowShareDeviceModal] = useState(false);
 
   const { isPending: isClientsPending, data: clients } = useQuery({
     queryKey: ["network", "clients"],
@@ -130,6 +132,14 @@ export default function DeviceDetail({ clientId }: DeviceDetailProps) {
         </ConfirmDeleteModal>
       )}
 
+      {client && (
+        <ShareDeviceDialog
+          device={client}
+          isOpen={showShareDeviceModal}
+          setIsOpen={setShowShareDeviceModal}
+        />
+      )}
+
       <ConfirmDeleteModal
         isOpen={showDeleteDeviceModal}
         setIsOpen={setShowDeleteDeviceModal}
@@ -164,7 +174,16 @@ export default function DeviceDetail({ clientId }: DeviceDetailProps) {
             <p className="text-sm text-gray-600">{client.description}</p>
           )}
         </div>
-        <h2 className="mt-12 mb-2">Shared with</h2>
+        <div className="flex flex-row items-start">
+          <h2 className="mt-12 mb-2">Shared with</h2>
+          <div className="grow" />
+          <button
+            className="button btn-primary"
+            onClick={() => setShowShareDeviceModal(true)}
+          >
+            Share device
+          </button>
+        </div>
 
         {(isClientsPending || isAssociationsPending) && <Loading />}
 
