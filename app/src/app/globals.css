@@ -28,6 +28,14 @@ h2 {
   @apply text-xl font-semibold;
 }
 
+a {
+  @apply hover:underline;
+}
+
+th {
+  font-weight: inherit;
+}
+
 .card {
   @apply border border-gray-300 bg-gray-100 rounded-md p-4 cursor-pointer hover:border-primary transition-all duration-150 hover:scale-[1.02];
 }
@@ -37,5 +45,5 @@ h2 {
 }
 
 .btn-primary {
-  @apply bg-primary hover:bg-primary-semidark border border-primary-semidark text-white;
+  @apply bg-primary hover:bg-primary-semidark border border-primary-semidark text-white disabled:bg-gray-400 disabled:border-none;
 }

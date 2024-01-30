@@ -168,7 +168,11 @@ def footer():
             <div class="copyline">Copyright {year} BringYour, Inc.</div>
         </div>
     </div>
+<<<<<<< HEAD
+    <script src="footer.js"></script>
+=======
     <script src="/footer.js"></script>
+>>>>>>> main
     """.format(
         year=datetime.now().year
     )

@@ -60,7 +60,7 @@ export default function Page() {
                         <>
                           <div className="w-3 h-3 rounded-full bg-gray-400"></div>
                           <div className="text-xs text-gray-500">
-                            Disonnected
+                            Disconnected
                           </div>
                         </>
                       )}

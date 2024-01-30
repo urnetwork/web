@@ -55,9 +55,9 @@ http {
             try_files $uri $uri.html $uri/ =404;
             alias /www/app.bringyour.com/;
 
-            add_header 'Cache-Control' 'no-cache' always;
-            add_header 'Last-Modified' '{{ http_last_modified }}' always;
-            add_header 'ETag' '"{{ http_etag }}"' always;
+            add_header 'Cache-Control' 'no-cache';
+            add_header 'Last-Modified' '{{ http_last_modified }}';
+            add_header 'ETag' '"{{ http_etag }}"';
         }
         # app resources are content addressed, meaning the name changes when the content changes
         # use a separate location block per rec in "if is evil"
@@ -66,9 +66,9 @@ http {
             try_files $uri =404;
             alias /www/app.bringyour.com/;
 
-            add_header 'Cache-Control' 'max-age=86400' always;
-            add_header 'Last-Modified' '{{ http_last_modified }}' always;
-            add_header 'ETag' '"{{ http_etag }}"' always;
+            add_header 'Cache-Control' 'max-age=86400';
+            add_header 'Last-Modified' '{{ http_last_modified }}';
+            add_header 'ETag' '"{{ http_etag }}"';
         }
     }
 }
