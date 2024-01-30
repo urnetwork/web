@@ -45,6 +45,8 @@ http {
     server {
         listen 80 default_server;
 
+        absolute_redirect off;
+
         location =/status {
             alias /srv/warp/status/status.json;
             add_header 'Content-Type' 'application/json';

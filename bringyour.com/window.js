@@ -20,8 +20,9 @@ function updateConnectButton() {
 window.notifyByJwtChanged = updateConnectButton
 
 window.addEventListener('load', (event) => {
-    let resetCode = new URLSearchParams(window.location.search).get('resetCode')
-    let auth = new URLSearchParams(window.location.search).get('auth')
+    let params = new URLSearchParams(window.location.search)
+    let resetCode = params.get('resetCode')
+    let auth = params.get('auth')
 
     if (resetCode) {
         // see gen.py `dialog_connect` for where the reset component is mounted

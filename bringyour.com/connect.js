@@ -1413,7 +1413,7 @@ function DialogComplete() {
 
         if (launchAppButtonElement) {
             launchAppButtonElement.addEventListener('click', (event) => {
-                self.launchApp()
+                self.launchApp('/')
             })
         }
 
@@ -1431,6 +1431,8 @@ function DialogComplete() {
                 self.submit()
             }
         })
+
+        self.authRedirect()
     }
     self.router = (url) => {
         if (url.pathname == '/connect/signout') {
@@ -1440,9 +1442,23 @@ function DialogComplete() {
     }
 
 
+    self.authRedirect = () => {
+        let params = new URLSearchParams(window.location.search)
+        let redirectUriAfterAuth = params.get('redirect-uri-after-auth')
+        if (params.get('auth') != null && redirectUriAfterAuth) {
+            // `redirect-after-auth` must be an absolute url that starts with the app route
+            let appPrefix = serviceUrl('app', '')
+            if (redirectUriAfterAuth.startsWith(appPrefix)) {
+                let appRoute = redirectUriAfterAuth.substring(appPrefix.length)
+                self.launchApp(appRoute, true)
+            }
+        }
+    }
+
+
     // event handlers
 
-    self.launchApp = () => {
+    self.launchApp = (appRoute, replace) => {
         const launchAppButtonElement = self.element('launch-app-button')
         const launchAppSpinnerElement = self.element('launch-app-spinner')
         const launchAppErrorElement = self.element('launch-app-error')
@@ -1458,14 +1474,14 @@ function DialogComplete() {
 
         apiRequest('POST', '/auth/code-create', requestBody)
             .catch((err) => {
-                self.handleLaunchAppResponse(null)
+                self.handleLaunchAppResponse(null, appRoute, replace)
             })
             .then((responseBody) => {
-                self.handleLaunchAppResponse(responseBody)
+                self.handleLaunchAppResponse(responseBody, appRoute, replace)
             })
     }
 
-    self.handleLaunchAppResponse = (responseBody) => {
+    self.handleLaunchAppResponse = (responseBody, appRoute, replace) => {
         const launchAppButtonElement = self.element('launch-app-button')
         const launchAppSpinnerElement = self.element('launch-app-spinner')
         const launchAppErrorElement = self.element('launch-app-error')
@@ -1478,9 +1494,9 @@ function DialogComplete() {
             launchAppErrorElement.classList.remove('d-none')
         } else if ('auth_code' in responseBody) {
             window.open(
-                serviceUrl('app', `/?auth_code=${responseBody['auth_code']}`),
+                serviceUrl('app', `${appRoute}${appRoute.includes('?') ? '&' : '?'}auth_code=${responseBody['auth_code']}`),
                 // open a new tab
-                '_blank'
+                replace ? '_self' : '_blank'
             )
         } else if ('error' in responseBody) {
             launchAppErrorElement.textContent = responseBody['error']['message']
@@ -1892,28 +1908,27 @@ function renderComplete(container, id, networkName) {
           </div>
     `
 
-    if (new URLSearchParams(window.location.search).get("app-preview") != null) {
+    if (new URLSearchParams(window.location.search).get('app-preview') != null) {
         html += `
           <div class="login-option">
                <div class="login-container">
-                    <div><button id="${id('launch-app-button')}" type="button" class="btn btn-primary" onclick="launchApp()">Manage Your Network<span id="${id('launch-app-spinner')}" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span></button></div>
+                    <div><button id="${id('launch-app-button')}" type="button" class="btn btn-primary">Manage Your Network<span id="${id('launch-app-spinner')}" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span></button></div>
                     <div id="${id('launch-app-error')}" class="text-danger d-none"></div>
                </div>
           </div>
         `
-    } else {
-        html += `
-          <div class="login-option">
-               <div class="login-container">
-                    <div>Log in to the app to use your network.</div>
-                    <div class="no-title">
-                         <a href=""><img src="res/images/store-play.png" class="store"></a>
-                         <a href=""><img src="res/images/store-app.svg" class="store"></a>
-                    </div>
-               </div>
-          </div>
-        `
-      }
+    }
+
+    html += `
+      <div class="login-option">
+           <div class="login-container">
+                <div>Log in to the app to use your network.</div>
+                <div class="no-title">
+                     <a href="https://play.google.com/store/apps/details?id=com.bringyour.network"><img src="res/images/store-play.png" class="store"></a>
+                </div>
+           </div>
+      </div>
+    `
 
       html += `
           <div class="login-option">
