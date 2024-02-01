@@ -32,20 +32,20 @@ def app_js_css():
     <link rel="stylesheet" href="/res/css/stats.css">
     <link rel="stylesheet" href="/res/css/connect.css">
 
-    <script src="/lib/d3.min.js"></script>
-    <script src="/lib/p5.min.js"></script>
-    <script src="/lib/jquery.min.js"></script>
-    <script src="/lib/bootstrap.bundle.min.js"></script>
+    <script src="/lib/d3.min.js" defer></script>
+    <script src="/lib/p5.min.js" defer></script>
+    <script src="/lib/jquery.min.js" defer></script>
+    <script src="/lib/bootstrap.bundle.min.js" defer></script>
 
-    <script src="/sketch_220824a.js"></script>
-    <script src="/logo.js"></script>
+    <script src="/sketch_220824a.js" defer></script>
+    <script src="/logo.js" defer></script>
     <script src="/client.js"></script>
-    <script src="/stats.js"></script>
+    <script src="/stats.js" defer></script>
     <script src="/connect.js"></script>
     <script src="/window.js"></script>
 
-    <script src="https://accounts.google.com/gsi/client"></script>
-    <script src="https://appleid.cdn-apple.com/appleauth/static/jsapi/appleid/1/en_US/appleid.auth.js"></script>
+    <script src="https://accounts.google.com/gsi/client" defer></script>
+    <script src="https://appleid.cdn-apple.com/appleauth/static/jsapi/appleid/1/en_US/appleid.auth.js" defer></script>
     """
 
 
@@ -65,7 +65,7 @@ def dialog_connect(page_path):
                 <div class="modal-body">
                     <div class="dialog" id="dialog-mount">
                         <script>                   
-                             (() => {
+                             windowLoadCallbacks.push(() => {
                                 let mount = createConnectMount('dialog-mount')
                                 // exported for connect
                                 window.connectMount = mount
@@ -85,7 +85,7 @@ def dialog_connect(page_path):
                                 } else {
                                     mount.render(new DialogInitial(""" + auth_auto_prompt + """))
                                 }
-                            })()
+                            })
                         </script>
                     </div>
                 </div>
