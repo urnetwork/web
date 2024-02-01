@@ -44,21 +44,19 @@
                         </tr>
                     </tbody>
                 </table>
-                <div class="main-message"><label><input type="checkbox" value="" data-bs-toggle="modal" data-bs-target="#dialog-connect">I want to free my network and data <span class="now">now!</span></label></div>
-            </div>
+            <div class="main-message"><label><input type="checkbox" value="" data-bs-toggle="modal" data-bs-target="#dialog-connect">I want to free my network and data <span class="now">now!</span></label></div>
+        </div>
 
-            <div class="stats">
-                <div class="header">Statistics</div>
-                <div id="stats-tooltip" class="d-none"></div>
-                <div id="stats-mount">
-                  <script>                   
-                     (() => {
-                        let mount = createStatsMount('stats-mount')
-                        mount.router()
-                        mount.render(new StatsPanel(true))
-                    })()
-                </script>
-            </div>
+        <div class="stats">
+            <div class="header">Statistics</div>
+            <div id="stats-tooltip" class="d-none"></div>
+            <div id="stats-mount"><script>
+                windowLoadCallbacks.push(() => {
+                    let mount = createStatsMount('stats-mount')
+                    mount.router()
+                    mount.render(new StatsPanel(true))
+                })
+            </script></div>
         </div>
 
         <div>

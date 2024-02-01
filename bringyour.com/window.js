@@ -19,6 +19,8 @@ function updateConnectButton() {
 
 window.notifyByJwtChanged = updateConnectButton
 
+let windowLoadCallbacks = []
+
 window.addEventListener('load', (event) => {
     let params = new URLSearchParams(window.location.search)
     let resetCode = params.get('resetCode')
@@ -29,5 +31,9 @@ window.addEventListener('load', (event) => {
         $('#dialog-connect').modal('show')
     } else if (auth != null) {
         $('#dialog-connect').modal('show')
+    }
+
+    for (const callback of windowLoadCallbacks) {
+        callback()
     }
 })
