@@ -1910,8 +1910,7 @@ function renderComplete(container, id, networkName) {
                <div class="login-container">
                     <div>Log in to the app to use your network.</div>
                     <div class="no-title">
-                         <a href=""><img src="res/images/store-play.png" class="store"></a>
-                         <a href=""><img src="res/images/store-app.svg" class="store"></a>
+                         <a href="https://play.google.com/store/apps/details?id=com.bringyour.network"><img src="res/images/store-play.png" class="store"></a>
                     </div>
                </div>
           </div>
