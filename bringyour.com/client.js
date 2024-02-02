@@ -3,6 +3,8 @@
 const clientVersion = '1.0.0';
 
 const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+// potentially slow. This could be better targeted at specific devices
+const isSlowMobile = /iPod|Android/i.test(navigator.userAgent);
 
 
 function loadScript(src, onload) {
