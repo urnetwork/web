@@ -1,6 +1,7 @@
 
 body {
 	font-family: 'Noto Sans', sans-serif;
+	font-display: swap;
 	font-size: 12pt;
 	margin: 0px;
 	min-height: 100%;
@@ -51,7 +52,8 @@ div.leader div.top-message {
 	text-align: center;
 	margin-top: 48px;
 	margin-bottom: 48px;
-	font-family: 'Barlow', cursive;
+	font-family: 'Barlow', sans-serif;
+	font-display: swap;
 	font-size: 36pt;
 }
 
@@ -70,6 +72,7 @@ div.leader div.main-message {
 
 div.leader div.main-message span.now {
 	font-family: 'Pacifico', cursive;
+	font-display: swap;
 /*	font-size: 24pt;*/
 }
 

@@ -1,5 +1,4 @@
-<!DOCTYPE html>
-<html lang="en">
+{{ html_header() }}
 <head>
     {{ title_icons_meta() }}
 
@@ -10,9 +9,29 @@
     {{ app_js_css() }}
 </head>
 <body>
-    {{ dialog_connect(page_path=page_path) }}
+    <script>
+        // delay loading the logo to optimize initial load time
+        windowLoadCallbacks.push(() => {
+            let load = () => {
+                loadScript('/lib/p5.min.js', () => {
+                    loadScript('/logo.js', () => {
+                        loadScript('/sketch_220824a.js', () => {
 
-    {{ tab_header(page_path=page_path) }}
+                        })
+                    })
+                })
+            }
+            if (isMobile) {
+                setTimeout(load, 1000)
+            } else {
+                load()
+            }
+        })
+    </script>
+
+    {{ dialog_connect() }}
+
+    {{ tab_header() }}
 
     <div class="runner">
         <div class="leader">
@@ -51,10 +70,22 @@
             <div class="header">Statistics</div>
             <div id="stats-tooltip" class="d-none"></div>
             <div id="stats-mount"><script>
+                // delay loading the stats to optimize initial load time
                 windowLoadCallbacks.push(() => {
-                    let mount = createStatsMount('stats-mount')
-                    mount.router()
-                    mount.render(new StatsPanel(true))
+                    let load = () => {
+                        loadScript('/lib/d3.min.js', () => {
+                            loadScript('/stats.js', () => {
+                                let mount = createStatsMount('stats-mount')
+                                mount.router()
+                                mount.render(new StatsPanel(true))
+                            })
+                        })
+                    }
+                    if (isMobile) {
+                        setTimeout(load, 1000)
+                    } else {
+                        load()
+                    }
                 })
             </script></div>
         </div>
@@ -107,4 +138,4 @@
     {{ footer() }}
 
 </body>
-</html>
+{{ html_footer() }}

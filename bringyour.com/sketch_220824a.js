@@ -1,9 +1,15 @@
 
+/*
 let LOGO_CONTAINER_ID = null;
 let LOGO_S0 = 60;
 let LOGO_S1 = 400;
 let LOGO_A_MODE = 1;
+*/
 
+const LOGO_S1=200;
+const LOGO_S0=60;
+const LOGO_CONTAINER_ID='logo';
+const LOGO_A_MODE=0;
 
 let logop5 = new p5((sketch) => {
 
@@ -39,7 +45,7 @@ let logop5 = new p5((sketch) => {
     () => {
       useArkitechFont = false;
     });
-    
+
     let canvas = sketch.createCanvas(LOGO_S1, sketch.min(LOGO_S1, sketch.windowHeight));
     if (null != LOGO_CONTAINER_ID) {
       canvas.parent(LOGO_CONTAINER_ID);
@@ -49,6 +55,10 @@ let logop5 = new p5((sketch) => {
     
     let placeholderElement = document.getElementById('logo-placeholder')
     placeholderElement.parentNode.removeChild(placeholderElement)
+
+    if (typeof updateScroll == 'function') {
+      updateScroll()
+    }
   }
   
   

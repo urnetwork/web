@@ -1,7 +1,3 @@
-LOGO_S1=200;
-LOGO_S0=60;
-LOGO_CONTAINER_ID='logo';
-LOGO_A_MODE=0;
 
 let lastKnownScrollPosition = 0;
 let ticking = false;
@@ -43,6 +39,12 @@ function updateScroll() {
 window.addEventListener('scroll', (e) => {
   updateScroll();
 });
+
+// if (document.readyState == 'complete') {
+//   updateScroll();
+// } else {
+//   windowLoadCallbacks.push(updateScroll);
+// }
 
 // window.addEventListener('load', (e) => {
 //   updateScroll();

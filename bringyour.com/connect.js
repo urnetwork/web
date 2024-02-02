@@ -62,21 +62,24 @@ function DialogInitial(firstLoad) {
                 if (!error) {
                     let authJwt = response.credential
                     self.submitAuthJwt('google', authJwt)
+                } else {
+                    console.log(error)
                 }
             },
         })
+        
+        window.google.accounts.id.renderButton(document.getElementById('g_id_button'), {
+            type: 'standard',
+            theme: 'outline',
+            size: 'large',
+            text: 'continue_with',
+            shape: 'rectangular',
+            logo_alignment: 'center',
+            width: 300
+        })
+        
         if (firstLoad) {
             window.google.accounts.id.prompt()
-        } else {
-            window.google.accounts.id.renderButton(document.getElementById('g_id_button'), {
-                type: 'standard',
-                theme: 'outline',
-                size: 'large',
-                text: 'continue_with',
-                shape: 'rectangular',
-                logo_alignment: 'center',
-                width: 300
-            })
         }
 
         const loginButtonElement = self.element('login-button')

@@ -55,6 +55,8 @@ http {
         location / {
             try_files $uri $uri.html $uri/ =404;
             alias {{ bringyour_home }}/web/bringyour.com/build/;
+
+            add_header 'Cache-Control' 'no-cache';
         }
     }
     server {
