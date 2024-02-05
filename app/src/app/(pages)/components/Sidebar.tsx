@@ -7,8 +7,8 @@ import { Fragment, useEffect, useState } from "react";
 import { Dialog, Transition } from "@headlessui/react";
 import { useQuery } from "@tanstack/react-query";
 import {
-  LOGIN_URL,
   getJwt,
+  getLoginUrl,
   getSubscriptionBalance,
   removeJwt,
 } from "@/app/_lib/api";
@@ -72,7 +72,7 @@ function SidebarContent() {
 
   const signOut = () => {
     removeJwt();
-    redirect(LOGIN_URL);
+    redirect(getLoginUrl());
   };
 
   return (
