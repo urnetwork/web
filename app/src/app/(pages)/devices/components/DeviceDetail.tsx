@@ -72,8 +72,17 @@ export default function DeviceDetail({ clientId }: DeviceDetailProps) {
 
   const { mutateAsync: mutateConfirmShareAsync } = useMutation({
     mutationKey: ["device", "confirm", "share"],
-    mutationFn: async ({ code, confirm }: { code: string; confirm: boolean }) =>
-      await postDeviceConfirmShare({ share_code: code, confirm: confirm }),
+    mutationFn: async ({
+      code,
+      associated_network_name,
+    }: {
+      code: string;
+      associated_network_name: string | null;
+    }) =>
+      await postDeviceConfirmShare({
+        share_code: code,
+        associated_network_name,
+      }),
     onSettled: (data) =>
       queryClient.invalidateQueries({ queryKey: ["device", "associations"] }),
   });
@@ -95,11 +104,15 @@ export default function DeviceDetail({ clientId }: DeviceDetailProps) {
   });
 
   const handleConfirmShare = async (code: string) => {
-    await mutateConfirmShareAsync({ code: code, confirm: true });
+    await mutateConfirmShareAsync({
+      code: code,
+      associated_network_name: "",
+      confirm: true,
+    });
   };
 
   const handleConfirmCancel = async (code: string) => {
-    await mutateConfirmShareAsync({ code: code, confirm: false });
+    await mutateRemoveAssociationAsync(code);
   };
 
   const handleRemoveAssociation = async (code: string) => {
