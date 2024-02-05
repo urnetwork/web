@@ -62,6 +62,7 @@ export default function RootLayout({
 
   return (
     <QueryClientProvider client={queryClient}>
+      <title>BringYour: Manage Your Network</title>
       <html lang="en" className="text-gray-900">
         <body className="bg-white">{children}</body>
       </html>
