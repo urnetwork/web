@@ -228,12 +228,10 @@ export async function postDeviceRemoveAssociation(body: {
   return makePostRequest("device/remove-association", body);
 }
 
-export async function getSubscriptionCheckBalanceCode(
-  balance_code: string
-): Promise<SubscriptionCheckBalanceCodeResult> {
-  return makeGetRequest(
-    `subscription/check-balance-code?balance_code=${balance_code}`
-  );
+export async function postSubscriptionCheckBalanceCode(body: {
+  balance_code: string;
+}): Promise<SubscriptionCheckBalanceCodeResult> {
+  return makePostRequest("subscription/check-balance-code", body);
 }
 
 export async function postSubscriptionRedeemBalanceCode(body: {
