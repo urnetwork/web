@@ -1,12 +1,12 @@
 import { postStatsProviderLast90 } from "@/app/_lib/api";
-import { Provider24h } from "@/app/_lib/types";
+import { ClientTransferData, Provider24h } from "@/app/_lib/types";
 import { Popover, Tab, Transition } from "@headlessui/react";
 import { DevicePhoneMobileIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import { useQuery } from "@tanstack/react-query";
 import { BarChart } from "./Chart";
 import { ChartBarIcon } from "@heroicons/react/24/solid";
 import UptimeWidget from "./UptimeWidget";
-import ActivityWidget from "./ActivityWidget";
+import ActivityWidget, { NUM_DAYS } from "./ActivityWidget";
 import { formatTimeseriesData } from "@/app/_lib/utils";
 
 type ChartItem = {
@@ -61,6 +61,18 @@ export default function DeviceDetailSidebar({
   });
 
   const isOpen = selectedProvider != null;
+
+  const getFormattedActivityData = (client: ClientTransferData) => {
+    return formatTimeseriesData(client.transfer_data).slice(-NUM_DAYS);
+  };
+
+  /** Find the max transfer data value across all connected devices */
+  const getMaxTransferData = (clientDetails: ClientTransferData[]) => {
+    const aggregate = clientDetails.flatMap((clientDetail) =>
+      formatTimeseriesData(clientDetail.transfer_data).slice(-NUM_DAYS)
+    );
+    return Math.max(...aggregate.map((entry) => Number(entry.value)));
+  };
 
   return (
     <Transition show={isOpen} as={Popover}>
@@ -183,7 +195,12 @@ export default function DeviceDetailSidebar({
                                     {client.client_id}
                                   </td>
                                   <td>
-                                    <ActivityWidget data={client} />
+                                    <ActivityWidget
+                                      data={getFormattedActivityData(client)}
+                                      maxValue={getMaxTransferData(
+                                        provider.client_details
+                                      )}
+                                    />
                                   </td>
                                 </tr>
                               ))}

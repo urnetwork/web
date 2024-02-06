@@ -6,7 +6,7 @@ import { Client } from "@/app/_lib/types";
 import { Dialog } from "@headlessui/react";
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 import PollShare from "./PollShare";
 
 type ShareDeviceDialogProps = {
