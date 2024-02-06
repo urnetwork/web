@@ -52,7 +52,7 @@ export default function DeviceDetailSidebar({
   selectedProvider,
   setSelectedProvider,
 }: DeviceDetailSidebarProps) {
-  const [mouseXPosition, setMouseXPosition] = useState<number>(0);
+  const [showTooltip, setShowTooltip] = useState(false);
 
   const { isPending, data: provider } = useQuery({
     queryKey: ["stats", "provider-last-90", selectedProvider?.client_id],
@@ -75,12 +75,6 @@ export default function DeviceDetailSidebar({
       formatTimeseriesData(clientDetail.transfer_data).slice(-NUM_DAYS)
     );
     return Math.max(...aggregate.map((entry) => Number(entry.value)));
-  };
-
-  const handleMouseMove = (event: React.MouseEvent<HTMLDivElement>) => {
-    const rect = event.currentTarget.getBoundingClientRect();
-    const xPosition = event.clientX - Math.ceil(rect.left);
-    setMouseXPosition(xPosition);
   };
 
   return (
@@ -161,14 +155,17 @@ export default function DeviceDetailSidebar({
                                 <div
                                   key={`chart-${chart.key}`}
                                   className="relative bg-gray-100 w-full rounded-md h-40 pt-6"
-                                  onMouseEnter={handleMouseMove}
-                                  onMouseMove={handleMouseMove}
+                                  // onMouseEnter={handleMouseMove}
+                                  // onMouseMove={handleMouseMove}
                                 >
                                   {/* <div
                                     className="z-20 absolute h-full w-[1px] bg-gray-600 -mt-6"
                                     style={{ left: mouseXPosition }}
                                   /> */}
-                                  <svg className="z-20 absolute h-full w-full -mt-6">
+                                  {/* <svg
+                                    className="z-20 absolute h-full w-full -mt-6"
+                                    onMouseMove={handleMouseMove}
+                                  >
                                     <rect
                                       x={mouseXPosition}
                                       y={0}
@@ -176,7 +173,7 @@ export default function DeviceDetailSidebar({
                                       width="1px"
                                       fill="#4b5563"
                                     />
-                                  </svg>
+                                  </svg> */}
                                   <div className="z-10 absolute top-2 left-2 text-sm font-semibold text-gray-400">
                                     {chart.name}
                                   </div>
@@ -186,6 +183,9 @@ export default function DeviceDetailSidebar({
                                     unit={chart.unit}
                                     data={provider[chart.key]}
                                     tooltipStyle={"simple"}
+                                    showTooltip={showTooltip}
+                                    setShowTooltip={setShowTooltip}
+                                    syncId={`${selectedProvider?.client_id}-chart`}
                                   />
                                 </div>
                               ))}
