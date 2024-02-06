@@ -26,7 +26,7 @@ export default function DeviceDetail({ clientId }: DeviceDetailProps) {
 
   const [networkToRemove, setNetworkToRemove] = useState<{
     code: string;
-    network_name: string;
+    network_name?: string;
   }>();
   const [showDeleteDeviceModal, setShowDeleteDeviceModal] = useState(false);
   const [showShareDeviceModal, setShowShareDeviceModal] = useState(false);
@@ -103,10 +103,13 @@ export default function DeviceDetail({ clientId }: DeviceDetailProps) {
       queryClient.invalidateQueries({ queryKey: ["network", "clients"] }),
   });
 
-  const handleConfirmShare = async (code: string) => {
+  const handleConfirmShare = async (
+    code: string,
+    associated_network_name: string
+  ) => {
     await mutateConfirmShareAsync({
       code: code,
-      associated_network_name: "",
+      associated_network_name: associated_network_name,
     });
   };
 
@@ -215,36 +218,70 @@ export default function DeviceDetail({ clientId }: DeviceDetailProps) {
                     key={`${clientId}-${network.network_name}`}
                     className="flex flex-row items-center w-full text-sm text-gray-600 py-2"
                   >
-                    <p>
-                      Shared with {network.network_name}{" "}
-                      {network.pending && "(awaiting confirmation)"}
-                    </p>
-                    <div className="grow" />
-                    {network.pending && (
-                      <div className="flex flex-row gap-2">
-                        <Button
-                          className="button bg-green-600 text-white"
-                          onClick={() => handleConfirmShare(network.code)}
-                        >
-                          Confirm
-                        </Button>
-                        <Button
-                          className="button border border-gray-400 text-gray-500 dark"
-                          onClick={() => handleConfirmCancel(network.code)}
-                        >
-                          Cancel
-                        </Button>
-                      </div>
+                    {network.pending && !network.network_name && (
+                      <>
+                        <p>
+                          Code generated:{" "}
+                          <span className="font-semibold">{network.code}</span>
+                        </p>
+                        <div className="grow" />
+                        <div className="flex flex-row gap-2">
+                          <Button
+                            className="button border border-gray-400 text-gray-500 dark"
+                            onClick={() => handleConfirmCancel(network.code)}
+                          >
+                            Delete
+                          </Button>
+                        </div>
+                      </>
+                    )}
+
+                    {network.pending && network.network_name && (
+                      <>
+                        <p>
+                          Shared with {network.network_name}{" "}
+                          {network.pending && "(awaiting confirmation)"}
+                        </p>
+                        <div className="grow" />
+
+                        <div className="flex flex-row gap-2">
+                          <Button
+                            className="button bg-green-600 text-white"
+                            onClick={() =>
+                              handleConfirmShare(
+                                network.code,
+                                network.network_name!
+                              )
+                            }
+                          >
+                            Confirm
+                          </Button>
+                          <Button
+                            className="button border border-gray-400 text-gray-500 dark"
+                            onClick={() => handleConfirmCancel(network.code)}
+                          >
+                            Cancel
+                          </Button>
+                        </div>
+                      </>
                     )}
                     {!network.pending && (
-                      <div className="flex flex-row gap-2">
-                        <Button
-                          className="button border border-red-400 text-red-500 dark"
-                          onClick={async () => setNetworkToRemove(network)}
-                        >
-                          Remove
-                        </Button>
-                      </div>
+                      <>
+                        <p>
+                          Shared with {network.network_name}{" "}
+                          {network.pending && "(awaiting confirmation)"}
+                        </p>
+                        <div className="grow" />
+
+                        <div className="flex flex-row gap-2">
+                          <Button
+                            className="button border border-red-400 text-red-500 dark"
+                            onClick={async () => setNetworkToRemove(network)}
+                          >
+                            Remove
+                          </Button>
+                        </div>
+                      </>
                     )}
                   </div>
                 ))}

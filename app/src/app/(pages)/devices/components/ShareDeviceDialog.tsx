@@ -20,7 +20,6 @@ export default function ShareDeviceDialog({
   isOpen,
   setIsOpen,
 }: ShareDeviceDialogProps) {
-  console.log("ShareDeviceDialog created...");
   const queryClient = useQueryClient();
 
   const {
