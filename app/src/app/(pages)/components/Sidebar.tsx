@@ -38,7 +38,6 @@ const navigation = [
 // Copied from web/bringyour.com/client.js
 // see https://stackoverflow.com/questions/38552003/how-to-decode-jwt-token-in-javascript-without-using-a-library
 function parseJwt(jwt: string) {
-  // console.log(jwt)
   var base64Url = jwt.split(".")[1];
   var base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
   var jsonPayload = decodeURIComponent(

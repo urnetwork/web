@@ -171,7 +171,7 @@ export type DeviceAssociationsResult = {
     code: string;
     device_name: string;
     client_id: string;
-    network_name: string;
+    network_name?: string;
   }[];
 };
 

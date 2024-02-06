@@ -192,7 +192,7 @@ export async function postDeviceShareStatus(body: {
 
 export async function postDeviceConfirmShare(body: {
   share_code: string;
-  confirm: boolean;
+  associated_network_name: string | null;
 }): Promise<DeviceConfirmShareResult> {
   return makePostRequest("device/confirm-share", body);
 }

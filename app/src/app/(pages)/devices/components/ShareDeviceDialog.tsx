@@ -2,48 +2,32 @@ import {
   getDeviceShareCodeQR,
   postDeviceCreateShareCode,
 } from "@/app/_lib/api";
-import { Client } from "@/app/_lib/types";
+import { Client, DeviceCreateShareCodeResult } from "@/app/_lib/types";
 import { Dialog } from "@headlessui/react";
 import { XMarkIcon } from "@heroicons/react/24/outline";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { useEffect } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useEffect, useRef } from "react";
 import PollShare from "./PollShare";
 
 type ShareDeviceDialogProps = {
-  device: Client;
+  clientId: string;
+  shareCodeResult: DeviceCreateShareCodeResult;
   isOpen: boolean;
   setIsOpen: (value: boolean) => void;
 };
 
 export default function ShareDeviceDialog({
-  device,
+  clientId,
+  shareCodeResult,
   isOpen,
   setIsOpen,
 }: ShareDeviceDialogProps) {
-  const {
-    data: shareCodeResult,
-    isPending,
-    mutate: mutateDeviceCreateShareCode,
-  } = useMutation({
-    mutationKey: ["device", "create", "share", "code", device?.client_id],
-    mutationFn: async () => {
-      return await postDeviceCreateShareCode({
-        client_id: device.client_id,
-        device_name: device.client_id, // Todo(awais): There must be a better device name?
-      });
-    },
-  });
-
   const { data: qrCodeURL, isPending: isQrImagePending } = useQuery({
     queryKey: ["share", "code", "qr", shareCodeResult?.share_code],
-    queryFn: async () =>
-      await getDeviceShareCodeQR(shareCodeResult?.share_code || ""),
-    enabled: !!shareCodeResult,
+    queryFn: async () => {
+      return await getDeviceShareCodeQR(shareCodeResult?.share_code || "");
+    },
   });
-
-  useEffect(() => {
-    mutateDeviceCreateShareCode();
-  }, []);
 
   return (
     <Dialog
@@ -68,13 +52,10 @@ export default function ShareDeviceDialog({
 
           <div className="p-4">
             <Dialog.Title className="mb-2">
-              Share device {device.client_id}
+              Share device {clientId}
             </Dialog.Title>
-            {isPending && (
-              <div className="w-full h-72 bg-gray-100 rounded-md" />
-            )}
 
-            {!isPending && shareCodeResult && (
+            {shareCodeResult && (
               <div className="flex flex-col gap-4">
                 <p className="text-sm">
                   Send this code to the network owner you want to share your
