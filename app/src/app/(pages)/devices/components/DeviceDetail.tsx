@@ -107,7 +107,6 @@ export default function DeviceDetail({ clientId }: DeviceDetailProps) {
     await mutateConfirmShareAsync({
       code: code,
       associated_network_name: "",
-      confirm: true,
     });
   };
 

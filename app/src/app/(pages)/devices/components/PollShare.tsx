@@ -37,10 +37,6 @@ export default function PollShare({ code, setIsModalOpen }: PollShareProps) {
     queryFn: async () => postDeviceShareStatus({ share_code: code }),
     enabled: isPolling,
     refetchInterval: (query) => {
-      console.log("Refetch interval function called");
-      console.log(query);
-      console.log(query.state.data);
-
       if (
         (!query.state.data || !query.state.data?.associated_network_name) &&
         isPolling

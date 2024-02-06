@@ -5,8 +5,8 @@ import {
 import { Client } from "@/app/_lib/types";
 import { Dialog } from "@headlessui/react";
 import { XMarkIcon } from "@heroicons/react/24/outline";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { useEffect } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useEffect, useRef } from "react";
 import PollShare from "./PollShare";
 
 type ShareDeviceDialogProps = {
@@ -20,6 +20,9 @@ export default function ShareDeviceDialog({
   isOpen,
   setIsOpen,
 }: ShareDeviceDialogProps) {
+  console.log("ShareDeviceDialog created...");
+  const queryClient = useQueryClient();
+
   const {
     data: shareCodeResult,
     isPending,
@@ -32,12 +35,15 @@ export default function ShareDeviceDialog({
         device_name: device.client_id, // Todo(awais): There must be a better device name?
       });
     },
+    onSettled: (data) =>
+      queryClient.invalidateQueries({ queryKey: ["device", "associations"] }),
   });
 
   const { data: qrCodeURL, isPending: isQrImagePending } = useQuery({
     queryKey: ["share", "code", "qr", shareCodeResult?.share_code],
-    queryFn: async () =>
-      await getDeviceShareCodeQR(shareCodeResult?.share_code || ""),
+    queryFn: async () => {
+      return await getDeviceShareCodeQR(shareCodeResult?.share_code || "");
+    },
     enabled: !!shareCodeResult,
   });
 
