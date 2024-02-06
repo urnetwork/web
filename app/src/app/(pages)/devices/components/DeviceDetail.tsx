@@ -4,6 +4,7 @@ import {
   getDeviceAssociations,
   getNetworkClients,
   postDeviceConfirmShare,
+  postDeviceCreateShareCode,
   postDeviceRemoveAssociation,
   postRemoveNetworkClient,
 } from "@/app/_lib/api";
@@ -70,6 +71,21 @@ export default function DeviceDetail({ clientId }: DeviceDetailProps) {
     );
   };
 
+  const {
+    data: shareCodeResult,
+    mutateAsync: mutateDeviceCreateShareCodeAsync,
+  } = useMutation({
+    mutationKey: ["device", "create", "share", "code", clientId],
+    mutationFn: async () => {
+      return await postDeviceCreateShareCode({
+        client_id: clientId,
+        device_name: clientId, // Todo(awais): There must be a better device name?
+      });
+    },
+    onSettled: (data) =>
+      queryClient.invalidateQueries({ queryKey: ["device", "associations"] }),
+  });
+
   const { mutateAsync: mutateConfirmShareAsync } = useMutation({
     mutationKey: ["device", "confirm", "share"],
     mutationFn: async ({
@@ -113,6 +129,13 @@ export default function DeviceDetail({ clientId }: DeviceDetailProps) {
     });
   };
 
+  const handleShareDevice = async (
+    event: React.MouseEvent<HTMLButtonElement>
+  ) => {
+    await mutateDeviceCreateShareCodeAsync();
+    setShowShareDeviceModal(true);
+  };
+
   const handleConfirmCancel = async (code: string) => {
     await mutateRemoveAssociationAsync(code);
   };
@@ -147,9 +170,10 @@ export default function DeviceDetail({ clientId }: DeviceDetailProps) {
         </ConfirmDeleteModal>
       )}
 
-      {client && showShareDeviceModal && (
+      {shareCodeResult && showShareDeviceModal && (
         <ShareDeviceDialog
-          device={client}
+          clientId={clientId}
+          shareCodeResult={shareCodeResult}
           isOpen={showShareDeviceModal}
           setIsOpen={setShowShareDeviceModal}
         />
@@ -192,12 +216,9 @@ export default function DeviceDetail({ clientId }: DeviceDetailProps) {
         <div className="flex flex-row items-start">
           <h2 className="mt-12 mb-2">Shared with</h2>
           <div className="grow" />
-          <button
-            className="button btn-primary"
-            onClick={() => setShowShareDeviceModal(true)}
-          >
+          <Button className="button btn-primary" onClick={handleShareDevice}>
             Share device
-          </button>
+          </Button>
         </div>
 
         {(isClientsPending || isAssociationsPending) && <Loading />}
