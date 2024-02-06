@@ -1,83 +1,96 @@
 "use client";
 
 import {
-  getSubscriptionCheckBalanceCode,
+  postSubscriptionCheckBalanceCode,
   postSubscriptionRedeemBalanceCode,
 } from "@/app/_lib/api";
 import { Breadcrumbs } from "@/app/_lib/components/Breadcrumbs";
 import Button from "@/app/_lib/components/Button";
 import {
+  CheckBadgeIcon,
   CheckCircleIcon,
   ExclamationCircleIcon,
 } from "@heroicons/react/24/solid";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { redirect } from "next/navigation";
+import { redirect, useSearchParams } from "next/navigation";
 import { useState } from "react";
 
 export default function Page() {
   const queryClient = useQueryClient();
+  const queryParams = useSearchParams();
 
-  const [code, setCode] = useState<string>();
+  const [code, setCode] = useState<string>(
+    queryParams.get("redeem-balance-code") || ""
+  );
   const [isCodeTouched, setIsCodeTouched] = useState<boolean>(false);
   const [isCodeValid, setIsCodeValid] = useState<boolean>(false);
   const [codeErrorMessage, setCodeErrorMessage] = useState<string>();
-  const [amountToAdd, setAmountToAdd] = useState<number>();
 
-  const validateCode = async (code: string) => {
+  const validateCodeAsync = async (code: string) => {
     try {
-      const result = await getSubscriptionCheckBalanceCode(code);
+      const result = await postSubscriptionCheckBalanceCode({
+        balance_code: code,
+      });
 
       if (result.valid) {
         setIsCodeValid(true);
         setCodeErrorMessage(undefined);
-        setAmountToAdd(result.transfer_data);
       } else {
         setIsCodeValid(false);
-        setCodeErrorMessage("This code is not valid, or has expired");
-        setAmountToAdd(undefined);
+        setCodeErrorMessage(
+          result.error?.message || "This code is not valid, or has expired"
+        );
       }
+      return result;
     } catch (error) {
       setIsCodeValid(false);
       setCodeErrorMessage("Sorry, we're unable to check if the code is valid");
-      setAmountToAdd(undefined);
     }
+    return null;
   };
 
   const handleOnChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const code = event.target.value;
     setCode(code);
-    setIsCodeValid(false);
-    setAmountToAdd(undefined);
 
     if (!code || code == "" || code == undefined) {
+      setIsCodeValid(false);
       setCodeErrorMessage("Please enter a code");
-      return;
+    } else {
+      setIsCodeValid(true);
+      setCodeErrorMessage(undefined);
     }
-
-    // Todo(awais): I don't want to be hitting the API on every keystroke...
-    await validateCode(code);
   };
 
   const shouldShowError = codeErrorMessage && isCodeTouched;
   const shouldShowCheckMark = isCodeValid;
 
-  const mutation = useMutation({
-    mutationKey: ["subscription", "redeem", "code", code],
-    mutationFn: (code: string) =>
-      postSubscriptionRedeemBalanceCode({ balance_code: code }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["subscription", "balance"] });
-      redirect("/account");
-    },
-  });
+  const { data: redeemBalanceResult, mutateAsync: mutateRedeemBalanceAsync } =
+    useMutation({
+      mutationKey: ["subscription", "redeem", "code", code],
+      mutationFn: (code: string) =>
+        postSubscriptionRedeemBalanceCode({ balance_code: code }),
+      onSuccess: () => {
+        queryClient.invalidateQueries({
+          queryKey: ["subscription", "balance"],
+        });
+        redirect("/account");
+      },
+    });
 
   const handleSubmitCode = async (
     event: React.MouseEvent<HTMLButtonElement>
   ) => {
+    event.preventDefault();
     if (!code) {
       return;
     }
-    mutation.mutateAsync(code);
+    const result = await validateCodeAsync(code);
+
+    if (!result || !result.valid) {
+      return;
+    }
+    await mutateRedeemBalanceAsync(code);
   };
 
   return (
@@ -112,7 +125,7 @@ export default function Page() {
                   onFocus={handleOnChange}
                   onBlur={() => setIsCodeTouched(true)}
                   placeholder="e.g. 249384883cf27ff2d844f379610da79e"
-                  className={`w-full block rounded-md bg-transparent py-2 px-2 text-gray-900 placeholder:text-gray-400 ring-1 ring-gray-400 sm:text-sm sm:leading-6 ${
+                  className={`w-full block rounded-md bg-transparent py-2 px-2 pr-12 text-gray-900 placeholder:text-gray-400 ring-1 ring-gray-400 sm:text-sm sm:leading-6 ${
                     shouldShowError ? "ring-red-500" : ""
                   }`}
                 />
@@ -142,10 +155,19 @@ export default function Page() {
               disabled={!isCodeValid}
               onClick={handleSubmitCode}
             >
-              {amountToAdd && `Add ${amountToAdd} GiB`}
-              {!amountToAdd && "Redeem code"}
+              Redeem code
             </Button>
           </div>
+          {redeemBalanceResult && (
+            <div className="w-full flex flex-col mt-8 items-center text-center px-8">
+              <p className="text-lg">Success!</p>
+              <CheckBadgeIcon className=" text-green-600 w-12 h-12 m-4" />
+              <p className="text-sm text-gray-500">
+                {redeemBalanceResult.transfer_data} GiB was added to your
+                balance balance
+              </p>
+            </div>
+          )}
         </form>
       )}
     </div>

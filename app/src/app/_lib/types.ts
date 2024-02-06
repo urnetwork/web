@@ -186,6 +186,9 @@ export type DeviceRemoveAssociationResult = {
 export type SubscriptionCheckBalanceCodeResult = {
   valid: boolean;
   transfer_data: number;
+  error?: {
+    message: string;
+  };
 };
 
 export type SubscriptionRedeemBalanceCodeResult = {
