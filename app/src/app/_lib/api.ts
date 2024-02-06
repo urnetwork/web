@@ -72,7 +72,14 @@ async function makeGetRequest(endpoint: string) {
     throw new Error("Failed to fetch");
   }
 
-  return response.json();
+  const result = await response.json();
+
+  if (result.error && result.error.message) {
+    const errorMessage: any = result.error.message;
+    alert(`Sorry, there was a problem:\n${errorMessage}`);
+  }
+
+  return Promise.resolve(result);
 }
 
 /**
@@ -91,7 +98,15 @@ async function makePostRequest(endpoint: string, body: object) {
   if (!response.ok) {
     throw new Error("Post request failed");
   }
-  return response.json();
+
+  const result = await response.json();
+
+  if (result.error && result.error.message) {
+    const errorMessage: any = result.error.message;
+    alert(`Sorry, there was a problem:\n${errorMessage}`);
+  }
+
+  return Promise.resolve(result);
 }
 
 /**

@@ -10,9 +10,7 @@ import {
   postDeviceRemoveAssociation,
 } from "@lib/api";
 import Link from "next/link";
-import ShareDeviceDialog from "./ShareDeviceDialog";
 import { useState } from "react";
-import { Client } from "@/app/_lib/types";
 import { ConfirmDeleteModal } from "@/app/_lib/components/ConfirmDeleteModal";
 
 const PAGE_SIZE = 3;
