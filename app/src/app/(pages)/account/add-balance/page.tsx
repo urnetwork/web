@@ -11,13 +11,16 @@ import {
   ExclamationCircleIcon,
 } from "@heroicons/react/24/solid";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { redirect } from "next/navigation";
+import { redirect, useSearchParams } from "next/navigation";
 import { useState } from "react";
 
 export default function Page() {
   const queryClient = useQueryClient();
+  const queryParams = useSearchParams();
 
-  const [code, setCode] = useState<string>();
+  const [code, setCode] = useState<string>(
+    queryParams.get("redeem-balance-code") || ""
+  );
   const [isCodeTouched, setIsCodeTouched] = useState<boolean>(false);
   const [isCodeValid, setIsCodeValid] = useState<boolean>(false);
   const [codeErrorMessage, setCodeErrorMessage] = useState<string>();

@@ -1,11 +1,9 @@
 "use client";
 
-import { postDeviceAdd, postDeviceShareStatus } from "@/app/_lib/api";
+import { postDeviceAdd } from "@/app/_lib/api";
 import { Breadcrumbs } from "@/app/_lib/components/Breadcrumbs";
 import Button from "@/app/_lib/components/Button";
-import PulseLoader from "@/app/_lib/components/LoadingSpinner";
-import { CheckBadgeIcon } from "@heroicons/react/24/solid";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { useSearchParams } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import Poll from "./components/Poll";
