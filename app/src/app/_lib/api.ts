@@ -26,6 +26,15 @@ import {
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://api.bringyour.com/";
 export const LOGIN_URL = "https://bringyour.com?auth";
 
+export function getLoginUrl() {
+  if (!window || !window.location) {
+    return LOGIN_URL;
+  }
+
+  const encodedRedirectUri = encodeURI(window.location.href);
+  return `${LOGIN_URL}&redirect-uri-after-auth=${encodedRedirectUri}`;
+}
+
 export function getJwt() {
   if (typeof localStorage == "undefined") {
     return null;
