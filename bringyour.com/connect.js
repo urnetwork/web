@@ -50,6 +50,9 @@ function DialogInitial(firstLoad) {
             // see https://developer.apple.com/documentation/sign_in_with_apple/sign_in_with_apple_rest_api/authenticating_users_with_sign_in_with_apple
             let authJwt = event.detail.authorization.id_token
             self.submitAuthJwt('apple', authJwt)
+            if (window.showConnectDialog) {
+                window.showConnectDialog()
+            }
         })
         document.addEventListener('AppleIDSignInOnFailure', (event) => {
             // do nothing
@@ -62,6 +65,9 @@ function DialogInitial(firstLoad) {
                 if (!error) {
                     let authJwt = response.credential
                     self.submitAuthJwt('google', authJwt)
+                    if (window.showConnectDialog) {
+                        window.showConnectDialog()
+                    }
                 } else {
                     console.log(error)
                 }
@@ -1910,7 +1916,7 @@ function renderComplete(container, id, networkName) {
                <div class="login-container">
                     <div>Log in to the app to use your network.</div>
                     <div class="no-title">
-                         <a href="https://play.google.com/store/apps/details?id=com.bringyour.network"><img src="res/images/store-play.png" class="store"></a>
+                         <a href="https://play.google.com/store/apps/details?id=com.bringyour.network" target="_blank"><img src="res/images/store-play.png" class="store"></a>
                     </div>
                </div>
           </div>

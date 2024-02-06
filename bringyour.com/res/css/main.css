@@ -57,6 +57,12 @@ div.leader div.top-message {
 	font-size: 36pt;
 }
 
+div.leader div.offer {
+	text-align: center;
+	margin-top: 24px;
+	margin-bottom: 24px;
+}
+
 div.leader div.sub-message {
 /*	text-align: center;*/
 	margin-top: 48px;

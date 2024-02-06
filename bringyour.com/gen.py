@@ -147,7 +147,7 @@ def dialog_connect():
                 </div>
                 <div class="modal-body">
                     <div class="dialog" id="dialog-mount">
-                        <script>                   
+                        <script>
                              windowLoadCallbacks.push(() => {
                                 let mount = createConnectMount('dialog-mount')
                                 // exported for connect

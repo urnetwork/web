@@ -19,6 +19,7 @@ function updateConnectButton() {
 
 window.notifyByJwtChanged = updateConnectButton
 
+
 let windowLoadCallbacks = []
 
 window.addEventListener('load', (event) => {
@@ -31,8 +32,12 @@ window.addEventListener('load', (event) => {
 
     if (resetCode) {
         // see gen.py `dialog_connect` for where the reset component is mounted
-        $('#dialog-connect').modal('show')
+        if (window.showConnectDialog) {
+            window.showConnectDialog()
+        }
     } else if (auth != null) {
-        $('#dialog-connect').modal('show')
+        if (window.showConnectDialog) {
+            window.showConnectDialog()
+        }
     }
 })
