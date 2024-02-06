@@ -83,6 +83,11 @@ export type StatsProvidersOverviewLast90Result = {
   clients: Timeseries;
 };
 
+export type ClientTransferData = {
+  client_id: string;
+  transfer_data: Timeseries;
+};
+
 export type StatsProviderLast90 = {
   [index: string]: any;
   lookback: number;
@@ -93,10 +98,7 @@ export type StatsProviderLast90 = {
   search_interest: Timeseries;
   contracts: Timeseries;
   clients: Timeseries;
-  client_details: {
-    client_id: string;
-    transfer_data: Timeseries;
-  }[];
+  client_details: ClientTransferData[];
 };
 
 export type RemoveNetworkClientResult = {

@@ -13,7 +13,7 @@ import {
   NameType,
 } from "recharts/types/component/DefaultTooltipContent";
 import moment from "moment";
-import { useState } from "react";
+import { Dispatch, SetStateAction, useState } from "react";
 import { Timeseries } from "@/app/_lib/types";
 import { formatTimeseriesData } from "@/app/_lib/utils";
 
@@ -22,7 +22,10 @@ type BarChartProps = {
   pre_unit?: string;
   unit?: string;
   data: Timeseries;
+  syncId?: string;
   tooltipStyle?: "normal" | "simple";
+  showTooltip?: boolean;
+  setShowTooltip?: Dispatch<SetStateAction<boolean>>;
 };
 
 export function BarChart({
@@ -30,10 +33,16 @@ export function BarChart({
   pre_unit,
   unit,
   data,
+  syncId,
   tooltipStyle = "normal",
+  showTooltip,
+  setShowTooltip,
 }: BarChartProps) {
   const [tooltipPostion, setTooltipPosition] = useState({ x: 0, y: 0 });
-  const [isTooltipVisible, setIsTooltipVisible] = useState(false);
+  const [_isTooltipVisible, _setIsTooltipVisible] = useState(false);
+  const isTooltipVisible = showTooltip || _isTooltipVisible;
+  const setIsTooltipVisible = setShowTooltip || _setIsTooltipVisible;
+
   const formattedData = formatTimeseriesData(data);
 
   const formatDate = (date: string): string => {
@@ -101,12 +110,11 @@ export function BarChart({
   return (
     <>
       <ResponsiveContainer width="100%">
-        <ReBarChart data={formattedData}>
+        <ReBarChart data={formattedData} syncId={syncId}>
           <Tooltip
-            cursor={false}
             active={isTooltipVisible}
-            position={tooltipPostion}
             wrapperStyle={{ zIndex: 15 }}
+            position={{ y: -20 }}
             content={
               tooltipStyle == "simple" ? <SimpleTooltip /> : <CustomTooltip />
             }
@@ -118,10 +126,6 @@ export function BarChart({
             fill="#818cf8"
             activeBar={{ fill: "#4f46e5" }}
             onMouseEnter={(event) => {
-              setTooltipPosition({
-                x: event.x,
-                y: tooltipStyle == "simple" ? event.y - 70 : event.y - 85,
-              });
               setIsTooltipVisible(true);
             }}
             onMouseLeave={() => setIsTooltipVisible(false)}
