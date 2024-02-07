@@ -1,5 +1,4 @@
-<!DOCTYPE html>
-<html lang="en">
+{{ html_header() }}
 <head>
     {{ title_icons_meta() }}
 
@@ -8,9 +7,9 @@
     {{ app_js_css() }}
 </head>
 <body>
-    {{ dialog_connect(page_path=page_path) }}
+    {{ dialog_connect() }}
 
-    {{ tab_header(page_path=page_path) }}
+    {{ tab_header() }}
 
 	<div class="runner">
 
@@ -56,4 +55,4 @@
 	{{ footer() }}
 
 </body>
-</html>
+{{ html_footer() }}

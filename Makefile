@@ -7,13 +7,13 @@ deps:
 	npm install html-minifier -g
 	npm install uglify-js -g
 	npm install clean-css-cli -g
+	npm install purgecss -g
 
 clean:
 	python webgen/webgen.py clean bringyour.com/gen.py
-	python webgen/webgen.py clean nginx/gen.py
 	rm -rf build
 
-gen:
+content_gen:
 	python webgen/webgen.py build bringyour.com/gen.py
 	# generate the api docs into the latest build
 	npx -y @redocly/cli build-docs ${BRINGYOUR_HOME}/connect/api/bringyour.yml -o bringyour.com/build/api.html
@@ -21,10 +21,11 @@ gen:
 	pandoc -f markdown -t plain legal/privacy.md -o bringyour.com/build/privacy.txt
 	pandoc -f markdown -t plain legal/terms.md -o bringyour.com/build/terms.txt
 	pandoc -f markdown -t plain legal/vdp.md -o bringyour.com/build/vdp.txt
-	python webgen/webgen.py build nginx/gen.py
 
 build:
-	$(MAKE) gen
+	$(MAKE) content_gen
+	python webgen/webgen.py clean nginx/gen.py
+	python webgen/webgen.py build nginx/gen.py
 	mkdir -p build/${WARP_ENV}
 	echo "{\"version\":\"${WARP_VERSION}\",\"status\":\"ok\"}" > build/${WARP_ENV}/status.json
 	docker buildx build --progress plain \
@@ -46,7 +47,8 @@ local_routing_off:
 	sudo hostctl remove bringyour_web_local
 
 run_local:
-	$(MAKE) gen
+	$(MAKE) content_gen
+	python webgen/webgen.py clean nginx-local/gen.py
 	python webgen/webgen.py build nginx-local/gen.py
 	mkdir nginx-local/build/log
 	$(MAKE) local_routing_on

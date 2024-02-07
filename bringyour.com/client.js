@@ -2,6 +2,19 @@
 
 const clientVersion = '1.0.0';
 
+const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+// potentially slow. This could be better targeted at specific devices
+const isSlowMobile = /iPod|Android/i.test(navigator.userAgent);
+
+
+function loadScript(src, onload) {
+    let script = document.createElement('script')
+    document.head.appendChild(script)
+    script.onload = onload
+    script.src = src
+    
+}
+
 
 function getByJwt() {
     let byJwtStr = localStorage.getItem('byJwt')
