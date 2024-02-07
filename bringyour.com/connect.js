@@ -65,18 +65,19 @@ function DialogInitial(firstLoad) {
                 }
             },
         })
+        
+        window.google.accounts.id.renderButton(document.getElementById('g_id_button'), {
+            type: 'standard',
+            theme: 'outline',
+            size: 'large',
+            text: 'continue_with',
+            shape: 'rectangular',
+            logo_alignment: 'center',
+            width: 300
+        })
+        
         if (firstLoad) {
             window.google.accounts.id.prompt()
-        } else {
-            window.google.accounts.id.renderButton(document.getElementById('g_id_button'), {
-                type: 'standard',
-                theme: 'outline',
-                size: 'large',
-                text: 'continue_with',
-                shape: 'rectangular',
-                logo_alignment: 'center',
-                width: 300
-            })
         }
 
         const loginButtonElement = self.element('login-button')
@@ -1432,7 +1433,9 @@ function DialogComplete() {
             }
         })
 
-        self.authRedirect()
+        if (isFlagAppPreview()) {
+            self.authRedirect()
+        }
     }
     self.router = (url) => {
         if (url.pathname == '/connect/signout') {
@@ -1449,6 +1452,8 @@ function DialogComplete() {
             // `redirect-after-auth` must be an absolute url that starts with the app route
             let appPrefix = serviceUrl('app', '')
             if (redirectUriAfterAuth.startsWith(appPrefix)) {
+                // remove the redirect parameter from the history to allow back
+                window.history.replaceState({}, document.title, window.location.pathname)
                 let appRoute = redirectUriAfterAuth.substring(appPrefix.length)
                 self.launchApp(appRoute, true)
             }
@@ -1908,7 +1913,7 @@ function renderComplete(container, id, networkName) {
           </div>
     `
 
-    if (new URLSearchParams(window.location.search).get('app-preview') != null) {
+    if (isFlagAppPreview()) {
         html += `
           <div class="login-option">
                <div class="login-container">
