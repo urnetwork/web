@@ -51,6 +51,7 @@ export default function ActivityWidget({
     <div className="w-36 h-5 flex flex-row gap-1 justify-end">
       {data.map((entry) => (
         <div
+          key={`${entry.date}-${entry.value}`}
           className="relative w-4 h-full cursor-pointer rounded-sm hover:border-2 border-indigo-900"
           style={{ backgroundColor: calculateColor(Number(entry.value)) }}
           onMouseEnter={() => setTooltipEntry(entry)}
