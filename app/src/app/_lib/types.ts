@@ -186,16 +186,23 @@ export type DeviceRemoveAssociationResult = {
 };
 
 export type SubscriptionCheckBalanceCodeResult = {
-  valid: boolean;
-  transfer_data: number;
+  balance?: {
+    start_time: string;
+    end_time: string;
+    balance_byte_count: number;
+  };
   error?: {
     message: string;
   };
 };
 
 export type SubscriptionRedeemBalanceCodeResult = {
-  valid: boolean;
-  transfer_data: number;
+  transfer_balance?: {
+    transfer_balance_id: string;
+    start_time: string;
+    end_time: string;
+    balance_byte_count: number;
+  };
   error?: {
     message: string;
   };

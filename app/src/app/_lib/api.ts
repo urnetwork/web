@@ -229,13 +229,13 @@ export async function postDeviceRemoveAssociation(body: {
 }
 
 export async function postSubscriptionCheckBalanceCode(body: {
-  balance_code: string;
+  secret: string;
 }): Promise<SubscriptionCheckBalanceCodeResult> {
   return makePostRequest("subscription/check-balance-code", body);
 }
 
 export async function postSubscriptionRedeemBalanceCode(body: {
-  balance_code: string;
+  secret: string;
 }): Promise<SubscriptionRedeemBalanceCodeResult> {
   return makePostRequest("subscription/redeem-balance-code", body);
 }

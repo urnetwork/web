@@ -6,33 +6,35 @@ import {
 } from "@/app/_lib/api";
 import { Breadcrumbs } from "@/app/_lib/components/Breadcrumbs";
 import Button from "@/app/_lib/components/Button";
+import { prettyPrintByteCount } from "@/app/_lib/utils";
 import {
   CheckBadgeIcon,
   CheckCircleIcon,
   ExclamationCircleIcon,
 } from "@heroicons/react/24/solid";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { redirect, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { useState } from "react";
 
 export default function Page() {
   const queryClient = useQueryClient();
   const queryParams = useSearchParams();
+  const paramCode = queryParams.get("redeem-balance-code") || "";
 
-  const [code, setCode] = useState<string>(
-    queryParams.get("redeem-balance-code") || ""
+  const [code, setCode] = useState<string>(paramCode);
+  const [isCodeTouched, setIsCodeTouched] = useState<boolean>(
+    Boolean(paramCode)
   );
-  const [isCodeTouched, setIsCodeTouched] = useState<boolean>(false);
-  const [isCodeValid, setIsCodeValid] = useState<boolean>(false);
+  const [isCodeValid, setIsCodeValid] = useState<boolean>(Boolean(paramCode));
   const [codeErrorMessage, setCodeErrorMessage] = useState<string>();
 
   const validateCodeAsync = async (code: string) => {
     try {
       const result = await postSubscriptionCheckBalanceCode({
-        balance_code: code,
+        secret: code,
       });
 
-      if (result.valid) {
+      if (result.balance) {
         setIsCodeValid(true);
         setCodeErrorMessage(undefined);
       } else {
@@ -63,18 +65,16 @@ export default function Page() {
   };
 
   const shouldShowError = codeErrorMessage && isCodeTouched;
-  const shouldShowCheckMark = isCodeValid;
 
   const { data: redeemBalanceResult, mutateAsync: mutateRedeemBalanceAsync } =
     useMutation({
       mutationKey: ["subscription", "redeem", "code", code],
       mutationFn: (code: string) =>
-        postSubscriptionRedeemBalanceCode({ balance_code: code }),
+        postSubscriptionRedeemBalanceCode({ secret: code }),
       onSuccess: () => {
         queryClient.invalidateQueries({
           queryKey: ["subscription", "balance"],
         });
-        redirect("/account");
       },
     });
 
@@ -87,7 +87,7 @@ export default function Page() {
     }
     const result = await validateCodeAsync(code);
 
-    if (!result || !result.valid) {
+    if (!result || result.error || !result.balance) {
       return;
     }
     await mutateRedeemBalanceAsync(code);
@@ -136,12 +136,6 @@ export default function Page() {
                       aria-hidden="true"
                     />
                   )}
-                  {shouldShowCheckMark && (
-                    <CheckCircleIcon
-                      className="h-6 w-6 text-green-600"
-                      aria-hidden="true"
-                    />
-                  )}
                 </div>
               </div>
               {shouldShowError && (
@@ -158,13 +152,15 @@ export default function Page() {
               Redeem code
             </Button>
           </div>
-          {redeemBalanceResult && (
+          {redeemBalanceResult && redeemBalanceResult.transfer_balance && (
             <div className="w-full flex flex-col mt-8 items-center text-center px-8">
               <p className="text-lg">Success!</p>
               <CheckBadgeIcon className=" text-green-600 w-12 h-12 m-4" />
               <p className="text-sm text-gray-500">
-                {redeemBalanceResult.transfer_data} GiB was added to your
-                balance balance
+                {prettyPrintByteCount(
+                  redeemBalanceResult.transfer_balance?.balance_byte_count!
+                )}{" "}
+                was added to your balance
               </p>
             </div>
           )}

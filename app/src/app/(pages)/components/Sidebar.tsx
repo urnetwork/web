@@ -12,7 +12,7 @@ import {
   getSubscriptionBalance,
   removeJwt,
 } from "@/app/_lib/api";
-import { classNames } from "@/app/_lib/utils";
+import { classNames, prettyPrintByteCount } from "@/app/_lib/utils";
 
 const navigation = [
   {
@@ -101,9 +101,9 @@ function SidebarContent() {
         {!isPending && (
           <>
             <p className="text-5xl tracking-wider font-light">
-              {subscriptionBalanceResult?.balance_byte_count ||
-                0 / 1_000_000_000}{" "}
-              GiB
+              {prettyPrintByteCount(
+                subscriptionBalanceResult?.balance_byte_count!
+              )}
             </p>
             <Link href="/account/add-balance">
               <p className="mt-1 text-sm tracking-widest font-extralight">
