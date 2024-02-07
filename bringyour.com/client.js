@@ -42,7 +42,6 @@ function parseJwt(jwt) {
 }
 
 
-
 function setByJwt(byJwt) {
     localStorage.setItem('byJwt', byJwt)
     if (window.notifyByJwtChanged) {

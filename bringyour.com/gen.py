@@ -109,6 +109,7 @@ def app_js_css():
 
     {js_client}
     {js_window}
+    {js_flag}
 
     <script src="/lib/jquery.min.js" defer></script>
     <script src="/lib/bootstrap.bundle.min.js" defer></script>
@@ -127,6 +128,7 @@ def app_js_css():
         css_connect=css('res/css/connect.css', inline),
         js_client=js('client.js', inline),
         js_window=js('window.js', inline),
+        js_flag=js('flag.js', inline),
         stats_bundle=stats_bundle,
         logo_bundle=logo_bundle,
     )
