@@ -50,6 +50,9 @@ function DialogInitial(firstLoad) {
             // see https://developer.apple.com/documentation/sign_in_with_apple/sign_in_with_apple_rest_api/authenticating_users_with_sign_in_with_apple
             let authJwt = event.detail.authorization.id_token
             self.submitAuthJwt('apple', authJwt)
+            if (window.showConnectDialog) {
+                window.showConnectDialog()
+            }
         })
         document.addEventListener('AppleIDSignInOnFailure', (event) => {
             // do nothing
@@ -62,6 +65,11 @@ function DialogInitial(firstLoad) {
                 if (!error) {
                     let authJwt = response.credential
                     self.submitAuthJwt('google', authJwt)
+                    if (window.showConnectDialog) {
+                        window.showConnectDialog()
+                    }
+                } else {
+                    console.log(error)
                 }
             },
         })
