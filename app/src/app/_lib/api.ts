@@ -26,6 +26,15 @@ import {
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://api.bringyour.com/";
 export const LOGIN_URL = "https://bringyour.com?auth";
 
+export function getLoginUrl() {
+  if (!window || !window.location) {
+    return LOGIN_URL;
+  }
+
+  const encodedRedirectUri = encodeURI(window.location.href);
+  return `${LOGIN_URL}&redirect-uri-after-auth=${encodedRedirectUri}`;
+}
+
 export function getJwt() {
   if (typeof localStorage == "undefined") {
     return null;
@@ -63,7 +72,14 @@ async function makeGetRequest(endpoint: string) {
     throw new Error("Failed to fetch");
   }
 
-  return response.json();
+  const result = await response.json();
+
+  if (result.error && result.error.message) {
+    const errorMessage: any = result.error.message;
+    alert(`Sorry, there was a problem:\n${errorMessage}`);
+  }
+
+  return Promise.resolve(result);
 }
 
 /**
@@ -82,7 +98,15 @@ async function makePostRequest(endpoint: string, body: object) {
   if (!response.ok) {
     throw new Error("Post request failed");
   }
-  return response.json();
+
+  const result = await response.json();
+
+  if (result.error && result.error.message) {
+    const errorMessage: any = result.error.message;
+    alert(`Sorry, there was a problem:\n${errorMessage}`);
+  }
+
+  return Promise.resolve(result);
 }
 
 /**
@@ -152,7 +176,7 @@ export async function postDeviceSetProvide(body: {
   client_id: string;
   provide_mode: number;
 }): Promise<DeviceSetProvideResult> {
-  return makePostRequest("devices/set-provide", body);
+  return makePostRequest("device/set-provide", body);
 }
 
 export async function postDeviceAdd(body: {
@@ -183,7 +207,7 @@ export async function postDeviceShareStatus(body: {
 
 export async function postDeviceConfirmShare(body: {
   share_code: string;
-  confirm: boolean;
+  associated_network_name: string | null;
 }): Promise<DeviceConfirmShareResult> {
   return makePostRequest("device/confirm-share", body);
 }
@@ -204,16 +228,14 @@ export async function postDeviceRemoveAssociation(body: {
   return makePostRequest("device/remove-association", body);
 }
 
-export async function getSubscriptionCheckBalanceCode(
-  balance_code: string
-): Promise<SubscriptionCheckBalanceCodeResult> {
-  return makeGetRequest(
-    `subscription/check-balance-code?balance_code=${balance_code}`
-  );
+export async function postSubscriptionCheckBalanceCode(body: {
+  secret: string;
+}): Promise<SubscriptionCheckBalanceCodeResult> {
+  return makePostRequest("subscription/check-balance-code", body);
 }
 
 export async function postSubscriptionRedeemBalanceCode(body: {
-  balance_code: string;
+  secret: string;
 }): Promise<SubscriptionRedeemBalanceCodeResult> {
   return makePostRequest("subscription/redeem-balance-code", body);
 }

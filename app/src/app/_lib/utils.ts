@@ -48,3 +48,28 @@ export function formatTimeseriesData(data: Timeseries): TimeseriesEntry[] {
       }
     });
 }
+
+/**
+ * This function is from: https://stackoverflow.com/questions/15900485/correct-way-to-convert-size-in-bytes-to-kb-mb-gb-in-javascript
+ */
+export function prettyPrintByteCount(byteCount: number, decimals = 0) {
+  if (!+byteCount) return "0 Bytes";
+
+  const k = 1024;
+  const dm = decimals < 0 ? 0 : decimals;
+  const sizes = [
+    "Bytes",
+    "KiB",
+    "MiB",
+    "GiB",
+    "TiB",
+    "PiB",
+    "EiB",
+    "ZiB",
+    "YiB",
+  ];
+
+  const i = Math.floor(Math.log(byteCount) / Math.log(k));
+
+  return `${parseFloat((byteCount / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`;
+}

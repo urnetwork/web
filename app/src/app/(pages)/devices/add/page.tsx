@@ -1,11 +1,9 @@
 "use client";
 
-import { postDeviceAdd, postDeviceShareStatus } from "@/app/_lib/api";
+import { postDeviceAdd } from "@/app/_lib/api";
 import { Breadcrumbs } from "@/app/_lib/components/Breadcrumbs";
 import Button from "@/app/_lib/components/Button";
-import PulseLoader from "@/app/_lib/components/LoadingSpinner";
-import { CheckBadgeIcon } from "@heroicons/react/24/solid";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { useSearchParams } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import Poll from "./components/Poll";
@@ -16,7 +14,6 @@ export default function Page() {
   const [code, setCode] = useState<string>(queryParams.get("code") || "");
   const [isCodeTouched, setIsCodeTouched] = useState<boolean>(false);
   const [codeErrorMessage, setCodeErrorMessage] = useState<string>();
-  const [isPolling, setIsPolling] = useState<boolean>(false);
 
   const validateCode = (code: string | undefined) => {
     if (!code || code == "" || code == undefined) {
@@ -36,16 +33,17 @@ export default function Page() {
     isError,
     mutateAsync,
   } = useMutation({
-    mutationFn: async (code: string) => {
-      return await postDeviceAdd({ code: code });
-    },
+    mutationFn: async (code: string) => await postDeviceAdd({ code: code }),
   });
 
   const handleAddDevice = async (
     event: React.MouseEvent<HTMLButtonElement>
   ): Promise<void> => {
     event.preventDefault();
-    await mutateAsync(code);
+    const result = await mutateAsync(code);
+    if (result.error) {
+      setCodeErrorMessage(result.error.message);
+    }
   };
 
   const hasError = codeErrorMessage !== undefined;
@@ -74,9 +72,11 @@ export default function Page() {
           </div>
         )}
 
-        {deviceAddResult && <Poll result={deviceAddResult} />}
+        {deviceAddResult && !deviceAddResult.error && (
+          <Poll result={deviceAddResult} />
+        )}
 
-        {!deviceAddResult && (
+        {(!deviceAddResult || deviceAddResult.error) && (
           <form onSubmit={() => {}}>
             <div className="mt-6 flex flex-col gap-6 items-start">
               <div className="w-full flex flex-col gap-2">

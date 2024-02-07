@@ -7,12 +7,12 @@ import { Fragment, useEffect, useState } from "react";
 import { Dialog, Transition } from "@headlessui/react";
 import { useQuery } from "@tanstack/react-query";
 import {
-  LOGIN_URL,
   getJwt,
+  getLoginUrl,
   getSubscriptionBalance,
   removeJwt,
 } from "@/app/_lib/api";
-import { classNames } from "@/app/_lib/utils";
+import { classNames, prettyPrintByteCount } from "@/app/_lib/utils";
 
 const navigation = [
   {
@@ -38,7 +38,6 @@ const navigation = [
 // Copied from web/bringyour.com/client.js
 // see https://stackoverflow.com/questions/38552003/how-to-decode-jwt-token-in-javascript-without-using-a-library
 function parseJwt(jwt: string) {
-  // console.log(jwt)
   var base64Url = jwt.split(".")[1];
   var base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
   var jsonPayload = decodeURIComponent(
@@ -72,7 +71,7 @@ function SidebarContent() {
 
   const signOut = () => {
     removeJwt();
-    redirect(LOGIN_URL);
+    redirect(getLoginUrl());
   };
 
   return (
@@ -102,9 +101,9 @@ function SidebarContent() {
         {!isPending && (
           <>
             <p className="text-5xl tracking-wider font-light">
-              {subscriptionBalanceResult?.balance_byte_count ||
-                0 / 1_000_000_000}{" "}
-              GiB
+              {prettyPrintByteCount(
+                subscriptionBalanceResult?.balance_byte_count!
+              )}
             </p>
             <Link href="/account/add-balance">
               <p className="mt-1 text-sm tracking-widest font-extralight">
