@@ -159,7 +159,6 @@ export default function DevicesTable({}: DevicesTableProps) {
                 key={`device-row-${provider.client_id}`}
                 className="whitespace-nowrap text-sm text-gray-800 cursor-pointer hover:bg-gray-100"
                 onClick={() => {
-                  console.log("Row on click");
                   setSelectedProvider(provider);
                 }}
               >

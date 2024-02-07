@@ -3,7 +3,7 @@
 import "./globals.css";
 import { redirect, usePathname, useSearchParams } from "next/navigation";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { LOGIN_URL, getJwt, postAuthCodeLogin, removeJwt } from "@lib/api";
+import { getJwt, getLoginUrl, postAuthCodeLogin, removeJwt } from "@lib/api";
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 
@@ -31,7 +31,7 @@ export default function RootLayout({
      */
     if (!authParam && !isLoggedIn) {
       // User needs to log in
-      redirect(LOGIN_URL);
+      redirect(getLoginUrl());
     }
 
     if (!authParam && isLoggedIn && pathname == "/") {
@@ -49,7 +49,7 @@ export default function RootLayout({
       } catch (e: any) {
         alert("Failed to log in. Please try again.");
         removeJwt();
-        router.push(LOGIN_URL);
+        router.push(getLoginUrl());
       }
     }
     handleAuthParam(authParam);
@@ -62,6 +62,7 @@ export default function RootLayout({
 
   return (
     <QueryClientProvider client={queryClient}>
+      <title>BringYour: Manage Your Network</title>
       <html lang="en" className="text-gray-900">
         <body className="bg-white">{children}</body>
       </html>

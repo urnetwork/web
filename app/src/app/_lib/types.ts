@@ -83,6 +83,11 @@ export type StatsProvidersOverviewLast90Result = {
   clients: Timeseries;
 };
 
+export type ClientTransferData = {
+  client_id: string;
+  transfer_data: Timeseries;
+};
+
 export type StatsProviderLast90 = {
   [index: string]: any;
   lookback: number;
@@ -93,10 +98,7 @@ export type StatsProviderLast90 = {
   search_interest: Timeseries;
   contracts: Timeseries;
   clients: Timeseries;
-  client_details: {
-    client_id: string;
-    transfer_data: Timeseries;
-  }[];
+  client_details: ClientTransferData[];
 };
 
 export type RemoveNetworkClientResult = {
@@ -171,7 +173,7 @@ export type DeviceAssociationsResult = {
     code: string;
     device_name: string;
     client_id: string;
-    network_name: string;
+    network_name?: string;
   }[];
 };
 
@@ -184,13 +186,23 @@ export type DeviceRemoveAssociationResult = {
 };
 
 export type SubscriptionCheckBalanceCodeResult = {
-  valid: boolean;
-  transfer_data: number;
+  balance?: {
+    start_time: string;
+    end_time: string;
+    balance_byte_count: number;
+  };
+  error?: {
+    message: string;
+  };
 };
 
 export type SubscriptionRedeemBalanceCodeResult = {
-  valid: boolean;
-  transfer_data: number;
+  transfer_balance?: {
+    transfer_balance_id: string;
+    start_time: string;
+    end_time: string;
+    balance_byte_count: number;
+  };
   error?: {
     message: string;
   };

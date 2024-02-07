@@ -5,30 +5,28 @@
  * on that day.
  */
 
-import { Timeseries, TimeseriesEntry } from "@/app/_lib/types";
-import { formatTimeseriesData } from "@/app/_lib/utils";
+import { TimeseriesEntry } from "@/app/_lib/types";
 import moment from "moment";
 import { useState } from "react";
 
+// How many days of data do we want to show in this widget?
+export const NUM_DAYS = 7;
+
 type ActivityWidgetProps = {
-  data: {
-    client_id: string;
-    transfer_data: Timeseries;
-  };
+  data: TimeseriesEntry[];
   maxValue?: number; // Use this to set the 'max' value across multiple ActivityWidget instances
 };
 
-export default function ActivityWidget({ data }: ActivityWidgetProps) {
+export default function ActivityWidget({
+  data,
+  maxValue,
+}: ActivityWidgetProps) {
   const [tooltipEntry, setTooltipEntry] = useState<TimeseriesEntry>();
 
-  if (
-    !data ||
-    !data.transfer_data ||
-    Object.keys(data.transfer_data).length === 0
-  ) {
+  if (!data || data.length == 0) {
     return (
       <div className="w-36 h-5 flex flex-row gap-1 justify-end">
-        {Array(7)
+        {Array(NUM_DAYS)
           .fill(0)
           .map(() => (
             <div className="w-4 h-full bg-gray-400 cursor-pointer rounded-sm" />
@@ -37,8 +35,7 @@ export default function ActivityWidget({ data }: ActivityWidgetProps) {
     );
   }
 
-  const formattedData = formatTimeseriesData(data.transfer_data).slice(-7);
-  const max = Math.max(...formattedData.map((entry) => Number(entry.value)));
+  const max = maxValue || Math.max(...data.map((entry) => Number(entry.value)));
 
   const calculateColor = (value: number) => {
     const normedValue = value / max;
@@ -52,8 +49,9 @@ export default function ActivityWidget({ data }: ActivityWidgetProps) {
 
   return (
     <div className="w-36 h-5 flex flex-row gap-1 justify-end">
-      {formattedData.map((entry) => (
+      {data.map((entry) => (
         <div
+          key={`${entry.date}-${entry.value}`}
           className="relative w-4 h-full cursor-pointer rounded-sm hover:border-2 border-indigo-900"
           style={{ backgroundColor: calculateColor(Number(entry.value)) }}
           onMouseEnter={() => setTooltipEntry(entry)}

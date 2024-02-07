@@ -4,6 +4,7 @@ import { getSubscriptionBalance } from "@/app/_lib/api";
 import { useQuery } from "@tanstack/react-query";
 import Loading from "./loading";
 import Link from "next/link";
+import { prettyPrintByteCount } from "@/app/_lib/utils";
 
 export default function Page() {
   const { isPending, data: result } = useQuery({
@@ -35,7 +36,7 @@ export default function Page() {
               </div>
               <p>
                 <span className="font-semibold">Transfer balance:</span>{" "}
-                {result?.balance_byte_count || 0 / 1_000_000_000} GB
+                {prettyPrintByteCount(result?.balance_byte_count!)}
               </p>
               {!currentSubscription && <p>No current subscriptions found</p>}
               {currentSubscription && <p>{currentSubscription.plan}</p>}

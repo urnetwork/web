@@ -10,9 +10,7 @@ import {
   postDeviceRemoveAssociation,
 } from "@lib/api";
 import Link from "next/link";
-import ShareDeviceDialog from "./ShareDeviceDialog";
 import { useState } from "react";
-import { Client } from "@/app/_lib/types";
 import { ConfirmDeleteModal } from "@/app/_lib/components/ConfirmDeleteModal";
 
 const PAGE_SIZE = 3;
@@ -20,7 +18,6 @@ const PAGE_SIZE = 3;
 export default function DeviceList() {
   const queryClient = useQueryClient();
 
-  const [selectedClient, setSelectedClient] = useState<Client>();
   const [deviceToRemove, setDeviceToRemove] = useState<{
     code: string;
     client_id: string;
@@ -52,7 +49,7 @@ export default function DeviceList() {
    */
   const getNumOutgoingNetworks = (clientId: string) => {
     const networks = outgoingSharedDevices?.filter(
-      (device) => device.client_id == clientId
+      (device) => device.client_id == clientId && !!device.network_name
     );
     const numNetworks = networks?.length || 0;
 
