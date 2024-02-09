@@ -1422,7 +1422,15 @@ function DialogComplete() {
 
         if (launchAppButtonElement) {
             launchAppButtonElement.addEventListener('click', (event) => {
-                self.launchApp('/')
+                let windowRef = null
+                if (window.safari !== undefined) {
+                    // desktop Safari
+                    // this is because desktop Safari does not allow async from click to open new tab
+                    // see https://stackoverflow.com/questions/20696041/window-openurl-blank-not-working-on-imac-safari
+                    // see https://stackoverflow.com/questions/7944460/detect-safari-browser
+                    windowRef = window.open('about:blank', '_blank')
+                }
+                self.launchApp('/', windowRef)
             })
         }
 
@@ -1463,7 +1471,7 @@ function DialogComplete() {
                 // remove the redirect parameter from the history to allow back
                 window.history.replaceState({}, document.title, window.location.pathname)
                 let appRoute = redirectUriAfterAuth.substring(appPrefix.length)
-                self.launchApp(appRoute, true)
+                self.launchApp(appRoute)
             }
         }
     }
@@ -1471,7 +1479,7 @@ function DialogComplete() {
 
     // event handlers
 
-    self.launchApp = (appRoute, replace) => {
+    self.launchApp = (appRoute, windowRef) => {
         const launchAppButtonElement = self.element('launch-app-button')
         const launchAppSpinnerElement = self.element('launch-app-spinner')
         const launchAppErrorElement = self.element('launch-app-error')
@@ -1487,14 +1495,14 @@ function DialogComplete() {
 
         apiRequest('POST', '/auth/code-create', requestBody)
             .catch((err) => {
-                self.handleLaunchAppResponse(null, appRoute, replace)
+                self.handleLaunchAppResponse(null, appRoute, windowRef)
             })
             .then((responseBody) => {
-                self.handleLaunchAppResponse(responseBody, appRoute, replace)
+                self.handleLaunchAppResponse(responseBody, appRoute, windowRef)
             })
     }
 
-    self.handleLaunchAppResponse = (responseBody, appRoute, replace) => {
+    self.handleLaunchAppResponse = (responseBody, appRoute, windowRef) => {
         const launchAppButtonElement = self.element('launch-app-button')
         const launchAppSpinnerElement = self.element('launch-app-spinner')
         const launchAppErrorElement = self.element('launch-app-error')
@@ -1505,18 +1513,32 @@ function DialogComplete() {
         if (!responseBody) {
             launchAppErrorElement.textContent = 'Something unexpected happened.'
             launchAppErrorElement.classList.remove('d-none')
+            if (windowRef) {
+                windowRef.close()
+            }
         } else if ('auth_code' in responseBody) {
-            window.open(
-                serviceUrl('app', `${appRoute}${appRoute.includes('?') ? '&' : '?'}auth_code=${responseBody['auth_code']}`),
-                // open a new tab
-                replace ? '_self' : '_blank'
-            )
+            let url = serviceUrl('app', `${appRoute}${appRoute.includes('?') ? '&' : '?'}auth_code=${responseBody['auth_code']}`)
+            if (windowRef) {
+                windowRef.location = url
+            } else {
+                if (!window.open(url, '_blank')) {
+                    if (!window.open(url, '_self')) {
+                        window.location.assign(url)
+                    }
+                }
+            }
         } else if ('error' in responseBody) {
             launchAppErrorElement.textContent = responseBody['error']['message']
             launchAppErrorElement.classList.remove('d-none')
+            if (windowRef) {
+                windowRef.close()
+            }
         } else {
             launchAppErrorElement.textContent = 'Something unexpected happened.'
             launchAppErrorElement.classList.remove('d-none')
+            if (windowRef) {
+                windowRef.close()
+            }
         }
     }
 

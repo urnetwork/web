@@ -46,12 +46,12 @@ def title_icons_meta():
     return """
     <meta charset="UTF-8">
     <title>BringYour VPN Everywhere</title>
-    <link rel="icon" type="image/svg+xml" href="favicon.svg">
-    <link rel="icon" type="image/png" size="32x32" href="favicon-32.png">
-    <link rel="icon" type="image/png" size="128x128" href="favicon-128.png">
-    <link rel="icon" type="image/png" size="180x180" href="favicon-180.png">
-    <link rel="icon" type="image/png" size="192x192" href="favicon.png">
-    <link rel="apple-touch-icon" size="192x192" href="apple-touch-icon.png">
+    <link rel="icon" type="image/svg+xml" sizes="any" href="/favicon.svg">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+    <link rel="icon" type="image/png" sizes="128x128" href="/favicon-128.png">
+    <link rel="icon" type="image/png" sizes="180x180" href="/favicon-180.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="/favicon.png">
+    <link rel="apple-touch-icon" type="image/png" sizes="192x192" href="/apple-touch-icon.png">
 
     <meta name="viewport" content="width=device-width, initial-scale=0.4">
     <meta name="description" content="Instant worldwide VPN everywhere. Let's build the best privacy, security, and personal data control network with just our phones and tablets.">
@@ -199,7 +199,7 @@ def tab_header():
         if tab_page_path == canonical_page_path:
             tab_html_part = f"""<div class="tab tab-selected">{tab_title}</div>"""
         else:
-            tab_html_part = f"""<a href="{tab_page_path}"><div class="tab">{tab_title}</div></a>"""
+            tab_html_part = f"""<a href="/{tab_page_path}"><div class="tab">{tab_title}</div></a>"""
         tab_html_parts.append(tab_html_part)
 
     return """
@@ -230,22 +230,22 @@ def footer():
                 <tbody>
                     <tr>
                         <td>
-                            <div class="link"><a href="whitepaper" target="_blank">Whitepaper</a></div>
+                            <div class="link"><a href="/whitepaper" target="_blank">Whitepaper</a></div>
                             <div class="link"><a href="https://status.bringyour.com" target="_blank">Status</a></div>
                             <div class="link"><a href="https://github.com/bringyour" target="_blank"><img src="/res/images/s2-github.svg" class="social" alt="github"> GitHub</a></div>
-                            <div class="link"><a href="discord" target="_blank"><img src="/res/images/s2-discord.svg" class="social" alt="discord"> Discord Community</a></div>
+                            <div class="link"><a href="/discord" target="_blank"><img src="/res/images/s2-discord.svg" class="social" alt="discord"> Discord Community</a></div>
                             <div class="social-container"><div><a href="https://www.reddit.com/r/bringyour" target="_blank"><img src="/res/images/s2-reddit.svg" class="social" alt="reddit"></a></div><div><a href="https://www.youtube.com/@bringyour" target="_blank"><img src="/res/images/s2-youtube.svg" class="social" alt="youtube"></a></div><div><a href="https://www.linkedin.com/company/bringyour" target="_blank"><img src="/res/images/s2-linkedin.svg" class="social" alt="linkedin"></a></div></div>
                         </td>
                         <td>
                             <div class="store"><a href="https://play.google.com/store/apps/details?id=com.bringyour.network" target="_blank"><img src="/res/images/store-play.png" alt="get the app on the Google Play store"></a></div>
                             <div class="store"><a href="https://apps.apple.com/us/app/bringyour/id6446097114" target="_blank"><img src="/res/images/store-app.svg" alt="get the app on the Apple App Store"></a></div>
-                            <div class="link"><a href="roadmap" target="_blank">Platform Roadmap</a></div>
+                            <div class="link"><a href="/roadmap" target="_blank">Platform Roadmap</a></div>
                             <div class="link"><a href="https://github.com/bringyour/product/discussions" target="_blank">Product Feedback</a></div>
                         </td>
                         <td>
-                            <div class="link"><a href="terms">Terms of Service</a></div>
-                            <div class="link"><a href="privacy">Privacy Policy</a></div>
-                            <div class="link"><a href="vdp">Vulnerability Disclosure Policy</a></div>
+                            <div class="link"><a href="/terms">Terms of Service</a></div>
+                            <div class="link"><a href="/privacy">Privacy Policy</a></div>
+                            <div class="link"><a href="/vdp">Vulnerability Disclosure Policy</a></div>
                         </td>
                     </tr>
                 </tbody>

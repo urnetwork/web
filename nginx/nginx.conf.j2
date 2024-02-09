@@ -63,5 +63,14 @@ http {
         location =/discord {
             return 307 https://discord.gg/RUNZXMwPRK;
         }
+        location =/roadmap {
+            return 307 https://github.com/bringyour/product/discussions/2;
+        }
+        location =/install {
+            return 307 https://play.google.com/store/apps/details?id=com.bringyour.network;
+        }
+        location =/whitepaper {
+            return 307 https://github.com/bringyour/product/blob/main/archive/whitepaper.md;
+        }
     }
 }
