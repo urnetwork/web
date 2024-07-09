@@ -4,10 +4,10 @@ function humanRound(value) {
 }
 
 function humanUnits(value) {
-    if (1000 * 1000 < value) {
-        return (Math.round(10 * value / (1000 * 1000)) / 10) + 'm'
-    } else if (1000 < value) {
-        return (Math.round(10 * value / (1000)) / 10) + 'k'
+    if (1000 * 1000 <= value) {
+        return (Math.round(100 * value / (1000 * 1000)) / 100) + 'm'
+    } else if (1000 <= value) {
+        return (Math.round(100 * value / (1000)) / 100) + 'k'
     } else {
         return value + ''
     }

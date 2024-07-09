@@ -182,12 +182,12 @@ def dialog_connect():
 
 def tab_header():
     if page_path == 'index':
-        canonical_page_path = '/'
+        canonical_page_path = ''
     else:
         canonical_page_path = page_path
 
     tabs = [
-        ('/', 'Network'),
+        ('', 'Network'),
         ('pricing', 'Pricing'),
         ('faq', 'FAQ'),
         ('participate', 'Participate'),
