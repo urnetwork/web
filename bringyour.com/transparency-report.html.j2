@@ -1,0 +1,82 @@
+
+{{ html_header() }}
+<head>
+    {{ title_icons_meta() }}
+
+    {{ fonts() }}
+
+    {{ app_js_css() }}
+    
+    <style>
+
+        div.runner > div {
+            margin-top: 24px;
+        }
+
+        div.sub-header > div:nth-of-type(1) {
+            font-weight: bold;
+            margin-bottom: 12px;
+        }
+
+        table.stats-summary tr:nth-of-type(1) td {
+            border-bottom: 1px solid rgb(0, 0, 0);
+        }
+
+        table.stats-summary td {
+            padding: 8px;
+        }
+    </style>
+</head>
+<body>
+    {{ dialog_connect() }}
+
+    {{ tab_header() }}
+
+
+<div class="runner">
+
+<div class="header">Transparency Report</div>
+
+
+<div>This page lists quarterly statistics of the number and type of abuse reports, decryptions of the abuse logs, and type of outcomes since the start of the company.</div>
+
+<div>See the <a href="/trust-and-safety">trust and safety page</a> for more information.</div>
+
+<div class="header">Statistics</div>
+
+<table class="stats-summary">
+<tr>
+<td>Quarter</td><td>Abuse reports</td><td>Decrypted records</td>
+</tr>
+<tr>
+<td>April-June 2024</td><td>0</td><td>0</td>
+</tr>
+<tr>
+<td>January-March 2024</td><td>0</td><td>0</td>
+</tr>
+</table>
+
+<div class="header">Outcomes</div>
+
+<div class="sub-header">
+<div>April-June 2024</div>
+<div>No outcomes.</div>
+</div>
+
+<div class="sub-header">
+<div>January-March 2024</div>
+<div>No outcomes.</div>
+</div>
+
+
+</div>
+
+
+    {{ footer() }}
+
+</body>
+{{ html_footer() }}
+
+
+
+

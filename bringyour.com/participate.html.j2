@@ -53,40 +53,15 @@ Earn up to $5/month</div>
 
         <div>
             <div class="header">Docker container</div>
-            <div>Follow these steps to run a BringYour provider inside of a Docker container:
-            <pre>
-            docker pull bringyour/provider:latest
-            docker run bringyour/provider
-            Add this device: a-b-c-d
-            </pre>
-
-            From the app, add the container as a device using the <code>a-b-c-d</code> key that was printed to the terminal. This only needs to be done on the first run of the container. After the container is added as a device, you can control it from the app.
-
-            To run the container in the background with auto-updates, use the WARP loader.
-
-            <pre>
-            warpctl init hsm
-            warpctl install main bringyour/provider --use-global-auth
-            warpctl log main bringyour/provider
-            Add this device: a-b-c-d
-            </pre>
-
-            Note <code>--use-global-auth</code> means the container credentials are stored in the HSM storage area and shared across all provider containers on the same host, so that auto updates will not need to re-add the container as a device to the network. 
-
-            You can tail the logs of the container using:
-
-            <pre>
-            journalctl -u bringyour-provider-main -f
-            </pre>
+            <div>Follow <a href="https://hub.docker.com/r/bringyour/community-provider">these steps</a> to run a BringYour provider inside of a Docker container. The basic command is: <code>docker run bringyour/community-provider:g4-latest</code>.
             </div>
-            <div><a href="">GitHub documentation on running a BringYour provider docker container.</a></div>
         </div>
-
+<!--
         <div>
             <div class="header">EdgeMax router</div>
             <div>EdgeMax is a popular hackable router platform because it is cheap, stable, and globally available.</div>
             <div><a href="">GitHub documentation on running a BringYour provider on an EdgeMax router.</a></div>
-        </div>
+        </div>-->
 
 		<div>
 			<div class="header">Strength in decentralized</div>

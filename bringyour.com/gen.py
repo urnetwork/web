@@ -237,8 +237,8 @@ def footer():
                             <div class="social-container"><div><a href="https://www.reddit.com/r/bringyour" target="_blank"><img src="/res/images/s2-reddit.svg" class="social" alt="reddit"></a></div><div><a href="https://www.youtube.com/@bringyour" target="_blank"><img src="/res/images/s2-youtube.svg" class="social" alt="youtube"></a></div><div><a href="https://www.linkedin.com/company/bringyour" target="_blank"><img src="/res/images/s2-linkedin.svg" class="social" alt="linkedin"></a></div></div>
                         </td>
                         <td>
+                            <div class="link"><a href="/buy-data">Buy Data</a></div>
                             <div class="store"><a href="https://play.google.com/store/apps/details?id=com.bringyour.network" target="_blank"><img src="/res/images/store-play.png" alt="get the app on the Google Play store"></a></div>
-                            <div class="store"><a href="https://apps.apple.com/us/app/bringyour/id6446097114" target="_blank"><img src="/res/images/store-app.svg" alt="get the app on the Apple App Store"></a></div>
                             <div class="link"><a href="/roadmap" target="_blank">Platform Roadmap</a></div>
                             <div class="link"><a href="https://github.com/bringyour/product/discussions" target="_blank">Product Feedback</a></div>
                         </td>
@@ -246,6 +246,9 @@ def footer():
                             <div class="link"><a href="/terms">Terms of Service</a></div>
                             <div class="link"><a href="/privacy">Privacy Policy</a></div>
                             <div class="link"><a href="/vdp">Vulnerability Disclosure Policy</a></div>
+                            <div class="link"><a href="/trust-and-safety">Trust and Safety</a></div>
+                            <div class="link"><a href="/transparency-report">Transparency Report</a></div>
+                            <div class="link"><a href="/warrant-canary">Warrant Canary</a></div>
                         </td>
                     </tr>
                 </tbody>
