@@ -1,54 +1,66 @@
-
-
 <html>
-<head>
 
+<head>
     <style>
-        iframe {
-            max-width: 100px !important;
-        }
+    iframe {
+        max-width: 100px !important;
+    }
+
+    div.card-top img.card {
+        transform:
+            rotate3d(0, 0, 0, 0deg) rotate(0deg) scale(1.0);
+
+        transition:
+            transform .4s ease;
+
+
+    }
+
+    div.card-top:hover img.card {
+        transform:
+            rotate3d(0, 0, 0.0, 0deg) rotate(0deg) scale(1.1);
+    }
+
+
+    div.card-top:hover {
+        background-color: rgba(220, 220, 220, 0.2);
+        border-radius: 12px;
+    }
+
+    div.card-top {
+        float: left;
+        padding: 24px;
+    }
+    </style>
     </style>
 </head>
+
 <body>
-
-<div>
-The best way to get access to the network is to subscribe via an in-app purchase via <a href="">one of the apps</a>. This follows the pricing structure on the <a href="">pricing page</a>.
-</div>
-
-<div>
-However, data packs are an alternate way to get access to the network that can be paid for with a variety of options, including crypto. This can be useful for apps where in-app purchases are not available, such as alternate app stores.
-</div>
-
-<div>
-    Payment methods supported include:
-    <ul>
-    <li>Stripe: Credit, Debit, ACH, Cash App, WeChat, +more</li>
-    <li>Coinbase: USDC, Bitcoin, Ethereum, +more</li>
-</ul>
-</div>
-
-<div>
-Data will expire 30 days after purchase. A data code will be emailed after purchase and can be added to any account by tapping the link in the email, or visiting https://app.bringyour.com/account/add-balance.
-</div>
-
-
-
-<script async
-  src="https://js.stripe.com/v3/buy-button.js">
-</script>
-
-
-
-<div>
-    <div><img src="300GiB.png" style="width: 200px"></div>
-    <div>$5</div>
-
-<div style="display: inline-block; width: 140px">
-
-    <button onclick="window.open('https://pay.bringyour.com/b/14kaIs4Thbo74fe3ch', '_blank');">Buy with Stripe</button>
-    <button onclick="window.open('https://commerce.coinbase.com/checkout/033b1385-3a39-444f-9ad0-04ff3567f706', '_blank');">Buy with Coinbase</button>
-
-<!--
+    <div>
+        The easiest way to get access to the network is to subscribe via an in-app purchase via one of the apps.
+    </div>
+    <div>
+        However, data packs are an alternate way to get access to the network that can be paid for with a variety of options, including crypto. This can be useful for apps where in-app purchases are not available, such as alternate app stores or gifting.
+    </div>
+    <div>
+        Payment methods supported include:
+        <ul>
+            <li>Stripe: Credit, Debit, ACH, Cash App, WeChat, +more</li>
+            <li>Coinbase: USDC, Bitcoin, Ethereum, +more</li>
+        </ul>
+    </div>
+    <div>
+        Data will expire 1 year after purchase. A data code will be emailed after purchase and can be added to any account by tapping the link in the email, or entering the code at <a href="https://app.bringyour.com/account/add-balance">https://app.bringyour.com/account/add-balance</a>.
+    </div>
+    <script async src="https://js.stripe.com/v3/buy-button.js">
+    </script>
+    <div class="card-top">
+        <div><img src="300GiB.png" style="width: 200px" class="card"></div>
+        <div style="display: inline-block; width: 140px; padding-left: 24px; padding-right: 24px;">
+            <div>$5</div>
+            <button style="margin-top: 4px" onclick="window.open('https://pay.bringyour.com/b/14kaIs4Thbo74fe3ch', '_blank');" class="btn btn-primary">Buy with Stripe</button>
+            <button style="margin-top: 4px" onclick="window.open('https://commerce.coinbase.com/checkout/033b1385-3a39-444f-9ad0-04ff3567f706', '_blank');" class="btn btn-secondary">Buy with Coinbase</button>
+            <!--
 <stripe-buy-button
   buy-button-id="buy_btn_1NyUefEqqTaiwAGPf0HizZdN"
   publishable-key="pk_live_51NxwYlEqqTaiwAGP9MEExhEVqZ2fPl98W88ewxMJAFgsT7ZZSnK0ymKM6Ra9OkJg2zqvePHFBQV4Y0zQolYu4gx100jCeEPvbP"
@@ -64,22 +76,15 @@ Data will expire 30 days after purchase. A data code will be emailed after purch
       </script>
     </div>
 -->
-</div>
-
-</div>
-
-<div>
-    
-    <div><img src="1TiB.png" style="width: 200px"></div>
-    <div><s>$17</s> <b>$10</b> (save 40%)</div>
-
-
-<div style="display: inline-block; width: 140px">
-<div>Most Popular</div>
-    <button onclick="window.open('https://pay.bringyour.com/b/9AQ5o8adB77R27628c', '_blank');">Buy with Stripe</button>
-    <button onclick="window.open('https://commerce.coinbase.com/checkout/e4d94c97-b7a0-4a4d-ba03-2bc549df15f9', '_blank');">Buy with Coinbase</button>
-
-<!--
+        </div>
+    </div>
+    <div class="card-top">
+        <div><img src="1TiB.png" style="width: 200px" class="card"></div>
+        <div style="display: inline-block; width: 140px; padding-left: 24px; padding-right: 24px;">
+            <div><s>$17</s> <b>$10</b> (save 40%)</div>
+            <button style="margin-top: 4px" onclick="window.open('https://pay.bringyour.com/b/9AQ5o8adB77R27628c', '_blank');" class="btn btn-primary">Buy with Stripe</button>
+            <button style="margin-top: 4px" onclick="window.open('https://commerce.coinbase.com/checkout/e4d94c97-b7a0-4a4d-ba03-2bc549df15f9', '_blank');" class="btn btn-secondary">Buy with Coinbase</button>
+            <!--
 <stripe-buy-button
   buy-button-id="buy_btn_1NyUefEqqTaiwAGPf0HizZdN"
   publishable-key="pk_live_51NxwYlEqqTaiwAGP9MEExhEVqZ2fPl98W88ewxMJAFgsT7ZZSnK0ymKM6Ra9OkJg2zqvePHFBQV4Y0zQolYu4gx100jCeEPvbP"
@@ -96,22 +101,16 @@ Data will expire 30 days after purchase. A data code will be emailed after purch
       </script>
     </div>
 -->
-</div>
-
-</div>
-
-
-
-<div>
-    <div><img src="2TiB.png" style="width: 200px"></div>
-    <div><s>$34</s> <b>$17</b> (save 50%)</div>
-
-<div style="display: inline-block; width: 140px">
-
-    <button onclick="window.open('https://pay.bringyour.com/b/3csdUE1H5eAjbHG8wz', '_blank');">Buy with Stripe</button>
-    <button onclick="window.open('https://commerce.coinbase.com/checkout/f53551c1-b0c6-46fc-8df8-e11ca91cc386', '_blank');">Buy with Coinbase</button>
-
-<!--
+        </div>
+    </div>
+    <div class="card-top">
+        <div><img src="2TiB.png" style="width: 200px" class="card"></div>
+        <div style="display: inline-block; width: 140px; padding-left: 24px; padding-right: 24px;">
+            <div><s>$34</s> <b>$17</b> (save 50%)</div>
+            <div>Most Popular</div>
+            <button style="margin-top: 4px" onclick="window.open('https://pay.bringyour.com/b/3csdUE1H5eAjbHG8wz', '_blank');" class="btn btn-primary">Buy with Stripe</button>
+            <button style="margin-top: 4px" onclick="window.open('https://commerce.coinbase.com/checkout/f53551c1-b0c6-46fc-8df8-e11ca91cc386', '_blank');" class="btn btn-secondary">Buy with Coinbase</button>
+            <!--
 <stripe-buy-button
   buy-button-id="buy_btn_1NyUefEqqTaiwAGPf0HizZdN"
   publishable-key="pk_live_51NxwYlEqqTaiwAGP9MEExhEVqZ2fPl98W88ewxMJAFgsT7ZZSnK0ymKM6Ra9OkJg2zqvePHFBQV4Y0zQolYu4gx100jCeEPvbP"
@@ -127,16 +126,21 @@ Data will expire 30 days after purchase. A data code will be emailed after purch
       </script>
     </div>
 -->
-
+        </div>
     </div>
-</div>
-
-
-<h2>Give data to your entire team with a company data pack</h2>
-<div>
-We offer a company data pack that gives anyone with an email in a private domain access to a shared amount of data. The shared data is valid for one year after purchase. A staff member will reach out after purchase to set up the account.
-</div>
-
+    <div style="clear: both;"></div>
+    <h2>Give data to your entire team with a company data pack</h2>
+    <div>
+        We offer a company data pack that gives anyone with an email in a private domain access to a shared amount of data. This requires that users authenticate with email and will not work with public email domains like <i>gmail.com</i>, etc. The shared data is valid for one year after purchase. A staff member will reach out after purchase to set up the account.
+    </div>
+    <div class="card-top">
+        <div><img src="Company10TiB.png" style="width: 200px" class="card"></div>
+        <div style="display: inline-block; width: 140px; padding-left: 24px; padding-right: 24px;">
+            <div>$100</div>
+            <button style="margin-top: 4px" onclick="window.open('https://pay.bringyour.com/b/6oE7wgclJ3VF7rqfZ4', '_blank');" class="btn btn-secondary">Buy with Stripe</button>
+        </div>
+    </div>
+    <!--
 <div>
 10Tib Shared Data
 $100
@@ -144,7 +148,15 @@ $100
     <button onclick="window.open('https://pay.bringyour.com/b/3csdUE1H5eAjbHG8wz', '_blank');">Buy with Stripe</button>
 </div>
 </div>
-
+-->
+    <div class="card-top">
+        <div><img src="Company100TiB.png" style="width: 200px" class="card"></div>
+        <div style="display: inline-block; width: 140px; padding-left: 24px; padding-right: 24px;">
+            <div><s>$1000</s> <b>$500</b> (save 50%)</div>
+            <button style="margin-top: 4px" onclick="window.open('https://pay.bringyour.com/b/4gw3g04ThcsbdPOfZ5', '_blank');" class="btn btn-secondary">Buy with Stripe</button>
+        </div>
+    </div>
+    <!--
 <div>
 100Tib Shared Data
 <div><s>$1000</s> <b>$500</b> (save 50%)</div>
@@ -152,12 +164,8 @@ $100
     <button onclick="window.open('https://pay.bringyour.com/b/3csdUE1H5eAjbHG8wz', '_blank');">Buy with Stripe</button>
 </div>
 </div>
-
-
-
-
-
+-->
+    <div style="clear: both;"></div>
 </body>
+
 </html>
-
-

@@ -1,0 +1,69 @@
+
+{{ html_header() }}
+<head>
+    {{ title_icons_meta() }}
+
+    {{ fonts() }}
+
+    {{ app_js_css() }}
+    
+    <style>
+
+        div.runner > div {
+            margin-top: 24px;
+        }
+
+        div.sub-header > div:nth-of-type(1) {
+            font-weight: bold;
+            margin-bottom: 12px;
+        }
+
+        div.sub-header > div:not(:nth-of-type(1)) {
+            margin-bottom: 6px;
+        }
+    </style>
+</head>
+<body>
+    {{ dialog_connect() }}
+
+    {{ tab_header() }}
+
+
+<div class="runner">
+
+<div class="header">Warrant Canary</div>
+
+<div>
+The existence of this page confirms:
+
+<ul>
+<li>BringYour has never turned over our encryption or authentication keys or our customers' encryption or authentication keys to anyone.</li>
+
+<li>BringYour has never installed any law enforcement software or equipment anywhere on our network.</li>
+
+<li>BringYour has never provided any law enforcement organization a feed of our customers' content transiting our network.</li>
+
+<li>BringYour has never modified network content at the request of law enforcement or another third party.</li>
+
+<li>BringYour has never weakened, compromised, or subverted any of its encryption at the request of law enforcement or another third party.</li>
+</ul>
+
+</div>
+
+<div>
+See the <a href="/trust-and-safety">trust and safety page</a> for more information.
+</div>
+
+
+
+</div>
+
+
+    {{ footer() }}
+
+</body>
+{{ html_footer() }}
+
+
+
+
