@@ -239,6 +239,7 @@ def footer():
                         <td>
                             <div class="link"><a href="/buy-data">Buy Data</a></div>
                             <div class="store"><a href="https://play.google.com/store/apps/details?id=com.bringyour.network" target="_blank"><img src="/res/images/store-play.png" alt="get the app on the Google Play store"></a></div>
+                            <div class="link"><a href="/api">API</a></div>
                             <div class="link"><a href="/roadmap" target="_blank">Platform Roadmap</a></div>
                             <div class="link"><a href="https://github.com/bringyour/product/discussions" target="_blank">Product Feedback</a></div>
                         </td>
