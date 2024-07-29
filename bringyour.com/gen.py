@@ -242,6 +242,7 @@ def footer():
                             <div class="link"><a href="/api">API</a></div>
                             <div class="link"><a href="/roadmap" target="_blank">Platform Roadmap</a></div>
                             <div class="link"><a href="https://github.com/bringyour/product/discussions" target="_blank">Product Feedback</a></div>
+                            <div class="link"><a href="/blog">Blog</a></div>
                         </td>
                         <td>
                             <div class="link"><a href="/terms">Terms of Service</a></div>
