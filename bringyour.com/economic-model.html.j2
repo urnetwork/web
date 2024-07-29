@@ -1,0 +1,132 @@
+
+{{ html_header() }}
+<head>
+    {{ title_icons_meta() }}
+
+    {{ fonts() }}
+
+    {{ app_js_css() }}
+    
+    <style>
+
+        div.runner > div {
+            margin-top: 24px;
+        }
+
+        div.sub-header > div:nth-of-type(1) {
+            font-weight: bold;
+            margin-bottom: 12px;
+        }
+
+        div.sub-header > div:not(:nth-of-type(1)) {
+            margin-bottom: 6px;
+        }
+    </style>
+</head>
+<body>
+    {{ dialog_connect() }}
+
+    {{ tab_header() }}
+
+
+<div class="runner">
+
+<div class="header">Our Economic Model</div>
+
+<div>This page outlines our economic model as of May 2024. This file is <a href="https://github.com/bringyour/product/blob/main/economic-model/economic-model.md">versioned</a> so that you can track changes. For input and feedback please join <a href="https://bringyour.com/discord">our Discord</a>.</div>
+
+<div>BringYour earns revenue from user premium subscriptions. We build and operate the protocol that connects users to a global network of egress providers, which are access points to localized internets all around the world. Our goal is to have the largest network of egress providers, so that traffic from our network is indistinguishable from normal internet traffic. We designed our economic model to both 1. reward people who help run and grow the network, and 2. build a great business.</div>
+
+<div>Because the number of egress providers grows with the number of users, our data center costs are almost fixed. We're able to offer access for free because, simply, you've earned it by participating in the network to provide security and privacy to other users. This is a completely new design that lets us build a free, fast, private VPN in a transparent and ethical way.</div>
+
+<div>Traditional VPNs need to spend money on bandwidth and operations. To pay for this, traditional free VPNs monetize their users - your data, ads, scraping, malware, botnets. Because in our network users run the egress providers and trade bandwidth with each other, we do not have to spend money on bandwidth and operations. Instead we spend money on building the protocol, automated processes, and simple apps to scale the network.</div>
+
+<div>We're focused on making the network safe, scalable, and fast. We're continually improving our protocol to thrive in the realities of the global internet. We're also focused on premium features that matter to you, like private sharing, third-party blocking, anti-censorship, and data management. Because we charge a small subscription for premium, we're able to spend more on bandwidth and servers for our premium users.</div>
+
+<div>We see a future where a significant portion of internet users switch away from sketchy traditional VPNs to us, because we work better, more private, and cheaper. It's important that we have an economic model that rewards the community and leads to a great business as we scale. If we didn't have a realistic model that leads to a great business at scale, one could conclude we also plan to monetize our users. For this reason we want to be transparent with our economic model.</div>
+
+<div>Our current model factors in three components:
+<ul>
+<li>Paid transfer (the old way)</li>
+<li>Subsidized transfer (the new way)</li>
+<li>Referral bonuses</li>
+</ul>
+</div>
+
+<div>Note that with subsidized transfer, paid transfer trends to zero. We keep it in the model since that was the operation of the network from public beta launch in H1 2024 to the &quot;v0&quot; launch in H2 2024.</div>
+
+<div class="header">Payments to the community</div>
+
+<div>We set our subsidy payment as 10% of premium revenue with a guaranteed minimum amount of $.1 per MAU. MAU does not include automation and bots. The payout amount per device is determined by the amount of data routed, weighted 75% against all global devices and 25% against devices in the same country, where all countries are weighted equally. The guaranteed minimum amount will adjust every year after launch.</div>
+
+<div>We set our referral bonus as 50% of the earnings of the referred user and 50% of their referral bonus.</div>
+
+<div>This means that we’re paying out up to 20% of our premium revenue back to the community, with a minimum amount up to $.2 per MAU.</div>
+
+<div>This also means that we’re targeting margins between 70-80% at scale, which is where we want to be as a business. This is competitive in the market and allows us to run as an independent company.</div>
+
+<div>The revenue share of paid transfer is 50%. However, the amount of paid traffic trends to zero after our launch in H2 2024.</div>
+
+<div>The payouts to the community are sent to each network’s active wallet, as USDC, either on Polygon or Solana. The active wallet is managed in the app, and a default user-controlled wallet can be created directly in the app.</div>
+
+<div>Payouts to the active wallet subtract the gas fee from the payout. The payout is held and combined with future payouts until the value minus the gas fee is positive.</div>
+
+<div>There is no cost to participate as a provider.</div>
+
+
+
+
+<div class="header">Phases of the company</div>
+
+<div>The launch of the network and community payments creates four phases of the company:
+<ol start="0">
+<li>Repeatable network</li>
+<li>Repeatable premium product</li>
+<li>Scale</li>
+<li>Profitable company</li>
+</ol>
+</div>
+
+<div>In phase 0, we will focus on a network that is better than other  consumer VPNs, and scaling the network in a cost efficient way. The exit is a scalable network with almost fixed operating costs.</div>
+
+<div>In phase 1, the premium revenue is not enough to subsidize the community payments. We’ll be in this phase as long as premium conversion per MAU is less than .2/premium price [^2]. At our current premium price of $5/month, the break-even exit of phase 1 is at 4% conversion of users to premium users. In this phase the company will focus on a repeatable premium offering that converts above the break-even rate to exit.</div>
+
+<div>In phase 2, the company can scale revenue with an almost fixed operating cost by scaling MAU. The company will scale faster if the conversion to premium is higher than the break-even. In this phase the company will focus on volume to cover operating costs and exit.</div>
+
+<div>In phase 3, the company will be profitable as it scales. At this point we will look at expanding our TAM with new premium products starting at phase 1.</div>
+
+
+<div class="header">Payout sweep</div>
+
+<div>Payouts are done weekly and the subsidy is computed from the previous week’s revenue and the previous month’s MAU.</div>
+
+
+<div class="header">Privacy</div>
+
+<div>Payment on our network is private.</div>
+
+<div>Transfer between a user and provider is preceded by a contract. A contract combines payment information, access control, and priority so that a user and provider can directly communicate and apply the right rules. Both user and provider close a contract, and if they agree, the contract is settled and added to the payout.</div>
+
+<div>Settled contracts used for a payout are removed one week after the payout. This is in line with our approach of aggressively deleting user information from our system. If there are any issues with a payout, participants must contact us within one week.</div>
+
+
+
+<div class="sub-header">
+<div>Footnotes</div>
+<div>[1] As a formula, the subsidized payout to a single provider is <code>0.75 * sum(all contracts serviced by provider)/sum(all contracts) + (0.25 / NumberOfCountries) * sum(all contracts serviced by provider)/sum(all contracts in provider's country)</code></div>
+<div>[2] <code>PremiumPrice/month * PremiumConversion * MAU = .2 * MAU/month</code></div>
+</div>
+
+
+
+</div>
+
+
+    {{ footer() }}
+
+</body>
+{{ html_footer() }}
+
+
+
+
