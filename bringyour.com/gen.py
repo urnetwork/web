@@ -250,6 +250,7 @@ def footer():
                             <div class="link"><a href="/trust-and-safety">Trust and Safety</a></div>
                             <div class="link"><a href="/transparency-report">Transparency Report</a></div>
                             <div class="link"><a href="/warrant-canary">Warrant Canary</a></div>
+                            <div class="link"><a href="/economic-model">Economic Model</a></div>
                         </td>
                     </tr>
                 </tbody>
