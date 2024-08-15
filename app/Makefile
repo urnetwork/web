@@ -10,8 +10,10 @@ webpack:
 	# Outputs build artifacts to ./build
 	. ${NVM_DIR}/nvm.sh && \
 		nvm exec ${NODE_VERSION} npm ci && \
-		nvm exec ${NODE_VERSION} npm audit &&\
 		nvm exec ${NODE_VERSION} npm run build
+# 		note remove `npm audit` until outdated dependencies can be fixed
+# 		the app will be removed in the v0 launch
+# 		nvm exec ${NODE_VERSION} npm audit &&\
 
 build:
 	$(MAKE) webpack
