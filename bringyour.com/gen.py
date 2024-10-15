@@ -45,7 +45,7 @@ def html_footer():
 def title_icons_meta():
     return """
     <meta charset="UTF-8">
-    <title>BringYour VPN Everywhere</title>
+    <title>URnetwork</title>
     <link rel="icon" type="image/svg+xml" sizes="any" href="/favicon.svg">
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
     <link rel="icon" type="image/png" sizes="128x128" href="/favicon-128.png">
@@ -187,11 +187,7 @@ def tab_header():
         canonical_page_path = page_path
 
     tabs = [
-        ('', 'Network'),
-        ('pricing', 'Pricing'),
-        ('faq', 'FAQ'),
-        ('participate', 'Participate'),
-        ('about', 'About')
+        ('', 'URnetwork'),
     ]
 
     tab_html_parts = []
@@ -209,7 +205,7 @@ def tab_header():
                 <tr>
                     <td id="logo"><img id="logo-placeholder" src="/res/images/logo-placeholder.png" alt="BringYour"></td>
                     <td class="expand"><div class="tab-container">{tab_html}</div></td>
-                    <td class="start"><button type="button" id="start" class="btn btn-primary d-none" data-bs-toggle="modal" data-bs-target="#dialog-connect">Get Connected</button></td>
+                    <td class="start"><button type="button" id="start" class="btn btn-primary d-none" data-bs-toggle="modal" data-bs-target="#dialog-connect">Connect</button></td>
                 </tr>
             </tbody>
         </table>
@@ -230,28 +226,24 @@ def footer():
                 <tbody>
                     <tr>
                         <td>
-                            <div class="link"><a href="/whitepaper" target="_blank">Whitepaper</a></div>
-                            <div class="link"><a href="https://status.bringyour.com" target="_blank">Status</a></div>
-                            <div class="link"><a href="https://github.com/bringyour" target="_blank"><img src="/res/images/s2-github.svg" class="social" alt="github"> GitHub</a></div>
-                            <div class="link"><a href="/discord" target="_blank"><img src="/res/images/s2-discord.svg" class="social" alt="discord"> Discord Community</a></div>
-                            <div class="social-container"><div><a href="https://www.reddit.com/r/bringyour" target="_blank"><img src="/res/images/s2-reddit.svg" class="social" alt="reddit"></a></div><div><a href="https://www.youtube.com/@bringyour" target="_blank"><img src="/res/images/s2-youtube.svg" class="social" alt="youtube"></a></div><div><a href="https://www.linkedin.com/company/bringyour" target="_blank"><img src="/res/images/s2-linkedin.svg" class="social" alt="linkedin"></a></div></div>
+                        <div class="link"><a href="https://ur.io">URnetwork</a></div>
+                        <div class="link"><a href="https://ur.io/apps" target="_blank">Get the apps</a></div>
+                            <div class="link"><a href="https://status.ur.io" target="_blank">Status</a></div>
+                            
                         </td>
                         <td>
-                            <div class="link"><a href="/buy-data">Buy Data</a></div>
-                            <div class="store"><a href="https://play.google.com/store/apps/details?id=com.bringyour.network" target="_blank"><img src="/res/images/store-play.png" alt="get the app on the Google Play store"></a></div>
-                            <div class="link"><a href="/api">API</a></div>
-                            <div class="link"><a href="/roadmap" target="_blank">Platform Roadmap</a></div>
-                            <div class="link"><a href="https://github.com/bringyour/product/discussions" target="_blank">Product Feedback</a></div>
-                            <div class="link"><a href="/blog">Blog</a></div>
+
+                            <div class="link"><a href="mailto:support@ur.io" target="_blank">Support</a></div>
+                            <div class="link"><a href="https://docs.ur.io" target="_blank">Docs</a></div>
+                            <div class="link"><a href="https://feedback.ur.io" target="_blank">Feedback</a></div>                            
+                            <div class="link"><a href="https://github.com/urnetwork" target="_blank">GitHub</a></div>
+                            
                         </td>
                         <td>
-                            <div class="link"><a href="/terms">Terms of Service</a></div>
-                            <div class="link"><a href="/privacy">Privacy Policy</a></div>
-                            <div class="link"><a href="/vdp">Vulnerability Disclosure Policy</a></div>
-                            <div class="link"><a href="/trust-and-safety">Trust and Safety</a></div>
-                            <div class="link"><a href="/transparency-report">Transparency Report</a></div>
-                            <div class="link"><a href="/warrant-canary">Warrant Canary</a></div>
-                            <div class="link"><a href="/economic-model">Economic Model</a></div>
+                            <div class="link"><a href="https://ur.io/terms">Terms of Service</a></div>
+                            <div class="link"><a href="https://ur.io/privacy">Privacy Policy</a></div>
+                            <div class="link"><a href="https://ur.io/vdp">Vulnerability Disclosure Policy</a></div>
+                            <div>&#x270C;</div>
                         </td>
                     </tr>
                 </tbody>

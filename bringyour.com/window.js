@@ -11,7 +11,7 @@ function updateConnectButton() {
         startElement.classList.add('btn-light')
     }
     else {
-        startElement.textContent = 'Get Connected'
+        startElement.textContent = 'Connect'
         startElement.classList.add('btn-primary')
         startElement.classList.remove('btn-light')
     }

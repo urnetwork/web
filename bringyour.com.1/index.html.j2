@@ -1,0 +1,145 @@
+{{ html_header() }}
+<head>
+    {{ title_icons_meta() }}
+
+    <link rel="canonical" href="https://bringyour.com/">
+    <link rel="manifest" href="/manifest.json" />
+
+    {{ fonts() }}
+
+    {{ app_js_css() }}
+</head>
+<body>
+    <script>
+        // delay loading the logo to optimize initial load time
+        windowLoadCallbacks.push(() => {
+            let load = () => {
+                loadScript('/lib/p5.min.js', () => {
+                    loadScript('/logo.js', () => {
+                        loadScript('/sketch_220824a.js', () => {
+
+                        })
+                    })
+                })
+            }
+            if (isSlowMobile) {
+                setTimeout(load, 4000)
+            } else {
+                load()
+            }
+        })
+    </script>
+
+    {{ dialog_connect() }}
+
+    {{ tab_header() }}
+
+    <div class="runner">
+        <div class="leader">
+            <div class="top-message"><b>Fast and secure internet</b> wherever you want to be, with ultimate control of your data</div>
+
+            <div class="offer"><input type="image" data-bs-toggle="modal" data-bs-target="#dialog-connect" src="/res/images/signup-redeem.svg" width="400" height="80" alt="Redeem 30GiB of free data for new networks"></div>
+
+            <div class="sub-message">BringYour runs on every device that supports iCloud Private Relay&trade; or VPN by Google ONE&trade;, and adds new security, privacy, and data control features.</div>
+
+                <table>
+                    <tbody>
+                        <tr>
+                            <td class="text"><span class="feature-point">Private, anonymous, global internet access.</span> Tap into the world with peer plus multi-hop routing.</td>
+                            <td class="graphic"><img src="/res/images/pack-2-alpha.webp" class="leader-right" alt="private, anonymous, global internet access"></td>
+                        </tr>
+                    </tbody>
+                </table>
+                <table>
+                    <tbody>
+                        <tr>
+                            <td class="graphic"><img src="/res/images/share-private-2-alpha.webp" class="leader-left" alt="collaborate"></td>
+                            <td class="text"><span class="feature-point">Collaborate.</span> Connect between your devices, physical addresses, friends and family.</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <table>
+                    <tbody>
+                        <tr>
+                            <td class="graphic"><img src="/res/images/share-public-2-alpha.webp" class="leader-left" alt="own your data"></td>
+                            <td class="text"><span class="feature-point">Own your data.</span> See where your data goes and control your digital footprint.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            <div class="main-message"><label><input type="checkbox" value="" data-bs-toggle="modal" data-bs-target="#dialog-connect">I want to free my network and data <span class="now">now!</span></label></div>
+        </div>
+
+        <div class="stats">
+            <div class="header">Statistics</div>
+            <div id="stats-tooltip" class="d-none"></div>
+            <div id="stats-mount"><script>
+                // delay loading the stats to optimize initial load time
+                windowLoadCallbacks.push(() => {
+                    let load = () => {
+                        loadScript('/lib/d3.min.js', () => {
+                            loadScript('/stats.js', () => {
+                                let mount = createStatsMount('stats-mount')
+                                mount.router()
+                                mount.render(new StatsPanel(true))
+                            })
+                        })
+                    }
+                    if (isSlowMobile) {
+                        setTimeout(load, 4000)
+                    } else {
+                        load()
+                    }
+                })
+            </script></div>
+        </div>
+
+        <div>
+            <div class="header">Fast</div>
+            <div>Designed to minimize latency using peer-to-peer connections and global edges. A novel latency map technique allows linear path multi-hop routing for data anonymity that is nearly identical in performance to single-hop.</div>
+        </div>
+
+        <div>
+            <div class="header">Collaborate</div>
+            <div>Your network is your own globally unique IPv6 subnet with an unlimited number of devices. Connecting to other networks and services is as easy as sharing a link.</div>
+        </div>
+
+        <div>
+            <div class="header">See the invisble</div>
+            <div>Asking questions about your network, data privacy and digital footprint is hard until you can see it. All your data is brought to the foreground, with a control panel to turn off aspects you don't like.</div>
+        </div>
+
+        <div>
+            <div class="header">Web standards</div>
+            <div>Built using the protocols that power the web. End-to-end encryption always. We believe in a developer vision where VPN can be embedded everywhere.</div>
+        </div>
+
+        <div>
+            <div class="header">Open core</div>
+            <div>An <a href="https://github.com/bringyour" target="_blank">open source Go library</a> that implements the core functionality. An <a href="https://github.com/bringyour" target="_blank">open API</a> to coordinate the clients. We're following a business plan and technology outlined in <a href="whitepaper" target="_blank">our whitepaper</a>.</div>
+        </div>
+
+        <div>
+            <div class="header">Built for you</div>
+            <div>We believe in private networks for everyone. What do you want from your network? We want to hear from you. Please submit product feedback on our <a href="https://github.com/bringyour/product/discussions" target="_blank">feedback page</a>. Join us in our <a href="discord" target="_blank">Discord community</a>.</div>
+        </div>
+
+        <div>
+            <div class="header">No leaks</div>
+            <div>Our <a href="terms">terms of service</a> and <a href="privacy">privacy policy</a> are easy to understand. We don't keep logs and we don't sell your data.</div>
+        </div>
+
+        <div class="use-cases">
+            <img src="/res/images/use-cases-2-alpha.webp" alt="use cases">
+        </div>
+        <!--
+        <div>
+            <div class="header"><img src="/res/images/lagdev.svg" alt="lag.dev global latency test">Test your latency</div>
+            <div>Visit <a href="https://lag.dev" target="_blank">lag.dev</a> to test your latency against the global latency map.</div>
+        </div>
+        -->
+    </div>
+
+    {{ footer() }}
+
+</body>
+{{ html_footer() }}

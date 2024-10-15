@@ -1,13 +1,3 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<svg width="32px" height="32px" viewBox="0 0 32 32" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-    <title>Favicon</title>
-    <g id="Favicon" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-        <g id="Android-1024-Square">
-            <rect id="Rectangle" fill="#FFFFFF" fill-rule="nonzero" x="0" y="0" width="32" height="32" rx="16"></rect>
-            <circle id="Oval" stroke="#FF8027" stroke-width="1.5" cx="16.0595956" cy="9.52338682" r="6"></circle>
-            <circle id="Oval" stroke="#20B24C" stroke-width="1.5" cx="16.0595956" cy="21.4764095" r="6"></circle>
-            <circle id="Oval" stroke="#4148CD" stroke-width="1.5" transform="translate(21.814020, 15.721923) rotate(90.000000) translate(-21.814020, -15.721923) " cx="21.8140197" cy="15.721923" r="6"></circle>
-            <circle id="Oval" stroke="#B77B58" stroke-width="1.5" transform="translate(9.860841, 15.721892) rotate(90.000000) translate(-9.860841, -15.721892) " cx="9.86084083" cy="15.7218918" r="6"></circle>
-        </g>
-    </g>
+<svg width="256" height="256" viewBox="0 0 256 256" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M240 64C231.164 64 224 56.8363 224 48C224 39.1637 216.836 32 208 32C199.164 32 192 24.8363 192 16C192 7.16375 184.836 0 176 0H80C71.1637 0 64 7.16375 64 16C64 24.8363 56.8363 32 48 32C39.1637 32 32 39.1637 32 48C32 56.8363 24.8363 64 16 64C7.16375 64 0 71.1637 0 80V176C0 184.836 7.16375 192 16 192C24.8363 192 32 199.164 32 208C32 216.836 39.1637 224 48 224C56.8363 224 64 231.164 64 240C64 248.836 71.1637 256 80 256H176C184.836 256 192 248.836 192 240C192 231.164 199.164 224 208 224C216.836 224 224 216.836 224 208C224 199.164 231.164 192 240 192C248.836 192 256 184.836 256 176V80C256 71.1637 248.836 64 240 64Z" fill="#101010"/>
 </svg>
