@@ -227,16 +227,17 @@ def footer():
                     <tr>
                         <td>
                         <div class="link"><a href="https://ur.io">URnetwork</a></div>
-                        <div class="link"><a href="https://ur.io/apps" target="_blank">Get the apps</a></div>
+                        <div class="link"><a href="https://ur.io/app" target="_blank">Get the app</a></div>
                             <div class="link"><a href="https://status.ur.io" target="_blank">Status</a></div>
                             
                         </td>
                         <td>
 
-                            <div class="link"><a href="mailto:support@ur.io" target="_blank">Support</a></div>
+                            
                             <div class="link"><a href="https://docs.ur.io" target="_blank">Docs</a></div>
                             <div class="link"><a href="https://feedback.ur.io" target="_blank">Feedback</a></div>                            
                             <div class="link"><a href="https://github.com/urnetwork" target="_blank">GitHub</a></div>
+                            <div class="link"><a href="mailto:support@ur.io" target="_blank">Support</a></div>
                             
                         </td>
                         <td>

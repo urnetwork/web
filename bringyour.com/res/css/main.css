@@ -44,12 +44,26 @@ div.runner > div > div:not(:first-child) {
 	padding-top: 12px;
 }
 
-div.runner div.new-icon {
+
+div.runner > div.newname {
 	text-align: center;
 }
 
-div.runner div.new-icon img {
+div.runner > div.icon {
+	text-align: center;
+	text-decoration: none;
+}
+
+div.runner > div.icon a {
+	border: none;
+}
+
+div.runner > div.icon img {
 	width: 300px;
+}
+
+div.runner > div.icon > div:not(:first-child) {
+	padding-top: 24px;
 }
 
 div.runner div.world img {
