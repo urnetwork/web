@@ -1,24 +1,35 @@
 
 // ur.io framer integration
-new function() {
-	let self = this
 
-	let headerRootElement = document.querySelector('div[aria-label="header-ip-address"]')
-	let rootElement = document.querySelector('div[aria-label="ip-address-root"]')
+setTimeout(function() {
+	new function() {
+		let self = this
 
-	if (headerRootElement) {
-		let headerSvgUse = headerRootElement.querySelector('svg > use')
-		if (headerSvgUse) {
-			headerSvgUse.setAttribute('href', 'https://bringyour.com/res/images/ip-disconnected.svg')
+		let headerRootElement = document.querySelector('div[aria-label="header-ip-address"]')
+
+		if (headerRootElement) {
+			// load the ip address header 
+
+			// TODO
+			let connectedToUrNetwork = false
+			let ipAddress = '1.2.3.4'
+
+			let headerSvg = headerRootElement.querySelector('svg')
+			if (headerSvg) {
+				let connectedImg = document.createElement('img')
+				connectedImg.setAttribute('style', 'width:100%; height:100%')
+				if (connectedToUrNetwork) {
+					connectedImg.setAttribute('src', 'https://bringyour.com/res/images/ip-connected.svg')
+				} else {
+					connectedImg.setAttribute('src', 'https://bringyour.com/res/images/ip-disconnected.svg')
+				}
+				headerSvg.replaceWith(connectedImg)
+			}
+
+			let headerA = headerRootElement.querySelector('a')
+			if (headerA) {
+				headerA.textContent = ipAddress
+			}
 		}
-
-		let headerA = headerRootElement.querySelector('a')
-		if (headerA) {
-			headerA.textContent = '1.2.3.4'
-		}
-	}
-
-	if (rootElement) {
-		// load the ip address component
-	}
-}()
+	}()
+}, 0)
