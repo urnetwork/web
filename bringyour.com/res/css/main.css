@@ -25,15 +25,53 @@ div.runner {
 }
 
 div.runner a {
-	color: rgb(0, 0, 0);
+	color: rgb(16, 16, 16);
 	text-decoration: none;
-	border-bottom: 1px dotted rgb(0, 0, 0);
+	border-bottom: 1px dotted rgb(16, 16, 16);
 }
 
 div.runner a:hover {
-	color: rgb(0, 105, 217);
-	border-bottom: 1px dotted rgb(0, 105, 217);
+	color: rgb(237, 143, 255);
+	border-bottom: 1px dotted rgb(237, 143, 255);
 }
+
+div.runner > div {
+	padding-top: 48px;
+	padding-bottom: 48px;
+}
+
+div.runner > div > div:not(:first-child) {
+	padding-top: 12px;
+}
+
+
+div.runner > div.newname {
+	text-align: center;
+}
+
+div.runner > div.icon {
+	text-align: center;
+	text-decoration: none;
+}
+
+div.runner > div.icon a {
+	border: none;
+}
+
+div.runner > div.icon img {
+	width: 300px;
+}
+
+div.runner > div.icon > div:not(:first-child) {
+	padding-top: 24px;
+}
+
+div.runner div.world img {
+	width: 100%;
+	height: auto;
+}
+
+
 
 div.figure img {
 	width: 100%;
@@ -130,10 +168,6 @@ div.leader table td.text {
 	vertical-align: middle;
 }
 
-div.use-cases img {
-	width: 100%;
-	height: auto;
-}
 
 div.leader-left {
 	float: left;
@@ -283,8 +317,8 @@ div.use-cases {
 }
 
 #footer {
-	color: rgb(255, 255, 255);
-	background-color: rgb(64, 64, 64);
+	color: rgb(248, 248, 248);
+	background-color: rgb(16, 16, 16);
 	font-weight: 100;
 	padding: 24px;
 	text-align: center;
@@ -292,14 +326,14 @@ div.use-cases {
 }
 
 #footer div.link a {
-	color: rgb(255, 255, 255);
+	color: rgb(248, 248, 248);
 	text-decoration: none;
-	background-color: rgba(255, 255, 255, 0.1);
+	background-color: rgba(248, 248, 248, 0.1);
 	padding: 4px;
 }
 
 #footer div.link a:hover {
-	background-color: rgba(255, 255, 255, 0.2);
+	background-color: rgba(248, 248, 248, 0.2);
 }
 
 #footer div.link {
@@ -312,7 +346,7 @@ div.use-cases {
 }
 
 #footer td {
-	color: rgb(255, 255, 255);
+	color: rgb(248, 248, 248);
 	min-width: 200px;
 	font-weight: 100;
 	vertical-align: top;

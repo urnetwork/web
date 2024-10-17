@@ -1,0 +1,17 @@
+
+@font-face {
+    font-family: 'Arkitech';
+    src: url('/res/fonts/Arkitech-Light.woff2') format('woff2'),
+        url('/res/fonts/Arkitech-Light.woff') format('woff');
+    font-weight: 300;
+    font-style: normal;
+    font-display: block;
+}
+@font-face {
+    font-family: 'Arkitech';
+    src: url('/res/fonts/Arkitech-Medium.woff2') format('woff2'),
+        url('/res/fonts/Arkitech-Medium.woff') format('woff');
+    font-weight: 500;
+    font-style: normal;
+    font-display: block;
+}
