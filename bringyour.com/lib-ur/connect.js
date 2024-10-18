@@ -10,7 +10,7 @@ new function() {
 
     const googleClientId = '338638865390-cg4m0t700mq9073smhn9do81mr640ig1.apps.googleusercontent.com'
     const appleClientId = 'com.bringyour.service'
-    const authJwtRedirect = 'https://ur.io/?auth'
+    const authJwtRedirect = 'https://ur.io'
 
 
     const defaultClientTimeoutMillis = 15 * 1000
@@ -23,11 +23,18 @@ new function() {
 
 
     self.connectMount = null
-
+    self.modal = null
     setTimeout(function(){
-        let mount = self.createConnectMount('dialog-connect-mount')
-        self.connectMount = mount
-        mount.router()
+        self.connectMount = self.createConnectMount('dialog-connect-mount')
+        if (!self.connectMount) {
+            console.log('[connect]mount not created')
+        } else {
+            self.finishConnectMount()
+        }
+    }, 0)
+
+    self.finishConnectMount = function() {
+        self.connectMount.router()
 
         let params = new URLSearchParams(window.location.search)
         let resetCode = params.get('resetCode')
@@ -37,13 +44,13 @@ new function() {
         
 
         if (resetCode) {
-            mount.render(new self.DialogPasswordResetComplete(resetCode))
+            self.connectMount.render(new self.DialogPasswordResetComplete(resetCode))
         } else if (byJwtData) {
             let networkName = byJwtData['networkName']
-            mount.render(new self.DialogComplete(networkName))
+            self.connectMount.render(new self.DialogComplete(networkName))
         } else {
             let authAutoPrompt = (window.location.pathname == '/')
-            mount.render(new self.DialogInitial(authAutoPrompt))
+            self.connectMount.render(new self.DialogInitial(authAutoPrompt))
         }
 
         if (resetCode) {
@@ -51,7 +58,7 @@ new function() {
         } else if (auth != null) {
             self.showConnectDialog()
         }
-    }, 0)
+    }
 
     self.notifyByJwtChanged = function() {
         let buttonElements = document.querySelectorAll('div[data-bs-target="#dialog-connect"]')
@@ -71,13 +78,25 @@ new function() {
     }
 
     self.showConnectDialog = function() {
-        let dialogConnect = document.getElementById('dialog-connect')
-        if (dialogConnect) {
-            new bootstrap.Modal(dialogConnect, {}).show()
+        if (self.modal) {
+            self.modal.show()
+        } else {
+            let dialogs = document.querySelectorAll('#dialog-connect')
+            if (dialogs.length == 0) {
+                return
+            }
+            if (1 < dialogs.length) {
+                console.log('[connect]show more than one dialog')
+            }
+            let dialog = dialogs[dialogs.length - 1]
+            // important - avoid creating multiple modal instances with multiple backdrops
+            // this is needed because modals can be launched via click target or programatically
+            self.modal = bootstrap.Modal.getOrCreateInstance(dialog, {})
+            // window.connectModal = self.modal
+            self.modal.show()
         }
     }
     
-
 
     self.getByJwt = function() {
         return localStorage.getItem('byJwt')
@@ -237,7 +256,14 @@ new function() {
 
 
     self.createMount = function(elementId, topLevelRoutes) {
-        let container = document.getElementById(elementId)
+        let containers = document.querySelectorAll('#' + elementId)
+        if (containers.length == 0) {
+            return null
+        }
+        if (1 < containers.length) {
+            console.log('[connect]more than one mount')
+        }
+        let container = containers[containers.length - 1]
         let idPrefix = elementId + '-'
         return new self.Mount(container, idPrefix, topLevelRoutes)
     }
@@ -293,12 +319,12 @@ new function() {
 
             // see https://developers.google.com/identity/gsi/web/guides/handle-credential-responses-js-functions
             window.handleGoogleCredentialResponse = function(response) {
-                // console.log(response)
                 let authJwt = response.credential
                 if (connectSelf.connectMount) {
                     connectSelf.connectMount.activeComponent.submitAuthJwt('google', authJwt)
                 }
-                self.showConnectDialog()
+
+                connectSelf.showConnectDialog()
             }
 
             if (window.google) {
@@ -316,7 +342,7 @@ new function() {
                     },
                 })
                 
-                window.google.accounts.id.renderButton(document.getElementById('g_id_button'), {
+                window.google.accounts.id.renderButton(self.element('g_id_button'), {
                     type: 'standard',
                     theme: 'outline',
                     size: 'large',
@@ -1937,7 +1963,7 @@ new function() {
                              data-width="300"
                              data-height="39"></div>
 
-                        <div id="g_id_button" class="g_id_signin"
+                        <div id="${id('g_id_button')}" class="g_id_signin"
                              data-type="standard"
                              data-shape="rectangular"
                              data-theme="outline"
