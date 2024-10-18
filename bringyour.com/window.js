@@ -1,5 +1,6 @@
 
-function updateConnectButton() {
+
+window.notifyByJwtChanged = function() {
     let startElement = document.getElementById('start')
     startElement.classList.remove('d-none')
 
@@ -16,8 +17,6 @@ function updateConnectButton() {
         startElement.classList.remove('btn-light')
     }
 }
-
-window.notifyByJwtChanged = updateConnectButton
 
 
 let windowLoadCallbacks = []
