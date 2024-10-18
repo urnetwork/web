@@ -10,7 +10,7 @@ new function() {
 
     const googleClientId = '338638865390-cg4m0t700mq9073smhn9do81mr640ig1.apps.googleusercontent.com'
     const appleClientId = 'com.bringyour.service'
-    const authJwtRedirect = 'https://bringyour.com/connect'
+    const authJwtRedirect = 'https://ur.io/?auth'
 
 
     const defaultClientTimeoutMillis = 15 * 1000
@@ -61,7 +61,7 @@ new function() {
                 let byJwt = self.parseByJwt()
                 if (byJwt) {
                     let networkName = byJwt['network_name']
-                    pElement.textContent = networkName + '.ur.network'
+                    pElement.textContent = networkName /*+ '.ur.network'*/
                 }
                 else {
                     pElement.textContent = 'Connect'
@@ -1662,8 +1662,8 @@ new function() {
 
             const launchAppButtonElement = self.element('launch-app-button')
             const preferencesProductUpdateElement = self.element('preferences-product-updates')
-            const feedbackButtonElement = self.element('feedback-button')
-            const feedbackFormElement = self.element('feedback-form')
+            // const feedbackButtonElement = self.element('feedback-button')
+            // const feedbackFormElement = self.element('feedback-form')
 
             if (launchAppButtonElement) {
                 launchAppButtonElement.addEventListener('click', (event) => {
@@ -1683,16 +1683,16 @@ new function() {
                 self.submitPreferences()
             })
 
-            feedbackButtonElement.addEventListener('click', (event) => {
-                self.submit()
-            })
+            // feedbackButtonElement.addEventListener('click', (event) => {
+            //     self.submit()
+            // })
 
-            feedbackFormElement.addEventListener('submit', (event) => {
-                event.preventDefault()
-                if (!feedbackButtonElement.disabled) {
-                    self.submit()
-                }
-            })
+            // feedbackFormElement.addEventListener('submit', (event) => {
+            //     event.preventDefault()
+            //     if (!feedbackButtonElement.disabled) {
+            //         self.submit()
+            //     }
+            // })
 
             if (connectSelf.isFlagAppPreview()) {
                 self.authRedirect()
@@ -2218,7 +2218,7 @@ new function() {
         html += `
           <div class="login-option">
                <div class="login-container">
-                    <div><a href="/app">Get the app</a> to use your network.</div>
+                    <div><button type="button" class="btn btn-primary">Enter</button></div>
                </div>
           </div>
         `
@@ -2233,16 +2233,14 @@ new function() {
          `
 
         html += `
+              <div class="login-separator">account tools</div>
               <div class="login-option">
                    <div class="login-container">
-                        <div><button id="${id('launch-app-button')}" type="button" class="btn btn-primary">Copy an auth code<span id="${id('launch-app-spinner')}" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span></button></div>
+                        <div><button id="${id('launch-app-button')}" type="button" class="btn btn-secondary btn-sm">Copy an auth code<span id="${id('launch-app-spinner')}" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span></button></div>
                         <div id="${id('launch-app-error')}" class="text-danger d-none"></div>
-                        <div>This is used to set up a provider node. <a href="">See docs.</a></div>
+                        <div>This is used to <a href="">set up a provider node</a>.</div>
                    </div>
               </div>
-            `
-
-         html += `
               <div class="login-option">
                    <div class="login-container">
                         <a href="/connect/signout">Sign out</a>

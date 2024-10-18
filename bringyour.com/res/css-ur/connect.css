@@ -66,6 +66,7 @@
    font-size: 18pt;
    font-weight: 200;
    overflow-wrap: break-word;
+   font-family: "ABC Gravity Extra Condensed", "ABC Gravity Extra Condensed Placeholder", sans-serif;
 }
 
 #dialog-connect-mount div.title span.material-symbols-outlined {
@@ -138,7 +139,6 @@
    position: relative;
    margin-top: 12px;
    margin-bottom: 12px;
-   font-family: "ABC Gravity Extra Condensed", "ABC Gravity Extra Condensed Placeholder", sans-serif;
 }
 
 #dialog-connect-mount div.login-header div.header-right {
