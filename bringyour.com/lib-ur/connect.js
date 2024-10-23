@@ -11,6 +11,7 @@ new function() {
     const googleClientId = '338638865390-cg4m0t700mq9073smhn9do81mr640ig1.apps.googleusercontent.com'
     const appleClientId = 'com.bringyour.service'
     const authJwtRedirect = 'https://ur.io'
+    const authLoginUri = "https://api.bringyour.com/connect"
 
 
     const defaultClientTimeoutMillis = 15 * 1000
@@ -21,17 +22,33 @@ new function() {
     }
 
 
-
     self.connectMount = null
-    self.modal = null
+    // self.modal = null
+
     setTimeout(function(){
-        self.connectMount = self.createConnectMount('dialog-connect-mount')
+        self.connectMount = self.createConnectMount()
         if (!self.connectMount) {
             console.log('[connect]mount not created')
         } else {
             self.finishConnectMount()
         }
     }, 0)
+
+    self.createConnectMount = function() {
+        let dialogs = document.querySelectorAll('#dialog-connect')
+        if (dialogs.length != 1) {
+            return null
+        }
+        let dialog = dialogs[0]
+
+        let container = dialog.querySelector('#dialog-connect-mount')
+        let idPrefix = 'dialog-connect-mount-'
+        const topLevelRoutes = [
+            new self.Route('/connect', new self.DialogInitial()),
+            new self.Route('/connect/create', new self.DialogCreateNetwork()),
+        ]
+        return new self.Mount(dialog, container, idPrefix, topLevelRoutes)
+    }
 
     self.finishConnectMount = function() {
         self.connectMount.router()
@@ -78,25 +95,29 @@ new function() {
     }
 
     self.showConnectDialog = function() {
-        if (self.modal) {
-            self.modal.show()
-        } else {
-            let dialogs = document.querySelectorAll('#dialog-connect')
-            if (dialogs.length == 0) {
-                return
-            }
-            if (1 < dialogs.length) {
-                console.log('[connect]show more than one dialog')
-            }
-            let dialog = dialogs[dialogs.length - 1]
+        // if (self.modal) {
+        //     self.modal.show()
+        if (self.connectMount) {
             // important - avoid creating multiple modal instances with multiple backdrops
             // this is needed because modals can be launched via click target or programatically
-            self.modal = bootstrap.Modal.getOrCreateInstance(dialog, {})
+            let modal = bootstrap.Modal.getOrCreateInstance(self.connectMount.dialog, {})
             // window.connectModal = self.modal
-            self.modal.show()
+            modal.show()
+        } else {
+            console.log("[connect]dialog not mounted")
         }
     }
-    
+
+    // self.showAllConnectDialogs = function() {
+    //     let dialogs = document.querySelectorAll('#dialog-connect')
+    //     for (dialog of dialogs) {
+    //         // important - avoid creating multiple modal instances with multiple backdrops
+    //         // this is needed because modals can be launched via click target or programatically
+    //         let modal = bootstrap.Modal.getOrCreateInstance(dialog, {})
+    //         // window.connectModal = self.modal
+    //         modal.show()
+    //     }
+    // }
 
     self.getByJwt = function() {
         return localStorage.getItem('byJwt')
@@ -192,9 +213,11 @@ new function() {
         this.component = component
     }
 
-    self.Mount = function(container, idPrefix, topLevelRoutes) {
+    self.Mount = function(dialog, container, idPrefix, topLevelRoutes) {
         const self = this
 
+        self.dialog = dialog
+        self.container = container
         self.activeComponent = null
 
         self.id = (elementId) => {
@@ -254,37 +277,19 @@ new function() {
         }
     }
 
-
-    self.createMount = function(elementId, topLevelRoutes) {
-        let containers = document.querySelectorAll('#' + elementId)
-        if (containers.length == 0) {
-            return null
-        }
-        if (1 < containers.length) {
-            console.log('[connect]more than one mount')
-        }
-        let container = containers[containers.length - 1]
-        let idPrefix = elementId + '-'
-        return new self.Mount(container, idPrefix, topLevelRoutes)
-    }
-
-    
-    self.createConnectMount = function(elementId) {
-        const connectTopLevelRoutes = [
-            new self.Route('/connect', new self.DialogInitial()),
-            new self.Route('/connect/create', new self.DialogCreateNetwork()),
-        ]
-        return self.createMount(elementId, connectTopLevelRoutes)
-    }
-
-
-
-
-
-
-
-
-
+    // self.createMount = function(dialog, container, topLevelRoutes) {
+    //     let containers = dialog.querySelector('#' + elementId + ":not([ur-mounted=true])")
+    //     if (containers.length == 0) {
+    //         return null
+    //     }
+    //     if (1 < containers.length) {
+    //         console.log('[connect]more than one mount')
+    //     }
+    //     let container = containers[containers.length - 1]
+    //     container.setAttribute("ur-mounted", "true")
+    //     let idPrefix = elementId + '-'
+    //     return new self.Mount(dialog, container, idPrefix, topLevelRoutes)
+    // }
 
     self.DialogInitial = function(firstLoad) {
         const self = this
@@ -311,6 +316,7 @@ new function() {
                 let authJwt = event.detail.authorization.id_token
                 self.submitAuthJwt('apple', authJwt)
                 connectSelf.showConnectDialog()
+
             })
             document.addEventListener('AppleIDSignInOnFailure', (event) => {
                 // do nothing
@@ -318,14 +324,11 @@ new function() {
 
 
             // see https://developers.google.com/identity/gsi/web/guides/handle-credential-responses-js-functions
-            window.handleGoogleCredentialResponse = function(response) {
-                let authJwt = response.credential
-                if (connectSelf.connectMount) {
-                    connectSelf.connectMount.activeComponent.submitAuthJwt('google', authJwt)
-                }
-
-                connectSelf.showConnectDialog()
-            }
+            // window.handleGoogleCredentialResponse = function(response) {
+            //     let authJwt = response.credential
+            //     self.submitAuthJwt('google', authJwt)
+            //     connectSelf.showConnectDialog()
+            // }
 
             if (window.google) {
                 // connect with google
@@ -336,6 +339,8 @@ new function() {
                             let authJwt = response.credential
                             self.submitAuthJwt('google', authJwt)
                             connectSelf.showConnectDialog()
+                            // connectSelf.showAllConnectDialogs()
+
                         } else {
                             console.log(error)
                         }
@@ -1942,6 +1947,7 @@ new function() {
 
 
     self.renderInitial = function(container, id, nonce) {
+        //  data-callback="window.handleGoogleCredentialResponse"
         let html = `
               <div class="login-option">
                    <div class="login-container">
@@ -1955,9 +1961,8 @@ new function() {
                              data-client_id="${googleClientId}"
                              data-context="signin"
                              data-ux_mode="popup"
-                             data-login_uri="${authJwtRedirect}"
+                             data-login_uri="${authLoginUri}"
                              data-nonce="${nonce}"
-                             data-callback="window.handleGoogleCredentialResponse"
                              data-auto_select="true"
                              data-itp_support="true"
                              data-width="300"
