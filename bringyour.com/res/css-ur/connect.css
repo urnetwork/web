@@ -97,7 +97,7 @@
    background-color: inherit !important;
 }*/
 
-#dialog-connect-mount div.login-option input[type=text], input[type=password] {
+#dialog-connect-mount div.login-option input[type=text]:not(.form-control), input[type=password]:not(.form-control) {
    height: 39px;
    border: 1px solid rgb(218, 220, 224);
    border-radius: 4px;

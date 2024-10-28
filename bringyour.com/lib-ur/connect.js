@@ -6,13 +6,10 @@ new function() {
     const clientVersion = '1.0.0-ur';
     const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 
-
-
     const googleClientId = '338638865390-cg4m0t700mq9073smhn9do81mr640ig1.apps.googleusercontent.com'
     const appleClientId = 'com.bringyour.service'
     const authJwtRedirect = 'https://ur.io'
     const authLoginUri = "https://api.bringyour.com/connect"
-
 
     const defaultClientTimeoutMillis = 15 * 1000
     const timeoutError = Symbol()
@@ -23,7 +20,6 @@ new function() {
 
 
     self.connectMount = null
-    // self.modal = null
 
     setTimeout(function(){
         self.connectMount = self.createConnectMount()
@@ -95,34 +91,19 @@ new function() {
     }
 
     self.showConnectDialog = function() {
-        // if (self.modal) {
-        //     self.modal.show()
         if (self.connectMount) {
             // important - avoid creating multiple modal instances with multiple backdrops
             // this is needed because modals can be launched via click target or programatically
             let modal = bootstrap.Modal.getOrCreateInstance(self.connectMount.dialog, {})
-            // window.connectModal = self.modal
             modal.show()
         } else {
             console.log("[connect]dialog not mounted")
         }
     }
 
-    // self.showAllConnectDialogs = function() {
-    //     let dialogs = document.querySelectorAll('#dialog-connect')
-    //     for (dialog of dialogs) {
-    //         // important - avoid creating multiple modal instances with multiple backdrops
-    //         // this is needed because modals can be launched via click target or programatically
-    //         let modal = bootstrap.Modal.getOrCreateInstance(dialog, {})
-    //         // window.connectModal = self.modal
-    //         modal.show()
-    //     }
-    // }
-
     self.getByJwt = function() {
         return localStorage.getItem('byJwt')
     }
-
 
     self.parseByJwt = function() {
         let byJwtStr = localStorage.getItem('byJwt')
@@ -149,20 +130,15 @@ new function() {
         self.notifyByJwtChanged()
     }
 
-
-
     self.escapeHtml = function(html) {
         return html && html.replace(/[<>"]+/g, '')
     }
-
 
     self.serviceUrl = function(service, path) {
         // main
         let baseHost = 'bringyour.com'
         return `${window.location.protocol}//${service}.${baseHost}${path}`
     }
-
-
 
     self.withTimeout = function(p, millis, exception) {
         var timeout
@@ -277,20 +253,6 @@ new function() {
         }
     }
 
-    // self.createMount = function(dialog, container, topLevelRoutes) {
-    //     let containers = dialog.querySelector('#' + elementId + ":not([ur-mounted=true])")
-    //     if (containers.length == 0) {
-    //         return null
-    //     }
-    //     if (1 < containers.length) {
-    //         console.log('[connect]more than one mount')
-    //     }
-    //     let container = containers[containers.length - 1]
-    //     container.setAttribute("ur-mounted", "true")
-    //     let idPrefix = elementId + '-'
-    //     return new self.Mount(dialog, container, idPrefix, topLevelRoutes)
-    // }
-
     self.DialogInitial = function(firstLoad) {
         const self = this
 
@@ -309,26 +271,21 @@ new function() {
                     nonce: nonce,
                     usePopup: true
                 })
+
+                // see https://developer.apple.com/documentation/sign_in_with_apple/sign_in_with_apple_js/configuring_your_webpage_for_sign_in_with_apple
+                document.addEventListener('AppleIDSignInOnSuccess', function(event) {
+                    // see https://developer.apple.com/documentation/sign_in_with_apple/sign_in_with_apple_rest_api/authenticating_users_with_sign_in_with_apple
+                    console.log(event.detail)
+                    let authJwt = event.detail.authorization.id_token
+                    self.submitAuthJwt('apple', authJwt)
+                    connectSelf.showConnectDialog()
+
+                })
+                document.addEventListener('AppleIDSignInOnFailure', (event) => {
+                    // do nothing
+                    console.log(`[apple]sign in failure: ${event.detail.error}`)
+                })
             }
-            // see https://developer.apple.com/documentation/sign_in_with_apple/sign_in_with_apple_js/configuring_your_webpage_for_sign_in_with_apple
-            document.addEventListener('AppleIDSignInOnSuccess', function(event) {
-                // see https://developer.apple.com/documentation/sign_in_with_apple/sign_in_with_apple_rest_api/authenticating_users_with_sign_in_with_apple
-                let authJwt = event.detail.authorization.id_token
-                self.submitAuthJwt('apple', authJwt)
-                connectSelf.showConnectDialog()
-
-            })
-            document.addEventListener('AppleIDSignInOnFailure', (event) => {
-                // do nothing
-            })
-
-
-            // see https://developers.google.com/identity/gsi/web/guides/handle-credential-responses-js-functions
-            // window.handleGoogleCredentialResponse = function(response) {
-            //     let authJwt = response.credential
-            //     self.submitAuthJwt('google', authJwt)
-            //     connectSelf.showConnectDialog()
-            // }
 
             if (window.google) {
                 // connect with google
@@ -339,8 +296,6 @@ new function() {
                             let authJwt = response.credential
                             self.submitAuthJwt('google', authJwt)
                             connectSelf.showConnectDialog()
-                            // connectSelf.showAllConnectDialogs()
-
                         } else {
                             console.log(error)
                         }
@@ -376,7 +331,9 @@ new function() {
                 }
             })
         }
-        self.router = (url) => {}
+        self.router = (url) => {
+            window.location.assign(url)
+        }
 
 
         // event handlers
@@ -398,11 +355,11 @@ new function() {
             }
 
             connectSelf.apiRequest('POST', '/auth/login', requestBody)
-                .catch((err) => {
-                    self.handleSubmitAuthJwtResponse(null, authJwtType, authJwt)
-                })
                 .then((responseBody) => {
                     self.handleSubmitAuthJwtResponse(responseBody, authJwtType, authJwt)
+                })
+                .catch((err) => {
+                    self.handleSubmitAuthJwtResponse(null, authJwtType, authJwt)
                 })
 
             // setTimeout(() => {
@@ -474,11 +431,11 @@ new function() {
             }
 
             connectSelf.apiRequest('POST', '/auth/login', requestBody)
-                .catch((err) => {
-                    self.handleSubmitResponse(null)
-                })
                 .then((responseBody) => {
                     self.handleSubmitResponse(responseBody)
+                })
+                .catch((err) => {
+                    self.handleSubmitResponse(null)
                 })
 
             // setTimeout(() => {
@@ -593,11 +550,11 @@ new function() {
             }
 
             connectSelf.apiRequest('POST', '/auth/login-with-password', requestBody)
-                .catch((err) => {
-                    self.handleSubmitResponse(null)
-                })
                 .then((responseBody) => {
                     self.handleSubmitResponse(responseBody)
+                })
+                .catch((err) => {
+                    self.handleSubmitResponse(null)
                 })
 
             // setTimeout(() => {
@@ -697,11 +654,11 @@ new function() {
             }
 
             connectSelf.apiRequest('POST', '/auth/password-reset', requestBody)
-                .catch((err) => {
-                    self.handleSubmitResponse(null)
-                })
                 .then((responseBody) => {
                     self.handleSubmitResponse(responseBody)
+                })
+                .catch((err) => {
+                    self.handleSubmitResponse(null)
                 })
 
             // setTimeout(() => {
@@ -778,11 +735,11 @@ new function() {
             }
 
             connectSelf.apiRequest('POST', '/auth/password-reset', requestBody)
-                .catch((err) => {
-                    self.handleResendResponse(null)
-                })
                 .then((responseBody) => {
                     self.handleResendResponse(responseBody)
+                })
+                .catch((err) => {
+                    self.handleResendResponse(null)
                 })
 
             // setTimeout(() => {
@@ -878,11 +835,11 @@ new function() {
             }
 
             connectSelf.apiRequest('POST', '/auth/password-set', requestBody)
-                .catch((err) => {
-                    self.handleSubmitResponse(null)
-                })
                 .then((responseBody) => {
                     self.handleSubmitResponse(responseBody)
+                })
+                .catch((err) => {
+                    self.handleSubmitResponse(null)
                 })
 
             // setTimeout(() => {
@@ -1061,11 +1018,11 @@ new function() {
                 }
 
                 connectSelf.apiRequest('POST', '/auth/network-check', requestBody)
-                    .catch((err) => {
-                        apiRequestCallback(null)
-                    })
                     .then((responseBody) => {
                         apiRequestCallback(responseBody)
+                    })
+                    .catch((err) => {
+                        apiRequestCallback(null)
                     })
             }
         }
@@ -1178,11 +1135,11 @@ new function() {
             }
 
             connectSelf.apiRequest('POST', '/auth/network-create', requestBody)
-                .catch((err) => {
-                    self.handleSubmitResponse(null)
-                })
                 .then((responseBody) => {
                     self.handleSubmitResponse(responseBody)
+                })
+                .catch((err) => {
+                    self.handleSubmitResponse(null)
                 })
 
             // setTimeout(() => {
@@ -1405,11 +1362,11 @@ new function() {
             }
 
             connectSelf.apiRequest('POST', '/auth/network-create', requestBody)
-                .catch((err) => {
-                    self.handleSubmitResponse(null)
-                })
                 .then((responseBody) => {
                     self.handleSubmitResponse(responseBody)
+                })
+                .catch((err) => {
+                    self.handleSubmitResponse(null)
                 })
 
             // setTimeout(() => {
@@ -1588,11 +1545,11 @@ new function() {
             }
 
             connectSelf.apiRequest('POST', '/auth/verify', requestBody)
-                .catch((err) => {
-                    self.handleSubmitResponse(null)
-                })
                 .then((responseBody) => {
                     self.handleSubmitResponse(responseBody)
+                })
+                .catch((err) => {
+                    self.handleSubmitResponse(null)
                 })
 
             // setTimeout(() => {
@@ -1647,11 +1604,11 @@ new function() {
             }
 
             connectSelf.apiRequest('POST', '/auth/verify-send', requestBody)
-                .catch((err) => {
-                    self.handleResendResponse(null)
-                })
                 .then((responseBody) => {
                     self.handleResendResponse(responseBody)
+                })
+                .catch((err) => {
+                    self.handleResendResponse(null)
                 })
 
             // setTimeout(() => {
@@ -1690,6 +1647,22 @@ new function() {
             let networkName = byJwtData['network_name']
 
             connectSelf.renderComplete(container, self.id, networkName)
+
+            const enterButtonElement = self.element('enter-button')
+            const copyAuthCodeButtonElement = self.element('copy-auth-code-button')
+            const copyAuthCodeManualCodeCopyButtonElement = self.element('copy-auth-code-manual-code-copy')
+
+            enterButtonElement.addEventListener('click', (event) => {
+                self.enter()
+            })
+
+            copyAuthCodeButtonElement.addEventListener('click', (event) => {
+                self.copyAuthCode()
+            })
+
+            copyAuthCodeManualCodeCopyButtonElement.addEventListener('click', (event) => {
+                self.copyAuthCodeManual()
+            })
 
             const launchAppButtonElement = self.element('launch-app-button')
             const preferencesProductUpdateElement = self.element('preferences-product-updates')
@@ -1755,6 +1728,175 @@ new function() {
 
         // event handlers
 
+        self.enter = () => {
+            const enterButtonElement = self.element('enter-button')
+            const enterSpinnerElement = self.element('enter-spinner')
+            const enterErrorElement = self.element('enter-error')
+            
+            enterButtonElement.disabled = true
+            enterSpinnerElement.classList.remove('d-none')
+            enterErrorElement.classList.add('d-none')
+
+            let requestBody = {
+                'uses': 1,
+                'duration_minutes': 1.0
+            }
+
+            connectSelf.apiRequest('POST', '/auth/code-create', requestBody)
+                .then((responseBody) => {
+                    self.handleEnterResponse(responseBody)
+                })
+                .catch((err) => {
+                    self.handleEnterResponse(null)
+                })
+        }
+
+        self.handleEnterResponse = (responseBody) => {
+            const enterButtonElement = self.element('enter-button')
+            const enterSpinnerElement = self.element('enter-spinner')
+            const enterErrorElement = self.element('enter-error')
+            
+            enterButtonElement.disabled = false
+            enterSpinnerElement.classList.add('d-none')
+
+            if (!responseBody) {
+                enterErrorElement.textContent = 'Something unexpected happened.'
+                enterErrorElement.classList.remove('d-none')
+            } else if ('auth_code' in responseBody) {
+                let url = `/c?auth=${responseBody['auth_code']}`
+                window.location.assign(url)
+            } else if ('error' in responseBody) {
+                enterErrorElement.textContent = responseBody['error']['message']
+                enterErrorElement.classList.remove('d-none')
+            } else {
+                enterErrorElement.textContent = 'Something unexpected happened.'
+                enterErrorElement.classList.remove('d-none')
+            }
+        }
+
+        self.copyAuthCode = () => {
+            const copyAuthCodeButtonElement = self.element('copy-auth-code-button')
+            const copyAuthCodeSpinnerElement = self.element('copy-auth-code-spinner')
+            const copyAuthCodeErrorElement = self.element('copy-auth-code-error')
+            const copyAuthCodeManualElement = self.element('copy-auth-code-manual')
+            
+            copyAuthCodeButtonElement.disabled = true
+            copyAuthCodeSpinnerElement.classList.remove('d-none')
+            copyAuthCodeErrorElement.classList.add('d-none')
+            copyAuthCodeManualElement.classList.add('d-none')
+
+            let requestBody = {
+                'uses': 1,
+                'duration_minutes': 1.0
+            }
+
+            connectSelf.apiRequest('POST', '/auth/code-create', requestBody)
+                .then((responseBody) => {
+                    self.handleCopyAuthCodeResponse(responseBody)
+                })
+                .catch((err) => {
+                    self.handleCopyAuthCodeResponse(null)
+                })
+        }
+
+        self.handleCopyAuthCodeResponse = (responseBody) => {
+            const copyAuthCodeButtonElement = self.element('copy-auth-code-button')
+            const copyAuthCodeSpinnerElement = self.element('copy-auth-code-spinner')
+            const copyAuthCodeErrorElement = self.element('copy-auth-code-error')
+            const copyAuthCodeManualElement = self.element('copy-auth-code-manual')
+            const copyAuthCodeManualCodeElement = self.element('copy-auth-code-manual-code')
+
+            const copyAuthCodeTextElement = self.element('copy-auth-code-text')
+            const copyAuthCodeTextCopiedElement = self.element('copy-auth-code-text-copied')
+            
+            
+            if (!responseBody) {
+                copyAuthCodeErrorElement.textContent = 'Something unexpected happened.'
+                copyAuthCodeErrorElement.classList.remove('d-none')
+            } else if ('auth_code' in responseBody) {                
+                let authCode = responseBody['auth_code']
+
+                // navigator.permissions.query({ name: "clipboard-write" })
+                //     .then((result) => {
+                //         if (result.state === "granted" || result.state === "prompt") {
+                            navigator.clipboard.writeText(authCode)
+                                .then(() => {
+                                    copyAuthCodeTextElement.classList.add('d-none')
+                                    copyAuthCodeTextCopiedElement.classList.remove('d-none')
+
+                                    copyAuthCodeSpinnerElement.classList.add('d-none')
+
+                                    setTimeout(function() {
+                                        copyAuthCodeTextElement.classList.remove('d-none')
+                                        copyAuthCodeTextCopiedElement.classList.add('d-none')
+                                        copyAuthCodeButtonElement.disabled = false
+                                    }, 1000)
+                                })
+                                .catch((err) => {
+                                    copyAuthCodeButtonElement.disabled = false
+                                    copyAuthCodeSpinnerElement.classList.add('d-none')
+                                    copyAuthCodeManualElement.classList.remove('d-none')
+
+                                    copyAuthCodeManualCodeElement.value = authCode
+                                })
+                    //     } else {
+                    //         copyAuthCodeButtonElement.disabled = false
+                    //         copyAuthCodeSpinnerElement.classList.add('d-none')
+
+                    //         copyAuthCodeErrorElement.textContent = `${err.name}: ${err.message}`
+                    //         copyAuthCodeErrorElement.classList.remove('d-none')
+                    //     }
+                    // })
+                    // .catch((err) => {
+                    //     copyAuthCodeButtonElement.disabled = false
+                    //     copyAuthCodeSpinnerElement.classList.add('d-none')
+
+                    //     copyAuthCodeErrorElement.textContent = `${err.name}: ${err.message}`
+                    //     copyAuthCodeErrorElement.classList.remove('d-none')
+                    // })
+
+                
+            } else if ('error' in responseBody) {
+                copyAuthCodeButtonElement.disabled = false
+                copyAuthCodeSpinnerElement.classList.add('d-none')
+
+                copyAuthCodeErrorElement.textContent = responseBody['error']['message']
+                copyAuthCodeErrorElement.classList.remove('d-none')
+            } else {
+                copyAuthCodeButtonElement.disabled = false
+                copyAuthCodeSpinnerElement.classList.add('d-none')
+
+                copyAuthCodeErrorElement.textContent = 'Something unexpected happened.'
+                copyAuthCodeErrorElement.classList.remove('d-none')
+            }
+        }
+
+        self.copyAuthCodeManual = () => {
+            const copyAuthCodeErrorElement = self.element('copy-auth-code-error')
+            const copyAuthCodeManualCodeElement = self.element('copy-auth-code-manual-code')
+            const copyAuthCodeManualCodeCopyElement = self.element('copy-auth-code-manual-code-copy')
+            
+            copyAuthCodeErrorElement.classList.add('d-none')
+
+            copyAuthCodeManualCodeCopyElement.disabled = false
+
+            navigator.clipboard.writeText(copyAuthCodeManualCodeElement.value)
+                .then(() => {
+                    copyAuthCodeManualCodeCopyElement.textContent = 'Copied'
+
+                    setTimeout(function() {
+                        copyAuthCodeManualCodeCopyElement.textContent = 'Copy'
+                        copyAuthCodeManualCodeCopyElement.disabled = false
+                    }, 1000)
+                })
+                .catch((err) => {
+                    copyAuthCodeManualCodeCopyElement.disabled = false
+
+                    copyAuthCodeErrorElement.textContent = `${err.name}: ${err.message}`
+                    copyAuthCodeErrorElement.classList.remove('d-none')
+                })
+        }
+
         self.launchApp = (appRoute, windowRef) => {
             const launchAppButtonElement = self.element('launch-app-button')
             const launchAppSpinnerElement = self.element('launch-app-spinner')
@@ -1770,11 +1912,11 @@ new function() {
             }
 
             connectSelf.apiRequest('POST', '/auth/code-create', requestBody)
-                .catch((err) => {
-                    self.handleLaunchAppResponse(null, appRoute, windowRef)
-                })
                 .then((responseBody) => {
                     self.handleLaunchAppResponse(responseBody, appRoute, windowRef)
+                })
+                .catch((err) => {
+                    self.handleLaunchAppResponse(null, appRoute, windowRef)
                 })
         }
 
@@ -1832,11 +1974,11 @@ new function() {
             }
 
             connectSelf.apiRequest('POST', '/preferences/set-preferences', requestBody)
-                .catch((err) => {
-                    self.handleSubmitPreferencesResponse(null)
-                })
                 .then((responseBody) => {
                     self.handleSubmitPreferencesResponse(responseBody)
+                })
+                .catch((err) => {
+                    self.handleSubmitPreferencesResponse(null)
                 })
 
             // setTimeout(() => {
@@ -1923,11 +2065,11 @@ new function() {
             }
 
             connectSelf.apiRequest('POST', '/feedback/send-feedback', requestBody)
-                .catch((err) => {
-                    self.handleSubmitResponse(null)
-                })
                 .then((responseBody) => {
                     self.handleSubmitResponse(responseBody)
+                })
+                .catch((err) => {
+                    self.handleSubmitResponse(null)
                 })
 
             // setTimeout(() => {
@@ -1947,7 +2089,6 @@ new function() {
 
 
     self.renderInitial = function(container, id, nonce) {
-        //  data-callback="window.handleGoogleCredentialResponse"
         let html = `
               <div class="login-option">
                    <div class="login-container">
@@ -2007,7 +2148,7 @@ new function() {
               </div>
               <div class="login-separator">- or -</div>
               <div class="login-option">
-                   Commitment issues? <a href="">Try guest mode</a>
+                   Commitment issues? <a href="/c?guest">Try guest mode</a>
               </div>
          `
         container.innerHTML = html
@@ -2249,27 +2390,32 @@ new function() {
         html += `
           <div class="login-option">
                <div class="login-container">
-                    <div><button type="button" class="btn btn-primary">Enter</button></div>
+                    <div><button id="${id('enter-button')}" type="button" class="btn btn-primary">Enter<span id="${id('enter-spinner')}" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span></button></div>
+                    <div id="${id('enter-error')}" class="text-danger d-none"></div>
                </div>
           </div>
         `
 
-          html += `
-              <div class="login-option">
+        html += `
+            <div class="login-option">
                    <div class="login-container">
                         <label class="form-check-label"><input id="${id('preferences-product-updates')}" type="checkbox" value="" class="form-check-input"> You can send me occasional product updates</label>
                         <div><span id="${id('preferences-spinner')}" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span><span id="${id('preferences-saved')}" class="text-success d-none">Preferences saved!</span></div>
                    </div>
-              </div>
-         `
+            </div>
+        `
 
         html += `
               <div class="login-separator">account tools</div>
               <div class="login-option">
                    <div class="login-container">
-                        <div><button id="${id('launch-app-button')}" type="button" class="btn btn-secondary btn-sm">Copy an auth code<span id="${id('launch-app-spinner')}" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span></button></div>
-                        <div id="${id('launch-app-error')}" class="text-danger d-none"></div>
-                        <div>This is used to <a href="">set up a provider node</a>.</div>
+                        <div><button id="${id('copy-auth-code-button')}" type="button" class="btn btn-secondary btn-sm"><span id="${id('copy-auth-code-text')}">Copy an auth code</span><span id="${id('copy-auth-code-text-copied')}" class="d-none">Copied</span><span id="${id('copy-auth-code-spinner')}" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span></button></div>
+                        <div id="${id('copy-auth-code-error')}" class="text-danger d-none"></div>
+                        <div id="${id('copy-auth-code-manual')}" class="input-group input-group-sm mb-3 d-none">
+                            <input id="${id('copy-auth-code-manual-code')}" type="text" class="form-control" placeholder="Auth Code" aria-label="Auth Code" aria-describedby="${id('copy-auth-code-manual-code-copy')}" readonly>
+                            <button id="${id('copy-auth-code-manual-code-copy')}" class="btn btn-outline-secondary btn-sm" type="button">Copy</button>
+                        </div>
+                        <div>This is used to <a href="https://docs.ur.io/provider" target="_blank">set up provider nodes</a>, <a href="https://docs.ur.io/integrations/routers" target="_blank">secure wifi routers</a>, and <a href="https://docs.ur.io/integrations" target="_blank">more</a>.</div>
                    </div>
               </div>
               <div class="login-option">
@@ -2277,14 +2423,10 @@ new function() {
                         <a href="/connect/signout">Sign out</a>
                    </div>
               </div>
-              
-         `
+        `
 
         container.innerHTML = html
     }
-
-
-
 
 }()
 
