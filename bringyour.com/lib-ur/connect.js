@@ -3,8 +3,8 @@ new function() {
     const self = this
     const connectSelf = self
 
-    const clientVersion = '1.0.0-ur';
-    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    const clientVersion = '1.0.0-ur'
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
 
     const googleClientId = '338638865390-cg4m0t700mq9073smhn9do81mr640ig1.apps.googleusercontent.com'
     const appleClientId = 'com.bringyour.service'
@@ -262,7 +262,12 @@ new function() {
             connectSelf.renderInitial(container, self.id, nonce)
 
             if (typeof AppleID !== 'undefined') {
-                // connect with apple
+                // connect with apple                
+                // note this component doesn't have a proper de-initialization
+                // clean up overlapping listeners so that there is only once active mount per document
+
+                // see https://developer.apple.com/documentation/sign_in_with_apple/sign_in_with_apple_js/configuring_your_webpage_for_sign_in_with_apple
+                // see https://developer.apple.com/documentation/sign_in_with_apple/sign_in_with_apple_rest_api/authenticating_users_with_sign_in_with_apple
                 AppleID.auth.init({
                     clientId: appleClientId,
                     scope: 'name email',
@@ -272,23 +277,29 @@ new function() {
                     usePopup: true
                 })
 
-                // see https://developer.apple.com/documentation/sign_in_with_apple/sign_in_with_apple_js/configuring_your_webpage_for_sign_in_with_apple
-                document.addEventListener('AppleIDSignInOnSuccess', function(event) {
-                    // see https://developer.apple.com/documentation/sign_in_with_apple/sign_in_with_apple_rest_api/authenticating_users_with_sign_in_with_apple
-                    console.log(event.detail)
+                if (window.connectAppleIDSignInOnSuccess) {
+                    document.removeEventListener('AppleIDSignInOnSuccess', window.connectAppleIDSignInOnSuccess)
+                }
+                window.connectAppleIDSignInOnSuccess = function(event) {
                     let authJwt = event.detail.authorization.id_token
                     self.submitAuthJwt('apple', authJwt)
                     connectSelf.showConnectDialog()
+                }
+                document.addEventListener('AppleIDSignInOnSuccess', window.connectAppleIDSignInOnSuccess)
 
-                })
-                document.addEventListener('AppleIDSignInOnFailure', (event) => {
+                if (window.connectAppleIDSignInOnFailure) {
+                    document.removeEventListener('AppleIDSignInOnFailure', window.connectAppleIDSignInOnFailure)
+                }
+                window.connectAppleIDSignInOnFailure = function(event) {
                     // do nothing
                     console.log(`[apple]sign in failure: ${event.detail.error}`)
-                })
+                }
+                document.addEventListener('AppleIDSignInOnFailure', window.connectAppleIDSignInOnFailure)
             }
 
             if (window.google) {
                 // connect with google
+                // note this replaces the previously initialized mount
                 window.google.accounts.id.initialize({
                     client_id: googleClientId,
                     callback: (response, error) => {
@@ -1763,7 +1774,7 @@ new function() {
                 enterErrorElement.textContent = 'Something unexpected happened.'
                 enterErrorElement.classList.remove('d-none')
             } else if ('auth_code' in responseBody) {
-                let url = `/c?auth=${responseBody['auth_code']}`
+                let url = `/c?auth_code=${responseBody['auth_code']}`
                 window.location.assign(url)
             } else if ('error' in responseBody) {
                 enterErrorElement.textContent = responseBody['error']['message']
