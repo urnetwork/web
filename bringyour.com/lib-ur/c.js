@@ -5,11 +5,16 @@ new function() {
 
     setTimeout(function(){
         self.initStoreLinks()
+
+        // attempt to redirect to the deep link
+        let u = URL.parse(window.location.href)
+    	let deepLink = `ur://${u.search}`
+    	window.location.replace(deepLink)
     }, 0)
 
     self.initStoreLinks = function() {
     	var storeLink
-    	if (self.isAndroid()) {
+    	if (self.isPlatformSupported()) {
     		let referrer = encodeURIComponent(window.location.href)
     		storeLink = `https://play.google.com/store/apps/details?id=com.bringyour.network&referrer=${referrer}`
     	} else {
@@ -22,8 +27,16 @@ new function() {
         }
     }
 
+    self.isPlatformSupported = function() {
+    	return self.isAndroid() || self.isChromeOs()
+    }
+
     self.isAndroid = function() {
 	    return /Android/i.test(navigator.userAgent)
+	}
+
+	self.isChromeOs = function() {
+		return /CrOS/.test(navigator.userAgent)
 	}
 
 	self.isApple = function() {
