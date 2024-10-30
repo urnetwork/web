@@ -1,0 +1,176 @@
+
+
+#dialog-connect-mount {
+   font-family: "PP Neue Montreal Regular", "PP Neue Montreal Regular Placeholder", sans-serif;
+}
+
+
+#dialog-connect-mount div.dialog {
+/*   display: inline-block;*/
+/*   border: 1px solid rgb(0, 0, 0);*/
+   width: 100%;
+   min-height: 400;
+/*   padding: 12px;*/
+/*   margin: 24px;*/
+}
+
+/*#appleid-signin svg text {
+   font-family: sans-serif;
+   font-size: 8pt;
+}
+*/
+/*#appleid-signin {
+   position: relative;
+}
+
+#appleid-signin div.signin-action {
+   display: inline-block;
+   position: relative;
+   right: -100px;
+}*/
+
+
+
+#dialog-connect-mount div.login-separator {
+   text-align: center;
+}
+
+#dialog-connect-mount div.login-option {
+   margin-top: 12px;
+   margin-bottom: 12px;
+   text-align: center;
+}
+
+#dialog-connect-mount div.login-option div.login-container {
+   display: inline-block;
+   text-align: left;
+   width: 300px;
+}
+
+#apple-container {
+   display: inline-block;
+   border: 1px solid rgb(218, 220, 224);
+   border-radius: 4px;
+   cursor: pointer;
+   padding: 0px;
+   transition: background-color .218s, border-color .218s;
+   user-select: none;
+}
+
+#apple-container:hover {
+/*             border-color: #d2e3fc*/
+   border-color: rgb(0, 0, 0);
+}
+
+#dialog-connect-mount div.title {
+   font-size: 18pt;
+   font-weight: 200;
+   overflow-wrap: break-word;
+   font-family: "ABC Gravity Extra Condensed", "ABC Gravity Extra Condensed Placeholder", sans-serif;
+}
+
+#dialog-connect-mount div.title span.material-symbols-outlined {
+   font-size: 12pt;
+   padding: 4px;
+   color: rgb(0, 0, 0);
+}
+
+#dialog-connect-mount div.info-title {
+   font-size: 12pt;
+   font-weight: 200;
+   margin-top: 8px;
+   margin-bottom: 4px;
+}
+
+#dialog-connect-mount button span.primary {
+   margin-left: 8px;
+   margin-right: 8px;
+}
+
+
+
+/*#apple-container:active {
+   background-color: rgb(250, 250, 250) !important;
+}
+
+#apple-container:active div {
+   background-color: inherit !important;
+}*/
+
+#dialog-connect-mount div.login-option input[type=text]:not(.form-control), input[type=password]:not(.form-control) {
+   height: 39px;
+   border: 1px solid rgb(218, 220, 224);
+   border-radius: 4px;
+   width: 300px;
+}
+
+/*div.network-name {
+	width: 300px;
+}*/
+
+/*div.login-option input[type=text].network-name {
+   width: 100px !important;
+}*/
+
+#dialog-connect-mount div.login-option input[type=checkbox] {
+   margin-right: 8px;
+}
+
+/*div.login-option button {
+	margin-top: 12px;
+}*/
+
+#dialog-connect-mount div.login-option div.no-title {
+	margin-top: 12px;
+}
+
+/*div.login-option label {
+	margin-top: 12px;
+}*/
+
+#dialog-connect-mount div.login-option textarea {
+   height: 78px;
+   border: 1px solid rgb(218, 220, 224);
+   border-radius: 4px;
+   width: 300px;
+}
+
+#dialog-connect-mount div.login-header {
+   position: relative;
+   margin-top: 12px;
+   margin-bottom: 12px;
+}
+
+#dialog-connect-mount div.login-header div.header-right {
+   position: absolute;
+   bottom: 0px;
+   right: 0px;
+}
+
+
+#dialog-connect-mount div.password-header {
+   position: relative;
+   margin-top: 4px;
+   margin-bottom: 4px;
+}
+
+#dialog-connect-mount div.password-header div.header-right {
+   position: absolute;
+   bottom: 0px;
+   right: 0px;
+}
+
+#dialog-connect-mount img.store {
+   max-height: 40px;
+}
+
+#dialog-connect-mount div.login-option div.feedback-container {
+	margin-top: 2px;
+
+}
+
+
+#dialog-connect-mount img.arrow-back {
+   width: 24px;
+   height: 24px;
+}
