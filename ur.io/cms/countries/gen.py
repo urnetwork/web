@@ -405,7 +405,7 @@ countries = {
 "re": "R\xE9union",
 "ro": "Romania",
 "rs": "Serbia",
-"ru": "Russian Federation",
+"ru": "Russia",
 "rw": "Rwanda",
 "sa": "Saudi Arabia",
 "sb": "Solomon Islands",
@@ -467,59 +467,149 @@ countries = {
 "zw": "Zimbabwe"
 }
 
+top_country_codes = [
+    "us",  # United States
+    "cn",  # China
+    "jp",  # Japan
+    "de",  # Germany
+    "in",  # India
+    "gb",  # United Kingdom
+    "fr",  # France
+    "ru",  # Russia
+    "ca",  # Canada
+    "it",  # Italy
+    "br",  # Brazil
+    "kr",  # South Korea
+    "au",  # Australia
+    "mx",  # Mexico
+    "es",  # Spain
+    "id",  # Indonesia
+    "nl",  # Netherlands
+    "sa",  # Saudi Arabia
+    "tr",  # Turkey
+    "ch",  # Switzerland
+    "pl",  # Poland
+    "tw",  # Taiwan
+    "se",  # Sweden
+    "be",  # Belgium
+    "th",  # Thailand
+    "ng",  # Nigeria
+    "ir",  # Iran
+    "ae",  # United Arab Emirates
+    "ar",  # Argentina
+    "at",  # Austria
+    "no",  # Norway
+    "dk",  # Denmark
+    "za",  # South Africa
+    "ph",  # Philippines
+    "hk",  # Hong Kong
+    "sg",  # Singapore
+    "my",  # Malaysia
+    "ie",  # Ireland
+    "il",  # Israel
+    "co",  # Colombia
+    "vn",  # Vietnam
+    "eg",  # Egypt
+    "pk",  # Pakistan
+    "nz",  # New Zealand
+    "cl",  # Chile
+    "ro",  # Romania
+    "bd",  # Bangladesh
+    "pt",  # Portugal
+    "cz",  # Czech Republic
+    "pe",  # Peru
+]
+
+
+
+def repair_markdown(m):
+    return re.sub(r'\]\s+\(([^)]+)\)', '](\\1)', m)
+
 
 class Section(object):
+    country = ""
     header = ""
     body = ""
-    def __init__(self, header, body):
+    def __init__(self, country, header, body):
+        self.country = country
         self.header = header
         self.body = body
 
     def body_as_html(self, connect_links=True):
-        html = markdown.markdown(self.body)
+        repaired_body = repair_markdown(self.body)
+
+        html = markdown.markdown(repaired_body)
         if connect_links:
-            html = re.sub(r'href="(https://[^"]+)"', lambda m: 'href="/c?target={}"'.format(urllib.parse.quote_plus(m.group(1))), html)
+            def f(m):
+                return 'href="/c?{}&target={}"'.format(
+                    urllib.parse.quote(self.country.lower()),
+                    urllib.parse.quote_plus(re.sub(r'http://', r'https://', m.group(1)))
+                )
+            html = re.sub(r'href="(https?://[^"]+)"', f, html)
         return html
 
+
+ordered_items = [
+    (country_code, countries[country_code])
+    for country_code in top_country_codes
+]
+ordered_items += sorted(
+    [
+        (country_code, country)
+        for (country_code, country) in countries.items()
+        if country_code not in top_country_codes
+    ],
+    key=lambda t: t[1],
+)
 
 
 with open("out.csv", "w") as f:
 
     w = csv.writer(f, quoting=csv.QUOTE_ALL)
-    header_row = ["Title", "Slug", "Tint"]
+    header_row = ["Custom Slug", "Title", "Country Name", "Country Code", "Tint"]
     for i in range(0, 5):
         header_row += ["Title{}".format(i + 1), "Section{}".format(i + 1)]
     w.writerow(header_row)
     print(header_row)
 
-    for (country_code, country) in countries.items():
+    for (country_code, country) in ordered_items:
 
         sections = [
             Section(
+                country,
                 "Hello {country} from URnetwork! Why do you need a VPN?".format(country=country),
                 claude("Write a short paragraph pitch why I need a VPN inside {country}. List specific top geo-fencing and content access issues. Do not mention any other VPNs. Do not mention anything about government laws or illegal activity. Add links to websites for services. Add links inline markdown.".format(country=country)) + 
                 "\n" +
                 claude("Give a short paragraph pitch on why it is normal for a person in {country} to use a VPN or ad blocker. Use statistics about other people in {country}. Make people feel normal for wanting to use a VPN or ad blocker.".format(country=country))
             ),
             Section(
+                country,
                 "Hello world from URnetwork in {country}! Why do you need a VPN to access {country}?".format(country=country),
                 claude("Write a two paragraph pitch why I need a VPN to access apps and content inside {country} from another country. List specific top apps and top content. Do not mention any other VPNs. Add links to websites for services. Add links inline markdown.".format(country=country))
             ),
             Section(
+                country,
                 "How is URnetwork optimized for {country}?".format(country=country),
                 claude("Write a short paragraph pitch that asserts URnetwork unique architecture avoids other top issues that users have reported when using a VPN inside {country}.".format(country=country))
             ),
             Section(
+                country,
                 "What should I browse in {country}?".format(country=country),
                 claude("In three paragraphs, describe to an online viewer the streaming live sports, streaming tv, and online shopping available in {country}. Add links to websites for services. Add links inline markdown.".format(country=country))
             ),
             Section(
+                country,
                 "How is Consumer Privacy and Internet Freedom in {country}?".format(country=country),
                 claude("In a paragraph, describe the main consumer privacy laws and internet freedom laws in the {country}. Add links inline markdown.".format(country=country))
             ),
         ]
 
-        row = [country, country_code, "#{}".format(get_color_hex(country_code))]
+        country_slug = re.sub(r'\s+', '-', country.lower())
+        slug = 'vpn-access-in-{}'.format(country_slug)
+        title = 'VPN Access In {}'.format(country)
+        country_color_hex = "#{}".format(get_color_hex(country_code))
+
+        row = [slug, title, country, country_code, country_color_hex]
         for section in sections:
             row += [section.header, section.body_as_html()]
         w.writerow(row)
