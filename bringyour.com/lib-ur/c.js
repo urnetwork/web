@@ -4,15 +4,14 @@ new function() {
     const self = this
 
     setTimeout(function(){
-        self.initStoreLinks()
+        self.initLinks()
 
         // attempt to redirect to the deep link
-        let u = URL.parse(window.location.href)
-    	let deepLink = `ur://${u.search}`
+    	let deepLink = `ur://${window.location.search}`
     	window.location.replace(deepLink)
     }, 0)
 
-    self.initStoreLinks = function() {
+    self.initLinks = function() {
     	var storeLink
     	if (self.isPlatformSupported()) {
     		let referrer = encodeURIComponent(window.location.href)
@@ -24,6 +23,18 @@ new function() {
         let storeLinkElements = document.querySelectorAll('a[href="https://store.ur.io"]')
         for (const storeLinkElement of storeLinkElements) {
             storeLinkElement.setAttribute("href", storeLink)
+        }
+
+        let params = new URLSearchParams(window.location.search)
+        let targetLink = params.get("target")
+        if (targetLink) {
+            let u = URL.parse(targetLink)
+            if (u) {
+                let targetLinkElements = document.querySelectorAll('a[href="https://target.ur.io"]')
+                for (const targetLinkElement of targetLinkElements) {
+                    targetLinkElement.setAttribute("href", targetLink)
+                }
+            }
         }
     }
 
