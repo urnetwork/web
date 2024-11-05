@@ -291,7 +291,7 @@ countries = {
 "fo": "Faroe Islands",
 "fr": "France",
 "ga": "Gabon",
-"gb": "United Kingdom",
+"gb": "Great Britain",
 "gd": "Grenada",
 "ge": "Georgia",
 "gf": "French Guiana",
@@ -473,7 +473,7 @@ top_country_codes = [
     "jp",  # Japan
     "de",  # Germany
     "in",  # India
-    "gb",  # United Kingdom
+    "uk",  # United Kingdom
     "fr",  # France
     "ru",  # Russia
     "ca",  # Canada

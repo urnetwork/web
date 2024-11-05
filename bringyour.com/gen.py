@@ -114,13 +114,9 @@ def app_js_css():
     <script src="/lib/jquery.min.js" defer></script>
     <script src="/lib/bootstrap.bundle.min.js" defer></script>
 
-    <script src="/connect.js" defer></script>
-
     {stats_bundle}
     {logo_bundle}
     
-    <script src="https://accounts.google.com/gsi/client" defer></script>
-    <script src="https://appleid.cdn-apple.com/appleauth/static/jsapi/appleid/1/en_US/appleid.auth.js" defer></script>
     """.format(
         css_bootstrap=css('res/css/bootstrap.min.css', inline),
         css_main=css('res/css/main.css', inline),
@@ -191,12 +187,13 @@ def tab_header():
     ]
 
     tab_html_parts = []
-    for tab_page_path, tab_title in tabs:
-        if tab_page_path == canonical_page_path:
-            tab_html_part = f"""<div class="tab tab-selected">{tab_title}</div>"""
-        else:
-            tab_html_part = f"""<a href="/{tab_page_path}"><div class="tab">{tab_title}</div></a>"""
-        tab_html_parts.append(tab_html_part)
+    if canonical_page_path not in ['']:
+        for tab_page_path, tab_title in tabs:
+            if tab_page_path == canonical_page_path:
+                tab_html_part = f"""<div class="tab tab-selected">{tab_title}</div>"""
+            else:
+                tab_html_part = f"""<a href="/{tab_page_path}"><div class="tab">{tab_title}</div></a>"""
+            tab_html_parts.append(tab_html_part)
 
     return """
     <div id="header">
@@ -205,7 +202,6 @@ def tab_header():
                 <tr>
                     <td id="logo"><img id="logo-placeholder" src="/res/images/logo-placeholder.png" alt="BringYour"></td>
                     <td class="expand"><div class="tab-container">{tab_html}</div></td>
-                    <td class="start"><button type="button" id="start" class="btn btn-primary d-none" data-bs-toggle="modal" data-bs-target="#dialog-connect">Connect</button></td>
                 </tr>
             </tbody>
         </table>
