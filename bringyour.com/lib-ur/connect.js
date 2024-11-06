@@ -2426,7 +2426,7 @@ new function() {
                             <input id="${id('copy-auth-code-manual-code')}" type="text" class="form-control" placeholder="Auth Code" aria-label="Auth Code" aria-describedby="${id('copy-auth-code-manual-code-copy')}" readonly>
                             <button id="${id('copy-auth-code-manual-code-copy')}" class="btn btn-outline-secondary btn-sm" type="button">Copy</button>
                         </div>
-                        <div>This is used to <a href="https://docs.ur.io/provider" target="_blank">set up provider nodes</a>, <a href="https://docs.ur.io/integrations/routers" target="_blank">secure wifi routers</a>, and <a href="https://docs.ur.io/integrations" target="_blank">more</a>.</div>
+                        <div>This is used to <a href="https://docs.ur.io/provider" target="_blank">set up provider nodes</a>, <a href="https://docs.ur.io/api" target="_blank">API access</a>, and <a href="https://docs.ur.io/integrations" target="_blank">more</a>.</div>
                    </div>
               </div>
               <div class="login-option">

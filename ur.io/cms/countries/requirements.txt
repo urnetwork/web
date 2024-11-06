@@ -1,0 +1,5 @@
+anthropic
+google-cloud-translate
+markdown
+babel
+pycountry
