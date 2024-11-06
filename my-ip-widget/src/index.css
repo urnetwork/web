@@ -1,0 +1,18 @@
+.title {
+  font-family: "PP NeueBit Bold", "PP NeueBit Bold Placeholder", sans-serif;
+  font-size: 30px;
+  font-weight: 400;
+  text-decoration-color: rgb(16, 16, 16);
+}
+
+.text-body {
+    font-family: "PP Neue Montreal", "PP Neue Montreal Regular", "PP Neue Montreal Regular Placeholder", sans-serif;
+    color: #737373
+    font-size: 20px;
+    font-weight: 400;   
+}
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
