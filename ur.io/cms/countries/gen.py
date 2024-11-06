@@ -541,7 +541,10 @@ class Section(object):
         html = markdown.markdown(repaired_body)
         if connect_links:
             def f(m):
-                return 'href="/c?{}&target={}"'.format(
+                # framer cms does not suppport relative links with query params
+                # use the absolute url
+                # see https://www.framer.community/c/support/bug-cms-rich-text-stripping-query-parameter-from-links
+                return 'href="https://ur.io/c?{}&target={}"'.format(
                     urllib.parse.quote(self.country.lower()),
                     urllib.parse.quote_plus(re.sub(r'http://', r'https://', m.group(1)))
                 )
