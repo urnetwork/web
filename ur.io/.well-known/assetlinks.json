@@ -1,0 +1,29 @@
+[{
+  "relation": ["delegate_permission/common.handle_all_urls"],
+  "target": {
+    "namespace": "android_app",
+    "package_name": "com.bringyour.network",
+    "sha256_cert_fingerprints":
+    ["4B:B1:1E:A6:5A:B6:A6:84:D4:F0:F7:6B:A2:85:26:69:65:D6:36:2B:62:33:F8:58:A4:63:F9:03:EB:4E:B1:7C",
+      "9D:A6:E7:F8:F4:40:7C:79:3E:01:20:4C:1F:5A:EF:47:F9:8B:FD:10:CC:E1:99:2E:F0:42:E3:A2:BF:5B:25:CC",
+      "73:05:27:8D:84:FC:D7:A9:2D:F3:4A:A1:84:FB:4F:6C:81:58:33:6F:91:7D:D5:37:C7:57:E1:27:06:C4:0C:A2"]
+  }
+},
+{
+  "relation": ["delegate_permission/common.get_login_creds"],
+  "target": {
+    "namespace": "web",
+    "site": "https://ur.io"
+  }
+},
+{
+  "relation": ["delegate_permission/common.get_login_creds"],
+  "target": {
+    "namespace": "android_app",
+    "package_name": "com.bringyour.network",
+    "sha256_cert_fingerprints":
+    ["4B:B1:1E:A6:5A:B6:A6:84:D4:F0:F7:6B:A2:85:26:69:65:D6:36:2B:62:33:F8:58:A4:63:F9:03:EB:4E:B1:7C",
+      "9D:A6:E7:F8:F4:40:7C:79:3E:01:20:4C:1F:5A:EF:47:F9:8B:FD:10:CC:E1:99:2E:F0:42:E3:A2:BF:5B:25:CC",
+      "73:05:27:8D:84:FC:D7:A9:2D:F3:4A:A1:84:FB:4F:6C:81:58:33:6F:91:7D:D5:37:C7:57:E1:27:06:C4:0C:A2"]
+  }
+}]
