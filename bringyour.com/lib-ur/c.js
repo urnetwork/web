@@ -19,7 +19,7 @@ new function() {
             let params = new URLSearchParams(window.location.search)
             // any app can intercept the custom scheme
             params.delete('auth_code')
-        	let deepLink = `ur://ur.io/c${params.toString()}`
+        	let deepLink = `ur://ur.io/c?${params.toString()}`
         	window.location.replace(deepLink)
         }
     }, 0)
