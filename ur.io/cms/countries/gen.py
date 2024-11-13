@@ -40,17 +40,20 @@ def claude(prompt, natural=True):
         ]
     )
     
-    out = ""
+    out = []
     for b in message.content:
-        for c in b.text.split('\n'):
+        text = b.text.strip()
+        for c in text.split('\n'):
+            c = c.strip()
+            c = re.sub(r'\s+', ' ', c)
             if c and natural:
                 # print(out)
                 c = translate_text(c, 'en')
-            out = "{}\n{}".format(out, c)
+            out.append(c)
     # if natural:
     #     # print(out)
     #     out = translate_text(out, 'en')
-    return out
+    return '\n'.join(out)
 
 # fixme render markdown to html
 
@@ -530,10 +533,12 @@ class Section(object):
     country = ""
     header = ""
     body = ""
-    def __init__(self, country, header, body):
+    localize_links = False
+    def __init__(self, country, header, body, localize_links=False):
         self.country = country
         self.header = header
         self.body = body
+        self.localize_links = localize_links
 
     def body_as_html(self, connect_links=True):
         repaired_body = repair_markdown(self.body)
@@ -541,12 +546,21 @@ class Section(object):
         html = markdown.markdown(repaired_body)
         if connect_links:
             def f(m):
+                url = re.sub(r'http://', r'https://', m.group(1))
+                use_country = self.country
+                if self.localize_links:
+                    # could also try: Give a country where the following website has a rich community of users. The website must work in that country. Only the country name, do not add any other text. https://mercadolibre.com
+                    use_country = claude(
+                        'List the country where the following website is based. Only the country name, do not add any other text. {}'.format(url),
+                        natural=False
+                    )
+
                 # framer cms does not suppport relative links with query params
                 # use the absolute url
                 # see https://www.framer.community/c/support/bug-cms-rich-text-stripping-query-parameter-from-links
                 return 'href="https://ur.io/c?{}&target={}"'.format(
-                    urllib.parse.quote(self.country.lower()),
-                    urllib.parse.quote_plus(re.sub(r'http://', r'https://', m.group(1)))
+                    urllib.parse.quote(use_country.lower()),
+                    urllib.parse.quote_plus(url)
                 )
             html = re.sub(r'href="(https?://[^"]+)"', f, html)
         return html
@@ -569,7 +583,7 @@ ordered_items += sorted(
 with open("out.csv", "w") as f:
 
     w = csv.writer(f, quoting=csv.QUOTE_ALL)
-    header_row = ["Custom Slug", "Title", "Country Name", "Country Code", "Tint"]
+    header_row = ["Custom Slug", "Title", "Country Name", "Country Code", "Tint", "Stay Link", "Leave Link"]
     for i in range(0, 5):
         header_row += ["Title{}".format(i + 1), "Section{}".format(i + 1)]
     w.writerow(header_row)
@@ -580,25 +594,26 @@ with open("out.csv", "w") as f:
         sections = [
             Section(
                 country,
-                "Hello {country} from URnetwork! Why do you need a VPN?".format(country=country),
+                "Hello {country}!".format(country=country),
                 claude("Write a short paragraph pitch why I need a VPN inside {country}. List specific top geo-fencing and content access issues. Do not mention any other VPNs. Do not mention anything about government laws or illegal activity. Add links to websites for services. Add links inline markdown.".format(country=country)) + 
                 "\n" +
-                claude("Give a short paragraph pitch on why it is normal for a person in {country} to use a VPN or ad blocker. Use statistics about other people in {country}. Make people feel normal for wanting to use a VPN or ad blocker.".format(country=country))
+                claude("Give a short paragraph pitch on why it is normal for a person in {country} to use a VPN or ad blocker. Use statistics about other people in {country}. Make people feel normal for wanting to use a VPN or ad blocker.".format(country=country)),
+                localize_links=True,
             ),
             Section(
                 country,
-                "Hello world from URnetwork in {country}! Why do you need a VPN to access {country}?".format(country=country),
+                "Using a VPN in {country}".format(country=country),
                 claude("Write a two paragraph pitch why I need a VPN to access apps and content inside {country} from another country. List specific top apps and top content. Do not mention any other VPNs. Add links to websites for services. Add links inline markdown.".format(country=country))
+            ),
+            Section(
+                country,
+                "Access {country} content through a VPN".format(country=country),
+                claude("In three paragraphs, describe to an online viewer the streaming live sports, streaming tv, and online shopping available in {country}. Add links to websites for services. Add links inline markdown.".format(country=country))
             ),
             Section(
                 country,
                 "How is URnetwork optimized for {country}?".format(country=country),
                 claude("Write a short paragraph pitch that asserts URnetwork unique architecture avoids other top issues that users have reported when using a VPN inside {country}.".format(country=country))
-            ),
-            Section(
-                country,
-                "What should I browse in {country}?".format(country=country),
-                claude("In three paragraphs, describe to an online viewer the streaming live sports, streaming tv, and online shopping available in {country}. Add links to websites for services. Add links inline markdown.".format(country=country))
             ),
             Section(
                 country,
@@ -611,8 +626,15 @@ with open("out.csv", "w") as f:
         slug = 'vpn-access-in-{}'.format(country_slug)
         title = 'VPN Access In {}'.format(country)
         country_color_hex = "#{}".format(get_color_hex(country_code))
+        stay_link = "https://ur.io/c?{}".format(
+            urllib.parse.quote(country.lower())
+        )
+        leave_link = "https://ur.io/c?{}".format(
+            urllib.parse.quote('Strong Privacy Laws and Internet Freedom')
+        )
 
-        row = [slug, title, country, country_code, country_color_hex]
+
+        row = [slug, title, country, country_code, country_color_hex, stay_link, leave_link]
         for section in sections:
             row += [section.header, section.body_as_html()]
         w.writerow(row)
