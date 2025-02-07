@@ -26,9 +26,12 @@ new function() {
 
     self.initLinks = function() {
     	var storeLink
-    	if (self.isPlatformSupported()) {
+    	if (self.isAndroid() || self.isChromeOs()) {
     		let referrer = encodeURIComponent(window.location.href)
     		storeLink = `https://play.google.com/store/apps/details?id=com.bringyour.network&referrer=${referrer}`
+        } else if (self.isApple()) {
+            // FIXME referrer
+            storeLink = "https://apps.apple.com/us/app/urnetwork/id6741000606"
     	} else {
     		storeLink = "/app"
     	}
