@@ -14,10 +14,10 @@ new function() {
                 let byJwt = self.parseByJwt()
                 if (byJwt) {
                     let networkName = byJwt['network_name']
+                    pElement.urRestoreTextContent = pElement.textContent
                     pElement.textContent = networkName /*+ '.ur.network'*/
-                }
-                else {
-                    pElement.textContent = 'Connect'
+                } else if (pElement.urRestoreTextContent) {
+                    pElement.textContent = pElement.urRestoreTextContent
                 }
             }
         }

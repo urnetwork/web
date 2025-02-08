@@ -7,7 +7,7 @@ new function() {
     const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
 
     const googleClientId = '338638865390-cg4m0t700mq9073smhn9do81mr640ig1.apps.googleusercontent.com'
-    const appleClientId = 'com.bringyour.service'
+    const appleClientId = 'network.ur.service'
     const authJwtRedirect = 'https://ur.io'
     const authLoginUri = "https://api.bringyour.com/connect"
 

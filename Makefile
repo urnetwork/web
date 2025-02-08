@@ -47,23 +47,18 @@ build:
 gen_my_ip_info:
 	# Outputs build artifacts to ./build
 	cd components/whereami/my-ip-info; . ${NVM_DIR}/nvm.sh && \
+		nvm exec ${NODE_VERSION} npm audit && \
 		nvm exec ${NODE_VERSION} npm ci && \
 		nvm exec ${NODE_VERSION} npm run build
 	cp components/whereami/my-ip-info/dist/my-ip-info.js bringyour.com/build/lib-ur/
-# 		note remove `npm audit` until outdated dependencies can be fixed
-# 		the app will be removed in the v0 launch
-# 		nvm exec ${NODE_VERSION} npm audit &&\
 
 gen_my_ip_widget:
 	# Outputs build artifacts to ./build
 	cd components/whereami/my-ip-widget; . ${NVM_DIR}/nvm.sh && \
+		nvm exec ${NODE_VERSION} npm audit && \
 		nvm exec ${NODE_VERSION} npm ci && \
 		nvm exec ${NODE_VERSION} npm run build
 	cp components/whereami/my-ip-widget/dist/my-ip-widget.js bringyour.com/build/lib-ur/
-# 		note remove `npm audit` until outdated dependencies can be fixed
-# 		the app will be removed in the v0 launch
-# 		nvm exec ${NODE_VERSION} npm audit &&\
-
 
 
 # LOCAL DEVELOPMENT
