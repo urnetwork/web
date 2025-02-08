@@ -24,6 +24,8 @@ gen_content:
 	pandoc -f markdown -t plain ${BRINGYOUR_HOME}/docs/legal/privacy.md -o bringyour.com/build/privacy.txt
 	pandoc -f markdown -t plain ${BRINGYOUR_HOME}/docs/legal/terms.md -o bringyour.com/build/terms.txt
 	pandoc -f markdown -t plain ${BRINGYOUR_HOME}/docs/legal/vdp.md -o bringyour.com/build/vdp.txt
+	# include altstore
+	cp -r ${BRINGYOUR_HOME}/release/apple/stores/altstore bringyour.com/build/altstore
 
 build:
 	$(MAKE) gen_content

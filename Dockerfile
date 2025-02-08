@@ -32,6 +32,10 @@ RUN nginx -V
 ADD nginx/build/ /etc/nginx/
 ADD bringyour.com/build /www/bringyour.com
 
+# make sure all static files can be read
+RUN find /www/bringyour.com -type d -exec chmod ugo=rx {} +
+RUN find /www/bringyour.com -type f -exec chmod ugo=r {} +
+
 COPY build/${WARP_ENV}/status.json /srv/warp/status/status.json
 
 EXPOSE 80

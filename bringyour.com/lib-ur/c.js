@@ -56,10 +56,6 @@ new function() {
         }
     }
 
-    self.isPlatformSupported = function() {
-    	return self.isAndroid() || self.isChromeOs()
-    }
-
     self.isAndroid = function() {
 	    return navigator.userAgent && /Android/i.test(navigator.userAgent)
 	}
