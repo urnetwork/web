@@ -184,6 +184,18 @@ new function() {
         return self.withTimeout(p)
     }
 
+    self.isAndroid = function() {
+        return navigator.userAgent && /Android/i.test(navigator.userAgent)
+    }
+
+    self.isChromeOs = function() {
+        return navigator.userAgent && /CrOS/.test(navigator.userAgent)
+    }
+
+    self.isApple = function() {
+        return navigator.userAgent && /iPhone|iPad|iPod|Macintosh/i.test(navigator.userAgent)
+    }
+
     self.Route = function(path, component) {
         this.path = path
         this.component = component
@@ -1775,7 +1787,22 @@ new function() {
                 enterErrorElement.classList.remove('d-none')
             } else if ('auth_code' in responseBody) {
                 let url = `/c?auth_code=${responseBody['auth_code']}`
-                window.location.assign(url)
+
+                // FIXME put the protocol detection and fallback logic in this handler
+                // FIXME e.g. attempt to use protocol, then after 1s forward to store link as below
+
+                var storeLink
+                if (connectSelf.isAndroid() || connectSelf.isChromeOs()) {
+                    let referrer = encodeURIComponent(url)
+                    storeLink = `https://play.google.com/store/apps/details?id=com.bringyour.network&referrer=${referrer}`
+                } else if (connectSelf.isApple()) {
+                    // FIXME referrer
+                    storeLink = 'https://apps.apple.com/us/app/urnetwork/id6741000606'
+                } else {
+                    storeLink = url
+                }
+
+                window.location.assign(storeLink)
             } else if ('error' in responseBody) {
                 enterErrorElement.textContent = responseBody['error']['message']
                 enterErrorElement.classList.remove('d-none')
@@ -2097,24 +2124,11 @@ new function() {
         }
     }
 
-    self.isAndroid = function() {
-        return navigator.userAgent && /Android/i.test(navigator.userAgent)
-    }
-
-    self.isChromeOs = function() {
-        return navigator.userAgent && /CrOS/.test(navigator.userAgent)
-    }
-
-    self.isApple = function() {
-        return navigator.userAgent && /iPhone|iPad|iPod|Macintosh/i.test(navigator.userAgent)
-    }
-
     self.renderInitial = function(container, id, nonce) {
-
         var storeLink
-        if (self.isAndroid() || self.isChromeOs()) {
+        if (connectSelf.isAndroid() || connectSelf.isChromeOs()) {
             storeLink = 'https://play.google.com/store/apps/details?id=com.bringyour.network'
-        } else if (self.isApple()) {
+        } else if (connectSelf.isApple()) {
             storeLink = 'https://apps.apple.com/us/app/urnetwork/id6741000606'
         } else {
             storeLink = '/c?guest'
@@ -2294,7 +2308,7 @@ new function() {
             authName = 'Something'
         }
 
-        let userNameStr = userName || ''
+        let userNameStr = /*userName ||*/ `anon${crypto.randomUUID()}`
 
         let html = `
               <div class="login-option">
@@ -2325,6 +2339,7 @@ new function() {
 
     self.renderCreateNetwork = function(container, id, userAuth) {
         let userAuthStr = userAuth || ''
+        let userNameStr = `anon${crypto.randomUUID()}`
         let html = `
               <div class="login-option">
                    <div class="login-container">
@@ -2335,7 +2350,7 @@ new function() {
                    <div class="login-container">
                         <form id="${id('create-form')}">
                              <div class="info-title d-none">Your Name</div>
-                             <div class="d-none"><input id="${id('create-user-name')}" type="text" class="form-control"></div>
+                             <div class="d-none"><input id="${id('create-user-name')}" type="text" value="${self.escapeHtml(userNameStr)}" class="form-control"></div>
                              <div class="info-title">Email or Phone Number</div>
                              <div><input id="${id('create-user-auth')}" type="text" value="${self.escapeHtml(userAuthStr)}" class="form-control"></div>
                              <div id="${id('create-user-auth-error')}" class="text-danger d-none"></div>
