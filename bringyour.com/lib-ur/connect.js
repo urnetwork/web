@@ -973,13 +973,15 @@ new function() {
         // event handlers
 
         self.updateUserName = () => {
-            if (!self.networkEdited) {
-                let userName = createUserNameElement.value
+            // don't tie the network name to the user name
+            // the network name is public
+            // if (!self.networkEdited) {
+            //     let userName = createUserNameElement.value
 
-                let networkName = normalizeNetworkName(userName)
-                createNetworkNameElement.value = networkName
-                self.debounceValidateNetworkName(networkName)
-            }
+            //     let networkName = normalizeNetworkName(userName)
+            //     createNetworkNameElement.value = networkName
+            //     self.debounceValidateNetworkName(networkName)
+            // }
 
             self.userNameOk = 0 < createUserNameElement.value.length
             callback()
