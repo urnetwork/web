@@ -121,14 +121,14 @@ function Widget(props) {
       <div class="h-5 w-5">
         <Dot color={pulseColor()} />
       </div>
-      <a href={props.href} class="flex flex-col items-start justify-center fixed-150px leading-4">
+      <div class="flex flex-col items-start justify-center fixed-150px leading-4">
         <Show when={myIPv4}>
           <p class="text-xl text-navitem">{myIPv4}</p>
         </Show>
         <Show when={myIPv6} style="line-height: 1em;">
           <p class="text-xs text-navitem">{myIPv6}</p>
         </Show>
-      </a>
+      </div>
     </div>
   )
 }
@@ -136,10 +136,10 @@ function Widget(props) {
 customElement(
   "my-ip-widget",
   {
-    href: {
-      type: String,
-      attribute: "href",
-    },
+    // href: {
+    //   type: String,
+    //   attribute: "href",
+    // },
   },
   function (props, options) {
     noShadowDOM()
