@@ -161,7 +161,11 @@
 }
 
 #dialog-connect-mount img.store {
-   max-height: 40px;
+   height: 48px;
+}
+
+#dialog-connect-mount div.store {
+   margin: 12px;
 }
 
 #dialog-connect-mount div.login-option div.feedback-container {

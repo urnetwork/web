@@ -1,4 +1,6 @@
 
+NODE_VERSION := v20.10.0
+
 
 all: clean build
 
@@ -13,18 +15,22 @@ clean:
 	python webgen/webgen.py clean bringyour.com/gen.py
 	rm -rf build
 
-content_gen:
+gen_content:
 	python webgen/webgen.py build bringyour.com/gen.py
 	# generate the api docs into the latest build
 	npx -y @redocly/cli build-docs ${BRINGYOUR_HOME}/connect/api/bringyour.yml -o bringyour.com/build/api.html
 	npx -y @redocly/cli build-docs ${BRINGYOUR_HOME}/connect/api/gpt.yml -o bringyour.com/build/gpt.html
 	# include the legal documents verbatim as per privacytxt.dev
-	pandoc -f markdown -t plain legal/privacy.md -o bringyour.com/build/privacy.txt
-	pandoc -f markdown -t plain legal/terms.md -o bringyour.com/build/terms.txt
-	pandoc -f markdown -t plain legal/vdp.md -o bringyour.com/build/vdp.txt
+	pandoc -f markdown -t plain ${BRINGYOUR_HOME}/docs/legal/privacy.md -o bringyour.com/build/privacy.txt
+	pandoc -f markdown -t plain ${BRINGYOUR_HOME}/docs/legal/terms.md -o bringyour.com/build/terms.txt
+	pandoc -f markdown -t plain ${BRINGYOUR_HOME}/docs/legal/vdp.md -o bringyour.com/build/vdp.txt
+	# include altstore
+	cp -r ${BRINGYOUR_HOME}/release/apple/stores/altstore bringyour.com/build/altstore
 
 build:
-	$(MAKE) content_gen
+	$(MAKE) gen_content
+	$(MAKE) gen_my_ip_info
+	$(MAKE) gen_my_ip_widget
 	python webgen/webgen.py clean nginx/gen.py
 	python webgen/webgen.py build nginx/gen.py
 	mkdir -p build/${WARP_ENV}
@@ -36,6 +42,25 @@ build:
 		--no-cache \
 		--push \
 		.
+
+
+# COMPONENTS
+
+gen_my_ip_info:
+	# Outputs build artifacts to ./build
+	cd components/whereami/my-ip-info; . ${NVM_DIR}/nvm.sh && \
+		nvm exec ${NODE_VERSION} npm audit && \
+		nvm exec ${NODE_VERSION} npm ci && \
+		nvm exec ${NODE_VERSION} npm run build
+	cp components/whereami/my-ip-info/dist/my-ip-info.js bringyour.com/build/lib-ur/
+
+gen_my_ip_widget:
+	# Outputs build artifacts to ./build
+	cd components/whereami/my-ip-widget; . ${NVM_DIR}/nvm.sh && \
+		nvm exec ${NODE_VERSION} npm audit && \
+		nvm exec ${NODE_VERSION} npm ci && \
+		nvm exec ${NODE_VERSION} npm run build
+	cp components/whereami/my-ip-widget/dist/my-ip-widget.js bringyour.com/build/lib-ur/
 
 
 # LOCAL DEVELOPMENT

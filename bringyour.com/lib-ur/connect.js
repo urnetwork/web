@@ -7,7 +7,7 @@ new function() {
     const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
 
     const googleClientId = '338638865390-cg4m0t700mq9073smhn9do81mr640ig1.apps.googleusercontent.com'
-    const appleClientId = 'com.bringyour.service'
+    const appleClientId = 'network.ur.service'
     const authJwtRedirect = 'https://ur.io'
     const authLoginUri = "https://api.bringyour.com/connect"
 
@@ -182,6 +182,18 @@ new function() {
                 return response.json()
             })
         return self.withTimeout(p)
+    }
+
+    self.isAndroid = function() {
+        return navigator.userAgent && /Android/i.test(navigator.userAgent)
+    }
+
+    self.isChromeOs = function() {
+        return navigator.userAgent && /CrOS/.test(navigator.userAgent)
+    }
+
+    self.isApple = function() {
+        return navigator.userAgent && /iPhone|iPad|iPod|Macintosh/i.test(navigator.userAgent)
     }
 
     self.Route = function(path, component) {
@@ -1775,7 +1787,22 @@ new function() {
                 enterErrorElement.classList.remove('d-none')
             } else if ('auth_code' in responseBody) {
                 let url = `/c?auth_code=${responseBody['auth_code']}`
-                window.location.assign(url)
+
+                // FIXME put the protocol detection and fallback logic in this handler
+                // FIXME e.g. attempt to use protocol, then after 1s forward to store link as below
+
+                var storeLink
+                if (connectSelf.isAndroid() || connectSelf.isChromeOs()) {
+                    let referrer = encodeURIComponent(url)
+                    storeLink = `https://play.google.com/store/apps/details?id=com.bringyour.network&referrer=${referrer}`
+                } else if (connectSelf.isApple()) {
+                    // FIXME referrer
+                    storeLink = 'https://apps.apple.com/us/app/urnetwork/id6741000606'
+                } else {
+                    storeLink = url
+                }
+
+                window.location.assign(storeLink)
             } else if ('error' in responseBody) {
                 enterErrorElement.textContent = responseBody['error']['message']
                 enterErrorElement.classList.remove('d-none')
@@ -2097,9 +2124,16 @@ new function() {
         }
     }
 
-
-
     self.renderInitial = function(container, id, nonce) {
+        var storeLink
+        if (connectSelf.isAndroid() || connectSelf.isChromeOs()) {
+            storeLink = 'https://play.google.com/store/apps/details?id=com.bringyour.network'
+        } else if (connectSelf.isApple()) {
+            storeLink = 'https://apps.apple.com/us/app/urnetwork/id6741000606'
+        } else {
+            storeLink = '/c?guest'
+        }
+
         let html = `
               <div class="login-option">
                    <div class="login-container">
@@ -2159,7 +2193,11 @@ new function() {
               </div>
               <div class="login-separator">- or -</div>
               <div class="login-option">
-                   Commitment issues? <a href="/c?guest">Try guest mode</a>
+                   Commitment issues? <a href="${storeLink}" target="_blank">Try guest mode</a>
+              </div>
+              <div class="login-option">
+                <div class="store"><a href="https://apps.apple.com/us/app/urnetwork/id6741000606" target="_blank"><img src="https://bringyour.com/res/images/store-app-dark.svg" class="store"></a></div>
+                <div class="store"><a href="https://play.google.com/store/apps/details?id=com.bringyour.network" target="_blank"><img src="https://bringyour.com/res/images/store-play.png" class="store"></a></div>
               </div>
          `
         container.innerHTML = html
@@ -2270,7 +2308,7 @@ new function() {
             authName = 'Something'
         }
 
-        let userNameStr = userName || ''
+        let userNameStr = /*userName ||*/ `anon${crypto.randomUUID()}`
 
         let html = `
               <div class="login-option">
@@ -2282,8 +2320,8 @@ new function() {
               <div class="login-option">
                    <div class="login-container">
                         <form id="${id('create-form')}">
-                             <div class="info-title">Your Name</div>
-                             <div><input id="${id('create-user-name')}" type="text" value="${self.escapeHtml(userNameStr)}" class="form-control"></div>
+                             <div class="info-title d-none">Your Name</div>
+                             <div class="d-none"><input id="${id('create-user-name')}" type="text" value="${self.escapeHtml(userNameStr)}" class="form-control"></div>
                              <div class="info-title">Choose a network name</div>
                              <div><div class="input-group"><input id="${id('create-network-name')}" type="text" placeholder="yournetworkname" class="form-control network-name" aria-describedby="${id('network-addon')}"/><span class="input-group-text" id="${id('network-addon')}">.ur.network<span id="${id('create-network-name-spinner')}" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span></span></div></div>
                              <div id="${id('create-network-name-error')}" class="text-secondary d-none"></div>
@@ -2301,6 +2339,7 @@ new function() {
 
     self.renderCreateNetwork = function(container, id, userAuth) {
         let userAuthStr = userAuth || ''
+        let userNameStr = `anon${crypto.randomUUID()}`
         let html = `
               <div class="login-option">
                    <div class="login-container">
@@ -2310,8 +2349,8 @@ new function() {
               <div class="login-option">
                    <div class="login-container">
                         <form id="${id('create-form')}">
-                             <div class="info-title">Your Name</div>
-                             <div><input id="${id('create-user-name')}" type="text" class="form-control"></div>
+                             <div class="info-title d-none">Your Name</div>
+                             <div class="d-none"><input id="${id('create-user-name')}" type="text" value="${self.escapeHtml(userNameStr)}" class="form-control"></div>
                              <div class="info-title">Email or Phone Number</div>
                              <div><input id="${id('create-user-auth')}" type="text" value="${self.escapeHtml(userAuthStr)}" class="form-control"></div>
                              <div id="${id('create-user-auth-error')}" class="text-danger d-none"></div>
