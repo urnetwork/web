@@ -1,8 +1,0 @@
-Contact: mailto:security@bringyour.com
-Expires: 2025-01-01T08:00:00.000Z
-Encryption: https://bringyour.com/pgp-key.txt
-Acknowledgments: https://bringyour.com/aknowledgements
-Preferred-Languages: en
-Canonical: https://bringyour.com/.well-known/security.txt
-Policy: https://bringyour.com/vdp
-Hiring: mailto:founders@bringyour.com
