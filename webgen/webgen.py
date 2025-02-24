@@ -284,7 +284,8 @@ def build(dirpath, minify=True, validate=True):
             else:
                 process_file(*target)
 
-    purge_unused_css()
+    # FIXME we need to separate res into cdn res versus actually used on the site
+    # purge_unused_css()
 
     gen.build_phase = 'final'
     for target in page_targets:

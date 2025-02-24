@@ -1,0 +1,16 @@
+
+@font-face {
+    font-family: 'PP Neue Montreal';
+    src: url('https://bringyour.com/res/fonts/PP Neue Montreal/PPNeueMontreal-Regular.woff2') format('woff2');
+    font-weight: normal;
+    font-style: normal;
+    font-display: block;
+}
+
+@font-face {
+    font-family: 'PP Neue Montreal';
+    src: url('https://bringyour.com/res/fonts/PP Neue Montreal/PPNeueMontreal-Bold.woff2') format('woff2');
+    font-weight: bold;
+    font-style: normal;
+    font-display: block;
+}
