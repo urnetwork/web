@@ -2,9 +2,10 @@
 NODE_VERSION := v20.10.0
 
 
-all: clean build
+all: init clean build
 
-deps:
+init:
+	pip install -r requirements.txt
 	npm install html-validate -g
 	npm install html-minifier -g
 	npm install uglify-js -g
