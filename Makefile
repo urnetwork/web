@@ -72,7 +72,7 @@ local_routing_off:
 	sudo hostctl remove bringyour_web_local
 
 run_local:
-	$(MAKE) content_gen
+	$(MAKE) gen_content
 	python webgen/webgen.py clean nginx-local/gen.py
 	python webgen/webgen.py build nginx-local/gen.py
 	mkdir nginx-local/build/log
