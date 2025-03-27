@@ -16,7 +16,7 @@ clean:
 	python webgen/webgen.py clean bringyour.com/gen.py
 	rm -rf build
 
-gen_content:
+build:
 	python webgen/webgen.py build bringyour.com/gen.py
 	# generate the api docs into the latest build
 	npx -y @redocly/cli build-docs ${BRINGYOUR_HOME}/connect/api/bringyour.yml -o bringyour.com/build/api.html
@@ -28,14 +28,17 @@ gen_content:
 	# include altstore
 	cp -r ${BRINGYOUR_HOME}/release/apple/stores/altstore bringyour.com/build/altstore
 
-build:
-	$(MAKE) gen_content
+warp_build:
+	$(MAKE) init
+	$(MAKE) clean
+	$(MAKE) build
 	$(MAKE) gen_my_ip_info
 	$(MAKE) gen_my_ip_widget
 	python webgen/webgen.py clean nginx/gen.py
 	python webgen/webgen.py build nginx/gen.py
 	mkdir -p build/${WARP_ENV}
 	echo "{\"version\":\"${WARP_VERSION}\",\"status\":\"ok\"}" > build/${WARP_ENV}/status.json
+
 	docker buildx build --progress plain \
 		--build-arg warp_env=${WARP_ENV} \
 		--platform linux/arm64/v8,linux/amd64 \
@@ -72,7 +75,7 @@ local_routing_off:
 	sudo hostctl remove bringyour_web_local
 
 run_local:
-	$(MAKE) gen_content
+	$(MAKE) build
 	python webgen/webgen.py clean nginx-local/gen.py
 	python webgen/webgen.py build nginx-local/gen.py
 	mkdir nginx-local/build/log
