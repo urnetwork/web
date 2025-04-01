@@ -2,7 +2,7 @@
 NODE_VERSION := v20.10.0
 
 
-all: init clean build
+all: init clean build gen_components
 
 init:
 	pip install -r requirements.txt
@@ -29,11 +29,7 @@ build:
 	cp -r ${BRINGYOUR_HOME}/release/apple/stores/altstore bringyour.com/build/altstore
 
 warp_build:
-	$(MAKE) init
-	$(MAKE) clean
-	$(MAKE) build
-	$(MAKE) gen_my_ip_info
-	$(MAKE) gen_my_ip_widget
+	$(MAKE) all
 	python webgen/webgen.py clean nginx/gen.py
 	python webgen/webgen.py build nginx/gen.py
 	mkdir -p build/${WARP_ENV}
@@ -49,6 +45,10 @@ warp_build:
 
 
 # COMPONENTS
+
+gen_components:
+	$(MAKE) gen_my_ip_info
+	$(MAKE) gen_my_ip_widget
 
 gen_my_ip_info:
 	# Outputs build artifacts to ./build
@@ -67,6 +67,7 @@ gen_my_ip_widget:
 
 # LOCAL DEVELOPMENT
 # note these will go away when `warpctl run-local` is fixed
+# see https://guumaster.github.io/hostctl/docs/installation/#homebrew
 
 local_routing_on:
 	sudo hostctl add domains bringyour_web_local bringyour.com api.bringyour.com
