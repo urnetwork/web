@@ -1364,6 +1364,7 @@ new function() {
             const createPasswordElement = self.element('create-password')
             const createNetworkNameElement = self.element('create-network-name')
             const createAgreeTermsElement = self.element('create-agree-terms')
+            const bonusReferralElement = self.element('create-bonus-referral')
 
             createUserNameElement.disabled = true
             createUserAuthElement.disabled = true
@@ -1371,6 +1372,7 @@ new function() {
             createNetworkNameElement.disabled = true
             createAgreeTermsElement.disabled = true
             createButtonElement.disabled = true
+            bonusReferralElement.disabled = true
             createSpinnerElement.classList.remove('d-none')
 
             let userName = createUserNameElement.value
@@ -1378,12 +1380,14 @@ new function() {
             let password = createPasswordElement.value
             let networkName = createNetworkNameElement.value
             let terms = createAgreeTermsElement.checked
+            let bonusReferral = bonusReferralElement.value
             let requestBody = {
                 'user_name': userName,
                 'user_auth': userAuth,
                 'password': password,
                 'network_name': networkName,
-                'terms': terms
+                'terms': terms,
+                'referral_code': bonusReferral
             }
 
             connectSelf.apiRequest('POST', '/auth/network-create', requestBody)
@@ -1407,6 +1411,7 @@ new function() {
             const createPasswordElement = self.element('create-password')
             const createNetworkNameElement = self.element('create-network-name')
             const createAgreeTermsElement = self.element('create-agree-terms')
+            const bonusReferralElement = self.element('create-bonus-referral')
 
             const createErrorElement = self.element('create-error')
             const createUserAuthErrorElement = self.element('create-user-auth-error')
@@ -1419,6 +1424,7 @@ new function() {
             createNetworkNameElement.disabled = false
             createAgreeTermsElement.disabled = false
             createButtonElement.disabled = false
+            bonusReferralElement.disabled = false
             createSpinnerElement.classList.add('d-none')
 
             if (responseBody) {
@@ -2341,6 +2347,7 @@ new function() {
 
     self.renderCreateNetwork = function(container, id, userAuth) {
         let userAuthStr = userAuth || ''
+        let bonusReferralStr = ''
         let userNameStr = `anon${crypto.randomUUID()}`
         let html = `
               <div class="login-option">
@@ -2366,6 +2373,9 @@ new function() {
                              <div class="no-title"><label class="form-check-label"><input id="${id('create-agree-terms')}" type="checkbox" class="form-check-input" value="">A one-time message to establish your identity will be sent to you. Message and data rates may apply. I agree to the <a href="/terms" target="_blank">URnetwork terms</a>. Learn about how we use and protect your data in our <a href="/privacy" target="_blank">Privacy Policy</a></label></div>
                              <div id="${id('create-error')}" class="text-danger d-none"></div>
                              <div class="no-title"><button id="${id('create-button')}" class="btn btn-primary" type="button"><span id="${id('create-spinner')}" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span><span class="primary">Create Network</span></button></div>
+                             <hr />
+                             <div class="info-title">Enter referral code</div>
+                             <div><input id="${id('create-bonus-referral')}" type="text" value="${self.escapeHtml(bonusReferralStr)}" class="form-control"></div>
                         </form>
                    </div>
               </div>
