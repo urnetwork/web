@@ -2346,8 +2346,13 @@ new function() {
     }
 
     self.renderCreateNetwork = function(container, id, userAuth) {
+
+        // get bonus from query params
+        const urlParams = new URLSearchParams(window.location.search)
+        const bonusReferral = urlParams.get('bonus')
+
         let userAuthStr = userAuth || ''
-        let bonusReferralStr = ''
+        let bonusReferralStr = bonusReferral ?? ''
         let userNameStr = `anon${crypto.randomUUID()}`
         let html = `
               <div class="login-option">
