@@ -4,13 +4,15 @@ NODE_VERSION := v20.10.0
 
 all: init clean build gen_components
 
+# brew install pandoc
 init:
 	pip install -r requirements.txt
-	npm install html-validate -g
-	npm install html-minifier -g
-	npm install uglify-js -g
-	npm install clean-css-cli -g
-	npm install purgecss -g
+	nvm install ${NODE_VERSION}
+	nvm exec ${NODE_VERSION} npm install html-validate -g
+	nvm exec ${NODE_VERSION} npm install html-minifier -g
+	nvm exec ${NODE_VERSION} npm install uglify-js -g
+	nvm exec ${NODE_VERSION} npm install clean-css-cli -g
+	nvm exec ${NODE_VERSION} npm install purgecss -g
 
 clean:
 	python webgen/webgen.py clean bringyour.com/gen.py
