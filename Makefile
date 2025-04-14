@@ -7,12 +7,13 @@ all: init clean build gen_components
 # brew install pandoc
 init:
 	pip install -r requirements.txt
-	nvm install ${NODE_VERSION}
-	nvm exec ${NODE_VERSION} npm install html-validate -g
-	nvm exec ${NODE_VERSION} npm install html-minifier -g
-	nvm exec ${NODE_VERSION} npm install uglify-js -g
-	nvm exec ${NODE_VERSION} npm install clean-css-cli -g
-	nvm exec ${NODE_VERSION} npm install purgecss -g
+	(. ${NVM_DIR}/nvm.sh && \
+		nvm install ${NODE_VERSION} && \
+		nvm exec ${NODE_VERSION} npm install html-validate -g && \
+		nvm exec ${NODE_VERSION} npm install html-minifier -g && \
+		nvm exec ${NODE_VERSION} npm install uglify-js -g && \
+		nvm exec ${NODE_VERSION} npm install clean-css-cli -g && \
+		nvm exec ${NODE_VERSION} npm install purgecss -g)
 
 clean:
 	python webgen/webgen.py clean bringyour.com/gen.py
