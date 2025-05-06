@@ -39,17 +39,3 @@ new function() {
         return JSON.parse(jsonPayload)
     }
 }()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
