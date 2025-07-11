@@ -1,0 +1,49 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --foreground-rgb: 0, 0, 0;
+  --background-start-rgb: 214, 219, 220;
+  --background-end-rgb: 255, 255, 255;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --foreground-rgb: 255, 255, 255;
+    --background-start-rgb: 0, 0, 0;
+    --background-end-rgb: 0, 0, 0;
+  }
+}
+
+body {
+  @apply text-gray-900;
+}
+
+h1 {
+  @apply text-4xl font-semibold;
+}
+
+h2 {
+  @apply text-xl font-semibold;
+}
+
+a {
+  @apply hover:underline;
+}
+
+th {
+  font-weight: inherit;
+}
+
+.card {
+  @apply border border-gray-300 bg-gray-100 rounded-md p-4 cursor-pointer hover:border-primary transition-all duration-150 hover:scale-[1.02];
+}
+
+.button {
+  @apply cursor-pointer py-2 px-4 rounded-md active:translate-y-0.5;
+}
+
+.btn-primary {
+  @apply bg-primary hover:bg-primary-semidark border border-primary-semidark text-white disabled:bg-gray-400 disabled:border-none;
+}
