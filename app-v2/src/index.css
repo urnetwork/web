@@ -1,0 +1,88 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes scaleIn {
+  from { transform: scale(0.95); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.2s ease-out;
+}
+
+.animate-scaleIn {
+  animation: scaleIn 0.2s ease-out;
+}
+
+body {
+  @apply text-gray-100 bg-gray-900;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+}
+
+/* Custom scrollbar for dark mode */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-gray-800;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-gray-600 rounded-full;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-gray-500;
+}
+
+/* Dark mode gradient backgrounds */
+.gradient-dark-blue {
+  background: linear-gradient(135deg, #1e3a8a 0%, #3730a3 100%);
+}
+
+.gradient-dark-purple {
+  background: linear-gradient(135deg, #581c87 0%, #7c3aed 100%);
+}
+
+.gradient-dark-green {
+  background: linear-gradient(135deg, #065f46 0%, #059669 100%);
+}
+
+.gradient-dark-red {
+  background: linear-gradient(135deg, #991b1b 0%, #dc2626 100%);
+}
+
+.gradient-dark-yellow {
+  background: linear-gradient(135deg, #92400e 0%, #d97706 100%);
+}
+
+/* Mobile-specific improvements */
+@media (max-width: 768px) {
+  .container {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+  
+  /* Ensure text doesn't overflow on mobile */
+  h1, h2, h3 {
+    word-break: break-word;
+  }
+  
+  /* Better button spacing on mobile */
+  .space-x-3 > * + * {
+    margin-left: 0.5rem;
+  }
+  
+  /* Improve table responsiveness */
+  .overflow-x-auto {
+    -webkit-overflow-scrolling: touch;
+  }
+}
