@@ -2,3 +2,4 @@
 **/build
 **/build.*
 **/__pycache__
+!.github/workflows/build.yml
