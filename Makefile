@@ -29,7 +29,7 @@ build:
 	pandoc -f markdown -t plain ${BRINGYOUR_HOME}/docs/legal/terms.md -o bringyour.com/build/terms.txt
 	pandoc -f markdown -t plain ${BRINGYOUR_HOME}/docs/legal/vdp.md -o bringyour.com/build/vdp.txt
 	# include altstore
-	cp -r ${WARP_HOME}/release/apple/stores/altstore bringyour.com/build/altstore
+	cp -r altstore bringyour.com/build/altstore
 
 warp_build:
 	$(MAKE) all

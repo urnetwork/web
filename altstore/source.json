@@ -1,0 +1,48 @@
+{
+    "name": "URnetwork",
+    "subtitle": "Goodbye VPN!",
+    "description": "Privacy-First Decentralized Network\nAll of the privacy and all of the fun. Join a decentralized VPN that advances the state of the art of privacy, availability, security, and performance.",
+    "iconURL": "https://bringyour.com/altstore/res/icon.png",
+    "headerURL": "https://bringyour.com/altstore/res/goodbye-vpn.png",
+    "website": "https://ur.io",
+    "tintColor": "#ED8FFF",
+    "patreon":
+    {},
+    "featuredApps":
+    [
+        "network.ur"
+    ],
+    "apps":
+    [
+        {
+            "name": "URnetwork",
+            "bundleIdentifier": "network.ur",
+            "marketplaceID": "12345678",
+            "developerName": "BringYour, Inc.",
+            "subtitle": "Goodbye VPN!",
+            "localizedDescription": "Privacy-First Decentralized Network\nAll of the privacy and all of the fun. Join a decentralized VPN that advances the state of the art of privacy, availability, security, and performance.",
+            "iconURL": "https://bringyour.com/altstore/res/icon.png",
+            "tintColor": "#ED8FFF",
+            "category": "utilities",
+            "screenshots":
+            [
+                "https://bringyour.com/altstore/res/screen1.jpg",
+                "https://bringyour.com/altstore/res/screen2.jpg",
+                "https://bringyour.com/altstore/res/screen3.jpg",
+                "https://bringyour.com/altstore/res/screen4.jpg"
+            ],
+            "versions":
+            [
+                {
+                    "downloadURL": "https://bringyour.com/altstore/bb7d1496-2f36-41ec-9544-e7dd35881a56"
+                }
+            ],
+            "appPermissions":
+            {},
+            "patreon":
+            {}
+        }
+    ],
+    "news":
+    []
+}
