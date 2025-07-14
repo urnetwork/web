@@ -14,10 +14,6 @@ new function() {
     const defaultClientTimeoutMillis = 15 * 1000
     const timeoutError = Symbol()
 
-    self.isFlagAppPreview = function() {
-        return false
-    }
-
 
     self.connectMount = null
 
@@ -136,7 +132,13 @@ new function() {
 
     self.serviceUrl = function(service, path) {
         // main
-        let baseHost = 'bringyour.com'
+        var baseHost
+        if (service == 'app') {
+            baseHost = 'ur.network'
+        } else {
+            // FIXME other services have not been migrated yet
+            baseHost = 'bringyour.com'
+        }
         return `${window.location.protocol}//${service}.${baseHost}${path}`
     }
 
@@ -1729,9 +1731,9 @@ new function() {
             //     }
             // })
 
-            if (connectSelf.isFlagAppPreview()) {
-                self.authRedirect()
-            }
+            // if (connectSelf.isFlagAppPreview()) {
+            //     self.authRedirect()
+            // }
         }
         self.router = (url) => {
             if (url.pathname == '/connect/signout') {
@@ -2443,16 +2445,14 @@ new function() {
               </div>
         `
 
-        if (self.isFlagAppPreview()) {
-            html += `
-              <div class="login-option">
-                   <div class="login-container">
-                        <div><button id="${id('launch-app-button')}" type="button" class="btn btn-primary">Manage Your Network<span id="${id('launch-app-spinner')}" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span></button></div>
-                        <div id="${id('launch-app-error')}" class="text-danger d-none"></div>
-                   </div>
-              </div>
-            `
-        }
+        html += `
+          <div class="login-option">
+               <div class="login-container">
+                    <div><button id="${id('launch-app-button')}" type="button" class="btn btn-primary">Open Dashboard<span id="${id('launch-app-spinner')}" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span></button></div>
+                    <div id="${id('launch-app-error')}" class="text-danger d-none"></div>
+               </div>
+          </div>
+        `
 
         html += `
           <div class="login-option">
