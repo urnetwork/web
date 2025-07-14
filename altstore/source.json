@@ -17,7 +17,7 @@
         {
             "name": "URnetwork",
             "bundleIdentifier": "network.ur",
-            "marketplaceID": "12345678",
+            "marketplaceID": "6741000606",
             "developerName": "BringYour, Inc.",
             "subtitle": "Goodbye VPN!",
             "localizedDescription": "Privacy-First Decentralized Network\nAll of the privacy and all of the fun. Join a decentralized VPN that advances the state of the art of privacy, availability, security, and performance.",
@@ -51,9 +51,7 @@
                 {
                     "NSAccentColorName": "AccentColor"
                 }
-            },
-            "patreon":
-            {}
+            }
         }
     ],
     "news":
