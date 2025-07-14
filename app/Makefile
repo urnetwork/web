@@ -1,19 +1,18 @@
 
-NODE_VERSION := v20.10.0
+NODE_VERSION := v22.14.0
 
 all: clean build
 
 clean:
 	rm -rf build
+	rm -rf dist
 
 webpack:
 	# Outputs build artifacts to ./dist
 	. ${NVM_DIR}/nvm.sh && \
 		nvm exec ${NODE_VERSION} npm ci && \
+		nvm exec ${NODE_VERSION} npm audit && \
 		nvm exec ${NODE_VERSION} npm run build
-
-	# FIXME
-	# nvm exec ${NODE_VERSION} npm audit && \
 
 build:
 	$(MAKE) webpack
@@ -21,7 +20,7 @@ build:
 	python ../webgen/webgen.py build nginx/gen.py
 
 warp_build:
-	$(MAKE) build
+	$(MAKE) all
 	mkdir -p build/${WARP_ENV}
 	echo "{\"version\":\"${WARP_VERSION}\",\"status\":\"ok\"}" > build/${WARP_ENV}/status.json
 	docker buildx build --progress plain \
