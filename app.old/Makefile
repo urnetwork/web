@@ -7,21 +7,17 @@ clean:
 	rm -rf build
 
 webpack:
-	# Outputs build artifacts to ./dist
+	# Outputs build artifacts to ./build
 	. ${NVM_DIR}/nvm.sh && \
 		nvm exec ${NODE_VERSION} npm ci && \
 		nvm exec ${NODE_VERSION} npm run build
-
 	# FIXME
 	# nvm exec ${NODE_VERSION} npm audit && \
 
-build:
+warp_build:
 	$(MAKE) webpack
 	python ../webgen/webgen.py clean nginx/gen.py
 	python ../webgen/webgen.py build nginx/gen.py
-
-warp_build:
-	$(MAKE) build
 	mkdir -p build/${WARP_ENV}
 	echo "{\"version\":\"${WARP_VERSION}\",\"status\":\"ok\"}" > build/${WARP_ENV}/status.json
 	docker buildx build --progress plain \

@@ -2478,7 +2478,7 @@ new function() {
               </div>
               <div class="login-option">
                    <div class="login-container">
-                        <div><button id="${id('launch-app-button')}" type="button" class="btn btn-secondary btn-sm">Open Dashboard<span id="${id('launch-app-spinner')}" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span></button></div>
+                        <div><button id="${id('launch-app-button')}" type="button" class="btn btn-secondary btn-sm">Open Client Manager<span id="${id('launch-app-spinner')}" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span></button></div>
                         <div id="${id('launch-app-error')}" class="text-danger d-none"></div>
                    </div>
               </div>

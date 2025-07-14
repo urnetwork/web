@@ -1,0 +1,74 @@
+
+user www-data;
+pid /run/nginx.pid;
+include /etc/nginx/modules-enabled/*.conf;
+
+
+# target concurrent users (from sites.yml): 589824
+# https://www.nginx.com/blog/tuning-nginx/
+worker_processes auto;
+events {
+    worker_connections 8192;
+    multi_accept on;
+}
+
+
+http {
+    ##
+    # Basic Settings
+    ##
+
+    sendfile on;
+    # minimize latency
+    tcp_nodelay on;
+    tcp_nopush off;
+    types_hash_max_size 2048;
+    server_tokens off;
+
+    include /etc/nginx/mime.types;
+    default_type application/octet-stream;
+
+    ##
+    # Logging Settings
+    ##
+
+    access_log /dev/stdout;
+    error_log stderr;
+
+    ##
+    # Gzip Settings
+    ##
+
+    gzip on;
+
+
+    server {
+        listen 80 default_server;
+
+        absolute_redirect off;
+
+        location =/status {
+            alias /srv/warp/status/status.json;
+            add_header 'Content-Type' 'application/json';
+        }
+        location / {
+            try_files $uri $uri.html $uri/ =404;
+            alias /www/app/;
+
+            add_header 'Cache-Control' 'no-cache';
+            add_header 'Last-Modified' '{{ http_last_modified }}';
+            add_header 'ETag' '"{{ http_etag }}"';
+        }
+        # app resources are content addressed, meaning the name changes when the content changes
+        # use a separate location block per rec in "if is evil"
+        # https://www.nginx.com/resources/wiki/start/topics/depth/ifisevil/
+        location ~ \.(js|css)$ {
+            try_files $uri =404;
+            alias /www/app/;
+
+            add_header 'Cache-Control' 'max-age=86400';
+            add_header 'Last-Modified' '{{ http_last_modified }}';
+            add_header 'ETag' '"{{ http_etag }}"';
+        }
+    }
+}
