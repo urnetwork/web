@@ -34,15 +34,38 @@
             "versions":
             [
                 {
-                    "downloadURL": "https://bringyour.com/altstore/bb7d1496-2f36-41ec-9544-e7dd35881a56"
+                    "downloadURL": "https://bringyour.com/altstore/bb7d1496-2f36-41ec-9544-e7dd35881a56",
+                    "version": "2025.7.4",
+                    "buildVersion": "668695953",
+                    "date": "2025-07-12T16:52:00+02:00",
+                    "localizedDescription": "Bug and performance fixes.",
+                    "minOSVersion": "16.6"
                 }
             ],
             "appPermissions":
-            {},
+            {
+                "entitlements":
+                [],
+                "privacy":
+                {
+                    "NSAccentColorName": "AccentColor"
+                }
+            },
             "patreon":
             {}
         }
     ],
     "news":
-    []
+    [
+        {
+            "title": "Now on Altstore!",
+            "identifier": "news_hm9e1wwa5p",
+            "caption": "Introducing URnetwork!",
+            "date": "2025-07-12T18:41",
+            "tintColor": "#ED8FFF",
+            "notify": false,
+            "url": "https://ur.io/",
+            "appID": "network.ur"
+        }
+    ]
 }
