@@ -53,7 +53,7 @@ http {
         }
         location / {
             try_files $uri $uri.html $uri/ =404;
-            alias /www/app.bringyour.com/;
+            alias /www/app/;
 
             add_header 'Cache-Control' 'no-cache';
             add_header 'Last-Modified' '{{ http_last_modified }}';
@@ -64,7 +64,7 @@ http {
         # https://www.nginx.com/resources/wiki/start/topics/depth/ifisevil/
         location ~ \.(js|css)$ {
             try_files $uri =404;
-            alias /www/app.bringyour.com/;
+            alias /www/app/;
 
             add_header 'Cache-Control' 'max-age=86400';
             add_header 'Last-Modified' '{{ http_last_modified }}';
