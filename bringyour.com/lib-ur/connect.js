@@ -2448,15 +2448,6 @@ new function() {
         html += `
           <div class="login-option">
                <div class="login-container">
-                    <div><button id="${id('launch-app-button')}" type="button" class="btn btn-primary">Open Dashboard<span id="${id('launch-app-spinner')}" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span></button></div>
-                    <div id="${id('launch-app-error')}" class="text-danger d-none"></div>
-               </div>
-          </div>
-        `
-
-        html += `
-          <div class="login-option">
-               <div class="login-container">
                     <div><button id="${id('enter-button')}" type="button" class="btn btn-primary">Enter<span id="${id('enter-spinner')}" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span></button></div>
                     <div id="${id('enter-error')}" class="text-danger d-none"></div>
                </div>
@@ -2483,6 +2474,12 @@ new function() {
                             <button id="${id('copy-auth-code-manual-code-copy')}" class="btn btn-outline-secondary btn-sm" type="button">Copy</button>
                         </div>
                         <div>This is used to <a href="https://docs.ur.io/provider" target="_blank">set up provider nodes</a>, <a href="https://docs.ur.io/api" target="_blank">API access</a>, and <a href="https://docs.ur.io/cli" target="_blank">command line tools</a>.</div>
+                   </div>
+              </div>
+              <div class="login-option">
+                   <div class="login-container">
+                        <div><button id="${id('launch-app-button')}" type="button" class="btn btn-secondary btn-sm">Open Dashboard<span id="${id('launch-app-spinner')}" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span></button></div>
+                        <div id="${id('launch-app-error')}" class="text-danger d-none"></div>
                    </div>
               </div>
               <div class="login-option">

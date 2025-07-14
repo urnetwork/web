@@ -11,11 +11,10 @@ webpack:
 	. ${NVM_DIR}/nvm.sh && \
 		nvm exec ${NODE_VERSION} npm ci && \
 		nvm exec ${NODE_VERSION} npm run build
-# 		note remove `npm audit` until outdated dependencies can be fixed
-# 		the app will be removed in the v0 launch
-# 		nvm exec ${NODE_VERSION} npm audit &&\
+	# FIXME
+	# nvm exec ${NODE_VERSION} npm audit && \
 
-build:
+warp_build:
 	$(MAKE) webpack
 	python ../webgen/webgen.py clean nginx/gen.py
 	python ../webgen/webgen.py build nginx/gen.py
