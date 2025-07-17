@@ -22,9 +22,7 @@ import type {
   ProviderLocation,
 } from "./types";
 
-
-const API_BASE_URL = "https://api.bringyour.com";
-
+const API_BASE_URL = "/api";
 
 // Authentication API
 export const login = async (authCode: string): Promise<AuthResponse> => {
@@ -181,7 +179,8 @@ export const fetchClients = async (token: string): Promise<ClientsResponse> => {
 // Remove client API
 export const removeClient = async (
   token: string,
-  clientId: string
+  clientId: string,
+  abortSignal?: AbortSignal
 ): Promise<RemoveClientResponse> => {
   try {
     const response = await fetch(`${API_BASE_URL}/network/remove-client`, {
@@ -193,6 +192,7 @@ export const removeClient = async (
       body: JSON.stringify({
         client_id: clientId,
       }),
+      signal: abortSignal,
     });
 
     if (!response.ok) {
@@ -213,6 +213,7 @@ export const removeClient = async (
       error: {
         message:
           error instanceof Error ? error.message : "Failed to remove client",
+        isAborted: error instanceof Error && error.name === "AbortError",
       },
     };
   }

@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { Trophy, RefreshCw, AlertCircle, Medal } from "lucide-react";
-import { useAuth } from "../context/AuthContext";
 import { fetchLeaderboard, fetchNetworkRanking } from "../services/api";
 import type { LeaderboardEntry, NetworkRanking } from "../services/api";
 import toast from "react-hot-toast";
+import { useAuth } from "../hooks/useAuth";
 
 const LeaderboardSection: React.FC = () => {
   const { token } = useAuth();

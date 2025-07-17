@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Calendar, Clock, Cpu, Trash2, Info, AlertTriangle, Wifi, WifiOff } from 'lucide-react';
 import type { Client } from '../services/api';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../hooks/useAuth';
 import { removeClient } from '../services/api';
 import toast from 'react-hot-toast';
 import ConfirmModal from './ConfirmModal';

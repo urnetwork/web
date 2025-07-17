@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Users, RefreshCw, AlertCircle, Network, ChevronLeft, ChevronRight, Filter, Trash2 } from 'lucide-react';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../hooks/useAuth';
 import { fetchClients } from '../services/api';
 import ClientsList from './ClientsList';
 import RemoveClientForm from './RemoveClientForm';

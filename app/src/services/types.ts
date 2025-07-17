@@ -73,6 +73,7 @@ export interface ClientsResponse {
 export interface RemoveClientResponse {
   error?: {
     message: string;
+    isAborted: boolean;
   };
 }
 

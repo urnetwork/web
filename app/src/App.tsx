@@ -1,12 +1,12 @@
 import { Toaster } from 'react-hot-toast';
 import { BrowserRouter } from 'react-router-dom';
-import { AuthProvider } from './context/AuthContext';
+import { AuthContextProvider } from './context/AuthContext';
 import Layout from './components/Layout';
 
 function App() {
   return (
     <BrowserRouter>
-      <AuthProvider>
+      <AuthContextProvider>
         <div className="min-h-screen bg-gray-900">
           <Toaster 
             position="top-right"
@@ -32,7 +32,7 @@ function App() {
           />
           <Layout />
         </div>
-      </AuthProvider>
+      </AuthContextProvider>
     </BrowserRouter>
   );
 }

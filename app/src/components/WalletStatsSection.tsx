@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef, ComponentProps } from 'react';
 import { Wallet, RefreshCw, AlertCircle, Settings, Clock, TrendingUp, Database, DollarSign, User, Trash2, AlertTriangle, HardDrive, Activity } from 'lucide-react';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../hooks/useAuth';
 import { fetchWalletStats, fetchNetworkUser } from '../services/api';
 import { saveWalletStats, getWalletStatsHistory, clearWalletStatsHistory, getStorageInfo, type WalletStatsRecord } from '../services/localStorage';
 import type { NetworkUser } from '../services/api';

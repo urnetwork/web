@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { BarChart3, RefreshCw, AlertCircle, Activity, Clock, Database, Search, DollarSign, Users, TrendingUp } from 'lucide-react';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../hooks/useAuth';
 import { fetchProviderStats } from '../services/api';
 import type { Provider } from '../services/api';
 import toast from 'react-hot-toast';
