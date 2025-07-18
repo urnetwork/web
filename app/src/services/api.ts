@@ -22,7 +22,7 @@ import type {
   ProviderLocation,
 } from "./types";
 
-const API_BASE_URL = "/api";
+const API_BASE_URL = "https://api.bringyour.com";
 
 // Authentication API
 export const login = async (authCode: string): Promise<AuthResponse> => {
