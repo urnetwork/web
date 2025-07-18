@@ -52,7 +52,7 @@ http {
             add_header 'Content-Type' 'application/json';
         }
         location / {
-            try_files $uri $uri.html $uri/ =404;
+            try_files $uri $uri/ /index.html;
             alias /www/app/;
 
             add_header 'Cache-Control' 'no-cache';
