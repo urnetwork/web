@@ -38,6 +38,10 @@ export function useAutoLogin() {
 			autoAuthAttemptedRef.current = true;
 			loginHandler();
 		}
+
+		if (isAuthenticated && authCode) {
+			navigate(location.pathname, { replace: true });
+		}
 	}, [
 		authCode,
 		navigate,
