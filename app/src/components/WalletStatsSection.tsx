@@ -1,11 +1,13 @@
 import React, { useState, useEffect, useCallback, useRef, ComponentProps } from 'react';
-import { Wallet, RefreshCw, AlertCircle, Settings, Clock, TrendingUp, Database, DollarSign, User, Trash2, AlertTriangle, HardDrive, Activity } from 'lucide-react';
+import { Wallet, RefreshCw, AlertCircle, Settings, Clock, TrendingUp, Database, DollarSign, User, Trash2, AlertTriangle, HardDrive, Activity, CreditCard, BarChart3 } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { fetchWalletStats, fetchNetworkUser } from '../services/api';
 import { saveWalletStats, getWalletStatsHistory, clearWalletStatsHistory, getStorageInfo, type WalletStatsRecord } from '../services/localStorage';
 import type { NetworkUser } from '../services/api';
 import toast from 'react-hot-toast';
 import ConfirmModal from './ConfirmModal';
+import PayoutStatsSection from './PayoutStatsSection';
+import type { WalletStatsSettings } from '../services/types';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -30,15 +32,6 @@ ChartJS.register(
   Legend,
   Filler
 );
-
-// Settings interface for localStorage
-interface WalletStatsSettings {
-  refreshInterval: number;
-  timezone: string;
-  isAutoRefreshEnabled: boolean;
-  maxDataPoints: number;
-  showDataPoints: boolean;
-}
 
 // Default settings
 const DEFAULT_SETTINGS: WalletStatsSettings = {
@@ -75,6 +68,7 @@ const loadSettingsFromStorage = (): WalletStatsSettings => {
   return DEFAULT_SETTINGS;
 };
 const WalletStatsSection: React.FC = () => {
+  const [activeTab, setActiveTab] = useState<'data' | 'payouts'>('data');
   const { token } = useAuth();
   const [currentStats, setCurrentStats] = useState({ paid_mb: 0, unpaid_mb: 0 });
   const [statsHistory, setStatsHistory] = useState<WalletStatsRecord[]>([]);
@@ -226,7 +220,7 @@ const WalletStatsSection: React.FC = () => {
           // Reload history to include the new entry
           await loadStatsHistory();
           if (showToast) {
-            toast.success('Wallet stats updated successfully');
+            toast.success('Data Stats updated successfully');
           }
         }
       }
@@ -461,7 +455,37 @@ const WalletStatsSection: React.FC = () => {
   const unpaidChartData = createChartData('unpaid_bytes_provided', '#f59e0b', 'Unpaid Data Transfer');
 
   return (
-    <>
+    <div className="space-y-8">
+      {/* Tab Navigation */}
+      <div className="bg-gray-800 rounded-xl border border-gray-700 shadow-2xl">
+        <div className="flex space-x-1 p-2">
+          <button
+            onClick={() => setActiveTab('data')}
+            className={`flex-1 py-3 px-4 rounded-lg font-medium text-sm transition-all duration-200 ${
+              activeTab === 'data'
+                ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg transform scale-105'
+                : 'text-gray-400 hover:text-gray-200 hover:bg-gray-700'
+            }`}
+          >
+            <BarChart3 size={16} className="inline mr-2" />
+            Data Stats
+          </button>
+          <button
+            onClick={() => setActiveTab('payouts')}
+            className={`flex-1 py-3 px-4 rounded-lg font-medium text-sm transition-all duration-200 ${
+              activeTab === 'payouts'
+                ? 'bg-gradient-to-r from-green-600 to-emerald-600 text-white shadow-lg transform scale-105'
+                : 'text-gray-400 hover:text-gray-200 hover:bg-gray-700'
+            }`}
+          >
+            <CreditCard size={16} className="inline mr-2" />
+            Payout Stats
+          </button>
+        </div>
+      </div>
+
+      {/* Tab Content */}
+      {activeTab === 'data' ? (
       <div className="space-y-8">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
@@ -469,7 +493,7 @@ const WalletStatsSection: React.FC = () => {
               <div className="p-2 bg-gradient-to-r from-green-600 to-emerald-600 rounded-xl">
                 <Wallet className="text-white" size={28} />
               </div>
-              Wallet Statistics
+              Data Statistics
             </h2>
             <p className="text-gray-400 mt-2">
               Real-time tracking of data transfer earnings (stored locally)
@@ -779,7 +803,10 @@ const WalletStatsSection: React.FC = () => {
           </div>
         )}
       </div>
-
+      ) : (
+        <PayoutStatsSection />
+      )}
+      
       <ConfirmModal
         isOpen={showClearModal}
         onClose={() => setShowClearModal(false)}
@@ -798,7 +825,7 @@ const WalletStatsSection: React.FC = () => {
           </p>
         </div>
       </ConfirmModal>
-    </>
+    </div>
   );
 };
 

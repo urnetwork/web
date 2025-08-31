@@ -4,11 +4,11 @@ import { fetchProviderLocations, findProviderLocations } from '../services/api';
 import type { Device } from '../services/api';
 import toast from 'react-hot-toast';
 import debounce from 'lodash/debounce';
-import { ProviderLocation } from '../services/types';
+import { Location } from '../services/types';
 
 const ProvidersSection: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
-  const [locations, setLocations] = useState<ProviderLocation[]>([]);
+  const [locations, setLocations] = useState<Location[]>([]);
   const [devices, setDevices] = useState<Device[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -30,7 +30,7 @@ const ProvidersSection: React.FC = () => {
         setError(response.error.message);
         toast.error(response.error.message);
       } else {
-        let sortedLocations: ProviderLocation[];
+        let sortedLocations: Location[];
         
         if (query && query.trim().length > 0) {
           // When searching, prioritize exact matches first, then partial matches, then by provider count
@@ -75,12 +75,12 @@ const ProvidersSection: React.FC = () => {
             
             // If same match type, sort by provider count (descending)
             return b.provider_count - a.provider_count;
-          }).slice(0, 50) as ProviderLocation[];
+          }).slice(0, 50) as Location[];
         } else {
           // When not searching, sort by provider count in descending order (default behavior)
           sortedLocations = [...response.locations]
             .sort((a, b) => b.provider_count - a.provider_count)
-            .slice(0, 50) as ProviderLocation[];
+            .slice(0, 50) as Location[];
         }
 
         // Update state in a single batch
@@ -129,7 +129,7 @@ const ProvidersSection: React.FC = () => {
   };
 
   // Memoize card components
-  const LocationCard = React.memo<{ location: ProviderLocation }>(({ location }) => (
+  const LocationCard = React.memo<{ location: Location }>(({ location }) => (
     <div className="bg-gray-800 rounded-xl shadow-2xl overflow-hidden hover:shadow-3xl transition-all duration-300 border border-gray-700 hover:border-gray-600 transform hover:scale-105">
       <div className="bg-gradient-to-r from-gray-700 to-gray-800 px-4 py-3 border-b border-gray-600">
         <div className="flex items-center justify-between">

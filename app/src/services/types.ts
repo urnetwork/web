@@ -1,3 +1,17 @@
+// Type definitions for the application
+
+export interface WalletStatsSettings {
+  refreshInterval: number;
+  timezone: string;
+  isAutoRefreshEnabled: boolean;
+  maxDataPoints: number;
+  showDataPoints: boolean;
+}
+
+export interface StorageInfo {
+  totalRecords: number;
+  storageSize: string;
+}
 export interface AuthResponse {
   by_jwt?: string;
   error?: {
@@ -5,36 +19,9 @@ export interface AuthResponse {
   };
 }
 
-export interface PasswordLoginResponse {
-  verification_required?: {
-    user_auth: string;
-  };
-  network?: {
-    by_jwt: string;
-    name: string;
-  };
-  error?: {
-    message: string;
-  };
-}
-
-export interface NetworkUser {
-  user_id: string;
-  user_auth: string;
-  verified: boolean;
-  auth_type: string;
-  network_name: string;
-}
-
-export interface NetworkUserResponse {
-  network_user?: NetworkUser;
-  error?: {
-    message: string;
-  };
-}
-
 export interface Client {
   client_id: string;
+  source_client_id?: string;
   device_id: string;
   network_id: string;
   description: string;
@@ -73,7 +60,7 @@ export interface ClientsResponse {
 export interface RemoveClientResponse {
   error?: {
     message: string;
-    isAborted: boolean;
+    isAborted?: boolean;
   };
 }
 
@@ -143,7 +130,7 @@ export interface LocationGroup {
   match_distance: number;
 }
 
-export interface ProviderLocation {
+export interface Location {
   location_id: string;
   location_type: string;
   name: string;
@@ -166,7 +153,7 @@ export interface Device {
 export interface ProviderLocationsResponse {
   specs: LocationSpec[];
   groups: LocationGroup[];
-  locations: ProviderLocation[];
+  locations: Location[];
   devices: Device[];
   error?: {
     message: string;
@@ -190,6 +177,58 @@ export interface WalletStatsEntry {
   timestamp: string;
   paid_mb: number;
   unpaid_mb: number;
+}
+
+export type AccountPayment = {
+  payment_id: string;
+  token_type: string;
+  blockchain: string;
+  tx_hash: string;
+  payment_time: string;
+  token_amount: number;
+  payout_byte_count: number;
+  completed: boolean;
+  canceled: boolean;
+}
+
+export type ProviderLocation = Record<string, unknown>
+
+export type AccountPaymentsResponse = {
+  account_payments: AccountPayment[]
+  error?: { message: string };
+}
+
+export interface AuthResponse {
+  by_jwt?: string;
+  error?: {
+    message: string;
+  };
+}
+
+export interface NetworkUser {
+  user_id: string;
+  user_auth: string;
+  verified: boolean;
+  auth_type: string;
+  network_name: string;
+}
+ 
+export interface PasswordLoginResponse {
+  verification_required?: {
+    user_auth: string;
+  };
+  network?: {
+    by_jwt: string;
+    name: string;
+  };
+  error?: {
+    message: string;
+  };
+}
+
+export interface NetworkUserResponse {
+  network_user?: NetworkUser;
+  error?: { message?: string };
 }
 
 export interface CreateAuthCodeResponse {
