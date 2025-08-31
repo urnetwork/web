@@ -13,8 +13,11 @@ export default defineConfig({
       '/api': {
         target: 'https://api.bringyour.com',
         changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api/, ''),
-        secure: true
+        rewrite: (path) => path.replace(/^\/api/, ''),        
+		secure: true,
+        headers: {
+		  'Origin': 'https://api.bringyour.com'
+        },
       },
     },
   },
