@@ -2257,7 +2257,7 @@ new function() {
               </div>
               <div class="login-option">
                    <div class="login-container">
-                        <div>You may need to check your spam folder or unblock no-reply@ur.io</div>
+                        <div>You may need to check your spam folder or unblock support@ur.io</div>
                    </div>
               </div>
          `
@@ -2275,7 +2275,7 @@ new function() {
               </div>
               <div class="login-option">
                    <div class="login-container">
-                        <div>You may need to check your spam folder or unblock no-reply@ur.io</div>
+                        <div>You may need to check your spam folder or unblock support@ur.io</div>
                         <div><a id="${id('password-reset-resend-link')}" href="/connect/password-reset/resend">Resend</a><div id="${id('password-reset-resend-spinner')}" class="d-none"><span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>Resend</div><div id="${id('password-reset-resend-sent')}" class="d-none">Sent!</div></div>
                    </div>
               </div>
