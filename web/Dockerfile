@@ -1,6 +1,7 @@
 FROM ubuntu:22.04
 # see https://docs.docker.com/develop/develop-images/dockerfile_best-practices/
 
+ARG TARGETPLATFORM
 ARG warp_env
 ENV WARP_ENV=$warp_env
 
@@ -30,7 +31,7 @@ RUN apt-get update && apt-get install -y \
 RUN nginx -V
 
 ADD nginx/build/ /etc/nginx/
-ADD bringyour.com/build /www/bringyour.com
+ADD ../bringyour.com/build /www/bringyour.com
 
 # make sure all static files can be read
 RUN find /www/bringyour.com -type d -exec chmod ugo=rx {} +
@@ -38,8 +39,8 @@ RUN find /www/bringyour.com -type f -exec chmod ugo=r {} +
 
 COPY build/${WARP_ENV}/status.json /srv/warp/status/status.json
 
-EXPOSE 80
+COPY build/$TARGETPLATFORM/web /usr/local/sbin/web
 
 # see https://ubuntu.com/blog/avoiding-dropped-connections-in-nginx-containers-with-stopsignal-sigquit
 STOPSIGNAL SIGQUIT
-CMD ["nginx", "-g", "daemon off;"]
+CMD ["/usr/local/sbin/web"]
