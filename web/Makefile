@@ -1,12 +1,11 @@
 
 NODE_VERSION := v20.10.0
 
-
 all: init clean build gen_components
 
 # brew install pandoc
 init:
-	pip install -r requirements.txt
+	pip install -r ../requirements.txt
 	(. ${NVM_DIR}/nvm.sh && \
 		nvm install ${NODE_VERSION} && \
 		nvm exec ${NODE_VERSION} npm install html-validate -g && \
@@ -14,13 +13,17 @@ init:
 		nvm exec ${NODE_VERSION} npm install uglify-js -g && \
 		nvm exec ${NODE_VERSION} npm install clean-css-cli -g && \
 		nvm exec ${NODE_VERSION} npm install purgecss -g)
+	go clean -cache
+	go clean -modcache
 
 clean:
-	python webgen/webgen.py clean bringyour.com/gen.py
+	python ../webgen/webgen.py clean bringyour.com/gen.py
 	rm -rf build
 
 build:
-	python webgen/webgen.py build bringyour.com/gen.py
+	(. ${NVM_DIR}/nvm.sh && \
+		nvm use ${NODE_VERSION} && \
+		python ../webgen/webgen.py build bringyour.com/gen.py)
 	# generate the api docs into the latest build
 	npx -y @redocly/cli build-docs ${BRINGYOUR_HOME}/connect/api/bringyour.yml -o bringyour.com/build/api.html
 # 	npx -y @redocly/cli build-docs ${BRINGYOUR_HOME}/connect/api/gpt.yml -o bringyour.com/build/gpt.html
@@ -29,12 +32,16 @@ build:
 	pandoc -f markdown -t plain ${BRINGYOUR_HOME}/docs/legal/terms.md -o bringyour.com/build/terms.txt
 	pandoc -f markdown -t plain ${BRINGYOUR_HOME}/docs/legal/vdp.md -o bringyour.com/build/vdp.txt
 	# include altstore
-	cp -r altstore bringyour.com/build/altstore
+	cp -r ../altstore bringyour.com/build/altstore
+	env GOOS=linux GOARCH=arm64 go build -ldflags "-X main.Version=${WARP_VERSION}" -o build/linux/arm64/
+	env GOOS=linux GOARCH=amd64 go build -ldflags "-X main.Version=${WARP_VERSION}" -o build/linux/amd64/
+	env GOOS=darwin GOARCH=arm64 go build -ldflags "-X main.Version=${WARP_VERSION}" -o build/darwin/arm64/
+	env GOOS=darwin GOARCH=amd64 go build -ldflags "-X main.Version=${WARP_VERSION}" -o build/darwin/amd64/
 
 warp_build:
 	$(MAKE) all
-	python webgen/webgen.py clean nginx/gen.py
-	python webgen/webgen.py build nginx/gen.py
+	python ../webgen/webgen.py clean nginx/gen.py
+	python ../webgen/webgen.py build nginx/gen.py
 	mkdir -p build/${WARP_ENV}
 	echo "{\"version\":\"${WARP_VERSION}\",\"status\":\"ok\"}" > build/${WARP_ENV}/status.json
 
@@ -80,8 +87,8 @@ local_routing_off:
 
 run_local:
 	$(MAKE) build
-	python webgen/webgen.py clean nginx-local/gen.py
-	python webgen/webgen.py build nginx-local/gen.py
+	python ../webgen/webgen.py clean nginx-local/gen.py
+	python ../webgen/webgen.py build nginx-local/gen.py
 	mkdir nginx-local/build/log
 	$(MAKE) local_routing_on
 	trap "$(MAKE) local_routing_off" EXIT && $(MAKE) run_local_nginx

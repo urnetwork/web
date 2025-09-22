@@ -1,6 +1,7 @@
 FROM ubuntu:22.04
 # see https://docs.docker.com/develop/develop-images/dockerfile_best-practices/
 
+ARG TARGETPLATFORM
 ARG warp_env
 ENV WARP_ENV=$warp_env
 
@@ -34,8 +35,8 @@ ADD dist /www/app
 
 COPY build/${WARP_ENV}/status.json /srv/warp/status/status.json
 
-EXPOSE 80
+COPY build/$TARGETPLATFORM/app /usr/local/sbin/app
 
 # see https://ubuntu.com/blog/avoiding-dropped-connections-in-nginx-containers-with-stopsignal-sigquit
 STOPSIGNAL SIGQUIT
-CMD ["nginx", "-g", "daemon off;"]
+CMD ["/usr/local/sbin/app"]
