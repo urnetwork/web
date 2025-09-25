@@ -3,3 +3,5 @@
 **/build.*
 **/__pycache__
 !.github/workflows/build.yml
+app/app
+web/web
