@@ -1,0 +1,36 @@
+.title {
+  font-family: "PP NeueBit Bold", "PP NeueBit Bold Placeholder", sans-serif;
+  font-size: 30px;
+  font-weight: 400;
+  text-decoration-color: rgb(16, 16, 16);
+}
+
+.text-body {
+    font-family: "PP Neue Montreal", "PP Neue Montreal Regular", "PP Neue Montreal Regular Placeholder", sans-serif;
+    color: rgb(16, 16, 16);
+    font-size: 20px;
+    font-weight: 400;   
+}
+
+.text-navitem {
+    font-family: "PP Neue Montreal", "PP Neue Montreal Regular", "PP Neue Montreal Regular Placeholder", sans-serif;
+    font-weight: 400;
+    color:#737373;
+}
+
+
+.text-navitem:hover {
+    color:#737373;
+    color: rgb(16, 16, 16);
+}
+
+
+.fixed-150px {
+  width: 150px;
+}
+
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
