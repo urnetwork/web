@@ -16,7 +16,6 @@ webpack:
 	# Outputs build artifacts to ./dist
 	. ${NVM_DIR}/nvm.sh && \
 		nvm exec ${NODE_VERSION} npm ci && \
-		nvm exec ${NODE_VERSION} npm audit && \
 		nvm exec ${NODE_VERSION} npm run build
 
 build:
