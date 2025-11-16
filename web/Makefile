@@ -1,5 +1,5 @@
 
-NODE_VERSION := v20.10.0
+NODE_VERSION := v22.14.0
 
 all: init clean build gen_components
 
