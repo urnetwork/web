@@ -86,7 +86,7 @@ const StatsSection: React.FC = () => {
   return (
     <div className="space-y-8">
       {showWarningBanner && (
-        <div className="bg-yellow-900/50 border-l-4 border-yellow-500 p-4 rounded-lg shadow-lg animate-fadeIn">
+        <div className="bg-yellow-900/50 border-l-4 border-yellow-500 p-4 rounded-lg shadow-lg animate-staggerFadeUp" style={{ animationDelay: '0.05s' }}>
           <div className="flex items-start justify-between">
             <div className="flex items-start gap-3">
               <AlertCircle size={20} className="text-yellow-400 mt-0.5 flex-shrink-0" />
@@ -108,8 +108,8 @@ const StatsSection: React.FC = () => {
           </div>
         </div>
       )}
-      
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 animate-staggerFadeUp" style={{ animationDelay: '0.1s' }}>
         <div>
           <h2 className="text-3xl font-bold text-white flex items-center gap-3">
             <div className="p-2 bg-gradient-to-r from-green-600 to-emerald-600 rounded-xl">
@@ -157,7 +157,7 @@ const StatsSection: React.FC = () => {
         </div>
       ) : (
         <div className="space-y-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6 animate-staggerFadeUp" style={{ animationDelay: '0.15s' }}>
             <StatCard
               title="Active Providers"
               value={totals.activeProviders}
@@ -196,7 +196,7 @@ const StatsSection: React.FC = () => {
             />
           </div>
 
-          <div className="bg-gray-800 rounded-xl shadow-2xl overflow-hidden border border-gray-700">
+          <div className="bg-gray-800 rounded-xl shadow-2xl overflow-hidden border border-gray-700 animate-staggerFadeUp" style={{ animationDelay: '0.2s' }}>
             <div className="bg-gradient-to-r from-gray-700 to-gray-800 px-6 py-4 border-b border-gray-600">
               <div className="flex items-center justify-between">
                 <div>

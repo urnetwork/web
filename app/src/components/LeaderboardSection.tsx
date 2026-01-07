@@ -70,7 +70,7 @@ const LeaderboardSection: React.FC = () => {
 
   return (
     <div className="space-y-8">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 animate-staggerFadeUp" style={{ animationDelay: '0.05s' }}>
         <div>
           <h2 className="text-3xl font-bold text-white flex items-center gap-3">
             <div className="p-2 bg-gradient-to-r from-yellow-600 to-orange-600 rounded-xl">
@@ -123,7 +123,7 @@ const LeaderboardSection: React.FC = () => {
       ) : (
         <div className="space-y-6">
           {ranking && (
-            <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl shadow-2xl p-6 text-white border border-blue-500">
+            <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl shadow-2xl p-6 text-white border border-blue-500 animate-staggerFadeUp" style={{ animationDelay: '0.1s' }}>
               <div className="flex items-center gap-3 mb-4">
                 <Medal size={24} />
                 <h3 className="text-xl font-semibold">Your Network Ranking</h3>
@@ -151,7 +151,7 @@ const LeaderboardSection: React.FC = () => {
             </div>
           )}
 
-          <div className="bg-gray-800 rounded-xl shadow-2xl overflow-hidden border border-gray-700">
+          <div className="bg-gray-800 rounded-xl shadow-2xl overflow-hidden border border-gray-700 animate-staggerFadeUp" style={{ animationDelay: '0.15s' }}>
             <div className="bg-gradient-to-r from-gray-700 to-gray-800 px-6 py-4 border-b border-gray-600">
               <h3 className="font-medium text-gray-100">Global Rankings</h3>
               <p className="text-sm text-gray-400 mt-1">

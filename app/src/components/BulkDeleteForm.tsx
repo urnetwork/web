@@ -53,10 +53,17 @@ const BulkDeleteForm: React.FC<BulkDeleteFormProps> = ({
     const failedClients: string[] = [];
     let aborted = false;
 
+    // Create abort controller once for the entire operation
+    const abortController = new AbortController();
+    abortControllerRef.current = abortController;
+
     try {
       for (let i = 0; i < clientsToDelete.length; i++) {
-        const abortController = new AbortController();
-        abortControllerRef.current = abortController;
+        // Check if operation was canceled before processing next client
+        if (abortController.signal.aborted) {
+          aborted = true;
+          break;
+        }
 
         const client = clientsToDelete[i];
         setDeleteProgress({ current: i + 1, total: clientsToDelete.length });
@@ -114,6 +121,7 @@ const BulkDeleteForm: React.FC<BulkDeleteFormProps> = ({
       toast.error("Bulk delete operation failed");
       console.error("Bulk delete error:", error);
     } finally {
+      abortControllerRef.current = null;
       setIsDeleting(false);
       setShowModal(false);
       setDeleteProgress({ current: 0, total: 0 });
@@ -336,8 +344,11 @@ const BulkDeleteForm: React.FC<BulkDeleteFormProps> = ({
       <ConfirmModal
         isOpen={showModal}
         onClose={() => {
-          abortControllerRef.current?.abort();
-          setShowModal(false);
+          if (isDeleting) {
+            abortControllerRef.current?.abort();
+          } else {
+            setShowModal(false);
+          }
         }}
         onConfirm={handleBulkDelete}
         title="Confirm Bulk Delete"

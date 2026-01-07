@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import {
 	CreditCard,
 	RefreshCw,
@@ -11,10 +11,11 @@ import {
 	Clock,
 	TrendingUp,
 	Database,
+	Star,
 } from "lucide-react";
 import { useAuth } from "../hooks/useAuth";
-import { fetchAccountPayments } from "../services/api";
-import type { AccountPayment } from "../services/api";
+import { fetchAccountPayments, fetchAccountPoints } from "../services/api";
+import type { AccountPayment, AccountPoint } from "../services/api";
 import toast from "react-hot-toast";
 
 const StatCard = ({
@@ -43,14 +44,34 @@ const StatCard = ({
 	</div>
 );
 
+const formatNumber = (num: number): string => {
+	if (num >= 1_000_000_000) {
+		return `${(num / 1_000_000_000).toFixed(2)}B`;
+	} else if (num >= 1_000_000) {
+		return `${(num / 1_000_000).toFixed(2)}M`;
+	} else if (num >= 1_000) {
+		return `${(num / 1_000).toFixed(2)}K`;
+	}
+	return num.toLocaleString("en-US");
+};
+
 const PayoutStatsSection: React.FC = () => {
 	const { token } = useAuth();
 	const [payments, setPayments] = useState<AccountPayment[]>([]);
+	const [points, setPoints] = useState<AccountPoint[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
 	const [lastUpdated, setLastUpdated] = useState<string>("");
 	const tableWrapperRef = useRef<HTMLDivElement | null>(null);
 	const initialRenderRef = useRef<boolean>(true);
+
+	const pointsByPaymentId = useMemo(() => {
+		const map = new Map<string, AccountPoint>();
+		for (const point of points) {
+			map.set(point.account_payment_id, point);
+		}
+		return map;
+	}, [points]);
 
 	useEffect(() => {
 		if (!initialRenderRef.current || isLoading) {
@@ -75,13 +96,17 @@ const PayoutStatsSection: React.FC = () => {
 		setError(null);
 
 		try {
-			const response = await fetchAccountPayments(token);
+			const [paymentsResponse, pointsResponse] = await Promise.all([
+				fetchAccountPayments(token),
+				fetchAccountPoints(token),
+			]);
 
-			if (response.error) {
-				setError(response.error.message);
-				toast.error(response.error.message);
+			if (paymentsResponse.error) {
+				setError(paymentsResponse.error.message);
+				toast.error(paymentsResponse.error.message);
 			} else {
-				setPayments(response.account_payments || []);
+				setPayments(paymentsResponse.account_payments || []);
+				setPoints(pointsResponse.account_points || []);
 				setLastUpdated(new Date().toISOString());
 				if (showToast) {
 					toast.success("Payout Stats updated successfully");
@@ -122,7 +147,7 @@ const PayoutStatsSection: React.FC = () => {
 	};
 
 	const calculateTotals = () => {
-		return payments.reduce(
+		const paymentTotals = payments.reduce(
 			(acc, payment) => ({
 				totalPayouts: acc.totalPayouts + payment.token_amount,
 				totalBytes: acc.totalBytes + payment.payout_byte_count,
@@ -139,13 +164,20 @@ const PayoutStatsSection: React.FC = () => {
 				pendingPayments: 0,
 			},
 		);
+
+		const totalPoints = points.reduce(
+			(acc, point) => acc + point.point_value / 1_000_000,
+			0,
+		);
+
+		return { ...paymentTotals, totalPoints };
 	};
 
 	const totals = calculateTotals();
 
 	return (
 		<div className="space-y-8">
-			<div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+			<div className="flex flex-col md:flex-row md:items-center justify-between gap-4 animate-staggerFadeUp" style={{ animationDelay: '0.1s' }}>
 				<div>
 					<h3 className="text-2xl font-bold text-white flex items-center gap-3">
 						<CreditCard className="text-green-400" size={24} />
@@ -198,7 +230,7 @@ const PayoutStatsSection: React.FC = () => {
 				</div>
 			) : (
 				<div className="space-y-8">
-					<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+					<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 animate-staggerFadeUp" style={{ animationDelay: '0.2s' }}>
 						<StatCard
 							title="Total USDC Earned"
 							value={`$${totals.totalPayouts.toFixed(4)}`}
@@ -206,10 +238,16 @@ const PayoutStatsSection: React.FC = () => {
 							gradient="bg-gradient-to-r from-green-600 to-emerald-600"
 						/>
 						<StatCard
+							title="Total Points Earned"
+							value={formatNumber(totals.totalPoints)}
+							icon={Star}
+							gradient="bg-gradient-to-r from-amber-500 to-yellow-500"
+						/>
+						<StatCard
 							title="Total Data Paid"
 							value={formatBytes(totals.totalBytes)}
 							icon={Database}
-							gradient="bg-gradient-to-r from-blue-600 to-indigo-600"
+							gradient="bg-gradient-to-r from-blue-600 to-cyan-600"
 						/>
 						<StatCard
 							title="Completed Payments"
@@ -221,11 +259,11 @@ const PayoutStatsSection: React.FC = () => {
 							title="Total Payments"
 							value={payments.length}
 							icon={TrendingUp}
-							gradient="bg-gradient-to-r from-purple-600 to-pink-600"
+							gradient="bg-gradient-to-r from-rose-600 to-pink-600"
 						/>
 					</div>
 
-					<div className="bg-gray-800 rounded-xl shadow-2xl overflow-hidden border border-gray-700">
+					<div className="bg-gray-800 rounded-xl shadow-2xl overflow-hidden border border-gray-700 animate-chartSlideUp" style={{ animationDelay: '0.25s' }}>
 						<div className="bg-gradient-to-r from-gray-700 to-gray-800 px-4 py-2 lg:px-6 lg:py-4 border-b border-gray-600">
 							<div className="flex items-center justify-between">
 								<div>
@@ -274,6 +312,9 @@ const PayoutStatsSection: React.FC = () => {
 											</th>
 											<th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
 												Amount
+											</th>
+											<th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+												Points Earned
 											</th>
 											<th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
 												Data Transferred
@@ -327,11 +368,17 @@ const PayoutStatsSection: React.FC = () => {
 													</span>
 												</td>
 												<td className="px-6 py-4 whitespace-nowrap text-sm text-green-400 font-medium">
-													$
+													{payment.token_amount ? <>$
 													{payment.token_amount.toFixed(
 														4,
 													)}{" "}
-													{payment.token_type}
+													{payment.token_type}</> : <>&mdash;</>}
+												</td>
+												<td className="px-6 py-4 whitespace-nowrap text-sm text-amber-400 font-medium">
+													{(() => {
+														const point = pointsByPaymentId.get(payment.payment_id);
+														return point ? formatNumber(point.point_value / 1_000_000) : <>&mdash;</>;
+													})()}
 												</td>
 												<td className="px-6 py-4 whitespace-nowrap text-sm text-blue-400 font-medium">
 													{formatBytes(
@@ -344,9 +391,9 @@ const PayoutStatsSection: React.FC = () => {
 															size={14}
 															className="text-gray-500"
 														/>
-														{formatDate(
+														{payment.payment_time ? formatDate(
 															payment.payment_time,
-														)}
+														) : <>&mdash;</>}
 													</div>
 												</td>
 												<td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
@@ -356,39 +403,37 @@ const PayoutStatsSection: React.FC = () => {
 															className="text-gray-500"
 														/>
 														<span className="font-mono text-xs">
-															{payment.tx_hash.substring(
+															{payment.tx_hash ? <>{payment.tx_hash.substring(
 																0,
 																Math.floor(
-																	payment
-																		.tx_hash
-																		.length /
+																	(payment
+																		.tx_hash?.length ?? 0) /
 																		4,
 																),
 															)}
 															...
 															{payment.tx_hash.substring(
 																Math.floor(
-																	payment
-																		.tx_hash
-																		.length *
+																	(payment
+																		.tx_hash?.length ?? 0) *
 																		(3 / 4),
 																),
-															)}
+															)}</> : ""}
 														</span>
 														<a
-															href={`https://solscan.io/tx/${payment.tx_hash}`}
+															href={payment.tx_hash ? `https://solscan.io/tx/${payment.tx_hash}` : '#'}
 															target="_blank"
 															rel="noopener noreferrer"
 															className="text-blue-400 hover:text-blue-300 transition-colors"
 														>
-															<ExternalLink
+															{payment.tx_hash ? <ExternalLink
 																size={12}
-															/>
+															/> : <>&mdash;</>}
 														</a>
 													</div>
 												</td>
 												<td className="px-6 py-4 whitespace-nowrap text-sm text-purple-400 font-medium">
-													{payment.blockchain}
+													{payment.blockchain || <>&mdash;</>}
 												</td>
 											</tr>
 										))}

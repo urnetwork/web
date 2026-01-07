@@ -216,7 +216,7 @@ const ClientsSection: React.FC = () => {
 
 	return (
 		<div className="space-y-8">
-			<div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+			<div className="flex flex-col md:flex-row md:items-center justify-between gap-4 animate-staggerFadeUp" style={{ animationDelay: '0.05s' }}>
 				<div>
 					<h2 className="text-3xl font-bold text-white flex items-center gap-3">
 						<div className="p-2 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl">
@@ -252,7 +252,7 @@ const ClientsSection: React.FC = () => {
 			</div>
 
 			{/* Search Bar */}
-			<div className="bg-gray-800 rounded-xl shadow-2xl p-6 border border-gray-700">
+			<div className="bg-gray-800 rounded-xl shadow-2xl p-6 border border-gray-700 animate-staggerFadeUp" style={{ animationDelay: '0.1s' }}>
 				<div className="relative">
 					<div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
 						<Search className="h-5 w-5 text-gray-400" />
@@ -282,7 +282,7 @@ const ClientsSection: React.FC = () => {
 			</div>
 
 			{/* Filters and Sorting */}
-			<div className="bg-gray-800 rounded-xl shadow-2xl p-6 border border-gray-700">
+			<div className="bg-gray-800 rounded-xl shadow-2xl p-6 border border-gray-700 animate-staggerFadeUp" style={{ animationDelay: '0.15s' }}>
 				<div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
 					<div className="flex flex-col sm:flex-row sm:items-center gap-4">
 						<div className="flex items-center gap-2">
@@ -453,22 +453,24 @@ const ClientsSection: React.FC = () => {
 						</div>
 					)}
 
-					<div className="bg-gray-800 rounded-xl shadow-2xl overflow-hidden border border-gray-700">
-						<div className="bg-gradient-to-r from-red-600 to-pink-600 px-6 py-4 border-b border-gray-600">
+					<div className="bg-gray-800 rounded-xl shadow-2xl overflow-hidden border-2 border-red-600/30 hover:border-red-600/50 transition-all duration-200 animate-staggerFadeUp" style={{ animationDelay: '0.25s' }}>
+						<div className="bg-gradient-to-r from-red-600 to-pink-600 px-6 py-4 border-b border-red-500">
 							<div className="flex items-center gap-3">
-								<Trash2 size={20} className="text-white" />
+								<div className="p-2 bg-white/10 rounded-lg">
+									<Trash2 size={20} className="text-white" />
+								</div>
 								<div>
-									<h3 className="font-medium text-white">
+									<h3 className="font-semibold text-white text-lg">
 										Bulk Delete Offline Clients
 									</h3>
-									<p className="text-red-100 text-sm mt-1">
+									<p className="text-red-50 text-sm mt-1">
 										Remove multiple offline clients based on
 										their last authentication time
 									</p>
 								</div>
 							</div>
 						</div>
-						<div className="p-6">
+						<div className="p-6 bg-gray-800/50">
 							<BulkDeleteForm
 								clients={allClients}
 								onClientsRemoved={handleClientsRemoved}
@@ -476,16 +478,23 @@ const ClientsSection: React.FC = () => {
 						</div>
 					</div>
 
-					<div className="bg-gray-800 rounded-xl shadow-2xl overflow-hidden border border-gray-700">
-						<div className="bg-gradient-to-r from-indigo-600 to-purple-600 px-6 py-4 border-b border-gray-600">
-							<h3 className="font-medium text-white">
-								Remove Client Manually
-							</h3>
-							<p className="text-indigo-100 text-sm mt-1">
-								Enter a client ID to remove it from the network
-							</p>
+					<div className="bg-gray-800 rounded-xl shadow-2xl overflow-hidden border-2 border-blue-600/30 hover:border-blue-600/50 transition-all duration-200 animate-staggerFadeUp" style={{ animationDelay: '0.3s' }}>
+						<div className="bg-gradient-to-r from-blue-600 to-cyan-600 px-6 py-4 border-b border-blue-500">
+							<div className="flex items-center gap-3">
+								<div className="p-2 bg-white/10 rounded-lg">
+									<Trash2 size={20} className="text-white" />
+								</div>
+								<div>
+									<h3 className="font-semibold text-white text-lg">
+										Remove Client Manually
+									</h3>
+									<p className="text-blue-50 text-sm mt-1">
+										Enter a client ID to remove it from the network
+									</p>
+								</div>
+							</div>
 						</div>
-						<div className="p-6">
+						<div className="p-6 bg-gray-800/50">
 							<RemoveClientForm
 								onClientRemoved={handleClientRemoved}
 							/>

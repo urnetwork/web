@@ -177,7 +177,7 @@ const ProvidersSection: React.FC = () => {
 
   return (
     <div className="space-y-8">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 animate-staggerFadeUp" style={{ animationDelay: '0.05s' }}>
         <div>
           <h2 className="text-3xl font-bold text-white flex items-center gap-3">
             <div className="p-2 bg-gradient-to-r from-purple-600 to-indigo-600 rounded-xl">
@@ -210,7 +210,7 @@ const ProvidersSection: React.FC = () => {
         </button>
       </div>
 
-      <div className="relative">
+      <div className="relative animate-staggerFadeUp" style={{ animationDelay: '0.1s' }}>
         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
           <Search className="h-5 w-5 text-gray-400" />
         </div>
@@ -243,12 +243,12 @@ const ProvidersSection: React.FC = () => {
       ) : (
         <div className="space-y-8">
           <div>
-            <h3 className="text-xl font-semibold text-white mb-6 flex items-center gap-2">
+            <h3 className="text-xl font-semibold text-white mb-6 flex items-center gap-2 animate-staggerFadeUp" style={{ animationDelay: '0.15s' }}>
               <Globe className="text-blue-400" size={20} />
               Provider Locations
              <span className="text-sm text-gray-400 font-normal">({locations.length})</span>
             </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-staggerFadeUp" style={{ animationDelay: '0.2s' }}>
               {locations.map((location) => (
                 <LocationCard key={location.location_id} location={location} />
               ))}

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Routes, Route, useNavigate, useLocation } from "react-router-dom";
 import { TerminalSquare, LogOut } from "lucide-react";
 import AuthSection from "./AuthSection";
@@ -22,11 +22,25 @@ const Layout: React.FC = () => {
 		| "wallet-stats"
 		| "account";
 
-	const { isAuthenticated, logout } = useAuth();
+	const { isAuthenticated, logout, isLoggingOut, isTransitioning } = useAuth();
 	const navigate = useNavigate();
 	const location = useLocation();
 	const [showMobileMenu, setShowMobileMenu] = useState(false);
+	const [showDashboard, setShowDashboard] = useState(false);
+	const [previousTab, setPreviousTab] = useState<TabType>("clients");
+	const [animationDirection, setAnimationDirection] = useState<"left" | "right" | "none">("none");
 	const viewportType = useViewportType();
+
+	useEffect(() => {
+		if (isAuthenticated) {
+			const timer = setTimeout(() => {
+				setShowDashboard(true);
+			}, 300);
+			return () => clearTimeout(timer);
+		} else {
+			setShowDashboard(false);
+		}
+	}, [isAuthenticated]);
 
 	useAutoLogin();
 
@@ -44,26 +58,52 @@ const Layout: React.FC = () => {
 	const activeTab = getCurrentTab();
 
 	const tabs = [
-		{ id: "clients", label: "Clients", color: "blue" },
-		{ id: "stats", label: "Statistics", color: "green" },
-		{ id: "leaderboard", label: "Leaderboard", color: "yellow" },
-		{ id: "providers", label: "Providers", color: "purple" },
-		{ id: "wallet-stats", label: "Wallet Stats", color: "indigo" },
-		{ id: "account", label: "Account Settings", color: "gray" },
+		{ id: "clients", label: "Clients", color: "blue", index: 0 },
+		{ id: "stats", label: "Statistics", color: "green", index: 1 },
+		{ id: "leaderboard", label: "Leaderboard", color: "yellow", index: 2 },
+		{ id: "providers", label: "Providers", color: "purple", index: 3 },
+		{ id: "wallet-stats", label: "Wallet Stats", color: "indigo", index: 4 },
+		{ id: "account", label: "Account Settings", color: "gray", index: 5 },
 	];
 
 	const activeTabData = tabs.find((tab) => tab.id === activeTab);
 
 	const handleTabChange = (tabId: TabType) => {
+		// Don't do anything if clicking the same tab
+		if (tabId === activeTab) {
+			setShowMobileMenu(false);
+			return;
+		}
+
+		const currentIndex = tabs.find(tab => tab.id === activeTab)?.index || 0;
+		const newIndex = tabs.find(tab => tab.id === tabId)?.index || 0;
+
+		if (currentIndex < newIndex) {
+			setAnimationDirection("left");
+		} else if (currentIndex > newIndex) {
+			setAnimationDirection("right");
+		} else {
+			setAnimationDirection("none");
+		}
+
+		setPreviousTab(activeTab);
+
 		const path = tabId === "clients" ? "/" : `/${tabId}`;
 		navigate(path);
 		setShowMobileMenu(false);
 	};
 
+	useEffect(() => {
+		const currentTab = getCurrentTab();
+		if (currentTab !== previousTab) {
+			setPreviousTab(currentTab);
+		}
+	}, [location.pathname]); // eslint-disable-line react-hooks/exhaustive-deps
+
 	return (
 		<div className="min-h-screen flex flex-col bg-gray-900">
 			{isAuthenticated && (
-				<header className="bg-gradient-to-r from-gray-800 via-gray-900 to-black text-white shadow-2xl border-b border-gray-700">
+				<header className={`bg-gradient-to-r from-gray-800 via-gray-900 to-black text-white shadow-2xl border-b border-gray-700 ${isLoggingOut ? 'animate-unlockSequence' : showDashboard ? 'animate-slideInFromTop' : ''}`} style={{ opacity: showDashboard ? 1 : 0 }}>
 					<div className="px-4 py-4">
 						<div className="flex justify-between items-center gap-4">
 							<div className="flex items-center space-x-2 md:space-x-3 min-w-0 flex-1">
@@ -81,7 +121,7 @@ const Layout: React.FC = () => {
 										</span>
 									</h1>
 									<p className="text-xs text-gray-400 hidden md:block">
-										Advanced Network Management
+										Beta Application
 									</p>
 								</div>
 							</div>
@@ -89,7 +129,12 @@ const Layout: React.FC = () => {
 							<div className="flex items-center space-x-2 md:space-x-3">
 								<button
 									onClick={logout}
-									className="flex items-center space-x-1 md:space-x-2 bg-gray-700 hover:bg-gray-600 text-white px-3 md:px-4 py-2 rounded-lg transition-all duration-200 border border-gray-600 hover:border-gray-500 shadow-lg hover:shadow-xl flex-shrink-0"
+									disabled={isLoggingOut || isTransitioning}
+									className={`flex items-center space-x-1 md:space-x-2 text-white px-3 md:px-4 py-2 rounded-lg transition-all duration-200 border shadow-lg flex-shrink-0 ${
+										isLoggingOut || isTransitioning
+											? "bg-gray-800 border-gray-700 cursor-not-allowed opacity-60"
+											: "bg-gray-700 hover:bg-gray-600 border-gray-600 hover:border-gray-500 hover:shadow-xl"
+									}`}
 								>
 									<LogOut
 										size={14}
@@ -107,10 +152,10 @@ const Layout: React.FC = () => {
 			<main className="flex-grow container mx-auto px-4 py-8">
 				{isAuthenticated && (
 					<>
-						<div className="bg-gray-800 rounded-xl border border-gray-700 shadow-2xl">
+						<div className={`bg-gray-800 rounded-xl border border-gray-700 shadow-2xl ${isLoggingOut ? 'animate-unlockSequence' : showDashboard ? 'animate-expandFromCenter' : ''}`} style={{ opacity: showDashboard ? 1 : 0, overflow: viewportType === ViewportType.Mobile ? 'visible' : 'hidden', position: 'relative', zIndex: 10 }}>
 							{viewportType === ViewportType.Mobile ? (
-								<div className="p-2">
-									<div className="relative">
+								<div className="p-2" style={{ overflow: 'visible' }}>
+									<div className="relative" style={{ zIndex: 1000 }}>
 										<button
 											onClick={() =>
 												setShowMobileMenu(
@@ -127,7 +172,7 @@ const Layout: React.FC = () => {
 										</button>
 
 										{showMobileMenu && (
-											<div className="absolute top-full left-0 right-0 mt-1 bg-gray-800 border border-gray-700 rounded-lg shadow-xl z-50 animate-fadeIn">
+											<div className="absolute top-full left-0 right-0 mt-2 rounded-lg shadow-2xl animate-fadeIn" style={{ backgroundColor: 'rgb(31, 41, 55)', border: '2px solid rgb(75, 85, 99)', zIndex: 9999 }}>
 												{tabs.map((tab) => (
 													<button
 														key={tab.id}
@@ -136,11 +181,17 @@ const Layout: React.FC = () => {
 																tab.id as TabType,
 															)
 														}
-														className={`w-full text-left py-3 px-4 text-sm transition-all duration-200 first:rounded-t-lg last:rounded-b-lg ${
+														className={`w-full text-left py-4 px-4 text-sm font-semibold transition-all duration-200 first:rounded-t-lg last:rounded-b-lg border-b last:border-b-0 ${
 															activeTab === tab.id
 																? `bg-gradient-to-r from-${tab.color}-600 to-${tab.color}-500 text-white`
-																: "text-gray-400 hover:text-gray-200 hover:bg-gray-700"
+																: "text-white hover:bg-gray-700 active:bg-gray-600"
 														}`}
+														style={{
+															pointerEvents: 'auto',
+															touchAction: 'manipulation',
+															backgroundColor: activeTab === tab.id ? undefined : 'rgb(55, 65, 81)',
+															borderColor: 'rgb(75, 85, 99)'
+														}}
 													>
 														{tab.label}
 													</button>
@@ -172,7 +223,18 @@ const Layout: React.FC = () => {
 							)}
 						</div>
 
-						<div className="animate-fadeIn mt-8">
+						<div
+							className={`mt-8 tab-content-wrapper ${
+								isLoggingOut
+									? "animate-unlockSequence"
+									: animationDirection === "left"
+									? "animate-tabSlideFadeLeft"
+									: animationDirection === "right"
+									? "animate-tabSlideFadeRight"
+									: ""
+							}`}
+							key={location.pathname}
+						>
 							<Routes>
 								<Route path="/" element={<ClientsSection />} />
 								<Route
@@ -214,7 +276,7 @@ const Layout: React.FC = () => {
 						</p>
 					</div>
 					<p className="text-xs text-gray-500">
-						Advanced Network Management • Preview Application
+						Beta Application
 					</p>
 				</div>
 			</footer>
