@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useCallback, useRef, ComponentProps } from 'react';
 import { Wallet, RefreshCw, AlertCircle, Settings, Clock, TrendingUp, Database, DollarSign, User, Trash2, AlertTriangle, HardDrive, Activity, CreditCard, BarChart3 } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
-import { fetchWalletStats, fetchNetworkUser } from '../services/api';
+import { fetchWalletStats, fetchNetworkUser, fetchNetworkReliability } from '../services/api';
 import { saveWalletStats, getWalletStatsHistory, clearWalletStatsHistory, getStorageInfo, type WalletStatsRecord } from '../services/localStorage';
 import type { NetworkUser } from '../services/api';
+import type { ReliabilityWindow } from '../services/types';
 import toast from 'react-hot-toast';
 import ConfirmModal from './ConfirmModal';
 import PayoutStatsSection from './PayoutStatsSection';
@@ -80,6 +81,11 @@ const WalletStatsSection: React.FC = () => {
   const [showClearModal, setShowClearModal] = useState(false);
   const [isClearing, setIsClearing] = useState(false);
   const [storageInfo, setStorageInfo] = useState({ totalRecords: 0, storageSize: '0 KB' });
+  const [reliabilityData, setReliabilityData] = useState<ReliabilityWindow | null>(null);
+  const [reliabilityError, setReliabilityError] = useState<string | null>(null);
+  const [showReliabilityWeight, setShowReliabilityWeight] = useState(true);
+  const [showWeightedClients, setShowWeightedClients] = useState(true);
+  const [showTotalClients, setShowTotalClients] = useState(true);
   const intervalRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const settingsInitialized = useRef(false);
   
@@ -157,16 +163,16 @@ const WalletStatsSection: React.FC = () => {
   // Load wallet stats history from localStorage
   const loadStatsHistory = useCallback(async () => {
     if (!networkUser?.user_id) return;
-    
+
     try {
       const { data, error } = await getWalletStatsHistory(networkUser.user_id, 1000);
-      
+
       if (error) {
         console.error('Error loading stats history:', error);
       } else if (data) {
         setStatsHistory(data);
         updateStorageInfo();
-        
+
         // Set current stats from the latest entry
         if (data.length > 0) {
           const latest = data[0];
@@ -180,6 +186,25 @@ const WalletStatsSection: React.FC = () => {
       console.error('Error loading stats history:', err);
     }
   }, [networkUser?.user_id, updateStorageInfo]);
+
+  const loadReliabilityData = useCallback(async () => {
+    if (!token) return;
+
+    setReliabilityError(null);
+
+    try {
+      const response = await fetchNetworkReliability(token);
+
+      if (response.error) {
+        setReliabilityError(response.error.message);
+      } else if (response.reliability_window) {
+        setReliabilityData(response.reliability_window);
+      }
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to load reliability data';
+      setReliabilityError(message);
+    }
+  }, [token]);
 
   // Fetch wallet stats from API and save to localStorage
   const loadWalletStats = useCallback(async (showToast = true) => {
@@ -299,6 +324,13 @@ const WalletStatsSection: React.FC = () => {
     }
   }, [loadStatsHistory, networkUser?.user_id]);
 
+  // Load reliability data when token is available
+  useEffect(() => {
+    if (token) {
+      loadReliabilityData();
+    }
+  }, [loadReliabilityData, token]);
+
   // Update storage info on mount
   useEffect(() => {
     updateStorageInfo();
@@ -361,12 +393,12 @@ const WalletStatsSection: React.FC = () => {
     // Reverse to show chronological order and limit data points
     const actualMaxPoints = settings.maxDataPoints === 1000 ? statsHistory.length : Math.min(settings.maxDataPoints, statsHistory.length);
     const sortedData = [...statsHistory].reverse().slice(-actualMaxPoints);
-    
+
     return {
       labels: sortedData.map(record => {
         const date = new Date(record.created_at);
-        return date.toLocaleDateString('en-US', { 
-          month: 'short', 
+        return date.toLocaleDateString('en-US', {
+          month: 'short',
           day: 'numeric',
           hour: '2-digit',
           minute: '2-digit'
@@ -377,7 +409,7 @@ const WalletStatsSection: React.FC = () => {
           label,
           data: sortedData.map(record => bytesToMB(record[dataKey])),
           borderColor: color,
-          backgroundColor: color + '20', // Add transparency
+          backgroundColor: color + '20',
           fill: true,
           tension: 0.4,
           pointBackgroundColor: color,
@@ -388,6 +420,167 @@ const WalletStatsSection: React.FC = () => {
         },
       ],
     };
+  };
+
+  const createReliabilityChartData = () => {
+    if (!reliabilityData || reliabilityData.reliability_weights.length === 0) return null;
+
+    const weights = reliabilityData.reliability_weights;
+    const clientCounts = reliabilityData.client_counts;
+    const totalClientCounts = reliabilityData.total_client_counts;
+    const bucketDuration = reliabilityData.bucket_duration_seconds * 1000;
+    const startTime = reliabilityData.min_time_unix_milli;
+
+    const labels = weights.map((_, index) => {
+      const timestamp = startTime + (index * bucketDuration);
+      const date = new Date(timestamp);
+      return date.toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    });
+
+    const datasets = [];
+
+    if (showReliabilityWeight) {
+      datasets.push({
+        label: 'Reliability Weight',
+        data: weights,
+        borderColor: '#3b82f6',
+        backgroundColor: '#3b82f620',
+        fill: false,
+        tension: 0.4,
+        pointBackgroundColor: '#3b82f6',
+        pointBorderColor: '#1f2937',
+        pointBorderWidth: 2,
+        pointRadius: settings.showDataPoints ? 4 : 0,
+        pointHoverRadius: settings.showDataPoints ? 6 : 4,
+        yAxisID: 'y',
+      });
+    }
+
+    if (showWeightedClients) {
+      datasets.push({
+        label: 'Weighted Clients',
+        data: clientCounts,
+        borderColor: '#10b981',
+        backgroundColor: '#10b98120',
+        fill: false,
+        tension: 0.4,
+        pointBackgroundColor: '#10b981',
+        pointBorderColor: '#1f2937',
+        pointBorderWidth: 2,
+        pointRadius: settings.showDataPoints ? 4 : 0,
+        pointHoverRadius: settings.showDataPoints ? 6 : 4,
+        yAxisID: 'y1',
+      });
+    }
+
+    if (showTotalClients) {
+      datasets.push({
+        label: 'Total Clients',
+        data: totalClientCounts,
+        borderColor: '#f59e0b',
+        backgroundColor: '#f59e0b20',
+        fill: false,
+        tension: 0.4,
+        pointBackgroundColor: '#f59e0b',
+        pointBorderColor: '#1f2937',
+        pointBorderWidth: 2,
+        pointRadius: settings.showDataPoints ? 4 : 0,
+        pointHoverRadius: settings.showDataPoints ? 6 : 4,
+        yAxisID: 'y1',
+      });
+    }
+
+    return { labels, datasets };
+  };
+
+  const reliabilityChartOptions: ChartOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        position: 'top' as const,
+        labels: {
+          color: '#d1d5db',
+          font: {
+            size: 12,
+          },
+        },
+      },
+      tooltip: {
+        backgroundColor: '#374151',
+        titleColor: '#f3f4f6',
+        bodyColor: '#d1d5db',
+        borderColor: '#4b5563',
+        borderWidth: 1,
+        callbacks: {
+          label: function(context) {
+            const value = context.parsed.y;
+            return `${context.dataset.label}: ${value.toFixed(2)}`;
+          },
+        },
+      },
+    },
+    scales: {
+      x: {
+        grid: {
+          color: '#374151',
+        },
+        ticks: {
+          color: '#9ca3af',
+          font: {
+            size: 11,
+          },
+          maxTicksLimit: 8,
+        },
+      },
+      y: {
+        type: 'linear' as const,
+        display: showReliabilityWeight,
+        position: 'left' as const,
+        grid: {
+          color: '#374151',
+        },
+        title: {
+          display: true,
+          text: 'Reliability Weight',
+          color: '#3b82f6',
+        },
+        ticks: {
+          color: '#3b82f6',
+          font: {
+            size: 11,
+          },
+        },
+      },
+      y1: {
+        type: 'linear' as const,
+        display: showWeightedClients || showTotalClients,
+        position: 'right' as const,
+        grid: {
+          drawOnChartArea: false,
+        },
+        title: {
+          display: true,
+          text: 'Client Count',
+          color: '#9ca3af',
+        },
+        ticks: {
+          color: '#9ca3af',
+          font: {
+            size: 11,
+          },
+        },
+      },
+    },
+    interaction: {
+      intersect: false,
+      mode: 'index' as const,
+    },
   };
 
   const chartOptions: ChartOptions = {
@@ -453,11 +646,12 @@ const WalletStatsSection: React.FC = () => {
 
   const paidChartData = createChartData('paid_bytes_provided', '#10b981', 'Paid Data Transfer');
   const unpaidChartData = createChartData('unpaid_bytes_provided', '#f59e0b', 'Unpaid Data Transfer');
+  const reliabilityChartData = createReliabilityChartData();
 
   return (
     <div className="space-y-8">
       {/* Tab Navigation */}
-      <div className="bg-gray-800 rounded-xl border border-gray-700 shadow-2xl">
+      <div className="bg-gray-800 rounded-xl border border-gray-700 shadow-2xl animate-staggerFadeUp" style={{ animationDelay: '0.05s' }}>
         <div className="flex space-x-1 p-2">
           <button
             onClick={() => setActiveTab('data')}
@@ -487,7 +681,7 @@ const WalletStatsSection: React.FC = () => {
       {/* Tab Content */}
       {activeTab === 'data' ? (
       <div className="space-y-8">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 animate-staggerFadeUp" style={{ animationDelay: '0.1s' }}>
           <div>
             <h2 className="text-3xl font-bold text-white flex items-center gap-3">
               <div className="p-2 bg-gradient-to-r from-green-600 to-emerald-600 rounded-xl">
@@ -693,7 +887,7 @@ const WalletStatsSection: React.FC = () => {
           </div>
         ) : (
           <div className="space-y-8">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 animate-staggerFadeUp" style={{ animationDelay: '0.2s' }}>
               <StatCard
                 title="Current Paid Data"
                 value={formatMBValue(currentStats.paid_mb)}
@@ -721,7 +915,7 @@ const WalletStatsSection: React.FC = () => {
             </div>
 
             {statsHistory.length > 0 && (
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 animate-chartSlideUp" style={{ animationDelay: '0.25s' }}>
                 {paidChartData && (
                   <div className="bg-gray-800 rounded-xl shadow-2xl p-6 border border-gray-700">
                     <h3 className="text-lg font-medium text-gray-100 mb-6 flex items-center gap-2">
@@ -745,6 +939,74 @@ const WalletStatsSection: React.FC = () => {
                     </div>
                   </div>
                 )}
+              </div>
+            )}
+
+            {reliabilityData && (
+              <div className="animate-chartSlideUp" style={{ animationDelay: '0.35s' }}>
+                <div className="bg-gray-800 rounded-xl shadow-2xl p-6 border border-gray-700">
+                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+                    <div className="flex items-center gap-4">
+                      <h3 className="text-lg font-medium text-gray-100 flex items-center gap-2">
+                        <Activity size={20} className="text-blue-400" />
+                        Network Reliability
+                      </h3>
+                      <div className="flex items-center gap-2 text-sm">
+                        <span className="text-gray-400">Mean:</span>
+                        <span className="text-blue-400 font-medium">
+                          {reliabilityData.mean_reliability_weight.toFixed(2)}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="flex flex-wrap items-center gap-4">
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={showReliabilityWeight}
+                          onChange={(e) => setShowReliabilityWeight(e.target.checked)}
+                          className="rounded border-gray-600 bg-gray-700 text-blue-500 focus:ring-blue-500 focus:ring-offset-gray-800"
+                        />
+                        <span className="text-sm text-blue-400">Reliability Weight</span>
+                      </label>
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={showWeightedClients}
+                          onChange={(e) => setShowWeightedClients(e.target.checked)}
+                          className="rounded border-gray-600 bg-gray-700 text-emerald-500 focus:ring-emerald-500 focus:ring-offset-gray-800"
+                        />
+                        <span className="text-sm text-emerald-400">Weighted Clients</span>
+                      </label>
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={showTotalClients}
+                          onChange={(e) => setShowTotalClients(e.target.checked)}
+                          className="rounded border-gray-600 bg-gray-700 text-amber-500 focus:ring-amber-500 focus:ring-offset-gray-800"
+                        />
+                        <span className="text-sm text-amber-400">Total Clients</span>
+                      </label>
+                    </div>
+                  </div>
+                  {reliabilityChartData && reliabilityChartData.datasets.length > 0 ? (
+                    <div className="h-64 md:h-80">
+                      <Line data={reliabilityChartData} options={reliabilityChartOptions as ComponentProps<typeof Line>["options"]} />
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-center h-64 text-gray-400">
+                      Select at least one data series to display
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {reliabilityError && !reliabilityData && (
+              <div className="bg-gray-800 rounded-xl shadow-2xl p-6 border border-gray-700">
+                <div className="flex items-center gap-3 text-red-400">
+                  <AlertCircle size={20} />
+                  <span>Failed to load reliability data: {reliabilityError}</span>
+                </div>
               </div>
             )}
 

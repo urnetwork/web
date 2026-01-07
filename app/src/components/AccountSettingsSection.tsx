@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
-import { Settings, Key, Copy, Clock, Users, AlertCircle, CheckCircle, Shield } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Settings, Key, Copy, Clock, Users, AlertCircle, CheckCircle, Shield, Lock, CreditCard, ExternalLink } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
-import { createAuthCode } from '../services/api';
+import { createAuthCode, fetchNetworkUser } from '../services/api';
 import type { CreateAuthCodeResponse } from '../services/api';
 import toast from 'react-hot-toast';
+import PasswordResetModal from './PasswordResetModal';
 
 const AccountSettingsSection: React.FC = () => {
   const { token } = useAuth();
@@ -12,6 +13,31 @@ const AccountSettingsSection: React.FC = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [authCodeResponse, setAuthCodeResponse] = useState<CreateAuthCodeResponse | null>(null);
   const [copiedToClipboard, setCopiedToClipboard] = useState(false);
+  const [isPasswordResetModalOpen, setIsPasswordResetModalOpen] = useState(false);
+  const [userEmail, setUserEmail] = useState<string>('');
+  const [isLoadingUserEmail, setIsLoadingUserEmail] = useState(true);
+
+  useEffect(() => {
+    const loadUserEmail = async () => {
+      if (!token) {
+        setIsLoadingUserEmail(false);
+        return;
+      }
+
+      try {
+        const response = await fetchNetworkUser(token);
+        if (response.network_user?.user_auth) {
+          setUserEmail(response.network_user.user_auth);
+        }
+      } catch (error) {
+        console.error('Failed to fetch user email:', error);
+      } finally {
+        setIsLoadingUserEmail(false);
+      }
+    };
+
+    loadUserEmail();
+  }, [token]);
 
   const handleGenerateAuthCode = async () => {
     if (!token) return;
@@ -77,7 +103,7 @@ const AccountSettingsSection: React.FC = () => {
 
   return (
     <div className="space-y-8">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 animate-staggerFadeUp" style={{ animationDelay: '0.05s' }}>
         <div>
           <h2 className="text-3xl font-bold text-white flex items-center gap-3">
             <div className="p-2 bg-gradient-to-r from-gray-600 to-slate-600 rounded-xl">
@@ -92,7 +118,7 @@ const AccountSettingsSection: React.FC = () => {
       </div>
 
       {/* Authentication Token Generator */}
-      <div className="bg-gray-800 rounded-xl shadow-2xl overflow-hidden border border-gray-700">
+      <div className="bg-gray-800 rounded-xl shadow-2xl overflow-hidden border border-gray-700 animate-staggerFadeUp" style={{ animationDelay: '0.1s' }}>
         <div className="bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-4 border-b border-gray-600">
           <div className="flex items-center gap-3">
             <Key size={20} className="text-white" />
@@ -244,7 +270,7 @@ const AccountSettingsSection: React.FC = () => {
                     <CheckCircle size={20} className="text-green-400" />
                     <h4 className="font-medium text-green-300">Authentication Code Generated Successfully</h4>
                   </div>
-                  
+
                   <div className="space-y-3">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                       <div className="bg-green-800/30 p-3 rounded border border-green-600">
@@ -260,7 +286,7 @@ const AccountSettingsSection: React.FC = () => {
                         </div>
                       </div>
                     </div>
-                    
+
                     <div>
                       <div className="flex items-center justify-between mb-2">
                         <label className="text-sm font-medium text-green-300">Authentication Code</label>
@@ -301,6 +327,87 @@ const AccountSettingsSection: React.FC = () => {
           )}
         </div>
       </div>
+
+      {/* Password Reset */}
+      <div className="bg-gray-800 rounded-xl shadow-2xl overflow-hidden border border-gray-700 animate-staggerFadeUp" style={{ animationDelay: '0.15s' }}>
+        <div className="bg-gradient-to-r from-blue-600 to-cyan-600 px-6 py-4 border-b border-gray-600">
+          <div className="flex items-center gap-3">
+            <Lock size={20} className="text-white" />
+            <div>
+              <h3 className="font-medium text-white">Password Reset</h3>
+              <p className="text-blue-100 text-sm mt-1">Request a password reset link to change your account password</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="p-6">
+          <p className="text-gray-300 mb-4">
+            If you need to change your password, we can send a reset link to your registered email address.
+            Click the button below to request a password reset email.
+          </p>
+
+          <button
+            onClick={() => setIsPasswordResetModalOpen(true)}
+            disabled={isLoadingUserEmail || !userEmail}
+            className={`flex items-center justify-center gap-2 px-6 py-3 rounded-lg font-medium transition-all duration-200 ${
+              isLoadingUserEmail || !userEmail
+                ? 'bg-gray-600 cursor-not-allowed border border-gray-600 text-gray-400'
+                : 'bg-blue-600 hover:bg-blue-700 text-white border border-blue-500 hover:shadow-lg transform hover:scale-[1.02]'
+            }`}
+          >
+            {isLoadingUserEmail ? (
+              <>
+                <svg className="animate-spin h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Loading...
+              </>
+            ) : (
+              <>
+                <Lock size={18} />
+                Reset Password
+              </>
+            )}
+          </button>
+        </div>
+      </div>
+
+      {/* Subscription Management */}
+      <div className="bg-gray-800 rounded-xl shadow-2xl overflow-hidden border border-gray-700 animate-staggerFadeUp" style={{ animationDelay: '0.2s' }}>
+        <div className="bg-gradient-to-r from-green-600 to-emerald-600 px-6 py-4 border-b border-gray-600">
+          <div className="flex items-center gap-3">
+            <CreditCard size={20} className="text-white" />
+            <div>
+              <h3 className="font-medium text-white">Subscription Management</h3>
+              <p className="text-green-100 text-sm mt-1">Access your Stripe subscription portal to manage billing and payment details</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="p-6">
+          <p className="text-gray-300 mb-4">
+            Access your subscription portal to manage your billing details, update payment methods, view invoices, and modify your subscription plan.
+          </p>
+
+          <a
+            href="https://pay.ur.io/p/login/00g16I4Mag2O240aEE"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-lg font-medium transition-all duration-200 bg-green-600 hover:bg-green-700 text-white border border-green-500 hover:shadow-lg transform hover:scale-[1.02]"
+          >
+            <CreditCard size={18} />
+            Open Subscription Portal
+            <ExternalLink size={16} />
+          </a>
+        </div>
+      </div>
+
+      <PasswordResetModal
+        isOpen={isPasswordResetModalOpen}
+        onClose={() => setIsPasswordResetModalOpen(false)}
+        userEmail={userEmail}
+      />
     </div>
   );
 };
