@@ -2358,7 +2358,7 @@ new function() {
         // get bonus from query params
         const urlParams = new URLSearchParams(window.location.search)
         const bonusReferral = urlParams.get('bonus')
-        const balanceCode = urlParams.get('balance')
+        const balanceCode = urlParams.get('balance-code')
 
         let userAuthStr = userAuth || ''
         let bonusReferralStr = bonusReferral ?? ''
