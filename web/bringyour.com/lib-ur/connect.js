@@ -1367,6 +1367,7 @@ new function() {
             const createNetworkNameElement = self.element('create-network-name')
             const createAgreeTermsElement = self.element('create-agree-terms')
             const bonusReferralElement = self.element('create-bonus-referral')
+            const balanceCodeElement = self.element('create-balance-code')
 
             createUserNameElement.disabled = true
             createUserAuthElement.disabled = true
@@ -1375,6 +1376,7 @@ new function() {
             createAgreeTermsElement.disabled = true
             createButtonElement.disabled = true
             bonusReferralElement.disabled = true
+            balanceCodeElement.disabled = true
             createSpinnerElement.classList.remove('d-none')
 
             let userName = createUserNameElement.value
@@ -1383,13 +1385,15 @@ new function() {
             let networkName = createNetworkNameElement.value
             let terms = createAgreeTermsElement.checked
             let bonusReferral = bonusReferralElement.value
+            let balanceCode = balanceCodeElement.value
             let requestBody = {
                 'user_name': userName,
                 'user_auth': userAuth,
                 'password': password,
                 'network_name': networkName,
                 'terms': terms,
-                'referral_code': bonusReferral
+                'referral_code': bonusReferral,
+                'balance_code': balanceCode,
             }
 
             connectSelf.apiRequest('POST', '/auth/network-create', requestBody)
@@ -1414,6 +1418,7 @@ new function() {
             const createNetworkNameElement = self.element('create-network-name')
             const createAgreeTermsElement = self.element('create-agree-terms')
             const bonusReferralElement = self.element('create-bonus-referral')
+            const balanceCodeElement = self.element('create-balance-code')
 
             const createErrorElement = self.element('create-error')
             const createUserAuthErrorElement = self.element('create-user-auth-error')
@@ -1427,6 +1432,7 @@ new function() {
             createAgreeTermsElement.disabled = false
             createButtonElement.disabled = false
             bonusReferralElement.disabled = false
+            balanceCodeElement.disabled = false
             createSpinnerElement.classList.add('d-none')
 
             if (responseBody) {
@@ -2352,9 +2358,11 @@ new function() {
         // get bonus from query params
         const urlParams = new URLSearchParams(window.location.search)
         const bonusReferral = urlParams.get('bonus')
+        const balanceCode = urlParams.get('balance-code')
 
         let userAuthStr = userAuth || ''
         let bonusReferralStr = bonusReferral ?? ''
+        let balanceCodeStr = balanceCode ?? ''
         let userNameStr = `anon${crypto.randomUUID()}`
         let html = `
               <div class="login-option">
@@ -2383,6 +2391,8 @@ new function() {
                              <hr />
                              <div class="info-title">Enter referral code</div>
                              <div><input id="${id('create-bonus-referral')}" type="text" value="${self.escapeHtml(bonusReferralStr)}" class="form-control"></div>
+                            <div class="info-title">Enter balance code</div>
+                             <div><input id="${id('create-balance-code')}" type="text" value="${self.escapeHtml(balanceCodeStr)}" class="form-control"></div>
                         </form>
                    </div>
               </div>
