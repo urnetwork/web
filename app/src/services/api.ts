@@ -32,6 +32,8 @@ import type {
   AccountPoint,
   AccountPointsResponse,
   NetworkReliabilityResponse,
+  RedeemedTransferBalanceCodesResponse,
+  RedeemTransferBalanceCodeResponse,
 } from "./types";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE ?? "https://api.bringyour.com";
@@ -874,6 +876,99 @@ export const fetchNetworkReliability = async (
           error instanceof Error
             ? error.message
             : "Failed to fetch network reliability",
+      },
+    };
+  }
+};
+
+/**
+ * Get network reliability statistics
+ * @param token - JWT authentication token
+ * @returns NetworkReliabilityResponse with reliability window data or error
+ */
+export const fetchNetworkTransferBalanceCodes = async (
+  token: string
+): Promise<RedeemedTransferBalanceCodesResponse> => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/account/balance-codes`, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: "*/*",
+      },
+    });
+
+    if (!response.ok) {
+      return {
+        balance_codes: [],
+        error: {
+          message: `HTTP error! status: ${response.status}`,
+        },
+      };
+    }
+
+    return await safeJsonParse<RedeemedTransferBalanceCodesResponse>(response);
+  } catch (error) {
+    console.error("Fetch network transfer balance codes error:", error);
+    return {
+      balance_codes: [],
+      error: {
+        message:
+          error instanceof Error
+            ? error.message
+            : "Failed to fetch network transfer balance codes",
+      },
+    };
+  }
+};
+
+/**
+ * Redeem transfer balance code
+ * @param balanceCode - The transfer balance code to redeem
+ * @returns PasswordResetResponse with error if failed
+ */
+export const redeemTransferBalanceCode = async (
+  balanceCode: string,
+  token: string
+): Promise<RedeemTransferBalanceCodeResponse> => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/subscription/redeem-balance-code`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+        Accept: "*/*",
+      },
+      body: JSON.stringify({
+        secret: balanceCode,
+      }),
+    });
+
+    if (!response.ok) {
+      console.error(
+        "Redeem transfer balance code request failed:",
+        response.status,
+        response.statusText
+      );
+      const errorData = await response.text();
+      console.error("Error response:", errorData);
+
+      return {
+        error: {
+          message: `HTTP error! status: ${response.status}`,
+        },
+      };
+    }
+
+    return await safeJsonParse<RedeemTransferBalanceCodeResponse>(response);
+  } catch (error) {
+    console.error("Redeem transfer balance code request error:", error);
+    return {
+      error: {
+        message:
+          error instanceof Error
+            ? error.message
+            : "Failed to redeem transfer balance code",
       },
     };
   }

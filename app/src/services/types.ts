@@ -537,3 +537,29 @@ export interface NetworkReliabilityResponse {
   /** Error information if request failed */
   error?: { message: string };
 }
+
+/**
+ * Network redeemed transfer balance code
+ */
+export interface RedeemedTransferBalanceCode {
+  balance_code_id: string;
+  balance_byte_count: number;
+  redeem_time: string;
+  end_time: string;
+  secret: string;
+}
+
+/**
+ * Response for fetching network redeemed transfer balance codes
+ */
+export interface RedeemedTransferBalanceCodesResponse {
+  balance_codes: RedeemedTransferBalanceCode[];
+  error?: { message: string };
+}
+
+/**
+ * Response from redeeming a transfer balance code
+ */
+export interface RedeemTransferBalanceCodeResponse {
+  error?: { message: string };
+}

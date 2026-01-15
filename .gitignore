@@ -5,3 +5,4 @@
 !.github/workflows/build.yml
 app/app
 web/web
+/venv
