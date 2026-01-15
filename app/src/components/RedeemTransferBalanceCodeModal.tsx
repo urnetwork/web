@@ -5,7 +5,7 @@ import { redeemTransferBalanceCode } from "../services/api";
 import toast from "react-hot-toast";
 import { useAuth } from "../hooks/useAuth";
 
-interface PasswordResetModalProps {
+interface RedeemTransferBalanceCodeModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess: () => void;
@@ -13,7 +13,7 @@ interface PasswordResetModalProps {
 
 type ModalState = "initial" | "loading" | "success";
 
-const RedeemTransferBalanceCodeModal: React.FC<PasswordResetModalProps> = ({
+const RedeemTransferBalanceCodeModal: React.FC<RedeemTransferBalanceCodeModalProps> = ({
   isOpen,
   onClose,
   onSuccess,
@@ -21,7 +21,6 @@ const RedeemTransferBalanceCodeModal: React.FC<PasswordResetModalProps> = ({
   const { token } = useAuth();
   const modalRef = useRef<HTMLDivElement>(null);
   const [state, setState] = useState<ModalState>("initial");
-//   const [balanceCode, setBalanceCode] = useState<string>("");
   const balanceCodeInputRef = useRef<HTMLInputElement>(null);
   const [balanceCodeFocused, setBalanceCodeFocused] = useState<boolean>(false);
   const [isBalanceCodeValid, setIsBalanceCodeValid] = useState<boolean>(false);
@@ -30,6 +29,13 @@ const RedeemTransferBalanceCodeModal: React.FC<PasswordResetModalProps> = ({
   useEffect(() => {
     if (isOpen) {
       setState("initial");
+      setIsBalanceCodeValid(false);
+      if (balanceCodeInputRef.current) {
+        balanceCodeInputRef.current.value = "";
+      }
+      setTimeout(() => {
+        balanceCodeInputRef.current?.focus();
+      }, 100);
     }
   }, [isOpen]);
 
@@ -69,7 +75,8 @@ const RedeemTransferBalanceCodeModal: React.FC<PasswordResetModalProps> = ({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [isOpen, onClose, state]);
 
-  const handleRedeemTransferBalance = async () => {
+  const handleRedeemTransferBalance = async (e?: React.FormEvent) => {
+    e?.preventDefault();
 
     if (!token) {
         toast.error("You must be logged in to redeem a balance code.");
@@ -78,8 +85,8 @@ const RedeemTransferBalanceCodeModal: React.FC<PasswordResetModalProps> = ({
 
     const balanceCode = balanceCodeInputRef.current?.value?.toString().trim();
 
-    if (!balanceCode || balanceCode.length != 26) {
-      toast.error("Please enter a valid balance code.");
+    if (!balanceCode || balanceCode.length !== 26) {
+      toast.error("Please enter a valid 26-character balance code.");
       return;
     }
 
@@ -123,6 +130,7 @@ const RedeemTransferBalanceCodeModal: React.FC<PasswordResetModalProps> = ({
             <button
               onClick={onClose}
               className="text-gray-400 hover:text-gray-200 focus:outline-none focus:text-gray-200 transition-colors p-1 rounded-lg hover:bg-gray-700"
+              aria-label="Close modal"
             >
               <X size={20} />
             </button>
@@ -140,9 +148,8 @@ const RedeemTransferBalanceCodeModal: React.FC<PasswordResetModalProps> = ({
               </h4>
             </div>
           ) : (
-            <>
+            <form onSubmit={handleRedeemTransferBalance}>
               <div className="mb-6">
-                
                 <input
                     id="redeemBalanceCode"
                     type="text"
@@ -151,7 +158,7 @@ const RedeemTransferBalanceCodeModal: React.FC<PasswordResetModalProps> = ({
                     onBlur={() => setBalanceCodeFocused(false)}
                     onChange={(e) =>
                         setIsBalanceCodeValid(
-                            e.target.value.trim().length == 26,
+                            e.target.value.trim().length === 26,
                         )
                     }
                     className={`w-full px-4 py-3 bg-gray-700 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 text-white placeholder-gray-400 ${
@@ -165,16 +172,21 @@ const RedeemTransferBalanceCodeModal: React.FC<PasswordResetModalProps> = ({
                     }`}
                     placeholder="Enter your transfer balance code"
                     disabled={state === "loading"}
+                    aria-label="Transfer balance code"
+                    aria-describedby="balance-code-help"
+                    maxLength={26}
+                    autoComplete="off"
                     required
                 />
 
-                <p className="text-gray-500 text-sm mt-3">
+                <p id="balance-code-help" className="text-gray-500 text-sm mt-3">
                   Redeeming transfer balance will add data credit to your network.
                 </p>
               </div>
 
               <div className="flex justify-end space-x-3">
                 <button
+                  type="button"
                   onClick={onClose}
                   className="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-gray-200 rounded-lg transition-colors border border-gray-600"
                   disabled={state === "loading"}
@@ -182,10 +194,10 @@ const RedeemTransferBalanceCodeModal: React.FC<PasswordResetModalProps> = ({
                   Cancel
                 </button>
                 <button
-                  onClick={handleRedeemTransferBalance}
+                  type="submit"
                   disabled={state === "loading" || !isBalanceCodeValid}
                   className={`px-4 py-2 bg-blue-600 text-white rounded-lg transition-all duration-200 ${
-                    state === "loading"
+                    state === "loading" || !isBalanceCodeValid
                       ? "opacity-70 cursor-not-allowed"
                       : "hover:bg-blue-700 hover:shadow-lg"
                   }`}
@@ -219,7 +231,7 @@ const RedeemTransferBalanceCodeModal: React.FC<PasswordResetModalProps> = ({
                   )}
                 </button>
               </div>
-            </>
+            </form>
           )}
         </div>
       </div>
