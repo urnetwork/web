@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Settings, Key, Copy, Clock, Users, AlertCircle, CheckCircle, Shield, Lock, CreditCard, ExternalLink, TicketSlash, TicketCheck } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { createAuthCode, fetchNetworkTransferBalanceCodes, fetchNetworkUser } from '../services/api';
@@ -22,7 +22,7 @@ const AccountSettingsSection: React.FC = () => {
   const [userEmail, setUserEmail] = useState<string>('');
   const [isLoadingUserEmail, setIsLoadingUserEmail] = useState(true);
 
-  const loadTransferBalanceCodes = async () => {
+  const loadTransferBalanceCodes = useCallback(async () => {
     if (!token) {
       setIsLoadingTransferBalanceCodes(false);
       return;
@@ -40,7 +40,7 @@ const AccountSettingsSection: React.FC = () => {
     } finally {
       setIsLoadingTransferBalanceCodes(false);
     }
-  }
+  }, [token]);
 
   useEffect(() => {
     const loadUserEmail = async () => {
