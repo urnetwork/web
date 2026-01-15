@@ -882,9 +882,9 @@ export const fetchNetworkReliability = async (
 };
 
 /**
- * Get network reliability statistics
+ * Get redeemed transfer balance codes
  * @param token - JWT authentication token
- * @returns NetworkReliabilityResponse with reliability window data or error
+ * @returns RedeemedTransferBalanceCodesResponse with balance codes history or error
  */
 export const fetchNetworkTransferBalanceCodes = async (
   token: string
@@ -907,7 +907,12 @@ export const fetchNetworkTransferBalanceCodes = async (
       };
     }
 
-    return await safeJsonParse<RedeemedTransferBalanceCodesResponse>(response);
+    const data = await safeJsonParse<RedeemedTransferBalanceCodesResponse>(response);
+
+    return {
+      balance_codes: Array.isArray(data.balance_codes) ? data.balance_codes : [],
+      error: data.error,
+    };
   } catch (error) {
     console.error("Fetch network transfer balance codes error:", error);
     return {
@@ -923,9 +928,10 @@ export const fetchNetworkTransferBalanceCodes = async (
 };
 
 /**
- * Redeem transfer balance code
- * @param balanceCode - The transfer balance code to redeem
- * @returns PasswordResetResponse with error if failed
+ * Redeem transfer balance code to add data credit
+ * @param balanceCode - The 26-character transfer balance code to redeem
+ * @param token - JWT authentication token
+ * @returns RedeemTransferBalanceCodeResponse with error if failed
  */
 export const redeemTransferBalanceCode = async (
   balanceCode: string,
