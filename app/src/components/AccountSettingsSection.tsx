@@ -401,15 +401,15 @@ const AccountSettingsSection: React.FC = () => {
                 <TicketSlash className="text-gray-500" size={24} />
               </div>
               <h3 className="text-lg font-medium text-gray-200 mb-2">No Transfer Balance Codes Redeemed</h3>
-              <p className="text-gray-400 italic">No transfer balances codes found for your network.</p>
+              <p className="text-gray-400 italic">No transfer balance codes found for your network.</p>
             </div>
           )}
 
           <button
             onClick={() => setIsAddTransferBalanceCodeModalOpen(true)}
-            disabled={isGenerating}
+            disabled={isLoadingTransferBalanceCodes}
             className={`flex items-center justify-center gap-2 px-6 py-4 rounded-lg font-medium transition-all duration-200 ${
-              isGenerating
+              isLoadingTransferBalanceCodes
                 ? 'bg-gray-600 cursor-not-allowed border border-gray-600 text-gray-400'
                 : 'bg-blue-600 hover:bg-blue-700 text-white border border-blue-500 hover:shadow-lg transform hover:scale-[1.02]'
             }`}
