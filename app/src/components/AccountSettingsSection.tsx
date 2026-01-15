@@ -63,7 +63,7 @@ const AccountSettingsSection: React.FC = () => {
 
     loadUserEmail();
     loadTransferBalanceCodes();
-  }, [token]);
+  }, [token, loadTransferBalanceCodes]);
 
   const handleGenerateAuthCode = async () => {
     if (!token) return;
