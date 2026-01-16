@@ -375,27 +375,9 @@ const AccountSettingsSection: React.FC = () => {
             </div>
           </div>
         </div>
-        
-        <div className="p-6 space-y-6">
 
-          <table className="min-w-full divide-y divide-gray-700">
-            <thead className="bg-gray-900">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Secret</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Redeemed</th>
-              </tr>
-            </thead>
-            <tbody className="bg-gray-800 divide-y divide-gray-700">
-              {transferBalanceCodes.map((code) => (
-                <tr key={code.balance_code_id}>
-                  <td className="px-6 py-4 whitespace-nowrap">{maskSecret(code.secret)}</td>
-                  <td className="px-6 py-4 whitespace-nowrap">{formatDate(code.redeem_time)}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-
-          {transferBalanceCodes.length === 0 && !isLoadingTransferBalanceCodes && (
+        {transferBalanceCodes.length === 0 && !isLoadingTransferBalanceCodes ? (
+          <div className="p-6">
             <div className="text-center py-12">
               <div className="w-16 h-16 bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4">
                 <TicketSlash className="text-gray-500" size={24} />
@@ -403,12 +385,33 @@ const AccountSettingsSection: React.FC = () => {
               <h3 className="text-lg font-medium text-gray-200 mb-2">No Transfer Balance Codes Redeemed</h3>
               <p className="text-gray-400 italic">No transfer balance codes found for your network.</p>
             </div>
-          )}
+          </div>
+        ) : (
+          <div className="max-h-80 overflow-y-auto">
+            <table className="min-w-full divide-y divide-gray-700">
+              <thead className="bg-gray-900 sticky top-0 z-10">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Secret</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Redeemed</th>
+                </tr>
+              </thead>
+              <tbody className="bg-gray-800 divide-y divide-gray-700">
+                {transferBalanceCodes.map((code) => (
+                  <tr key={code.balance_code_id}>
+                    <td className="px-6 py-4 whitespace-nowrap">{maskSecret(code.secret)}</td>
+                    <td className="px-6 py-4 whitespace-nowrap">{formatDate(code.redeem_time)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
 
+        <div className="p-6">
           <button
             onClick={() => setIsAddTransferBalanceCodeModalOpen(true)}
             disabled={isLoadingTransferBalanceCodes}
-            className={`flex items-center justify-center gap-2 px-6 py-4 rounded-lg font-medium transition-all duration-200 ${
+            className={`w-full flex items-center justify-center gap-2 px-6 py-4 rounded-lg font-medium transition-all duration-200 ${
               isLoadingTransferBalanceCodes
                 ? 'bg-gray-600 cursor-not-allowed border border-gray-600 text-gray-400'
                 : 'bg-blue-600 hover:bg-blue-700 text-white border border-blue-500 hover:shadow-lg transform hover:scale-[1.02]'
