@@ -12,6 +12,7 @@ import { ChevronDown } from "lucide-react";
 import { useViewportType, ViewportType } from "../hooks/useViewportType";
 import { useAuth } from "../hooks/useAuth";
 import { useAutoLogin } from "../hooks/useAutoLogin";
+import BalanceCodesSection from "./BalanceCodesSection";
 
 const Layout: React.FC = () => {
 	type TabType =
@@ -20,7 +21,8 @@ const Layout: React.FC = () => {
 		| "leaderboard"
 		| "providers"
 		| "wallet-stats"
-		| "account";
+		| "account"
+		| "balance-codes";
 
 	const { isAuthenticated, logout, isLoggingOut, isTransitioning } = useAuth();
 	const navigate = useNavigate();
@@ -52,6 +54,7 @@ const Layout: React.FC = () => {
 		if (path === "/providers") return "providers";
 		if (path === "/wallet-stats") return "wallet-stats";
 		if (path === "/account") return "account";
+		if (path === "/balance-codes") return "balance-codes";
 		return "clients"; // default
 	};
 
@@ -64,6 +67,7 @@ const Layout: React.FC = () => {
 		{ id: "providers", label: "Providers", color: "purple", index: 3 },
 		{ id: "wallet-stats", label: "Wallet Stats", color: "indigo", index: 4 },
 		{ id: "account", label: "Account Settings", color: "gray", index: 5 },
+		{ id: "balance-codes", label: "Balance Codes", color: "emerald", index: 6 },
 	];
 
 	const activeTabData = tabs.find((tab) => tab.id === activeTab);
@@ -256,6 +260,10 @@ const Layout: React.FC = () => {
 								<Route
 									path="/account"
 									element={<AccountSettingsSection />}
+								/>
+								<Route
+									path="/balance-codes"
+									element={<BalanceCodesSection />}
 								/>
 							</Routes>
 						</div>

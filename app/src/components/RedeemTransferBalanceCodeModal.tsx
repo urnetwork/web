@@ -121,7 +121,7 @@ const RedeemTransferBalanceCodeModal: React.FC<RedeemTransferBalanceCodeModalPro
       >
         <div className="flex items-start justify-between p-6 border-b border-gray-700">
           <div className="flex items-center space-x-3">
-            <div className="flex-shrink-0 p-2 bg-blue-600 rounded-lg">
+            <div className="flex-shrink-0 p-2 bg-emerald-600 rounded-lg">
               <TicketCheck size={20} className="text-white" />
             </div>
             <h3 className="text-lg font-medium text-gray-100">Redeem Transfer Balance Code</h3>
@@ -196,10 +196,10 @@ const RedeemTransferBalanceCodeModal: React.FC<RedeemTransferBalanceCodeModalPro
                 <button
                   type="submit"
                   disabled={state === "loading" || !isBalanceCodeValid}
-                  className={`px-4 py-2 bg-blue-600 text-white rounded-lg transition-all duration-200 ${
+                  className={`px-4 py-2 bg-emerald-600 text-white rounded-lg transition-all duration-200 ${
                     state === "loading" || !isBalanceCodeValid
                       ? "opacity-70 cursor-not-allowed"
-                      : "hover:bg-blue-700 hover:shadow-lg"
+                      : "hover:bg-emerald-700 hover:shadow-lg"
                   }`}
                 >
                   {state === "loading" ? (
