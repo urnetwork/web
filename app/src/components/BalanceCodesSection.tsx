@@ -6,6 +6,48 @@ import { fetchNetworkTransferBalanceCodes } from "../services/api";
 import RedeemTransferBalanceCodeModal from "./RedeemTransferBalanceCodeModal";
 
 const BalanceCodesSection: React.FC = () => {
+    const sectionColor = "emerald";
+
+    const colorConfig = {
+      emerald: {
+        iconBg: "p-2 bg-gradient-to-r from-emerald-600 to-emerald-600 rounded-xl",
+        headerBg: "bg-gradient-to-r from-emerald-600 to-emerald-600 px-6 py-4 border-b border-gray-600",
+        headerText: "text-emerald-100 text-sm mt-1",
+        buttonBg: "bg-emerald-600 hover:bg-emerald-700 text-white border border-emerald-500 hover:shadow-lg transform hover:scale-[1.02]",
+      },
+      blue: {
+        iconBg: "p-2 bg-gradient-to-r from-blue-600 to-blue-600 rounded-xl",
+        headerBg: "bg-gradient-to-r from-blue-600 to-blue-600 px-6 py-4 border-b border-gray-600",
+        headerText: "text-blue-100 text-sm mt-1",
+        buttonBg: "bg-blue-600 hover:bg-blue-700 text-white border border-blue-500 hover:shadow-lg transform hover:scale-[1.02]",
+      },
+      purple: {
+        iconBg: "p-2 bg-gradient-to-r from-purple-600 to-purple-600 rounded-xl",
+        headerBg: "bg-gradient-to-r from-purple-600 to-purple-600 px-6 py-4 border-b border-gray-600",
+        headerText: "text-purple-100 text-sm mt-1",
+        buttonBg: "bg-purple-600 hover:bg-purple-700 text-white border border-purple-500 hover:shadow-lg transform hover:scale-[1.02]",
+      },
+      red: {
+        iconBg: "p-2 bg-gradient-to-r from-red-600 to-red-600 rounded-xl",
+        headerBg: "bg-gradient-to-r from-red-600 to-red-600 px-6 py-4 border-b border-gray-600",
+        headerText: "text-red-100 text-sm mt-1",
+        buttonBg: "bg-red-600 hover:bg-red-700 text-white border border-red-500 hover:shadow-lg transform hover:scale-[1.02]",
+      },
+      amber: {
+        iconBg: "p-2 bg-gradient-to-r from-amber-600 to-amber-600 rounded-xl",
+        headerBg: "bg-gradient-to-r from-amber-600 to-amber-600 px-6 py-4 border-b border-gray-600",
+        headerText: "text-amber-100 text-sm mt-1",
+        buttonBg: "bg-amber-600 hover:bg-amber-700 text-white border border-amber-500 hover:shadow-lg transform hover:scale-[1.02]",
+      },
+      teal: {
+        iconBg: "p-2 bg-gradient-to-r from-teal-600 to-teal-600 rounded-xl",
+        headerBg: "bg-gradient-to-r from-teal-600 to-teal-600 px-6 py-4 border-b border-gray-600",
+        headerText: "text-teal-100 text-sm mt-1",
+        buttonBg: "bg-teal-600 hover:bg-teal-700 text-white border border-teal-500 hover:shadow-lg transform hover:scale-[1.02]",
+      },
+    };
+
+    const colorClasses = colorConfig[sectionColor as keyof typeof colorConfig];
 
     const { token } = useAuth();
     const [transferBalanceCodes, setTransferBalanceCodes] = useState<RedeemedTransferBalanceCode[]>([]);
@@ -46,14 +88,12 @@ const BalanceCodesSection: React.FC = () => {
       return date.toLocaleString();
     };
 
-    const sectionColor = "emerald"
-
     return (
     <div className="space-y-8">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 animate-staggerFadeUp" style={{ animationDelay: '0.05s' }}>
         <div>
           <h2 className="text-3xl font-bold text-white flex items-center gap-3">
-            <div className={`p-2 bg-gradient-to-r from-${sectionColor}-600 to-${sectionColor}-600 rounded-xl`}>
+            <div className={colorClasses.iconBg}>
               <Ticket className="text-white" size={28} />
             </div>
             Balance Codes
@@ -65,28 +105,18 @@ const BalanceCodesSection: React.FC = () => {
       </div>
 
 
-      <div className={`bg-${sectionColor}-800 rounded-xl shadow-2xl overflow-hidden border border-gray-700 animate-staggerFadeUp`} style={{ animationDelay: '0.1s' }}>
-        <div className={`bg-gradient-to-r from-${sectionColor}-600 to-${sectionColor}-600 px-6 py-4 border-b border-gray-600`}>
+      <div className="bg-slate-800 rounded-xl shadow-2xl overflow-hidden border border-gray-700 animate-staggerFadeUp" style={{ animationDelay: '0.1s' }}>
+        <div className={colorClasses.headerBg}>
           <div className="flex items-center gap-3">
             <TicketCheck size={20} className="text-white" />
             <div>
               <h3 className="font-medium text-white">Account Transfer Balance Codes</h3>
-              <p className="text-blue-100 text-sm mt-1">Redeem a transfer balance code to add data to your account.</p>
+              <p className={colorClasses.headerText}>Redeem a transfer balance code to add data to your account.</p>
             </div>
           </div>
         </div>
 
-        {transferBalanceCodes.length === 0 && !isLoadingTransferBalanceCodes ? (
-          <div className="p-6">
-            <div className="text-center py-12">
-              <div className="w-16 h-16 bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4">
-                <TicketSlash className="text-gray-500" size={24} />
-              </div>
-              <h3 className="text-lg font-medium text-gray-200 mb-2">No Transfer Balance Codes Redeemed</h3>
-              <p className="text-gray-400 italic">No transfer balance codes found for your network.</p>
-            </div>
-          </div>
-        ) : (
+        {transferBalanceCodes.length > 0 ? (
           <div className="max-h-80 overflow-y-auto">
             <table className="min-w-full divide-y divide-gray-700">
             <thead className="bg-gray-900 sticky top-0 z-10">
@@ -105,6 +135,16 @@ const BalanceCodesSection: React.FC = () => {
             </tbody>
             </table>
           </div>
+        ) : (
+          <div className="p-6">
+            <div className="text-center py-12">
+              <div className="w-16 h-16 bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4">
+                <TicketSlash className="text-gray-500" size={24} />
+              </div>
+              <h3 className="text-lg font-medium text-gray-200 mb-2">No Transfer Balance Codes Redeemed</h3>
+              <p className="text-gray-400 italic">No transfer balance codes found for your network.</p>
+            </div>
+          </div>
         )}
 
         <div className="p-6">
@@ -114,7 +154,7 @@ const BalanceCodesSection: React.FC = () => {
               className={`w-full flex items-center justify-center gap-2 px-6 py-4 rounded-lg font-medium transition-all duration-200 ${
               isLoadingTransferBalanceCodes
                   ? 'bg-gray-600 cursor-not-allowed border border-gray-600 text-gray-400'
-                  : `bg-emerald-600 hover:bg-emerald-700 text-white border border-emerald-500 hover:shadow-lg transform hover:scale-[1.02]`
+                  : colorClasses.buttonBg
               }`}
           >
               <TicketCheck size={20} />
