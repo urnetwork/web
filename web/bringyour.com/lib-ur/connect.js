@@ -1704,6 +1704,8 @@ new function() {
             })
 
             const launchAppButtonElement = self.element('launch-app-button')
+            const launchRedeemBalanceCodeButtonElement = self.element('launch-redeem-balance-code')
+
             const preferencesProductUpdateElement = self.element('preferences-product-updates')
             // const feedbackButtonElement = self.element('feedback-button')
             // const feedbackFormElement = self.element('feedback-form')
@@ -1719,6 +1721,20 @@ new function() {
                         windowRef = window.open('about:blank', '_blank')
                     }
                     self.launchApp('/', windowRef)
+                })
+            }
+
+            if (launchRedeemBalanceCodeButtonElement) {
+                launchRedeemBalanceCodeButtonElement.addEventListener('click', (event) => {
+                    let windowRef = null
+                    if (window.safari !== undefined) {
+                        // desktop Safari
+                        // this is because desktop Safari does not allow async from click to open new tab
+                        // see https://stackoverflow.com/questions/20696041/window-openurl-blank-not-working-on-imac-safari
+                        // see https://stackoverflow.com/questions/7944460/detect-safari-browser
+                        windowRef = window.open('about:blank', '_blank')
+                    }
+                    self.launchApp('/balance-codes', windowRef)
                 })
             }
 
@@ -2490,6 +2506,12 @@ new function() {
                    <div class="login-container">
                         <div><button id="${id('launch-app-button')}" type="button" class="btn btn-secondary btn-sm">Open Client Manager<span id="${id('launch-app-spinner')}" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span></button></div>
                         <div id="${id('launch-app-error')}" class="text-danger d-none"></div>
+                   </div>
+              </div>
+              <div class="login-option">
+                   <div class="login-container">
+                        <div><button id="${id('launch-redeem-balance-code')}" type="button" class="btn btn-secondary btn-sm">Redeem Balance Code</button></div>
+                        <div id="${id('launch-redeem-balance-code-error')}" class="text-danger d-none"></div>
                    </div>
               </div>
               <div class="login-option">

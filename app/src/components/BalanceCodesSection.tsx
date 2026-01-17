@@ -46,7 +46,7 @@ const BalanceCodesSection: React.FC = () => {
       return date.toLocaleString();
     };
 
-    let sectionColor = "emerald"
+    const sectionColor = "emerald"
 
     return (
     <div className="space-y-8">
