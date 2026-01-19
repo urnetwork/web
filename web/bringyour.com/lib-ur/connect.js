@@ -2519,7 +2519,7 @@ new function() {
               </div>
               <div class="login-option">
                    <div class="login-container">
-                        <div><button id="${id('launch-redeem-balance-code')}" type="button" class="btn btn-secondary btn-sm">Redeem Balance Code</button></div>
+                        <div><button id="${id('launch-redeem-balance-code')}" type="button" class="btn btn-secondary btn-sm">Manage Balance Codes</button></div>
                         <div id="${id('launch-redeem-balance-code-error')}" class="text-danger d-none"></div>
                    </div>
               </div>
