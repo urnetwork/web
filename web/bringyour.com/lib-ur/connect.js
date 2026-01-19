@@ -24,6 +24,7 @@ new function() {
         } else {
             self.finishConnectMount()
         }
+
     }, 0)
 
     self.createConnectMount = function() {
@@ -66,6 +67,12 @@ new function() {
             self.showConnectDialog()
         } else if (auth != null) {
             self.showConnectDialog()
+        }
+
+        // for app sumo
+        if (window.location.pathname == '/' && params.has('app-sumo')) {
+            self.showConnectDialog()
+            self.connectMount.render(new self.DialogCreateNetwork())
         }
     }
 
@@ -2375,6 +2382,8 @@ new function() {
         const urlParams = new URLSearchParams(window.location.search)
         const bonusReferral = urlParams.get('bonus')
         const balanceCode = urlParams.get('balance-code')
+        const isAppSumoPrompt = urlParams.has('app-sumo')
+        const balanceCodeLabel = isAppSumoPrompt ? 'App Sumo Code' : 'Balance Code'
 
         let userAuthStr = userAuth || ''
         let bonusReferralStr = bonusReferral ?? ''
@@ -2407,7 +2416,7 @@ new function() {
                              <hr />
                              <div class="info-title">Enter referral code</div>
                              <div><input id="${id('create-bonus-referral')}" type="text" value="${self.escapeHtml(bonusReferralStr)}" class="form-control"></div>
-                            <div class="info-title">Enter balance code</div>
+                             <div class="info-title">Enter ${self.escapeHtml(balanceCodeLabel)}</div>
                              <div><input id="${id('create-balance-code')}" type="text" value="${self.escapeHtml(balanceCodeStr)}" class="form-control"></div>
                         </form>
                    </div>
