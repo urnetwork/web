@@ -1711,7 +1711,7 @@ new function() {
             })
 
             const launchAppButtonElement = self.element('launch-app-button')
-            const launchRedeemBalanceCodeButtonElement = self.element('launch-redeem-balance-code')
+            const launchManageBalanceCodesButtonElement = self.element('launch-manage-balance-codes-button')
 
             const preferencesProductUpdateElement = self.element('preferences-product-updates')
             // const feedbackButtonElement = self.element('feedback-button')
@@ -1731,8 +1731,8 @@ new function() {
                 })
             }
 
-            if (launchRedeemBalanceCodeButtonElement) {
-                launchRedeemBalanceCodeButtonElement.addEventListener('click', (event) => {
+            if (launchManageBalanceCodesButtonElement) {
+                launchManageBalanceCodesButtonElement.addEventListener('click', (event) => {
                     let windowRef = null
                     if (window.safari !== undefined) {
                         // desktop Safari
@@ -1975,13 +1975,28 @@ new function() {
         }
 
         self.launchApp = (appRoute, windowRef) => {
-            const launchAppButtonElement = self.element('launch-app-button')
-            const launchAppSpinnerElement = self.element('launch-app-spinner')
-            const launchAppErrorElement = self.element('launch-app-error')
-            
-            launchAppButtonElement.disabled = true
-            launchAppSpinnerElement.classList.remove('d-none')
-            launchAppErrorElement.classList.add('d-none')
+
+            if (appRoute == '/balance-codes') {
+
+                const launchManageBalanceCodesButtonElement = self.element('launch-manage-balance-codes-button')
+                const launchManageBalanceCodesSpinnerElement = self.element('launch-manage-balance-codes-spinner')
+                const launchManageBalanceCodesErrorElement = self.element('launch-manage-balance-codes-error')
+                
+                launchManageBalanceCodesButtonElement.disabled = true
+                launchManageBalanceCodesSpinnerElement.classList.remove('d-none')
+                launchManageBalanceCodesErrorElement.classList.add('d-none')
+
+            } else {
+
+                const launchAppButtonElement = self.element('launch-app-button')
+                const launchAppSpinnerElement = self.element('launch-app-spinner')
+                const launchAppErrorElement = self.element('launch-app-error')
+                
+                launchAppButtonElement.disabled = true
+                launchAppSpinnerElement.classList.remove('d-none')
+                launchAppErrorElement.classList.add('d-none')
+
+            }
 
             let requestBody = {
                 'uses': 1,
@@ -2004,6 +2019,13 @@ new function() {
             
             launchAppButtonElement.disabled = false
             launchAppSpinnerElement.classList.add('d-none')
+
+            const launchManageBalanceCodesButtonElement = self.element('launch-manage-balance-codes-button')
+            const launchManageBalanceCodesSpinnerElement = self.element('launch-manage-balance-codes-spinner')
+            const launchManageBalanceCodesErrorElement = self.element('launch-manage-balance-codes-error')
+            
+            launchManageBalanceCodesButtonElement.disabled = false
+            launchManageBalanceCodesSpinnerElement.classList.add('d-none')
 
             if (!responseBody) {
                 launchAppErrorElement.textContent = 'Something unexpected happened.'
@@ -2519,8 +2541,8 @@ new function() {
               </div>
               <div class="login-option">
                    <div class="login-container">
-                        <div><button id="${id('launch-redeem-balance-code')}" type="button" class="btn btn-secondary btn-sm">Manage Balance Codes</button></div>
-                        <div id="${id('launch-redeem-balance-code-error')}" class="text-danger d-none"></div>
+                        <div><button id="${id('launch-manage-balance-codes-button')}" type="button" class="btn btn-secondary btn-sm">Manage Balance Codes<span id="${id('launch-manage-balance-codes-spinner')}" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span></button></div>
+                        <div id="${id('launch-manage-balance-codes-error')}" class="text-danger d-none"></div>
                    </div>
               </div>
               <div class="login-option">
