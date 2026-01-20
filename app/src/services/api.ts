@@ -34,6 +34,7 @@ import type {
   NetworkReliabilityResponse,
   RedeemedTransferBalanceCodesResponse,
   RedeemTransferBalanceCodeResponse,
+  SubscriptionBalanceResponse,
 } from "./types";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE ?? "https://api.bringyour.com";
@@ -975,6 +976,48 @@ export const redeemTransferBalanceCode = async (
           error instanceof Error
             ? error.message
             : "Failed to redeem transfer balance code",
+      },
+    };
+  }
+};
+
+/**
+ * Get subscription balance
+ * @param token - JWT authentication token
+ * @returns SubscriptionBalanceResponse with balance info
+ */
+export const fetchSubscriptionBalance = async (
+  token: string
+): Promise<SubscriptionBalanceResponse|{ error: { message: string } }> => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/subscription/balance`, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: "*/*",
+      },
+    });
+
+    if (!response.ok) {
+      return {
+        error: {
+          message: `HTTP error! status: ${response.status}`,
+        },
+      };
+    }
+
+    const data = await safeJsonParse<SubscriptionBalanceResponse>(response);
+
+    return data;
+
+  } catch (error) {
+    console.error("Fetch subscription balance error:", error);
+    return {
+      error: {
+        message:
+          error instanceof Error
+            ? error.message
+            : "Failed to fetch subscription balance",
       },
     };
   }

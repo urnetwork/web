@@ -563,3 +563,32 @@ export interface RedeemedTransferBalanceCodesResponse {
 export interface RedeemTransferBalanceCodeResponse {
   error?: { message: string };
 }
+
+/**
+ * Response from fetching subscription balance
+ */
+export interface SubscriptionBalanceResponse {
+  start_balance_byte_count: number;
+  balance_byte_count: number;
+  open_transfer_byte_count: number;
+  current_subscription: CurrentSubscription;
+  pending_payout_usd_nano_cents: number;
+  update_time: string;
+  active_transfer_balances: TransferBalance[];
+}
+
+export interface CurrentSubscription {
+  subscription_id: string;
+  store: string; // e.g., "apple", "google"
+  plan: string;
+}
+
+export interface TransferBalance {
+  balance_id: string;
+  network_id: string;
+  start_time: string;
+  end_time: string;
+  start_balance_byte_count: number;
+  net_revenue: number;
+  balance_byte_count: number;
+}
