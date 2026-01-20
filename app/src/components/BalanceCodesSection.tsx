@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useAuth } from "../hooks/useAuth";
 import { Ticket, TicketCheck, TicketSlash } from "lucide-react";
-import { RedeemedTransferBalanceCode } from "../services/types";
-import { fetchNetworkTransferBalanceCodes } from "../services/api";
+import { RedeemedTransferBalanceCode, SubscriptionBalanceResponse } from "../services/types";
+import { fetchNetworkTransferBalanceCodes, fetchSubscriptionBalance } from "../services/api";
 import RedeemTransferBalanceCodeModal from "./RedeemTransferBalanceCodeModal";
 
 const BalanceCodesSection: React.FC = () => {
@@ -53,7 +53,9 @@ const BalanceCodesSection: React.FC = () => {
     const [transferBalanceCodes, setTransferBalanceCodes] = useState<RedeemedTransferBalanceCode[]>([]);
     const [isAddTransferBalanceCodeModalOpen, setIsAddTransferBalanceCodeModalOpen] = useState(false);
     const [isLoadingTransferBalanceCodes, setIsLoadingTransferBalanceCodes] = useState(true);
-
+    const [isLoadingSubscriptionBalance, setIsLoadingSubscriptionBalance] = useState(true);
+    const [subscriptionBalance, setSubscriptionBalance] = useState<SubscriptionBalanceResponse | null>(null);
+    
     const loadTransferBalanceCodes = useCallback(async () => {
         if (!token) {
             setIsLoadingTransferBalanceCodes(false);
@@ -74,9 +76,34 @@ const BalanceCodesSection: React.FC = () => {
         }
     }, [token]);
 
+    const loadSubscriptionBalance = useCallback(async () => {
+
+      if (!token) {
+        setIsLoadingSubscriptionBalance(false);
+        return;
+      }
+
+      setIsLoadingSubscriptionBalance(true);
+
+      try {
+        const response = await fetchSubscriptionBalance(token);
+        if (response && 'error' in response) {
+          console.error('Error fetching subscription balance:', response.error.message);
+          return;
+        }
+        setSubscriptionBalance(response);
+      } catch (error) {
+        console.error('Failed to fetch subscription balance:', error);
+      } finally {
+        setIsLoadingSubscriptionBalance(false);
+      }
+
+    }, [token]);
+
     useEffect(() => {
       loadTransferBalanceCodes();
-    }, [token, loadTransferBalanceCodes]);
+      loadSubscriptionBalance();
+    }, [token, loadTransferBalanceCodes, loadSubscriptionBalance]);
 
     const maskSecret = (secret: string) => {
       if (!secret || secret.length <= 6) return secret;
@@ -86,6 +113,19 @@ const BalanceCodesSection: React.FC = () => {
     const formatDate = (dateString: string) => {
       const date = new Date(dateString);
       return date.toLocaleString();
+    };
+
+    const formatDataBalance = (bytes: number) => {
+      if (typeof bytes !== "number" || isNaN(bytes)) return "-";
+      const TIB = 1099511627776;
+      const GIB = 1073741824;
+      if (bytes < TIB) {
+        const gib = bytes / GIB;
+        return `${gib.toFixed(2)} GiB`;
+      } else {
+        const tib = bytes / TIB;
+        return `${tib.toFixed(2)} TiB`;
+      }
     };
 
     return (
@@ -104,7 +144,6 @@ const BalanceCodesSection: React.FC = () => {
         </div>
       </div>
 
-
       <div className="bg-slate-800 rounded-xl shadow-2xl overflow-hidden border border-gray-700 animate-staggerFadeUp" style={{ animationDelay: '0.1s' }}>
         <div className={colorClasses.headerBg}>
           <div className="flex items-center gap-3">
@@ -116,20 +155,38 @@ const BalanceCodesSection: React.FC = () => {
           </div>
         </div>
 
+        <div className="px-6 py-4 border-b border-gray-700">
+          <p>
+            Total Data Balance: 
+            <span className="ml-1">
+              {isLoadingSubscriptionBalance 
+                ? " Loading..." 
+                : subscriptionBalance 
+                  ? formatDataBalance(subscriptionBalance.balance_byte_count) 
+                  : "-"
+              }
+            </span>
+          </p>
+        </div>
+
         {transferBalanceCodes.length > 0 ? (
           <div className="max-h-80 overflow-y-auto">
             <table className="min-w-full divide-y divide-gray-700">
             <thead className="bg-gray-900 sticky top-0 z-10">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Secret</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Data</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Redeemed</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Valid Until</th>
               </tr>
             </thead>
             <tbody className="bg-gray-800 divide-y divide-gray-700">
                 {transferBalanceCodes.map((code) => (
                 <tr key={code.balance_code_id}>
                   <td className="px-6 py-4 whitespace-nowrap">{maskSecret(code.secret)}</td>
+                  <td className="px-6 py-4 whitespace-nowrap">{`+${formatDataBalance(code.balance_byte_count)}`}</td>
                   <td className="px-6 py-4 whitespace-nowrap">{formatDate(code.redeem_time)}</td>
+                  <td className="px-6 py-4 whitespace-nowrap">{formatDate(code.end_time)}</td>
                 </tr>
                 ))}
             </tbody>
