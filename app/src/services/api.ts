@@ -988,7 +988,7 @@ export const redeemTransferBalanceCode = async (
  */
 export const fetchSubscriptionBalance = async (
   token: string
-): Promise<SubscriptionBalanceResponse|{ error: { message: string } }> => {
+): Promise<SubscriptionBalanceResponse> => {
   try {
     const response = await fetch(`${API_BASE_URL}/subscription/balance`, {
       method: "GET",
@@ -1006,10 +1006,7 @@ export const fetchSubscriptionBalance = async (
       };
     }
 
-    const data = await safeJsonParse<SubscriptionBalanceResponse>(response);
-
-    return data;
-
+    return await safeJsonParse<SubscriptionBalanceResponse>(response);
   } catch (error) {
     console.error("Fetch subscription balance error:", error);
     return {
