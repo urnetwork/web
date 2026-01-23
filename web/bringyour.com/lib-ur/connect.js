@@ -1327,7 +1327,7 @@ new function() {
                     self.passwordOk = true
                     self.updateButton()
                 } else {
-                    createPasswordErrorElement.textContent = 'Password must be at least 65 bits of entropy (at least 12 characters, mixed case, mixed alphanumeric and non-alphanumeric).'
+                    createPasswordErrorElement.textContent = 'Password must be at least 12 characters, mixed case, mixed alphanumeric and non-alphanumeric.'
                     createPasswordErrorElement.classList.remove('d-none')
 
                     self.passwordOk = false
@@ -2385,7 +2385,7 @@ new function() {
                              <div class="d-none"><input id="${id('create-user-name')}" type="text" value="${self.escapeHtml(userNameStr)}" class="form-control"></div>
                              <div class="info-title">Choose a network name</div>
                              <div><div class="input-group"><input id="${id('create-network-name')}" type="text" placeholder="yournetworkname" class="form-control network-name" aria-describedby="${id('network-addon')}"/><span class="input-group-text" id="${id('network-addon')}">.ur.network<span id="${id('create-network-name-spinner')}" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span></span></div></div>
-                             <div id="${id('create-network-name-error')}" class="text-secondary d-none"></div>
+                             <div id="${id('create-network-name-error')}" class="text-warning d-none"></div>
                              <div id="${id('create-network-name-available')}" class="text-success d-none">Available!</div>
                              <div class="no-title"><label class="form-check-label"><input id="${id('create-agree-terms')}" type="checkbox" class="form-check-input" value="">I agree to the <a href="/terms" target="_blank">BringYour terms</a>. Learn about how we use and protect your data in our <a href="/privacy" target="_blank">Privacy Policy</a></label></div>
                              <div id="${id('create-error')}" class="text-danger d-none"></div>
@@ -2427,10 +2427,10 @@ new function() {
                              <div id="${id('create-user-auth-error')}" class="text-danger d-none"></div>
                              <div class="info-title">Password</div>
                              <div><input id="${id('create-password')}" type="password" class="form-control"/></div>
-                             <div id="${id('create-password-error')}" class="text-secondary d-none"></div>
+                             <div id="${id('create-password-error')}" class="text-warning d-none"></div>
                              <div class="info-title">Choose a network name</div>
                              <div><div class="input-group"><input id="${id('create-network-name')}" type="text" placeholder="yournetworkname" class="form-control network-name" aria-describedby="${id('network-addon')}"/><span class="input-group-text" id="${id('network-addon')}">.ur.network<span id="${id('create-network-name-spinner')}" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span></span></div></div>
-                             <div id="${id('create-network-name-error')}" class="text-secondary d-none"></div>
+                             <div id="${id('create-network-name-error')}" class="text-warning d-none"></div>
                              <div id="${id('create-network-name-available')}" class="text-success d-none">Available!</div>
                              <div class="no-title"><label class="form-check-label"><input id="${id('create-agree-terms')}" type="checkbox" class="form-check-input" value="">A one-time message to establish your identity will be sent to you. Message and data rates may apply. I agree to the <a href="/terms" target="_blank">URnetwork terms</a>. Learn about how we use and protect your data in our <a href="/privacy" target="_blank">Privacy Policy</a></label></div>
                              <div id="${id('create-error')}" class="text-danger d-none"></div>
