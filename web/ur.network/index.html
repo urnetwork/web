@@ -11,17 +11,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>URnetwork</title>
     <style>
-        @font-face {
-            font-family: 'PP Neue Bit';
-            src: url('PPNeueBit-Bold.woff2') format('woff2');
-            font-weight: bold;
-        }
-
-        @font-face {
-            font-family: 'PP Neue Montreal';
-            src: url('PPNeueMontreal-Regular.woff2') format('woff2');
-            font-weight: normal;
-        }
+        @font-face { font-family: 'PP Neue Bit'; src: url('PPNeueBit-Bold.woff2') format('woff2'); font-weight: bold; }
+        @font-face { font-family: 'PP Neue Montreal'; src: url('PPNeueMontreal-Regular.woff2') format('woff2'); font-weight: normal; }
 
         body {
             background-color: #101010;
@@ -38,216 +29,186 @@
         .card {
             background: #101010;
             padding: 40px;
-            border: 2px solid #ED8FFF;
-            box-shadow: 0 0 20px rgba(237, 143, 255, 0.15);
-            width: 90%;
-            max-width: 900px;
+            border: 1px solid #ED8FFF;
+            box-shadow: 0 0 25px rgba(237, 143, 255, 0.15);
+            width: 95%;
+            max-width: 1000px;
             position: relative;
         }
 
-        /* Refresh Timer Progress Bar */
-        .timer-container {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 4px;
-            background: rgba(255, 255, 255, 0.05);
-        }
+        .timer-container { position: absolute; top: 0; left: 0; width: 100%; height: 3px; background: rgba(255, 255, 255, 0.05); }
+        #progressBar { height: 100%; background: #ED8FFF; width: 100%; box-shadow: 0 0 10px #ED8FFF; }
 
-        #progressBar {
-            height: 100%;
-            background: #ED8FFF;
-            width: 100%;
-            box-shadow: 0 0 10px #ED8FFF;
-        }
-
-        .header {
-            margin-bottom: 30px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .logo-container img {
-            height: 24px;
-            display: block;
-        }
+        .header { margin-bottom: 30px; display: flex; justify-content: space-between; align-items: flex-end; }
+        .logo-container img { height: 22px; display: block; margin-bottom: 12px; }
 
         .stats-display {
             font-family: 'PP Neue Bit', monospace;
-            font-size: 28px; /* Bit font usually needs a larger size for legibility */
+            font-size: 32px;
             color: #D6E6F4;
-            letter-spacing: 1px;
-            margin-top: 10px;
-            text-shadow: 0 0 5px rgba(214, 230, 244, 0.3);
+            text-shadow: 0 0 8px rgba(214, 230, 244, 0.4);
         }
 
-        .terminal-label {
+        .status-badge {
             font-family: 'PP Neue Bit', monospace;
             color: #ED8FFF;
-            font-size: 18px;
+            font-size: 16px;
+            letter-spacing: 2px;
             border: 1px solid #ED8FFF;
-            padding: 2px 10px;
-            text-transform: uppercase;
+            padding: 4px 12px;
         }
 
-        canvas {
-            width: 100%;
-            height: 380px;
-            display: block;
-            cursor: crosshair;
-        }
+        canvas { width: 100%; height: 440px; display: block; }
     </style>
 </head>
 <body>
 
 <div class="card">
-    <div class="timer-container">
-        <div id="progressBar"></div>
-    </div>
+    <div class="timer-container"><div id="progressBar"></div></div>
     <div class="header">
         <div>
-            <div class="logo-container">
-                <img src="URnetwork-logo-light.svg" alt="URnetwork">
-            </div>
-            <div id="stats" class="stats-display">FETCHING_DATA...</div>
+            <div class="logo-container"><img src="URnetwork-logo-light.png" alt="URnetwork logo"></div>
+            <div id="stats" class="stats-display">SYNCING_DATA...</div>
         </div>
-        <div class="terminal-label">LIVE_NODE</div>
+        <div class="status-badge">LIVE_DATA</div>
     </div>
     <canvas id="customChart"></canvas>
 </div>
 
 <script>
+    const initialData = {"networks_data":{"2025-10-28":177683,"2025-10-29":178441,"2025-10-30":179261,"2025-10-31":180104,"2025-11-01":181374,"2025-11-02":182129,"2025-11-03":182923,"2025-11-04":183481,"2025-11-05":184001,"2025-11-06":184843,"2025-11-07":185648,"2025-11-08":186452,"2025-11-09":187111,"2025-11-10":187717,"2025-11-11":188432,"2025-11-12":189193,"2025-11-13":189886,"2025-11-14":190944,"2025-11-15":191692,"2025-11-16":192363,"2025-11-17":192814,"2025-11-18":193265,"2025-11-19":193696,"2025-11-20":194195,"2025-11-21":194599,"2025-11-22":195037,"2025-11-23":195476,"2025-11-24":195912,"2025-11-25":196363,"2025-11-26":196948,"2025-11-27":197497,"2025-11-28":198039,"2025-11-29":198630,"2025-11-30":199123,"2025-12-01":199671,"2025-12-02":200222,"2025-12-03":201140,"2025-12-04":203334,"2025-12-05":205461,"2025-12-06":207014,"2025-12-07":208360,"2025-12-08":209707,"2025-12-09":210896,"2025-12-10":211892,"2025-12-11":212693,"2025-12-12":213963,"2025-12-13":215435,"2025-12-14":216461,"2025-12-15":217508,"2025-12-16":218452,"2025-12-17":219227,"2025-12-18":220065,"2025-12-19":220751,"2025-12-20":221906,"2025-12-21":222834,"2025-12-22":223534,"2025-12-23":224148,"2025-12-24":224899,"2025-12-25":225686,"2025-12-26":226382,"2025-12-27":226973,"2025-12-28":227698,"2025-12-29":228469,"2025-12-30":229174,"2025-12-31":229865,"2026-01-01":230853,"2026-01-02":232150,"2026-01-03":233693,"2026-01-04":235595,"2026-01-05":236924,"2026-01-06":238230,"2026-01-07":239667,"2026-01-08":241022,"2026-01-09":241814,"2026-01-10":242580,"2026-01-11":243401,"2026-01-12":244045,"2026-01-13":244742,"2026-01-14":245529,"2026-01-15":246401,"2026-01-16":247211,"2026-01-17":247996,"2026-01-18":248736,"2026-01-19":249416,"2026-01-20":250061,"2026-01-21":250867,"2026-01-22":256581,"2026-01-23":271745,"2026-01-24":277365,"2026-01-25":280540,"2026-01-26":283188}};
+
     const canvas = document.getElementById('customChart');
     const ctx = canvas.getContext('2d');
     const statsEl = document.getElementById('stats');
     const progressBar = document.getElementById('progressBar');
 
     const REFRESH_INTERVAL = 30000;
-    let lastFetchTime = Date.now();
-    let cachedData = null;
-    let cachedChanges = null;
+    let lastRefreshTime = Date.now();
+    let chartValues = [];
+    let chartChanges = [];
+    let chartDates = [];
 
-    const COLORS = {
-        glow: '#ED8FFF',
-        bars: '#D6E6F4',
-        text: '#F8F8F8',
-        bg: '#101010'
-    };
+    function processNetworkData(dataObj) {
+        const sortedDates = Object.keys(dataObj).sort();
+        const vals = sortedDates.map(d => dataObj[d]);
+        const chngs = vals.map((v, i) => i === 0 ? 0 : v - vals[i-1]);
+        return { vals, chngs, sortedDates };
+    }
 
-    async function updateData() {
+    async function fetchUpdate() {
         try {
             const response = await fetch('https://api.bringyour.com/stats/last-90');
             const json = await response.json();
-            const data = json.network_data;
-            
-            cachedData = data.map(d => d.count);
-            cachedChanges = cachedData.map((v, i) => i === 0 ? 0 : v - cachedData[i-1]);
-            
-            lastFetchTime = Date.now();
+            const rawData = json.networks_data || json.network_data;
+            const processed = processNetworkData(rawData);
+            chartValues = processed.vals;
+            chartChanges = processed.chngs;
+            chartDates = processed.sortedDates;
+            updateStatsUI();
             render();
-            
-            const lastVal = cachedData[cachedData.length - 1];
-            const lastChange = cachedChanges[cachedChanges.length - 1];
-            statsEl.innerText = `TOTAL: ${lastVal} // CHANGE: ${lastChange >= 0 ? '+' : ''}${lastChange}`;
-        } catch (e) {
-            statsEl.innerText = "LINK_ERROR: RETRYING...";
-        }
+        } catch (e) { console.error("Update failed:", e); }
+        lastRefreshTime = Date.now();
+    }
+
+    function updateStatsUI() {
+        const lastVal = chartValues[chartValues.length - 1];
+        const lastChange = chartChanges[chartChanges.length - 1];
+        statsEl.innerText = `TOTAL_NETS: ${lastVal.toLocaleString()} // Δ_24H: +${lastChange.toLocaleString()}`;
     }
 
     function render() {
-        if (!cachedData) return;
-
         const dpr = window.devicePixelRatio || 1;
         const rect = canvas.getBoundingClientRect();
-        canvas.width = rect.width * dpr;
-        canvas.height = rect.height * dpr;
+        canvas.width = rect.width * dpr; canvas.height = rect.height * dpr;
         ctx.scale(dpr, dpr);
 
-        const w = rect.width;
-        const h = rect.height;
-        const pad = 50;
-        const chartW = w - (pad * 2);
-        const chartH = h - (pad * 2);
+        const w = rect.width; const h = rect.height;
+        const padL = 90, padR = 20, padT = 20, padB = 80; // Extra left pad for Neue Bit text size
+        const chartW = w - padL - padR; const chartH = h - padT - padB;
 
-        const maxVal = Math.max(...cachedData);
-        const minVal = Math.min(...cachedData);
-        const maxChange = Math.max(...cachedChanges.map(Math.abs));
+        const maxVal = Math.max(...chartValues); const minVal = Math.min(...chartValues);
+        const maxChange = Math.max(...chartChanges.map(Math.abs));
 
-        const getX = (i) => pad + (i * (chartW / (cachedData.length - 1)));
-        const getY = (val) => (pad + chartH) - ((val - minVal) / (maxVal - minVal)) * chartH;
+        const getX = (i) => padL + (i * (chartW / (chartValues.length - 1)));
+        const getY = (val) => (padT + chartH) - ((val - minVal) / (maxVal - minVal || 1)) * chartH;
 
         ctx.clearRect(0, 0, w, h);
 
-        // 1. Grid & Borders (Square Block Feel)
-        ctx.strokeStyle = COLORS.text;
-        ctx.globalAlpha = 0.05;
-        ctx.lineWidth = 1;
-        ctx.strokeRect(pad, pad, chartW, chartH);
-        
-        // 2. Daily Change Bars (D6E6F4)
-        ctx.fillStyle = COLORS.bars;
-        ctx.globalAlpha = 0.2;
-        cachedData.forEach((_, i) => {
-            const barH = (Math.abs(cachedChanges[i]) / (maxChange || 1)) * (chartH * 0.3);
-            const barW = (chartW / cachedData.length) * 0.5;
-            ctx.fillRect(getX(i) - barW/2, (pad + chartH) - barH, barW, barH);
+        // Grid Border
+        ctx.strokeStyle = '#F8F8F8'; ctx.globalAlpha = 0.05;
+        ctx.strokeRect(padL, padT, chartW, chartH);
+
+        // Timeline & X-Axis (PP Neue Bit Labels)
+        ctx.globalAlpha = 1.0;
+        chartDates.forEach((dateStr, i) => {
+            const x = getX(i);
+            const date = new Date(dateStr);
+            const isFirstOfMonth = date.getDate() === 1;
+            const isMonday = date.getDay() === 1;
+
+            if (isFirstOfMonth) {
+                ctx.beginPath();
+                ctx.strokeStyle = '#F8F8F8'; ctx.globalAlpha = 0.6; ctx.lineWidth = 2;
+                ctx.moveTo(x, padT + chartH); ctx.lineTo(x, padT + chartH + 15);
+                ctx.stroke();
+                
+                ctx.fillStyle = '#ED8FFF'; ctx.font = '20px PP Neue Bit'; ctx.textAlign = 'center';
+                const monthName = date.toLocaleString('default', { month: 'short' }).toUpperCase();
+                ctx.fillText(monthName, x, padT + chartH + 35);
+            } else if (isMonday) {
+                ctx.beginPath();
+                ctx.strokeStyle = '#F8F8F8'; ctx.globalAlpha = 0.3; ctx.lineWidth = 1.5;
+                ctx.moveTo(x, padT + chartH); ctx.lineTo(x, padT + chartH + 10);
+                ctx.stroke();
+            } else {
+                ctx.beginPath();
+                ctx.strokeStyle = '#F8F8F8'; ctx.globalAlpha = 0.1; ctx.lineWidth = 1;
+                ctx.moveTo(x, padT + chartH); ctx.lineTo(x, padT + chartH + 5);
+                ctx.stroke();
+            }
         });
 
-        // 3. History Curve (ED8FFF with Glow)
-        ctx.globalAlpha = 1.0;
-        ctx.shadowBlur = 12;
-        ctx.shadowColor = COLORS.glow;
-        ctx.strokeStyle = COLORS.glow;
-        ctx.lineWidth = 3;
-        ctx.lineJoin = 'round';
-        ctx.beginPath();
-        for (let i = 0; i < cachedData.length; i++) {
-            const x = getX(i);
-            const y = getY(cachedData[i]);
+        // Daily Change Bars (#D6E6F4)
+        ctx.fillStyle = '#D6E6F4'; ctx.globalAlpha = 0.15;
+        chartValues.forEach((_, i) => {
+            const barH = (Math.abs(chartChanges[i]) / (maxChange || 1)) * (chartH * 0.4);
+            const barW = (chartW / chartValues.length) * 0.7;
+            ctx.fillRect(getX(i) - barW/2, (padT + chartH) - barH, barW, barH);
+        });
+
+        // History Curve (#ED8FFF with Glow)
+        ctx.globalAlpha = 1.0; ctx.shadowBlur = 15; ctx.shadowColor = '#ED8FFF';
+        ctx.strokeStyle = '#ED8FFF'; ctx.lineWidth = 3; ctx.beginPath();
+        for (let i = 0; i < chartValues.length; i++) {
+            const x = getX(i); const y = getY(chartValues[i]);
             if (i === 0) ctx.moveTo(x, y);
             else {
-                const prevX = getX(i - 1);
-                const prevY = getY(cachedData[i - 1]);
-                ctx.bezierCurveTo(prevX + (x - prevX)/2, prevY, prevX + (x - prevX)/2, y, x, y);
+                const px = getX(i - 1); const py = getY(chartValues[i - 1]);
+                ctx.bezierCurveTo(px + (x - px)/2, py, px + (x - px)/2, y, x, y);
             }
         }
-        ctx.stroke();
-        ctx.shadowBlur = 0;
+        ctx.stroke(); ctx.shadowBlur = 0;
 
-        // 4. Axis Labels (PP Neue Montreal)
-        ctx.fillStyle = COLORS.text;
-        ctx.globalAlpha = 0.6;
-        ctx.font = '11px PP Neue Montreal';
-        ctx.textAlign = 'right';
-        ctx.fillText(maxVal, pad - 12, getY(maxVal) + 4);
-        ctx.fillText(minVal, pad - 12, getY(minVal) + 4);
-        
-        ctx.textAlign = 'center';
-        ctx.fillText('HISTORY_90D', pad + chartW/2, pad + chartH + 25);
+        // Y-Axis Labels (Standardized to PP Neue Bit)
+        ctx.fillStyle = '#F8F8F8'; ctx.globalAlpha = 0.8;
+        ctx.font = '18px PP Neue Bit'; ctx.textAlign = 'right';
+        ctx.fillText(maxVal.toLocaleString(), padL - 15, getY(maxVal) + 6);
+        ctx.fillText(minVal.toLocaleString(), padL - 15, getY(minVal) + 6);
     }
 
-    function animateTimer() {
-        const elapsed = Date.now() - lastFetchTime;
-        const progress = Math.max(0, 1 - (elapsed / REFRESH_INTERVAL));
-        progressBar.style.width = (progress * 100) + "%";
-        
-        if (elapsed >= REFRESH_INTERVAL) {
-            updateData();
-        }
-        requestAnimationFrame(animateTimer);
+    function animate() {
+        const elapsed = Date.now() - lastRefreshTime;
+        progressBar.style.width = Math.max(0, 1 - (elapsed / REFRESH_INTERVAL)) * 100 + "%";
+        if (elapsed >= REFRESH_INTERVAL) fetchUpdate();
+        requestAnimationFrame(animate);
     }
 
-    // Initial load
-    updateData();
-    animateTimer();
-    
-    // Resize handling
-    window.addEventListener('resize', () => {
-        render();
-    });
+    // Initial Process
+    const initialProcessed = processNetworkData(initialData.networks_data);
+    chartValues = initialProcessed.vals; chartChanges = initialProcessed.chngs; chartDates = initialProcessed.sortedDates;
+    updateStatsUI(); render(); animate();
+    window.addEventListener('resize', render);
 </script>
-
 </body>
 </html>
