@@ -18,6 +18,8 @@ init:
 
 clean:
 	python ../webgen/webgen.py clean bringyour.com/gen.py
+	python ../webgen/webgen.py clean ur.network/gen.py
+	python ../webgen/webgen.py clean ur.xyz/gen.py
 	rm -rf build
 
 build:
@@ -34,6 +36,12 @@ build:
 	# include altstore assets
 	cp -r ../altstore bringyour.com/build/altstore
 	cp -r ${WARP_HOME}/release/apple/stores/altstore/ bringyour.com/build/altstore/
+	(. ${NVM_DIR}/nvm.sh && \
+		nvm use ${NODE_VERSION} && \
+		python ../webgen/webgen.py build ur.network/gen.py)
+	(. ${NVM_DIR}/nvm.sh && \
+		nvm use ${NODE_VERSION} && \
+		python ../webgen/webgen.py build ur.xyz/gen.py)
 	env GOOS=linux GOARCH=arm64 go build -ldflags "-X main.Version=${WARP_VERSION}" -o build/linux/arm64/
 	env GOOS=linux GOARCH=amd64 go build -ldflags "-X main.Version=${WARP_VERSION}" -o build/linux/amd64/
 	env GOOS=darwin GOARCH=arm64 go build -ldflags "-X main.Version=${WARP_VERSION}" -o build/darwin/arm64/

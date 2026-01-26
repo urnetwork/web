@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>$UR Privacy Infrastructure</title>
+    <style>
+        /* --- Font Definitions --- */
+        @font-face {
+            font-family: 'PPNeueMontreal';
+            src: url('PPNeueMontreal-Regular.woff2') format('woff2');
+            font-weight: normal;
+            font-style: normal;
+        }
+
+        @font-face {
+            font-family: 'PPNeueBit';
+            src: url('PPNeueBit-Bold.woff2') format('woff2');
+            font-weight: bold;
+            font-style: normal;
+        }
+
+        /* BRAND PALETTE */
+        :root { 
+            --brand-ur: #ED8FFF;       /* Pink */
+            --brand-usd: #87FB67;      /* Green */
+            --brand-prov: #0039DE;     /* Deep Blue */
+            --brand-bg: #101010;       /* Dark */
+            --brand-white: #F8F8F8;    /* Off-white */
+            --brand-ui: #D6E6F4;       /* Light Blue */
+            --brand-burn: #FF6C58;     /* BRAND RED (Absorb Light) */
+            --brand-burn-dark: #421006; /* BRAND RED (Absorb Dark Text) */
+        }
+
+        /* Set Default Font */
+        body { 
+            margin: 0; 
+            background: var(--brand-bg); 
+            color: var(--brand-ui); 
+            font-family: 'PPNeueMontreal', sans-serif; 
+            overflow: hidden; 
+        }
+        
+        canvas { display: block; }
+        
+        /* --- Dashboard --- */
+        .dashboard {
+            position: absolute; top: 20px; right: 20px; width: 280px;
+            background: rgba(16, 16, 16, 0.9); 
+            padding: 25px 20px; 
+            border: 1px solid var(--brand-ui);
+            box-shadow: 0 0 30px rgba(214, 230, 244, 0.1); 
+            backdrop-filter: blur(10px); z-index: 100;
+        }
+        
+        .logo-container {
+            width: 100%; text-align: center; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid #333;
+        }
+        .logo-container img { max-width: 120px; height: auto; display: inline-block; }
+        
+        .logo-subtitle {
+            font-size: 0.65rem;
+            color: var(--brand-ui);
+            margin-top: 5px;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            font-weight: bold;
+        }
+
+        /* Call to Action Link Styling */
+        .app-link {
+            display: inline-block;
+            margin-top: 8px;
+            font-size: 0.75rem;
+            color: var(--brand-ur);
+            text-decoration: none;
+            border-bottom: 1px solid var(--brand-ur);
+            transition: all 0.2s ease;
+            font-weight: normal;
+            cursor: pointer;
+        }
+        .app-link:hover {
+            color: var(--brand-white);
+            border-bottom-color: var(--brand-white);
+        }
+
+        .header { 
+            font-size: 0.8rem; 
+            border-bottom: 1px solid #333; 
+            margin-bottom: 12px; 
+            padding-bottom: 5px; 
+            color: var(--brand-ui); 
+            letter-spacing: 1px; 
+            font-weight: bold;
+        }
+        
+        .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .stat-box { margin-bottom: 5px; }
+        .full-width { grid-column: span 2; }
+        
+        .label { 
+            font-size: 0.6rem; 
+            text-transform: uppercase; 
+            opacity: 0.8; 
+            margin-bottom: 2px; 
+            color: var(--brand-ui); 
+            letter-spacing: 0.5px;
+        }
+        
+        /* Value Colors - Using PP Neue Bit for Stats */
+        .val-usd, .val-ur, .val-supply, .val-white, .val-burn, .val-data {
+            font-family: 'PPNeueBit', monospace; 
+            font-size: 1.4rem; 
+            line-height: 1.1;
+        }
+
+        .val-usd { color: var(--brand-usd); }
+        .val-ur { color: var(--brand-ur); }
+        .val-supply { color: var(--brand-white); letter-spacing: 0.5px; } 
+        .val-white { color: var(--brand-white); }
+        .val-burn { color: var(--brand-burn); }
+        .val-data { color: var(--brand-prov); }
+
+        /* --- Disclaimer --- */
+        .disclaimer {
+            margin-top: 15px;
+            padding-top: 10px;
+            border-top: 1px solid #333;
+            font-size: 0.55rem;
+            text-align: center;
+            opacity: 0.6;
+            color: var(--brand-ui);
+            letter-spacing: 0.5px;
+        }
+
+        /* --- Payout Alert Toast --- */
+        #toast-container {
+            position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%);
+            display: flex; flex-direction: column; align-items: center; pointer-events: none; z-index: 200;
+        }
+        .payout-toast {
+            background: var(--brand-ur); 
+            color: #000;
+            padding: 12px 25px;
+            margin-top: 10px;
+            border-radius: 4px;
+            font-family: 'PPNeueBit', monospace; 
+            font-weight: bold;
+            font-size: 1.1rem;
+            line-height: 1.3;
+            box-shadow: 0 0 20px rgba(237, 143, 255, 0.4);
+            border: 2px solid var(--brand-white);
+            animation: slideUp 0.5s ease-out, fadeOut 0.5s 3.5s forwards;
+            white-space: nowrap;
+            text-align: center;
+        }
+
+        @keyframes slideUp { from { transform: translateY(50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes fadeOut { to { opacity: 0; transform: translateY(-20px); } }
+
+        /* --- Mobile Responsive (Compact Mode) --- */
+        @media (max-width: 768px) {
+            .dashboard {
+                width: 100%; left: 0; top: 0; right: auto;
+                border: none; border-bottom: 1px solid var(--brand-ui);
+                padding: 8px 12px; /* Tighter padding */
+                box-sizing: border-box; border-radius: 0;
+                background: rgba(16, 16, 16, 0.95); /* More opaque */
+            }
+            
+            /* Compact Header: Logo Left, Link Right */
+            .logo-container { 
+                margin-bottom: 8px; padding-bottom: 0; border-bottom: none;
+                display: flex; justify-content: space-between; align-items: center;
+            }
+            .logo-container img { max-width: 60px; } /* Smaller Logo */
+            .logo-subtitle { display: none; } /* Hide Subtitle */
+            .app-link { margin-top: 0; font-size: 0.7rem; } /* Link inline */
+
+            /* Tighter Grid */
+            .stat-grid { grid-template-columns: 1fr 1fr; gap: 8px; row-gap: 6px; }
+            .stat-box { margin-bottom: 0; }
+            
+            /* Smaller Fonts */
+            .val-usd, .val-ur, .val-supply, .val-white, .val-burn, .val-data { font-size: 1.0rem; }
+            .label { font-size: 0.45rem; margin-bottom: 1px; }
+            
+            .header { display: none; }
+            .full-width { grid-column: span 2; }
+            .disclaimer { display: none; } /* Hide Disclaimer */
+            
+            /* Toast adjustments */
+            #toast-container { bottom: 20px; width: 90%; }
+            .payout-toast { font-size: 0.85rem; padding: 10px; white-space: normal; }
+        }
+    </style>
+</head>
+<body>
+
+<div id="toast-container"></div>
+
+<div class="dashboard">
+    <div class="logo-container">
+        <img src="ur.svg" alt="$UR Logo">
+        <p class="logo-subtitle">Own your network. Own your privacy.</p>
+        <a href="https://ur.io" target="_blank" class="app-link">Get the app</a>
+    </div>
+
+    <div class="header">PROTOCOL LEDGER</div>
+    
+    <div class="stat-grid">
+        <div class="stat-box">
+            <div class="label">Total Revenue (USD)</div>
+            <div id="total-usd" class="val-usd">$0</div>
+        </div>
+
+        <div class="stat-box">
+            <div class="label">Total Data</div>
+            <div id="total-data" class="val-data">0.00 PB</div>
+        </div>
+
+        <div class="stat-box">
+            <div class="label">Total Networks</div>
+            <div id="total-networks" class="val-white">0</div>
+        </div>
+
+        <div class="stat-box">
+            <div class="label">Block Height</div>
+            <div id="block-height" class="val-white">#0</div>
+        </div>
+
+        <div class="stat-box full-width">
+            <div class="label">Total $UR Supply</div>
+            <div id="total-supply" class="val-supply">10,000,000.00</div>
+        </div>
+
+        <div class="stat-box">
+            <div class="label">Tokens Purchased</div>
+            <div id="total-ur-bought" class="val-ur">0.00</div>
+        </div>
+
+        <div class="stat-box">
+            <div class="label">Total Distributed</div>
+            <div id="total-ur-dist" class="val-ur">0.00</div>
+        </div>
+
+        <div class="stat-box full-width">
+            <div class="label">$UR Absorbed</div>
+            <div id="total-absorbed" class="val-burn">0.00</div>
+        </div>
+    </div>
+
+    <div class="disclaimer">This is a simulation of the $UR economy.</div>
+</div>
+
+<canvas id="simCanvas"></canvas>
+
+<script>
+const canvas = document.getElementById('simCanvas');
+const ctx = canvas.getContext('2d');
+const toastContainer = document.getElementById('toast-container');
+
+// BRAND COLORS
+const COLORS = {
+    ur: '#ED8FFF',       // Pink
+    usd: '#87FB67',      // Green
+    prov: '#0039DE',     // Deep Blue
+    bg: '#101010',       // Dark
+    white: '#F8F8F8',    // Off-white
+    ui: '#D6E6F4',       // Light Blue
+    burn: '#FF6C58',     // Brand Red (Light - Dashboard)
+    burnDark: '#421006'  // Brand Red (Dark - Toast Text)
+};
+
+const stats = { 
+    usdIn: 0, 
+    urBought: 0, 
+    urDistributed: 0, 
+    urAbsorbed: 0, 
+    urCurrentPool: 0, 
+    blockHeight: 0,
+    totalSupply: 10000000,
+    dataPB: 0,
+    totalNetworks: 250000,      // Start at 250,000
+    displayedNetworks: 250000,  // Smooth transition tracker
+    blockUsdRevenue: 0          // Tracks revenue for the current block
+};
+
+let width, height, globeRadius, rotation = 0, distTimer = 0;
+let providers = [], users = [], particles = [], bolts = [];
+let currentRadius = 4;
+let globeCenterX, globeCenterY;
+
+const hubs = {
+    ops: { x: 0, y: 0, label: "OPS" },
+    protocol: { x: 0, y: 0, label: "PROTOCOL" }
+};
+
+function init() {
+    width = canvas.width = window.innerWidth;
+    height = canvas.height = window.innerHeight;
+    
+    const isMobile = width < 768;
+
+    if(isMobile) {
+        globeRadius = Math.min(width, height) * 0.3;
+        globeCenterX = width * 0.5;
+        globeCenterY = height * 0.70;
+        hubs.ops.x = width * 0.25; hubs.ops.y = height * 0.35; 
+        hubs.protocol.x = width * 0.75; hubs.protocol.y = height * 0.35;
+    } else {
+        globeRadius = Math.min(width, height) * 0.35;
+        globeCenterX = width * 0.62;
+        globeCenterY = height * 0.5;
+        hubs.ops.x = width * 0.1; hubs.ops.y = height * 0.5;
+        hubs.protocol.x = width * 0.25; hubs.protocol.y = height * 0.5;
+    }
+    
+    if(providers.length === 0) {
+        const count = 160;
+        for(let i=0; i<count; i++) {
+            const phiP = Math.acos(-1 + (2 * i) / count);
+            const thetaP = Math.sqrt(count * Math.PI) * phiP;
+            providers.push({ phi: phiP, theta: thetaP, id: i, excite: 0, balance: 0 });
+
+            const phiU = Math.acos(-1 + (2 * (i+0.5)) / count);
+            const thetaU = Math.sqrt(count * Math.PI) * phiU;
+            users.push({ phi: phiU, theta: thetaU, id: i, balance: 0 });
+        }
+    }
+}
+
+function project(phi, theta, rot) {
+    const x = Math.sin(phi) * Math.cos(theta + rot);
+    const y = Math.cos(phi);
+    const z = Math.sin(phi) * Math.sin(theta + rot);
+    return { x: globeCenterX + x * globeRadius, y: globeCenterY + y * globeRadius, z: z, visible: z > 0 };
+}
+
+function spawn(s, eType, eIdx, color, type, spd, val) {
+    particles.push({ s, eType, eIdx, color, type, p: 0, spd, val, trail: [] });
+}
+
+function createHop(currentIdx, color, hopsLeft) {
+    if (hopsLeft <= 0) return;
+    providers[currentIdx].excite = 1.0;
+    let targetIdx = (currentIdx + Math.floor(Math.random() * 20) + 1) % providers.length;
+    bolts.push({ 
+        startIdx: currentIdx, endIdx: targetIdx, 
+        color, life: 1.0, decay: 0.04,
+        onComplete: () => createHop(targetIdx, color, hopsLeft - 1)
+    });
+}
+
+function showToast(amount, absorbed, usdRevenue) {
+    const el = document.createElement('div');
+    el.className = 'payout-toast';
+    // Removed color from USD amount, set to black (default) or bold
+    el.innerHTML = `⚡ BLOCK #${stats.blockHeight}<br>
+                    ${amount.toFixed(2)} $UR DISTRIBUTED <br>
+                    <span style="font-size:0.8em; font-weight:normal;">CONVERTED FROM <span style="font-weight:bold;">$${Math.floor(usdRevenue).toLocaleString()}</span> NETWORK OPERATOR REVENUE</span><br>
+                    <span style="font-size:0.85em; color:${COLORS.burnDark}">
+                    (${absorbed.toFixed(2)} Absorbed)</span>`;
+    toastContainer.appendChild(el);
+    setTimeout(() => el.remove(), 4000);
+}
+
+function updateUI() {
+    document.getElementById('total-usd').innerText = `$${Math.floor(stats.usdIn).toLocaleString()}`;
+    document.getElementById('total-ur-bought').innerText = stats.urBought.toFixed(2);
+    document.getElementById('total-ur-dist').innerText = stats.urDistributed.toFixed(2);
+    document.getElementById('total-absorbed').innerText = stats.urAbsorbed.toFixed(2);
+    document.getElementById('block-height').innerText = `#${stats.blockHeight}`;
+    document.getElementById('total-data').innerText = `${stats.dataPB.toFixed(2)} PB`;
+    
+    // Smooth Interpolation
+    const diff = stats.totalNetworks - stats.displayedNetworks;
+    if (Math.abs(diff) > 0.5) {
+        stats.displayedNetworks += diff * 0.08; 
+    } else {
+        stats.displayedNetworks = stats.totalNetworks;
+    }
+    document.getElementById('total-networks').innerText = Math.floor(stats.displayedNetworks).toLocaleString();
+    
+    document.getElementById('total-supply').innerText = stats.totalSupply.toLocaleString(undefined, {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+    });
+}
+
+function animate() {
+    ctx.fillStyle = COLORS.bg;
+    ctx.fillRect(0, 0, width, height);
+    rotation += 0.002;
+
+    // --- REVENUE GROWTH LOGIC (Proportional to Networks) ---
+    const revenuePerBlockTarget = stats.totalNetworks * (60000000 / 9000000000);
+    const valPerParticle = revenuePerBlockTarget / 100; 
+
+    // Logic: Demand
+    if(Math.random() < 0.25) {
+        const randomUser = users[Math.floor(Math.random() * users.length)];
+        const actualVal = valPerParticle * (0.5 + Math.random()); 
+        
+        spawn(randomUser, 'ops', null, COLORS.usd, 'usd', 0.015, actualVal);
+        randomUser.balance += 0.5; 
+        const randomProviderIdx = Math.floor(Math.random() * providers.length);
+        spawn(randomUser, 'provider', randomProviderIdx, COLORS.prov, 'data', 0.015, 0.05);
+    }
+
+    // Logic: Ops -> Protocol
+    if(Math.random() < 0.1) spawn(hubs.ops, 'protocol', null, COLORS.ur, 'ur', 0.012, Math.random()*250);
+
+    // Protocol Size
+    const targetRadius = 4 + Math.sqrt(stats.urCurrentPool / Math.PI) * 1.5;
+    currentRadius += (targetRadius - currentRadius) * 0.08;
+
+    // Distribution Logic
+    distTimer++;
+    if(distTimer > 400) {
+        const payout = stats.urCurrentPool * 0.95;
+        if(payout > 1) {
+            stats.urCurrentPool -= payout; 
+            stats.urDistributed += payout;
+            stats.blockHeight++;
+            
+            // --- NETWORK GROWTH LOGIC ---
+            const N = stats.totalNetworks;
+            const CAP_9B = 9000000000;
+            let growth = 0;
+
+            if (N >= CAP_9B) {
+                stats.totalNetworks = CAP_9B;
+            } else if (N < 3000000000) {
+                const rate = 0.15 + Math.random() * 0.10;
+                growth = Math.floor(N * rate);
+            } else if (N < 4000000000) {
+                const progress = (N - 3000000000) / 1000000000;
+                const rate = 0.10 * (1 - progress) + 0.01;
+                growth = Math.floor(N * rate);
+            } else if (N < 5000000000) {
+                const progress = (N - 4000000000) / 1000000000;
+                const rate = 0.01 * (1 - progress);
+                growth = Math.floor(N * rate);
+                if(growth < 1000) growth = 1000 + Math.floor(Math.random() * 5000);
+            } else {
+                growth = 5 + Math.floor(Math.random() * 20);
+            }
+            stats.totalNetworks += growth;
+
+            // --- Burn / Distribute ---
+            const absorbedAmount = payout * 0.025;
+            stats.urAbsorbed += absorbedAmount;
+            stats.totalSupply -= absorbedAmount;
+
+            showToast(payout, absorbedAmount, stats.blockUsdRevenue);
+            
+            stats.blockUsdRevenue = 0;
+            
+            providers.forEach((p, i) => {
+                if(Math.random() > 0.8) spawn(hubs.protocol, 'provider', i, COLORS.ur, 'dist', 0.005, payout/30);
+            });
+
+            for(let k=0; k<5; k++) {
+                spawn(hubs.protocol, 'protocol', null, COLORS.burn, 'absorb', 0.01, 0);
+            }
+        }
+        distTimer = 0;
+    }
+
+    // Draw Protocol
+    ctx.beginPath();
+    ctx.arc(hubs.protocol.x, hubs.protocol.y, currentRadius, 0, Math.PI*2);
+    ctx.fillStyle = COLORS.bg; ctx.fill();
+    ctx.strokeStyle = COLORS.ur; ctx.lineWidth = 2;
+    ctx.shadowBlur = currentRadius * 0.5; ctx.shadowColor = COLORS.ur;
+    ctx.stroke(); ctx.shadowBlur = 0;
+
+    // Draw Globe
+    providers.forEach(p => {
+        const pos = project(p.phi, p.theta, rotation);
+        if(pos.visible) {
+            const accumulatedSize = Math.sqrt(p.balance) * 0.8;
+            const pulseSize = p.excite * 4;
+            const totalSize = 1.5 + accumulatedSize + pulseSize;
+            
+            ctx.fillStyle = p.excite > 0.1 ? '#4d7cff' : COLORS.prov; 
+            ctx.globalAlpha = 0.6 + p.excite * 0.4;
+            ctx.beginPath(); ctx.arc(pos.x, pos.y, totalSize, 0, Math.PI*2); ctx.fill();
+            ctx.globalAlpha = 1;
+        }
+        p.excite *= 0.92;
+        p.balance *= 0.999; 
+    });
+
+    users.forEach(u => {
+        const pos = project(u.phi, u.theta, rotation);
+        if(pos.visible) {
+            const accumulatedSize = Math.sqrt(u.balance) * 0.6;
+            const totalSize = 1.2 + accumulatedSize;
+            ctx.fillStyle = COLORS.white;
+            ctx.globalAlpha = 0.5;
+            ctx.beginPath(); ctx.arc(pos.x, pos.y, totalSize, 0, Math.PI*2); ctx.fill();
+            ctx.globalAlpha = 1;
+        }
+        u.balance *= 0.999;
+    });
+
+    // Draw Bolts
+    bolts = bolts.filter(b => {
+        const p1 = project(providers[b.startIdx].phi, providers[b.startIdx].theta, rotation);
+        const p2 = project(providers[b.endIdx].phi, providers[b.endIdx].theta, rotation);
+        if(p1.visible && p2.visible) {
+            ctx.beginPath(); ctx.strokeStyle = b.color; ctx.globalAlpha = b.life * 0.5;
+            ctx.moveTo(p1.x, p1.y);
+            ctx.lineTo((p1.x+p2.x)/2 + (Math.random()-0.5)*15, (p1.y+p2.y)/2 + (Math.random()-0.5)*15);
+            ctx.lineTo(p2.x, p2.y);
+            ctx.stroke(); ctx.globalAlpha = 1;
+        }
+        b.life -= b.decay;
+        return b.life > 0;
+    });
+
+    // Draw Particles
+    particles = particles.filter(pt => {
+        pt.p += pt.spd;
+        
+        if(pt.type === 'absorb') {
+            const r = currentRadius * (1 - pt.p); 
+            const angle = Math.random() * Math.PI * 2;
+            const ax = hubs.protocol.x + Math.cos(angle) * r;
+            const ay = hubs.protocol.y + Math.sin(angle) * r;
+            ctx.beginPath(); ctx.arc(ax, ay, 2, 0, Math.PI*2);
+            ctx.fillStyle = COLORS.burn; ctx.fill();
+            if(pt.p >= 1) return false;
+            return true;
+        }
+
+        let startPos;
+        if(pt.s.phi !== undefined) startPos = project(pt.s.phi, pt.s.theta, rotation);
+        else startPos = pt.s;
+
+        let endPos;
+        if(pt.eType === 'ops') endPos = hubs.ops;
+        else if(pt.eType === 'protocol') endPos = hubs.protocol;
+        else {
+            const pr = providers[pt.eIdx];
+            endPos = project(pr.phi, pr.theta, rotation);
+        }
+
+        const cx = startPos.x + (endPos.x - startPos.x) * pt.p;
+        const cy = startPos.y + (endPos.y - startPos.y) * pt.p;
+        pt.trail.push({x: cx, y: cy});
+        if(pt.trail.length > 10) pt.trail.shift();
+
+        ctx.beginPath(); ctx.strokeStyle = pt.color;
+        pt.trail.forEach((pos, i) => {
+            ctx.globalAlpha = i / pt.trail.length;
+            i === 0 ? ctx.moveTo(pos.x, pos.y) : ctx.lineTo(pos.x, pos.y);
+        });
+        ctx.stroke(); ctx.globalAlpha = 1;
+
+        if(pt.p >= 1) {
+            if(pt.type === 'usd') {
+                stats.usdIn += pt.val;
+                stats.blockUsdRevenue += pt.val; // Accumulate block revenue
+            }
+            if(pt.type === 'ur') { 
+                stats.urBought += pt.val; 
+                stats.urCurrentPool += pt.val; 
+            }
+            if(pt.type === 'data') { 
+                stats.dataPB += pt.val; 
+                createHop(pt.eIdx, COLORS.prov, 5); 
+            }
+            if(pt.type === 'dist') {
+                providers[pt.eIdx].excite = 1.0;
+                providers[pt.eIdx].balance += pt.val;
+            }
+            updateUI(); return false;
+        }
+        return true;
+    });
+
+    ctx.fillStyle = COLORS.ui; ctx.font = 'bold 10px "PPNeueMontreal", sans-serif'; ctx.textAlign = 'center';
+    ctx.fillText("OPS", hubs.ops.x, hubs.ops.y - 12);
+    ctx.fillStyle = COLORS.ur;
+    ctx.fillText("PROTOCOL", hubs.protocol.x, hubs.protocol.y - (currentRadius + 10));
+
+    requestAnimationFrame(animate);
+}
+
+window.addEventListener('resize', init);
+init();
+animate();
+</script>
+</body>
+</html>

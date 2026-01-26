@@ -31,11 +31,17 @@ RUN apt-get update && apt-get install -y \
 RUN nginx -V
 
 ADD nginx/build/ /etc/nginx/
-ADD ../bringyour.com/build /www/bringyour.com
+ADD bringyour.com/build /www/bringyour.com
+ADD ur.network/build /www/ur.network
+ADD ur.xyz/build /www/ur.xyz
 
 # make sure all static files can be read
 RUN find /www/bringyour.com -type d -exec chmod ugo=rx {} +
 RUN find /www/bringyour.com -type f -exec chmod ugo=r {} +
+RUN find /www/ur.network -type d -exec chmod ugo=rx {} +
+RUN find /www/ur.network -type f -exec chmod ugo=r {} +
+RUN find /www/ur.xyz -type d -exec chmod ugo=rx {} +
+RUN find /www/ur.xyz -type f -exec chmod ugo=r {} +
 
 COPY build/${WARP_ENV}/status.json /srv/warp/status/status.json
 

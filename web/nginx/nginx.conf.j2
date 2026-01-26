@@ -41,7 +41,6 @@ http {
 
     gzip on;
 
-
     server {
         listen 80 default_server;
 
@@ -52,7 +51,7 @@ http {
             add_header 'Content-Type' 'application/json';
         }
         location / {
-            try_files $uri $uri.html $uri/ =404;
+            try_files $uri $uri.html $uri/ $uri/index.html =404;
             alias /www/bringyour.com/;
 
             # always check for updates in the background
@@ -71,6 +70,48 @@ http {
         }
         location =/whitepaper {
             return 307 https://github.com/bringyour/product/blob/main/archive/whitepaper.md;
+        }
+    }
+
+    server {
+        listen 80;
+        server_name ur.network *.ur.network;
+
+        absolute_redirect off;
+
+        location =/status {
+            alias /srv/warp/status/status.json;
+            add_header 'Content-Type' 'application/json';
+        }
+        location / {
+            try_files $uri $uri.html $uri/ $uri/index.html =404;
+            alias /www/ur.network/;
+
+            # always check for updates in the background
+            add_header 'Cache-Control' 'max-age=0, stale-while-revalidate=86400';
+            add_header 'Last-Modified' '{{ http_last_modified }}';
+            add_header 'ETag' '"{{ http_etag }}"';
+        }
+    }
+
+    server {
+        listen 80;
+        server_name ur.xyz *.ur.xyz;
+
+        absolute_redirect off;
+
+        location =/status {
+            alias /srv/warp/status/status.json;
+            add_header 'Content-Type' 'application/json';
+        }
+        location / {
+            try_files $uri $uri.html $uri/ $uri/index.html =404;
+            alias /www/ur.xyz/;
+
+            # always check for updates in the background
+            add_header 'Cache-Control' 'max-age=0, stale-while-revalidate=86400';
+            add_header 'Last-Modified' '{{ http_last_modified }}';
+            add_header 'ETag' '"{{ http_etag }}"';
         }
     }
 }
