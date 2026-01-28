@@ -988,7 +988,7 @@ export const redeemTransferBalanceCode = async (
  */
 export const fetchSubscriptionBalance = async (
   token: string
-): Promise<SubscriptionBalanceResponse> => {
+): Promise<SubscriptionBalanceResponse|{error: {message: string}}> => {
   try {
     const response = await fetch(`${API_BASE_URL}/subscription/balance`, {
       method: "GET",

@@ -180,7 +180,7 @@ const RedeemTransferBalanceCodeModal: React.FC<RedeemTransferBalanceCodeModalPro
                 />
 
                 <p id="balance-code-help" className="text-gray-500 text-sm mt-3">
-                  Redeeming transfer balance will add data credit to your network.
+                  Redeeming AppSumo code will add data credit to your network.
                 </p>
               </div>
 
