@@ -2435,11 +2435,14 @@ new function() {
                              <div class="no-title"><label class="form-check-label"><input id="${id('create-agree-terms')}" type="checkbox" class="form-check-input" value="">A one-time message to establish your identity will be sent to you. Message and data rates may apply. I agree to the <a href="/terms" target="_blank">URnetwork terms</a>. Learn about how we use and protect your data in our <a href="/privacy" target="_blank">Privacy Policy</a></label></div>
                              <div id="${id('create-error')}" class="text-danger d-none"></div>
                              <div class="no-title"><button id="${id('create-button')}" class="btn btn-primary" type="button"><span id="${id('create-spinner')}" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span><span class="primary">Create Network</span></button></div>
-                             <hr />
-                             <div class="info-title">Enter referral code</div>
-                             <div><input id="${id('create-bonus-referral')}" type="text" value="${self.escapeHtml(bonusReferralStr)}" class="form-control"></div>
-                             <div class="info-title">Enter ${self.escapeHtml(balanceCodeLabel)}</div>
-                             <div><input id="${id('create-balance-code')}" type="text" value="${self.escapeHtml(balanceCodeStr)}" class="form-control"></div>
+                             <!-- requested by AppSumo to hide these for now -->
+                             <div class="invisible">
+                                <hr />
+                                <div class="info-title">Enter referral code</div>
+                                <div><input id="${id('create-bonus-referral')}" type="text" value="${self.escapeHtml(bonusReferralStr)}" class="form-control"></div>
+                                <div class="info-title">Enter ${self.escapeHtml(balanceCodeLabel)}</div>
+                                <div><input id="${id('create-balance-code')}" type="text" value="${self.escapeHtml(balanceCodeStr)}" class="form-control"></div>
+                            </div>
                         </form>
                    </div>
               </div>
