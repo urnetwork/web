@@ -76,6 +76,29 @@ new function() {
         }
     }
 
+    self.sendJWTToExtension = async (jwt) => {
+        // chrome extension id
+        const extensionId = 'kpnklgbgjkihebbieiggfeokkddjbkfb'
+
+        try {
+            const response = await chrome.runtime.sendMessage(
+                extensionId,
+                {
+                    type: "SET_JWT",
+                    jwt: jwt,
+                }
+            );
+            
+            if (response && response.success) {
+                console.log("JWT successfully sent to extension");
+            } else {
+                console.error("Failed to send JWT:", response?.error);
+            }
+        } catch (error) {
+            console.error("Error communicating with extension:", error);
+        }
+    }
+
     self.notifyByJwtChanged = function() {
         let buttonElements = document.querySelectorAll('div[data-bs-target="#dialog-connect"]')
         for (const buttonElement of buttonElements) {
@@ -126,6 +149,7 @@ new function() {
     self.setByJwt = function(byJwt) {
         localStorage.setItem('byJwt', byJwt)
         self.notifyByJwtChanged()
+        self.sendJWTToExtension(byJwt)
     }
 
     self.removeByJwt = function() {
