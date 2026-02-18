@@ -14,7 +14,7 @@ func main() {
 	configPath := "/etc/nginx/nginx.conf"
 	convertedConfigPath := "/etc/nginx/nginx_host.conf"
 
-	err, exitCode := warp.Nginx(configPath, convertedConfigPath)
+	err, exitCode := warp.NginxWithDefaults(configPath, convertedConfigPath)
 	if err != nil {
 		panic(err)
 	}
