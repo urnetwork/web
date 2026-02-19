@@ -136,10 +136,10 @@ const BalanceCodesSection: React.FC = () => {
             <div className={colorClasses.iconBg}>
               <Ticket className="text-white" size={28} />
             </div>
-            AppSumo Codes
+            Balance Codes
           </h2>
           <p className="text-gray-400 mt-2">
-            Manage your account AppSumo codes for more data.
+            Manage your account balance codes for more data.
           </p>
         </div>
       </div>
@@ -149,8 +149,8 @@ const BalanceCodesSection: React.FC = () => {
           <div className="flex items-center gap-3">
             <TicketCheck size={20} className="text-white" />
             <div>
-              <h3 className="font-medium text-white">Account AppSumo Codes</h3>
-              <p className={colorClasses.headerText}>Redeem an AppSumo code to add data to your account.</p>
+              <h3 className="font-medium text-white">Account Transfer Balance Codes</h3>
+              <p className={colorClasses.headerText}>Redeem a transfer balance code to add data to your account.</p>
             </div>
           </div>
         </div>
@@ -198,8 +198,8 @@ const BalanceCodesSection: React.FC = () => {
               <div className="w-16 h-16 bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4">
                 <TicketSlash className="text-gray-500" size={24} />
               </div>
-              <h3 className="text-lg font-medium text-gray-200 mb-2">No AppSumo Codes Redeemed</h3>
-              <p className="text-gray-400 italic">No AppSumo codes found for your network.</p>
+              <h3 className="text-lg font-medium text-gray-200 mb-2">No Transfer Balance Codes Redeemed</h3>
+              <p className="text-gray-400 italic">No transfer balance codes found for your network.</p>
             </div>
           </div>
         )}
@@ -215,7 +215,7 @@ const BalanceCodesSection: React.FC = () => {
               }`}
           >
               <TicketCheck size={20} />
-              <span>Redeem AppSumo Code</span>
+              <span>Redeem Transfer Balance Code</span>
           </button>
         </div>
       </div>
@@ -226,7 +226,6 @@ const BalanceCodesSection: React.FC = () => {
         onSuccess={() => {
           // reload balance codes
           loadTransferBalanceCodes();
-		  loadSubscriptionBalance();
         }}
       />
     </div>

@@ -592,3 +592,116 @@ export interface TransferBalance {
   net_revenue: number;
   balance_byte_count: number;
 }
+
+/**
+ * Request payload for creating an auth client
+ */
+export interface AuthClientRequest {
+  client_id?: string;
+  source_client_id?: string;
+  description?: string;
+  device_spec?: string;
+  derived_client_id?: string;
+  proxy_config?: ProxyConfig;
+}
+
+/**
+ * Proxy configuration for auth client
+ */
+export interface ProxyConfig {
+  lock_caller_ip?: boolean;
+  lock_ip_list?: string[];
+  https_require_auth?: boolean;
+  enable_wg?: boolean;
+  initial_device_state?: InitialDeviceState;
+}
+
+/**
+ * Initial device state configuration
+ */
+export interface InitialDeviceState {
+  country_code?: string;
+  location?: DeviceLocation;
+  performance_profile?: PerformanceProfile;
+}
+
+/**
+ * Device location configuration
+ */
+export interface DeviceLocation {
+  connect_location_id?: ConnectLocationId;
+  name?: string;
+  location_type?: string;
+}
+
+/**
+ * Connect location identifier
+ */
+export interface ConnectLocationId {
+  client_id?: string;
+  location_id?: string;
+  location_group_id?: string;
+  best_available?: boolean;
+}
+
+/**
+ * Performance profile configuration
+ */
+export interface PerformanceProfile {
+  window_type?: string;
+  window_size_settings?: WindowSizeSettings;
+}
+
+/**
+ * Window size settings for performance profile
+ */
+export interface WindowSizeSettings {
+  window_size_min?: number;
+  window_size_min_p2p_only?: number;
+  window_size_max?: number;
+  window_size_hard_max?: number;
+  window_size_reconnect_scale?: number;
+  keep_healthiest_count?: number;
+  ulimit?: number;
+}
+
+/**
+ * Response from creating an auth client
+ */
+export interface AuthClientResponse {
+  by_client_jwt?: string;
+  proxy_config_result?: ProxyConfigResult;
+  error?: {
+    client_limit_exceeded?: boolean;
+    message: string;
+  };
+}
+
+/**
+ * WireGuard configuration returned when enable_wg is true
+ */
+export interface WgConfig {
+  wg_proxy_port: number;
+  client_private_key: string;
+  client_public_key: string;
+  client_ipv4: string;
+  proxy_public_key: string;
+  config: string;
+}
+
+/**
+ * Proxy configuration result from auth client creation
+ */
+export interface ProxyConfigResult {
+  keepalive_seconds: number;
+  http_proxy_url?: string;
+  https_proxy_url: string;
+  socks_proxy_url: string;
+  auth_token: string;
+  instance_id: string;
+  proxy_host?: string;
+  socks_proxy_port?: number;
+  http_proxy_port?: number;
+  https_proxy_port?: number;
+  wg_config?: WgConfig;
+}

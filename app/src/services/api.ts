@@ -35,6 +35,8 @@ import type {
   RedeemedTransferBalanceCodesResponse,
   RedeemTransferBalanceCodeResponse,
   SubscriptionBalanceResponse,
+  AuthClientRequest,
+  AuthClientResponse,
 } from "./types";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE ?? "https://api.bringyour.com";
@@ -1020,6 +1022,56 @@ export const fetchSubscriptionBalance = async (
   }
 };
 
+/**
+ * Create an authenticated client with proxy configuration
+ * @param token - JWT authentication token
+ * @param request - Auth client configuration
+ * @returns AuthClientResponse with proxy credentials or error
+ */
+export const createAuthClient = async (
+  token: string,
+  request: AuthClientRequest
+): Promise<AuthClientResponse> => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/network/auth-client`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(request),
+    });
+
+    if (!response.ok) {
+      console.error(
+        "Create auth client failed:",
+        response.status,
+        response.statusText
+      );
+      const errorData = await response.text();
+      console.error("Error response:", errorData);
+
+      return {
+        error: {
+          message: `HTTP error! status: ${response.status}`,
+        },
+      };
+    }
+
+    return await safeJsonParse<AuthClientResponse>(response);
+  } catch (error) {
+    console.error("Create auth client error:", error);
+    return {
+      error: {
+        message:
+          error instanceof Error
+            ? error.message
+            : "Failed to create auth client",
+      },
+    };
+  }
+};
+
 // Export types for convenience
 export type {
   AuthResponse,
@@ -1048,4 +1100,6 @@ export type {
   AccountPoint,
   AccountPointsResponse,
   NetworkReliabilityResponse,
+  AuthClientRequest,
+  AuthClientResponse,
 };

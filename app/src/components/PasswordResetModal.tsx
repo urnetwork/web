@@ -85,15 +85,18 @@ const PasswordResetModal: React.FC<PasswordResetModalProps> = ({
 
   if (!isOpen) return null;
 
+  const portalRoot = document.getElementById('portal-root');
+  if (!portalRoot) return null;
+
   return createPortal(
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 animate-fadeIn">
+    <div className="fixed inset-0 z-[9999] bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 animate-fadeIn overflow-visible">
       <div
         ref={modalRef}
         className="bg-gray-800 rounded-xl shadow-2xl max-w-md w-full mx-auto animate-scaleIn border border-gray-700"
       >
         <div className="flex items-start justify-between p-6 border-b border-gray-700">
           <div className="flex items-center space-x-3">
-            <div className="flex-shrink-0 p-2 bg-blue-600 rounded-lg">
+            <div className="flex-shrink-0 p-2 bg-red-600 rounded-lg">
               <Lock size={20} className="text-white" />
             </div>
             <h3 className="text-lg font-medium text-gray-100">Password Reset</h3>
@@ -121,8 +124,8 @@ const PasswordResetModal: React.FC<PasswordResetModalProps> = ({
                 A password reset link has been sent to:
               </p>
               <div className="bg-gray-700/50 px-4 py-2 rounded-lg inline-flex items-center gap-2">
-                <Mail size={16} className="text-blue-400" />
-                <span className="text-blue-300 font-medium">{userEmail}</span>
+                <Mail size={16} className="text-red-400" />
+                <span className="text-red-300 font-medium">{userEmail}</span>
               </div>
               <p className="text-gray-500 text-xs mt-4">
               </p>
@@ -135,8 +138,8 @@ const PasswordResetModal: React.FC<PasswordResetModalProps> = ({
                   associated with your account:
                 </p>
                 <div className="bg-gray-700/50 px-4 py-3 rounded-lg flex items-center gap-3">
-                  <Mail size={18} className="text-blue-400" />
-                  <span className="text-blue-300 font-medium">{userEmail}</span>
+                  <Mail size={18} className="text-red-400" />
+                  <span className="text-red-300 font-medium">{userEmail}</span>
                 </div>
                 <p className="text-gray-500 text-sm mt-3">
                   Please check your email and follow the link to reset your
@@ -155,10 +158,10 @@ const PasswordResetModal: React.FC<PasswordResetModalProps> = ({
                 <button
                   onClick={handleSendResetEmail}
                   disabled={state === "loading"}
-                  className={`px-4 py-2 bg-blue-600 text-white rounded-lg transition-all duration-200 ${
+                  className={`px-4 py-2 bg-red-600 text-white rounded-lg transition-all duration-200 ${
                     state === "loading"
                       ? "opacity-70 cursor-not-allowed"
-                      : "hover:bg-blue-700 hover:shadow-lg"
+                      : "hover:bg-red-700 hover:shadow-lg"
                   }`}
                 >
                   {state === "loading" ? (
@@ -195,7 +198,7 @@ const PasswordResetModal: React.FC<PasswordResetModalProps> = ({
         </div>
       </div>
     </div>,
-    document.body
+    portalRoot
   );
 };
 
