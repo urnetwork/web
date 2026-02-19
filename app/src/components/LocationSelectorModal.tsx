@@ -9,8 +9,9 @@ import debounce from 'lodash/debounce';
 interface LocationSelectorModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSelectLocation: (countryCode: string, locationName: string) => void;
+  onSelectLocation: (location: Location) => void;
   currentCountryCode?: string;
+  currentLocationId?: string;
 }
 
 const LocationSelectorModal: React.FC<LocationSelectorModalProps> = ({
@@ -18,6 +19,7 @@ const LocationSelectorModal: React.FC<LocationSelectorModalProps> = ({
   onClose,
   onSelectLocation,
   currentCountryCode,
+  currentLocationId,
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [locations, setLocations] = useState<Location[]>([]);
@@ -134,11 +136,12 @@ const LocationSelectorModal: React.FC<LocationSelectorModalProps> = ({
   };
 
   const handleSelectLocation = (location: Location) => {
-    if (location.country_code) {
-      onSelectLocation(location.country_code.toLowerCase(), location.name);
-      toast.success(`Selected ${location.name} (${location.country_code.toUpperCase()})`);
-      onClose();
-    }
+    onSelectLocation(location);
+    const label = location.location_type === 'country'
+      ? `${location.name} (${location.country_code.toUpperCase()})`
+      : `${location.name} (${location.location_type})`;
+    toast.success(`Selected ${label}`);
+    onClose();
   };
 
   const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -243,15 +246,27 @@ const LocationSelectorModal: React.FC<LocationSelectorModalProps> = ({
                       key={location.location_id}
                       onClick={() => handleSelectLocation(location)}
                       className={`bg-gray-750 rounded-lg p-4 border transition-all duration-200 text-left hover:scale-105 hover:shadow-lg ${
-                        currentCountryCode?.toLowerCase() === location.country_code?.toLowerCase()
+                        (currentLocationId && currentLocationId === location.location_id) ||
+                        (!currentLocationId && currentCountryCode?.toLowerCase() === location.country_code?.toLowerCase() && location.location_type === 'country')
                           ? 'border-teal-500 bg-teal-900/30'
                           : 'border-gray-600 hover:border-teal-500'
                       }`}
                     >
                       <div className="flex items-center justify-between mb-3">
-                        <h3 className="font-medium text-gray-100 truncate flex-1" title={location.name}>
-                          {location.name}
-                        </h3>
+                        <div className="flex items-center gap-2 min-w-0 flex-1">
+                          <h3 className="font-medium text-gray-100 truncate" title={location.name}>
+                            {location.name}
+                          </h3>
+                          <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded flex-shrink-0 ${
+                            location.location_type === 'city'
+                              ? 'bg-blue-900/50 text-blue-300 border border-blue-700/50'
+                              : location.location_type === 'region'
+                                ? 'bg-yellow-900/50 text-yellow-300 border border-yellow-700/50'
+                                : 'bg-gray-700 text-gray-400 border border-gray-600'
+                          }`}>
+                            {location.location_type}
+                          </span>
+                        </div>
                         <span className="bg-teal-900 text-teal-300 text-xs font-medium px-2 py-1 rounded border border-teal-700 ml-2 flex-shrink-0">
                           {location.provider_count}
                         </span>
