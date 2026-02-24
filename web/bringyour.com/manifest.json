@@ -1,6 +1,6 @@
 {
-  "short_name": "BringYour",
-  "name": "All of the internet with ultimate privacy, security and speed",
+  "short_name": "URnetwork",
+  "name": "URnetwork: Goodbye VPN!",
   "icons": [
     {
       "src": "/favicon.png",
@@ -18,6 +18,10 @@
     {
       "platform": "play",
       "id": "com.bringyour.network"
+    },
+    {
+      "platform": "chrome_web_store",
+      "id": "kpnklgbgjkihebbieiggfeokkddjbkfb"
     }
   ]
 }

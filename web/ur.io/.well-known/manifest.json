@@ -17,8 +17,14 @@
     "sizes": "512x512"
   }],
   "prefer_related_applications": true,
-  "related_applications": [{
-    "platform": "play",
-    "id": "com.bringyour.network"
-  }]
+  "related_applications": [
+    {
+      "platform": "play",
+      "id": "com.bringyour.network"
+    },
+    {
+      "platform": "chrome_web_store",
+      "id": "kpnklgbgjkihebbieiggfeokkddjbkfb"
+    }
+  ]
 }
