@@ -2,14 +2,8 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <link rel="icon" type="image/svg+xml" sizes="any" href="/favicon.svg">
-    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
-    <link rel="icon" type="image/png" sizes="128x128" href="/favicon-128.png">
-    <link rel="icon" type="image/png" sizes="180x180" href="/favicon-180.png">
-    <link rel="icon" type="image/png" sizes="192x192" href="/favicon.png">
-    <link rel="apple-touch-icon" type="image/png" sizes="192x192" href="/apple-touch-icon.png">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>$UR Privacy Infrastructure</title>
+    <title>$UR Deflationary Model</title>
     <style>
         /* --- Font Definitions --- */
         @font-face {
@@ -169,33 +163,25 @@
             .dashboard {
                 width: 100%; left: 0; top: 0; right: auto;
                 border: none; border-bottom: 1px solid var(--brand-ui);
-                padding: 8px 12px; /* Tighter padding */
+                padding: 8px 12px; 
                 box-sizing: border-box; border-radius: 0;
-                background: rgba(16, 16, 16, 0.95); /* More opaque */
+                background: rgba(16, 16, 16, 0.95); 
             }
-            
-            /* Compact Header: Logo Left, Link Right */
             .logo-container { 
                 margin-bottom: 8px; padding-bottom: 0; border-bottom: none;
                 display: flex; justify-content: space-between; align-items: center;
             }
-            .logo-container img { max-width: 60px; } /* Smaller Logo */
-            .logo-subtitle { display: none; } /* Hide Subtitle */
-            .app-link { margin-top: 0; font-size: 0.7rem; } /* Link inline */
+            .logo-container img { max-width: 60px; }
+            .logo-subtitle { display: none; }
+            .app-link { margin-top: 0; font-size: 0.7rem; }
 
-            /* Tighter Grid */
             .stat-grid { grid-template-columns: 1fr 1fr; gap: 8px; row-gap: 6px; }
             .stat-box { margin-bottom: 0; }
-            
-            /* Smaller Fonts */
             .val-usd, .val-ur, .val-supply, .val-white, .val-burn, .val-data { font-size: 1.0rem; }
             .label { font-size: 0.45rem; margin-bottom: 1px; }
-            
             .header { display: none; }
             .full-width { grid-column: span 2; }
-            .disclaimer { display: none; } /* Hide Disclaimer */
-            
-            /* Toast adjustments */
+            .disclaimer { display: none; }
             #toast-container { bottom: 20px; width: 90%; }
             .payout-toast { font-size: 0.85rem; padding: 10px; white-space: normal; }
         }
@@ -207,7 +193,7 @@
 
 <div class="dashboard">
     <div class="logo-container">
-        <img src="ur.svg" alt="$UR Logo">
+        <img src="UR.png" alt="$UR Logo">
         <p class="logo-subtitle">Own your network. Own your privacy.</p>
         <a href="https://ur.io" target="_blank" class="app-link">Get the app</a>
     </div>
@@ -216,8 +202,8 @@
     
     <div class="stat-grid">
         <div class="stat-box">
-            <div class="label">Total Revenue (USD)</div>
-            <div id="total-usd" class="val-usd">$0</div>
+            <div class="label">Total Fees ($UR)</div>
+            <div id="total-fees" class="val-ur">0.00</div>
         </div>
 
         <div class="stat-box">
@@ -250,9 +236,14 @@
             <div id="total-ur-dist" class="val-ur">0.00</div>
         </div>
 
-        <div class="stat-box full-width">
+        <div class="stat-box">
             <div class="label">$UR Absorbed</div>
             <div id="total-absorbed" class="val-burn">0.00</div>
+        </div>
+
+        <div class="stat-box">
+            <div class="label">Status Held ($UR)</div>
+            <div id="total-held" class="val-ur">0.00</div>
         </div>
     </div>
 
@@ -279,7 +270,7 @@ const COLORS = {
 };
 
 const stats = { 
-    usdIn: 0, 
+    totalFeesUr: 0, 
     urBought: 0, 
     urDistributed: 0, 
     urAbsorbed: 0, 
@@ -287,9 +278,9 @@ const stats = {
     blockHeight: 0,
     totalSupply: 10000000,
     dataPB: 0,
-    totalNetworks: 250000,      // Start at 250,000
-    displayedNetworks: 250000,  // Smooth transition tracker
-    blockUsdRevenue: 0          // Tracks revenue for the current block
+    totalNetworks: 250000,      
+    displayedNetworks: 250000,
+    totalHeldUr: 0 // Ledger value representing tokens currently held for status
 };
 
 let width, height, globeRadius, rotation = 0, distTimer = 0;
@@ -331,7 +322,7 @@ function init() {
 
             const phiU = Math.acos(-1 + (2 * (i+0.5)) / count);
             const thetaU = Math.sqrt(count * Math.PI) * phiU;
-            users.push({ phi: phiU, theta: thetaU, id: i, balance: 0 });
+            users.push({ phi: phiU, theta: thetaU, id: i, balance: 0, glow: 0 });
         }
     }
 }
@@ -358,13 +349,12 @@ function createHop(currentIdx, color, hopsLeft) {
     });
 }
 
-function showToast(amount, absorbed, usdRevenue) {
+function showToast(amount, absorbed, blockFeesUr) {
     const el = document.createElement('div');
     el.className = 'payout-toast';
-    // Removed color from USD amount, set to black (default) or bold
     el.innerHTML = `⚡ BLOCK #${stats.blockHeight}<br>
                     ${amount.toFixed(2)} $UR DISTRIBUTED <br>
-                    <span style="font-size:0.8em; font-weight:normal;">CONVERTED FROM <span style="font-weight:bold;">$${Math.floor(usdRevenue).toLocaleString()}</span> NETWORK OPERATOR REVENUE</span><br>
+                    <span style="font-size:0.8em; font-weight:normal;"><span style="font-weight:bold;">${blockFeesUr.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})} $UR</span> BLOCK FEES</span><br>
                     <span style="font-size:0.85em; color:${COLORS.burnDark}">
                     (${absorbed.toFixed(2)} Absorbed)</span>`;
     toastContainer.appendChild(el);
@@ -372,14 +362,21 @@ function showToast(amount, absorbed, usdRevenue) {
 }
 
 function updateUI() {
-    document.getElementById('total-usd').innerText = `$${Math.floor(stats.usdIn).toLocaleString()}`;
+    document.getElementById('total-fees').innerText = stats.totalFeesUr.toLocaleString(undefined, {
+        minimumFractionDigits: 2, maximumFractionDigits: 2
+    });
     document.getElementById('total-ur-bought').innerText = stats.urBought.toFixed(2);
     document.getElementById('total-ur-dist').innerText = stats.urDistributed.toFixed(2);
     document.getElementById('total-absorbed').innerText = stats.urAbsorbed.toFixed(2);
+    
+    document.getElementById('total-held').innerText = stats.totalHeldUr.toLocaleString(undefined, {
+        minimumFractionDigits: 2, maximumFractionDigits: 2
+    });
+
     document.getElementById('block-height').innerText = `#${stats.blockHeight}`;
     document.getElementById('total-data').innerText = `${stats.dataPB.toFixed(2)} PB`;
     
-    // Smooth Interpolation
+    // Smooth Interpolation for Networks
     const diff = stats.totalNetworks - stats.displayedNetworks;
     if (Math.abs(diff) > 0.5) {
         stats.displayedNetworks += diff * 0.08; 
@@ -389,8 +386,7 @@ function updateUI() {
     document.getElementById('total-networks').innerText = Math.floor(stats.displayedNetworks).toLocaleString();
     
     document.getElementById('total-supply').innerText = stats.totalSupply.toLocaleString(undefined, {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2
+        minimumFractionDigits: 2, maximumFractionDigits: 2
     });
 }
 
@@ -399,11 +395,10 @@ function animate() {
     ctx.fillRect(0, 0, width, height);
     rotation += 0.002;
 
-    // --- REVENUE GROWTH LOGIC (Proportional to Networks) ---
     const revenuePerBlockTarget = stats.totalNetworks * (60000000 / 9000000000);
     const valPerParticle = revenuePerBlockTarget / 100; 
 
-    // Logic: Demand
+    // Logic: Demand (Users buying data via OPS)
     if(Math.random() < 0.25) {
         const randomUser = users[Math.floor(Math.random() * users.length)];
         const actualVal = valPerParticle * (0.5 + Math.random()); 
@@ -417,6 +412,26 @@ function animate() {
     // Logic: Ops -> Protocol
     if(Math.random() < 0.1) spawn(hubs.ops, 'protocol', null, COLORS.ur, 'ur', 0.012, Math.random()*250);
 
+    // Logic: Direct User -> Protocol Payment in $UR (Requires holding $UR)
+    if(Math.random() < 0.08 && stats.totalHeldUr > 0) { 
+        const randomUser = users[Math.floor(Math.random() * users.length)];
+        const basePayment = 50 + Math.random() * 100; 
+        
+        const discountFactor = Math.min(0.9, randomUser.balance * 0.05); 
+        let finalPayment = basePayment * (1 - discountFactor);
+
+        // Deduct payment from the strictly tracked total held status pool.
+        // Ensures status held can never exceed total amount distributed.
+        finalPayment = Math.min(finalPayment, stats.totalHeldUr);
+        stats.totalHeldUr -= finalPayment;
+
+        spawn(randomUser, 'protocol', null, COLORS.ur, 'ur_direct', 0.015, finalPayment);
+
+        if (discountFactor > 0.2) {
+            randomUser.glow = 1.0; 
+        }
+    }
+
     // Protocol Size
     const targetRadius = 4 + Math.sqrt(stats.urCurrentPool / Math.PI) * 1.5;
     currentRadius += (targetRadius - currentRadius) * 0.08;
@@ -428,6 +443,10 @@ function animate() {
         if(payout > 1) {
             stats.urCurrentPool -= payout; 
             stats.urDistributed += payout;
+            
+            // Add the distributed tokens to the status pool held by users
+            stats.totalHeldUr += payout;
+
             stats.blockHeight++;
             
             // --- NETWORK GROWTH LOGIC ---
@@ -459,9 +478,11 @@ function animate() {
             stats.urAbsorbed += absorbedAmount;
             stats.totalSupply -= absorbedAmount;
 
-            showToast(payout, absorbedAmount, stats.blockUsdRevenue);
-            
-            stats.blockUsdRevenue = 0;
+            // Compute Block Fees precisely
+            const currentBlockFees = payout + absorbedAmount;
+            stats.totalFeesUr += currentBlockFees;
+
+            showToast(payout, absorbedAmount, currentBlockFees);
             
             providers.forEach((p, i) => {
                 if(Math.random() > 0.8) spawn(hubs.protocol, 'provider', i, COLORS.ur, 'dist', 0.005, payout/30);
@@ -482,7 +503,7 @@ function animate() {
     ctx.shadowBlur = currentRadius * 0.5; ctx.shadowColor = COLORS.ur;
     ctx.stroke(); ctx.shadowBlur = 0;
 
-    // Draw Globe
+    // Draw Globe Providers
     providers.forEach(p => {
         const pos = project(p.phi, p.theta, rotation);
         if(pos.visible) {
@@ -499,17 +520,27 @@ function animate() {
         p.balance *= 0.999; 
     });
 
+    // Draw Globe Users
     users.forEach(u => {
         const pos = project(u.phi, u.theta, rotation);
         if(pos.visible) {
             const accumulatedSize = Math.sqrt(u.balance) * 0.6;
             const totalSize = 1.2 + accumulatedSize;
+            
             ctx.fillStyle = COLORS.white;
             ctx.globalAlpha = 0.5;
             ctx.beginPath(); ctx.arc(pos.x, pos.y, totalSize, 0, Math.PI*2); ctx.fill();
             ctx.globalAlpha = 1;
+
+            if (u.glow && u.glow > 0.01) {
+                ctx.fillStyle = COLORS.ur;
+                ctx.globalAlpha = u.glow * 0.9;
+                ctx.beginPath(); ctx.arc(pos.x, pos.y, totalSize * 0.8, 0, Math.PI*2); ctx.fill();
+                ctx.globalAlpha = 1;
+            }
         }
         u.balance *= 0.999;
+        if(u.glow !== undefined) u.glow *= 0.93; 
     });
 
     // Draw Bolts
@@ -567,12 +598,11 @@ function animate() {
         ctx.stroke(); ctx.globalAlpha = 1;
 
         if(pt.p >= 1) {
-            if(pt.type === 'usd') {
-                stats.usdIn += pt.val;
-                stats.blockUsdRevenue += pt.val; // Accumulate block revenue
-            }
             if(pt.type === 'ur') { 
                 stats.urBought += pt.val; 
+                stats.urCurrentPool += pt.val; 
+            } else if (pt.type === 'ur_direct') { 
+                // Direct payments are returned to the protocol pool
                 stats.urCurrentPool += pt.val; 
             }
             if(pt.type === 'data') { 

@@ -1,0 +1,117 @@
+/* Simulation.css */
+@font-face {
+    font-family: 'PPNeueMontreal';
+    src: url('/PPNeueMontreal-Regular.woff2') format('woff2'); /* Adjust path to your public folder */
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'PPNeueBit';
+    src: url('/PPNeueBit-Bold.woff2') format('woff2'); /* Adjust path to your public folder */
+    font-weight: bold;
+    font-style: normal;
+}
+
+:root { 
+    --brand-ur: #ED8FFF;
+    --brand-usd: #87FB67;
+    --brand-prov: #0039DE;
+    --brand-bg: #101010;
+    --brand-white: #F8F8F8;
+    --brand-ui: #D6E6F4;
+    --brand-burn: #FF6C58;
+    --brand-burn-dark: #421006;
+}
+
+.simulation-wrapper {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    background: var(--brand-bg);
+    color: var(--brand-ui);
+    font-family: 'PPNeueMontreal', sans-serif;
+    overflow: hidden;
+}
+
+.sim-canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+/* --- Dashboard --- */
+.dashboard {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    width: 280px;
+    background: rgba(16, 16, 16, 0.9);
+    padding: 25px 20px;
+    border: 1px solid var(--brand-ui);
+    box-shadow: 0 0 30px rgba(214, 230, 244, 0.1);
+    backdrop-filter: blur(10px);
+    z-index: 100;
+}
+
+.logo-container {
+    width: 100%; text-align: center; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid #333;
+}
+.logo-container img { max-width: 120px; height: auto; display: inline-block; }
+.logo-subtitle { font-size: 0.65rem; color: var(--brand-ui); margin-top: 5px; letter-spacing: 0.5px; text-transform: uppercase; font-weight: bold; }
+
+.app-link {
+    display: inline-block; margin-top: 8px; font-size: 0.75rem; color: var(--brand-ur); text-decoration: none; border-bottom: 1px solid var(--brand-ur); transition: all 0.2s ease; cursor: pointer;
+}
+.app-link:hover { color: var(--brand-white); border-bottom-color: var(--brand-white); }
+
+.header { font-size: 0.8rem; border-bottom: 1px solid #333; margin-bottom: 12px; padding-bottom: 5px; color: var(--brand-ui); letter-spacing: 1px; font-weight: bold; }
+
+.stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+.stat-box { margin-bottom: 5px; }
+.full-width { grid-column: span 2; }
+
+.label { font-size: 0.6rem; text-transform: uppercase; opacity: 0.8; margin-bottom: 2px; color: var(--brand-ui); letter-spacing: 0.5px; }
+
+/* Value Colors */
+.val-usd, .val-ur, .val-supply, .val-white, .val-burn, .val-data { font-family: 'PPNeueBit', monospace; font-size: 1.4rem; line-height: 1.1; }
+.val-usd { color: var(--brand-usd); }
+.val-ur { color: var(--brand-ur); }
+.val-supply { color: var(--brand-white); letter-spacing: 0.5px; } 
+.val-white { color: var(--brand-white); }
+.val-burn { color: var(--brand-burn); }
+.val-data { color: var(--brand-prov); }
+
+.disclaimer { margin-top: 15px; padding-top: 10px; border-top: 1px solid #333; font-size: 0.55rem; text-align: center; opacity: 0.6; color: var(--brand-ui); letter-spacing: 0.5px; }
+
+/* --- Toasts --- */
+.toast-container {
+    position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%);
+    display: flex; flex-direction: column; align-items: center; pointer-events: none; z-index: 200;
+}
+.payout-toast {
+    background: var(--brand-ur); color: #000; padding: 12px 25px; margin-top: 10px; border-radius: 4px;
+    font-family: 'PPNeueBit', monospace; font-weight: bold; font-size: 1.1rem; line-height: 1.3;
+    box-shadow: 0 0 20px rgba(237, 143, 255, 0.4); border: 2px solid var(--brand-white);
+    animation: slideUp 0.5s ease-out, fadeOut 0.5s 3.5s forwards; white-space: nowrap; text-align: center;
+}
+
+@keyframes slideUp { from { transform: translateY(50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+@keyframes fadeOut { to { opacity: 0; transform: translateY(-20px); } }
+
+/* --- Mobile Responsive --- */
+@media (max-width: 768px) {
+    .dashboard { width: 100%; left: 0; top: 0; right: auto; border: none; border-bottom: 1px solid var(--brand-ui); padding: 8px 12px; border-radius: 0; background: rgba(16, 16, 16, 0.95); }
+    .logo-container { margin-bottom: 8px; padding-bottom: 0; border-bottom: none; display: flex; justify-content: space-between; align-items: center; }
+    .logo-container img { max-width: 60px; }
+    .logo-subtitle { display: none; }
+    .app-link { margin-top: 0; font-size: 0.7rem; }
+    .stat-grid { grid-template-columns: 1fr 1fr; gap: 8px; row-gap: 6px; }
+    .stat-box { margin-bottom: 0; }
+    .val-usd, .val-ur, .val-supply, .val-white, .val-burn, .val-data { font-size: 1.0rem; }
+    .label { font-size: 0.45rem; margin-bottom: 1px; }
+    .header { display: none; }
+    .disclaimer { display: none; }
+    .toast-container { bottom: 20px; width: 90%; }
+    .payout-toast { font-size: 0.85rem; padding: 10px; white-space: normal; width: 100%; box-sizing: border-box;}
+}
