@@ -1,0 +1,76 @@
+/* App.css
+ * Global brand tokens, base reset, and shared layout primitives.
+ * Component-specific styles live alongside their components.
+ */
+
+/* --- Brand tokens --- */
+:root {
+    --brand-ur:        #ED8FFF;   /* Pink — token */
+    --brand-usd:       #87FB67;   /* Green — settlement */
+    --brand-prov:      #0039DE;   /* Deep blue — providers */
+    --brand-bg:        #101010;   /* Near-black background */
+    --brand-white:     #F8F8F8;   /* Off-white */
+    --brand-ui:        #D6E6F4;   /* Pale blue UI text */
+    --brand-burn:      #FF6C58;   /* Burn red */
+    --brand-burn-dark: #421006;
+
+    --nav-height: 64px;
+}
+
+/* --- Base reset --- */
+*, *::before, *::after {
+    box-sizing: border-box;
+}
+
+html, body, #root {
+    margin: 0;
+    padding: 0;
+    background: var(--brand-bg);
+    color: var(--brand-ui);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+    font-family: 'PPNeueMontreal', system-ui, -apple-system, Segoe UI, sans-serif;
+    line-height: 1.5;
+    overflow-x: hidden;
+}
+
+a {
+    color: inherit;
+}
+
+img, svg {
+    display: block;
+    max-width: 100%;
+}
+
+/* --- App shell --- */
+.app {
+    min-height: 100vh;
+    background: var(--brand-bg);
+    position: relative;
+}
+
+main {
+    position: relative;
+    z-index: 1;
+}
+
+/* The hero is full bleed beneath the fixed nav.
+   The nav uses a backdrop-filter so the simulation reads through it. */
+.hero {
+    margin-top: 0;
+}
+
+/* Subtle scroll behavior for anchor navigation. */
+html {
+    scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    html {
+        scroll-behavior: auto;
+    }
+}

@@ -1,0 +1,87 @@
+/* Simulation.css
+ * Visual styles for the URSimulation canvas + its in-canvas toast layer.
+ * The Dashboard / Stats panel lives in components/StatsPanel.css since it
+ * detaches from the simulation as the user scrolls.
+ */
+
+@font-face {
+    font-family: 'PPNeueMontreal';
+    src: url('/PPNeueMontreal-Regular.woff2') format('woff2');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'PPNeueBit';
+    src: url('/PPNeueBit-Bold.woff2') format('woff2');
+    font-weight: bold;
+    font-style: normal;
+    font-display: swap;
+}
+
+.simulation-wrapper {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    background: var(--brand-bg);
+    color: var(--brand-ui);
+    font-family: 'PPNeueMontreal', sans-serif;
+    overflow: hidden;
+}
+
+.sim-canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+/* --- Payout Toasts --- */
+.toast-container {
+    position: absolute;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    pointer-events: none;
+    z-index: 5;
+}
+
+.payout-toast {
+    background: var(--brand-ur);
+    color: #000;
+    padding: 12px 25px;
+    margin-top: 10px;
+    border-radius: 4px;
+    font-family: 'PPNeueBit', monospace;
+    font-weight: bold;
+    font-size: 1.1rem;
+    line-height: 1.3;
+    box-shadow: 0 0 20px rgba(237, 143, 255, 0.4);
+    border: 2px solid var(--brand-white);
+    animation: slideUp 0.5s ease-out, fadeOut 0.5s 3.5s forwards;
+    white-space: nowrap;
+    text-align: center;
+}
+
+@keyframes slideUp {
+    from { transform: translateY(50px); opacity: 0; }
+    to   { transform: translateY(0);    opacity: 1; }
+}
+
+@keyframes fadeOut {
+    to { opacity: 0; transform: translateY(-20px); }
+}
+
+@media (max-width: 768px) {
+    .toast-container { bottom: 20px; width: 90%; }
+    .payout-toast {
+        font-size: 0.85rem;
+        padding: 10px;
+        white-space: normal;
+        width: 100%;
+        box-sizing: border-box;
+    }
+}

@@ -1,0 +1,176 @@
+/* StatsPanel.css
+ * The Protocol Ledger panel that morphs from a top-right dashboard on the
+ * simulation hero, into a centered banner at the top of the whitepaper
+ * section, and finally into a full-width ticker bar pinned beneath the nav.
+ *
+ * The JS layer drives:
+ *   --p          : 0 → 1 detach → dock progress
+ *   --q          : 0 → 1 dock → sticky/ticker progress
+ *   transform    : translate3d(left, top, 0)
+ *   width        : interpolated between detached/docked/full
+ *
+ * The CSS layer translates --p and --q into visual emphasis (border, glow,
+ * padding, header height, font sizes) so the panel feels like it earns
+ * each of its three positions.
+ */
+
+.stats-panel {
+    --p: 0;
+    --q: 0;
+
+    /* Positioned by JS via transform; fall back top/left = 0 */
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 320px;
+
+    z-index: 30;
+    box-sizing: border-box;
+
+    /* Padding interpolates across all three states.
+       Vertical:   detached 20 → docked 24 → ticker 6
+       Horizontal: detached 22 → docked 28 → ticker 32 */
+    padding:
+        calc((20px + 4px * var(--p)) * (1 - var(--q)) + 6px * var(--q))
+        calc((22px + 6px * var(--p)) * (1 - var(--q)) + 32px * var(--q));
+
+    background: rgba(16, 16, 16, calc(0.78 + 0.14 * var(--p) + 0.04 * var(--q)));
+
+    /* Top/left/right borders fade out as we approach the ticker; the
+       bottom border stays so the bar reads as an extension of the nav. */
+    border-top:    1px solid rgba(214, 230, 244, calc((0.18 + 0.12 * var(--p)) * (1 - var(--q))));
+    border-left:   1px solid rgba(214, 230, 244, calc((0.18 + 0.12 * var(--p)) * (1 - var(--q))));
+    border-right:  1px solid rgba(214, 230, 244, calc((0.18 + 0.12 * var(--p)) * (1 - var(--q))));
+    border-bottom: 1px solid rgba(214, 230, 244, calc(0.18 + 0.12 * var(--p)));
+
+    /* Glow + drop shadow fade out into the ticker. */
+    box-shadow:
+        0 0 calc(40px + 30px * var(--p))
+            rgba(214, 230, 244, calc((0.06 + 0.04 * var(--p)) * (1 - var(--q)))),
+        0 calc(8px + 12px * var(--p)) calc(40px + 30px * var(--p))
+            rgba(0, 0, 0, calc((0.3 + 0.15 * var(--p)) * (1 - var(--q))));
+
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+
+    color: var(--brand-ui);
+    font-family: 'PPNeueMontreal', sans-serif;
+
+    will-change: transform, width;
+    /* No CSS transition on transform/width — JS interpolates per frame. */
+}
+
+/* Header collapses smoothly into the ticker form. */
+.stats-panel-header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 16px;
+    overflow: hidden;
+
+    max-height: calc(40px * (1 - var(--q)));
+    opacity: calc(1 - var(--q));
+    padding-bottom: calc(12px * (1 - var(--q)));
+    margin-bottom: calc(14px * (1 - var(--q)));
+    border-bottom: 1px solid rgba(214, 230, 244, calc(0.12 * (1 - var(--q))));
+}
+
+.stats-panel-eyebrow {
+    font-size: 0.7rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--brand-ui);
+    font-weight: 600;
+}
+
+/* Auto-fit grid: 2 cols at 320px wide, naturally morphs to many more
+   columns as the JS expands width through the docked and ticker states. */
+.stat-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(132px, 1fr));
+    /* Row gap tightens for the ticker; column gap stays generous. */
+    gap:
+        calc(14px * (1 - var(--q)) + 6px * var(--q))
+        18px;
+}
+
+.stat-box {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+}
+
+.stat-label {
+    /* Slight tightening for ticker form. */
+    font-size: calc(0.58rem * (1 - var(--q)) + 0.55rem * var(--q));
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    opacity: 0.7;
+    margin-bottom: calc(4px * (1 - var(--q)) + 2px * var(--q));
+    color: var(--brand-ui);
+
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+}
+
+.stat-value {
+    font-family: 'PPNeueBit', monospace;
+    font-size: calc(1.35rem * (1 - var(--q)) + 1.1rem * var(--q));
+    line-height: 1.05;
+    letter-spacing: 0.02em;
+
+    /* Stable digit widths so values update in place. PPNeueBit is
+       monospace already; tabular-nums is belt-and-braces. */
+    font-variant-numeric: tabular-nums;
+
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+}
+
+.tone-ur    { color: var(--brand-ur); }
+.tone-usd   { color: var(--brand-usd); }
+.tone-data  { color: var(--brand-prov); }
+.tone-white { color: var(--brand-white); }
+.tone-burn  { color: var(--brand-burn); }
+
+/* --- Mobile: simple horizontal bar pinned below the nav, no morph --- */
+@media (max-width: 768px) {
+    .stats-panel {
+        position: fixed !important;
+        top: var(--nav-height) !important;
+        left: 0 !important;
+        right: 0 !important;
+        width: 100% !important;
+        transform: none !important;
+
+        padding: 10px 14px;
+        background: rgba(16, 16, 16, 0.92);
+        border: none;
+        border-bottom: 1px solid rgba(214, 230, 244, 0.18);
+        box-shadow: none;
+    }
+
+    .stats-panel-header {
+        display: none;
+    }
+
+    .stat-grid {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 6px 12px;
+    }
+
+    .stat-box:nth-child(n+5) { display: none; }
+
+    .stat-label {
+        font-size: 0.5rem;
+        margin-bottom: 1px;
+    }
+
+    .stat-value { font-size: 0.95rem; }
+}

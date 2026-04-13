@@ -1,0 +1,183 @@
+/* Section.css — shared layout for every content section */
+
+.section {
+    position: relative;
+    width: 100%;
+    padding: 120px 32px 140px;
+    background: var(--brand-bg);
+    color: var(--brand-ui);
+    font-family: 'PPNeueMontreal', sans-serif;
+    border-top: 1px solid rgba(214, 230, 244, 0.06);
+}
+
+.section-inner {
+    max-width: 980px;
+    margin: 0 auto;
+}
+
+/* The whitepaper section is the landing page — its top reserves space for
+   the StatsPanel to dock above the title without overlapping. The reserved
+   region is sized for the docked panel (~210px) plus breathing room. */
+.section-whitepaper {
+    padding-top: 300px;
+    border-top: none;
+}
+
+/* --- Header --- */
+.section-header {
+    margin-bottom: 64px;
+}
+
+.section-eyebrow {
+    display: inline-block;
+    font-size: 0.72rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--brand-ur);
+    margin-bottom: 18px;
+    font-weight: 600;
+}
+
+.section-title {
+    font-family: 'PPNeueMontreal', sans-serif;
+    font-size: clamp(2.4rem, 4.5vw, 4rem);
+    font-weight: 400;
+    line-height: 1.05;
+    letter-spacing: -0.01em;
+    color: var(--brand-white);
+    margin: 0;
+}
+
+.section-rule {
+    margin-top: 36px;
+    width: 64px;
+    height: 1px;
+    background: var(--brand-ui);
+    opacity: 0.4;
+}
+
+/* --- Body --- */
+.section-body {
+    font-size: 1.05rem;
+    line-height: 1.65;
+    color: var(--brand-ui);
+}
+
+.section-body p {
+    margin: 0 0 1.4em;
+    max-width: 68ch;
+}
+
+.section-body p:last-child {
+    margin-bottom: 0;
+}
+
+/* --- Article: business-style "statement of facts" used by Whitepaper --- */
+.article-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 56px;
+}
+
+.article-clause {
+    display: grid;
+    grid-template-columns: 110px 1fr;
+    gap: 28px;
+    align-items: baseline;
+}
+
+.article-numeral {
+    font-family: 'PPNeueBit', monospace;
+    font-size: 1.6rem;
+    color: var(--brand-ur);
+    letter-spacing: 0.06em;
+    line-height: 1;
+}
+
+.article-title {
+    font-family: 'PPNeueMontreal', sans-serif;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    color: var(--brand-white);
+    font-weight: 600;
+    margin: 0 0 14px;
+}
+
+.article-body p {
+    margin: 0 0 1.1em;
+    color: var(--brand-ui);
+    opacity: 0.9;
+}
+
+.article-body p:last-child { margin-bottom: 0; }
+
+/* --- Card grid for sections like Providers / Operators --- */
+.card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 24px;
+    margin-top: 16px;
+}
+
+.card {
+    border: 1px solid rgba(214, 230, 244, 0.14);
+    background: rgba(255, 255, 255, 0.015);
+    padding: 28px 24px;
+    transition: border-color 0.25s ease, background 0.25s ease, transform 0.25s ease;
+}
+
+.card:hover {
+    border-color: rgba(237, 143, 255, 0.45);
+    background: rgba(237, 143, 255, 0.04);
+    transform: translateY(-2px);
+}
+
+.card-eyebrow {
+    font-family: 'PPNeueBit', monospace;
+    color: var(--brand-ur);
+    font-size: 0.95rem;
+    margin-bottom: 12px;
+    letter-spacing: 0.05em;
+}
+
+.card-title {
+    font-size: 1.05rem;
+    color: var(--brand-white);
+    font-weight: 500;
+    margin: 0 0 10px;
+    letter-spacing: 0.01em;
+}
+
+.card-body {
+    font-size: 0.92rem;
+    color: var(--brand-ui);
+    opacity: 0.85;
+    line-height: 1.55;
+    margin: 0;
+}
+
+/* --- Responsive --- */
+@media (max-width: 768px) {
+    .section {
+        padding: 80px 20px 100px;
+    }
+
+    .section-whitepaper {
+        /* Mobile keeps the panel as a top bar; less reserved space needed */
+        padding-top: 140px;
+    }
+
+    .section-header {
+        margin-bottom: 44px;
+    }
+
+    .article-clause {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+
+    .article-numeral {
+        font-size: 1.3rem;
+    }
+}

@@ -1,0 +1,3 @@
+[submodule "web/ur.xyz/docs"]
+	path = web/ur.xyz/docs
+	url = git@github.com:urnetwork/docs.git
