@@ -14,6 +14,16 @@ export default function Research() {
                         <div className="card-eyebrow">{p.tag}</div>
                         <h3 className="card-title">{p.title}</h3>
                         <p className="card-body">{p.body}</p>
+                        {p.href && (
+                            <a
+                                href={p.href}
+                                className="card-link"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                            >
+                                {p.linkLabel}
+                            </a>
+                        )}
                     </div>
                 ))}
             </div>

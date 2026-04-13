@@ -14,6 +14,11 @@ export default function Providers() {
                         <div className="card-eyebrow">{r.tag}</div>
                         <h3 className="card-title">{r.title}</h3>
                         <p className="card-body">{r.body}</p>
+                        {r.href && (
+                            <a href={r.href} className="card-link" target="_blank" rel="noopener noreferrer">
+                                {r.linkLabel}
+                            </a>
+                        )}
                     </div>
                 ))}
             </div>

@@ -1,14 +1,10 @@
 import React, { useEffect, useRef, useState } from 'react';
 import './Nav.css';
 import { useLanguage, LANG_ORDER } from '../i18n';
-import { buildPath, navigate, useRoute } from '../router';
+import { buildPath, navigate, useRoute, SECTION_ROUTES } from '../router';
 
-const SECTION_IDS = ['whitepaper', 'research', 'providers', 'extenders', 'exchanges'];
-
-// The Usage section is rendered separately as the primary CTA, but we
-// still need to track it for active-state highlighting.
-const PRIMARY_ID = 'usage';
-const TRACKED_IDS = [...SECTION_IDS, PRIMARY_ID];
+// Header sections that appear as nav links — each maps to its own page.
+const NAV_SECTIONS = SECTION_ROUTES;
 
 // 24 samples = 24 conceptual "hours" of cost history. The wall-clock
 // sample interval is short so the bar feels alive while the visitor is
@@ -234,26 +230,25 @@ function LanguageSelector() {
  * Nav
  *
  * Fixed top navigation. Contains the URnetwork logo, the brand tagline,
- * anchor links to each section, a language selector, and a single Usage
- * CTA on the far right — a bordered pill that wraps the "Usage" label
- * together with two off-white cost sparklines ($UR/GB and $UR/user).
- * Tapping anywhere inside the pill, including on the sparklines,
- * scrolls to the Usage section.
+ * route links to each section page, a language selector, and a Usage
+ * CTA pill with sparkline cost data on the far right.
+ *
+ * The nav sits below the Disclaimer bar. When the disclaimer is visible
+ * (at the top of the page) the nav shifts down by --nav-height via the
+ * `nav-below-disclaimer` class passed in from the parent.
  */
-export default function Nav({ stats }) {
+export default function Nav({ stats, disclaimerVisible, activeRoute }) {
     const { t, code } = useLanguage();
-    const route = useRoute();
+    const route = activeRoute ? { name: activeRoute, slug: null } : useRoute();
     const onHome = route.name === 'home';
-    const [active, setActive] = useState('whitepaper');
     const [scrolled, setScrolled] = useState(false);
+    const [whitepaperActive, setWhitepaperActive] = useState(false);
     const { series, current } = useCostHistory(stats);
 
     useEffect(() => {
-        // Section spy is only meaningful on the landing page; off-page
-        // routes (docs, api) should display the nav as "scrolled" so the
-        // backdrop stays solid against the explorer body.
         if (!onHome) {
             setScrolled(true);
+            setWhitepaperActive(false);
             return undefined;
         }
 
@@ -264,16 +259,12 @@ export default function Nav({ stats }) {
                 raf = 0;
                 setScrolled(window.scrollY > 8);
 
-                // pick the section whose top is closest to (just below) the nav
-                const probe = 120;
-                let cur = TRACKED_IDS[0];
-                for (const id of TRACKED_IDS) {
-                    const el = document.getElementById(id);
-                    if (!el) continue;
+                // Track when the whitepaper section is in view.
+                const el = document.getElementById('whitepaper');
+                if (el) {
                     const rect = el.getBoundingClientRect();
-                    if (rect.top - probe <= 0) cur = id;
+                    setWhitepaperActive(rect.top - 120 <= 0);
                 }
-                setActive(cur);
             });
         };
         onScroll();
@@ -284,19 +275,22 @@ export default function Nav({ stats }) {
         };
     }, [onHome]);
 
+    /** Navigate to a section route page. */
+    const handleLinkClick = (e, name) => {
+        e.preventDefault();
+        navigate(buildPath({ name, slug: null }, code));
+    };
+
     /**
-     * Click handler for in-page section anchors. When we are already on
-     * the home page we just smooth-scroll to the requested element. When
-     * we are on /docs or /api we navigate to the home route first and
-     * defer the scroll to the next animation frame so the home page has
-     * mounted by the time we look up the element.
+     * Whitepaper lives on the home page — scroll to it. If we are on
+     * another page, navigate home first and defer the scroll.
      */
-    const handleSectionClick = (e, id) => {
+    const handleWhitepaperClick = (e) => {
         e.preventDefault();
         if (!onHome) {
             navigate(buildPath({ name: 'home' }, code));
             requestAnimationFrame(() => {
-                const el = document.getElementById(id);
+                const el = document.getElementById('whitepaper');
                 if (el) {
                     const top = el.getBoundingClientRect().top + window.scrollY - 64;
                     window.scrollTo({ top });
@@ -304,28 +298,29 @@ export default function Nav({ stats }) {
             });
             return;
         }
-        const el = document.getElementById(id);
+        const el = document.getElementById('whitepaper');
         if (!el) return;
         const top = el.getBoundingClientRect().top + window.scrollY - 64;
         window.scrollTo({ top, behavior: 'smooth' });
     };
 
-    const handleDocsClick = (e) => {
-        e.preventDefault();
-        navigate(buildPath({ name: 'docs', slug: null }, code));
-    };
-
     const handleBrandClick = (e) => {
         e.preventDefault();
         if (onHome) {
-            handleSectionClick(e, 'whitepaper');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         } else {
             navigate(buildPath({ name: 'home' }, code));
         }
     };
 
+    const navClass = [
+        'nav',
+        scrolled ? 'nav-scrolled' : '',
+        disclaimerVisible ? 'nav-below-disclaimer' : ''
+    ].filter(Boolean).join(' ');
+
     return (
-        <header className={`nav ${scrolled ? 'nav-scrolled' : ''}`}>
+        <header className={navClass}>
             <div className="nav-inner">
                 <a
                     href={buildPath({ name: 'home' }, code)}
@@ -337,20 +332,27 @@ export default function Nav({ stats }) {
                 </a>
 
                 <nav className="nav-links" aria-label="Primary">
-                    {SECTION_IDS.map(id => (
+                    <a
+                        href={`${buildPath({ name: 'home' }, code)}#whitepaper`}
+                        className={`nav-link ${onHome && whitepaperActive ? 'is-active' : ''}`}
+                        onClick={handleWhitepaperClick}
+                    >
+                        {t.nav.whitepaper}
+                    </a>
+                    {NAV_SECTIONS.map(name => (
                         <a
-                            key={id}
-                            href={`#${id}`}
-                            className={`nav-link ${onHome && active === id ? 'is-active' : ''}`}
-                            onClick={(e) => handleSectionClick(e, id)}
+                            key={name}
+                            href={buildPath({ name, slug: null }, code)}
+                            className={`nav-link ${route.name === name ? 'is-active' : ''}`}
+                            onClick={(e) => handleLinkClick(e, name)}
                         >
-                            {t.nav[id]}
+                            {t.nav[name]}
                         </a>
                     ))}
                     <a
                         href={buildPath({ name: 'docs', slug: null }, code)}
                         className={`nav-link ${route.name === 'docs' || route.name === 'api' ? 'is-active' : ''}`}
-                        onClick={handleDocsClick}
+                        onClick={(e) => handleLinkClick(e, 'docs')}
                     >
                         {t.nav.docs}
                     </a>
@@ -358,10 +360,8 @@ export default function Nav({ stats }) {
 
                 <LanguageSelector />
 
-                <a
-                    href={`#${PRIMARY_ID}`}
-                    className={`nav-cta ${onHome && active === PRIMARY_ID ? 'is-active' : ''}`}
-                    onClick={(e) => handleSectionClick(e, PRIMARY_ID)}
+                <div
+                    className="nav-cta"
                     aria-label={t.nav.ctaAria}
                 >
                     <span className="nav-cta-label">{t.nav.usage}</span>
@@ -381,7 +381,7 @@ export default function Nav({ stats }) {
                             <Sparkline series={series.user} />
                         </div>
                     </div>
-                </a>
+                </div>
             </div>
         </header>
     );

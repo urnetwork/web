@@ -1,6 +1,7 @@
 import React, { useCallback, useState } from 'react';
 import './App.css';
 
+import Disclaimer, { useDisclaimerVisible } from './components/Disclaimer';
 import Nav from './components/Nav';
 import Hero from './components/Hero';
 import StatsPanel from './components/StatsPanel';
@@ -10,8 +11,7 @@ import Whitepaper from './components/sections/Whitepaper';
 import Research from './components/sections/Research';
 import Providers from './components/sections/Providers';
 import Extenders from './components/sections/Extenders';
-import Exchanges from './components/sections/Exchanges';
-import Usage from './components/sections/Usage';
+import Community from './components/sections/Community';
 
 import DocsExplorer from './components/DocsExplorer';
 import ApiExplorer from './components/ApiExplorer';
@@ -28,17 +28,20 @@ const INITIAL_STATS = {
     totalHeldUr: 0
 };
 
+/** Map route names to their section component. */
+const SECTION_COMPONENTS = {
+    research:   Research,
+    providers:  Providers,
+    extenders:  Extenders,
+    community:  Community,
+};
+
 /**
  * App
  *
- * Top-level router. The site has three views:
- *
- *   • home  — the simulation landing page
- *   • docs  — the docs explorer at /docs and /docs/<slug>
- *   • api   — the OpenAPI explorer at /api
- *
- * The route is read from the URL by `useRoute`. Anything that isn't
- * /docs or /api falls through to the landing composition.
+ * Top-level router. Each content section lives at its own path.
+ * The docs and API explorers have their own views. Everything else
+ * falls through to the simulation landing page.
  */
 export default function App() {
     const route = useRoute();
@@ -46,51 +49,61 @@ export default function App() {
     if (route.name === 'docs') return <DocsExplorer />;
     if (route.name === 'api')  return <ApiExplorer />;
 
+    const SectionComponent = SECTION_COMPONENTS[route.name];
+    if (SectionComponent) return <SectionPage Component={SectionComponent} />;
+
     return <HomePage />;
 }
 
 /**
  * HomePage
  *
- * Composes the landing site:
- *
- *   <Nav>             — fixed top navigation
- *   <Hero>            — full-bleed simulation under the nav
- *   <StatsPanel>      — fixed; detaches from the simulation as you scroll,
- *                       docks at the top of the whitepaper section, then
- *                       expands into a sticky ticker bar pinned under the nav
- *   <Whitepaper>      — landing section, declarative facts about the token
- *   <Research>
- *   <Providers>
- *   <Extenders>
- *   <Exchanges>
- *   <Usage>           — primary action; pricing / cost / how to use the network
- *   <Footer>
- *
- * The simulation pushes its derived stats up via `onStats` so the StatsPanel
- * can render them without being parented inside the canvas.
+ * The landing page: simulation hero, protocol ledger stats panel that
+ * morphs as you scroll, and the whitepaper section. The scroll transition
+ * between the simulation and whitepaper is preserved — the StatsPanel
+ * detaches from the hero, docks at the whitepaper section, then expands
+ * into a sticky ticker bar.
  */
 function HomePage() {
     const [stats, setStats] = useState(INITIAL_STATS);
+    const disclaimerVisible = useDisclaimerVisible();
 
-    // Stable callback so URSimulation does not see a new prop each render.
     const handleStats = useCallback((next) => {
         setStats(next);
     }, []);
 
     return (
         <div className="app">
-            <Nav stats={stats} />
+            <Disclaimer visible={disclaimerVisible} />
+            <Nav stats={stats} disclaimerVisible={disclaimerVisible} />
             <Hero onStats={handleStats} />
             <StatsPanel stats={stats} anchorId="whitepaper" />
 
             <main>
                 <Whitepaper />
-                <Research />
-                <Providers />
-                <Extenders />
-                <Exchanges />
-                <Usage />
+            </main>
+
+            <Footer />
+        </div>
+    );
+}
+
+/**
+ * SectionPage
+ *
+ * Wraps a single section component in the shared site chrome:
+ * Disclaimer, Nav, section content, Footer.
+ */
+function SectionPage({ Component }) {
+    const disclaimerVisible = useDisclaimerVisible();
+
+    return (
+        <div className="app">
+            <Disclaimer visible={disclaimerVisible} />
+            <Nav disclaimerVisible={disclaimerVisible} />
+
+            <main className="section-page">
+                <Component />
             </main>
 
             <Footer />

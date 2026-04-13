@@ -1,17 +1,22 @@
 import React from 'react';
 import './Footer.css';
 import { useLanguage, LANG_ORDER, pathForLang } from '../i18n';
+import { buildPath, navigate, SECTION_ROUTES } from '../router';
 
 /**
  * Footer
  *
- * Minimal footer with the brand mark, a couple of links, copyright,
- * a language selector row, and a short disclaimer clarifying that this
- * site is an independent open source utility protocol — not the network
- * operator that sells access.
+ * Minimal footer with the brand mark, section links, external links,
+ * copyright, a language selector row, and a short disclaimer.
+ * Per the sitemap, all sections should be linked in the footer.
  */
 export default function Footer() {
     const { t, code, setLang, langs } = useLanguage();
+
+    const handleSectionClick = (e, name) => {
+        e.preventDefault();
+        navigate(buildPath({ name, slug: null }, code));
+    };
 
     return (
         <footer className="footer">
@@ -24,6 +29,30 @@ export default function Footer() {
 
                     <nav className="footer-links" aria-label="Footer">
                         <a
+                            href={`${buildPath({ name: 'home' }, code)}#whitepaper`}
+                            className="footer-link"
+                            onClick={(e) => handleSectionClick(e, 'home')}
+                        >
+                            {t.nav.whitepaper}
+                        </a>
+                        {SECTION_ROUTES.map(name => (
+                            <a
+                                key={name}
+                                href={buildPath({ name, slug: null }, code)}
+                                className="footer-link"
+                                onClick={(e) => handleSectionClick(e, name)}
+                            >
+                                {t.nav[name]}
+                            </a>
+                        ))}
+                        <a
+                            href={buildPath({ name: 'docs', slug: null }, code)}
+                            className="footer-link"
+                            onClick={(e) => handleSectionClick(e, 'docs')}
+                        >
+                            {t.nav.docs}
+                        </a>
+                        <a
                             href="https://github.com/urnetwork"
                             className="footer-link"
                             target="_blank"
@@ -31,7 +60,9 @@ export default function Footer() {
                         >
                             {t.footer.github}
                         </a>
-                        <a href="#contact" className="footer-link">{t.footer.contact}</a>
+                        <a href="mailto:info@ur.xyz" className="footer-link">
+                            {t.footer.contact}
+                        </a>
                     </nav>
 
                     <div className="footer-meta">
@@ -53,9 +84,6 @@ export default function Footer() {
                     ))}
                 </nav>
 
-                <p className="footer-disclaimer">
-                    {t.footer.disclaimer}
-                </p>
             </div>
         </footer>
     );

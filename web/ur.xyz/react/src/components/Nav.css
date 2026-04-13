@@ -13,7 +13,11 @@
     backdrop-filter: blur(14px);
     -webkit-backdrop-filter: blur(14px);
     border-bottom: 1px solid transparent;
-    transition: background 0.25s ease, border-color 0.25s ease;
+    transition: background 0.25s ease, border-color 0.25s ease, top 0.3s ease;
+}
+
+.nav-below-disclaimer {
+    top: var(--nav-height);
 }
 
 .nav-scrolled {

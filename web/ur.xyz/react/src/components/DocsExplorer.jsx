@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import Explorer from './Explorer';
+import Disclaimer, { useDisclaimerVisible } from './Disclaimer';
 import Nav from './Nav';
 import Footer from './Footer';
 import { Markdown } from '../lib/markdown.jsx';
@@ -26,7 +27,7 @@ const INITIAL_STATS = {
  * placeholder when no slug is selected, otherwise the markdown body of
  * the requested doc.
  */
-export default function DocsExplorer() {
+export default function DocsExplorer({ activeRoute } = {}) {
     const route = useRoute();
     const { code } = useLanguage();
 
@@ -41,9 +42,12 @@ export default function DocsExplorer() {
         }
     }, [route.slug, doc, code]);
 
+    const disclaimerVisible = useDisclaimerVisible();
+
     return (
         <div className="app">
-            <Nav stats={INITIAL_STATS} />
+            <Disclaimer visible={disclaimerVisible} />
+            <Nav stats={INITIAL_STATS} disclaimerVisible={disclaimerVisible} activeRoute={activeRoute} />
             <Explorer kind="docs">
                 {!doc ? <DocsLanding /> : <DocBody doc={doc} />}
             </Explorer>

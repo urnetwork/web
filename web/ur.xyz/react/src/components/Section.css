@@ -112,6 +112,59 @@
 
 .article-body p:last-child { margin-bottom: 0; }
 
+/* --- Article table (e.g. token allocation) --- */
+.article-table-wrap {
+    overflow-x: auto;
+    margin: 0.6em 0 1.4em;
+    -webkit-overflow-scrolling: touch;
+}
+
+.article-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: 'PPNeueMontreal', sans-serif;
+    font-size: 0.82rem;
+    color: var(--brand-ui);
+}
+
+.article-table th {
+    text-align: left;
+    font-weight: 600;
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--brand-white);
+    padding: 8px 14px 8px 0;
+    border-bottom: 1px solid rgba(214, 230, 244, 0.18);
+    white-space: nowrap;
+}
+
+.article-table td {
+    padding: 7px 14px 7px 0;
+    border-bottom: 1px solid rgba(214, 230, 244, 0.06);
+    opacity: 0.9;
+    white-space: nowrap;
+}
+
+.article-table td:first-child {
+    white-space: normal;
+}
+
+/* --- Article list --- */
+.article-list {
+    margin: 0.4em 0 1.4em;
+    padding-left: 1.3em;
+    color: var(--brand-ui);
+    opacity: 0.9;
+}
+
+.article-list li {
+    margin-bottom: 0.5em;
+    line-height: 1.55;
+}
+
+.article-list li:last-child { margin-bottom: 0; }
+
 /* --- Card grid for sections like Providers / Operators --- */
 .card-grid {
     display: grid;
@@ -155,6 +208,21 @@
     opacity: 0.85;
     line-height: 1.55;
     margin: 0;
+}
+
+.card-link {
+    display: inline-block;
+    margin-top: 14px;
+    font-size: 0.78rem;
+    letter-spacing: 0.06em;
+    color: var(--brand-ur);
+    text-decoration: none;
+    border-bottom: 1px solid transparent;
+    transition: border-color 0.2s ease;
+}
+
+.card-link:hover {
+    border-bottom-color: var(--brand-ur);
 }
 
 /* --- Responsive --- */

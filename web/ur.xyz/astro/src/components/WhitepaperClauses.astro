@@ -1,0 +1,41 @@
+---
+/**
+ * Renders the whitepaper article grid with clauses that can contain
+ * strings (paragraphs), tables, and lists — matching the React Whitepaper component.
+ */
+interface Props {
+    clauses: Array<{
+        numeral: string;
+        title: string;
+        body: Array<string | { type: 'table'; head: string[]; rows: string[][] } | { type: 'list'; items: string[] }>;
+    }>;
+}
+
+const { clauses } = Astro.props;
+---
+<div class="article-grid">
+    {clauses.map(c => (
+        <article class="article-clause">
+            <div class="article-numeral">{c.numeral}</div>
+            <div class="article-body">
+                <h3 class="article-title">{c.title}</h3>
+                {c.body.map(b =>
+                    typeof b === 'string' ? (
+                        <p>{b}</p>
+                    ) : b.type === 'table' ? (
+                        <div class="article-table-wrap">
+                            <table class="article-table">
+                                <thead><tr>{b.head.map(h => <th>{h}</th>)}</tr></thead>
+                                <tbody>{b.rows.map(row => <tr>{row.map(cell => <td>{cell}</td>)}</tr>)}</tbody>
+                            </table>
+                        </div>
+                    ) : b.type === 'list' ? (
+                        <ul class="article-list">
+                            {b.items.map(item => <li>{item}</li>)}
+                        </ul>
+                    ) : null
+                )}
+            </div>
+        </article>
+    ))}
+</div>

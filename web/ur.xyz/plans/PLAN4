@@ -1,0 +1,12 @@
+PLAN
+
+I want to deploy the site as statically rendered html pages. I want to maximimize page load speed and SEO. To do this, I want to use the Astro framework to import the react site and render each section as an html page.
+
+STEPS
+
+1. Create a new directory ur-astro and initialize it as a new Astro project. It should import the react component from ur-react.
+2. Each section of the site should be rendered to an html page. This includes the language slugs and the localized pages under each language path.
+3. The connect dialog and interactive components will remain client-side rendered react components embedded within each html page.
+4. Apply all performance and SEO optimizations available in Astro.
+5. Create a Makefile with the build target that renders the site to the build/<env> dir.
+6. We want to build two <env> versions of the site, main and canary. Each will use a different API URL that will be defined in a build config file.

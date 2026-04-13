@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import openapiYaml from 'virtual:ur-openapi';
 import Explorer from './Explorer';
+import Disclaimer, { useDisclaimerVisible } from './Disclaimer';
 import Nav from './Nav';
 import Footer from './Footer';
 import { Markdown } from '../lib/markdown.jsx';
@@ -45,7 +46,7 @@ const INITIAL_STATS = {
 const SPEC = parseYaml(openapiYaml || '');
 const NORMALISED = normalizeOpenApi(SPEC);
 
-export default function ApiExplorer() {
+export default function ApiExplorer({ activeRoute } = {}) {
     const { info, operations, groups, schemas } = NORMALISED;
 
     // Scroll to the requested operation on first mount if the URL has a
@@ -58,9 +59,12 @@ export default function ApiExplorer() {
         }
     }, []);
 
+    const disclaimerVisible = useDisclaimerVisible();
+
     return (
         <div className="app">
-            <Nav stats={INITIAL_STATS} />
+            <Disclaimer visible={disclaimerVisible} />
+            <Nav stats={INITIAL_STATS} disclaimerVisible={disclaimerVisible} activeRoute={activeRoute} />
             <Explorer kind="api" apiGroups={groups} apiOperations={operations}>
                 <header className="explorer-page-header">
                     <span className="explorer-page-eyebrow">API reference</span>

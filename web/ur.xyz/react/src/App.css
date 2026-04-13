@@ -58,6 +58,11 @@ main {
     z-index: 1;
 }
 
+/* Section pages: push content below the fixed nav. */
+.section-page {
+    padding-top: var(--nav-height);
+}
+
 /* The hero is full bleed beneath the fixed nav.
    The nav uses a backdrop-filter so the simulation reads through it. */
 .hero {
