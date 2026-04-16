@@ -1,0 +1,326 @@
+/* Nav.css — fixed top navigation */
+
+.nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: var(--nav-height);
+    z-index: 50;
+    display: flex;
+    align-items: center;
+    background: rgba(16, 16, 16, 0.55);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border-bottom: 1px solid transparent;
+    transition: background 0.25s ease, border-color 0.25s ease, top 0.3s ease;
+}
+
+.nav-below-disclaimer {
+    top: var(--nav-height);
+}
+
+.nav-scrolled {
+    background: rgba(16, 16, 16, 0.85);
+    border-bottom-color: rgba(214, 230, 244, 0.12);
+}
+
+.nav-inner {
+    width: 100%;
+    max-width: 1440px;
+    margin: 0 auto;
+    padding: 0 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 32px;
+}
+
+/* --- Brand --- */
+.nav-brand {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    text-decoration: none;
+    color: inherit;
+    flex: 0 0 auto;
+}
+
+.nav-logo {
+    height: 26px;
+    width: auto;
+    display: block;
+}
+
+.nav-tagline {
+    font-family: 'PPNeueMontreal', sans-serif;
+    font-size: 0.7rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--brand-ui);
+    opacity: 0.75;
+    border-left: 1px solid rgba(214, 230, 244, 0.18);
+    padding-left: 18px;
+    line-height: 1.2;
+}
+
+/* --- Links --- */
+.nav-links {
+    display: flex;
+    align-items: center;
+    gap: 28px;
+}
+
+.nav-link {
+    font-family: 'PPNeueMontreal', sans-serif;
+    font-size: 0.78rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    text-decoration: none;
+    color: var(--brand-ui);
+    opacity: 0.7;
+    padding: 6px 0;
+    position: relative;
+    transition: opacity 0.2s ease, color 0.2s ease;
+    white-space: nowrap;
+}
+
+.nav-link::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 1px;
+    background: var(--brand-ur);
+    transform: scaleX(0);
+    transform-origin: left center;
+    transition: transform 0.25s ease;
+}
+
+.nav-link:hover {
+    opacity: 1;
+    color: var(--brand-white);
+}
+
+.nav-link.is-active {
+    opacity: 1;
+    color: var(--brand-white);
+}
+
+.nav-link.is-active::after {
+    transform: scaleX(1);
+}
+
+/* --- Language selector --- */
+.nav-lang {
+    position: relative;
+    margin-left: 4px;
+    flex: 0 0 auto;
+}
+
+.nav-lang-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: var(--brand-ui);
+    font-family: 'PPNeueMontreal', sans-serif;
+    font-size: 0.78rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    opacity: 0.7;
+    padding: 6px 4px;
+    transition: opacity 0.2s ease, color 0.2s ease;
+}
+
+.nav-lang-toggle:hover,
+.nav-lang-toggle[aria-expanded="true"] {
+    opacity: 1;
+    color: var(--brand-white);
+}
+
+.nav-lang-caret {
+    font-size: 0.6rem;
+    line-height: 1;
+    opacity: 0.8;
+}
+
+.nav-lang-menu {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    margin: 0;
+    padding: 6px;
+    list-style: none;
+    background: rgba(16, 16, 16, 0.96);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border: 1px solid rgba(214, 230, 244, 0.18);
+    border-radius: 10px;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
+    min-width: 156px;
+    z-index: 60;
+}
+
+.nav-lang-menu li {
+    list-style: none;
+}
+
+.nav-lang-item {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    width: 100%;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: var(--brand-ui);
+    font-family: 'PPNeueMontreal', sans-serif;
+    text-align: left;
+    padding: 7px 12px;
+    border-radius: 6px;
+    opacity: 0.75;
+    transition: opacity 0.15s ease, background 0.15s ease, color 0.15s ease;
+}
+
+.nav-lang-item:hover {
+    opacity: 1;
+    background: rgba(214, 230, 244, 0.06);
+    color: var(--brand-white);
+}
+
+.nav-lang-item.is-active {
+    opacity: 1;
+    color: var(--brand-ur);
+}
+
+.nav-lang-item-code {
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+}
+
+.nav-lang-item-name {
+    font-size: 0.7rem;
+    opacity: 0.7;
+}
+
+[dir="rtl"] .nav-lang-menu {
+    right: auto;
+    left: 0;
+}
+
+/* --- Primary CTA (Usage label + sparklines wrapped in one bordered pill) --- */
+.nav-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    padding: 6px 14px;
+    margin-left: 8px;
+    border: 1px solid rgba(214, 230, 244, 0.35);
+    border-radius: 999px;
+    background: transparent;
+    color: var(--brand-white);
+    text-decoration: none;
+    flex: 0 0 auto;
+    transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.nav-cta:hover {
+    border-color: var(--brand-ur);
+    background: rgba(237, 143, 255, 0.06);
+}
+
+.nav-cta.is-active {
+    border-color: var(--brand-ur);
+}
+
+.nav-cta-label {
+    font-family: 'PPNeueMontreal', sans-serif;
+    font-size: 0.78rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--brand-white);
+    white-space: nowrap;
+}
+
+.nav-cta-sparks {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.nav-spark {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 2px;
+    width: 82px;
+    flex: 0 0 82px;
+}
+
+.nav-spark-meta {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 6px;
+    font-family: 'PPNeueMontreal', sans-serif;
+    line-height: 1;
+}
+
+.nav-spark-label {
+    font-size: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--brand-white);
+    opacity: 0.55;
+    white-space: nowrap;
+}
+
+.nav-spark-value {
+    font-family: 'PPNeueBit', monospace;
+    font-size: 0.78rem;
+    color: var(--brand-white);
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+}
+
+.nav-spark-svg {
+    display: block;
+    width: 100%;
+    height: 14px;
+    overflow: visible;
+}
+
+/* --- Responsive --- */
+@media (max-width: 1100px) {
+    .nav-tagline { display: none; }
+    .nav-links { gap: 20px; }
+    .nav-link { font-size: 0.72rem; }
+    .nav-cta { gap: 10px; padding: 6px 12px; }
+    .nav-cta-sparks { gap: 10px; }
+    .nav-spark { width: 76px; flex: 0 0 76px; }
+}
+
+@media (max-width: 900px) {
+    .nav-cta-sparks { display: none; }
+    .nav-cta { padding: 6px 14px; }
+}
+
+@media (max-width: 768px) {
+    .nav-inner { padding: 0 18px; gap: 16px; }
+    .nav-logo { height: 22px; }
+    .nav-links {
+        gap: 14px;
+        overflow-x: auto;
+        scrollbar-width: none;
+    }
+    .nav-links::-webkit-scrollbar { display: none; }
+    .nav-link { font-size: 0.68rem; letter-spacing: 0.06em; }
+    .nav-cta { padding: 5px 12px; margin-left: 2px; }
+    .nav-cta-label { font-size: 0.68rem; letter-spacing: 0.06em; }
+}

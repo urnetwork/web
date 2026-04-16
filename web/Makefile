@@ -34,8 +34,8 @@ build:
 	pandoc -f markdown -t plain ${BRINGYOUR_HOME}/docs/legal/terms.md -o bringyour.com/build/terms.txt
 	pandoc -f markdown -t plain ${BRINGYOUR_HOME}/docs/legal/vdp.md -o bringyour.com/build/vdp.txt
 	# include altstore assets
-	cp -r ../altstore bringyour.com/build/altstore
-	cp -r ${WARP_HOME}/release/apple/stores/altstore/ bringyour.com/build/altstore/
+# 	cp -r ../altstore bringyour.com/build/altstore
+# 	cp -r ${WARP_HOME}/release/apple/stores/altstore/ bringyour.com/build/altstore/
 	(. ${NVM_DIR}/nvm.sh && \
 		nvm use ${NODE_VERSION} && \
 		python ../webgen/webgen.py build ur.network/gen.py)
@@ -46,6 +46,21 @@ build:
 	env GOOS=linux GOARCH=amd64 go build -ldflags "-X main.Version=${WARP_VERSION}" -o build/linux/amd64/
 	env GOOS=darwin GOARCH=arm64 go build -ldflags "-X main.Version=${WARP_VERSION}" -o build/darwin/arm64/
 	env GOOS=darwin GOARCH=amd64 go build -ldflags "-X main.Version=${WARP_VERSION}" -o build/darwin/amd64/
+	$(MAKE) build-preview
+
+build-preview:
+	mkdir -p build
+	(. ${NVM_DIR}/nvm.sh && \
+		nvm use ${NODE_VERSION} && \
+		cd ${BRINGYOUR_HOME}/web/web2/ur.xyz/astro && \
+		make clean build-main && \
+		cp -r build/main ${BRINGYOUR_HOME}/web/web/build/preview.ur.xyz)
+	(. ${NVM_DIR}/nvm.sh && \
+		nvm use ${NODE_VERSION} && \
+		cd ${BRINGYOUR_HOME}/mmm/ur.io/astro && \
+		make clean build-main && \
+		cp -r build/main ${BRINGYOUR_HOME}/web/web/build/preview.ur.io)
+	
 
 warp_build:
 	$(MAKE) all

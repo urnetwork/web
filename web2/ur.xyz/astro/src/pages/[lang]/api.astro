@@ -1,0 +1,15 @@
+---
+import Base from '../../layouts/Base.astro';
+import ApiIsland from '../../islands/ApiIsland.jsx';
+import { NON_EN_LANGS, LANGS } from '../../lib/i18n.js';
+
+export function getStaticPaths() {
+    return NON_EN_LANGS.map(lang => ({ params: { lang } }));
+}
+
+const { lang } = Astro.params;
+const dir = LANGS[lang]?.dir || 'ltr';
+---
+<Base title="API Reference — URnetwork" lang={lang} dir={dir}>
+    <ApiIsland activeRoute="api" client:load />
+</Base>

@@ -1,0 +1,51 @@
+---
+import '@react/components/Footer.css';
+import { LANGS, LANG_CODES, SECTION_ROUTES } from '../lib/i18n.js';
+
+interface Props {
+    t: any;
+    lang: string;
+}
+
+const { t, lang } = Astro.props;
+
+function buildPath(name, l) {
+    const prefix = l && l !== 'en' ? `/${l}` : '';
+    if (name === 'home') return prefix || '/';
+    return `${prefix}/${name}`;
+}
+---
+<footer class="footer">
+    <div class="footer-inner">
+        <div class="footer-row">
+            <div class="footer-brand">
+                <img src="/ur.svg" alt="URnetwork" class="footer-logo" />
+                <span class="footer-tagline">{t.nav.tagline}</span>
+            </div>
+
+            <nav class="footer-links" aria-label="Footer">
+                <a href={buildPath('home', lang) + '#whitepaper'} class="footer-link">{t.nav.whitepaper}</a>
+                {SECTION_ROUTES.map(name => (
+                    <a href={buildPath(name, lang)} class="footer-link">{t.nav[name]}</a>
+                ))}
+                <a href={buildPath('docs', lang)} class="footer-link">{t.nav.docs}</a>
+                <a href="https://github.com/urnetwork" class="footer-link" target="_blank" rel="noopener noreferrer">{t.footer.github}</a>
+                <a href="mailto:info@ur.xyz" class="footer-link">{t.footer.contact}</a>
+            </nav>
+
+            <div class="footer-meta">{t.footer.copyright}</div>
+        </div>
+
+        <nav class="footer-langs" aria-label={t.footer.languagesAria}>
+            {LANG_CODES.map(c => (
+                <a
+                    href={c === 'en' ? '/' : `/${c}`}
+                    lang={c}
+                    class={`footer-lang ${c === lang ? 'is-active' : ''}`}
+                >
+                    {LANGS[c].label}
+                </a>
+            ))}
+        </nav>
+    </div>
+</footer>

@@ -1,0 +1,31 @@
+---
+/**
+ * Renders a card grid from an array of role/paper objects.
+ * Each item: { tag, title, body, href?, linkLabel? }
+ */
+interface Props {
+    items: Array<{
+        tag: string;
+        title: string;
+        body: string;
+        href?: string;
+        linkLabel?: string;
+    }>;
+}
+
+const { items } = Astro.props;
+---
+<div class="card-grid">
+    {items.map(r => (
+        <div class="card">
+            <div class="card-eyebrow">{r.tag}</div>
+            <h3 class="card-title">{r.title}</h3>
+            <p class="card-body">{r.body}</p>
+            {r.href && (
+                <a href={r.href} class="card-link" target="_blank" rel="noopener noreferrer">
+                    {r.linkLabel}
+                </a>
+            )}
+        </div>
+    ))}
+</div>

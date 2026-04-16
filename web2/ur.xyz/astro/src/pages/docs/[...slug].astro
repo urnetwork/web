@@ -1,0 +1,14 @@
+---
+import Base from '../../layouts/Base.astro';
+import DocsIsland from '../../islands/DocsIsland.jsx';
+import { docs } from '@react/lib/docs.js';
+
+export function getStaticPaths() {
+    return docs.map(d => ({
+        params: { slug: d.slug }
+    }));
+}
+---
+<Base title="Docs — URnetwork" description="URnetwork protocol documentation." lang="en">
+    <DocsIsland activeRoute="docs" client:load />
+</Base>

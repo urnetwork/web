@@ -1,0 +1,22 @@
+---
+import Base from '../../../layouts/Base.astro';
+import DocsIsland from '../../../islands/DocsIsland.jsx';
+import { NON_EN_LANGS, LANGS } from '../../../lib/i18n.js';
+import { docs } from '@react/lib/docs.js';
+
+export function getStaticPaths() {
+    const paths = [];
+    for (const lang of NON_EN_LANGS) {
+        for (const d of docs) {
+            paths.push({ params: { lang, slug: d.slug } });
+        }
+    }
+    return paths;
+}
+
+const { lang } = Astro.params;
+const dir = LANGS[lang]?.dir || 'ltr';
+---
+<Base title="Docs — URnetwork" lang={lang} dir={dir}>
+    <DocsIsland activeRoute="docs" client:load />
+</Base>

@@ -1,0 +1,71 @@
+---
+/**
+ * Static disclaimer bar. Visibility is toggled by the scroll listener.
+ * The nav offset is handled by the React Nav island via useDisclaimerVisible().
+ *
+ * Styles are defined here (not imported from the React CSS) so they are
+ * Astro-scoped and identical on every page regardless of which React
+ * island CSS bundles are loaded.
+ */
+---
+<div class="disclaimer" id="disclaimer-bar">
+    <a href="https://ur.io" class="disclaimer-link" target="_blank" rel="noopener noreferrer">
+        This site is an open source utility protocol powered by a
+        community of participants, run separately from the network
+        operator that sells access to the network at https://ur.io.
+    </a>
+</div>
+
+<style is:global>
+    .disclaimer {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: var(--nav-height);
+        z-index: 51;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(16, 16, 16, 0.92);
+        border-bottom: 1px solid rgba(214, 230, 244, 0.08);
+        transition: transform 0.3s ease;
+    }
+    .disclaimer-hidden {
+        transform: translateY(-100%);
+    }
+    .disclaimer-link {
+        font-family: 'PPNeueMontreal', sans-serif;
+        font-size: 0.68rem;
+        letter-spacing: 0.04em;
+        color: var(--brand-ui);
+        opacity: 0.6;
+        text-decoration: none;
+        text-align: center;
+        padding: 0 32px;
+        line-height: 1.4;
+        transition: opacity 0.2s ease;
+    }
+    .disclaimer-link:hover {
+        opacity: 1;
+    }
+    @media (max-width: 768px) {
+        .disclaimer-link {
+            font-size: 0.58rem;
+            padding: 0 18px;
+        }
+    }
+</style>
+
+<script>
+    const bar = document.getElementById('disclaimer-bar');
+    let raf = 0;
+    function update() {
+        raf = 0;
+        if (bar) bar.classList.toggle('disclaimer-hidden', window.scrollY > 8);
+    }
+    update();
+    window.addEventListener('scroll', () => {
+        if (!raf) raf = requestAnimationFrame(update);
+    }, { passive: true });
+</script>

@@ -1,0 +1,25 @@
+---
+import '@react/components/Section.css';
+
+interface Props {
+    id: string;
+    eyebrow?: string;
+    title: string;
+    variant?: string;
+}
+
+const { id, eyebrow, title, variant } = Astro.props;
+const cls = `section ${variant ? `section-${variant}` : ''}`;
+---
+<section id={id} class={cls}>
+    <div class="section-inner">
+        <header class="section-header">
+            {eyebrow && <span class="section-eyebrow">{eyebrow}</span>}
+            <h2 class="section-title">{title}</h2>
+            <div class="section-rule" aria-hidden="true"></div>
+        </header>
+        <div class="section-body">
+            <slot />
+        </div>
+    </div>
+</section>

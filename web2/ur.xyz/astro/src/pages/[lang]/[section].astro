@@ -1,0 +1,47 @@
+---
+import Base from '../../layouts/Base.astro';
+import DisclaimerStatic from '../../components/DisclaimerStatic.astro';
+import NavIsland from '../../islands/NavIsland.jsx';
+import Section from '../../components/Section.astro';
+import CardGrid from '../../components/CardGrid.astro';
+import FooterStatic from '../../components/FooterStatic.astro';
+import { NON_EN_LANGS, LANGS, SECTION_ROUTES, getDict } from '../../lib/i18n.js';
+
+import '@react/components/Nav.css';
+
+export function getStaticPaths() {
+    const paths = [];
+    for (const lang of NON_EN_LANGS) {
+        for (const section of SECTION_ROUTES) {
+            paths.push({ params: { lang, section } });
+        }
+    }
+    return paths;
+}
+
+const { lang, section } = Astro.params;
+const t = await getDict(lang);
+const dir = LANGS[lang]?.dir || 'ltr';
+const sectionData = t[section];
+const items = sectionData.roles || sectionData.items || sectionData.papers || [];
+---
+<Base
+    title={`${sectionData.title} — URnetwork`}
+    description={sectionData.intro}
+    lang={lang}
+    dir={dir}
+>
+    <div class="app">
+        <DisclaimerStatic />
+        <NavIsland activeRoute={section} client:load />
+
+        <main class="section-page">
+            <Section id={section} eyebrow={sectionData.eyebrow} title={sectionData.title}>
+                <p>{sectionData.intro}</p>
+                <CardGrid items={items} />
+            </Section>
+        </main>
+
+        <FooterStatic t={t} lang={lang} />
+    </div>
+</Base>
