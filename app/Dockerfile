@@ -1,4 +1,4 @@
-FROM ubuntu:22.04
+FROM ubuntu:24.04
 # see https://docs.docker.com/develop/develop-images/dockerfile_best-practices/
 
 ARG TARGETPLATFORM
@@ -18,12 +18,10 @@ RUN curl https://nginx.org/keys/nginx_signing.key | gpg --dearmor \
     | tee /usr/share/keyrings/nginx-archive-keyring.gpg > /dev/null
 
 RUN echo "deb [signed-by=/usr/share/keyrings/nginx-archive-keyring.gpg] \
-http://nginx.org/packages/ubuntu `lsb_release -cs` nginx" \
+https://nginx.org/packages/ubuntu `lsb_release -cs` nginx" \
     | tee /etc/apt/sources.list.d/nginx.list
 
-RUN apt-get update && apt-get install -y \
-	nginx \
-	openssl
+RUN apt-get update && apt-get install -y nginx
 
 # RUN rm -rf /var/lib/apt/sources.list.d/*
 
