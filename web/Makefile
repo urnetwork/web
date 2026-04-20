@@ -57,9 +57,11 @@ build-preview:
 		cp -r build/main ${BRINGYOUR_HOME}/web/web/build/preview.ur.xyz)
 	(. ${NVM_DIR}/nvm.sh && \
 		nvm use ${NODE_VERSION} && \
-		cd ${BRINGYOUR_HOME}/mmm/ur.io/astro && \
-		make clean build-main && \
-		cp -r build/main ${BRINGYOUR_HOME}/web/web/build/preview.ur.io)
+		if [[ -e "${WARP_HOME}/mmm" ]]; then \
+			cd ${WARP_HOME}/mmm/ur.io/astro && \
+			make clean build-main && \
+			cp -r build/main ${WARP_HOME}/web/web/build/preview.ur.io; \
+		fi)
 	
 
 warp_build:
