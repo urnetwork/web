@@ -37,10 +37,19 @@ export function useDisclaimerVisible() {
  * stay in sync with the disclaimer's position.
  */
 export default function Disclaimer({ visible }) {
+    const [href, setHref] = useState('https://ur.io');
+
+    useEffect(() => {
+        const host = window.location.hostname;
+        if (host === 'preview.ur.xyz' || host === 'localhost') {
+            setHref('https://preview.ur.io');
+        }
+    }, []);
+
     return (
         <div className={`disclaimer ${visible ? '' : 'disclaimer-hidden'}`}>
             <a
-                href="https://ur.io"
+                href={href}
                 className="disclaimer-link"
                 target="_blank"
                 rel="noopener noreferrer"

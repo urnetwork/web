@@ -50,6 +50,19 @@ http {
             alias /srv/warp/status/status.json;
             add_header 'Content-Type' 'application/json';
         }
+    }
+
+    # this is the default domain so it must have the /status route
+    server {
+        listen 80;
+        server_name bringyour.com *.bringyour.com;
+
+        absolute_redirect off;
+
+        location =/status {
+            alias /srv/warp/status/status.json;
+            add_header 'Content-Type' 'application/json';
+        }
         location / {
             try_files $uri $uri.html $uri/ $uri/index.html =404;
             alias /www/bringyour.com/;
@@ -59,30 +72,14 @@ http {
             add_header 'Last-Modified' '{{ http_last_modified }}';
             add_header 'ETag' '"{{ http_etag }}"';
         }
-        location =/discord {
-            return 307 https://discord.gg/RUNZXMwPRK;
-        }
-        location =/roadmap {
-            return 307 https://github.com/bringyour/product/discussions/2;
-        }
-        location =/install {
-            return 307 https://play.google.com/store/apps/details?id=com.bringyour.network;
-        }
-        location =/whitepaper {
-            return 307 https://github.com/bringyour/product/blob/main/archive/whitepaper.md;
-        }
     }
 
     server {
         listen 80;
-        server_name ur.network *.ur.network;
+        server_name ur.network;
 
         absolute_redirect off;
 
-        location =/status {
-            alias /srv/warp/status/status.json;
-            add_header 'Content-Type' 'application/json';
-        }
         location / {
             try_files $uri $uri.html $uri/ $uri/index.html =404;
             alias /www/ur.network/;
@@ -96,17 +93,47 @@ http {
 
     server {
         listen 80;
-        server_name ur.xyz *.ur.xyz;
+        server_name ur.xyz;
 
         absolute_redirect off;
 
-        location =/status {
-            alias /srv/warp/status/status.json;
-            add_header 'Content-Type' 'application/json';
-        }
         location / {
             try_files $uri $uri.html $uri/ $uri/index.html =404;
             alias /www/ur.xyz/;
+
+            # always check for updates in the background
+            add_header 'Cache-Control' 'max-age=0, stale-while-revalidate=86400';
+            add_header 'Last-Modified' '{{ http_last_modified }}';
+            add_header 'ETag' '"{{ http_etag }}"';
+        }
+    }
+
+    server {
+        listen 80;
+        server_name preview.ur.io;
+
+        absolute_redirect off;
+
+        location / {
+            try_files $uri $uri.html $uri/ $uri/index.html =404;
+            alias /www/preview.ur.io/;
+
+            # always check for updates in the background
+            add_header 'Cache-Control' 'max-age=0, stale-while-revalidate=86400';
+            add_header 'Last-Modified' '{{ http_last_modified }}';
+            add_header 'ETag' '"{{ http_etag }}"';
+        }
+    }
+
+    server {
+        listen 80;
+        server_name preview.ur.xyz;
+
+        absolute_redirect off;
+
+        location / {
+            try_files $uri $uri.html $uri/ $uri/index.html =404;
+            alias /www/preview.ur.xyz/;
 
             # always check for updates in the background
             add_header 'Cache-Control' 'max-age=0, stale-while-revalidate=86400';

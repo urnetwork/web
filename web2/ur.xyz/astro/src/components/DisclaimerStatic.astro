@@ -24,9 +24,6 @@
         right: 0;
         height: var(--nav-height);
         z-index: 51;
-        display: flex;
-        align-items: center;
-        justify-content: center;
         background: rgba(16, 16, 16, 0.92);
         border-bottom: 1px solid rgba(214, 230, 244, 0.08);
         transition: transform 0.3s ease;
@@ -35,6 +32,12 @@
         transform: translateY(-100%);
     }
     .disclaimer-link {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        height: 100%;
+        box-sizing: border-box;
         font-family: 'PPNeueMontreal', sans-serif;
         font-size: 0.68rem;
         letter-spacing: 0.04em;
@@ -44,10 +47,11 @@
         text-align: center;
         padding: 0 32px;
         line-height: 1.4;
-        transition: opacity 0.2s ease;
+        transition: opacity 0.2s ease, background-color 0.2s ease;
     }
     .disclaimer-link:hover {
         opacity: 1;
+        background: rgba(214, 230, 244, 0.06);
     }
     @media (max-width: 768px) {
         .disclaimer-link {
@@ -59,6 +63,11 @@
 
 <script>
     const bar = document.getElementById('disclaimer-bar');
+    const link = bar && bar.querySelector('.disclaimer-link');
+    const host = window.location.hostname;
+    if (link && (host === 'preview.ur.xyz' || host === 'localhost')) {
+        link.setAttribute('href', 'https://preview.ur.io');
+    }
     let raf = 0;
     function update() {
         raf = 0;
