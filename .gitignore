@@ -6,3 +6,4 @@
 app/app
 web/web
 /venv
+**/node_modules
