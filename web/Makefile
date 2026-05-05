@@ -60,7 +60,7 @@ build-preview:
 		if [[ -e "${WARP_HOME}/mmm" ]]; then \
 			cd ${WARP_HOME}/mmm/ur.io/astro && \
 			make clean build-main && \
-			cp -r build/main ${WARP_HOME}/web/web/build/preview.ur.io; \
+			cp -r build/main ${BRINGYOUR_HOME}/web/web/build/preview.ur.io; \
 		fi)
 	
 
