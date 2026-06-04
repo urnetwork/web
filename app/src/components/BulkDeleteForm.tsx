@@ -1,7 +1,7 @@
-import React, { useRef, useState } from "react";
+import React, { useState } from "react";
 import { Trash2, AlertTriangle, Clock, Users } from "lucide-react";
 import { useAuth } from '../hooks/useAuth';
-import { removeClient } from "../services/api";
+import { removeClient, removeClients } from "../services/api";
 import type { Client } from "../services/api";
 import toast from "react-hot-toast";
 import ConfirmModal from "./ConfirmModal";
@@ -19,11 +19,6 @@ const BulkDeleteForm: React.FC<BulkDeleteFormProps> = ({
   const [selectedDays, setSelectedDays] = useState<number>(7);
   const [isDeleting, setIsDeleting] = useState(false);
   const [showModal, setShowModal] = useState(false);
-  const [deleteProgress, setDeleteProgress] = useState({
-    current: 0,
-    total: 0,
-  });
-  const abortControllerRef = useRef<AbortController | null>(null);
 
   // Calculate which clients would be deleted
   const getClientsToDelete = (days: number) => {
@@ -47,84 +42,25 @@ const BulkDeleteForm: React.FC<BulkDeleteFormProps> = ({
     if (!token || clientsToDelete.length === 0) return;
 
     setIsDeleting(true);
-    setDeleteProgress({ current: 0, total: clientsToDelete.length });
 
-    const deletedClientIds: string[] = [];
-    const failedClients: string[] = [];
-    let aborted = false;
-
-    // Create abort controller once for the entire operation
-    const abortController = new AbortController();
-    abortControllerRef.current = abortController;
+    const clientIds = clientsToDelete.map(c => c.client_id);
 
     try {
-      for (let i = 0; i < clientsToDelete.length; i++) {
-        // Check if operation was canceled before processing next client
-        if (abortController.signal.aborted) {
-          aborted = true;
-          break;
-        }
+      const response = await removeClients(token, clientIds);
 
-        const client = clientsToDelete[i];
-        setDeleteProgress({ current: i + 1, total: clientsToDelete.length });
-
-        try {
-          const response = await removeClient(
-            token,
-            client.client_id,
-            abortController.signal
-          );
-
-          if (response.error) {
-            if (response.error.isAborted) {
-              console.log("Aborted");
-              aborted = true;
-              break;
-            }
-
-            failedClients.push(client.client_id);
-            console.error(
-              `Failed to delete client ${client.client_id}:`,
-              response.error.message
-            );
-          } else {
-            deletedClientIds.push(client.client_id);
-          }
-        } catch (error) {
-          failedClients.push(client.client_id);
-          console.error(`Error deleting client ${client.client_id}:`, error);
-        }
-
-        // Add a small delay to avoid overwhelming the API
-        if (i < clientsToDelete.length - 1) {
-          await new Promise((resolve) => setTimeout(resolve, 100));
-        }
-      }
-
-      if (aborted) {
-        onClientsRemoved(deletedClientIds);
-        toast.success(
-          `Operation canceled. Removed ${deletedClientIds.length} offline clients successfully, ${failedClients.length} failed`
-        );
-      }
-
-      // Update the UI with successfully deleted clients
-      else if (deletedClientIds.length > 0) {
-        onClientsRemoved(deletedClientIds);
-        toast.success(
-          `Successfully removed ${deletedClientIds.length} offline clients`
-        );
-      } else if (failedClients.length > 0) {
-        toast.error(`Failed to remove ${failedClients.length} clients`);
+      if (response.error) {
+        toast.error("Bulk delete operation failed: " + response.error.message);
+        console.error("Failed to delete clients:", response.error.message);
+      } else {
+        onClientsRemoved(clientIds);
+        toast.success(`Successfully removed ${clientIds.length} offline clients`);
       }
     } catch (error) {
       toast.error("Bulk delete operation failed");
       console.error("Bulk delete error:", error);
     } finally {
-      abortControllerRef.current = null;
       setIsDeleting(false);
       setShowModal(false);
-      setDeleteProgress({ current: 0, total: 0 });
     }
   };
 
@@ -191,7 +127,7 @@ const BulkDeleteForm: React.FC<BulkDeleteFormProps> = ({
                 removed
               </li>
               <li>
-                Each deletion is processed individually with error handling
+                Deletions are processed together as a single atomic operation
               </li>
             </ul>
           </div>
@@ -321,7 +257,7 @@ const BulkDeleteForm: React.FC<BulkDeleteFormProps> = ({
                     d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                   ></path>
                 </svg>
-                Deleting... ({deleteProgress.current}/{deleteProgress.total})
+                Deleting...
               </>
             ) : (
               <>
@@ -344,9 +280,7 @@ const BulkDeleteForm: React.FC<BulkDeleteFormProps> = ({
       <ConfirmModal
         isOpen={showModal}
         onClose={() => {
-          if (isDeleting) {
-            abortControllerRef.current?.abort();
-          } else {
+          if (!isDeleting) {
             setShowModal(false);
           }
         }}
@@ -373,7 +307,7 @@ const BulkDeleteForm: React.FC<BulkDeleteFormProps> = ({
                 • Permanently remove {clientsToDelete.length} clients from your
                 network
               </li>
-              <li>• Process deletions one by one (may take a few minutes)</li>
+              <li>• Process deletions instantly</li>
               <li>• Skip any connected clients automatically</li>
               <li>• Cannot be undone once completed</li>
             </ul>
@@ -388,26 +322,7 @@ const BulkDeleteForm: React.FC<BulkDeleteFormProps> = ({
             </p>
           </div>
 
-          {isDeleting && (
-            <div className="bg-gray-800 p-3 rounded-lg border border-gray-600">
-              <div className="flex items-center justify-between text-sm text-gray-300 mb-2">
-                <span>Progress</span>
-                <span>
-                  {deleteProgress.current} / {deleteProgress.total}
-                </span>
-              </div>
-              <div className="w-full bg-gray-700 rounded-full h-2">
-                <div
-                  className="bg-red-600 h-2 rounded-full transition-all duration-300"
-                  style={{
-                    width: `${
-                      (deleteProgress.current / deleteProgress.total) * 100
-                    }%`,
-                  }}
-                ></div>
-              </div>
-            </div>
-          )}
+
         </div>
       </ConfirmModal>
     </>

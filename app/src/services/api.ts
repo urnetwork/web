@@ -323,6 +323,54 @@ export const removeClient = async (
   }
 };
 
+export const removeClients = async (
+  token: string,
+  clientIds: string[],
+  abortSignal?: AbortSignal
+): Promise<RemoveClientResponse> => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/network/remove-clients`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        client_ids: clientIds,
+      }),
+      signal: abortSignal,
+    });
+
+    if (!response.ok) {
+      console.error(
+        "Remove clients failed:",
+        response.status,
+        response.statusText
+      );
+      const errorData = await response.text();
+      console.error("Error response:", errorData);
+
+      return {
+        error: {
+          message: `HTTP error! status: ${response.status}`,
+          isAborted: false,
+        },
+      };
+    }
+
+    return await safeJsonParse<RemoveClientResponse>(response);
+  } catch (error) {
+    console.error("Remove clients error:", error);
+    return {
+      error: {
+        message:
+          error instanceof Error ? error.message : "Failed to remove clients",
+        isAborted: error instanceof Error && error.name === "AbortError",
+      },
+    };
+  }
+};
+
 /**
  * Get provider statistics for the network
  * @param token - JWT authentication token
