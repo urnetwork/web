@@ -37,6 +37,17 @@ import type {
   SubscriptionBalanceResponse,
   AuthClientRequest,
   AuthClientResponse,
+  WalletAuthPayload,
+  WalletLoginResponse,
+  NetworkCreateRequest,
+  NetworkCreateResponse,
+  NetworkCheckResponse,
+  VerifySendResponse,
+  VerifyResponse,
+  CreateApiKeyResult,
+  GetApiKeysResult,
+  DeleteApiKeyResult,
+  ApiKeyMetadata,
 } from "./types";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE ?? "https://api.bringyour.com";
@@ -160,6 +171,49 @@ export const loginWithPassword = async (
           error instanceof Error
             ? error.message
             : "Password authentication failed",
+      },
+    };
+  }
+};
+
+/**
+ * Wallet-based login using Solana signature verification
+ * @param payload - Wallet address, signed message, and signature
+ * @returns WalletLoginResponse with network JWT or error
+ */
+export const loginWithWallet = async (
+  payload: WalletAuthPayload
+): Promise<WalletLoginResponse> => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/auth/login`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        wallet_auth: payload,
+      }),
+    });
+
+    if (!response.ok) {
+      console.error("Wallet login failed:", response.status, response.statusText);
+      const errorData = await response.text();
+      console.error("Error response:", errorData);
+
+      return {
+        error: {
+          message: `HTTP error! status: ${response.status}`,
+        },
+      };
+    }
+
+    return await safeJsonParse<WalletLoginResponse>(response);
+  } catch (error) {
+    console.error("Wallet login error:", error);
+    return {
+      error: {
+        message:
+          error instanceof Error ? error.message : "Wallet authentication failed",
       },
     };
   }
@@ -1072,6 +1126,272 @@ export const createAuthClient = async (
   }
 };
 
+interface NetworkDeleteResponse {
+  error?: {
+    message: string;
+  };
+}
+
+export const deleteNetwork = async (
+  token: string
+): Promise<NetworkDeleteResponse> => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/auth/network-delete`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (!response.ok) {
+      return {
+        error: {
+          message: `HTTP error! status: ${response.status}`,
+        },
+      };
+    }
+
+    return {};
+  } catch (error) {
+    console.error("Network delete error:", error);
+    return {
+      error: {
+        message:
+          error instanceof Error ? error.message : "Failed to delete account",
+      },
+    };
+  }
+};
+
+export const createNetwork = async (
+  request: NetworkCreateRequest
+): Promise<NetworkCreateResponse> => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/auth/network-create`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(request),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.text();
+      console.error("Create network error response:", errorData);
+      return {
+        error: {
+          message: `HTTP error! status: ${response.status}`,
+        },
+      };
+    }
+
+    return await safeJsonParse<NetworkCreateResponse>(response);
+  } catch (error) {
+    console.error("Create network error:", error);
+    return {
+      error: {
+        message:
+          error instanceof Error ? error.message : "Failed to create account",
+      },
+    };
+  }
+};
+
+export const checkNetworkName = async (
+  networkName: string
+): Promise<NetworkCheckResponse> => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/auth/network-check`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ network_name: networkName }),
+    });
+
+    if (!response.ok) {
+      return { available: false };
+    }
+
+    return await safeJsonParse<NetworkCheckResponse>(response);
+  } catch (error) {
+    console.error("Check network name error:", error);
+    return { available: false };
+  }
+};
+
+export const sendVerificationCode = async (
+  userAuth: string
+): Promise<VerifySendResponse> => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/auth/verify-send`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ user_auth: userAuth }),
+    });
+
+    if (!response.ok) {
+      return {
+        error: {
+          message: `HTTP error! status: ${response.status}`,
+        },
+      };
+    }
+
+    return await safeJsonParse<VerifySendResponse>(response);
+  } catch (error) {
+    console.error("Send verification code error:", error);
+    return {
+      error: {
+        message:
+          error instanceof Error
+            ? error.message
+            : "Failed to send verification code",
+      },
+    };
+  }
+};
+
+export const verifyCode = async (
+  userAuth: string,
+  verifyCode: string
+): Promise<VerifyResponse> => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/auth/verify`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ user_auth: userAuth, verify_code: verifyCode }),
+    });
+
+    if (!response.ok) {
+      return {
+        error: {
+          message: `HTTP error! status: ${response.status}`,
+        },
+      };
+    }
+
+    return await safeJsonParse<VerifyResponse>(response);
+  } catch (error) {
+    console.error("Verify code error:", error);
+    return {
+      error: {
+        message:
+          error instanceof Error ? error.message : "Failed to verify code",
+      },
+    };
+  }
+};
+
+export const createApiKey = async (
+  token: string,
+  name: string
+): Promise<CreateApiKeyResult> => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/account/api-key`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ name }),
+    });
+
+    if (!response.ok) {
+      return {
+        error: {
+          message: `HTTP error! status: ${response.status}`,
+        },
+      };
+    }
+
+    return await safeJsonParse<CreateApiKeyResult>(response);
+  } catch (error) {
+    return {
+      error: {
+        message:
+          error instanceof Error ? error.message : "Failed to create API key",
+      },
+    };
+  }
+};
+
+export const fetchApiKeys = async (
+  token: string
+): Promise<GetApiKeysResult> => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/account/api-keys`, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: "application/json",
+      },
+    });
+
+    if (!response.ok) {
+      return {
+        api_keys: [],
+        error: {
+          message: `HTTP error! status: ${response.status}`,
+        },
+      };
+    }
+
+    const data = await safeJsonParse<GetApiKeysResult>(response);
+
+    return {
+      api_keys: Array.isArray(data.api_keys) ? data.api_keys : [],
+      error: data.error,
+    };
+  } catch (error) {
+    return {
+      api_keys: [],
+      error: {
+        message:
+          error instanceof Error ? error.message : "Failed to fetch API keys",
+      },
+    };
+  }
+};
+
+export const deleteApiKey = async (
+  token: string,
+  apiKeyId: string
+): Promise<DeleteApiKeyResult> => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/account/api-key/remove`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ id: apiKeyId }),
+    });
+
+    if (!response.ok) {
+      return {
+        error: {
+          message: `HTTP error! status: ${response.status}`,
+        },
+      };
+    }
+
+    return await safeJsonParse<DeleteApiKeyResult>(response);
+  } catch (error) {
+    return {
+      error: {
+        message:
+          error instanceof Error ? error.message : "Failed to delete API key",
+      },
+    };
+  }
+};
+
 // Export types for convenience
 export type {
   AuthResponse,
@@ -1102,4 +1422,15 @@ export type {
   NetworkReliabilityResponse,
   AuthClientRequest,
   AuthClientResponse,
+  WalletAuthPayload,
+  WalletLoginResponse,
+  NetworkCreateRequest,
+  NetworkCreateResponse,
+  NetworkCheckResponse,
+  VerifySendResponse,
+  VerifyResponse,
+  CreateApiKeyResult,
+  GetApiKeysResult,
+  DeleteApiKeyResult,
+  ApiKeyMetadata,
 };

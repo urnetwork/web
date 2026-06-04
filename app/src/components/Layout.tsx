@@ -13,6 +13,7 @@ import { useViewportType, ViewportType } from "../hooks/useViewportType";
 import { useAuth } from "../hooks/useAuth";
 import { useAutoLogin } from "../hooks/useAutoLogin";
 import BalanceCodesSection from "./BalanceCodesSection";
+import ApiKeysSection from "./ApiKeysSection";
 
 const Layout: React.FC = () => {
 	type TabType =
@@ -53,7 +54,7 @@ const Layout: React.FC = () => {
 		if (path === "/leaderboard") return "leaderboard";
 		if (path === "/providers") return "providers";
 		if (path === "/wallet-stats") return "wallet-stats";
-		if (path === "/account") return "account";
+		if (path.startsWith("/account")) return "account";
 		if (path === "/balance-codes") return "balance-codes";
 		return "clients"; // default
 	};
@@ -260,6 +261,10 @@ const Layout: React.FC = () => {
 								<Route
 									path="/account"
 									element={<AccountSettingsSection />}
+								/>
+								<Route
+									path="/account/api-keys"
+									element={<ApiKeysSection />}
 								/>
 								<Route
 									path="/balance-codes"

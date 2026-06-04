@@ -1,5 +1,5 @@
 import React, { useRef, useState } from "react";
-import { Trash2, AlertTriangle, Clock, Users } from "lucide-react";
+import { Trash2, AlertTriangle, Clock, Users, Zap } from "lucide-react";
 import { useAuth } from '../hooks/useAuth';
 import { removeClient } from "../services/api";
 import type { Client } from "../services/api";
@@ -11,12 +11,23 @@ interface BulkDeleteFormProps {
   onClientsRemoved: (clientIds: string[]) => void;
 }
 
+const MIN_RATE = 1;
+const MAX_RATE = 50;
+
+const formatEstimatedTime = (seconds: number): string => {
+  if (seconds < 60) return `~${seconds}s`;
+  const mins = Math.floor(seconds / 60);
+  const secs = seconds % 60;
+  return secs > 0 ? `~${mins}m ${secs}s` : `~${mins}m`;
+};
+
 const BulkDeleteForm: React.FC<BulkDeleteFormProps> = ({
   clients,
   onClientsRemoved,
 }) => {
   const { token } = useAuth();
   const [selectedDays, setSelectedDays] = useState<number>(7);
+  const [deletionsPerSecond, setDeletionsPerSecond] = useState<number>(10);
   const [isDeleting, setIsDeleting] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [deleteProgress, setDeleteProgress] = useState({
@@ -25,23 +36,26 @@ const BulkDeleteForm: React.FC<BulkDeleteFormProps> = ({
   });
   const abortControllerRef = useRef<AbortController | null>(null);
 
-  // Calculate which clients would be deleted
   const getClientsToDelete = (days: number) => {
     const cutoffDate = new Date();
     cutoffDate.setDate(cutoffDate.getDate() - days);
 
     return clients.filter((client) => {
-      // Never delete connected clients
       const isConnected = client.connections && client.connections.length > 0;
       if (isConnected) return false;
-
-      // Check if client is offline for the specified number of days
       const authTime = new Date(client.auth_time);
       return authTime < cutoffDate;
     });
   };
 
   const clientsToDelete = getClientsToDelete(selectedDays);
+  const estimatedSeconds = Math.ceil(clientsToDelete.length / deletionsPerSecond);
+
+  const handleRateChange = (raw: string) => {
+    const parsed = parseInt(raw, 10);
+    if (isNaN(parsed)) return;
+    setDeletionsPerSecond(Math.min(MAX_RATE, Math.max(MIN_RATE, parsed)));
+  };
 
   const handleBulkDelete = async () => {
     if (!token || clientsToDelete.length === 0) return;
@@ -53,51 +67,54 @@ const BulkDeleteForm: React.FC<BulkDeleteFormProps> = ({
     const failedClients: string[] = [];
     let aborted = false;
 
-    // Create abort controller once for the entire operation
     const abortController = new AbortController();
     abortControllerRef.current = abortController;
 
     try {
-      for (let i = 0; i < clientsToDelete.length; i++) {
-        // Check if operation was canceled before processing next client
+      const batchSize = deletionsPerSecond;
+
+      for (let i = 0; i < clientsToDelete.length; i += batchSize) {
         if (abortController.signal.aborted) {
           aborted = true;
           break;
         }
 
-        const client = clientsToDelete[i];
-        setDeleteProgress({ current: i + 1, total: clientsToDelete.length });
+        const batch = clientsToDelete.slice(i, i + batchSize);
 
-        try {
-          const response = await removeClient(
-            token,
-            client.client_id,
-            abortController.signal
-          );
+        const results = await Promise.allSettled(
+          batch.map((client) =>
+            removeClient(token, client.client_id, abortController.signal)
+          )
+        );
 
-          if (response.error) {
-            if (response.error.isAborted) {
-              console.log("Aborted");
-              aborted = true;
-              break;
+        for (let j = 0; j < results.length; j++) {
+          const result = results[j];
+          const client = batch[j];
+
+          if (result.status === "fulfilled") {
+            if (result.value.error) {
+              if (result.value.error.isAborted) {
+                aborted = true;
+              } else {
+                failedClients.push(client.client_id);
+              }
+            } else {
+              deletedClientIds.push(client.client_id);
             }
-
-            failedClients.push(client.client_id);
-            console.error(
-              `Failed to delete client ${client.client_id}:`,
-              response.error.message
-            );
           } else {
-            deletedClientIds.push(client.client_id);
+            failedClients.push(client.client_id);
           }
-        } catch (error) {
-          failedClients.push(client.client_id);
-          console.error(`Error deleting client ${client.client_id}:`, error);
         }
 
-        // Add a small delay to avoid overwhelming the API
-        if (i < clientsToDelete.length - 1) {
-          await new Promise((resolve) => setTimeout(resolve, 100));
+        setDeleteProgress({
+          current: Math.min(i + batchSize, clientsToDelete.length),
+          total: clientsToDelete.length,
+        });
+
+        if (aborted) break;
+
+        if (i + batchSize < clientsToDelete.length) {
+          await new Promise((resolve) => setTimeout(resolve, 1000));
         }
       }
 
@@ -106,10 +123,7 @@ const BulkDeleteForm: React.FC<BulkDeleteFormProps> = ({
         toast.success(
           `Operation canceled. Removed ${deletedClientIds.length} offline clients successfully, ${failedClients.length} failed`
         );
-      }
-
-      // Update the UI with successfully deleted clients
-      else if (deletedClientIds.length > 0) {
+      } else if (deletedClientIds.length > 0) {
         onClientsRemoved(deletedClientIds);
         toast.success(
           `Successfully removed ${deletedClientIds.length} offline clients`
@@ -167,6 +181,8 @@ const BulkDeleteForm: React.FC<BulkDeleteFormProps> = ({
       description: "Remove clients offline for more than 30 days",
     },
   ];
+
+  const ratePercent = ((deletionsPerSecond - MIN_RATE) / (MAX_RATE - MIN_RATE)) * 100;
 
   return (
     <>
@@ -228,6 +244,63 @@ const BulkDeleteForm: React.FC<BulkDeleteFormProps> = ({
                 </label>
               ))}
             </div>
+          </div>
+
+          <div className="bg-gray-900 p-4 rounded-lg border border-gray-700">
+            <h4 className="text-sm font-medium text-gray-200 mb-4 flex items-center gap-2">
+              <Zap size={16} className="text-amber-400" />
+              Deletion Speed
+            </h4>
+
+            <div className="flex items-center gap-4 mb-3">
+              <div className="flex-1 relative">
+                <div
+                  className="absolute top-1/2 -translate-y-1/2 left-0 h-1.5 rounded-full bg-amber-500 pointer-events-none"
+                  style={{ width: `${ratePercent}%` }}
+                />
+                <input
+                  type="range"
+                  min={MIN_RATE}
+                  max={MAX_RATE}
+                  step={1}
+                  value={deletionsPerSecond}
+                  onChange={(e) => handleRateChange(e.target.value)}
+                  disabled={isDeleting}
+                  className="w-full h-1.5 rounded-full appearance-none bg-gray-700 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-amber-400 [&::-webkit-slider-thumb]:cursor-pointer [&::-moz-range-thumb]:h-4 [&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-amber-400 [&::-moz-range-thumb]:border-0 [&::-moz-range-thumb]:cursor-pointer"
+                />
+              </div>
+              <div className="flex items-center gap-1.5 shrink-0">
+                <input
+                  type="number"
+                  min={MIN_RATE}
+                  max={MAX_RATE}
+                  value={deletionsPerSecond}
+                  onChange={(e) => handleRateChange(e.target.value)}
+                  disabled={isDeleting}
+                  className="w-16 px-2 py-1 text-sm text-center bg-gray-800 border border-gray-600 rounded text-white focus:outline-none focus:border-amber-500 disabled:opacity-50 disabled:cursor-not-allowed [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                />
+                <span className="text-xs text-gray-400 whitespace-nowrap">/s</span>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between text-xs">
+              <span className="text-gray-500">{MIN_RATE}/s</span>
+              <span className="text-amber-400 font-medium">
+                {deletionsPerSecond} deletions / second
+                {clientsToDelete.length > 0 && (
+                  <span className="text-gray-400 font-normal ml-2">
+                    &mdash; est. {formatEstimatedTime(estimatedSeconds)}
+                  </span>
+                )}
+              </span>
+              <span className="text-gray-500">{MAX_RATE}/s</span>
+            </div>
+
+            {deletionsPerSecond > 20 && (
+              <p className="mt-3 text-xs text-amber-300/70">
+                High rates send many simultaneous requests. The API may rate-limit at very high speeds.
+              </p>
+            )}
           </div>
 
           <div className="bg-gray-900 p-4 rounded-lg border border-gray-700">
@@ -366,16 +439,18 @@ const BulkDeleteForm: React.FC<BulkDeleteFormProps> = ({
 
           <div className="bg-red-900/50 p-3 rounded-lg border border-red-700">
             <p className="text-sm text-red-300 font-medium mb-2">
-              ⚠️ This action will:
+              This action will:
             </p>
             <ul className="text-sm text-red-200 space-y-1">
               <li>
-                • Permanently remove {clientsToDelete.length} clients from your
+                Permanently remove {clientsToDelete.length} clients from your
                 network
               </li>
-              <li>• Process deletions one by one (may take a few minutes)</li>
-              <li>• Skip any connected clients automatically</li>
-              <li>• Cannot be undone once completed</li>
+              <li>
+                Process {deletionsPerSecond} deletions per second in parallel &mdash; est. {formatEstimatedTime(estimatedSeconds)}
+              </li>
+              <li>Skip any connected clients automatically</li>
+              <li>Cannot be undone once completed</li>
             </ul>
           </div>
 
@@ -392,8 +467,9 @@ const BulkDeleteForm: React.FC<BulkDeleteFormProps> = ({
             <div className="bg-gray-800 p-3 rounded-lg border border-gray-600">
               <div className="flex items-center justify-between text-sm text-gray-300 mb-2">
                 <span>Progress</span>
-                <span>
-                  {deleteProgress.current} / {deleteProgress.total}
+                <span className="flex items-center gap-2">
+                  <span className="text-xs text-amber-400">{deletionsPerSecond}/s</span>
+                  <span>{deleteProgress.current} / {deleteProgress.total}</span>
                 </span>
               </div>
               <div className="w-full bg-gray-700 rounded-full h-2">
@@ -401,7 +477,9 @@ const BulkDeleteForm: React.FC<BulkDeleteFormProps> = ({
                   className="bg-red-600 h-2 rounded-full transition-all duration-300"
                   style={{
                     width: `${
-                      (deleteProgress.current / deleteProgress.total) * 100
+                      deleteProgress.total > 0
+                        ? (deleteProgress.current / deleteProgress.total) * 100
+                        : 0
                     }%`,
                   }}
                 ></div>

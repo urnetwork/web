@@ -2,9 +2,10 @@ import { createContext, FC, PropsWithChildren, useState } from "react";
 import {
 	login as apiLogin,
 	loginWithPassword as apiLoginWithPassword,
+	loginWithWallet as apiLoginWithWallet,
 } from "../services/api";
 import toast from "react-hot-toast";
-import { AuthResponse, PasswordLoginResponse } from "../services/types";
+import { AuthResponse, PasswordLoginResponse, WalletAuthPayload, WalletLoginResponse } from "../services/types";
 
 interface AuthContextType {
 	token: string | null;
@@ -20,6 +21,9 @@ interface AuthContextType {
 		username: string,
 		password: string,
 	) => Promise<PasswordLoginResponse | null>;
+	loginWithWallet: (
+		payload: WalletAuthPayload,
+	) => Promise<WalletLoginResponse | null>;
 	logout: () => void;
 }
 
@@ -30,6 +34,7 @@ export const AuthContext = createContext<AuthContextType>({
 	logout: () => {},
 	login: async () => null,
 	loginWithPassword: async () => null,
+	loginWithWallet: async () => null,
 	isLoading: false,
 	isAutoLoginAttempted: false,
 	isAuthenticated: false,
@@ -81,8 +86,7 @@ export const AuthContextProvider: FC<PropsWithChildren> = ({ children }) => {
 		setIsLoading(false);
 
 		if (response.verification_required) {
-			toast.error(`Login failed: Verification required`);
-			return null;
+			return response;
 		}
 
 		if (response.error || !response.network?.by_jwt) {
@@ -98,6 +102,32 @@ export const AuthContextProvider: FC<PropsWithChildren> = ({ children }) => {
 		setTimeout(() => {
 			setToken(response.network?.by_jwt);
 			localStorage.setItem("byToken", response.network?.by_jwt);
+			setIsTransitioning(false);
+		}, 900);
+
+		return response;
+	};
+
+	const loginWithWallet = async (
+		payload: WalletAuthPayload,
+	): Promise<WalletLoginResponse | null> => {
+		setIsLoading(true);
+		const response = await apiLoginWithWallet(payload);
+		setIsLoading(false);
+
+		if (response.error || !response.network?.by_jwt) {
+			toast.error(
+				`Login failed: ${response.error?.message || "Invalid response received"}`,
+			);
+			return null;
+		}
+
+		setIsTransitioning(true);
+		toast.success("Wallet login successful");
+
+		setTimeout(() => {
+			setToken(response.network!.by_jwt);
+			localStorage.setItem("byToken", response.network!.by_jwt);
 			setIsTransitioning(false);
 		}, 900);
 
@@ -126,6 +156,7 @@ export const AuthContextProvider: FC<PropsWithChildren> = ({ children }) => {
 				setToken,
 				login,
 				loginWithPassword,
+				loginWithWallet,
 				isLoading,
 				isAuthenticated: !!token,
 				isTransitioning,

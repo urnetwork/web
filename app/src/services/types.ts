@@ -417,6 +417,34 @@ export interface PasswordLoginResponse {
 }
 
 /**
+ * Wallet authentication payload for Solana-based login
+ */
+export interface WalletAuthPayload {
+  wallet_address: string;
+  wallet_message: string;
+  wallet_signature: string;
+  blockchain: "solana";
+}
+
+/**
+ * Response from wallet-based login
+ * Mirrors the /auth/login endpoint response shape
+ */
+export interface WalletLoginResponse {
+  user_name?: string;
+  user_auth?: string;
+  auth_allowed?: string[];
+  network?: {
+    by_jwt: string;
+  };
+  wallet_auth?: WalletAuthPayload;
+  error?: {
+    suggested_user_auth?: string;
+    message: string;
+  };
+}
+
+/**
  * Response from fetching network user information
  */
 export interface NetworkUserResponse {
@@ -704,4 +732,85 @@ export interface ProxyConfigResult {
   http_proxy_port?: number;
   https_proxy_port?: number;
   wg_config?: WgConfig;
+}
+
+export interface NetworkCreateRequest {
+  user_name: string;
+  user_auth?: string;
+  password?: string;
+  network_name: string;
+  terms: true;
+  wallet_auth?: WalletAuthPayload;
+}
+
+export interface NetworkCreateResponse {
+  network?: {
+    by_jwt: string;
+    network_id: string;
+    network_name: string;
+  };
+  verification_required?: {
+    user_auth: string;
+  };
+  error?: {
+    message: string;
+  };
+}
+
+export interface NetworkCheckResponse {
+  available: boolean;
+}
+
+export interface VerifySendResponse {
+  user_auth?: string;
+  error?: {
+    message: string;
+  };
+}
+
+export interface VerifyResponse {
+  network?: {
+    by_jwt: string;
+    network_id: string;
+    network_name: string;
+  };
+  error?: {
+    message: string;
+  };
+}
+
+export interface CreateApiKeyArgs {
+  name: string;
+}
+
+export interface CreateApiKeyResult {
+  id?: string;
+  api_key?: string;
+  name?: string;
+  error?: {
+    message: string;
+  };
+}
+
+export interface ApiKeyMetadata {
+  id: string;
+  name: string;
+  create_time: string;
+}
+
+export interface GetApiKeysResult {
+  api_keys: ApiKeyMetadata[];
+  error?: {
+    message: string;
+  };
+}
+
+export interface DeleteApiKeyArgs {
+  id: string;
+}
+
+export interface DeleteApiKeyResult {
+  error?: {
+    message: string;
+  };
 }
