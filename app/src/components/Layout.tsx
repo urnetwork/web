@@ -15,7 +15,6 @@ import { useAutoLogin } from "../hooks/useAutoLogin";
 import BalanceCodesSection from "./BalanceCodesSection";
 import ApiKeysSection from "./ApiKeysSection";
 import LoginExtension from "../pages/LoginExtension";
-import LoginExtensionComplete from "../pages/LoginExtensionComplete";
 
 const EXTENSION_RETURN_KEY = 'extension_return_to';
 
@@ -171,7 +170,6 @@ const Layout: React.FC = () => {
 				{isAuthenticated && isExtensionRoute && (
 					<Routes>
 						<Route path="/login-extension" element={<LoginExtension />} />
-						<Route path="/login-extension/complete" element={<LoginExtensionComplete />} />
 					</Routes>
 				)}
 				{isAuthenticated && !isExtensionRoute && (
@@ -296,7 +294,6 @@ const Layout: React.FC = () => {
 				{!isAuthenticated && (
 					<Routes>
 						<Route path="/login-extension" element={<LoginExtension />} />
-						<Route path="/login-extension/complete" element={<LoginExtensionComplete />} />
 						<Route path="*" element={<AuthSection />} />
 					</Routes>
 				)}
