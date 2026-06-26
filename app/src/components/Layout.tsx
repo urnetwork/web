@@ -14,6 +14,10 @@ import { useAuth } from "../hooks/useAuth";
 import { useAutoLogin } from "../hooks/useAutoLogin";
 import BalanceCodesSection from "./BalanceCodesSection";
 import ApiKeysSection from "./ApiKeysSection";
+import LoginExtension from "../pages/LoginExtension";
+import LoginExtensionComplete from "../pages/LoginExtensionComplete";
+
+const EXTENSION_RETURN_KEY = 'extension_return_to';
 
 const Layout: React.FC = () => {
 	type TabType =
@@ -34,8 +38,17 @@ const Layout: React.FC = () => {
 	const [animationDirection, setAnimationDirection] = useState<"left" | "right" | "none">("none");
 	const viewportType = useViewportType();
 
+	const isExtensionRoute = location.pathname.startsWith('/login-extension');
+
 	useEffect(() => {
 		if (isAuthenticated) {
+			const returnTo = sessionStorage.getItem(EXTENSION_RETURN_KEY);
+			if (returnTo && returnTo.startsWith('/login-extension')) {
+				sessionStorage.removeItem(EXTENSION_RETURN_KEY);
+				navigate(returnTo, { replace: true });
+				return;
+			}
+
 			const timer = setTimeout(() => {
 				setShowDashboard(true);
 			}, 300);
@@ -43,7 +56,7 @@ const Layout: React.FC = () => {
 		} else {
 			setShowDashboard(false);
 		}
-	}, [isAuthenticated]);
+	}, [isAuthenticated]); // eslint-disable-line react-hooks/exhaustive-deps
 
 	useAutoLogin();
 
@@ -155,7 +168,13 @@ const Layout: React.FC = () => {
 				</header>
 			)}
 			<main className="flex-grow container mx-auto px-4 py-8">
-				{isAuthenticated && (
+				{isAuthenticated && isExtensionRoute && (
+					<Routes>
+						<Route path="/login-extension" element={<LoginExtension />} />
+						<Route path="/login-extension/complete" element={<LoginExtensionComplete />} />
+					</Routes>
+				)}
+				{isAuthenticated && !isExtensionRoute && (
 					<>
 						<div className={`bg-gray-800 rounded-xl border border-gray-700 shadow-2xl ${isLoggingOut ? 'animate-unlockSequence' : showDashboard ? 'animate-expandFromCenter' : ''}`} style={{ opacity: showDashboard ? 1 : 0, overflow: viewportType === ViewportType.Mobile ? 'visible' : 'hidden', position: 'relative', zIndex: 10 }}>
 							{viewportType === ViewportType.Mobile ? (
@@ -276,6 +295,8 @@ const Layout: React.FC = () => {
 				)}
 				{!isAuthenticated && (
 					<Routes>
+						<Route path="/login-extension" element={<LoginExtension />} />
+						<Route path="/login-extension/complete" element={<LoginExtensionComplete />} />
 						<Route path="*" element={<AuthSection />} />
 					</Routes>
 				)}
