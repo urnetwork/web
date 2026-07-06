@@ -1,0 +1,24 @@
+/* Continuous explainer canvases (MinerSim / ValidatorSim) — a 1:1 square that
+   spans the text-column width, at the bottom of its section. */
+.sim-wrap {
+    width: 100%;              /* fill the content column */
+    aspect-ratio: 1 / 1;     /* 1:1 square */
+    margin: 52px auto 8px;
+    position: relative;
+}
+.sim-canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+.sim-caption {
+    position: absolute;
+    left: 16px;
+    bottom: 16px;
+    width: 200px;
+    margin: 0;
+    font-family: 'PPNeueBit', monospace;
+    font-size: 16px;
+    line-height: 1.35;
+    color: var(--brand-ui, #D6E6F4);
+}

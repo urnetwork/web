@@ -5,10 +5,15 @@ import NavIsland from '../islands/NavIsland.jsx';
 import Section from '../components/Section.astro';
 import CardGrid from '../components/CardGrid.astro';
 import FooterStatic from '../components/FooterStatic.astro';
+import NetworkDiagram from '@react/components/NetworkDiagram.jsx';
+import MinerSim from '@react/components/MinerSim.jsx';
+import ValidatorSim from '@react/components/ValidatorSim.jsx';
 import en from '@react/i18n/en.js';
 import { SECTION_ROUTES } from '../lib/i18n.js';
 
 import '@react/components/Nav.css';
+
+const ROLE_SECTIONS = ['operators', 'miners', 'validators'];
 
 export function getStaticPaths() {
     return SECTION_ROUTES.map(s => ({ params: { section: s } }));
@@ -18,6 +23,7 @@ const { section } = Astro.params;
 const t = en;
 const sectionData = t[section];
 const items = sectionData.roles || sectionData.items || sectionData.papers || [];
+const showDiagram = ROLE_SECTIONS.includes(section);
 ---
 <Base
     title={`${sectionData.title} — URnetwork`}
@@ -31,7 +37,10 @@ const items = sectionData.roles || sectionData.items || sectionData.papers || []
         <main class="section-page">
             <Section id={section} eyebrow={sectionData.eyebrow} title={sectionData.title}>
                 <p>{sectionData.intro}</p>
+                {showDiagram && <NetworkDiagram client:load active={section} lang="en" />}
                 <CardGrid items={items} />
+                {section === 'miners' && <MinerSim client:visible />}
+                {section === 'validators' && <ValidatorSim client:visible />}
             </Section>
         </main>
 

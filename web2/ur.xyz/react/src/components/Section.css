@@ -112,6 +112,28 @@
 
 .article-body p:last-child { margin-bottom: 0; }
 
+/* --- "Read the full whitepaper" link-out below the clauses --- */
+.article-source {
+    margin: 44px 0 0;
+    padding-left: 138px; /* align with clause body: 110px numeral + 28px gap */
+    font-family: 'PPNeueMontreal', sans-serif;
+    font-size: 0.9rem;
+    letter-spacing: 0.02em;
+}
+
+.article-source a {
+    color: var(--brand-ur);
+    text-decoration: none;
+    border-bottom: 1px solid transparent;
+    transition: border-color 0.2s ease;
+}
+
+.article-source a:hover { border-bottom-color: currentColor; }
+
+@media (max-width: 768px) {
+    .article-source { padding-left: 0; }
+}
+
 /* --- Article table (e.g. token allocation) --- */
 .article-table-wrap {
     overflow-x: auto;

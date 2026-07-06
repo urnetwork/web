@@ -32,7 +32,7 @@ export function splitPath(pathname) {
 }
 
 /** Section names that map 1:1 to top-level paths (e.g. /providers). */
-export const SECTION_ROUTES = ['research', 'providers', 'extenders', 'community'];
+export const SECTION_ROUTES = ['operators', 'miners', 'validators', 'research', 'community'];
 
 const SECTION_SET = new Set(SECTION_ROUTES);
 

@@ -4,15 +4,16 @@
 export default {
     nav: {
         whitepaper: 'Whitepaper',
+        operators:  'Operators',
+        miners:     'Miners',
+        validators: 'Validators',
         research:   'Research',
-        providers:  'Providers',
-        extenders:  'Extenders',
         community:  'Community',
         usage:      'Usage',
         docs:       'Docs',
         tagline:    'Own your privacy. Own your network.',
         languageMenu: 'Language',
-        ctaAria:    'Usage — current network costs'
+        ctaAria:    'Usage — current network activity'
     },
 
     footer: {
@@ -24,104 +25,136 @@ export default {
     },
 
     stats: {
-        protocolLedger:  'Protocol Ledger',
-        block:           'Block',
-        totalFees:       'Total Fees ($UR)',
+        protocolLedger:  'Subnet Ledger',
+        block:           'Epoch',
+        totalFees:       'Deposits ($UR)',
         totalData:       'Total Data',
         totalUsers:      'Total Users',
         totalSupply:     'Total $UR Supply',
-        totalDistributed:'Total Distributed',
-        urAbsorbed:      '$UR Absorbed',
-        statusHeld:      'Status Held ($UR)'
+        totalDistributed:'Emission Distributed',
+        urAbsorbed:      'Buyback Reserve ($UR)',
+        statusHeld:      'Held in Contract ($UR)'
     },
 
     whitepaper: {
         eyebrow: 'Whitepaper',
-        title:   'A token for the open network.',
+        title:   'A privacy network, coordinated on Bittensor.',
         clauses: [
             {
                 numeral: 'I.',
-                title:   'General Description of URnetwork',
+                title:   'A decentralized privacy network',
                 body: [
-                    'URnetwork is a decentralized privacy infrastructure protocol designed to enable "whole internet encryption" by mitigating exposure of metadata inherent in the TCP/IP protocol suite. While most internet traffic is encrypted at the content layer, metadata such as source and destination IP addresses remain visible to intermediaries. The protocol distributes user traffic across a global network of independent providers using multi-hop routing and layered encryption, such that no single provider has access to both the user\'s identity and the content of communications. The protocol incorporates techniques including N-layer TLS encryption, SNI spoofing, and traffic indistinguishability to resemble standard HTTPS traffic.',
-                    'The protocol architecture separates transport, routing, matching, and settlement into distinct components. Users connect through client software that dynamically routes traffic across multiple providers based on performance and reliability metrics. Data transfer occurs through encrypted contracts between users and providers, with escrowed balances, defined permissions, and post-transfer settlement based on acknowledged usage. Contracts include dispute resolution mechanisms and are deleted after a defined period. The protocol is open source and has been operational since approximately April 2025.',
-                    'Users and providers can interact directly with the protocol without reliance on any network operator. Network operators are sophisticated protocol operators capable of coordinating and deploying significant volumes of smart contracts. They may resell that volume to consumers or use it for their own purposes. In many cases, network operators deploy protocol contracts acting as a bridge between everyday users and the protocol.',
-                    'The protocol is a self-operating permissionless system which operates independently of network operators. The protocol\'s economics operate via two rates: a per-gigabyte transfer rate and a per-user transfer rate. These two rates capture all of the use cases that the network is usable for. Anyone can utilize the protocol provided they pay one of these two rates.'
+                    'UR is a decentralized privacy network. It distributes user traffic across a global network of independent miners using multi-hop routing and layered encryption, so that no single miner sees both who a user is and what they are doing. The transport is designed to resemble ordinary HTTPS — N-layer TLS encryption, SNI spoofing, and traffic indistinguishability — so the network stays reachable almost everywhere.',
+                    'The UR Subnet coordinates this network through on-chain incentives on Bittensor. Network operators run the servers; independent miners carry the ingress and egress traffic; and independent validators continuously walk operator-assigned chains of miners to prove real-time transit and measure which miners are the weakest links. That measurement is the core signal the network pays for.',
+                    'Bittensor\'s Yuma Consensus turns the validators\' measurements into token emission, and a smart contract on the Subtensor EVM settles the payouts. The protocol is open source, and running a miner or a validator is permissionless.'
                 ]
             },
             {
                 numeral: 'II.',
-                title:   'Separation of Roles',
+                title:   'Roles',
                 body: [
-                    'The protocol operates wholly independently and would remain functional if the company that deployed it ceased maintaining it. The operation and utility of the protocol do not depend on the ongoing managerial or entrepreneurial efforts of any single entity.',
-                    'Users and providers do not need to use software or hardware provided by any particular company to participate. They can directly interact with the protocol via their own code deployments. The company that deployed the protocol intends to clearly delineate and identify the difference between its role as deployer of the protocol, as a network operator who uses the protocol to operate services, and as the present steward of the protocol.'
+                    'Network operators run the privacy servers and the verification endpoint. An operator deposits into the subnet, co-signs each measured path, and commits a payout list that splits its rewards among the miners attached to it. An operator directs where its rewards go but never holds anyone else\'s funds.',
+                    'Miners are the ingress and egress of the network. They run a safe-by-default security model, block known-malicious IPs, and route only encrypted traffic. A miner carries traffic for one or more operators and is paid for the routable capacity it contributes.',
+                    'Validators are independent. Each stakes its own $UR, runs the routing-verification protocol, and scores every operator\'s pool by demand and measured quality. Validators earn the network\'s native dividends for accurate, consensus-aligned scoring — no operator owns a validator, and the set is permissionless.',
+                    'The subnet owner — BringYour, Inc. — governs the settlement contract and operates the network\'s reserve. That role is transitional: control begins centralized-but-bounded and progressively decentralizes (clause V).'
                 ]
             },
             {
                 numeral: 'III.',
-                title:   'Introduction of $UR Token',
+                title:   'The $UR token',
                 body: [
-                    'Within the protocol, the token is intended to function as a payment and settlement instrument. Tokens are utilized in connection with discrete network operations and are consumed or allocated as part of those operations. The token is not designed to represent or provide any right to profits, income, or returns, and is intended to function solely as a means of accessing and participating in the protocol.',
-                    'Users utilize tokens by depositing them into programmatic contracts prior to network usage, with pricing based on data transfer and user activity. Deposited tokens fund contract-based bandwidth transactions between users and providers, with portions held in escrow during execution. Upon settlement, tokens are distributed into a reward pool and allocated to providers based on performance metrics.',
-                    'Upon completion of every block (one week), 97.5% of tokens used are distributed to providers, and 2.5% are removed from circulation via absorption. Tokens directed to absorption are not redistributed and are excluded from protocol-level accounting for future contract settlement. This mechanism is designed to balance network usage and resource allocation.',
-                    'The total supply is fixed at 1,000,000,000 tokens, all minted at genesis, with no ongoing inflation. At token generation, the allocation is as follows:',
-                    { type: 'table', head: ['Category', '%', 'Tokens', 'Vesting'], rows: [
-                        ['Contributor Rewards', '20%', '200,000,000', '1 year vest, 2 year linear unlock'],
-                        ['Team & Advisors',     '23%', '230,000,000', '1 year vest, up to 2 year linear unlock'],
-                        ['Equity Investors',    '15%', '150,000,000', '1 year vest, 2 year linear unlock'],
-                        ['Treasury',            '2%',  '20,000,000',  'Linear unlock over 1 year'],
-                        ['Strategic Reserve',   '40%', '450,000,000', 'Reserved for future protocol use (0 inflation)']
+                    '$UR is the subnet\'s native token — the unit of account for deposits, emission, and settlement. It is a utility token for coordinating and paying for network resources; it is not designed to represent or provide any right to profits, income, or returns.',
+                    'New $UR is emitted by Bittensor\'s coinbase each cycle and split three ways:',
+                    { type: 'table', head: ['Stream', 'Share', 'Recipients'], rows: [
+                        ['Owner',      '18%', 'BringYour, Inc. — subnet owner and network reserve'],
+                        ['Miners',     '41%', 'Miners — through operator pools and top-level miner slots'],
+                        ['Validators', '41%', 'Independent validators — native dividends for accurate scoring']
                     ]},
-                    'Approximately 2% of supply (20 million tokens) is expected to be in initial circulation for liquidity purposes.'
+                    'Operators fund the network by depositing $UR sized to their real usage, at a published reference rate. A deposit is a costly, revenue-backed signal of real demand — and it is conviction stake: the contract moves every deposit into a locked reserve where it compounds and is never redistributed, permanently removing $UR from liquid supply in proportion to real usage. An operator\'s cumulative locked stake lowers the rate it must post, so committed operators can onboard with less up-front capital.',
+                    'Miners are paid from emission, not from deposits. Because deposits are locked rather than recycled, real usage becomes a standing, growing bid under the token instead of sell pressure, while emission follows a fixed schedule with halvings.'
                 ]
             },
             {
                 numeral: 'IV.',
-                title:   'Distribution and Circulation',
+                title:   'Two ways to earn',
                 body: [
-                    'Tokens can be obtained in two ways: direct acquisition on secondary markets, or receipt as provider rewards for bandwidth contributed to the network.',
-                    'Network operators may acquire tokens on a non-exclusive, market-driven basis to support their use of the protocol. Such activity is undertaken solely for consumptive purposes and not for investment or market support. The protocol does not depend on any network operator to acquire tokens in order to function, and token demand is not designed to be driven by any single participant or class of participants.',
-                    'Network operators can sell access to the protocol in token, fiat, or token-denominated terms as they wish. Network operators may structure service tiers that incorporate token-based participation signals or payment methods to customize access to features within their applications.',
-                    'To summarize the interaction between entities:',
+                    'A single operator can serve well over 100,000 miners — far more than a subnet\'s roughly 256 on-chain slots — so the network pays miners through two tiers that run in parallel.',
+                    'The pool is the on-ramp. Every operator holds one on-chain slot for all of its miners; validators weight that pool by the operator\'s demand and its measured quality, and each miner claims its share directly from the settlement contract with a cryptographic proof. There is no slot to win and nothing to burn — it is where a miner starts and earns a baseline reward.',
+                    'Top-level miners are the supply apex. The roughly 200 largest fleets — ranked by how many distinct, routable exit IPs they actually serve, not by traffic volume — each claim their own on-chain slot and are paid directly by the network, with no operator in the payout path. A shared IP is split among the fleets that claim it, so breadth cannot be double-counted.',
+                    'The two tiers are one tournament: a miner starts in a pool, graduates to a top slot as its routable-IP breadth grows, and falls back to the pool if it slips. A governance-set share divides emission between the head and the tail.',
                     { type: 'list', items: [
-                        'A user may purchase tokens on the open market and use them to interact with the protocol directly (including to become a network operator), or they may rely on a network operator to access the protocol without touching tokens.',
-                        'A provider will receive tokens for provision of bandwidth to the protocol.',
-                        'Network operators will acquire, retain, and spend tokens to make their services available to their customers, who may or may not be users depending on the nature of those services.'
+                        'Pool tier — the on-ramp: join an operator with no slot and no registration cost; validators weight the pool by demand and quality; each miner claims its share by proof every settlement period.',
+                        'Top-level miners — the apex: the ~200 fleets with the broadest routable-IP coverage claim their own slot and are paid directly by the network, with no operator, no pool, and no intermediary.'
                     ]}
                 ]
             },
             {
                 numeral: 'V.',
-                title:   'Staking and Integrity Mechanisms',
+                title:   'Custody, settlement, and decentralization',
                 body: [
-                    'The protocol does not provide passive returns or yield on tokens. Any differences in outcomes across participants are solely a function of differences in activity, reliability, and usage within the network. The protocol has a form of operational qualification and prioritization built in — integrity mechanisms — that signal commitment, reliability, and quality of participation, which the protocol uses to prioritize resource allocation and contract selection.',
-                    { type: 'list', items: [
-                        'Consumer staking: Network operators may offer service tiers that integrate token-based authentication or participation signals to customize access to features within their applications.',
-                        'Developer staking: Developers that maintain token balances are eligible for reduced network rates as part of a usage-based pricing structure hard-wired into the protocol, designed to encourage sustained integration and long-term network participation.',
-                        'Provider staking: Providers that lock tokens are prioritized for contract assignment based on demonstrated commitment and reliability. Providers who lock $UR receive larger reward shares during the block-end reward cycle based on an allocation weighting multiplier (1.0x, 1.25x, 1.5x, or 2.0x). These adjusted multipliers do not create inflation — the total epoch reward pool is fixed. Unstaked providers still earn rewards at smaller proportional shares.'
-                    ]},
-                    'These integrity mechanisms support reliable operation, performance, and availability of the protocol by aligning network access and resource allocation with demonstrable participation and service quality. Across each category of participant, these mechanisms operate to facilitate effective use of the network rather than to provide economic benefit based on passive token ownership.'
+                    'Settlement runs on a seven-day cycle. The contract accrues each pool\'s emission over the period, then opens claims: miners pull their $UR directly from the contract against their operator\'s committed payout list. Top-level miners need no settlement step — the chain pays their slot natively every cycle.',
+                    'No one holds anyone else\'s funds. The settlement contract is the sole custodian of in-transit $UR, every pool payout is a direct on-chain claim, and top-level miners are paid natively to their own keys. Operators and the owner never take custody of miners\' rewards.',
+                    'Earned claims are final. Once a settlement period is finalized, the tokens backing its claims are committed — no upgrade, pause, or administrative action can block or reverse them. The locked reserve is one-way by the same standard: no function can move funds out of it.',
+                    'Control decentralizes over time. The network launches with the contract upgradeable behind an owner multisig — deliberate, bounded central control for early bug-fixes — and hardens in stages: a public timelock on every change, a pause-only guardian that can stop an exploit but can never move funds or block finalized claims, and, in time, on-chain governance and an immutable settlement core.'
                 ]
             }
+        ],
+        source: { label: 'Read the full whitepaper', href: 'https://github.com/urfoundation/sn/' }
+    },
+
+    operators: {
+        eyebrow: 'Operators',
+        title:   'The operators who run the network.',
+        intro:   'Network operators run the privacy servers and the verification endpoint. An operator deposits into the subnet as a costly, revenue-backed signal of real demand, runs the routing-verification protocol that co-signs each measured path, and commits the payout list that splits its rewards among the miners attached to it. Operators direct where rewards go but never hold anyone else\'s funds.',
+        roles: [
+            { tag: '01', title: 'Run the servers',    body: 'Operators run the privacy servers and the /verify endpoint that co-signs each measured path — the coordination layer between users and the miners that carry the traffic.' },
+            { tag: '02', title: 'Signal real demand',  body: 'Operators deposit $UR sized to their real usage. Every deposit is conviction stake locked in the buyback reserve — never redistributed — so it is a costly, revenue-backed signal that validators weight when they score the pools.' },
+            { tag: '03', title: 'Direct the payouts',  body: 'Each settlement period an operator commits a Merkle payout list that splits its pool among its miners. It directs the split but never takes custody — every miner claims its share directly from the contract.' },
+            { tag: '04', title: 'Get started',         body: 'Register a network-operator key, run the /verify server, and deposit to begin. Operator admission is owner-gated during the launch phase.', href: 'https://ur.xyz', linkLabel: 'Operator docs' }
+        ]
+    },
+
+    miners: {
+        eyebrow: 'Miners',
+        title:   'The miners who carry the traffic.',
+        intro:   'Miners are the supply of the network — they carry both the ingress and the egress traffic. They run a safe-by-default security model, route only encrypted traffic, register with one or more operators, and are paid from subnet emission for the routable capacity they contribute. Miners compete on reach: the fleets serving the most distinct, routable IP subnets are promoted to top-level miners and earn more. Everything runs in user space, on hardware you already own.',
+        roles: [
+            { tag: '01', title: 'Egress',              body: 'Egress miners are the exit IPs of the shared network. They reject traffic that conflicts with common regulation directions like CFAA and DMCA, block known-malicious IPs, and route only encrypted traffic — protecting both miners and users.' },
+            { tag: '02', title: 'Ingress',             body: 'Ingress miners (extenders) create entry points that improve reachability worldwide — using N-layer TLS, SNI spoofing, and trusted forwarding. A rotating subset is exposed each cycle, and clients automatically retry the entry points that worked before.' },
+            { tag: '03', title: 'Measured and matched',body: 'Independent validators walk chains of miners to prove real-time transit and measure liveness and quality. Miners are ranked by that measurement and by speed, and each operator runs its own matchmaking between users and miners.' },
+            { tag: '04', title: 'Earn from emission',  body: 'Miners are paid from the subnet\'s emission. Inside an operator\'s pool you claim your share each settlement by proof — a low-barrier baseline reward, with no slot to win and nothing to burn.', href: 'https://docs.ur.io/provider', linkLabel: 'Miner docs' },
+            { tag: '05', title: 'Compete for the top',  body: 'Miners compete on reach. The network ranks fleets by how many distinct, routable exit IPs they actually serve — not by traffic volume — and the roughly 200 with the broadest coverage are promoted to top-level miners: their own on-chain slot, paid natively, earning more. Shared IPs are split among the fleets that claim them, so unique coverage is what wins — grow your distinct-IP breadth to climb, and if your reach slips you fall back to the pool.' }
+        ]
+    },
+
+    validators: {
+        eyebrow: 'Validators',
+        title:   'The validators who measure the network.',
+        intro:   'Validators are independent. Each stakes its own $UR and runs the routing-verification protocol — continuously walking operator-assigned chains of miners to prove real-time transit and measure which miners are the weakest links. That measurement is the core signal the network pays for, and validators earn native dividends for producing it accurately.',
+        roles: [
+            { tag: '01', title: 'Walk the routes',        body: 'Validators walk operator-assigned chains of miners and collect a signed, self-proving record of each completed hop — cryptographic proof of real-time transit that anyone can check.' },
+            { tag: '02', title: 'Score the network',      body: 'Each cycle a validator scores every operator\'s pool by demand and measured quality, and ranks the top fleets by routable-IP breadth — all under commit-reveal. Bittensor\'s Yuma Consensus turns those independent scores into miner emission.' },
+            { tag: '03', title: 'Earn native dividends',  body: 'Validators earn Bittensor-native dividends for accurate, consensus-aligned scoring — their only reward. No operator owns a validator, and the set is permissionless.' },
+            { tag: '04', title: 'Independent by design',  body: 'Because commit-reveal hides each validator\'s scores until they are stale, copying earns nothing — a validator has to run real trails. The measurement stays honest, and no single party controls it.' }
         ]
     },
 
     research: {
         eyebrow: 'Research',
         title:   'Open algorithms, open data.',
-        intro:   'The protocol is a decentralized-native, multi-IP, multi-transport system designed to scale to millions of providers per network operator. Each algorithm area below is published with its source and, where applicable, anonymized data sets for independent analysis.',
+        intro:   'The protocol is a decentralized-native, multi-IP, multi-transport system designed to scale to millions of miners per network operator. Each algorithm area below is published with its source and, where applicable, anonymized data sets for independent analysis.',
         papers: [
             { tag: 'URTRANSPORT1', title: 'Performance',
               body: 'Multi-hop routing via TCP transports focused on global accessibility. UDP and peer-to-peer stream upgrades are supported with integration of WebRTC, XRay, and WireGuard planned.',
               href: 'https://github.com/urnetwork/connect/blob/main/transport.go', linkLabel: 'transport.go' },
             { tag: 'UREXTENDER1', title: 'Accessibility',
-              body: 'N-layer TLS encryption (N\u22652) where each outer layer uses a self-signed cert with SNI spoofing to an intermediary IP, forwarding to another hop or an end-to-end TLS connection. Anyone can host an extender on any domain.',
+              body: 'N-layer TLS encryption (N≥2) where each outer layer uses a self-signed cert with SNI spoofing to an intermediary IP, forwarding to another hop or an end-to-end TLS connection. Anyone can host an extender on any domain.',
               href: 'https://github.com/urnetwork/connect/blob/main/net_extender.go', linkLabel: 'net_extender.go' },
-            { tag: 'UR-FP2', title: 'Client\u2013Provider Matching',
-              body: 'Sampling algorithm that loads a 10\u00d7 random sample of potential providers and shuffles proportional to reliability \u00d7 client score. Sybil resistance is guaranteed by the constraint that reliability sums to at most 1 per IP subnet.',
+            { tag: 'UR-FP2', title: 'Client–Miner Matching',
+              body: 'Sampling algorithm that loads a 10× random sample of potential miners and shuffles proportional to reliability × client score. Sybil resistance is guaranteed by the constraint that reliability sums to at most 1 per IP subnet.',
               href: 'https://github.com/urnetwork/server/blob/main/model/network_client_location_model.go', linkLabel: 'network_client_location_model.go' },
             { tag: 'UR-MULTI', title: 'Multi Client',
-              body: 'Heuristic sweep algorithm managing a window of providers. Locks traffic into the top available tier based on transfer thresholds rather than protocol analysis.',
+              body: 'Heuristic sweep algorithm managing a window of miners. Locks traffic into the top available tier based on transfer thresholds rather than protocol analysis.',
               href: 'https://github.com/urnetwork/connect/blob/main/ip_remote_multi_client.go', linkLabel: 'ip_remote_multi_client.go' },
             { tag: 'UR-TRANSFER', title: 'Transfer',
               body: 'Reliable delivery window tuned for high-latency environments. Protocol retransmits are disabled since the window provides reliable delivery. Distributes traffic across transports by ranked performance.',
@@ -129,39 +162,15 @@ export default {
             { tag: 'UR-IP', title: 'IP Egress',
               body: 'Minimal-memory IP stack implementation. Assumes reliable peer communication via the transfer layer, so retransmits are optimized accordingly.',
               href: 'https://github.com/urnetwork/connect/blob/main/ip.go', linkLabel: 'ip.go' },
-            { tag: 'UR-PSUB2', title: 'Token Allocation',
-              body: 'Block rewards distributed every 7 days proportional to data transfer votes, reliability scores, and referrals. Paid-subscriber traffic is prioritized to counteract gaming. Multiplier bonuses apply for reliability and community incentives.',
+            { tag: 'UR-PSUB2', title: 'Reward Allocation',
+              body: 'Independent validators score every operator pool by demand and measured quality; Bittensor\'s Yuma Consensus turns those scores into emission. Within a pool, an operator ranks its miners by contracts served and reliability, commits a Merkle payout root each cycle, and every miner claims its share directly from the settlement contract.',
               href: 'https://github.com/urnetwork/server/blob/main/model/account_payment_model_plan.go', linkLabel: 'account_payment_model_plan.go' },
             { tag: 'UR-CONTRACT', title: 'Permission',
               body: 'Transfer between parties requires an encrypted contract with escrowed balance and a permission set. Both sides must close with acknowledged byte counts; disagreements trigger a forced resolution process.',
               href: 'https://github.com/urnetwork/server/blob/main/model/subscription_model.go', linkLabel: 'subscription_model.go' },
             { tag: 'UR-SEC1', title: 'Safety',
-              body: 'Port block list and IP block list protecting the provider network. Does not perform protocol inspection — providers route only encrypted traffic.',
+              body: 'Port block list and IP block list protecting the miner network. Does not perform protocol inspection — miners route only encrypted traffic.',
               href: 'https://github.com/urnetwork/connect/blob/main/ip_security.go', linkLabel: 'ip_security.go' }
-        ]
-    },
-
-    providers: {
-        eyebrow: 'Providers',
-        title:   'The egress of the shared network.',
-        intro:   'Providers are the egress IPs of the shared network. They run a default safe security model, block known malicious IPs, and route only encrypted traffic. Providers are ranked by speed and reliability, register with one or more network operators, and earn a share of the contract value they route. Providers run entirely in user space and do not require root privileges.',
-        roles: [
-            { tag: '01', title: 'Safe by default',     body: 'Providers reject traffic that conflicts with common regulation directions like CFAA and DMCA. Known botnets and malicious IPs are blocked. Only encrypted traffic is routed, protecting both providers and users.' },
-            { tag: '02', title: 'Ranked and matched',   body: 'Providers are ranked by speed and reliability and register with one or more network operators. Each network operator runs its own matchmaking algorithm between users and providers.' },
-            { tag: '03', title: 'Earn a share',         body: 'Providers earn a share of the contract value they route. Run a provider on hardware you already own — no root privileges required, everything runs in user space.' },
-            { tag: '04', title: 'Get started',          body: 'Set up a provider node and start contributing bandwidth to the network.', href: 'https://docs.ur.io/provider', linkLabel: 'Provider docs' }
-        ]
-    },
-
-    extenders: {
-        eyebrow: 'Extenders',
-        title:   'The ingress that carries the network further.',
-        intro:   'Extenders create a private or shared network of ingress IPs that use a variety of techniques to improve connectivity worldwide. Extenders can forward to known trusted network operators, to other extenders, and to trusted partner IPs using the network operator trust signing.',
-        roles: [
-            { tag: '01', title: 'Private extenders',         body: 'Not registered with network operators — act as a client of the system. Users manually enter the extender IP in the client to connect via the extender.' },
-            { tag: '02', title: 'Public extenders',           body: 'Register with network operators and receive a portion of the protocol contract value they route. Public extenders choose which network operators they forward to, and can also forward to other extender IPs or IPs signed by forwarded network operators.' },
-            { tag: '03', title: 'Rotating exposure',          body: 'A random subset of public extenders is chosen to be exposed each block (1 week). Exposure depends on calling region and time. Clients maintain a local cache of extenders so that previously working extenders are automatically retried.' },
-            { tag: '04', title: 'Trusted forwarding',         body: 'Network operators can associate a trusted IP with a password so extenders can forward to any IP that passes the trust test. The network stores the IP as a salted hash following the general IP storage guidelines.' }
         ]
     },
 
@@ -170,20 +179,9 @@ export default {
         title:   'The people behind the network.',
         intro:   'The protocol is open. The community that builds and operates it is growing. Here is where to find them.',
         items: [
-            { tag: '01', title: 'Network Operators',  body: 'Network operators build products on the protocol and sell access to the network.', href: 'https://ur.io', linkLabel: 'BringYour, Inc. — ur.io' },
-            { tag: '02', title: 'Discord',             body: 'Join the conversation — protocol development, provider support, and community discussion.', href: 'https://discord.gg/urnetwork', linkLabel: 'Join Discord' },
+            { tag: '01', title: 'Network Operators',  body: 'Network operators run servers, deposit into the subnet, and sell access to the network.', href: 'https://ur.io', linkLabel: 'BringYour, Inc. — ur.io' },
+            { tag: '02', title: 'Discord',             body: 'Join the conversation — protocol development, miner support, and community discussion.', href: 'https://discord.gg/urnetwork', linkLabel: 'Join Discord' },
             { tag: '03', title: 'Brand Kit',           body: 'URnetwork and the connector logo are registered US trademarks. Permission is granted for users of the protocol to use the brand kit as "powered by URnetwork" or similar component messaging.' }
-        ]
-    },
-
-    usage: {
-        eyebrow: 'Usage',
-        title:   'The people who package the network.',
-        intro:   'Network operators turn the open marketplace of providers and extenders into products that consumers and businesses can buy. They are the public face of the network, and the protocol holds them to the same standards as anyone else.',
-        roles: [
-            { tag: '01', title: 'Aggregate demand',  body: 'Operators bundle providers and extenders into networks that customers can buy from with predictable performance.' },
-            { tag: '02', title: 'Underwrite quality',body: 'Operators stake their status on the bandwidth they sell. Bad service is reflected in the ledger and the discount curve.' },
-            { tag: '03', title: 'Settle on-protocol',body: 'All settlement happens through $UR. Operators are accountable to the same rules as everyone else on the network.' }
         ]
     }
 };

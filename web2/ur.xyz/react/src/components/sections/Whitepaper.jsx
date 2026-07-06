@@ -1,9 +1,10 @@
 import React from 'react';
 import Section from '../Section';
+import NetworkDiagram from '../NetworkDiagram';
 import { useLanguage } from '../../i18n';
 
 export default function Whitepaper() {
-    const { t } = useLanguage();
+    const { t, code } = useLanguage();
     return (
         <Section
             id="whitepaper"
@@ -11,6 +12,7 @@ export default function Whitepaper() {
             title={t.whitepaper.title}
             variant="whitepaper"
         >
+            <NetworkDiagram active="subnet" lang={code} />
             <div className="article-grid">
                 {t.whitepaper.clauses.map(c => (
                     <article className="article-clause" key={c.numeral}>
@@ -30,6 +32,13 @@ export default function Whitepaper() {
                     </article>
                 ))}
             </div>
+            {t.whitepaper.source && (
+                <p className="article-source">
+                    <a href={t.whitepaper.source.href} target="_blank" rel="noopener noreferrer">
+                        {t.whitepaper.source.label} &rarr;
+                    </a>
+                </p>
+            )}
         </Section>
     );
 }

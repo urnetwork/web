@@ -1,113 +1,147 @@
-// Deutsch
+// Deutsch — spiegelt die kanonische Quelle en.js Schlüssel für Schlüssel.
+// Wird dort ein Schlüssel hinzugefügt, muss er auch hier ergänzt werden.
 export default {
     nav: {
         whitepaper: 'Whitepaper',
+        operators:  'Betreiber',
+        miners:     'Miner',
+        validators: 'Validatoren',
         research:   'Forschung',
-        providers:  'Anbieter',
-        extenders:  'Erweiterer',
         community:  'Gemeinschaft',
         usage:      'Nutzung',
         docs:       'Dokumentation',
         tagline:    'Besitze deine Privatsphäre. Besitze dein Netzwerk.',
         languageMenu: 'Sprache',
-        ctaAria:    'Nutzung — aktuelle Netzwerkkosten'
+        ctaAria:    'Nutzung — aktuelle Netzwerkaktivität'
     },
 
     footer: {
         github:     'GitHub',
         contact:    'Kontakt',
         copyright:  '© 2026 BringYour, Inc.',
-        disclaimer: 'Diese Seite ist ein Open-Source-Versorgungsprotokoll, getragen von einer Gemeinschaft von Teilnehmern, und wird unabhängig vom Netzbetreiber betrieben, der den Zugang zum Netzwerk verkauft.',
+        disclaimer: 'Diese Website ist ein quelloffenes Utility-Protokoll, getragen von einer Gemeinschaft von Teilnehmern, und wird getrennt vom Netzbetreiber betrieben, der den Zugang zum Netzwerk verkauft.',
         languagesAria: 'Sprachen'
     },
 
     stats: {
-        protocolLedger:  'Protokoll-Ledger',
-        block:           'Block',
-        totalFees:       'Gesamtgebühren ($UR)',
+        protocolLedger:  'Subnet-Ledger',
+        block:           'Epoche',
+        totalFees:       'Einzahlungen ($UR)',
         totalData:       'Gesamtdaten',
         totalUsers:      'Gesamtnutzer',
         totalSupply:     'Gesamt-$UR-Angebot',
-        totalDistributed:'Gesamt verteilt',
-        urAbsorbed:      '$UR absorbiert',
-        statusHeld:      'Status gehalten ($UR)'
+        totalDistributed:'Verteilte Emission',
+        urAbsorbed:      'Rückkaufreserve ($UR)',
+        statusHeld:      'Im Vertrag gehalten ($UR)'
     },
 
     whitepaper: {
         eyebrow: 'Whitepaper',
-        title:   'Ein Token für das offene Netzwerk.',
+        title:   'Ein Datenschutznetzwerk, koordiniert auf Bittensor.',
         clauses: [
             {
                 numeral: 'I.',
-                title:   'Allgemeine Beschreibung von URnetwork',
+                title:   'Ein dezentrales Datenschutznetzwerk',
                 body: [
-                    'URnetwork ist ein dezentrales Datenschutz-Infrastrukturprotokoll, das die „vollständige Internetverschlüsselung" ermöglicht, indem es die Offenlegung von Metadaten im TCP/IP-Protokollstapel minimiert. Während der Großteil des Internetverkehrs auf der Inhaltsebene verschlüsselt ist, bleiben Metadaten wie Quell- und Ziel-IP-Adressen für Zwischenstellen sichtbar. Das Protokoll verteilt den Benutzerverkehr über ein globales Netzwerk unabhängiger Anbieter mittels Multi-Hop-Routing und geschichteter Verschlüsselung, sodass kein einzelner Anbieter Zugang sowohl zur Identität des Nutzers als auch zum Inhalt der Kommunikation hat. Das Protokoll nutzt Techniken wie N-Schicht-TLS-Verschlüsselung, SNI-Spoofing und Verkehrsununterscheidbarkeit, um standardmäßigem HTTPS-Verkehr zu ähneln.',
-                    'Die Protokollarchitektur trennt Transport, Routing, Zuordnung und Abrechnung in eigenständige Komponenten. Nutzer verbinden sich über Client-Software, die den Verkehr dynamisch über mehrere Anbieter basierend auf Leistungs- und Zuverlässigkeitsmetriken leitet. Die Datenübertragung erfolgt über verschlüsselte Verträge zwischen Nutzern und Anbietern, mit Treuhandguthaben, definierten Berechtigungen und nachgelagerter Abrechnung basierend auf bestätigter Nutzung. Verträge beinhalten Streitbeilegungsmechanismen und werden nach einem definierten Zeitraum gelöscht. Das Protokoll ist quelloffen und seit etwa April 2025 in Betrieb.',
-                    'Nutzer und Anbieter können direkt mit dem Protokoll interagieren, ohne auf einen Netzbetreiber angewiesen zu sein. Netzbetreiber sind erfahrene Protokollbetreiber, die in der Lage sind, erhebliche Volumina an Smart Contracts zu koordinieren und einzusetzen. Sie können dieses Volumen an Verbraucher weiterverkaufen oder für eigene Zwecke nutzen. In vielen Fällen setzen Netzbetreiber Protokollverträge ein und fungieren als Brücke zwischen alltäglichen Nutzern und dem Protokoll.',
-                    'Das Protokoll ist ein selbstbetriebenes, erlaubnisfreies System, das unabhängig von Netzbetreibern operiert. Die Ökonomie des Protokolls funktioniert über zwei Raten: eine Pro-Gigabyte-Transferrate und eine Pro-Nutzer-Transferrate. Diese beiden Raten decken alle Nutzungsszenarien des Netzwerks ab. Jeder kann das Protokoll nutzen, sofern er eine dieser beiden Raten zahlt.'
+                    'UR ist ein dezentrales Datenschutznetzwerk. Es verteilt den Nutzerverkehr über ein globales Netzwerk unabhängiger Miner mittels Multi-Hop-Routing und geschichteter Verschlüsselung, sodass kein einzelner Miner zugleich sieht, wer ein Nutzer ist und was er tut. Der Transport ist so konzipiert, dass er gewöhnlichem HTTPS ähnelt — N-Schicht-TLS-Verschlüsselung, SNI-Spoofing und Verkehrsununterscheidbarkeit — damit das Netzwerk nahezu überall erreichbar bleibt.',
+                    'Das UR Subnet koordiniert dieses Netzwerk über On-Chain-Anreize auf Bittensor. Netzbetreiber betreiben die Server; unabhängige Miner tragen den Ingress- und Egress-Verkehr; und unabhängige Validatoren durchlaufen fortlaufend vom Betreiber zugewiesene Ketten von Minern, um Echtzeit-Transit nachzuweisen und zu messen, welche Miner die schwächsten Glieder sind. Diese Messung ist das zentrale Signal, für das das Netzwerk zahlt.',
+                    'Bittensors Yuma Consensus verwandelt die Messungen der Validatoren in Token-Emission, und ein Smart Contract auf der Subtensor EVM wickelt die Auszahlungen ab. Das Protokoll ist quelloffen, und der Betrieb eines Miners oder eines Validators ist erlaubnisfrei.'
                 ]
             },
             {
                 numeral: 'II.',
-                title:   'Rollentrennung',
+                title:   'Rollen',
                 body: [
-                    'Das Protokoll operiert völlig unabhängig und würde funktionsfähig bleiben, wenn das Unternehmen, das es eingesetzt hat, die Wartung einstellen würde. Betrieb und Nutzen des Protokolls hängen nicht von den fortlaufenden unternehmerischen Bemühungen einer einzelnen Einheit ab.',
-                    'Nutzer und Anbieter müssen keine Software oder Hardware eines bestimmten Unternehmens verwenden, um teilzunehmen. Sie können direkt über eigene Code-Deployments mit dem Protokoll interagieren. Das Unternehmen, das das Protokoll eingesetzt hat, beabsichtigt, seine Rolle als Deployer des Protokolls, als Netzbetreiber, der das Protokoll für den Betrieb von Diensten nutzt, und als gegenwärtiger Verwalter des Protokolls klar zu unterscheiden.'
+                    'Netzbetreiber betreiben die Datenschutzserver und den Verifizierungsendpunkt. Ein Betreiber zahlt in das Subnet ein, signiert jeden gemessenen Pfad mit und legt eine Auszahlungsliste fest, die seine Belohnungen auf die ihm zugeordneten Miner aufteilt. Ein Betreiber bestimmt, wohin seine Belohnungen fließen, verwahrt aber niemals fremde Gelder.',
+                    'Miner sind der Ingress und Egress des Netzwerks. Sie betreiben ein standardmäßig sicheres Sicherheitsmodell, blockieren bekannte bösartige IPs und leiten nur verschlüsselten Verkehr weiter. Ein Miner trägt Verkehr für einen oder mehrere Betreiber und wird für die routbare Kapazität bezahlt, die er beisteuert.',
+                    'Validatoren sind unabhängig. Jeder setzt sein eigenes $UR ein, führt das Routing-Verifizierungsprotokoll aus und bewertet den Pool jedes Betreibers nach Nachfrage und gemessener Qualität. Validatoren verdienen die nativen Dividenden des Netzwerks für genaue, konsenskonforme Bewertung — kein Betreiber besitzt einen Validator, und die Menge ist erlaubnisfrei.',
+                    'Der Subnet-Eigentümer — BringYour, Inc. — verwaltet den Abrechnungsvertrag und betreibt die Reserve des Netzwerks. Diese Rolle ist übergangsweise: Die Kontrolle beginnt zentralisiert, aber begrenzt und dezentralisiert sich schrittweise (Abschnitt V).'
                 ]
             },
             {
                 numeral: 'III.',
-                title:   'Einführung des $UR-Tokens',
+                title:   'Der $UR-Token',
                 body: [
-                    'Innerhalb des Protokolls soll der Token als Zahlungs- und Abrechnungsinstrument fungieren. Token werden im Zusammenhang mit diskreten Netzwerkoperationen verwendet und im Rahmen dieser Operationen verbraucht oder zugeteilt. Der Token ist nicht dafür konzipiert, Rechte auf Gewinne, Einkommen oder Renditen zu gewähren, und dient ausschließlich als Mittel für den Zugang zum und die Teilnahme am Protokoll.',
-                    'Nutzer verwenden Token, indem sie diese vor der Netzwerknutzung in programmatische Verträge einzahlen, wobei die Preise auf Datenübertragung und Nutzeraktivität basieren. Eingezahlte Token finanzieren vertragsbasierte Bandbreitentransaktionen zwischen Nutzern und Anbietern, wobei Teile während der Ausführung treuhänderisch gehalten werden. Bei der Abrechnung werden Token in einen Belohnungspool verteilt und basierend auf Leistungskennzahlen an Anbieter zugeteilt.',
-                    'Nach Abschluss jedes Blocks (eine Woche) werden 97,5 % der verwendeten Token an Anbieter verteilt und 2,5 % durch Absorption aus dem Umlauf genommen. Zur Absorption geleitete Token werden nicht umverteilt und aus der Protokoll-Buchhaltung für zukünftige Vertragsabrechnungen ausgeschlossen. Dieser Mechanismus dient der Ausbalancierung von Netzwerknutzung und Ressourcenzuteilung.',
-                    'Das Gesamtangebot ist auf 1.000.000.000 Token festgelegt, alle bei Genesis geprägt, ohne laufende Inflation. Bei der Token-Generierung ist die Zuteilung wie folgt:',
-                    { type: 'table', head: ['Kategorie', '%', 'Token', 'Vesting'], rows: [
-                        ['Contributor Rewards', '20%', '200.000.000', '1 Jahr Vesting, 2 Jahre lineare Freigabe'],
-                        ['Team & Advisors',     '23%', '230.000.000', '1 Jahr Vesting, bis zu 2 Jahre lineare Freigabe'],
-                        ['Equity Investors',    '15%', '150.000.000', '1 Jahr Vesting, 2 Jahre lineare Freigabe'],
-                        ['Treasury',            '2%',  '20.000.000',  'Lineare Freigabe über 1 Jahr'],
-                        ['Strategic Reserve',   '40%', '450.000.000', 'Reserviert für zukünftige Protokollnutzung (0 Inflation)']
+                    '$UR ist der native Token des Subnets — die Recheneinheit für Einzahlungen, Emission und Abrechnung. Es ist ein Utility-Token zur Koordinierung und Bezahlung von Netzwerkressourcen; es ist nicht dafür konzipiert, irgendein Recht auf Gewinne, Einkommen oder Renditen darzustellen oder zu gewähren.',
+                    'Neues $UR wird von Bittensors Coinbase in jedem Zyklus emittiert und dreifach aufgeteilt:',
+                    { type: 'table', head: ['Strom', 'Anteil', 'Empfänger'], rows: [
+                        ['Eigentümer', '18%', 'BringYour, Inc. — Subnet-Eigentümer und Netzwerkreserve'],
+                        ['Miner',      '41%', 'Miner — über Betreiber-Pools und Top-Level-Miner-Slots'],
+                        ['Validatoren','41%', 'Unabhängige Validatoren — native Dividenden für genaue Bewertung']
                     ]},
-                    'Etwa 2 % des Angebots (20 Millionen Token) werden voraussichtlich für Liquiditätszwecke im Anfangsumlauf sein.'
+                    'Betreiber finanzieren das Netzwerk, indem sie $UR in Höhe ihrer tatsächlichen Nutzung zu einem veröffentlichten Referenzsatz einzahlen. Eine Einzahlung ist ein kostspieliges, umsatzgedecktes Signal echter Nachfrage — und sie ist Überzeugungseinsatz (Conviction Stake): Der Vertrag überführt jede Einzahlung in eine gesperrte Reserve, wo sie anwächst und niemals umverteilt wird, wodurch $UR im Verhältnis zur tatsächlichen Nutzung dauerhaft aus dem liquiden Angebot entfernt wird. Der kumulierte gesperrte Einsatz eines Betreibers senkt den Satz, den er hinterlegen muss, sodass engagierte Betreiber mit weniger Vorabkapital einsteigen können.',
+                    'Miner werden aus der Emission bezahlt, nicht aus Einzahlungen. Da Einzahlungen gesperrt statt wiederverwendet werden, wird tatsächliche Nutzung zu einem dauerhaften, wachsenden Kaufgebot unter dem Token statt zu Verkaufsdruck, während die Emission einem festen Zeitplan mit Halbierungen folgt.'
                 ]
             },
             {
                 numeral: 'IV.',
-                title:   'Verteilung und Umlauf',
+                title:   'Zwei Wege zu verdienen',
                 body: [
-                    'Token können auf zwei Wegen erworben werden: direkter Erwerb auf Sekundärmärkten oder Erhalt als Anbieterbelohnungen für zum Netzwerk beigesteuerte Bandbreite.',
-                    'Netzbetreiber können Token auf nicht-exklusiver, marktgetriebener Basis erwerben, um ihre Nutzung des Protokolls zu unterstützen. Diese Aktivität erfolgt ausschließlich zu Verbrauchszwecken und nicht zur Investition oder Marktunterstützung. Das Protokoll ist nicht darauf angewiesen, dass Netzbetreiber Token erwerben, um zu funktionieren, und die Token-Nachfrage ist nicht darauf ausgelegt, von einem einzelnen Teilnehmer oder einer Teilnehmerklasse getrieben zu werden.',
-                    'Netzbetreiber können den Zugang zum Protokoll in Token, Fiatwährung oder tokendenominierten Konditionen verkaufen. Netzbetreiber können Serviceebenen strukturieren, die tokenbasierte Teilnahmesignale oder Zahlungsmethoden integrieren, um den Zugang zu Funktionen innerhalb ihrer Anwendungen anzupassen.',
-                    'Zusammenfassung der Interaktion zwischen den Teilnehmern:',
+                    'Ein einzelner Betreiber kann weit über 100.000 Miner bedienen — weit mehr als die rund 256 On-Chain-Slots eines Subnets — daher bezahlt das Netzwerk Miner über zwei parallel laufende Stufen.',
+                    'Der Pool ist der Einstieg. Jeder Betreiber hält einen On-Chain-Slot für alle seine Miner; Validatoren gewichten diesen Pool nach der Nachfrage des Betreibers und seiner gemessenen Qualität, und jeder Miner beansprucht seinen Anteil direkt vom Abrechnungsvertrag mit einem kryptografischen Nachweis. Es gibt keinen Slot zu gewinnen und nichts zu verbrennen — hier beginnt ein Miner und verdient eine Grundbelohnung.',
+                    'Top-Level-Miner sind die Spitze des Angebots. Die rund 200 größten Flotten — eingestuft danach, wie viele verschiedene, routbare Exit-IPs sie tatsächlich bedienen, nicht nach Verkehrsvolumen — beanspruchen jeweils ihren eigenen On-Chain-Slot und werden direkt vom Netzwerk bezahlt, ohne Betreiber im Auszahlungspfad. Eine gemeinsam genutzte IP wird auf die Flotten aufgeteilt, die sie beanspruchen, sodass Breite nicht doppelt gezählt werden kann.',
+                    'Die zwei Stufen sind ein einziges Turnier: Ein Miner beginnt in einem Pool, steigt zu einem Top-Slot auf, wenn seine routbare IP-Breite wächst, und fällt in den Pool zurück, wenn er abrutscht. Ein per Governance festgelegter Anteil teilt die Emission zwischen Spitze und Ausläufer auf.',
                     { type: 'list', items: [
-                        'Ein Nutzer kann Token auf dem offenen Markt kaufen und sie nutzen, um direkt mit dem Protokoll zu interagieren (einschließlich der Möglichkeit, Netzbetreiber zu werden), oder sich auf einen Netzbetreiber verlassen, um auf das Protokoll zuzugreifen, ohne Token zu berühren.',
-                        'Ein Anbieter erhält Token für die Bereitstellung von Bandbreite an das Protokoll.',
-                        'Netzbetreiber erwerben, halten und geben Token aus, um ihre Dienste ihren Kunden zur Verfügung zu stellen, die je nach Art der Dienste Nutzer sein können oder nicht.'
+                        'Pool-Stufe — der Einstieg: einem Betreiber ohne Slot und ohne Registrierungskosten beitreten; Validatoren gewichten den Pool nach Nachfrage und Qualität; jeder Miner beansprucht seinen Anteil per Nachweis in jedem Abrechnungszeitraum.',
+                        'Top-Level-Miner — die Spitze: die ~200 Flotten mit der breitesten routbaren IP-Abdeckung beanspruchen ihren eigenen Slot und werden direkt vom Netzwerk bezahlt, ohne Betreiber, ohne Pool und ohne Zwischenhändler.'
                     ]}
                 ]
             },
             {
                 numeral: 'V.',
-                title:   'Staking und Integritätsmechanismen',
+                title:   'Verwahrung, Abrechnung und Dezentralisierung',
                 body: [
-                    'Das Protokoll bietet keine passiven Erträge oder Renditen auf Token. Jegliche Unterschiede in den Ergebnissen zwischen Teilnehmern sind ausschließlich eine Funktion von Unterschieden in Aktivität, Zuverlässigkeit und Netzwerknutzung. Das Protokoll verfügt über eine eingebaute Form der operativen Qualifikation und Priorisierung — Integritätsmechanismen — die Engagement, Zuverlässigkeit und Teilnahmequalität signalisieren und die das Protokoll zur Priorisierung der Ressourcenzuteilung und Vertragsauswahl nutzt.',
-                    { type: 'list', items: [
-                        'Verbraucher-Staking: Netzbetreiber können Serviceebenen anbieten, die tokenbasierte Authentifizierung oder Teilnahmesignale integrieren, um den Zugang zu Funktionen innerhalb ihrer Anwendungen anzupassen.',
-                        'Entwickler-Staking: Entwickler, die Token-Guthaben halten, sind für reduzierte Netzwerkgebühren berechtigt — als Teil einer nutzungsbasierten Preisstruktur, die fest im Protokoll verankert ist und nachhaltige Integration sowie langfristige Netzwerkteilnahme fördern soll.',
-                        'Anbieter-Staking: Anbieter, die Token sperren, werden bei der Vertragszuweisung auf Basis nachgewiesenen Engagements und Zuverlässigkeit priorisiert. Anbieter, die $UR sperren, erhalten größere Belohnungsanteile im Block-End-Belohnungszyklus basierend auf einem Gewichtungsmultiplikator (1,0x, 1,25x, 1,5x oder 2,0x). Diese angepassten Multiplikatoren erzeugen keine Inflation — der Gesamtbelohnungspool der Epoche ist fest. Anbieter ohne Staking verdienen weiterhin Belohnungen in kleineren proportionalen Anteilen.'
-                    ]},
-                    'Diese Integritätsmechanismen unterstützen den zuverlässigen Betrieb, die Leistung und Verfügbarkeit des Protokolls, indem sie den Netzwerkzugang und die Ressourcenzuteilung mit nachweisbarer Teilnahme und Servicequalität in Einklang bringen. Für jede Teilnehmerkategorie dienen diese Mechanismen der Förderung einer effektiven Netzwerknutzung und nicht der Bereitstellung wirtschaftlicher Vorteile auf Basis passiven Token-Besitzes.'
+                    'Die Abrechnung läuft in einem Sieben-Tage-Zyklus. Der Vertrag sammelt die Emission jedes Pools über den Zeitraum an und öffnet dann die Ansprüche: Miner beziehen ihr $UR direkt vom Vertrag gegen die festgelegte Auszahlungsliste ihres Betreibers. Top-Level-Miner benötigen keinen Abrechnungsschritt — die Chain bezahlt ihren Slot in jedem Zyklus nativ.',
+                    'Niemand verwahrt fremde Gelder. Der Abrechnungsvertrag ist der alleinige Verwahrer von in Transit befindlichem $UR, jede Pool-Auszahlung ist ein direkter On-Chain-Anspruch, und Top-Level-Miner werden nativ auf ihre eigenen Schlüssel bezahlt. Betreiber und der Eigentümer nehmen niemals die Belohnungen der Miner in Verwahrung.',
+                    'Verdiente Ansprüche sind endgültig. Sobald ein Abrechnungszeitraum finalisiert ist, sind die Token, die seine Ansprüche decken, verbindlich festgelegt — kein Upgrade, keine Pause und keine administrative Maßnahme kann sie blockieren oder rückgängig machen. Die gesperrte Reserve ist nach demselben Maßstab einseitig: Keine Funktion kann Gelder aus ihr herausbewegen.',
+                    'Die Kontrolle dezentralisiert sich mit der Zeit. Das Netzwerk startet mit einem hinter einer Eigentümer-Multisig aktualisierbaren Vertrag — bewusste, begrenzte zentrale Kontrolle für frühe Fehlerbehebungen — und wird stufenweise gehärtet: ein öffentlicher Timelock für jede Änderung, ein reiner Pause-Guardian, der einen Exploit stoppen, aber niemals Gelder bewegen oder finalisierte Ansprüche blockieren kann, und mit der Zeit On-Chain-Governance sowie ein unveränderlicher Abrechnungskern.'
                 ]
             }
+        ],
+        source: { label: 'Das vollständige Whitepaper lesen', href: 'https://github.com/urfoundation/sn/' }
+    },
+
+    operators: {
+        eyebrow: 'Betreiber',
+        title:   'Die Betreiber, die das Netzwerk betreiben.',
+        intro:   'Netzbetreiber betreiben die Datenschutzserver und den Verifizierungsendpunkt. Ein Betreiber zahlt als kostspieliges, umsatzgedecktes Signal echter Nachfrage in das Subnet ein, führt das Routing-Verifizierungsprotokoll aus, das jeden gemessenen Pfad mitsigniert, und legt die Auszahlungsliste fest, die seine Belohnungen auf die ihm zugeordneten Miner aufteilt. Betreiber bestimmen, wohin Belohnungen fließen, verwahren aber niemals fremde Gelder.',
+        roles: [
+            { tag: '01', title: 'Die Server betreiben',    body: 'Betreiber betreiben die Datenschutzserver und den /verify-Endpunkt, der jeden gemessenen Pfad mitsigniert — die Koordinationsschicht zwischen Nutzern und den Minern, die den Verkehr tragen.' },
+            { tag: '02', title: 'Echte Nachfrage signalisieren',  body: 'Betreiber zahlen $UR in Höhe ihrer tatsächlichen Nutzung ein. Jede Einzahlung ist Überzeugungseinsatz, gesperrt in der Rückkaufreserve — niemals umverteilt —, also ein kostspieliges, umsatzgedecktes Signal, das Validatoren gewichten, wenn sie die Pools bewerten.' },
+            { tag: '03', title: 'Die Auszahlungen steuern',  body: 'In jedem Abrechnungszeitraum legt ein Betreiber eine Merkle-Auszahlungsliste fest, die seinen Pool auf seine Miner aufteilt. Er steuert die Aufteilung, nimmt aber niemals etwas in Verwahrung — jeder Miner beansprucht seinen Anteil direkt vom Vertrag.' },
+            { tag: '04', title: 'Erste Schritte',         body: 'Registriere einen Netzbetreiber-Schlüssel, betreibe den /verify-Server und zahle ein, um zu beginnen. Die Zulassung von Betreibern erfolgt während der Startphase durch den Eigentümer.', href: 'https://ur.xyz', linkLabel: 'Betreiber-Dokumentation' }
+        ]
+    },
+
+    miners: {
+        eyebrow: 'Miner',
+        title:   'Die Miner, die den Verkehr tragen.',
+        intro:   'Miner sind das Angebot des Netzwerks — sie tragen sowohl den Ingress- als auch den Egress-Verkehr. Sie betreiben ein standardmäßig sicheres Sicherheitsmodell, leiten nur verschlüsselten Verkehr weiter, registrieren sich bei einem oder mehreren Betreibern und werden aus der Subnet-Emission für die routbare Kapazität bezahlt, die sie beisteuern. Miner konkurrieren um Reichweite: Die Flotten, die die meisten verschiedenen, routbaren IP-Subnetze bedienen, werden zu Top-Level-Minern befördert und verdienen mehr. Alles läuft im User-Space, auf Hardware, die du bereits besitzt.',
+        roles: [
+            { tag: '01', title: 'Egress',              body: 'Egress-Miner sind die Exit-IPs des gemeinsamen Netzwerks. Sie lehnen Verkehr ab, der gängigen Regulierungsrichtlinien wie CFAA und DMCA widerspricht, blockieren bekannte bösartige IPs und leiten nur verschlüsselten Verkehr weiter — was sowohl Miner als auch Nutzer schützt.' },
+            { tag: '02', title: 'Ingress',             body: 'Ingress-Miner (Erweiterer) schaffen Einstiegspunkte, die die Erreichbarkeit weltweit verbessern — mittels N-Schicht-TLS, SNI-Spoofing und vertrauenswürdiger Weiterleitung. Eine rotierende Teilmenge wird in jedem Zyklus exponiert, und Clients versuchen automatisch erneut die Einstiegspunkte, die zuvor funktioniert haben.' },
+            { tag: '03', title: 'Gemessen und zugeordnet',body: 'Unabhängige Validatoren durchlaufen Ketten von Minern, um Echtzeit-Transit nachzuweisen und Lebendigkeit sowie Qualität zu messen. Miner werden nach dieser Messung und nach Geschwindigkeit eingestuft, und jeder Betreiber betreibt seine eigene Zuordnung zwischen Nutzern und Minern.' },
+            { tag: '04', title: 'Aus der Emission verdienen',  body: 'Miner werden aus der Emission des Subnets bezahlt. Innerhalb des Pools eines Betreibers beanspruchst du deinen Anteil bei jeder Abrechnung per Nachweis — eine niedrigschwellige Grundbelohnung, ohne Slot zu gewinnen und ohne etwas zu verbrennen.', href: 'https://docs.ur.io/provider', linkLabel: 'Miner-Dokumentation' },
+            { tag: '05', title: 'Um die Spitze konkurrieren',  body: 'Miner konkurrieren um Reichweite. Das Netzwerk stuft Flotten danach ein, wie viele verschiedene, routbare Exit-IPs sie tatsächlich bedienen — nicht nach Verkehrsvolumen — und die rund 200 mit der breitesten Abdeckung werden zu Top-Level-Minern befördert: ein eigener On-Chain-Slot, nativ bezahlt, mit höherem Verdienst. Gemeinsam genutzte IPs werden auf die Flotten aufgeteilt, die sie beanspruchen, sodass einzigartige Abdeckung entscheidet — vergrößere deine Breite an verschiedenen IPs, um aufzusteigen, und wenn deine Reichweite nachlässt, fällst du in den Pool zurück.' }
+        ]
+    },
+
+    validators: {
+        eyebrow: 'Validatoren',
+        title:   'Die Validatoren, die das Netzwerk vermessen.',
+        intro:   'Validatoren sind unabhängig. Jeder setzt sein eigenes $UR ein und führt das Routing-Verifizierungsprotokoll aus — dabei durchläuft er fortlaufend vom Betreiber zugewiesene Ketten von Minern, um Echtzeit-Transit nachzuweisen und zu messen, welche Miner die schwächsten Glieder sind. Diese Messung ist das zentrale Signal, für das das Netzwerk zahlt, und Validatoren verdienen native Dividenden dafür, sie genau zu erzeugen.',
+        roles: [
+            { tag: '01', title: 'Die Routen durchlaufen',        body: 'Validatoren durchlaufen vom Betreiber zugewiesene Ketten von Minern und sammeln eine signierte, selbstbeweisende Aufzeichnung jedes abgeschlossenen Hops — kryptografischer Beweis von Echtzeit-Transit, den jeder überprüfen kann.' },
+            { tag: '02', title: 'Das Netzwerk bewerten',      body: 'In jedem Zyklus bewertet ein Validator den Pool jedes Betreibers nach Nachfrage und gemessener Qualität und stuft die Top-Flotten nach routbarer IP-Breite ein — alles unter Commit-Reveal. Bittensors Yuma Consensus verwandelt diese unabhängigen Bewertungen in Miner-Emission.' },
+            { tag: '03', title: 'Native Dividenden verdienen',  body: 'Validatoren verdienen Bittensor-native Dividenden für genaue, konsenskonforme Bewertung — ihre einzige Belohnung. Kein Betreiber besitzt einen Validator, und die Menge ist erlaubnisfrei.' },
+            { tag: '04', title: 'Von Grund auf unabhängig',  body: 'Da Commit-Reveal die Bewertungen jedes Validators verbirgt, bis sie veraltet sind, bringt Kopieren nichts — ein Validator muss die Routen wirklich selbst durchlaufen. Die Messung bleibt ehrlich, und keine einzelne Partei kontrolliert sie.' }
         ]
     },
 
     research: {
         eyebrow: 'Forschung',
         title:   'Offene Algorithmen, offene Daten.',
-        intro:   'Das Protokoll ist ein dezentral-natives Multi-IP-Multi-Transport-System, das auf Millionen von Anbietern pro Netzbetreiber skalieren soll. Jeder Algorithmenbereich unten ist mit seinem Quellcode und, wo zutreffend, anonymisierten Datensätzen für unabhängige Analyse veröffentlicht.',
+        intro:   'Das Protokoll ist ein dezentral-natives Multi-IP-, Multi-Transport-System, das auf Millionen von Minern pro Netzbetreiber skalieren soll. Jeder Algorithmenbereich unten ist mit seinem Quellcode und, wo zutreffend, mit anonymisierten Datensätzen für unabhängige Analyse veröffentlicht.',
         papers: [
             { tag: 'URTRANSPORT1', title: 'Leistung',
               body: 'Multi-Hop-Routing über TCP-Transporte mit Fokus auf globale Erreichbarkeit. UDP- und Peer-to-Peer-Stream-Upgrades werden unterstützt, die Integration von WebRTC, XRay und WireGuard ist geplant.',
@@ -115,11 +149,11 @@ export default {
             { tag: 'UREXTENDER1', title: 'Erreichbarkeit',
               body: 'N-Schicht-TLS-Verschlüsselung (N≥2), bei der jede äußere Schicht ein selbstsigniertes Zertifikat mit SNI-Spoofing zu einer Zwischen-IP verwendet und an einen weiteren Hop oder eine Ende-zu-Ende-TLS-Verbindung weiterleitet. Jeder kann einen Erweiterer auf jeder Domain hosten.',
               href: 'https://github.com/urnetwork/connect/blob/main/net_extender.go', linkLabel: 'net_extender.go' },
-            { tag: 'UR-FP2', title: 'Client-Anbieter-Zuordnung',
-              body: 'Sampling-Algorithmus, der eine 10-fache Zufallsstichprobe potenzieller Anbieter lädt und proportional zu Zuverlässigkeit × Client-Bewertung mischt. Sybil-Resistenz wird durch die Bedingung garantiert, dass die Zuverlässigkeitssumme pro IP-Subnetz höchstens 1 beträgt.',
+            { tag: 'UR-FP2', title: 'Client-Miner-Zuordnung',
+              body: 'Sampling-Algorithmus, der eine 10×-Zufallsstichprobe potenzieller Miner lädt und proportional zu Zuverlässigkeit × Client-Bewertung mischt. Sybil-Resistenz wird durch die Bedingung garantiert, dass die Summe der Zuverlässigkeit pro IP-Subnetz höchstens 1 beträgt.',
               href: 'https://github.com/urnetwork/server/blob/main/model/network_client_location_model.go', linkLabel: 'network_client_location_model.go' },
             { tag: 'UR-MULTI', title: 'Multi-Client',
-              body: 'Heuristischer Sweep-Algorithmus, der ein Fenster von Anbietern verwaltet. Sperrt den Verkehr in die beste verfügbare Stufe basierend auf Übertragungsschwellen statt Protokollanalyse.',
+              body: 'Heuristischer Sweep-Algorithmus, der ein Fenster von Minern verwaltet. Sperrt den Verkehr in die beste verfügbare Stufe basierend auf Übertragungsschwellen statt Protokollanalyse.',
               href: 'https://github.com/urnetwork/connect/blob/main/ip_remote_multi_client.go', linkLabel: 'ip_remote_multi_client.go' },
             { tag: 'UR-TRANSFER', title: 'Übertragung',
               body: 'Zuverlässiges Zustellungsfenster, optimiert für Umgebungen mit hoher Latenz. Protokoll-Neuübertragungen sind deaktiviert, da das Fenster zuverlässige Zustellung gewährleistet. Verteilt den Verkehr über Transporte nach Leistungsranking.',
@@ -127,61 +161,26 @@ export default {
             { tag: 'UR-IP', title: 'IP-Egress',
               body: 'IP-Stack-Implementierung mit minimalem Speicherverbrauch. Setzt zuverlässige Peer-Kommunikation über die Übertragungsschicht voraus, daher werden Neuübertragungen entsprechend optimiert.',
               href: 'https://github.com/urnetwork/connect/blob/main/ip.go', linkLabel: 'ip.go' },
-            { tag: 'UR-PSUB2', title: 'Token-Zuteilung',
-              body: 'Blockbelohnungen werden alle 7 Tage proportional zu Datenübertragungs-Votes, Zuverlässigkeitsbewertungen und Empfehlungen verteilt. Bezahlter Abonnenten-Verkehr wird priorisiert, um Gaming entgegenzuwirken. Multiplikator-Boni gelten für Zuverlässigkeit und Community-Anreize.',
+            { tag: 'UR-PSUB2', title: 'Belohnungszuteilung',
+              body: 'Unabhängige Validatoren bewerten jeden Betreiber-Pool nach Nachfrage und gemessener Qualität; Bittensors Yuma Consensus verwandelt diese Bewertungen in Emission. Innerhalb eines Pools stuft ein Betreiber seine Miner nach bedienten Verträgen und Zuverlässigkeit ein, legt in jedem Zyklus eine Merkle-Auszahlungswurzel fest, und jeder Miner beansprucht seinen Anteil direkt vom Abrechnungsvertrag.',
               href: 'https://github.com/urnetwork/server/blob/main/model/account_payment_model_plan.go', linkLabel: 'account_payment_model_plan.go' },
             { tag: 'UR-CONTRACT', title: 'Berechtigung',
               body: 'Die Übertragung zwischen Parteien erfordert einen verschlüsselten Vertrag mit Treuhandguthaben und einem Berechtigungssatz. Beide Seiten müssen mit bestätigten Byte-Zählern abschließen; Meinungsverschiedenheiten lösen einen erzwungenen Lösungsprozess aus.',
               href: 'https://github.com/urnetwork/server/blob/main/model/subscription_model.go', linkLabel: 'subscription_model.go' },
             { tag: 'UR-SEC1', title: 'Sicherheit',
-              body: 'Port-Sperrliste und IP-Sperrliste zum Schutz des Anbieternetzwerks. Führt keine Protokollinspektion durch — Anbieter leiten nur verschlüsselten Verkehr weiter.',
+              body: 'Port-Sperrliste und IP-Sperrliste zum Schutz des Miner-Netzwerks. Führt keine Protokollinspektion durch — Miner leiten nur verschlüsselten Verkehr weiter.',
               href: 'https://github.com/urnetwork/connect/blob/main/ip_security.go', linkLabel: 'ip_security.go' }
-        ]
-    },
-
-    providers: {
-        eyebrow: 'Anbieter',
-        title:   'Der Egress des gemeinsamen Netzwerks.',
-        intro:   'Anbieter sind die Egress-IPs des gemeinsamen Netzwerks. Sie betreiben ein standardmäßig sicheres Sicherheitsmodell, blockieren bekannte bösartige IPs und leiten nur verschlüsselten Verkehr weiter. Anbieter werden nach Geschwindigkeit und Zuverlässigkeit eingestuft, registrieren sich bei einem oder mehreren Netzbetreibern und verdienen einen Anteil am Vertragswert, den sie weiterleiten. Anbieter laufen vollständig im User-Space und benötigen keine Root-Rechte.',
-        roles: [
-            { tag: '01', title: 'Standardmäßig sicher',        body: 'Anbieter lehnen Verkehr ab, der gängigen Regulierungsrichtlinien wie CFAA und DMCA widerspricht. Bekannte Botnetze und bösartige IPs werden blockiert. Nur verschlüsselter Verkehr wird weitergeleitet, was sowohl Anbieter als auch Nutzer schützt.' },
-            { tag: '02', title: 'Eingestuft und zugeordnet',    body: 'Anbieter werden nach Geschwindigkeit und Zuverlässigkeit eingestuft und registrieren sich bei einem oder mehreren Netzbetreibern. Jeder Netzbetreiber betreibt seinen eigenen Zuordnungsalgorithmus zwischen Nutzern und Anbietern.' },
-            { tag: '03', title: 'Anteil verdienen',              body: 'Anbieter verdienen einen Anteil am Vertragswert, den sie weiterleiten. Betreibe einen Anbieter auf Hardware, die du bereits besitzt — keine Root-Rechte erforderlich, alles läuft im User-Space.' },
-            { tag: '04', title: 'Erste Schritte',                body: 'Richte einen Anbieter-Knoten ein und beginne, Bandbreite zum Netzwerk beizutragen.', href: 'https://docs.ur.io/provider', linkLabel: 'Provider docs' }
-        ]
-    },
-
-    extenders: {
-        eyebrow: 'Erweiterer',
-        title:   'Der Ingress, der das Netzwerk weiterträgt.',
-        intro:   'Erweiterer schaffen ein privates oder gemeinsames Netzwerk von Ingress-IPs, die verschiedene Techniken nutzen, um die Konnektivität weltweit zu verbessern. Erweiterer können an bekannte vertrauenswürdige Netzbetreiber, an andere Erweiterer und an vertrauenswürdige Partner-IPs mithilfe der Vertrauenssignierung des Netzbetreibers weiterleiten.',
-        roles: [
-            { tag: '01', title: 'Private Erweiterer',           body: 'Nicht bei Netzbetreibern registriert — agieren als Client des Systems. Nutzer geben die Erweiterer-IP manuell im Client ein, um sich über den Erweiterer zu verbinden.' },
-            { tag: '02', title: 'Öffentliche Erweiterer',       body: 'Registrieren sich bei Netzbetreibern und erhalten einen Anteil am Vertragswert des Protokolls, den sie weiterleiten. Öffentliche Erweiterer wählen, an welche Netzbetreiber sie weiterleiten, und können auch an andere Erweiterer-IPs oder von weitergeleiteten Netzbetreibern signierte IPs weiterleiten.' },
-            { tag: '03', title: 'Rotierende Exposition',        body: 'Eine zufällige Teilmenge öffentlicher Erweiterer wird pro Block (1 Woche) zur Exposition ausgewählt. Die Exposition hängt von der Anrufregion und der Uhrzeit ab. Clients pflegen einen lokalen Cache von Erweiterern, sodass zuvor funktionierende Erweiterer automatisch erneut versucht werden.' },
-            { tag: '04', title: 'Vertrauenswürdige Weiterleitung', body: 'Netzbetreiber können eine vertrauenswürdige IP mit einem Passwort verknüpfen, sodass Erweiterer an jede IP weiterleiten können, die den Vertrauenstest besteht. Das Netzwerk speichert die IP als gesalzenen Hash gemäß den allgemeinen IP-Speicherrichtlinien.' }
         ]
     },
 
     community: {
         eyebrow: 'Gemeinschaft',
         title:   'Die Menschen hinter dem Netzwerk.',
-        intro:   'Das Protokoll ist offen. Die Gemeinschaft, die es aufbaut und betreibt, wächst. Hier findet man sie.',
+        intro:   'Das Protokoll ist offen. Die Gemeinschaft, die es aufbaut und betreibt, wächst. Hier findest du sie.',
         items: [
-            { tag: '01', title: 'Netzbetreiber',  body: 'Netzbetreiber entwickeln Produkte auf dem Protokoll und verkaufen den Zugang zum Netzwerk.', href: 'https://ur.io', linkLabel: 'BringYour, Inc. — ur.io' },
-            { tag: '02', title: 'Discord',          body: 'Tritt dem Gespräch bei — Protokollentwicklung, Anbieter-Support und Community-Diskussion.', href: 'https://discord.gg/urnetwork', linkLabel: 'Discord beitreten' },
-            { tag: '03', title: 'Markenkit',         body: 'URnetwork und das Connector-Logo sind eingetragene US-Marken. Nutzern des Protokolls wird gestattet, das Markenkit als „powered by URnetwork" oder ähnliche Komponentenhinweise zu verwenden.' }
-        ]
-    },
-
-    usage: {
-        eyebrow: 'Nutzung',
-        title:   'Die Menschen, die das Netzwerk bündeln.',
-        intro:   'Netzbetreiber verwandeln den offenen Marktplatz aus Anbietern und Erweiterern in Produkte, die Verbraucher und Unternehmen kaufen können. Sie sind das öffentliche Gesicht des Netzwerks, und das Protokoll hält sie an dieselben Standards wie alle anderen.',
-        roles: [
-            { tag: '01', title: 'Nachfrage bündeln',     body: 'Betreiber bündeln Anbieter und Erweiterer zu Netzwerken, von denen Kunden mit vorhersagbarer Leistung kaufen können.' },
-            { tag: '02', title: 'Qualität verbürgen',    body: 'Betreiber setzen ihren Status für die Bandbreite ein, die sie verkaufen. Schlechter Dienst spiegelt sich im Ledger und in der Rabattkurve wider.' },
-            { tag: '03', title: 'Auf-Protokoll-Abrechnung', body: 'Die gesamte Abrechnung erfolgt über $UR. Betreiber sind denselben Regeln unterworfen wie alle anderen im Netzwerk.' }
+            { tag: '01', title: 'Netzbetreiber',  body: 'Netzbetreiber betreiben Server, zahlen in das Subnet ein und verkaufen den Zugang zum Netzwerk.', href: 'https://ur.io', linkLabel: 'BringYour, Inc. — ur.io' },
+            { tag: '02', title: 'Discord',             body: 'Tritt dem Gespräch bei — Protokollentwicklung, Miner-Support und Community-Diskussion.', href: 'https://discord.gg/urnetwork', linkLabel: 'Discord beitreten' },
+            { tag: '03', title: 'Markenkit',           body: 'URnetwork und das Connector-Logo sind eingetragene US-Marken. Nutzern des Protokolls wird gestattet, das Markenkit als „powered by URnetwork" oder ähnliche Komponentenhinweise zu verwenden.' }
         ]
     }
 };

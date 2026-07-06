@@ -9,9 +9,10 @@ interface Props {
         title: string;
         body: Array<string | { type: 'table'; head: string[]; rows: string[][] } | { type: 'list'; items: string[] }>;
     }>;
+    source?: { label: string; href: string };
 }
 
-const { clauses } = Astro.props;
+const { clauses, source } = Astro.props;
 ---
 <div class="article-grid">
     {clauses.map(c => (
@@ -39,3 +40,8 @@ const { clauses } = Astro.props;
         </article>
     ))}
 </div>
+{source && (
+    <p class="article-source">
+        <a href={source.href} target="_blank" rel="noopener noreferrer">{source.label} &rarr;</a>
+    </p>
+)}

@@ -5,6 +5,7 @@ import Section from '../components/Section.astro';
 import WhitepaperClauses from '../components/WhitepaperClauses.astro';
 import FooterStatic from '../components/FooterStatic.astro';
 import HeroIsland from '../islands/HeroIsland.jsx';
+import NetworkDiagram from '@react/components/NetworkDiagram.jsx';
 import en from '@react/i18n/en.js';
 
 const t = en;
@@ -16,7 +17,8 @@ const t = en;
 
         <main>
             <Section id="whitepaper" eyebrow={t.whitepaper.eyebrow} title={t.whitepaper.title} variant="whitepaper">
-                <WhitepaperClauses clauses={t.whitepaper.clauses} />
+                <NetworkDiagram client:load active="subnet" lang="en" />
+                <WhitepaperClauses clauses={t.whitepaper.clauses} source={t.whitepaper.source} />
             </Section>
         </main>
 

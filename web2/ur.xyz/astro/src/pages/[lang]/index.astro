@@ -5,6 +5,7 @@ import Section from '../../components/Section.astro';
 import WhitepaperClauses from '../../components/WhitepaperClauses.astro';
 import FooterStatic from '../../components/FooterStatic.astro';
 import HeroIsland from '../../islands/HeroIsland.jsx';
+import NetworkDiagram from '@react/components/NetworkDiagram.jsx';
 import { NON_EN_LANGS, LANGS, getDict } from '../../lib/i18n.js';
 
 export function getStaticPaths() {
@@ -22,7 +23,8 @@ const dir = LANGS[lang]?.dir || 'ltr';
 
         <main>
             <Section id="whitepaper" eyebrow={t.whitepaper.eyebrow} title={t.whitepaper.title} variant="whitepaper">
-                <WhitepaperClauses clauses={t.whitepaper.clauses} />
+                <NetworkDiagram client:load active="subnet" lang={lang} />
+                <WhitepaperClauses clauses={t.whitepaper.clauses} source={t.whitepaper.source} />
             </Section>
         </main>
 

@@ -1,15 +1,18 @@
 import React from 'react';
 import Section from '../Section';
+import NetworkDiagram from '../NetworkDiagram';
+import ValidatorSim from '../ValidatorSim';
 import { useLanguage } from '../../i18n';
 
-export default function Providers() {
-    const { t } = useLanguage();
+export default function Validators() {
+    const { t, code } = useLanguage();
+    const s = t.validators;
     return (
-        <Section id="providers" eyebrow={t.providers.eyebrow} title={t.providers.title}>
-            <p>{t.providers.intro}</p>
-
+        <Section id="validators" eyebrow={s.eyebrow} title={s.title}>
+            <p>{s.intro}</p>
+            <NetworkDiagram active="validators" lang={code} />
             <div className="card-grid">
-                {t.providers.roles.map(r => (
+                {s.roles.map(r => (
                     <div className="card" key={r.tag}>
                         <div className="card-eyebrow">{r.tag}</div>
                         <h3 className="card-title">{r.title}</h3>
@@ -22,6 +25,7 @@ export default function Providers() {
                     </div>
                 ))}
             </div>
+            <ValidatorSim />
         </Section>
     );
 }

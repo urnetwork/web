@@ -1,16 +1,18 @@
-// Español
+// Español — refleja en.js (la fuente canónica) clave por clave.
+// Si se añade una clave allí, hay que añadirla también aquí.
 export default {
     nav: {
         whitepaper: 'Whitepaper',
+        operators:  'Operadores',
+        miners:     'Mineros',
+        validators: 'Validadores',
         research:   'Investigación',
-        providers:  'Proveedores',
-        extenders:  'Extensores',
         community:  'Comunidad',
         usage:      'Uso',
         docs:       'Documentación',
         tagline:    'Posee tu privacidad. Posee tu red.',
         languageMenu: 'Idioma',
-        ctaAria:    'Uso — costos actuales de la red'
+        ctaAria:    'Uso — actividad actual de la red'
     },
 
     footer: {
@@ -22,166 +24,163 @@ export default {
     },
 
     stats: {
-        protocolLedger:  'Libro del protocolo',
-        block:           'Bloque',
-        totalFees:       'Comisiones totales ($UR)',
+        protocolLedger:  'Libro de la subred',
+        block:           'Época',
+        totalFees:       'Depósitos ($UR)',
         totalData:       'Datos totales',
         totalUsers:      'Usuarios totales',
         totalSupply:     'Suministro total de $UR',
-        totalDistributed:'Total distribuido',
-        urAbsorbed:      '$UR absorbidos',
-        statusHeld:      'Estatus retenido ($UR)'
+        totalDistributed:'Emisión distribuida',
+        urAbsorbed:      'Reserva de recompra ($UR)',
+        statusHeld:      'Retenido en el contrato ($UR)'
     },
 
     whitepaper: {
         eyebrow: 'Whitepaper',
-        title:   'Un token para la red abierta.',
+        title:   'Una red de privacidad, coordinada en Bittensor.',
         clauses: [
             {
                 numeral: 'I.',
-                title:   'Descripción general de URnetwork',
+                title:   'Una red de privacidad descentralizada',
                 body: [
-                    'URnetwork es un protocolo descentralizado de infraestructura de privacidad diseñado para permitir la "encriptación total de internet" mitigando la exposición de metadatos inherente a la suite de protocolos TCP/IP. Si bien la mayor parte del tráfico de internet está encriptado a nivel de contenido, los metadatos como las direcciones IP de origen y destino permanecen visibles para los intermediarios. El protocolo distribuye el tráfico de los usuarios a través de una red global de proveedores independientes usando enrutamiento multi-salto y encriptación por capas, de modo que ningún proveedor individual tiene acceso tanto a la identidad del usuario como al contenido de las comunicaciones. El protocolo incorpora técnicas como encriptación TLS de N capas, suplantación de SNI e indistinguibilidad del tráfico para asemejarse al tráfico HTTPS estándar.',
-                    'La arquitectura del protocolo separa el transporte, el enrutamiento, la asignación y la liquidación en componentes distintos. Los usuarios se conectan a través de software cliente que enruta dinámicamente el tráfico a través de múltiples proveedores basándose en métricas de rendimiento y fiabilidad. La transferencia de datos ocurre a través de contratos encriptados entre usuarios y proveedores, con saldos en custodia, permisos definidos y liquidación posterior basada en el uso confirmado. Los contratos incluyen mecanismos de resolución de disputas y se eliminan después de un período definido. El protocolo es de código abierto y ha estado operativo desde aproximadamente abril de 2025.',
-                    'Los usuarios y proveedores pueden interactuar directamente con el protocolo sin depender de ningún operador de red. Los operadores de red son operadores sofisticados del protocolo capaces de coordinar y desplegar volúmenes significativos de contratos inteligentes. Pueden revender ese volumen a consumidores o usarlo para sus propios fines. En muchos casos, los operadores de red despliegan contratos del protocolo actuando como puente entre los usuarios cotidianos y el protocolo.',
-                    'El protocolo es un sistema autooperado y sin permisos que opera independientemente de los operadores de red. La economía del protocolo opera mediante dos tarifas: una tarifa de transferencia por gigabyte y una tarifa de transferencia por usuario. Estas dos tarifas abarcan todos los casos de uso de la red. Cualquier persona puede utilizar el protocolo siempre que pague una de estas dos tarifas.'
+                    'UR es una red de privacidad descentralizada. Distribuye el tráfico de los usuarios a través de una red global de mineros independientes mediante enrutamiento multi-salto y encriptación por capas, de modo que ningún minero individual ve al mismo tiempo quién es un usuario y qué está haciendo. El transporte está diseñado para asemejarse al tráfico HTTPS ordinario —encriptación TLS de N capas, suplantación de SNI e indistinguibilidad del tráfico— de modo que la red permanece accesible en casi todas partes.',
+                    'La UR Subnet coordina esta red mediante incentivos on-chain en Bittensor. Los operadores de red ejecutan los servidores; los mineros independientes transportan el tráfico de entrada y de salida; y los validadores independientes recorren continuamente cadenas de mineros asignadas por los operadores para probar el tránsito en tiempo real y medir qué mineros son los eslabones más débiles. Esa medición es la señal central por la que paga la red.',
+                    'El Yuma Consensus de Bittensor convierte las mediciones de los validadores en emisión de tokens, y un contrato inteligente en la Subtensor EVM liquida los pagos. El protocolo es de código abierto, y ejecutar un minero o un validador es sin permisos.'
                 ]
             },
             {
                 numeral: 'II.',
-                title:   'Separación de roles',
+                title:   'Roles',
                 body: [
-                    'El protocolo opera de forma completamente independiente y seguiría siendo funcional si la empresa que lo desplegó dejara de mantenerlo. La operación y utilidad del protocolo no dependen de los esfuerzos gerenciales o empresariales continuos de ninguna entidad individual.',
-                    'Los usuarios y proveedores no necesitan usar software o hardware proporcionado por ninguna empresa en particular para participar. Pueden interactuar directamente con el protocolo mediante sus propios despliegues de código. La empresa que desplegó el protocolo tiene la intención de distinguir claramente entre su papel como desplegador del protocolo, como operador de red que usa el protocolo para operar servicios, y como administrador actual del protocolo.'
+                    'Los operadores de red ejecutan los servidores de privacidad y el punto de verificación. Un operador deposita en la subred, co-firma cada ruta medida y registra una lista de pagos que reparte sus recompensas entre los mineros asociados a él. Un operador dirige a dónde van sus recompensas, pero nunca custodia los fondos de nadie más.',
+                    'Los mineros son la entrada y la salida de la red. Ejecutan un modelo de seguridad seguro por defecto, bloquean IPs maliciosas conocidas y solo enrutan tráfico cifrado. Un minero transporta tráfico para uno o más operadores y recibe pago por la capacidad enrutable que aporta.',
+                    'Los validadores son independientes. Cada uno hace staking de su propio $UR, ejecuta el protocolo de verificación de enrutamiento y puntúa el pool de cada operador según la demanda y la calidad medida. Los validadores ganan los dividendos nativos de la red por una puntuación precisa y alineada con el consenso: ningún operador posee un validador, y el conjunto es sin permisos.',
+                    'El propietario de la subred —BringYour, Inc.— gobierna el contrato de liquidación y opera la reserva de la red. Ese rol es transitorio: el control comienza centralizado pero acotado y se descentraliza progresivamente (cláusula V).'
                 ]
             },
             {
                 numeral: 'III.',
-                title:   'Introducción del token $UR',
+                title:   'El token $UR',
                 body: [
-                    'Dentro del protocolo, el token está destinado a funcionar como un instrumento de pago y liquidación. Los tokens se utilizan en conexión con operaciones de red discretas y se consumen o asignan como parte de esas operaciones. El token no está diseñado para representar ni otorgar ningún derecho a ganancias, ingresos o rendimientos, y está destinado a funcionar únicamente como medio de acceso y participación en el protocolo.',
-                    'Los usuarios utilizan tokens depositándolos en contratos programáticos antes del uso de la red, con precios basados en la transferencia de datos y la actividad del usuario. Los tokens depositados financian transacciones de ancho de banda basadas en contratos entre usuarios y proveedores, con porciones retenidas en custodia durante la ejecución. Al liquidar, los tokens se distribuyen en un fondo de recompensas y se asignan a los proveedores según métricas de rendimiento.',
-                    'Al completarse cada bloque (una semana), el 97,5% de los tokens utilizados se distribuyen a los proveedores, y el 2,5% se retira de circulación mediante absorción. Los tokens dirigidos a absorción no se redistribuyen y se excluyen de la contabilidad del protocolo para futuras liquidaciones de contratos. Este mecanismo está diseñado para equilibrar el uso de la red y la asignación de recursos.',
-                    'El suministro total está fijado en 1.000.000.000 de tokens, todos acuñados en el génesis, sin inflación continua. En la generación de tokens, la asignación es la siguiente:',
-                    { type: 'table', head: ['Categoría', '%', 'Tokens', 'Vesting'], rows: [
-                        ['Contributor Rewards', '20%', '200.000.000', '1 año de vesting, 2 años de desbloqueo lineal'],
-                        ['Team & Advisors',     '23%', '230.000.000', '1 año de vesting, hasta 2 años de desbloqueo lineal'],
-                        ['Equity Investors',    '15%', '150.000.000', '1 año de vesting, 2 años de desbloqueo lineal'],
-                        ['Treasury',            '2%',  '20.000.000',  'Desbloqueo lineal en 1 año'],
-                        ['Strategic Reserve',   '40%', '450.000.000', 'Reservado para uso futuro del protocolo (0 inflación)']
+                    '$UR es el token nativo de la subred: la unidad de cuenta para depósitos, emisión y liquidación. Es un token de utilidad para coordinar y pagar recursos de la red; no está diseñado para representar ni otorgar ningún derecho a ganancias, ingresos o rendimientos.',
+                    'Bittensor emite nuevo $UR mediante su coinbase en cada ciclo y se reparte en tres flujos:',
+                    { type: 'table', head: ['Flujo', 'Cuota', 'Destinatarios'], rows: [
+                        ['Propietario', '18%', 'BringYour, Inc. — propietario de la subred y reserva de la red'],
+                        ['Mineros',     '41%', 'Mineros — a través de los pools de operadores y los slots de mineros de nivel superior'],
+                        ['Validadores', '41%', 'Validadores independientes — dividendos nativos por una puntuación precisa']
                     ]},
-                    'Se espera que aproximadamente el 2% del suministro (20 millones de tokens) esté en circulación inicial para propósitos de liquidez.'
+                    'Los operadores financian la red depositando $UR en proporción a su uso real, a una tasa de referencia publicada. Un depósito es una señal costosa y respaldada por ingresos de demanda real, y a la vez una participación de convicción: el contrato traslada cada depósito a una reserva bloqueada donde se acumula y nunca se redistribuye, retirando permanentemente $UR del suministro líquido en proporción al uso real. La participación bloqueada acumulada de un operador reduce la tasa que debe aportar, de modo que los operadores comprometidos pueden incorporarse con menos capital inicial.',
+                    'A los mineros se les paga con la emisión, no con los depósitos. Como los depósitos se bloquean en lugar de reciclarse, el uso real se convierte en un soporte de compra permanente y creciente para el token en lugar de presión vendedora, mientras que la emisión sigue un calendario fijo con halvings.'
                 ]
             },
             {
                 numeral: 'IV.',
-                title:   'Distribución y circulación',
+                title:   'Dos formas de ganar',
                 body: [
-                    'Los tokens pueden obtenerse de dos formas: adquisición directa en mercados secundarios, o recepción como recompensas por el ancho de banda aportado a la red como proveedor.',
-                    'Los operadores de red pueden adquirir tokens de forma no exclusiva y basada en el mercado para apoyar su uso del protocolo. Dicha actividad se realiza únicamente con fines de consumo y no para inversión o soporte de mercado. El protocolo no depende de que ningún operador de red adquiera tokens para funcionar, y la demanda de tokens no está diseñada para ser impulsada por ningún participante o clase de participantes en particular.',
-                    'Los operadores de red pueden vender el acceso al protocolo en tokens, moneda fiduciaria o términos denominados en tokens. Los operadores de red pueden estructurar niveles de servicio que incorporen señales de participación basadas en tokens o métodos de pago para personalizar el acceso a funciones dentro de sus aplicaciones.',
-                    'Resumen de la interacción entre entidades:',
+                    'Un solo operador puede dar servicio a mucho más de 100,000 mineros —muchos más que los aproximadamente 256 slots on-chain de una subred—, por lo que la red paga a los mineros mediante dos niveles que funcionan en paralelo.',
+                    'El pool es la vía de entrada. Cada operador mantiene un único slot on-chain para todos sus mineros; los validadores ponderan ese pool según la demanda del operador y su calidad medida, y cada minero reclama su parte directamente del contrato de liquidación con una prueba criptográfica. No hay ningún slot que ganar ni nada que quemar: es donde un minero comienza y gana una recompensa base.',
+                    'Los mineros de nivel superior son el vértice de la oferta. Las aproximadamente 200 flotas más grandes —clasificadas por cuántas IPs de salida distintas y enrutables prestan realmente, no por volumen de tráfico— reclaman cada una su propio slot on-chain y reciben pago directamente de la red, sin ningún operador en la ruta de pago. Una IP compartida se reparte entre las flotas que la reclaman, de modo que la amplitud no puede contarse dos veces.',
+                    'Los dos niveles son un mismo torneo: un minero comienza en un pool, asciende a un slot superior a medida que crece su amplitud de IPs enrutables, y vuelve al pool si retrocede. Una cuota fijada por la gobernanza divide la emisión entre la cabeza y la cola.',
                     { type: 'list', items: [
-                        'Un usuario puede comprar tokens en el mercado abierto y usarlos para interactuar directamente con el protocolo (incluyendo convertirse en operador de red), o puede depender de un operador de red para acceder al protocolo sin tocar tokens.',
-                        'Un proveedor recibirá tokens por la provisión de ancho de banda al protocolo.',
-                        'Los operadores de red adquirirán, retendrán y gastarán tokens para poner sus servicios a disposición de sus clientes, quienes pueden o no ser usuarios dependiendo de la naturaleza de esos servicios.'
+                        'Nivel de pool — la vía de entrada: únete a un operador sin slot y sin coste de registro; los validadores ponderan el pool según la demanda y la calidad; cada minero reclama su parte mediante prueba en cada período de liquidación.',
+                        'Mineros de nivel superior — el vértice: las ~200 flotas con la cobertura de IPs enrutables más amplia reclaman su propio slot y reciben pago directamente de la red, sin operador, sin pool y sin intermediario.'
                     ]}
                 ]
             },
             {
                 numeral: 'V.',
-                title:   'Staking y mecanismos de integridad',
+                title:   'Custodia, liquidación y descentralización',
                 body: [
-                    'El protocolo no proporciona rendimientos pasivos ni ganancias sobre tokens. Cualquier diferencia en los resultados entre participantes es únicamente función de las diferencias en actividad, fiabilidad y uso dentro de la red. El protocolo tiene una forma integrada de cualificación operativa y priorización — mecanismos de integridad — que señalan compromiso, fiabilidad y calidad de participación, los cuales el protocolo usa para priorizar la asignación de recursos y la selección de contratos.',
-                    { type: 'list', items: [
-                        'Staking de consumidores: Los operadores de red pueden ofrecer niveles de servicio que integren autenticación basada en tokens o señales de participación para personalizar el acceso a funciones dentro de sus aplicaciones.',
-                        'Staking de desarrolladores: Los desarrolladores que mantienen saldos de tokens son elegibles para tarifas de red reducidas como parte de una estructura de precios basada en el uso integrada en el protocolo, diseñada para fomentar la integración sostenida y la participación a largo plazo en la red.',
-                        'Staking de proveedores: Los proveedores que bloquean tokens reciben prioridad en la asignación de contratos basándose en el compromiso y la fiabilidad demostrados. Los proveedores que bloquean $UR reciben mayores cuotas de recompensa durante el ciclo de recompensas al final del bloque basándose en un multiplicador de ponderación (1,0x, 1,25x, 1,5x o 2,0x). Estos multiplicadores ajustados no generan inflación — el fondo total de recompensas de la época es fijo. Los proveedores sin staking siguen ganando recompensas en proporciones menores.'
-                    ]},
-                    'Estos mecanismos de integridad apoyan la operación fiable, el rendimiento y la disponibilidad del protocolo alineando el acceso a la red y la asignación de recursos con la participación y calidad de servicio demostrables. Para cada categoría de participante, estos mecanismos operan para facilitar el uso efectivo de la red en lugar de proporcionar beneficios económicos basados en la propiedad pasiva de tokens.'
+                    'La liquidación se ejecuta en un ciclo de siete días. El contrato acumula la emisión de cada pool durante el período y luego abre las reclamaciones: los mineros retiran su $UR directamente del contrato contra la lista de pagos comprometida por su operador. Los mineros de nivel superior no necesitan ningún paso de liquidación: la cadena paga su slot de forma nativa en cada ciclo.',
+                    'Nadie custodia los fondos de nadie más. El contrato de liquidación es el único custodio del $UR en tránsito, cada pago de pool es una reclamación on-chain directa, y a los mineros de nivel superior se les paga de forma nativa a sus propias claves. Los operadores y el propietario nunca toman custodia de las recompensas de los mineros.',
+                    'Las reclamaciones ganadas son definitivas. Una vez que un período de liquidación se finaliza, los tokens que respaldan sus reclamaciones quedan comprometidos: ninguna actualización, pausa o acción administrativa puede bloquearlas ni revertirlas. La reserva bloqueada es unidireccional por el mismo estándar: ninguna función puede retirar fondos de ella.',
+                    'El control se descentraliza con el tiempo. La red se lanza con el contrato actualizable tras un multisig del propietario —un control central deliberado y acotado para corregir errores tempranos— y se refuerza por etapas: un timelock público en cada cambio, un guardián que solo puede pausar y que puede detener un exploit pero nunca mover fondos ni bloquear reclamaciones finalizadas, y, con el tiempo, gobernanza on-chain y un núcleo de liquidación inmutable.'
                 ]
             }
+        ],
+        source: { label: 'Lee el whitepaper completo', href: 'https://github.com/urfoundation/sn/' }
+    },
+
+    operators: {
+        eyebrow: 'Operadores',
+        title:   'Los operadores que ejecutan la red.',
+        intro:   'Los operadores de red ejecutan los servidores de privacidad y el punto de verificación. Un operador deposita en la subred como una señal costosa y respaldada por ingresos de demanda real, ejecuta el protocolo de verificación de enrutamiento que co-firma cada ruta medida, y registra la lista de pagos que reparte sus recompensas entre los mineros asociados a él. Los operadores dirigen a dónde van las recompensas, pero nunca custodian los fondos de nadie más.',
+        roles: [
+            { tag: '01', title: 'Ejecutar los servidores', body: 'Los operadores ejecutan los servidores de privacidad y el punto /verify que co-firma cada ruta medida: la capa de coordinación entre los usuarios y los mineros que transportan el tráfico.' },
+            { tag: '02', title: 'Señalar demanda real',    body: 'Los operadores depositan $UR en proporción a su uso real. Cada depósito es una participación de convicción bloqueada en la reserva de recompra —nunca redistribuida—, por lo que es una señal costosa y respaldada por ingresos que los validadores ponderan cuando puntúan los pools.' },
+            { tag: '03', title: 'Dirigir los pagos',        body: 'En cada período de liquidación, un operador registra una lista de pagos Merkle que reparte su pool entre sus mineros. Dirige el reparto pero nunca toma custodia: cada minero reclama su parte directamente del contrato.' },
+            { tag: '04', title: 'Comenzar',                 body: 'Registra una clave de operador de red, ejecuta el servidor /verify y deposita para empezar. La admisión de operadores está controlada por el propietario durante la fase de lanzamiento.', href: 'https://ur.xyz', linkLabel: 'Documentación para operadores' }
+        ]
+    },
+
+    miners: {
+        eyebrow: 'Mineros',
+        title:   'Los mineros que transportan el tráfico.',
+        intro:   'Los mineros son la oferta de la red: transportan tanto el tráfico de entrada como el de salida. Ejecutan un modelo de seguridad seguro por defecto, solo enrutan tráfico cifrado, se registran con uno o más operadores y reciben pago de la emisión de la subred por la capacidad enrutable que aportan. Los mineros compiten por alcance: las flotas que dan servicio a la mayor cantidad de subredes IP distintas y enrutables son promovidas a mineros de nivel superior y ganan más. Todo se ejecuta en espacio de usuario, en hardware que ya posees.',
+        roles: [
+            { tag: '01', title: 'Salida',               body: 'Los mineros de salida son las IPs de salida de la red compartida. Rechazan el tráfico que entra en conflicto con directrices regulatorias comunes como CFAA y DMCA, bloquean IPs maliciosas conocidas y solo enrutan tráfico cifrado, protegiendo tanto a los mineros como a los usuarios.' },
+            { tag: '02', title: 'Entrada',              body: 'Los mineros de entrada (extensores) crean puntos de entrada que mejoran la accesibilidad en todo el mundo, usando TLS de N capas, suplantación de SNI y reenvío de confianza. Un subconjunto rotativo se expone en cada ciclo, y los clientes reintentan automáticamente los puntos de entrada que funcionaron antes.' },
+            { tag: '03', title: 'Medido y emparejado', body: 'Los validadores independientes recorren cadenas de mineros para probar el tránsito en tiempo real y medir la disponibilidad y la calidad. Los mineros se clasifican según esa medición y según la velocidad, y cada operador ejecuta su propio emparejamiento entre usuarios y mineros.' },
+            { tag: '04', title: 'Ganar con la emisión', body: 'A los mineros se les paga con la emisión de la subred. Dentro del pool de un operador reclamas tu parte en cada liquidación mediante prueba: una recompensa base de baja barrera, sin ningún slot que ganar ni nada que quemar.', href: 'https://docs.ur.io/provider', linkLabel: 'Documentación para mineros' },
+            { tag: '05', title: 'Competir por la cima', body: 'Los mineros compiten por alcance. La red clasifica a las flotas por cuántas IPs de salida distintas y enrutables prestan realmente —no por volumen de tráfico— y las aproximadamente 200 con la cobertura más amplia son promovidas a mineros de nivel superior: su propio slot on-chain, con pago nativo, ganando más. Las IPs compartidas se reparten entre las flotas que las reclaman, de modo que la cobertura única es lo que gana: aumenta tu amplitud de IPs distintas para ascender, y si tu alcance retrocede vuelves al pool.' }
+        ]
+    },
+
+    validators: {
+        eyebrow: 'Validadores',
+        title:   'Los validadores que miden la red.',
+        intro:   'Los validadores son independientes. Cada uno hace staking de su propio $UR y ejecuta el protocolo de verificación de enrutamiento, recorriendo continuamente cadenas de mineros asignadas por los operadores para probar el tránsito en tiempo real y medir qué mineros son los eslabones más débiles. Esa medición es la señal central por la que paga la red, y los validadores ganan dividendos nativos por producirla con precisión.',
+        roles: [
+            { tag: '01', title: 'Recorrer las rutas',       body: 'Los validadores recorren cadenas de mineros asignadas por los operadores y recopilan un registro firmado y autoverificable de cada salto completado: prueba criptográfica del tránsito en tiempo real que cualquiera puede comprobar.' },
+            { tag: '02', title: 'Puntuar la red',           body: 'En cada ciclo, un validador puntúa el pool de cada operador según la demanda y la calidad medida, y clasifica las principales flotas por amplitud de IPs enrutables, todo bajo commit-reveal. El Yuma Consensus de Bittensor convierte esas puntuaciones independientes en emisión para los mineros.' },
+            { tag: '03', title: 'Ganar dividendos nativos', body: 'Los validadores ganan dividendos nativos de Bittensor por una puntuación precisa y alineada con el consenso: su única recompensa. Ningún operador posee un validador, y el conjunto es sin permisos.' },
+            { tag: '04', title: 'Independiente por diseño', body: 'Como el commit-reveal oculta las puntuaciones de cada validador hasta que quedan obsoletas, copiar no gana nada: un validador tiene que ejecutar recorridos reales. La medición se mantiene honesta, y ninguna parte individual la controla.' }
         ]
     },
 
     research: {
         eyebrow: 'Investigación',
         title:   'Algoritmos abiertos, datos abiertos.',
-        intro:   'El protocolo es un sistema nativo descentralizado, multi-IP y multi-transporte diseñado para escalar a millones de proveedores por operador de red. Cada área algorítmica a continuación se publica con su código fuente y, cuando corresponda, conjuntos de datos anonimizados para análisis independiente.',
+        intro:   'El protocolo es un sistema nativo descentralizado, multi-IP y multi-transporte diseñado para escalar a millones de mineros por operador de red. Cada área algorítmica a continuación se publica con su código fuente y, cuando corresponde, conjuntos de datos anonimizados para análisis independiente.',
         papers: [
             { tag: 'URTRANSPORT1', title: 'Rendimiento',
-              body: 'Enrutamiento multi-salto a través de transportes TCP enfocado en la accesibilidad global. Se admiten actualizaciones de UDP y flujos punto a punto, con integración planificada de WebRTC, XRay y WireGuard.',
+              body: 'Enrutamiento multi-salto a través de transportes TCP enfocado en la accesibilidad global. Se admiten actualizaciones a UDP y a flujos punto a punto, con integración planificada de WebRTC, XRay y WireGuard.',
               href: 'https://github.com/urnetwork/connect/blob/main/transport.go', linkLabel: 'transport.go' },
             { tag: 'UREXTENDER1', title: 'Accesibilidad',
-              body: 'Encriptación TLS de N capas (N≥2) donde cada capa exterior usa un certificado autofirmado con suplantación de SNI hacia una IP intermediaria, reenviando a otro salto o a una conexión TLS de extremo a extremo. Cualquier persona puede alojar un extensor en cualquier dominio.',
+              body: 'Encriptación TLS de N capas (N≥2) donde cada capa exterior usa un certificado autofirmado con suplantación de SNI hacia una IP intermediaria, reenviando a otro salto o a una conexión TLS de extremo a extremo. Cualquiera puede alojar un extensor en cualquier dominio.',
               href: 'https://github.com/urnetwork/connect/blob/main/net_extender.go', linkLabel: 'net_extender.go' },
-            { tag: 'UR-FP2', title: 'Emparejamiento cliente-proveedor',
-              body: 'Algoritmo de muestreo que carga una muestra aleatoria 10 veces mayor de proveedores potenciales y mezcla proporcionalmente a la fiabilidad por la puntuación del cliente. La resistencia Sybil se garantiza por la restricción de que la suma de fiabilidad es como máximo 1 por subred IP.',
+            { tag: 'UR-FP2', title: 'Emparejamiento cliente-minero',
+              body: 'Algoritmo de muestreo que carga una muestra aleatoria 10× de mineros potenciales y los mezcla proporcionalmente a fiabilidad × puntuación del cliente. La resistencia Sybil se garantiza por la restricción de que la fiabilidad suma como máximo 1 por subred IP.',
               href: 'https://github.com/urnetwork/server/blob/main/model/network_client_location_model.go', linkLabel: 'network_client_location_model.go' },
             { tag: 'UR-MULTI', title: 'Multi cliente',
-              body: 'Algoritmo heurístico de barrido que gestiona una ventana de proveedores. Fija el tráfico en el mejor nivel disponible basándose en umbrales de transferencia en lugar de análisis de protocolo.',
+              body: 'Algoritmo heurístico de barrido que gestiona una ventana de mineros. Fija el tráfico en el mejor nivel disponible basándose en umbrales de transferencia en lugar de análisis de protocolo.',
               href: 'https://github.com/urnetwork/connect/blob/main/ip_remote_multi_client.go', linkLabel: 'ip_remote_multi_client.go' },
             { tag: 'UR-TRANSFER', title: 'Transferencia',
-              body: 'Ventana de entrega fiable optimizada para entornos de alta latencia. Las retransmisiones del protocolo están desactivadas ya que la ventana proporciona entrega fiable. Distribuye el tráfico entre transportes según el rendimiento clasificado.',
+              body: 'Ventana de entrega fiable ajustada para entornos de alta latencia. Las retransmisiones del protocolo están desactivadas ya que la ventana proporciona entrega fiable. Distribuye el tráfico entre transportes según el rendimiento clasificado.',
               href: 'https://github.com/urnetwork/connect/blob/main/transfer.go', linkLabel: 'transfer.go' },
             { tag: 'UR-IP', title: 'Salida IP',
               body: 'Implementación de pila IP con consumo mínimo de memoria. Asume comunicación fiable entre pares a través de la capa de transferencia, por lo que las retransmisiones se optimizan en consecuencia.',
               href: 'https://github.com/urnetwork/connect/blob/main/ip.go', linkLabel: 'ip.go' },
-            { tag: 'UR-PSUB2', title: 'Asignación de tokens',
-              body: 'Las recompensas de bloque se distribuyen cada 7 días de forma proporcional a los votos de transferencia de datos, las puntuaciones de fiabilidad y las referencias. El tráfico de suscriptores de pago se prioriza para contrarrestar la manipulación. Se aplican bonificaciones multiplicadoras por fiabilidad e incentivos comunitarios.',
+            { tag: 'UR-PSUB2', title: 'Asignación de recompensas',
+              body: 'Los validadores independientes puntúan cada pool de operador según la demanda y la calidad medida; el Yuma Consensus de Bittensor convierte esas puntuaciones en emisión. Dentro de un pool, un operador clasifica a sus mineros según los contratos servidos y la fiabilidad, registra una raíz de pagos Merkle en cada ciclo, y cada minero reclama su parte directamente del contrato de liquidación.',
               href: 'https://github.com/urnetwork/server/blob/main/model/account_payment_model_plan.go', linkLabel: 'account_payment_model_plan.go' },
             { tag: 'UR-CONTRACT', title: 'Permiso',
               body: 'La transferencia entre partes requiere un contrato encriptado con saldo en custodia y un conjunto de permisos. Ambas partes deben cerrar con recuentos de bytes confirmados; los desacuerdos activan un proceso de resolución forzada.',
               href: 'https://github.com/urnetwork/server/blob/main/model/subscription_model.go', linkLabel: 'subscription_model.go' },
             { tag: 'UR-SEC1', title: 'Seguridad',
-              body: 'Lista de bloqueo de puertos y lista de bloqueo de IP que protegen la red de proveedores. No realiza inspección de protocolo: los proveedores solo enrutan tráfico encriptado.',
+              body: 'Lista de bloqueo de puertos y lista de bloqueo de IP que protegen la red de mineros. No realiza inspección de protocolo: los mineros solo enrutan tráfico cifrado.',
               href: 'https://github.com/urnetwork/connect/blob/main/ip_security.go', linkLabel: 'ip_security.go' }
-        ]
-    },
-
-    providers: {
-        eyebrow: 'Proveedores',
-        title:   'La salida de la red compartida.',
-        intro:   'Los proveedores son las IPs de salida de la red compartida. Ejecutan un modelo de seguridad seguro por defecto, bloquean IPs maliciosas conocidas y solo enrutan tráfico cifrado. Los proveedores se clasifican por velocidad y fiabilidad, se registran con uno o más operadores de red y obtienen una parte del valor contractual que enrutan. Los proveedores se ejecutan completamente en espacio de usuario y no requieren privilegios de root.',
-        roles: [
-            { tag: '01', title: 'Seguro por defecto',          body: 'Los proveedores rechazan tráfico que entra en conflicto con directrices regulatorias comunes como CFAA y DMCA. Se bloquean botnets conocidos e IPs maliciosas. Solo se enruta tráfico cifrado, protegiendo tanto a proveedores como a usuarios.' },
-            { tag: '02', title: 'Clasificado y emparejado',    body: 'Los proveedores se clasifican por velocidad y fiabilidad y se registran con uno o más operadores de red. Cada operador de red ejecuta su propio algoritmo de emparejamiento entre usuarios y proveedores.' },
-            { tag: '03', title: 'Ganar una parte',              body: 'Los proveedores ganan una parte del valor contractual que enrutan. Ejecuta un proveedor en hardware que ya posees — no se requieren privilegios de root, todo se ejecuta en espacio de usuario.' },
-            { tag: '04', title: 'Comenzar',                     body: 'Configura un nodo proveedor y comienza a contribuir ancho de banda a la red.', href: 'https://docs.ur.io/provider', linkLabel: 'Provider docs' }
-        ]
-    },
-
-    extenders: {
-        eyebrow: 'Extensores',
-        title:   'La entrada que lleva la red más lejos.',
-        intro:   'Los extensores crean una red privada o compartida de IPs de entrada que utilizan diversas técnicas para mejorar la conectividad en todo el mundo. Los extensores pueden reenviar a operadores de red de confianza conocidos, a otros extensores y a IPs de socios de confianza utilizando la firma de confianza del operador de red.',
-        roles: [
-            { tag: '01', title: 'Extensores privados',          body: 'No registrados con operadores de red — actúan como cliente del sistema. Los usuarios introducen manualmente la IP del extensor en el cliente para conectarse a través del extensor.' },
-            { tag: '02', title: 'Extensores públicos',          body: 'Se registran con operadores de red y reciben una porción del valor contractual del protocolo que enrutan. Los extensores públicos eligen a qué operadores de red reenvían, y también pueden reenviar a otras IPs de extensores o IPs firmadas por los operadores de red reenviados.' },
-            { tag: '03', title: 'Exposición rotativa',          body: 'Un subconjunto aleatorio de extensores públicos es elegido para ser expuesto en cada bloque (1 semana). La exposición depende de la región de llamada y la hora. Los clientes mantienen una caché local de extensores para que los extensores que funcionaron previamente se reintenten automáticamente.' },
-            { tag: '04', title: 'Reenvío de confianza',         body: 'Los operadores de red pueden asociar una IP de confianza con una contraseña para que los extensores puedan reenviar a cualquier IP que pase la prueba de confianza. La red almacena la IP como un hash con sal siguiendo las directrices generales de almacenamiento de IP.' }
         ]
     },
 
     community: {
         eyebrow: 'Comunidad',
         title:   'Las personas detrás de la red.',
-        intro:   'El protocolo es abierto. La comunidad que lo construye y opera está creciendo. Aquí es donde encontrarlos.',
+        intro:   'El protocolo es abierto. La comunidad que lo construye y opera está creciendo. Aquí es donde encontrarla.',
         items: [
-            { tag: '01', title: 'Operadores de red',  body: 'Los operadores de red construyen productos sobre el protocolo y venden acceso a la red.', href: 'https://ur.io', linkLabel: 'BringYour, Inc. — ur.io' },
-            { tag: '02', title: 'Discord',              body: 'Únete a la conversación: desarrollo del protocolo, soporte a proveedores y discusión de la comunidad.', href: 'https://discord.gg/urnetwork', linkLabel: 'Unirse a Discord' },
-            { tag: '03', title: 'Kit de marca',          body: 'URnetwork y el logotipo del conector son marcas registradas en EE. UU. Se permite a los usuarios del protocolo usar el kit de marca como "powered by URnetwork" o mensajes similares de componente.' }
-        ]
-    },
-
-    usage: {
-        eyebrow: 'Uso',
-        title:   'Las personas que empaquetan la red.',
-        intro:   'Los operadores de red transforman el mercado abierto de proveedores y extensores en productos que consumidores y empresas pueden comprar. Son la cara pública de la red, y el protocolo los somete a los mismos estándares que a todos los demás.',
-        roles: [
-            { tag: '01', title: 'Agregar demanda',          body: 'Los operadores agrupan proveedores y extensores en redes a las que los clientes pueden comprar con un rendimiento predecible.' },
-            { tag: '02', title: 'Garantizar la calidad',    body: 'Los operadores ponen en juego su estatus por el ancho de banda que venden. El mal servicio se refleja en el libro mayor y en la curva de descuento.' },
-            { tag: '03', title: 'Liquidar en el protocolo', body: 'Toda la liquidación ocurre a través de $UR. Los operadores responden a las mismas reglas que cualquier otro en la red.' }
+            { tag: '01', title: 'Operadores de red',  body: 'Los operadores de red ejecutan servidores, depositan en la subred y venden acceso a la red.', href: 'https://ur.io', linkLabel: 'BringYour, Inc. — ur.io' },
+            { tag: '02', title: 'Discord',             body: 'Únete a la conversación: desarrollo del protocolo, soporte a mineros y discusión de la comunidad.', href: 'https://discord.gg/urnetwork', linkLabel: 'Unirse a Discord' },
+            { tag: '03', title: 'Kit de marca',        body: 'URnetwork y el logotipo del conector son marcas registradas en EE. UU. Se permite a los usuarios del protocolo usar el kit de marca como "powered by URnetwork" o mensajes de componente similares.' }
         ]
     }
 };

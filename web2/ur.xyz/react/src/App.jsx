@@ -9,8 +9,9 @@ import Footer from './components/Footer';
 
 import Whitepaper from './components/sections/Whitepaper';
 import Research from './components/sections/Research';
-import Providers from './components/sections/Providers';
-import Extenders from './components/sections/Extenders';
+import Operators from './components/sections/Operators';
+import Miners from './components/sections/Miners';
+import Validators from './components/sections/Validators';
 import Community from './components/sections/Community';
 
 import DocsExplorer from './components/DocsExplorer';
@@ -30,9 +31,10 @@ const INITIAL_STATS = {
 
 /** Map route names to their section component. */
 const SECTION_COMPONENTS = {
+    operators:  Operators,
+    miners:     Miners,
+    validators: Validators,
     research:   Research,
-    providers:  Providers,
-    extenders:  Extenders,
     community:  Community,
 };
 

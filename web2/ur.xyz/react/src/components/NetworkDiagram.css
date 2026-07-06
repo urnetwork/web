@@ -1,0 +1,76 @@
+/* NetworkDiagram — rotating 3D pyramid inline, flat square nav when docked.
+   Positions/opacity/stroke of the vertices and edges are driven per-frame from
+   NetworkDiagram.jsx, so the animated properties carry NO CSS transition. */
+.nd-holder { position: relative; }
+
+.network-diagram {
+    display: block;
+    width: 100%;
+    max-width: 300px;
+    height: auto;
+    margin: 4px auto 44px;   /* centered in the content column when inline */
+    overflow: visible;
+}
+
+/* Interactive (hydrated, desktop): the SVG detaches into a fixed, JS-positioned
+   element that slides into the left column and shrinks/flattens on scroll. */
+.nd-holder.is-interactive .network-diagram {
+    position: fixed;
+    top: 0;
+    left: 0;
+    margin: 0;
+    max-width: none;
+    transform-origin: top left;
+    z-index: 40;
+    will-change: transform, width;
+}
+
+/* Edges (endpoints + stroke + opacity set per frame). */
+.nd-edge {
+    stroke: var(--brand-ui, #D6E6F4);
+    stroke-width: 1.5;
+    stroke-linecap: round;
+    opacity: 0.28;
+}
+/* Dashed = structural-only edges (no real mapping to the subnet). */
+.nd-edge-open {
+    stroke-dasharray: 3 6;
+    opacity: 0.3;
+}
+/* Pink = a real edge that connects to the current vertex. */
+.nd-edge-real.is-active {
+    stroke: var(--brand-ur, #ED8FFF);
+    opacity: 0.9;
+}
+
+/* Clickable vertices. `.nd-hit` is an invisible enlarged tap target. */
+.nd-node { cursor: pointer; }
+.nd-hit { fill: transparent; stroke: none; }
+
+.nd-node circle:not(.nd-hit) {
+    fill: var(--brand-bg, #101010);
+    stroke: var(--brand-ui, #D6E6F4);
+    stroke-width: 1.5;
+    opacity: 0.7;
+    transition: fill 0.3s ease, stroke 0.3s ease;
+}
+.nd-node.is-active circle:not(.nd-hit) {
+    fill: var(--brand-ur, #ED8FFF);
+    stroke: var(--brand-ur, #ED8FFF);
+    opacity: 1;
+}
+.nd-node:hover circle:not(.nd-hit) {
+    stroke: var(--brand-ur, #ED8FFF);
+    opacity: 1;
+}
+
+.nd-label {
+    fill: var(--brand-ui, #D6E6F4);
+    font-family: 'PPNeueMontreal', system-ui, sans-serif;
+    font-size: 13px;
+    letter-spacing: 0.04em;
+    opacity: 0.55;             /* SSR fallback; JS drives per-frame opacity */
+    transition: fill 0.3s ease;
+}
+.nd-node.is-active .nd-label { fill: var(--brand-white, #F8F8F8); font-weight: 600; }
+.nd-node:hover .nd-label { fill: var(--brand-white, #F8F8F8); }
