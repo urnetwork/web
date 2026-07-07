@@ -210,9 +210,11 @@ export default function MinerSim({ caption = 'Miners compete for the most unique
     }, []);
 
     return (
-        <div className="sim-wrap" ref={wrapRef}>
-            <canvas className="sim-canvas" ref={canvasRef} aria-hidden="true" />
-            <p className="sim-caption">{caption}</p>
-        </div>
+        <figure className="sim-figure">
+            <div className="sim-wrap" ref={wrapRef}>
+                <canvas className="sim-canvas" ref={canvasRef} aria-hidden="true" />
+            </div>
+            <figcaption className="sim-caption">{caption}</figcaption>
+        </figure>
     );
 }

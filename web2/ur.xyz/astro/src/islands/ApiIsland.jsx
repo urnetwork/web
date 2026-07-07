@@ -6,9 +6,9 @@ import React from 'react';
 import ApiExplorer from '@react/components/ApiExplorer.jsx';
 import { LanguageProvider } from '@react/i18n/index.jsx';
 
-export default function ApiIsland({ activeRoute }) {
+export default function ApiIsland({ activeRoute, lang }) {
     return (
-        <LanguageProvider>
+        <LanguageProvider initialLang={lang}>
             <ApiExplorer activeRoute={activeRoute} />
         </LanguageProvider>
     );

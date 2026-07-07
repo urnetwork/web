@@ -84,6 +84,15 @@
     grid-template-columns: 110px 1fr;
     gap: 28px;
     align-items: baseline;
+    /* Let the 1fr track shrink below its content's min-content. Without this,
+       a nowrap table (e.g. the token allocation) forces the grid — and the
+       whole page — wider than the viewport, causing a horizontal scroll on
+       mobile. The table's own overflow-x:auto wrapper then does its job. */
+    min-width: 0;
+}
+
+.article-body {
+    min-width: 0;
 }
 
 .article-numeral {

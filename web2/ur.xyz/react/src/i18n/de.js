@@ -12,6 +12,11 @@ export default {
         docs:       'Dokumentation',
         tagline:    'Besitze deine Privatsphäre. Besitze dein Netzwerk.',
         languageMenu: 'Sprache',
+        menu:         'Menü',
+        closeMenu:    'Menü schließen',
+        browseDocs:   'Dokumentation',
+        apiReference: 'API-Referenz',
+        search:       'Suche',
         ctaAria:    'Nutzung — aktuelle Netzwerkaktivität'
     },
 
@@ -116,7 +121,7 @@ export default {
     miners: {
         eyebrow: 'Miner',
         title:   'Die Miner, die den Verkehr tragen.',
-        intro:   'Miner sind das Angebot des Netzwerks — sie tragen sowohl den Ingress- als auch den Egress-Verkehr. Sie betreiben ein standardmäßig sicheres Sicherheitsmodell, leiten nur verschlüsselten Verkehr weiter, registrieren sich bei einem oder mehreren Betreibern und werden aus der Subnet-Emission für die routbare Kapazität bezahlt, die sie beisteuern. Miner konkurrieren um Reichweite: Die Flotten, die die meisten verschiedenen, routbaren IP-Subnetze bedienen, werden zu Top-Level-Minern befördert und verdienen mehr. Alles läuft im User-Space, auf Hardware, die du bereits besitzt.',
+        intro:   'Miner konkurrieren darum, möglichst viele IPv4-/29- und IPv6-/48-Subnetze im Netzwerk verfügbar zu machen — jedes davon jederzeit routbar für Ingress- oder Egress-Verkehr. Mit anderen Worten: Miner verwandeln das öffentliche Internet in ein anonymes privates Netzwerk, das jeder nutzen kann. Jeder Miner trägt sowohl Ingress- als auch Egress-Verkehr, betreibt ein standardmäßig sicheres Sicherheitsmodell, leitet nur verschlüsselten Verkehr weiter und wird aus der Subnet-Emission für die routbare Kapazität bezahlt, die er beisteuert. Die Flotten mit der größten Abdeckung an verschiedenen, routbaren Subnetzen werden zu Top-Level-Minern befördert und verdienen mehr — alles im User-Space, auf Hardware, die du bereits besitzt.',
         roles: [
             { tag: '01', title: 'Egress',              body: 'Egress-Miner sind die Exit-IPs des gemeinsamen Netzwerks. Sie lehnen Verkehr ab, der gängigen Regulierungsrichtlinien wie CFAA und DMCA widerspricht, blockieren bekannte bösartige IPs und leiten nur verschlüsselten Verkehr weiter — was sowohl Miner als auch Nutzer schützt.' },
             { tag: '02', title: 'Ingress',             body: 'Ingress-Miner (Erweiterer) schaffen Einstiegspunkte, die die Erreichbarkeit weltweit verbessern — mittels N-Schicht-TLS, SNI-Spoofing und vertrauenswürdiger Weiterleitung. Eine rotierende Teilmenge wird in jedem Zyklus exponiert, und Clients versuchen automatisch erneut die Einstiegspunkte, die zuvor funktioniert haben.' },

@@ -21,6 +21,7 @@ import './Sim.css';
 const MINER_MEAN = 600;
 const VAL_N = 60;               // concurrent validators
 const PROBES = 10;              // successful probes before a validator retires
+const CLAIM_HOLD_MS = 600;      // after the 10th success: fill solid and hold this long before fading (a claimed path)
 const VAL_R0 = 7, VAL_GROW = 2.2; // validator radius = base + growth per sequential success (also holds its count)
 const PROBE_MS = 320;           // outbound probe travel time
 const RETURN_MS = 300;          // return-message (content) travel time on success
@@ -77,7 +78,7 @@ export default function ValidatorSim({ caption = 'Validators probe the available
                 born: performance.now(), life: rand(14000, 40000),
             };
         };
-        const spawnValidator = () => { const a = Math.random() * Math.PI * 2; return { x: cluster.cx + Math.cos(a) * rim, y: cluster.cy + Math.sin(a) * rim, done: 0, target: null, phase: 'out', t: 0, alpha: 0, dead: false }; };
+        const spawnValidator = () => { const a = Math.random() * Math.PI * 2; return { x: cluster.cx + Math.cos(a) * rim, y: cluster.cy + Math.sin(a) * rim, done: 0, target: null, phase: 'out', t: 0, alpha: 0, dead: false, claimed: false, holdT: 0 }; };
         const init = () => { miners = []; for (let i = 0; i < minerN; i++) { const m = spawnMiner(); m.born -= rand(0, 30000); miners.push(m); } validators = []; for (let i = 0; i < valN; i++) validators.push(spawnValidator()); };
 
         // weighted-random miner: P(select i) = weight_i / Σ weight
@@ -109,6 +110,11 @@ export default function ValidatorSim({ caption = 'Validators probe the available
             for (const v of validators) {
                 if (v.dead) continue;
                 if (v.alpha < 1) v.alpha = Math.min(1, v.alpha + 0.08);
+                if (v.claimed) {                                                                    // claimed a path: hold the solid disc, then start fading
+                    v.holdT += dt;
+                    if (v.holdT >= CLAIM_HOLD_MS) v.dead = true;
+                    continue;
+                }
                 if (!v.target) { v.target = pickMiner(); v.phase = 'out'; v.t = 0; if (!v.target) continue; }
                 const m = v.target;
                 if (!m || miners.indexOf(m) < 0) { v.target = pickMiner(); v.phase = 'out'; v.t = 0; continue; }
@@ -119,7 +125,8 @@ export default function ValidatorSim({ caption = 'Validators probe the available
                 } else {                                                                            // return message travelling back to the validator
                     v.t += dt / RETURN_MS;
                     if (v.t >= 1) { m.innerT += SUCCESS_GROW * baseA; v.done++;                      // content received → pink core grows
-                                    if (v.done >= PROBES) v.dead = true; else { v.target = pickMiner(); v.phase = 'out'; v.t = 0; } }
+                                    if (v.done >= PROBES) { v.claimed = true; v.holdT = 0; v.target = null; } // 10th success → claim the path: fill solid + hold
+                                    else { v.target = pickMiner(); v.phase = 'out'; v.t = 0; } }
                 }
             }
             for (let i = validators.length - 1; i >= 0; i--) { const v = validators[i]; if (v.dead) { v.alpha -= 0.06; if (v.alpha <= 0) validators.splice(i, 1); } }
@@ -142,9 +149,17 @@ export default function ValidatorSim({ caption = 'Validators probe the available
             ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
             for (const v of validators) {
                 const r = VAL_R0 + v.done * VAL_GROW;   // grows with each sequential success
-                ctx.strokeStyle = `rgba(${COL_UI},${0.8 * v.alpha})`; ctx.lineWidth = 1.4;
-                ctx.beginPath(); ctx.arc(v.x, v.y, r, 0, Math.PI * 2); ctx.stroke();
-                ctx.fillStyle = `rgba(${COL_UI},${0.92 * v.alpha})`; ctx.font = `600 ${Math.round(r * 1.1)}px 'PPNeueBit', monospace`;
+                if (v.claimed) {
+                    // Claimed a path: the ring fills solid and holds, then fades out via v.alpha.
+                    ctx.fillStyle = `rgba(${COL_UI},${0.92 * v.alpha})`;
+                    ctx.beginPath(); ctx.arc(v.x, v.y, r, 0, Math.PI * 2); ctx.fill();
+                    ctx.fillStyle = `rgba(16,16,16,${0.9 * v.alpha})`;   // dark count for contrast on the solid fill
+                } else {
+                    ctx.strokeStyle = `rgba(${COL_UI},${0.8 * v.alpha})`; ctx.lineWidth = 1.4;
+                    ctx.beginPath(); ctx.arc(v.x, v.y, r, 0, Math.PI * 2); ctx.stroke();
+                    ctx.fillStyle = `rgba(${COL_UI},${0.92 * v.alpha})`;
+                }
+                ctx.font = `600 ${Math.round(r * 1.1)}px 'PPNeueBit', monospace`;
                 ctx.fillText(String(v.done), v.x, v.y);
             }
         };
@@ -159,9 +174,11 @@ export default function ValidatorSim({ caption = 'Validators probe the available
     }, []);
 
     return (
-        <div className="sim-wrap" ref={wrapRef}>
-            <canvas className="sim-canvas" ref={canvasRef} aria-hidden="true" />
-            <p className="sim-caption">{caption}</p>
-        </div>
+        <figure className="sim-figure">
+            <div className="sim-wrap" ref={wrapRef}>
+                <canvas className="sim-canvas" ref={canvasRef} aria-hidden="true" />
+            </div>
+            <figcaption className="sim-caption">{caption}</figcaption>
+        </figure>
     );
 }

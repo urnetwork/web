@@ -14,6 +14,17 @@
  * each of its three positions.
  */
 
+/* --q must be a registered <number> so the docked → ticker snap can
+   transition it; every calc() below that reads --q then eases in lockstep.
+   It MUST inherit: descendants (.stats-panel-header, .stat-grid, .stat-label,
+   .stat-value) read --q too, and only an inherited value reaches them — which
+   is also how the plain custom property behaved before registration. */
+@property --q {
+    syntax: '<number>';
+    inherits: true;
+    initial-value: 0;
+}
+
 .stats-panel {
     --p: 0;
     --q: 0;
@@ -57,7 +68,29 @@
     font-family: 'PPNeueMontreal', sans-serif;
 
     will-change: transform, width;
-    /* No CSS transition on transform/width — JS interpolates per frame. */
+    /* Detached → docked is scrubbed per-frame (no transition here). The
+       docked → ticker snap enables the transition below only while it plays. */
+}
+
+/* One-shot docked → ticker snap: a single slow-in/slow-out animation, switched
+   on for just its duration by the JS via the `is-snapping` class. Because --q
+   is @property-registered, transitioning it eases every calc() that reads it —
+   padding, borders, glow, header collapse, font sizes — across in lockstep with
+   the transform/width. Transform and width share the same timing, so the panel
+   stays centered throughout the expansion. */
+.stats-panel.is-snapping {
+    transition:
+        transform var(--snap-ms, 450ms) ease-in-out,
+        width var(--snap-ms, 450ms) ease-in-out,
+        --q var(--snap-ms, 450ms) ease-in-out;
+}
+
+/* Reduced motion: keep the two discrete states, but snap between them
+   instantly instead of animating. */
+@media (prefers-reduced-motion: reduce) {
+    .stats-panel.is-snapping {
+        transition: none;
+    }
 }
 
 /* Header collapses smoothly into the ticker form. */
@@ -154,6 +187,14 @@
         border: none;
         border-bottom: 1px solid rgba(214, 230, 244, 0.18);
         box-shadow: none;
+        /* Slide in step with the nav as the disclaimer shows/hides. */
+        transition: top 0.3s ease;
+    }
+
+    /* While the disclaimer bar is up, the nav is pushed down one row; the
+       ticker has to follow or it renders hidden behind the nav. */
+    .stats-panel.stats-panel-below-disclaimer {
+        top: calc(var(--nav-height) * 2) !important;
     }
 
     .stats-panel-header {

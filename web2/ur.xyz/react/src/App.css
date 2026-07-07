@@ -31,10 +31,18 @@ html, body, #root {
     -moz-osx-font-smoothing: grayscale;
 }
 
+/* Guard against any single element accidentally forcing a horizontal
+   scroll. `clip` (unlike `hidden`) does not create a scroll container,
+   so it never breaks position: sticky on descendants. The real fix for
+   any overflow still belongs at the source; this is defense in depth. */
+html {
+    overflow-x: clip;
+}
+
 body {
     font-family: 'PPNeueMontreal', system-ui, -apple-system, Segoe UI, sans-serif;
     line-height: 1.5;
-    overflow-x: hidden;
+    overflow-x: clip;
 }
 
 a {

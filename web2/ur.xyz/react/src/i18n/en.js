@@ -13,6 +13,11 @@ export default {
         docs:       'Docs',
         tagline:    'Own your privacy. Own your network.',
         languageMenu: 'Language',
+        menu:         'Menu',
+        closeMenu:    'Close menu',
+        browseDocs:   'Browse docs',
+        apiReference: 'API reference',
+        search:       'Search',
         ctaAria:    'Usage — current network activity'
     },
 
@@ -117,7 +122,7 @@ export default {
     miners: {
         eyebrow: 'Miners',
         title:   'The miners who carry the traffic.',
-        intro:   'Miners are the supply of the network — they carry both the ingress and the egress traffic. They run a safe-by-default security model, route only encrypted traffic, register with one or more operators, and are paid from subnet emission for the routable capacity they contribute. Miners compete on reach: the fleets serving the most distinct, routable IP subnets are promoted to top-level miners and earn more. Everything runs in user space, on hardware you already own.',
+        intro:   'Miners compete to make the most IPv4 /29 and IPv6 /48 subnets available on the network — each kept routable at any moment for ingress or egress traffic. In other words, miners convert the public internet into an anonymous private network for everyone to use. Every miner carries both ingress and egress traffic, runs a safe-by-default security model, routes only encrypted traffic, and is paid from subnet emission for the routable capacity it contributes. The fleets with the broadest distinct, routable coverage are promoted to top-level miners and earn more — everything in user space, on hardware you already own.',
         roles: [
             { tag: '01', title: 'Egress',              body: 'Egress miners are the exit IPs of the shared network. They reject traffic that conflicts with common regulation directions like CFAA and DMCA, block known-malicious IPs, and route only encrypted traffic — protecting both miners and users.' },
             { tag: '02', title: 'Ingress',             body: 'Ingress miners (extenders) create entry points that improve reachability worldwide — using N-layer TLS, SNI spoofing, and trusted forwarding. A rotating subset is exposed each cycle, and clients automatically retry the entry points that worked before.' },

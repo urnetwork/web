@@ -125,7 +125,10 @@ export default function NetworkDiagram({ active = 'subnet', lang = 'en' }) {
                 svg.style.width = NAT_W + 'px';
                 svg.style.transform =
                     `translate3d(${lerp(inlineX, dockX, p).toFixed(1)}px, ${lerp(rect.top, dockY, p).toFixed(1)}px, 0) scale(${lerp(1, DOCK_SCALE, p).toFixed(3)})`;
-                holder.style.height = (NAT_H * (1 - p)).toFixed(1) + 'px';
+                // Keep the pyramid's inline footprint reserved even while it's
+                // docked in the margin, so the content column holds the same
+                // vertical spacing and never lurches upward as it slides out.
+                holder.style.height = NAT_H + 'px';
             }
 
             // --- internal morph: pyramid (p=0) → flat square (p=1), rotating in polar ---

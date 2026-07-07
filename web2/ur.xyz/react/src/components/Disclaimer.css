@@ -10,6 +10,9 @@
     background: rgba(16, 16, 16, 0.92);
     border-bottom: 1px solid rgba(214, 230, 244, 0.08);
     transition: transform 0.3s ease;
+    /* The nav and stats offsets assume a fixed disclaimer height, so clip
+       rather than let unusually long copy spill onto the nav below. */
+    overflow: hidden;
 }
 
 .disclaimer-hidden {
@@ -43,6 +46,14 @@
 @media (max-width: 768px) {
     .disclaimer-link {
         font-size: 0.58rem;
+        line-height: 1.35;
         padding: 0 18px;
+    }
+}
+
+@media (max-width: 360px) {
+    .disclaimer-link {
+        font-size: 0.54rem;
+        padding: 0 14px;
     }
 }

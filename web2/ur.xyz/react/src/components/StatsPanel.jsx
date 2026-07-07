@@ -12,40 +12,33 @@ const fmt = (num) =>
  * StatsPanel
  *
  * The Protocol Ledger panel — a single element that lives through three
- * scroll-driven states. It morphs continuously between them; there is no
- * separate ticker component, this *is* the ticker once you've scrolled
- * past the whitepaper section.
+ * scroll states. The two moves are deliberately different in feel:
  *
- *   • Detached  (p1 = 0, p2 = 0)
- *       Top-right dashboard floating over the simulation hero.
- *       width  = 320px
- *       top    = navHeight + 24
- *       left   = viewportWidth - width - 24
- *       columns = 2 (driven by auto-fit grid)
+ *   1. Detached → Docked is a *continuous, scroll-linked* morph (--p / p1).
+ *   2. Docked → Sticky is a *one-shot snap* — a self-contained ease-in-out
+ *      animation that fires once the scroll crosses a threshold, never a
+ *      frame-by-frame scrub. So if you stop scrolling mid-way it is never
+ *      caught half-transitioned: it is always either the banner or the
+ *      ticker, and it settles under slow-in/slow-out easing.
  *
- *   • Docked    (p1 = 1, p2 = 0)
- *       Centered banner anchored to the top of the whitepaper section,
- *       scrolling naturally with it until its top would slip above the nav.
- *       width  = min(880, viewportWidth - 64)
- *       top    = whitepaperRect.top + 24
- *       left   = (viewportWidth - width) / 2
+ *   • Detached  (p1 = 0)    top-right dashboard over the hero      (320px)
+ *   • Docked    (p1 = 1)    centered banner at the whitepaper top  (≤880px)
+ *   • Sticky    (--q = 1)   full-width ticker pinned under the nav (100vw)
  *
- *   • Sticky    (p1 = 1, p2 = 1)
- *       Pinned ticker bar — same height as the nav, full viewport width,
- *       chunky borders / shadow / padding shed and the header collapsed.
- *       width  = viewportWidth
- *       top    = navHeight
- *       left   = 0
+ * The snap is a latched boolean guarded by hysteresis so it cannot chatter
+ * at the boundary. We measure how far the docked banner has pushed past the
+ * nav as a 0→1 progress centred on the pin line (0.5 = the banner's top is
+ * exactly at the nav). It flips to the ticker only past 0.5 + HYST and back
+ * to the banner only below 0.5 − HYST — i.e. the scroll has to travel a bit
+ * beyond the trigger in either direction before anything happens. The snap
+ * itself is a CSS transition toggled on only for its duration via the
+ * `is-snapping` class; --q (registered with @property) drives every bit of
+ * the ticker restyling and eases across with it.
  *
- * The dock → sticky morph (p2) begins the moment the docked panel's top
- * would otherwise drop above the nav. From there a fixed scroll range
- * smoothly expands the panel into its ticker form.
- *
- * On viewports below 768px the morph is disabled and a simpler horizontal
- * top-bar is rendered instead via CSS, since the morph depends on having
- * room to slide horizontally.
+ * On viewports below 768px the whole thing is disabled and CSS renders a
+ * simple pinned top-bar instead.
  */
-export default function StatsPanel({ stats, anchorId = 'whitepaper' }) {
+export default function StatsPanel({ stats, anchorId = 'whitepaper', disclaimerVisible = false }) {
     const ref = useRef(null);
     const { t } = useLanguage();
 
@@ -53,14 +46,25 @@ export default function StatsPanel({ stats, anchorId = 'whitepaper' }) {
         const el = ref.current;
         if (!el) return;
 
-        let raf = 0;
-
         const NAV_H = 64;
         const DETACHED_W = 320;
         const DETACHED_GAP = 24;
         const STICKY_TOP = NAV_H;
-        // Pixels of extra scroll over which the dock → sticky morph plays.
-        const MORPH_RANGE = 240;
+
+        // Docked → sticky one-shot snap.
+        const SNAP_MS = 450;   // slow-in/slow-out duration of the snap
+        const HYST = 0.25;     // normalized hysteresis on either side of the trigger
+        const ZONE = 160;      // px height of the transition zone (maps to 0→1)
+
+        // Single source of truth for the snap duration; the CSS transition
+        // reads it back via var(--snap-ms).
+        el.style.setProperty('--snap-ms', `${SNAP_MS}ms`);
+
+        let raf = 0;
+        let sticky = false;      // latched banner (false) ↔ ticker (true)
+        let prevSticky = false;
+        let snapTimer = 0;
+        let first = true;        // never animate the very first layout pass
 
         const update = () => {
             raf = 0;
@@ -73,6 +77,9 @@ export default function StatsPanel({ stats, anchorId = 'whitepaper' }) {
                 el.style.width = '';
                 el.style.setProperty('--p', '0');
                 el.style.setProperty('--q', '0');
+                el.classList.remove('is-snapping');
+                sticky = false;
+                prevSticky = false;
                 return;
             }
 
@@ -85,18 +92,32 @@ export default function StatsPanel({ stats, anchorId = 'whitepaper' }) {
             const startY = vh - 80;
             const endY = NAV_H + 80;
             const denom = Math.max(1, startY - endY);
-            let p1 = Math.max(0, Math.min(1, (startY - rect.top) / denom));
+            const p1 = Math.max(0, Math.min(1, (startY - rect.top) / denom));
 
             const dockedW = Math.min(880, vw - 64);
             const dockedTop = rect.top + 24;
 
+            // Docked → sticky as a hysteresis latch rather than a scrubbed
+            // morph. `progress` is 0.5 exactly when the banner's top meets the
+            // nav, rising above as you scroll past and falling below as you
+            // scroll back. Flip only once you're HYST beyond the midpoint, so
+            // the state can't oscillate at the trigger point.
+            const past = STICKY_TOP - dockedTop;
+            const progress = Math.max(0, Math.min(1, 0.5 + past / ZONE));
+            if (progress >= 0.5 + HYST) sticky = true;
+            else if (progress <= 0.5 - HYST) sticky = false;
+
             let width;
             let top;
             let left;
-            let p2 = 0;
 
-            if (dockedTop > STICKY_TOP) {
-                // Detached → docked. The original morph is unchanged.
+            if (sticky) {
+                // Ticker: pinned under the nav, full viewport width.
+                width = vw;
+                top = STICKY_TOP;
+                left = 0;
+            } else {
+                // Detached → docked. Continuous, scroll-linked morph (unchanged).
                 width = DETACHED_W + (dockedW - DETACHED_W) * p1;
 
                 const detachedTop = NAV_H + DETACHED_GAP;
@@ -105,21 +126,32 @@ export default function StatsPanel({ stats, anchorId = 'whitepaper' }) {
 
                 top = detachedTop * (1 - p1) + dockedTop * p1;
                 left = detachedLeft * (1 - p1) + dockedLeft * p1;
-            } else {
-                // Docked → sticky/ticker. Pin to STICKY_TOP and grow the
-                // panel out to viewport width as the user keeps scrolling.
-                p1 = 1;
-                p2 = Math.max(0, Math.min(1, (STICKY_TOP - dockedTop) / MORPH_RANGE));
 
-                width = dockedW + (vw - dockedW) * p2;
-                top = STICKY_TOP;
-                left = (vw - width) / 2;
+                // Hold the banner at the nav while it waits in the dead zone,
+                // so it never slides up underneath it before snapping.
+                top = Math.max(STICKY_TOP, top);
+            }
+
+            // Animate only at the instant the latch flips — one ease-in-out
+            // snap, switched on just long enough to play, then off again so
+            // the detached → docked morph stays crisply scroll-linked.
+            if (sticky !== prevSticky) {
+                if (!first) {
+                    el.classList.add('is-snapping');
+                    clearTimeout(snapTimer);
+                    snapTimer = setTimeout(
+                        () => el.classList.remove('is-snapping'),
+                        SNAP_MS + 60
+                    );
+                }
+                prevSticky = sticky;
             }
 
             el.style.transform = `translate3d(${left}px, ${top}px, 0)`;
             el.style.width = `${width}px`;
             el.style.setProperty('--p', p1.toFixed(3));
-            el.style.setProperty('--q', p2.toFixed(3));
+            el.style.setProperty('--q', sticky ? '1' : '0');
+            first = false;
         };
 
         const onScroll = () => {
@@ -134,11 +166,16 @@ export default function StatsPanel({ stats, anchorId = 'whitepaper' }) {
             window.removeEventListener('scroll', onScroll);
             window.removeEventListener('resize', update);
             if (raf) cancelAnimationFrame(raf);
+            clearTimeout(snapTimer);
         };
     }, [anchorId]);
 
     return (
-        <aside className="stats-panel" ref={ref} aria-label={t.stats.protocolLedger}>
+        <aside
+            className={`stats-panel ${disclaimerVisible ? 'stats-panel-below-disclaimer' : ''}`}
+            ref={ref}
+            aria-label={t.stats.protocolLedger}
+        >
             <div className="stats-panel-header">
                 <span className="stats-panel-eyebrow">{t.stats.protocolLedger}</span>
             </div>

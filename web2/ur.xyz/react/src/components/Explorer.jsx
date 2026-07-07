@@ -24,8 +24,11 @@ import { useLanguage } from '../i18n';
  */
 export default function Explorer({ kind, apiGroups, apiOperations, children }) {
     const route = useRoute();
-    const { code } = useLanguage();
+    const { code, t } = useLanguage();
     const [query, setQuery] = useState('');
+    // On mobile the sidebar is collapsed by default so the content is the
+    // first thing you see; this toggles it open.
+    const [navOpen, setNavOpen] = useState(false);
 
     const searchIndex = useMemo(
         () => buildSearchIndex(ALL_DOCS, apiOperations || []),
@@ -44,9 +47,11 @@ export default function Explorer({ kind, apiGroups, apiOperations, children }) {
     }, [query, searchIndex]);
 
     const onPickDoc = (slug) => {
+        setNavOpen(false);
         navigate(buildPath({ name: 'docs', slug }, code));
     };
     const onPickApi = (anchor) => {
+        setNavOpen(false);
         navigate(buildPath({ name: 'api' }, code));
         // Defer to next paint so the new page mounts before we scroll.
         requestAnimationFrame(() => {
@@ -64,8 +69,25 @@ export default function Explorer({ kind, apiGroups, apiOperations, children }) {
     const activeDocSlug = kind === 'docs' ? (route.slug || '') : null;
 
     return (
-        <div className="explorer">
-            <aside className="explorer-sidebar" aria-label="Documentation navigation">
+        <div className={`explorer ${navOpen ? 'sidebar-open' : ''}`}>
+            {/* Mobile-only handle: the sidebar is collapsed until tapped so the
+                doc/API content is visible on load instead of a wall of nav. */}
+            <button
+                type="button"
+                className="explorer-sidebar-toggle"
+                aria-expanded={navOpen}
+                aria-controls="explorer-sidebar"
+                onClick={() => setNavOpen(o => !o)}
+            >
+                <span className="explorer-sidebar-toggle-label">
+                    {kind === 'api' ? t.nav.apiReference : t.nav.browseDocs} &middot; {t.nav.search}
+                </span>
+                <span className="explorer-sidebar-toggle-icon" aria-hidden="true">
+                    {navOpen ? '✕' : '☰'}
+                </span>
+            </button>
+
+            <aside id="explorer-sidebar" className="explorer-sidebar" aria-label="Documentation navigation">
                 <div className="explorer-search">
                     <input
                         type="search"

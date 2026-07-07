@@ -12,6 +12,11 @@ export default {
         docs:       'Documentación',
         tagline:    'Posee tu privacidad. Posee tu red.',
         languageMenu: 'Idioma',
+        menu:         'Menú',
+        closeMenu:    'Cerrar menú',
+        browseDocs:   'Explorar documentación',
+        apiReference: 'Referencia de API',
+        search:       'Buscar',
         ctaAria:    'Uso — actividad actual de la red'
     },
 
@@ -116,7 +121,7 @@ export default {
     miners: {
         eyebrow: 'Mineros',
         title:   'Los mineros que transportan el tráfico.',
-        intro:   'Los mineros son la oferta de la red: transportan tanto el tráfico de entrada como el de salida. Ejecutan un modelo de seguridad seguro por defecto, solo enrutan tráfico cifrado, se registran con uno o más operadores y reciben pago de la emisión de la subred por la capacidad enrutable que aportan. Los mineros compiten por alcance: las flotas que dan servicio a la mayor cantidad de subredes IP distintas y enrutables son promovidas a mineros de nivel superior y ganan más. Todo se ejecuta en espacio de usuario, en hardware que ya posees.',
+        intro:   'Los mineros compiten por poner a disposición de la red la mayor cantidad de subredes IPv4 /29 e IPv6 /48, cada una enrutable en todo momento para el tráfico de entrada o de salida. En otras palabras, los mineros convierten la internet pública en una red privada y anónima que cualquiera puede usar. Cada minero transporta tanto el tráfico de entrada como el de salida, ejecuta un modelo de seguridad seguro por defecto, solo enruta tráfico cifrado y recibe pago de la emisión de la subred por la capacidad enrutable que aporta. Las flotas con la mayor cobertura de subredes distintas y enrutables son promovidas a mineros de nivel superior y ganan más: todo en espacio de usuario, en hardware que ya posees.',
         roles: [
             { tag: '01', title: 'Salida',               body: 'Los mineros de salida son las IPs de salida de la red compartida. Rechazan el tráfico que entra en conflicto con directrices regulatorias comunes como CFAA y DMCA, bloquean IPs maliciosas conocidas y solo enrutan tráfico cifrado, protegiendo tanto a los mineros como a los usuarios.' },
             { tag: '02', title: 'Entrada',              body: 'Los mineros de entrada (extensores) crean puntos de entrada que mejoran la accesibilidad en todo el mundo, usando TLS de N capas, suplantación de SNI y reenvío de confianza. Un subconjunto rotativo se expone en cada ciclo, y los clientes reintentan automáticamente los puntos de entrada que funcionaron antes.' },

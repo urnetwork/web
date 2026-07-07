@@ -20,16 +20,16 @@ const INITIAL_STATS = {
     totalHeldUr: 0
 };
 
-export default function HeroIsland() {
+export default function HeroIsland({ lang }) {
     const [stats, setStats] = useState(INITIAL_STATS);
     const handleStats = useCallback(next => setStats(next), []);
     const disclaimerVisible = useDisclaimerVisible();
 
     return (
-        <LanguageProvider>
+        <LanguageProvider initialLang={lang}>
             <Nav stats={stats} disclaimerVisible={disclaimerVisible} />
             <Hero onStats={handleStats} />
-            <StatsPanel stats={stats} anchorId="whitepaper" />
+            <StatsPanel stats={stats} anchorId="whitepaper" disclaimerVisible={disclaimerVisible} />
         </LanguageProvider>
     );
 }

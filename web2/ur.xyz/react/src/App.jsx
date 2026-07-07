@@ -79,7 +79,7 @@ function HomePage() {
             <Disclaimer visible={disclaimerVisible} />
             <Nav stats={stats} disclaimerVisible={disclaimerVisible} />
             <Hero onStats={handleStats} />
-            <StatsPanel stats={stats} anchorId="whitepaper" />
+            <StatsPanel stats={stats} anchorId="whitepaper" disclaimerVisible={disclaimerVisible} />
 
             <main>
                 <Whitepaper />

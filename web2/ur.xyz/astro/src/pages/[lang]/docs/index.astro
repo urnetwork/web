@@ -11,5 +11,5 @@ const { lang } = Astro.params;
 const dir = LANGS[lang]?.dir || 'ltr';
 ---
 <Base title="Docs — URnetwork" lang={lang} dir={dir}>
-    <DocsIsland activeRoute="docs" client:load />
+    <DocsIsland activeRoute="docs" lang={lang} client:load />
 </Base>

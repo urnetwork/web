@@ -19,7 +19,7 @@ const dir = LANGS[lang]?.dir || 'ltr';
 <Base title={`$UR — ${t.nav.tagline}`} lang={lang} dir={dir}>
     <div class="app">
         <DisclaimerStatic />
-        <HeroIsland client:load />
+        <HeroIsland lang={lang} client:load />
 
         <main>
             <Section id="whitepaper" eyebrow={t.whitepaper.eyebrow} title={t.whitepaper.title} variant="whitepaper">

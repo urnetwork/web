@@ -40,7 +40,7 @@ const showDiagram = ROLE_SECTIONS.includes(section);
 >
     <div class="app">
         <DisclaimerStatic />
-        <NavIsland activeRoute={section} client:load />
+        <NavIsland activeRoute={section} lang={lang} client:load />
 
         <main class="section-page">
             <Section id={section} eyebrow={sectionData.eyebrow} title={sectionData.title}>

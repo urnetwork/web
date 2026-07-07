@@ -238,12 +238,65 @@ function LanguageSelector() {
  * `nav-below-disclaimer` class passed in from the parent.
  */
 export default function Nav({ stats, disclaimerVisible, activeRoute }) {
-    const { t, code } = useLanguage();
+    const { t, code, setLang, langs } = useLanguage();
     const route = activeRoute ? { name: activeRoute, slug: null } : useRoute();
     const onHome = route.name === 'home';
     const [scrolled, setScrolled] = useState(false);
     const [whitepaperActive, setWhitepaperActive] = useState(false);
+    const [menuOpen, setMenuOpen] = useState(false);
+    const menuBtnRef = useRef(null);
+    const drawerRef = useRef(null);
     const { series, current } = useCostHistory(stats);
+
+    // While the mobile drawer is open: lock background scroll, wire
+    // Escape-to-close, trap Tab within the drawer, and restore focus to the
+    // control that opened it once it closes.
+    useEffect(() => {
+        if (!menuOpen) return undefined;
+        const drawer = drawerRef.current;
+        const opener = menuBtnRef.current;
+
+        // Visible, focusable controls inside the drawer, in DOM order.
+        const focusable = () =>
+            drawer
+                ? Array.from(drawer.querySelectorAll(
+                      'a[href], button:not([disabled]), input, [tabindex]:not([tabindex="-1"])'
+                  )).filter(el => el.offsetWidth > 0 || el.offsetHeight > 0)
+                : [];
+
+        // Move focus into the drawer — its close button.
+        const closeBtn = drawer && drawer.querySelector('.nav-drawer-bar .nav-menu-toggle');
+        (closeBtn || focusable()[0] || drawer)?.focus();
+
+        const onKey = (e) => {
+            if (e.key === 'Escape') { setMenuOpen(false); return; }
+            if (e.key !== 'Tab') return;
+            const list = focusable();
+            if (list.length === 0) return;
+            const first = list[0];
+            const last = list[list.length - 1];
+            if (e.shiftKey && document.activeElement === first) {
+                e.preventDefault();
+                last.focus();
+            } else if (!e.shiftKey && document.activeElement === last) {
+                e.preventDefault();
+                first.focus();
+            }
+        };
+        document.addEventListener('keydown', onKey);
+        const prevOverflow = document.body.style.overflow;
+        document.body.style.overflow = 'hidden';
+
+        return () => {
+            document.removeEventListener('keydown', onKey);
+            document.body.style.overflow = prevOverflow;
+            // Return focus to the opener, if it is still in the document.
+            if (opener && document.contains(opener)) opener.focus();
+        };
+    }, [menuOpen]);
+
+    // Any route change (a followed link, or browser back/forward) closes it.
+    useEffect(() => { setMenuOpen(false); }, [route.name]);
 
     useEffect(() => {
         if (!onHome) {
@@ -278,6 +331,7 @@ export default function Nav({ stats, disclaimerVisible, activeRoute }) {
     /** Navigate to a section route page. */
     const handleLinkClick = (e, name) => {
         e.preventDefault();
+        setMenuOpen(false);
         navigate(buildPath({ name, slug: null }, code));
     };
 
@@ -287,6 +341,7 @@ export default function Nav({ stats, disclaimerVisible, activeRoute }) {
      */
     const handleWhitepaperClick = (e) => {
         e.preventDefault();
+        setMenuOpen(false);
         if (!onHome) {
             navigate(buildPath({ name: 'home' }, code));
             requestAnimationFrame(() => {
@@ -306,6 +361,7 @@ export default function Nav({ stats, disclaimerVisible, activeRoute }) {
 
     const handleBrandClick = (e) => {
         e.preventDefault();
+        setMenuOpen(false);
         if (onHome) {
             window.scrollTo({ top: 0, behavior: 'smooth' });
         } else {
@@ -320,6 +376,7 @@ export default function Nav({ stats, disclaimerVisible, activeRoute }) {
     ].filter(Boolean).join(' ');
 
     return (
+        <>
         <header className={navClass}>
             <div className="nav-inner">
                 <a
@@ -332,57 +389,150 @@ export default function Nav({ stats, disclaimerVisible, activeRoute }) {
                 </a>
 
                 <nav className="nav-links" aria-label="Primary">
-                    <a
-                        href={`${buildPath({ name: 'home' }, code)}#whitepaper`}
-                        className={`nav-link ${onHome && whitepaperActive ? 'is-active' : ''}`}
-                        onClick={handleWhitepaperClick}
-                    >
-                        {t.nav.whitepaper}
-                    </a>
-                    {NAV_SECTIONS.map(name => (
-                        <a
-                            key={name}
-                            href={buildPath({ name, slug: null }, code)}
-                            className={`nav-link ${route.name === name ? 'is-active' : ''}`}
-                            onClick={(e) => handleLinkClick(e, name)}
-                        >
-                            {t.nav[name]}
-                        </a>
-                    ))}
-                    <a
-                        href={buildPath({ name: 'docs', slug: null }, code)}
-                        className={`nav-link ${route.name === 'docs' || route.name === 'api' ? 'is-active' : ''}`}
-                        onClick={(e) => handleLinkClick(e, 'docs')}
-                    >
-                        {t.nav.docs}
-                    </a>
+                    <PrimaryLinks
+                        t={t} code={code} route={route} onHome={onHome}
+                        whitepaperActive={whitepaperActive}
+                        onWhitepaper={handleWhitepaperClick} onLink={handleLinkClick}
+                    />
                 </nav>
 
                 <LanguageSelector />
 
-                <div
-                    className="nav-cta"
-                    aria-label={t.nav.ctaAria}
+                <UsageTicker t={t} current={current} series={series} />
+
+                {/* Hamburger — only shown ≤900px (see Nav.css). */}
+                <button
+                    type="button"
+                    ref={menuBtnRef}
+                    className={`nav-menu-toggle ${menuOpen ? 'is-open' : ''}`}
+                    aria-label={menuOpen ? t.nav.closeMenu : t.nav.menu}
+                    aria-expanded={menuOpen}
+                    aria-controls="nav-drawer"
+                    onClick={() => setMenuOpen(o => !o)}
                 >
-                    <span className="nav-cta-label">{t.nav.usage}</span>
-                    <div className="nav-cta-sparks">
-                        <div className="nav-spark">
-                            <div className="nav-spark-meta">
-                                <span className="nav-spark-label">$UR/GB</span>
-                                <span className="nav-spark-value">{fmtCost(current.gb)}</span>
-                            </div>
-                            <Sparkline series={series.gb} />
-                        </div>
-                        <div className="nav-spark">
-                            <div className="nav-spark-meta">
-                                <span className="nav-spark-label">$UR/user</span>
-                                <span className="nav-spark-value">{fmtCost(current.user)}</span>
-                            </div>
-                            <Sparkline series={series.user} />
-                        </div>
-                    </div>
-                </div>
+                    <span className="nav-menu-icon" aria-hidden="true"><span /><span /><span /></span>
+                </button>
             </div>
         </header>
+
+            {/* Mobile navigation drawer (≤900px). Rendered as a sibling of the
+                header — NOT inside it — because the nav's backdrop-filter makes
+                it the containing block for fixed descendants, which would pin
+                the drawer to the 64px bar instead of the viewport. Always in the
+                DOM; the is-open class drives the transition and, when closed,
+                removes it from the tab order via visibility:hidden. */}
+            <div
+                id="nav-drawer"
+                ref={drawerRef}
+                className={`nav-drawer ${menuOpen ? 'is-open' : ''}`}
+                role="dialog"
+                aria-modal="true"
+                aria-label={t.nav.menu}
+            >
+                <div className="nav-drawer-bar">
+                    <a
+                        href={buildPath({ name: 'home' }, code)}
+                        className="nav-brand"
+                        onClick={handleBrandClick}
+                    >
+                        <img src="/ur.svg" alt="URnetwork" className="nav-logo" />
+                    </a>
+                    <button
+                        type="button"
+                        className="nav-menu-toggle is-open"
+                        aria-label={t.nav.closeMenu}
+                        onClick={() => setMenuOpen(false)}
+                    >
+                        <span className="nav-menu-icon" aria-hidden="true"><span /><span /><span /></span>
+                    </button>
+                </div>
+
+                <nav className="nav-drawer-links" aria-label="Primary">
+                    <PrimaryLinks
+                        t={t} code={code} route={route} onHome={onHome}
+                        whitepaperActive={whitepaperActive}
+                        onWhitepaper={handleWhitepaperClick} onLink={handleLinkClick}
+                    />
+                </nav>
+
+                <div className="nav-drawer-foot">
+                    <UsageTicker t={t} current={current} series={series} />
+                    <nav className="nav-drawer-langs" aria-label={t.nav.languageMenu}>
+                        {LANG_ORDER.map(c => (
+                            <button
+                                key={c}
+                                type="button"
+                                lang={c}
+                                className={`nav-drawer-lang ${c === code ? 'is-active' : ''}`}
+                                onClick={() => { setLang(c); setMenuOpen(false); }}
+                            >
+                                {langs[c].label}
+                            </button>
+                        ))}
+                    </nav>
+                </div>
+            </div>
+        </>
+    );
+}
+
+/**
+ * Primary section links. Shared verbatim by the desktop bar (.nav-links)
+ * and the mobile drawer (.nav-drawer-links); the two contexts restyle the
+ * same .nav-link markup via their parent selector.
+ */
+function PrimaryLinks({ t, code, route, onHome, whitepaperActive, onWhitepaper, onLink }) {
+    return (
+        <>
+            <a
+                href={`${buildPath({ name: 'home' }, code)}#whitepaper`}
+                className={`nav-link ${onHome && whitepaperActive ? 'is-active' : ''}`}
+                onClick={onWhitepaper}
+            >
+                {t.nav.whitepaper}
+            </a>
+            {NAV_SECTIONS.map(name => (
+                <a
+                    key={name}
+                    href={buildPath({ name, slug: null }, code)}
+                    className={`nav-link ${route.name === name ? 'is-active' : ''}`}
+                    onClick={(e) => onLink(e, name)}
+                >
+                    {t.nav[name]}
+                </a>
+            ))}
+            <a
+                href={buildPath({ name: 'docs', slug: null }, code)}
+                className={`nav-link ${route.name === 'docs' || route.name === 'api' ? 'is-active' : ''}`}
+                onClick={(e) => onLink(e, 'docs')}
+            >
+                {t.nav.docs}
+            </a>
+        </>
+    );
+}
+
+/** The Usage pill with its two cost sparklines. */
+function UsageTicker({ t, current, series }) {
+    return (
+        <div className="nav-cta" aria-label={t.nav.ctaAria}>
+            <span className="nav-cta-label">{t.nav.usage}</span>
+            <div className="nav-cta-sparks">
+                <div className="nav-spark">
+                    <div className="nav-spark-meta">
+                        <span className="nav-spark-label">$UR/GB</span>
+                        <span className="nav-spark-value">{fmtCost(current.gb)}</span>
+                    </div>
+                    <Sparkline series={series.gb} />
+                </div>
+                <div className="nav-spark">
+                    <div className="nav-spark-meta">
+                        <span className="nav-spark-label">$UR/user</span>
+                        <span className="nav-spark-value">{fmtCost(current.user)}</span>
+                    </div>
+                    <Sparkline series={series.user} />
+                </div>
+            </div>
+        </div>
     );
 }

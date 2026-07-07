@@ -15,7 +15,12 @@
     grid-template-columns: var(--sidebar-width) 1fr;
     align-items: stretch;
     min-height: 100vh;
-    padding-top: var(--nav-height);
+    /* Reserve the disclaimer + nav stack (both are shown at the top of the
+       page) so the content and the sticky sidebar clear them. This is a
+       static reservation — a dynamic one would reflow the page mid-scroll as
+       the disclaimer retracts. The sidebar's own sticky top stays at
+       var(--nav-height) so it tucks under the nav once scrolled. */
+    padding-top: calc(var(--nav-height) * 2);
     background: var(--brand-bg);
     color: var(--brand-ui);
     font-family: 'PPNeueMontreal', sans-serif;
@@ -43,6 +48,40 @@
 }
 .explorer-sidebar::-webkit-scrollbar-thumb:hover {
     background: rgba(214, 230, 244, 0.28);
+}
+
+/* --- Mobile sidebar toggle (revealed ≤900px) --- */
+.explorer-sidebar-toggle {
+    display: none;
+    position: sticky;
+    top: var(--nav-height);
+    z-index: 5;
+    width: 100%;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 14px 22px;
+    background: rgba(16, 16, 16, 0.92);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border: none;
+    border-bottom: 1px solid var(--sidebar-border);
+    cursor: pointer;
+    font-family: 'PPNeueMontreal', sans-serif;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.explorer-sidebar-toggle-label {
+    font-size: 0.78rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--brand-ui);
+}
+
+.explorer-sidebar-toggle-icon {
+    font-size: 1rem;
+    line-height: 1;
+    color: var(--brand-ur);
 }
 
 /* --- Search --- */
@@ -971,15 +1010,31 @@
     .explorer {
         --sidebar-width: 100%;
         grid-template-columns: 1fr;
+        /* padding-top (disclaimer + nav reservation) is inherited from the
+           base rule; the sticky toggle below sits just under it. */
     }
+
+    .explorer-sidebar-toggle { display: flex; }
+
+    /* Collapsed by default so content leads; expands on tap. */
     .explorer-sidebar {
         position: relative;
         top: 0;
         height: auto;
-        max-height: 60vh;
+        max-height: 0;
+        overflow: hidden;
+        padding: 0 20px;
         border-right: none;
+        border-bottom: none;
+        transition: max-height 0.3s ease, padding 0.3s ease;
+    }
+    .explorer.sidebar-open .explorer-sidebar {
+        max-height: 78vh;
+        overflow-y: auto;
+        padding: 20px 20px 28px;
         border-bottom: 1px solid var(--sidebar-border);
     }
+
     .explorer-main {
         padding: 36px 22px 80px;
     }

@@ -102,13 +102,15 @@ const LanguageContext = createContext({
     setLang: () => {}
 });
 
-export function LanguageProvider({ children }) {
+export function LanguageProvider({ children, initialLang }) {
     const [code, setCode] = useState(() => {
-        // main.jsx has already aligned the URL with the resolved language;
-        // we just need to read the URL back here so the provider's initial
-        // state matches what's in the address bar.
-        const urlLang = parseLangFromPath();
-        return urlLang || DEFAULT_LANG;
+        // An explicit initialLang (passed by the Astro islands, which know the
+        // page's language at build time) wins, so the server render and the
+        // first client render agree. Without it, SSR defaults to English while
+        // the client reads a localized URL — a hydration mismatch. In the React
+        // SPA no initialLang is passed and we read the URL back, exactly as
+        // before (main.jsx has already aligned the URL with the language).
+        return initialLang || parseLangFromPath() || DEFAULT_LANG;
     });
 
     // Keep <html lang> / <html dir> in sync on every change.

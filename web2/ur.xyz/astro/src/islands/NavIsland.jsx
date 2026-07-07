@@ -18,11 +18,11 @@ const INITIAL_STATS = {
     totalHeldUr: 0
 };
 
-export default function NavIsland({ stats, activeRoute }) {
+export default function NavIsland({ stats, activeRoute, lang }) {
     const disclaimerVisible = useDisclaimerVisible();
 
     return (
-        <LanguageProvider>
+        <LanguageProvider initialLang={lang}>
             <Nav stats={stats || INITIAL_STATS} disclaimerVisible={disclaimerVisible} activeRoute={activeRoute} />
         </LanguageProvider>
     );
