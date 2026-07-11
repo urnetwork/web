@@ -1,0 +1,69 @@
+/* CommunityFoot.css — supporter / partner walls of logos. */
+
+.community-orgs {
+    margin-top: 56px;
+}
+
+.community-orgs-title {
+    font-family: 'PPNeueMontreal', sans-serif;
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--brand-white);
+    margin: 0 0 20px;
+}
+
+/* A borderless wall: just the logos, generously spaced. */
+.community-orgs-list {
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 28px 60px;
+    margin: 0;
+    padding: 0;
+}
+
+.community-org {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    color: var(--brand-white);
+    text-decoration: none;
+    opacity: 0.85;
+    transition: opacity 0.2s ease;
+}
+
+a.community-org:hover {
+    opacity: 1;
+}
+
+/* Wordmark logos stand alone at a common height. */
+.community-org-logo {
+    display: block;
+    height: 40px;
+    width: auto;
+}
+
+/* Square marks sit next to the org's name. */
+.community-org-logo.is-mark {
+    height: 38px;
+    border-radius: 8px;
+}
+
+/* Typographic wordmark for orgs without a published logo asset. */
+.community-org-name {
+    font-size: 1.2rem;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    white-space: nowrap;
+}
+
+@media (max-width: 768px) {
+    .community-orgs-list {
+        gap: 20px 40px;
+    }
+
+    .community-org-logo { height: 32px; }
+    .community-org-logo.is-mark { height: 30px; }
+    .community-org-name { font-size: 1.05rem; }
+}

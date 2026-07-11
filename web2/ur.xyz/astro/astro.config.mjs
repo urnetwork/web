@@ -3,6 +3,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { defineConfig } from 'astro/config';
 import react from '@astrojs/react';
+import sitemap from '@astrojs/sitemap';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PROJECT_ROOT = path.resolve(__dirname, '..');
@@ -68,7 +69,18 @@ const envConfig = fs.existsSync(envPath)
     : {};
 
 export default defineConfig({
-    integrations: [react()],
+    site: 'https://ur.xyz',
+    integrations: [
+        react(),
+        // Sitemap with per-page hreflang alternates — every page exists in
+        // all six languages at the same path under its /<lang> prefix.
+        sitemap({
+            i18n: {
+                defaultLocale: 'en',
+                locales: { en: 'en', ru: 'ru', ar: 'ar', zh: 'zh', de: 'de', es: 'es' }
+            }
+        })
+    ],
     output: 'static',
     outDir: path.resolve(__dirname, 'build', ENV),
     vite: {

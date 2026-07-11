@@ -1,0 +1,36 @@
+---
+/**
+ * Shared shell for the legal document pages (terms | privacy | vdp).
+ */
+import Base from '../layouts/Base.astro';
+import DisclaimerStatic from './DisclaimerStatic.astro';
+import NavIsland from '../islands/NavIsland.jsx';
+import Section from './Section.astro';
+import FooterStatic from './FooterStatic.astro';
+
+import '@react/components/Nav.css';
+
+interface Props {
+    t: any;
+    lang: string;
+    dir?: string;
+    doc: 'terms' | 'privacy' | 'vdp';
+}
+
+const { t, lang, dir = 'ltr', doc } = Astro.props;
+const d = t.legal[doc];
+---
+<Base title={`${d.title} — UR`} description={d.body} lang={lang} dir={dir}>
+    <div class="app">
+        <DisclaimerStatic />
+        <NavIsland lang={lang} client:load />
+
+        <main class="section-page">
+            <Section id={doc} eyebrow={t.legal.eyebrow} title={d.title}>
+                <p>{d.body}</p>
+            </Section>
+        </main>
+
+        <FooterStatic t={t} lang={lang} />
+    </div>
+</Base>

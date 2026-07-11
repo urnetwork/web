@@ -8,6 +8,9 @@ import FooterStatic from '../components/FooterStatic.astro';
 import NetworkDiagram from '@react/components/NetworkDiagram.jsx';
 import MinerSim from '@react/components/MinerSim.jsx';
 import ValidatorSim from '@react/components/ValidatorSim.jsx';
+import OperatorsDirectoryIsland from '../islands/OperatorsDirectoryIsland.jsx';
+import { ResearchCompetition, ResearchCardGrid, ResearchFoot } from '@react/components/ResearchExtras.jsx';
+import { CommunityFoot } from '@react/components/CommunityFoot.jsx';
 import en from '@react/i18n/en.js';
 import { SECTION_ROUTES } from '../lib/i18n.js';
 
@@ -26,7 +29,7 @@ const items = sectionData.roles || sectionData.items || sectionData.papers || []
 const showDiagram = ROLE_SECTIONS.includes(section);
 ---
 <Base
-    title={`${sectionData.title} — URnetwork`}
+    title={`${sectionData.title} — UR`}
     description={sectionData.intro}
     lang="en"
 >
@@ -36,11 +39,17 @@ const showDiagram = ROLE_SECTIONS.includes(section);
 
         <main class="section-page">
             <Section id={section} eyebrow={sectionData.eyebrow} title={sectionData.title}>
+                {section === 'research' && <ResearchCompetition t={t} />}
                 <p>{sectionData.intro}</p>
-                {showDiagram && <NetworkDiagram client:load active={section} lang="en" />}
-                <CardGrid items={items} />
+                {showDiagram && <NetworkDiagram client:load active={section} lang="en" ctaLabel={sectionData.cta} />}
+                {section === 'research'
+                    ? <ResearchCardGrid t={t} />
+                    : <CardGrid items={items} />}
+                {section === 'operators' && <OperatorsDirectoryIsland lang="en" client:visible />}
                 {section === 'miners' && <MinerSim client:visible />}
                 {section === 'validators' && <ValidatorSim client:visible />}
+                {section === 'research' && <ResearchFoot t={t} />}
+                {section === 'community' && <CommunityFoot t={t} />}
             </Section>
         </main>
 

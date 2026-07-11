@@ -1,0 +1,13 @@
+---
+import LegalPage from '../../components/LegalPage.astro';
+import { NON_EN_LANGS, LANGS, getDict } from '../../lib/i18n.js';
+
+export function getStaticPaths() {
+    return NON_EN_LANGS.map(lang => ({ params: { lang } }));
+}
+
+const { lang } = Astro.params;
+const t = await getDict(lang);
+const dir = LANGS[lang]?.dir || 'ltr';
+---
+<LegalPage t={t} lang={lang} dir={dir} doc="privacy" />

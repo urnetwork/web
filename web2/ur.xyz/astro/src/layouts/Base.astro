@@ -1,5 +1,6 @@
 ---
 import '@react/App.css';
+import { LANG_CODES, NON_EN_LANGS } from '../lib/i18n.js';
 
 interface Props {
     title: string;
@@ -10,10 +11,21 @@ interface Props {
 
 const {
     title,
-    description = '$UR — Own your privacy. Own your network.',
+    description = 'UR — Own your privacy. Own your network.',
     lang = 'en',
     dir = 'ltr',
 } = Astro.props;
+
+const SITE_ORIGIN = 'https://ur.xyz';
+const canonical = new URL(Astro.url.pathname, SITE_ORIGIN).href;
+const ogImage = `${SITE_ORIGIN}/ur.png`;
+
+// Language alternates: every page exists at the same path in all six
+// languages (English at the bare path, the rest under /<lang>).
+const langPrefix = new RegExp(`^/(${NON_EN_LANGS.join('|')})(?=/|$)`);
+const basePath = Astro.url.pathname.replace(langPrefix, '') || '/';
+const altHref = (l) =>
+    new URL(l === 'en' ? basePath : `/${l}${basePath === '/' ? '' : basePath}`, SITE_ORIGIN).href;
 ---
 <!doctype html>
 <html lang={lang} dir={dir}>
@@ -22,12 +34,26 @@ const {
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#101010" />
     <meta name="description" content={description} />
+    <meta name="application-name" content="UR" />
+    <link rel="canonical" href={canonical} />
+    {LANG_CODES.map(l => (
+        <link rel="alternate" hreflang={l} href={altHref(l)} />
+    ))}
+    <link rel="alternate" hreflang="x-default" href={altHref('en')} />
 
     <!-- Open Graph -->
+    <meta property="og:site_name" content="UR" />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:type" content="website" />
-    <meta property="og:image" content="/ur.png" />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImage} />
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImage} />
 
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
@@ -55,6 +81,9 @@ const {
     </style>
 
     <title>{title}</title>
+
+    <!-- Page-specific head extras (e.g. the price page's RSS autodiscovery link). -->
+    <slot name="head" />
 </head>
 <body>
     <!-- Static site: navigation should do full page loads, not pushState -->

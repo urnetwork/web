@@ -10,7 +10,7 @@ export default function Validators() {
     return (
         <Section id="validators" eyebrow={s.eyebrow} title={s.title}>
             <p>{s.intro}</p>
-            <NetworkDiagram active="validators" lang={code} />
+            <NetworkDiagram active="validators" lang={code} ctaLabel={s.cta} />
             <div className="card-grid">
                 {s.roles.map(r => (
                     <div className="card" key={r.tag}>

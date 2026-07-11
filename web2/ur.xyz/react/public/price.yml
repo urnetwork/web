@@ -1,0 +1,9 @@
+sn: 1
+# the alpha must be deposited as demand deposits per block (7 days)
+tiered_per_block_demand_deposits:
+  0:
+    alpha_per_gib: 1
+    alpha_per_user: 1
+  1000:
+    alpha_per_gib: 0.1
+    alpha_per_user: 0.1

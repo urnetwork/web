@@ -8,17 +8,6 @@ import { docs as ALL_DOCS, docGroups, findDoc } from '../lib/docs';
 import { buildPath, navigate, useRoute } from '../router';
 import { useLanguage } from '../i18n';
 
-const INITIAL_STATS = {
-    totalFeesUr: 0,
-    dataPB: 0,
-    displayedNetworks: 250000,
-    blockHeight: 0,
-    totalSupply: 10000000,
-    urDistributed: 0,
-    urAbsorbed: 0,
-    totalHeldUr: 0
-};
-
 /**
  * DocsExplorer
  *
@@ -47,7 +36,7 @@ export default function DocsExplorer({ activeRoute } = {}) {
     return (
         <div className="app">
             <Disclaimer visible={disclaimerVisible} />
-            <Nav stats={INITIAL_STATS} disclaimerVisible={disclaimerVisible} activeRoute={activeRoute} />
+            <Nav disclaimerVisible={disclaimerVisible} activeRoute={activeRoute} />
             <Explorer kind="docs">
                 {!doc ? <DocsLanding /> : <DocBody doc={doc} />}
             </Explorer>

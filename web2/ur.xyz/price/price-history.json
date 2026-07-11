@@ -1,0 +1,6 @@
+[
+  {
+    "date": "2026-07-08T21:12:54.564Z",
+    "yaml": "sn: 1\n# the alpha must be deposited as demand deposits per block (7 days)\ntiered_per_block_demand_deposits:\n  0:\n    alpha_per_gib: 1\n    alpha_per_user: 1\n  1000:\n    alpha_per_gib: 0.1\n    alpha_per_user: 0.1\n"
+  }
+]

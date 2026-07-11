@@ -10,6 +10,6 @@ export function getStaticPaths() {
 const { lang } = Astro.params;
 const dir = LANGS[lang]?.dir || 'ltr';
 ---
-<Base title="API Reference — URnetwork" lang={lang} dir={dir}>
+<Base title="API Reference — UR" lang={lang} dir={dir}>
     <ApiIsland activeRoute="api" lang={lang} client:load />
 </Base>

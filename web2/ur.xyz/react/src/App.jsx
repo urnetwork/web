@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React from 'react';
 import './App.css';
 
 import Disclaimer, { useDisclaimerVisible } from './components/Disclaimer';
@@ -6,6 +6,7 @@ import Nav from './components/Nav';
 import Hero from './components/Hero';
 import StatsPanel from './components/StatsPanel';
 import Footer from './components/Footer';
+import { useBlockClock, useNetworkTotals } from './lib/network';
 
 import Whitepaper from './components/sections/Whitepaper';
 import Research from './components/sections/Research';
@@ -13,21 +14,16 @@ import Operators from './components/sections/Operators';
 import Miners from './components/sections/Miners';
 import Validators from './components/sections/Validators';
 import Community from './components/sections/Community';
+import PriceSection from './components/PriceSection';
+import LegalSection from './components/LegalSection';
 
 import DocsExplorer from './components/DocsExplorer';
 import ApiExplorer from './components/ApiExplorer';
 import { useRoute } from './router';
 
-const INITIAL_STATS = {
-    totalFeesUr: 0,
-    dataPB: 0,
-    displayedNetworks: 250000,
-    blockHeight: 0,
-    totalSupply: 10000000,
-    urDistributed: 0,
-    urAbsorbed: 0,
-    totalHeldUr: 0
-};
+const Terms = () => <LegalSection doc="terms" />;
+const Privacy = () => <LegalSection doc="privacy" />;
+const Vdp = () => <LegalSection doc="vdp" />;
 
 /** Map route names to their section component. */
 const SECTION_COMPONENTS = {
@@ -36,6 +32,10 @@ const SECTION_COMPONENTS = {
     validators: Validators,
     research:   Research,
     community:  Community,
+    price:      PriceSection,
+    terms:      Terms,
+    privacy:    Privacy,
+    vdp:        Vdp,
 };
 
 /**
@@ -67,19 +67,21 @@ export default function App() {
  * into a sticky ticker bar.
  */
 function HomePage() {
-    const [stats, setStats] = useState(INITIAL_STATS);
+    const block = useBlockClock();
+    const network = useNetworkTotals();
     const disclaimerVisible = useDisclaimerVisible();
-
-    const handleStats = useCallback((next) => {
-        setStats(next);
-    }, []);
 
     return (
         <div className="app">
             <Disclaimer visible={disclaimerVisible} />
-            <Nav stats={stats} disclaimerVisible={disclaimerVisible} />
-            <Hero onStats={handleStats} />
-            <StatsPanel stats={stats} anchorId="whitepaper" disclaimerVisible={disclaimerVisible} />
+            <Nav disclaimerVisible={disclaimerVisible} />
+            <Hero block={block} network={network} />
+            <StatsPanel
+                block={block}
+                network={network}
+                anchorId="whitepaper"
+                disclaimerVisible={disclaimerVisible}
+            />
 
             <main>
                 <Whitepaper />

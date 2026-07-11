@@ -1,0 +1,38 @@
+---
+import Base from '../layouts/Base.astro';
+import DisclaimerStatic from '../components/DisclaimerStatic.astro';
+import NavIsland from '../islands/NavIsland.jsx';
+import PriceIsland from '../islands/PriceIsland.jsx';
+import FooterStatic from '../components/FooterStatic.astro';
+import en from '@react/i18n/en.js';
+
+import '@react/components/Nav.css';
+
+const t = en;
+---
+<Base
+    title={`${t.price.title} — UR`}
+    description={t.price.intro}
+    lang="en"
+>
+    <!-- RSS autodiscovery: browsers and feed readers pick /price.rss up
+         straight from this page. -->
+    <link
+        slot="head"
+        rel="alternate"
+        type="application/rss+xml"
+        title="UR usage cost"
+        href="/price.rss"
+    />
+
+    <div class="app">
+        <DisclaimerStatic />
+        <NavIsland activeRoute="price" lang="en" client:load />
+
+        <main class="section-page">
+            <PriceIsland lang="en" client:load />
+        </main>
+
+        <FooterStatic t={t} lang="en" />
+    </div>
+</Base>

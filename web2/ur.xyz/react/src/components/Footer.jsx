@@ -53,16 +53,33 @@ export default function Footer() {
                             {t.nav.docs}
                         </a>
                         <a
-                            href="https://github.com/urnetwork"
+                            href={buildPath({ name: 'price', slug: null }, code)}
+                            className="footer-link"
+                            onClick={(e) => handleSectionClick(e, 'price')}
+                        >
+                            {t.nav.price}
+                        </a>
+                        <a
+                            href="https://github.com/urfoundation"
                             className="footer-link"
                             target="_blank"
                             rel="noopener noreferrer"
                         >
                             {t.footer.github}
                         </a>
-                        <a href="mailto:info@ur.xyz" className="footer-link">
+                        <a href="mailto:support@ur.xyz" className="footer-link">
                             {t.footer.contact}
                         </a>
+                        {['terms', 'privacy', 'vdp'].map(name => (
+                            <a
+                                key={name}
+                                href={buildPath({ name, slug: null }, code)}
+                                className="footer-link"
+                                onClick={(e) => handleSectionClick(e, name)}
+                            >
+                                {t.footer[name]}
+                            </a>
+                        ))}
                     </nav>
 
                     <div className="footer-meta">

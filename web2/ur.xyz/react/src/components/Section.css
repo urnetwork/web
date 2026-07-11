@@ -280,3 +280,42 @@
         font-size: 1.3rem;
     }
 }
+
+/* --- Card status chip ("coming soon") and pill button --- */
+.card-soon {
+    display: inline-block;
+    margin-top: 14px;
+    font-size: 0.66rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--brand-ui);
+    opacity: 0.55;
+    padding: 3px 10px;
+    border: 1px solid rgba(214, 230, 244, 0.2);
+    border-radius: 999px;
+}
+
+.card-button {
+    display: inline-block;
+    margin-top: 14px;
+    padding: 8px 18px;
+    border-radius: 999px;
+    border: 1px solid rgba(214, 230, 244, 0.35);
+    color: var(--brand-white);
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    text-decoration: none;
+    transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+a.card-button:hover {
+    border-color: var(--brand-ur);
+    background: rgba(237, 143, 255, 0.06);
+}
+
+/* No target yet — rendered inert until the link lands. */
+.card-button.is-disabled {
+    opacity: 0.45;
+    cursor: default;
+}

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+    <channel>
+        <title>UR usage cost</title>
+        <link>https://ur.xyz/price</link>
+        <atom:link href="https://ur.xyz/price.rss" rel="self" type="application/rss+xml" />
+        <description>Published price sheet changes for the UR subnet — the alpha demand deposit required per GiB and per user in each 7-day block, by staked-alpha tier.</description>
+        <language>en</language>
+        <lastBuildDate>Wed, 08 Jul 2026 21:12:54 GMT</lastBuildDate>
+        <item>
+            <title>UR usage cost update — 2026-07-08</title>
+            <link>https://ur.xyz/price</link>
+            <guid isPermaLink="false">urn:ur-xyz:price:2026-07-08T21:12:54.564Z</guid>
+            <pubDate>Wed, 08 Jul 2026 21:12:54 GMT</pubDate>
+            <description><![CDATA[<p>UR subnet 1 — demand deposit price per block (7 days). An operator pays the best tier whose staked-&#945; threshold it meets; tier 0 applies to everyone.</p><table border="1" cellpadding="4" cellspacing="0"><tr><th>Tier</th><th>Staked &#945; threshold</th><th>&#945; / GiB</th><th>&#945; / user</th></tr><tr><td>0</td><td>0 (everyone)</td><td>1</td><td>1</td></tr><tr><td>1</td><td>&#8805; 1000</td><td>0.1</td><td>0.1</td></tr></table><pre>sn: 1
+# the alpha must be deposited as demand deposits per block (7 days)
+tiered_per_block_demand_deposits:
+  0:
+    alpha_per_gib: 1
+    alpha_per_user: 1
+  1000:
+    alpha_per_gib: 0.1
+    alpha_per_user: 0.1
+</pre>]]></description>
+        </item>
+    </channel>
+</rss>

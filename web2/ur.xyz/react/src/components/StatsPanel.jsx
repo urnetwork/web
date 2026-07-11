@@ -8,6 +8,11 @@ const fmt = (num) =>
         maximumFractionDigits: 2
     });
 
+const fmtInt = (num) => Math.floor(Number(num || 0)).toLocaleString();
+
+// Placeholder while no operator feed has answered yet.
+const DASH = '—';
+
 /**
  * StatsPanel
  *
@@ -38,7 +43,7 @@ const fmt = (num) =>
  * On viewports below 768px the whole thing is disabled and CSS renders a
  * simple pinned top-bar instead.
  */
-export default function StatsPanel({ stats, anchorId = 'whitepaper', disclaimerVisible = false }) {
+export default function StatsPanel({ block, network, anchorId = 'whitepaper', disclaimerVisible = false }) {
     const ref = useRef(null);
     const { t } = useLanguage();
 
@@ -170,6 +175,11 @@ export default function StatsPanel({ stats, anchorId = 'whitepaper', disclaimerV
         };
     }, [anchorId]);
 
+    // Everything except the block clock and the operator count comes from
+    // the operators' feeds; until at least one feed answers those fields
+    // show a placeholder.
+    const totals = network ? network.totals : null;
+
     return (
         <aside
             className={`stats-panel ${disclaimerVisible ? 'stats-panel-below-disclaimer' : ''}`}
@@ -181,14 +191,14 @@ export default function StatsPanel({ stats, anchorId = 'whitepaper', disclaimerV
             </div>
 
             <div className="stat-grid">
-                <Stat label={t.stats.block}            value={`#${stats.blockHeight}`}                                       tone="ur"    />
-                <Stat label={t.stats.totalFees}        value={fmt(stats.totalFeesUr)}                                        tone="ur"    />
-                <Stat label={t.stats.totalData}        value={`${fmt(stats.dataPB)} PB`}                                     tone="data"  />
-                <Stat label={t.stats.totalUsers}       value={Math.floor(stats.displayedNetworks).toLocaleString()}          tone="white" />
-                <Stat label={t.stats.totalSupply}      value={fmt(stats.totalSupply)}                                        tone="white" />
-                <Stat label={t.stats.totalDistributed} value={fmt(stats.urDistributed)}                                      tone="ur"    />
-                <Stat label={t.stats.urAbsorbed}       value={fmt(stats.urAbsorbed)}                                         tone="burn"  />
-                <Stat label={t.stats.statusHeld}       value={fmt(stats.totalHeldUr)}                                        tone="ur"    />
+                <Stat label={t.stats.blockNumber}      value={`#${block ? block.number : 1}`}                    tone="ur"    />
+                <Stat label={t.stats.dataPerBlock}     value={totals ? fmt(totals.dataGib) : DASH}               tone="data"  />
+                <Stat label={t.stats.usersPerBlock}    value={totals ? fmtInt(totals.users) : DASH}              tone="usd"   />
+                <Stat label={t.stats.totalNetworks}    value={totals ? fmtInt(totals.totalNetworks) : DASH}      tone="white" />
+                <Stat label={t.stats.stakedInContract} value={totals ? fmt(totals.stakedAlpha) : DASH}           tone="ur"    />
+                <Stat label={t.stats.demandDeposits}   value={totals ? fmt(totals.demandDepositsAlpha) : DASH}   tone="ur"    />
+                <Stat label={t.stats.minerEmissions}   value={totals ? fmt(totals.minerEmissionsAlpha) : DASH}   tone="ur"    />
+                <Stat label={t.stats.networkOperators} value={fmtInt(network ? network.operators : 0)}           tone="white" />
             </div>
         </aside>
     );

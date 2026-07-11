@@ -10,7 +10,7 @@ export default function Miners() {
     return (
         <Section id="miners" eyebrow={s.eyebrow} title={s.title}>
             <p>{s.intro}</p>
-            <NetworkDiagram active="miners" lang={code} />
+            <NetworkDiagram active="miners" lang={code} ctaLabel={s.cta} />
             <div className="card-grid">
                 {s.roles.map(r => (
                     <div className="card" key={r.tag}>

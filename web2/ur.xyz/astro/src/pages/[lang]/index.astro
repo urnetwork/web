@@ -16,7 +16,7 @@ const { lang } = Astro.params;
 const t = await getDict(lang);
 const dir = LANGS[lang]?.dir || 'ltr';
 ---
-<Base title={`$UR — ${t.nav.tagline}`} lang={lang} dir={dir}>
+<Base title={`UR — ${t.nav.tagline}`} lang={lang} dir={dir}>
     <div class="app">
         <DisclaimerStatic />
         <HeroIsland lang={lang} client:load />

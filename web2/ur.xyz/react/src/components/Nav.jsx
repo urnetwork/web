@@ -2,15 +2,11 @@ import React, { useEffect, useRef, useState } from 'react';
 import './Nav.css';
 import { useLanguage, LANG_ORDER } from '../i18n';
 import { buildPath, navigate, useRoute, SECTION_ROUTES } from '../router';
+import { useAlphaPrice, usePriceDenom } from '../lib/usePrice';
 
 // Header sections that appear as nav links — each maps to its own page.
 const NAV_SECTIONS = SECTION_ROUTES;
 
-// 24 samples = 24 conceptual "hours" of cost history. The wall-clock
-// sample interval is short so the bar feels alive while the visitor is
-// on the page; this is illustrative data, not a real market feed.
-const SAMPLE_INTERVAL_MS = 2500;
-const SERIES_LEN = 24;
 const SPARK_W = 78;
 const SPARK_H = 14;
 
@@ -34,90 +30,6 @@ const fmtCost = (n) => {
     return prefix + str;
 };
 
-/**
- * Generate `count` plausible-looking samples around `base` using a
- * mean-reverting random walk. The series ends at the baseline so the
- * eventual handoff to real data isn't a hard step.
- */
-function seedSeries(base, count = SERIES_LEN, volatility = 0.18) {
-    const out = [];
-    let v = base * (1 + (Math.random() - 0.5) * volatility);
-    for (let i = 0; i < count - 1; i++) {
-        v = v + (base - v) * 0.18 + (Math.random() - 0.5) * base * volatility;
-        v = Math.max(v, base * 0.1);
-        out.push(v);
-    }
-    out.push(base);
-    return out;
-}
-
-/**
- * Maintains a 24-sample rolling window of per-interval costs derived
- * from the simulation stats. Pre-seeded with synthetic 24h history; on
- * each subsequent tick the cost-per-GB and cost-per-user that accrued
- * during the elapsed sample interval are appended (and the oldest entry
- * falls off the front).
- */
-function useCostHistory(stats) {
-    const [series, setSeries] = useState(() => ({
-        gb:   seedSeries(SEED_BASE.gb),
-        user: seedSeries(SEED_BASE.user)
-    }));
-    const lastRef = useRef(null);
-    const statsRef = useRef(stats);
-
-    useEffect(() => { statsRef.current = stats; }, [stats]);
-
-    useEffect(() => {
-        // Seed lastRef immediately so the first real sample is a delta
-        // from the page-load state, not from zero.
-        const seed = statsRef.current;
-        if (seed) {
-            lastRef.current = {
-                fees: seed.totalFeesUr,
-                data: seed.dataPB,
-                users: Math.max(seed.displayedNetworks || 0, 1)
-            };
-        }
-
-        const sample = () => {
-            const s = statsRef.current;
-            if (!s) return;
-            const users = Math.max(s.displayedNetworks || 0, 1);
-
-            if (lastRef.current === null) {
-                lastRef.current = { fees: s.totalFeesUr, data: s.dataPB, users };
-                return;
-            }
-
-            const dFees = s.totalFeesUr - lastRef.current.fees;
-            const dData = s.dataPB - lastRef.current.data;
-
-            // dataPB is in petabytes; convert to GB so the unit label fits.
-            const dGB = dData * 1e6;
-            const gbCost = dGB > 1e-9 ? dFees / dGB : 0;
-            const userCost = dFees / users;
-
-            lastRef.current = { fees: s.totalFeesUr, data: s.dataPB, users };
-
-            setSeries(prev => ({
-                gb:   [...prev.gb,   gbCost  ].slice(-SERIES_LEN),
-                user: [...prev.user, userCost].slice(-SERIES_LEN)
-            }));
-        };
-
-        const id = setInterval(sample, SAMPLE_INTERVAL_MS);
-        return () => clearInterval(id);
-    }, []);
-
-    const current = {
-        gb:   series.gb[series.gb.length - 1]   || 0,
-        user: series.user[series.user.length - 1] || 0
-    };
-
-    return { series, current };
-}
-
 function Sparkline({ series, width = SPARK_W, height = SPARK_H }) {
     if (series.length < 2) {
         return (
@@ -133,12 +45,17 @@ function Sparkline({ series, width = SPARK_W, height = SPARK_H }) {
     const min = Math.min(...series);
     const max = Math.max(...series);
     const range = Math.max(max - min, 1e-9);
+    // A constant series (the α price is fixed until the sheet changes)
+    // draws as a centered flat line rather than hugging the bottom edge.
+    const flat = max - min < 1e-12;
     const padY = 1.5;
 
     const points = series
         .map((v, i) => {
             const x = (i / (series.length - 1)) * width;
-            const y = height - padY - ((v - min) / range) * (height - 2 * padY);
+            const y = flat
+                ? height / 2
+                : height - padY - ((v - min) / range) * (height - 2 * padY);
             return `${x.toFixed(2)},${y.toFixed(2)}`;
         })
         .join(' ');
@@ -230,14 +147,14 @@ function LanguageSelector() {
  * Nav
  *
  * Fixed top navigation. Contains the URnetwork logo, the brand tagline,
- * route links to each section page, a language selector, and a Usage
- * CTA pill with sparkline cost data on the far right.
+ * route links to each section page, a language selector, and the Price
+ * pill with the published network price on the far right.
  *
  * The nav sits below the Disclaimer bar. When the disclaimer is visible
  * (at the top of the page) the nav shifts down by --nav-height via the
  * `nav-below-disclaimer` class passed in from the parent.
  */
-export default function Nav({ stats, disclaimerVisible, activeRoute }) {
+export default function Nav({ disclaimerVisible, activeRoute }) {
     const { t, code, setLang, langs } = useLanguage();
     const route = activeRoute ? { name: activeRoute, slug: null } : useRoute();
     const onHome = route.name === 'home';
@@ -246,7 +163,10 @@ export default function Nav({ stats, disclaimerVisible, activeRoute }) {
     const [menuOpen, setMenuOpen] = useState(false);
     const menuBtnRef = useRef(null);
     const drawerRef = useRef(null);
-    const { series, current } = useCostHistory(stats);
+    // One shared feed + denomination for the desktop pill and the drawer
+    // copy, so they can't drift apart or double-poll.
+    const price = useAlphaPrice({ series: true });
+    const [denom, setDenom] = usePriceDenom();
 
     // While the mobile drawer is open: lock background scroll, wire
     // Escape-to-close, trap Tab within the drawer, and restore focus to the
@@ -398,7 +318,7 @@ export default function Nav({ stats, disclaimerVisible, activeRoute }) {
 
                 <LanguageSelector />
 
-                <UsageTicker t={t} current={current} series={series} />
+                <PriceTicker t={t} code={code} price={price} denom={denom} setDenom={setDenom} />
 
                 {/* Hamburger — only shown ≤900px (see Nav.css). */}
                 <button
@@ -456,7 +376,7 @@ export default function Nav({ stats, disclaimerVisible, activeRoute }) {
                 </nav>
 
                 <div className="nav-drawer-foot">
-                    <UsageTicker t={t} current={current} series={series} />
+                    <PriceTicker t={t} code={code} price={price} denom={denom} setDenom={setDenom} />
                     <nav className="nav-drawer-langs" aria-label={t.nav.languageMenu}>
                         {LANG_ORDER.map(c => (
                             <button
@@ -512,25 +432,88 @@ function PrimaryLinks({ t, code, route, onHome, whitepaperActive, onWhitepaper, 
     );
 }
 
-/** The Usage pill with its two cost sparklines. */
-function UsageTicker({ t, current, series }) {
+/**
+ * The Price pill — the published 0-tier price from /price.yml, shown in
+ * USD (default; resolved against the network's price feeds) or in α via
+ * the denomination toggle, with a real 24h sparkline. Tapping anywhere
+ * on the pill except the toggle opens the price page: a stretched link
+ * covers the pill, the passive spans let clicks fall through to it, and
+ * the toggle sits above it with its own hit area.
+ */
+function PriceTicker({ t, code, price, denom, setDenom }) {
+    const { sheet, alphaUsd, closes } = price;
+    const tier0 = sheet?.tiers?.[0] || null;
+
+    const value = (alphaPer) => {
+        if (alphaPer == null) return null;
+        if (denom === 'alpha') return alphaPer;
+        return alphaUsd == null ? null : alphaPer * alphaUsd;
+    };
+
+    const series = (alphaPer) => {
+        if (alphaPer == null) return [];
+        if (denom === 'usd' && closes && closes.length >= 2) {
+            return closes.map(usd => usd * alphaPer);
+        }
+        // In α the price is fixed until the sheet changes — a flat line.
+        return [alphaPer, alphaPer];
+    };
+
+    const unit = denom === 'alpha' ? 'α' : 'USD';
+    const priceHref = buildPath({ name: 'price', slug: null }, code);
+    const handleOpen = (e) => {
+        e.preventDefault();
+        navigate(priceHref);
+    };
+
     return (
-        <div className="nav-cta" aria-label={t.nav.ctaAria}>
-            <span className="nav-cta-label">{t.nav.usage}</span>
+        <div className="nav-cta">
+            <a
+                className="nav-cta-hit"
+                href={priceHref}
+                onClick={handleOpen}
+                aria-label={t.nav.ctaAria}
+            />
+
+            <span className="nav-cta-label">{t.nav.price}</span>
+
+            <div className="nav-denom" role="group" aria-label={t.nav.denomAria}>
+                <button
+                    type="button"
+                    className={denom === 'usd' ? 'is-active' : ''}
+                    aria-pressed={denom === 'usd'}
+                    onClick={() => setDenom('usd')}
+                >
+                    USD
+                </button>
+                <button
+                    type="button"
+                    className={denom === 'alpha' ? 'is-active' : ''}
+                    aria-pressed={denom === 'alpha'}
+                    onClick={() => setDenom('alpha')}
+                >
+                    α
+                </button>
+            </div>
+
             <div className="nav-cta-sparks">
                 <div className="nav-spark">
                     <div className="nav-spark-meta">
-                        <span className="nav-spark-label">$UR/GB</span>
-                        <span className="nav-spark-value">{fmtCost(current.gb)}</span>
+                        <span className="nav-spark-label">{unit}/GiB</span>
+                        <span className="nav-spark-value">
+                            {value(tier0?.alphaPerGib) == null ? '—' : fmtCost(value(tier0?.alphaPerGib))}
+                        </span>
                     </div>
-                    <Sparkline series={series.gb} />
+                    <Sparkline series={series(tier0?.alphaPerGib)} />
                 </div>
                 <div className="nav-spark">
                     <div className="nav-spark-meta">
-                        <span className="nav-spark-label">$UR/user</span>
-                        <span className="nav-spark-value">{fmtCost(current.user)}</span>
+                        <span className="nav-spark-label">{unit}/user</span>
+                        <span className="nav-spark-value">
+                            {value(tier0?.alphaPerUser) == null ? '—' : fmtCost(value(tier0?.alphaPerUser))}
+                        </span>
                     </div>
-                    <Sparkline series={series.user} />
+                    <Sparkline series={series(tier0?.alphaPerUser)} />
                 </div>
             </div>
         </div>

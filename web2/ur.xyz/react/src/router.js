@@ -34,7 +34,11 @@ export function splitPath(pathname) {
 /** Section names that map 1:1 to top-level paths (e.g. /providers). */
 export const SECTION_ROUTES = ['operators', 'miners', 'validators', 'research', 'community'];
 
+/** Legal documents — top-level paths, linked from the footer only. */
+export const LEGAL_ROUTES = ['terms', 'privacy', 'vdp'];
+
 const SECTION_SET = new Set(SECTION_ROUTES);
+const LEGAL_SET = new Set(LEGAL_ROUTES);
 
 export function parseRoute(pathname) {
     const { rest } = splitPath(pathname);
@@ -49,6 +53,8 @@ export function parseRoute(pathname) {
         return { name: 'docs', slug: bare.slice('docs/'.length) };
     }
     if (bare === 'api') return { name: 'api', slug: null };
+    if (bare === 'price') return { name: 'price', slug: null };
+    if (LEGAL_SET.has(bare)) return { name: bare, slug: null };
     return { name: 'home', slug: null };
 }
 
@@ -64,6 +70,8 @@ export function buildPath(route, lang) {
         return route.slug ? `${prefix}/docs/${route.slug}` : `${prefix}/docs`;
     }
     if (route.name === 'api') return `${prefix}/api`;
+    if (route.name === 'price') return `${prefix}/price`;
+    if (LEGAL_SET.has(route.name)) return `${prefix}/${route.name}`;
     return prefix || '/';
 }
 

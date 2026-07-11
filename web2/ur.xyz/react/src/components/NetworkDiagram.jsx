@@ -25,6 +25,10 @@ const NODE_KEYS = ['operators', 'miners', 'validators', 'subnet'];
 const LABEL = { operators: 'Operators', miners: 'Miners', validators: 'Validators', subnet: 'Subnet' };
 const ROUTE = { operators: 'operators', miners: 'miners', validators: 'validators', subnet: 'home' };
 
+// Docs target for each role's "Become a …" CTA. Miners have a published
+// guide; the others land on the docs root until theirs exist.
+const CTA_DOCS_SLUG = { operators: null, miners: 'provider', validators: null };
+
 // Flat square corners + label anchors, in the 320×288 viewBox (the docked layout).
 const SQUARE = {
     operators:  { x: 72,  y: 56,  lx: 72,  ly: 36  },
@@ -63,9 +67,10 @@ const lerp = (a, b, t) => a + (b - a) * t;
 const lerpAngle = (a0, a1, t) => { const d = Math.atan2(Math.sin(a1 - a0), Math.cos(a1 - a0)); return a0 + d * t; };
 const easeInOut = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
 
-export default function NetworkDiagram({ active = 'subnet', lang = 'en' }) {
+export default function NetworkDiagram({ active = 'subnet', lang = 'en', ctaLabel = null }) {
     const holderRef = useRef(null);
     const svgRef = useRef(null);
+    const ctaRef = useRef(null);
     const circleRefs = useRef({});
     const hitRefs = useRef({});
     const labelRefs = useRef({});
@@ -112,11 +117,16 @@ export default function NetworkDiagram({ active = 'subnet', lang = 'en' }) {
             p = reduce ? target : animFrom + (target - animFrom) * easeInOut(Math.min(1, (now - animStart) / DOCK_DURATION));
 
             // --- external morph: slide/shrink into the left column, driven by eased p ---
+            const cta = ctaRef.current;
             if (!canDock) {
                 holder.classList.remove('is-interactive');
                 holder.style.height = '';
                 svg.style.transform = '';
                 svg.style.width = '';
+                if (cta) {
+                    cta.classList.remove('is-floating');
+                    cta.style.transform = '';
+                }
             } else {
                 holder.classList.add('is-interactive');
                 const inlineX = rect.left + (rect.width - NAT_W) / 2; // centered in the content column
@@ -129,6 +139,14 @@ export default function NetworkDiagram({ active = 'subnet', lang = 'en' }) {
                 // docked in the margin, so the content column holds the same
                 // vertical spacing and never lurches upward as it slides out.
                 holder.style.height = NAT_H + 'px';
+                // The role CTA parks in the left margin where the square will
+                // dock, then yields downward beneath it as it arrives.
+                if (cta) {
+                    cta.classList.add('is-floating');
+                    const ctaX = (leftCol - cta.offsetWidth) / 2;
+                    const ctaY = lerp(dockY, dockY + DOCKED_H + 18, p);
+                    cta.style.transform = `translate3d(${ctaX.toFixed(1)}px, ${ctaY.toFixed(1)}px, 0)`;
+                }
             }
 
             // --- internal morph: pyramid (p=0) → flat square (p=1), rotating in polar ---
@@ -204,6 +222,12 @@ export default function NetworkDiagram({ active = 'subnet', lang = 'en' }) {
         navigate(route === 'home' ? buildPath({ name: 'home' }, l) : buildPath({ name: route, slug: null }, l));
     };
 
+    const ctaRoute = { name: 'docs', slug: CTA_DOCS_SLUG[active] || null };
+    const goCta = (e) => {
+        e.preventDefault();
+        navigate(buildPath(ctaRoute, splitPath(window.location.pathname).lang));
+    };
+
     // SSR / no-JS render = the flat square (accessible fallback; JS morphs it).
     return (
         <div className="nd-holder" ref={holderRef}>
@@ -246,6 +270,17 @@ export default function NetworkDiagram({ active = 'subnet', lang = 'en' }) {
                     })}
                 </g>
             </svg>
+
+            {ctaLabel && (
+                <a
+                    ref={ctaRef}
+                    className="card-button nd-cta"
+                    href={buildPath(ctaRoute, lang)}
+                    onClick={goCta}
+                >
+                    {ctaLabel}
+                </a>
+            )}
         </div>
     );
 }

@@ -138,7 +138,9 @@
 .stat-label {
     /* Slight tightening for ticker form. */
     font-size: calc(0.58rem * (1 - var(--q)) + 0.55rem * var(--q));
-    text-transform: uppercase;
+    /* No text-transform: the i18n label strings are display-ready — an
+       uppercase transform would turn the α unit into a capital Alpha
+       (Α, indistinguishable from a Latin A) and GiB into GIB. */
     letter-spacing: 0.08em;
     opacity: 0.7;
     margin-bottom: calc(4px * (1 - var(--q)) + 2px * var(--q));

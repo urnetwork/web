@@ -214,8 +214,13 @@
     left: 0;
 }
 
-/* --- Primary CTA (Usage label + sparklines wrapped in one bordered pill) --- */
+/* --- Primary CTA (Price label + denomination toggle + sparklines wrapped
+       in one bordered pill) ---
+   The whole pill opens the price page: a stretched link (.nav-cta-hit)
+   covers it, the label and sparklines let pointer events fall through to
+   that link, and only the denomination toggle keeps its own hit area. */
 .nav-cta {
+    position: relative;
     display: inline-flex;
     align-items: center;
     gap: 12px;
@@ -228,6 +233,31 @@
     text-decoration: none;
     flex: 0 0 auto;
     transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.nav-cta-hit {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    border-radius: 999px;
+    cursor: pointer;
+}
+
+.nav-cta-hit:focus-visible {
+    outline: 1px solid var(--brand-ur);
+    outline-offset: 2px;
+}
+
+.nav-cta-label,
+.nav-cta-sparks {
+    position: relative;
+    z-index: 1;
+    pointer-events: none;
+}
+
+.nav-denom {
+    position: relative;
+    z-index: 2;
 }
 
 .nav-cta:hover {
@@ -246,6 +276,42 @@
     text-transform: uppercase;
     color: var(--brand-white);
     white-space: nowrap;
+}
+
+/* USD / α denomination toggle. */
+.nav-denom {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    padding: 2px;
+    border: 1px solid rgba(214, 230, 244, 0.25);
+    border-radius: 999px;
+    flex: 0 0 auto;
+}
+
+[dir="rtl"] .nav-denom { direction: ltr; }
+
+.nav-denom button {
+    background: transparent;
+    border: none;
+    border-radius: 999px;
+    cursor: pointer;
+    color: var(--brand-ui);
+    font-family: 'PPNeueMontreal', sans-serif;
+    font-size: 0.55rem;
+    letter-spacing: 0.08em;
+    line-height: 1;
+    padding: 3px 7px;
+    opacity: 0.6;
+    transition: opacity 0.15s ease, background 0.15s ease, color 0.15s ease;
+}
+
+.nav-denom button:hover { opacity: 1; }
+
+.nav-denom button.is-active {
+    opacity: 1;
+    color: #101010;
+    background: var(--brand-white);
 }
 
 .nav-cta-sparks {
@@ -274,7 +340,8 @@
 
 .nav-spark-label {
     font-size: 0.5rem;
-    text-transform: uppercase;
+    /* No text-transform: the unit strings ("USD/GiB", "α/GiB") are rendered
+       verbatim — uppercasing would turn α into a capital Alpha (Α ≈ A). */
     letter-spacing: 0.1em;
     color: var(--brand-white);
     opacity: 0.55;
@@ -465,11 +532,14 @@
     .nav-spark { width: 76px; flex: 0 0 76px; }
 }
 
-/* Sparklines are the widest optional piece; drop them from the top bar just
-   above the hamburger threshold so the 900–1040 band never clips. They
-   remain in the mobile drawer's Usage ticker. */
-@media (max-width: 1040px) {
-    .nav-inner > .nav-cta .nav-cta-sparks { display: none; }
+/* The sparkline graphs are the widest optional piece — and the pill grew a
+   denomination toggle and a raw link — so drop the graphs from the top bar
+   well above the hamburger threshold. The labeled price values stay until
+   the whole cluster collapses into the drawer; the drawer's copy of the
+   pill keeps its graphs. */
+@media (max-width: 1240px) {
+    .nav-inner > .nav-cta .nav-spark-svg { display: none; }
+    .nav-inner > .nav-cta .nav-spark { width: auto; flex: 0 0 auto; }
 }
 
 /* Below 900px the entire link cluster collapses into the drawer. */

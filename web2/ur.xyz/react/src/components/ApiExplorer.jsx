@@ -14,17 +14,6 @@ import {
     operationExamples
 } from '../lib/openapi';
 
-const INITIAL_STATS = {
-    totalFeesUr: 0,
-    dataPB: 0,
-    displayedNetworks: 250000,
-    blockHeight: 0,
-    totalSupply: 10000000,
-    urDistributed: 0,
-    urAbsorbed: 0,
-    totalHeldUr: 0
-};
-
 /**
  * ApiExplorer
  *
@@ -64,7 +53,7 @@ export default function ApiExplorer({ activeRoute } = {}) {
     return (
         <div className="app">
             <Disclaimer visible={disclaimerVisible} />
-            <Nav stats={INITIAL_STATS} disclaimerVisible={disclaimerVisible} activeRoute={activeRoute} />
+            <Nav disclaimerVisible={disclaimerVisible} activeRoute={activeRoute} />
             <Explorer kind="api" apiGroups={groups} apiOperations={operations}>
                 <header className="explorer-page-header">
                     <span className="explorer-page-eyebrow">API reference</span>

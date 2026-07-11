@@ -1,0 +1,28 @@
+/* PriceSection.css — the published price sheet page. */
+
+/* Column headers are display-ready strings: an uppercase transform would
+   turn the α unit into a capital Alpha (Α ≈ A). */
+.price-table th {
+    text-transform: none;
+    letter-spacing: 0.06em;
+}
+
+.price-table td {
+    font-variant-numeric: tabular-nums;
+}
+
+.price-note {
+    font-size: 0.85rem;
+    opacity: 0.75;
+}
+
+.price-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 28px;
+    margin-top: 4px;
+}
+
+.price-actions .card-link {
+    margin-top: 0;
+}

@@ -1,6 +1,7 @@
 import React from 'react';
 import Section from '../Section';
 import NetworkDiagram from '../NetworkDiagram';
+import OperatorsDirectory from '../OperatorsDirectory';
 import { useLanguage } from '../../i18n';
 
 export default function Operators() {
@@ -9,7 +10,7 @@ export default function Operators() {
     return (
         <Section id="operators" eyebrow={s.eyebrow} title={s.title}>
             <p>{s.intro}</p>
-            <NetworkDiagram active="operators" lang={code} />
+            <NetworkDiagram active="operators" lang={code} ctaLabel={s.cta} />
             <div className="card-grid">
                 {s.roles.map(r => (
                     <div className="card" key={r.tag}>
@@ -24,6 +25,7 @@ export default function Operators() {
                     </div>
                 ))}
             </div>
+            <OperatorsDirectory />
         </Section>
     );
 }

@@ -1,7 +1,9 @@
 ---
 /**
  * Renders a card grid from an array of role/paper objects.
- * Each item: { tag, title, body, href?, linkLabel? }
+ * Each item: { tag, title, body, href?, linkLabel?, soon?, button? }
+ *   soon   — small "coming soon" chip in place of a link
+ *   button — pill button; disabled look until button.href exists
  */
 interface Props {
     items: Array<{
@@ -10,6 +12,8 @@ interface Props {
         body: string;
         href?: string;
         linkLabel?: string;
+        soon?: string;
+        button?: { label: string; href?: string };
     }>;
 }
 
@@ -25,6 +29,12 @@ const { items } = Astro.props;
                 <a href={r.href} class="card-link" target="_blank" rel="noopener noreferrer">
                     {r.linkLabel}
                 </a>
+            )}
+            {r.soon && <span class="card-soon">{r.soon}</span>}
+            {r.button && (
+                r.button.href
+                    ? <a href={r.button.href} class="card-button" target="_blank" rel="noopener noreferrer">{r.button.label}</a>
+                    : <span class="card-button is-disabled">{r.button.label}</span>
             )}
         </div>
     ))}

@@ -1,5 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import './Simulation.css';
+import { useLanguage } from './i18n';
+import { blockEndAt, blockNumberAt } from './lib/network';
 
 // Brand Constants mapped from the CSS variables
 const COLORS = {
@@ -8,42 +10,163 @@ const COLORS = {
     prov: '#0039DE',
     bg: '#101010',
     white: '#F8F8F8',
-    ui: '#D6E6F4',
-    burn: '#FF6C58',
-    burnDark: '#421006'
+    ui: '#D6E6F4'
 };
+
+const fmtAlpha = (n) =>
+    Number(n || 0).toLocaleString(undefined, {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+    });
+
+/**
+ * Animate a displayed number toward `target` with an ease-out ramp each
+ * time the target moves — the "counting up" of the block accumulators.
+ * Returns null until the first real target arrives.
+ */
+function useCountUp(target) {
+    const [display, setDisplay] = useState(null);
+    const displayRef = useRef(0);
+    const rafRef = useRef(0);
+
+    useEffect(() => {
+        if (target == null) return undefined;
+        const from = displayRef.current;
+        const start = performance.now();
+        const DURATION = 900;
+
+        cancelAnimationFrame(rafRef.current);
+        const tick = (now) => {
+            const p = Math.min(1, (now - start) / DURATION);
+            const eased = 1 - Math.pow(1 - p, 3);
+            const v = from + (target - from) * eased;
+            displayRef.current = v;
+            setDisplay(v);
+            if (p < 1) rafRef.current = requestAnimationFrame(tick);
+        };
+        rafRef.current = requestAnimationFrame(tick);
+        return () => cancelAnimationFrame(rafRef.current);
+    }, [target]);
+
+    return display;
+}
+
+/**
+ * A once-per-second wall clock, started client-side only (null during
+ * SSR and the hydration render, so the static build stays deterministic).
+ */
+function useSecondTick() {
+    const [now, setNow] = useState(null);
+    useEffect(() => {
+        const tick = () => setNow(Date.now());
+        tick();
+        const id = setInterval(tick, 1000);
+        return () => clearInterval(id);
+    }, []);
+    return now;
+}
+
+/**
+ * BlockToast
+ *
+ * Persistent progress card for the current block (7 days). The bar along
+ * its top edge fills as the block elapses, the two accumulators count up
+ * the miner emissions and demand deposits reported by the network
+ * operators' feeds for the block so far, and a live countdown runs to
+ * the block's end (always 00:00 UTC).
+ */
+function BlockToast({ block, network }) {
+    const { t, code } = useLanguage();
+    const totals = network ? network.totals : null;
+    const emissions = useCountUp(totals ? totals.minerEmissionsAlpha : null);
+    const deposits = useCountUp(totals ? totals.demandDepositsAlpha : null);
+    const now = useSecondTick();
+
+    if (!block) return null;
+    const pct = block.progress * 100;
+
+    // The countdown reads its own clock so the title, end date, and the
+    // remaining time all agree to the second — including at rollover.
+    let blockNumber = block.number;
+    let countdown = null;
+    if (now != null) {
+        blockNumber = blockNumberAt(now);
+        const end = blockEndAt(now);
+        const left = Math.max(0, end - now);
+        const endDate = new Date(end).toLocaleDateString(code, {
+            month: 'short',
+            day: 'numeric',
+            timeZone: 'UTC'
+        });
+        countdown = t.sim.endsAt
+            .replace('{date}', endDate)
+            .replace('{d}', Math.floor(left / 86400000))
+            .replace('{h}', Math.floor(left / 3600000) % 24)
+            .replace('{m}', Math.floor(left / 60000) % 60)
+            .replace('{s}', Math.floor(left / 1000) % 60);
+    }
+
+    return (
+        <div className="block-toast" role="status" aria-label={t.sim.blockProgressAria}>
+            <div className="block-toast-progress" aria-hidden="true">
+                <span
+                    className="block-toast-progress-fill"
+                    style={{ width: `${pct.toFixed(3)}%` }}
+                />
+            </div>
+            <div className="block-toast-head">
+                <span className="block-toast-title">⚡ {t.sim.block} #{blockNumber}</span>
+                <span className="block-toast-pct">{Math.floor(pct)}%</span>
+            </div>
+            <div className="block-toast-rows">
+                <div className="block-toast-row">
+                    <span className="block-toast-label">{t.stats.minerEmissions}</span>
+                    <span className="block-toast-value is-ur">
+                        {emissions == null ? '—' : fmtAlpha(emissions)}
+                    </span>
+                </div>
+                <div className="block-toast-row">
+                    <span className="block-toast-label">{t.stats.demandDeposits}</span>
+                    <span className="block-toast-value is-ur">
+                        {deposits == null ? '—' : fmtAlpha(deposits)}
+                    </span>
+                </div>
+            </div>
+            {/* aria-hidden: a per-second text change inside a role="status"
+                live region would be announced continuously. */}
+            {countdown && (
+                <div className="block-toast-countdown" aria-hidden="true">
+                    {countdown}
+                </div>
+            )}
+        </div>
+    );
+}
 
 /**
  * URSimulation
  *
- * The canvas fills its parent container (no longer the full viewport).
- * Stats are pushed to the parent via the `onStats` callback so they can be
- * rendered by an external StatsPanel that animates independently from the
- * simulation as the user scrolls.
- *
- * Toasts (block payout flashes) remain owned by the simulation since they
- * are part of the visual rhythm of the canvas itself.
+ * The canvas fills its parent container. The animation is decorative
+ * rhythm — demand flowing in from users, deposits staking into the
+ * contract, emission pulsing out to the providers — at a fixed, alive
+ * cadence. It carries no synthetic statistics: the one real magnitude in
+ * the scene is the contract pool, whose size tracks the staked α the
+ * operators' feeds report. Every figure lives in the StatsPanel and the
+ * BlockToast, fed by the same feeds.
  */
-export default function URSimulation({ onStats }) {
+export default function URSimulation({ block, network }) {
     const canvasRef = useRef(null);
     const wrapperRef = useRef(null);
-    const onStatsRef = useRef(onStats);
-    onStatsRef.current = onStats;
-
-    const [toasts, setToasts] = useState([]);
+    // The animation loop reads the live totals through a ref so the canvas
+    // effect never re-runs when a poll lands.
+    const networkRef = useRef(network);
+    networkRef.current = network;
 
     useEffect(() => {
         const canvas = canvasRef.current;
         const wrapper = wrapperRef.current;
         const ctx = canvas.getContext('2d');
         let animationFrameId;
-
-        // Core Simulation State (kept inside effect to avoid strict-mode ghosts & stale closures)
-        const stats = {
-            totalFeesUr: 0, urDistributed: 0, urAbsorbed: 0,
-            urCurrentPool: 0, blockHeight: 0, totalSupply: 10000000, dataPB: 0,
-            totalNetworks: 250000, displayedNetworks: 250000, totalHeldUr: 0
-        };
 
         let width, height, globeRadius, rotation = 0, distTimer = 0;
         let providers = [], users = [], particles = [], bolts = [];
@@ -119,120 +242,51 @@ export default function URSimulation({ onStats }) {
             });
         }
 
-        function pushStats() {
-            const diff = stats.totalNetworks - stats.displayedNetworks;
-            if (Math.abs(diff) > 0.5) stats.displayedNetworks += diff * 0.08;
-            else stats.displayedNetworks = stats.totalNetworks;
-
-            if (onStatsRef.current) {
-                onStatsRef.current({
-                    totalFeesUr: stats.totalFeesUr,
-                    dataPB: stats.dataPB,
-                    displayedNetworks: stats.displayedNetworks,
-                    blockHeight: stats.blockHeight,
-                    totalSupply: stats.totalSupply,
-                    urDistributed: stats.urDistributed,
-                    urAbsorbed: stats.urAbsorbed,
-                    totalHeldUr: stats.totalHeldUr
-                });
-            }
-        }
-
-        function triggerToast(amount, absorbed, blockFeesUr) {
-            const id = Date.now() + Math.random();
-            const toastData = { id, amount, absorbed, blockFeesUr, blockHeight: stats.blockHeight };
-
-            setToasts(prev => [...prev, toastData]);
-
-            setTimeout(() => {
-                setToasts(prev => prev.filter(t => t.id !== id));
-            }, 4000);
-        }
-
         function animate() {
             ctx.fillStyle = COLORS.bg;
             ctx.fillRect(0, 0, width, height);
             rotation += 0.002;
 
-            const revenuePerBlockTarget = stats.totalNetworks * (60000000 / 9000000000);
-            const valPerParticle = revenuePerBlockTarget / 100;
-
-            // Logic: Demand (Users buying data via OPS)
+            // Demand: users buying data via OPS. A fixed cadence — the
+            // flows are texture, not statistics.
             if (Math.random() < 0.25) {
                 const randomUser = users[Math.floor(Math.random() * users.length)];
-                const actualVal = valPerParticle * (0.5 + Math.random());
-                spawn(randomUser, 'ops', null, COLORS.usd, 'usd', 0.015, actualVal);
+                spawn(randomUser, 'ops', null, COLORS.usd, 'usd', 0.015, 0);
                 randomUser.balance += 0.5;
                 const randomProviderIdx = Math.floor(Math.random() * providers.length);
-                spawn(randomUser, 'provider', randomProviderIdx, COLORS.prov, 'data', 0.015, 0.05);
+                spawn(randomUser, 'provider', randomProviderIdx, COLORS.prov, 'data', 0.015, 0);
             }
 
-            // Logic: Ops -> Protocol
-            if (Math.random() < 0.1) spawn(hubs.ops, 'protocol', null, COLORS.ur, 'ur', 0.012, Math.random() * 250);
+            // Ops -> Protocol: demand deposits headed for the contract.
+            if (Math.random() < 0.1) spawn(hubs.ops, 'protocol', null, COLORS.ur, 'ur', 0.012, 0);
 
-            // Logic: Direct User -> Protocol Payment
-            if (Math.random() < 0.08 && stats.totalHeldUr > 0) {
+            // Direct User -> Protocol deposits; frequent buyers glow.
+            if (Math.random() < 0.08) {
                 const randomUser = users[Math.floor(Math.random() * users.length)];
-                const basePayment = 50 + Math.random() * 100;
                 const discountFactor = Math.min(0.9, randomUser.balance * 0.05);
-                let finalPayment = basePayment * (1 - discountFactor);
-
-                finalPayment = Math.min(finalPayment, stats.totalHeldUr);
-                stats.totalHeldUr -= finalPayment;
-
-                spawn(randomUser, 'protocol', null, COLORS.ur, 'ur_direct', 0.015, finalPayment);
-
+                spawn(randomUser, 'protocol', null, COLORS.ur, 'ur_direct', 0.015, 0);
                 if (discountFactor > 0.2) randomUser.glow = 1.0;
             }
 
-            const targetRadius = 4 + Math.sqrt(stats.urCurrentPool / Math.PI) * 1.5;
+            // The one real magnitude in the scene: the contract pool is
+            // sized from the α the operators report staked, on a log scale
+            // so early stake reads while heavy stake can't blow the
+            // composition (saturates around 10M α).
+            const totals = networkRef.current ? networkRef.current.totals : null;
+            const stakedAlpha = totals ? totals.stakedAlpha : 0;
+            const maxRadius = Math.min(globeRadius * 0.6, 80);
+            const stakedNorm = Math.min(1, Math.log10(1 + stakedAlpha) / 7);
+            const targetRadius = 4 + (maxRadius - 4) * stakedNorm;
             currentRadius += (targetRadius - currentRadius) * 0.08;
 
-            // Distribution Logic
+            // Emission pulse: a periodic wave from the contract out to the
+            // providers. The small fixed value lets the dots breathe
+            // without inventing a statistic.
             distTimer++;
             if (distTimer > 400) {
-                const payout = stats.urCurrentPool * 0.95;
-                if (payout > 1) {
-                    stats.urCurrentPool -= payout;
-                    stats.urDistributed += payout;
-                    stats.totalHeldUr += payout;
-                    stats.blockHeight++;
-
-                    // Network Growth
-                    const N = stats.totalNetworks;
-                    const CAP_9B = 9000000000;
-                    let growth = 0;
-
-                    if (N >= CAP_9B) stats.totalNetworks = CAP_9B;
-                    else if (N < 3000000000) growth = Math.floor(N * (0.15 + Math.random() * 0.10));
-                    else if (N < 4000000000) {
-                        const p = (N - 3000000000) / 1000000000;
-                        growth = Math.floor(N * (0.10 * (1 - p) + 0.01));
-                    } else if (N < 5000000000) {
-                        const p = (N - 4000000000) / 1000000000;
-                        growth = Math.floor(N * (0.01 * (1 - p)));
-                        if (growth < 1000) growth = 1000 + Math.floor(Math.random() * 5000);
-                    } else {
-                        growth = 5 + Math.floor(Math.random() * 20);
-                    }
-                    stats.totalNetworks += growth;
-
-                    // Burn / Distribute
-                    const absorbedAmount = payout * 0.025;
-                    stats.urAbsorbed += absorbedAmount;
-                    stats.totalSupply -= absorbedAmount;
-
-                    const currentBlockFees = payout + absorbedAmount;
-                    stats.totalFeesUr += currentBlockFees;
-
-                    triggerToast(payout, absorbedAmount, currentBlockFees);
-
-                    providers.forEach((p, i) => {
-                        if (Math.random() > 0.8) spawn(hubs.protocol, 'provider', i, COLORS.ur, 'dist', 0.005, payout / 30);
-                    });
-
-                    for (let k = 0; k < 5; k++) spawn(hubs.protocol, 'protocol', null, COLORS.burn, 'absorb', 0.01, 0);
-                }
+                providers.forEach((p, i) => {
+                    if (Math.random() > 0.8) spawn(hubs.protocol, 'provider', i, COLORS.ur, 'dist', 0.005, 6);
+                });
                 distTimer = 0;
             }
 
@@ -292,11 +346,13 @@ export default function URSimulation({ onStats }) {
             particles = particles.filter(pt => {
                 pt.p += pt.spd;
 
-                if (pt.type === 'absorb') {
+                if (pt.type === 'stake') {
+                    // A deposit locking into the contract: a shimmer that
+                    // collapses from the pool's rim to its center.
                     const r = currentRadius * (1 - pt.p);
                     const angle = Math.random() * Math.PI * 2;
                     ctx.beginPath(); ctx.arc(hubs.protocol.x + Math.cos(angle) * r, hubs.protocol.y + Math.sin(angle) * r, 2, 0, Math.PI * 2);
-                    ctx.fillStyle = COLORS.burn; ctx.fill();
+                    ctx.fillStyle = COLORS.ur; ctx.fill();
                     return pt.p < 1;
                 }
 
@@ -317,17 +373,17 @@ export default function URSimulation({ onStats }) {
 
                 if (pt.p >= 1) {
                     if (pt.type === 'ur' || pt.type === 'ur_direct') {
-                        stats.urCurrentPool += pt.val;
+                        // A deposit locking into the contract — the shimmer
+                        // is the visual; the pool's size tracks the feeds.
+                        for (let k = 0; k < 2; k++) spawn(hubs.protocol, 'protocol', null, COLORS.ur, 'stake', 0.01, 0);
                     }
                     if (pt.type === 'data') {
-                        stats.dataPB += pt.val;
                         createHop(pt.eIdx, COLORS.prov, 5);
                     }
                     if (pt.type === 'dist') {
                         providers[pt.eIdx].excite = 1.0;
                         providers[pt.eIdx].balance += pt.val;
                     }
-                    pushStats();
                     return false;
                 }
                 return true;
@@ -357,23 +413,7 @@ export default function URSimulation({ onStats }) {
     return (
         <div className="simulation-wrapper" ref={wrapperRef}>
             <canvas ref={canvasRef} className="sim-canvas"></canvas>
-
-            <div className="toast-container">
-                {toasts.map(toast => (
-                    <div key={toast.id} className="payout-toast">
-                        ⚡ BLOCK #{toast.blockHeight}<br />
-                        {toast.amount.toFixed(2)} $UR DISTRIBUTED <br />
-                        <span style={{ fontSize: '0.8em', fontWeight: 'normal' }}>
-                            <span style={{ fontWeight: 'bold' }}>
-                                {toast.blockFeesUr.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} $UR
-                            </span> BLOCK FEES
-                        </span><br />
-                        <span style={{ fontSize: '0.85em', color: COLORS.burnDark }}>
-                            ({toast.absorbed.toFixed(2)} Absorbed)
-                        </span>
-                    </div>
-                ))}
-            </div>
+            <BlockToast block={block} network={network} />
         </div>
     );
 }

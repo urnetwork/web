@@ -29,8 +29,12 @@ function buildPath(name, l) {
                     <a href={buildPath(name, lang)} class="footer-link">{t.nav[name]}</a>
                 ))}
                 <a href={buildPath('docs', lang)} class="footer-link">{t.nav.docs}</a>
-                <a href="https://github.com/urnetwork" class="footer-link" target="_blank" rel="noopener noreferrer">{t.footer.github}</a>
-                <a href="mailto:info@ur.xyz" class="footer-link">{t.footer.contact}</a>
+                <a href={buildPath('price', lang)} class="footer-link">{t.nav.price}</a>
+                <a href="https://github.com/urfoundation" class="footer-link" target="_blank" rel="noopener noreferrer">{t.footer.github}</a>
+                <a href="mailto:support@ur.xyz" class="footer-link">{t.footer.contact}</a>
+                <a href={buildPath('terms', lang)} class="footer-link">{t.footer.terms}</a>
+                <a href={buildPath('privacy', lang)} class="footer-link">{t.footer.privacy}</a>
+                <a href={buildPath('vdp', lang)} class="footer-link">{t.footer.vdp}</a>
             </nav>
 
             <div class="footer-meta">{t.footer.copyright}</div>

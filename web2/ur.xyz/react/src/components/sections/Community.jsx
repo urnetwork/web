@@ -1,6 +1,7 @@
 import React from 'react';
 import Section from '../Section';
 import { useLanguage } from '../../i18n';
+import { CommunityFoot } from '../CommunityFoot';
 
 export default function Community() {
     const { t } = useLanguage();
@@ -24,9 +25,26 @@ export default function Community() {
                                 {r.linkLabel}
                             </a>
                         )}
+                        {r.soon && <span className="card-soon">{r.soon}</span>}
+                        {r.button && (
+                            r.button.href ? (
+                                <a
+                                    href={r.button.href}
+                                    className="card-button"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                >
+                                    {r.button.label}
+                                </a>
+                            ) : (
+                                <span className="card-button is-disabled">{r.button.label}</span>
+                            )
+                        )}
                     </div>
                 ))}
             </div>
+
+            <CommunityFoot t={t} />
         </Section>
     );
 }

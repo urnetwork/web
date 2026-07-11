@@ -1,0 +1,109 @@
+/* OperatorsDirectory.css — the operator table at the bottom of /operators. */
+
+.operators-directory {
+    margin-top: 56px;
+}
+
+.operators-directory-title {
+    font-family: 'PPNeueMontreal', sans-serif;
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--brand-white);
+    margin: 0 0 6px;
+}
+
+.operators-directory-note {
+    font-size: 0.85rem;
+    opacity: 0.7;
+    margin: 0 0 14px;
+}
+
+/* Column headers are display-ready strings: an uppercase transform would
+   turn the α unit into a capital Alpha (Α ≈ A). They may wrap to two
+   lines so all seven columns fit the article width without scrolling. */
+.operators-table th {
+    text-transform: none;
+    letter-spacing: 0.06em;
+    white-space: normal;
+    vertical-align: bottom;
+    max-width: 130px;
+}
+
+.operators-table td {
+    font-variant-numeric: tabular-nums;
+    vertical-align: top;
+}
+
+/* Identity cell: operator name over its app + store listings. */
+.op-ident {
+    min-width: 250px;
+}
+
+.op-links {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+}
+
+/* Secondary identity links: public dashboard, GitHub. */
+.op-ident-link {
+    font-size: 0.72rem;
+    letter-spacing: 0.04em;
+    color: var(--brand-ur);
+    text-decoration: none;
+    border-bottom: 1px solid transparent;
+    transition: border-color 0.2s ease;
+}
+
+.op-ident-link:hover {
+    border-bottom-color: var(--brand-ur);
+}
+
+.op-name {
+    color: var(--brand-white);
+    font-size: 0.95rem;
+    text-decoration: none;
+    border-bottom: 1px solid transparent;
+    transition: border-color 0.2s ease;
+}
+
+.op-name:hover {
+    border-bottom-color: var(--brand-ur);
+}
+
+.op-app {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 7px;
+}
+
+.op-app-name {
+    font-size: 0.78rem;
+    opacity: 0.85;
+}
+
+/* Mini store icon strip. */
+.op-stores {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+}
+
+.op-store {
+    display: inline-flex;
+    color: var(--brand-ui);
+    opacity: 0.6;
+    transition: opacity 0.15s ease, color 0.15s ease;
+}
+
+.op-store:hover {
+    opacity: 1;
+    color: var(--brand-white);
+}
+
+.op-store svg {
+    width: 16px;
+    height: 16px;
+    display: block;
+}

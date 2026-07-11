@@ -8,7 +8,7 @@ export default {
         validators: 'Validadores',
         research:   'Investigación',
         community:  'Comunidad',
-        usage:      'Uso',
+        price:      'Costo de uso',
         docs:       'Documentación',
         tagline:    'Posee tu privacidad. Posee tu red.',
         languageMenu: 'Idioma',
@@ -17,7 +17,8 @@ export default {
         browseDocs:   'Explorar documentación',
         apiReference: 'Referencia de API',
         search:       'Buscar',
-        ctaAria:    'Uso — actividad actual de la red'
+        ctaAria:    'Costo de uso — el precio actual de la red',
+        denomAria:  'Moneda del precio'
     },
 
     footer: {
@@ -25,19 +26,66 @@ export default {
         contact:    'Contacto',
         copyright:  '© 2026 BringYour, Inc.',
         disclaimer: 'Este sitio es un protocolo de utilidad de código abierto impulsado por una comunidad de participantes, operado de forma independiente al operador de red que vende el acceso a la red.',
-        languagesAria: 'Idiomas'
+        languagesAria: 'Idiomas',
+        terms:      'Términos de uso',
+        privacy:    'Privacidad',
+        vdp:        'VDP'
     },
 
+    // Las etiquetas de estadísticas se muestran tal cual (sin text-transform
+    // en CSS) para que el glifo α y la unidad GiB conserven su caja —
+    // escríbelas en su forma final.
     stats: {
         protocolLedger:  'Libro de la subred',
-        block:           'Época',
-        totalFees:       'Depósitos ($UR)',
-        totalData:       'Datos totales',
-        totalUsers:      'Usuarios totales',
-        totalSupply:     'Suministro total de $UR',
-        totalDistributed:'Emisión distribuida',
-        urAbsorbed:      'Reserva de recompra ($UR)',
-        statusHeld:      'Retenido en el contrato ($UR)'
+        blockNumber:     'NÚMERO DE BLOQUE',
+        dataPerBlock:    'DATOS TOTALES / BLOQUE (GiB)',
+        usersPerBlock:   'USUARIOS TOTALES / BLOQUE',
+        totalNetworks:   'REDES TOTALES',
+        stakedInContract:'EN STAKE EN EL CONTRATO (α)',
+        demandDeposits:  'DEPÓSITOS DE DEMANDA / BLOQUE (α)',
+        minerEmissions:  'EMISIÓN DE MINEROS / BLOQUE (α)',
+        networkOperators:'OPERADORES DE RED'
+    },
+
+    sim: {
+        block: 'BLOQUE',
+        blockProgressAria: 'Progreso del bloque actual',
+        endsAt: 'Termina a las 00:00 UTC del {date}. {d}d {h}h {m}m {s}s hasta el fin del bloque'
+    },
+
+    price: {
+        eyebrow: 'Costo de uso',
+        title:   'El precio publicado de la red.',
+        intro:   'Los operadores financian la red con depósitos de demanda: α depositado por bloque (7 días) según los datos y usuarios que atienden. La tabla siguiente es la tarifa publicada: un operador paga el mejor nivel cuyo umbral de α en stake cumple; el nivel 0 aplica a todos, con o sin α en stake.',
+        colTier:    'Nivel',
+        colStake:   'Umbral de α en stake',
+        colGib:     'α / GiB',
+        colUser:    'α / usuario',
+        colGibUsd:  'USD / GiB',
+        colUserUsd: 'USD / usuario',
+        tierEveryone: 'Todos',
+        usdNote:  'Los equivalentes en USD usan el precio de α en vivo de SN{sn} del feed público de CoinGecko (GeckoTerminal).',
+        usdNoteOperators: 'Los equivalentes en USD usan el precio medio de α informado por los operadores de red.',
+        alphaNow: '1 α = {usd}',
+        usdUnavailable: 'Precio de α en vivo no disponible — equivalentes en USD ocultos.',
+        subscribe: 'Suscribirse a los cambios de precio (RSS)',
+        rawFile:   'Tabla de precios sin procesar (price.yml)'
+    },
+
+    legal: {
+        eyebrow: 'Legal',
+        terms: {
+            title: 'Términos de uso',
+            body:  'Los términos que rigen el uso de este sitio y de las interfaces del protocolo que documenta. El documento completo se está finalizando y se publicará aquí.'
+        },
+        privacy: {
+            title: 'Política de privacidad',
+            body:  'Este sitio no requiere cuenta y no recopila información personal: las cifras de precios y de red se obtienen directamente de feeds públicos. La política completa se está finalizando y se publicará aquí.'
+        },
+        vdp: {
+            title: 'Política de divulgación de vulnerabilidades',
+            body:  'Damos la bienvenida a la investigación de seguridad de buena fe sobre el protocolo y este sitio. Reporta vulnerabilidades a support@ur.xyz. La política completa —alcance, salvaguardas y plazos de divulgación— se está finalizando y se publicará aquí.'
+        }
     },
 
     whitepaper: {
@@ -59,22 +107,22 @@ export default {
                 body: [
                     'Los operadores de red ejecutan los servidores de privacidad y el punto de verificación. Un operador deposita en la subred, co-firma cada ruta medida y registra una lista de pagos que reparte sus recompensas entre los mineros asociados a él. Un operador dirige a dónde van sus recompensas, pero nunca custodia los fondos de nadie más.',
                     'Los mineros son la entrada y la salida de la red. Ejecutan un modelo de seguridad seguro por defecto, bloquean IPs maliciosas conocidas y solo enrutan tráfico cifrado. Un minero transporta tráfico para uno o más operadores y recibe pago por la capacidad enrutable que aporta.',
-                    'Los validadores son independientes. Cada uno hace staking de su propio $UR, ejecuta el protocolo de verificación de enrutamiento y puntúa el pool de cada operador según la demanda y la calidad medida. Los validadores ganan los dividendos nativos de la red por una puntuación precisa y alineada con el consenso: ningún operador posee un validador, y el conjunto es sin permisos.',
+                    'Los validadores son independientes. Cada uno hace staking de su propio UR, ejecuta el protocolo de verificación de enrutamiento y puntúa el pool de cada operador según la demanda y la calidad medida. Los validadores ganan los dividendos nativos de la red por una puntuación precisa y alineada con el consenso: ningún operador posee un validador, y el conjunto es sin permisos.',
                     'El propietario de la subred —BringYour, Inc.— gobierna el contrato de liquidación y opera la reserva de la red. Ese rol es transitorio: el control comienza centralizado pero acotado y se descentraliza progresivamente (cláusula V).'
                 ]
             },
             {
                 numeral: 'III.',
-                title:   'El token $UR',
+                title:   'El token UR',
                 body: [
-                    '$UR es el token nativo de la subred: la unidad de cuenta para depósitos, emisión y liquidación. Es un token de utilidad para coordinar y pagar recursos de la red; no está diseñado para representar ni otorgar ningún derecho a ganancias, ingresos o rendimientos.',
-                    'Bittensor emite nuevo $UR mediante su coinbase en cada ciclo y se reparte en tres flujos:',
+                    'UR es el token nativo de la subred: la unidad de cuenta para depósitos, emisión y liquidación. Es un token de utilidad para coordinar y pagar recursos de la red; no está diseñado para representar ni otorgar ningún derecho a ganancias, ingresos o rendimientos.',
+                    'Bittensor emite nuevo UR mediante su coinbase en cada ciclo y se reparte en tres flujos:',
                     { type: 'table', head: ['Flujo', 'Cuota', 'Destinatarios'], rows: [
                         ['Propietario', '18%', 'BringYour, Inc. — propietario de la subred y reserva de la red'],
                         ['Mineros',     '41%', 'Mineros — a través de los pools de operadores y los slots de mineros de nivel superior'],
                         ['Validadores', '41%', 'Validadores independientes — dividendos nativos por una puntuación precisa']
                     ]},
-                    'Los operadores financian la red depositando $UR en proporción a su uso real, a una tasa de referencia publicada. Un depósito es una señal costosa y respaldada por ingresos de demanda real, y a la vez una participación de convicción: el contrato traslada cada depósito a una reserva bloqueada donde se acumula y nunca se redistribuye, retirando permanentemente $UR del suministro líquido en proporción al uso real. La participación bloqueada acumulada de un operador reduce la tasa que debe aportar, de modo que los operadores comprometidos pueden incorporarse con menos capital inicial.',
+                    'Los operadores financian la red depositando UR en proporción a su uso real, a una tasa de referencia publicada. Un depósito es una señal costosa y respaldada por ingresos de demanda real, y a la vez una participación de convicción: el contrato traslada cada depósito a una reserva bloqueada donde se acumula y nunca se redistribuye, retirando permanentemente UR del suministro líquido en proporción al uso real. La participación bloqueada acumulada de un operador reduce la tasa que debe aportar, de modo que los operadores comprometidos pueden incorporarse con menos capital inicial.',
                     'A los mineros se les paga con la emisión, no con los depósitos. Como los depósitos se bloquean en lugar de reciclarse, el uso real se convierte en un soporte de compra permanente y creciente para el token en lugar de presión vendedora, mientras que la emisión sigue un calendario fijo con halvings.'
                 ]
             },
@@ -96,8 +144,8 @@ export default {
                 numeral: 'V.',
                 title:   'Custodia, liquidación y descentralización',
                 body: [
-                    'La liquidación se ejecuta en un ciclo de siete días. El contrato acumula la emisión de cada pool durante el período y luego abre las reclamaciones: los mineros retiran su $UR directamente del contrato contra la lista de pagos comprometida por su operador. Los mineros de nivel superior no necesitan ningún paso de liquidación: la cadena paga su slot de forma nativa en cada ciclo.',
-                    'Nadie custodia los fondos de nadie más. El contrato de liquidación es el único custodio del $UR en tránsito, cada pago de pool es una reclamación on-chain directa, y a los mineros de nivel superior se les paga de forma nativa a sus propias claves. Los operadores y el propietario nunca toman custodia de las recompensas de los mineros.',
+                    'La liquidación se ejecuta en un ciclo de siete días. El contrato acumula la emisión de cada pool durante el período y luego abre las reclamaciones: los mineros retiran su UR directamente del contrato contra la lista de pagos comprometida por su operador. Los mineros de nivel superior no necesitan ningún paso de liquidación: la cadena paga su slot de forma nativa en cada ciclo.',
+                    'Nadie custodia los fondos de nadie más. El contrato de liquidación es el único custodio del UR en tránsito, cada pago de pool es una reclamación on-chain directa, y a los mineros de nivel superior se les paga de forma nativa a sus propias claves. Los operadores y el propietario nunca toman custodia de las recompensas de los mineros.',
                     'Las reclamaciones ganadas son definitivas. Una vez que un período de liquidación se finaliza, los tokens que respaldan sus reclamaciones quedan comprometidos: ninguna actualización, pausa o acción administrativa puede bloquearlas ni revertirlas. La reserva bloqueada es unidireccional por el mismo estándar: ninguna función puede retirar fondos de ella.',
                     'El control se descentraliza con el tiempo. La red se lanza con el contrato actualizable tras un multisig del propietario —un control central deliberado y acotado para corregir errores tempranos— y se refuerza por etapas: un timelock público en cada cambio, un guardián que solo puede pausar y que puede detener un exploit pero nunca mover fondos ni bloquear reclamaciones finalizadas, y, con el tiempo, gobernanza on-chain y un núcleo de liquidación inmutable.'
                 ]
@@ -110,18 +158,25 @@ export default {
         eyebrow: 'Operadores',
         title:   'Los operadores que ejecutan la red.',
         intro:   'Los operadores de red ejecutan los servidores de privacidad y el punto de verificación. Un operador deposita en la subred como una señal costosa y respaldada por ingresos de demanda real, ejecuta el protocolo de verificación de enrutamiento que co-firma cada ruta medida, y registra la lista de pagos que reparte sus recompensas entre los mineros asociados a él. Los operadores dirigen a dónde van las recompensas, pero nunca custodian los fondos de nadie más.',
+        cta: 'Conviértete en operador de red',
         roles: [
             { tag: '01', title: 'Ejecutar los servidores', body: 'Los operadores ejecutan los servidores de privacidad y el punto /verify que co-firma cada ruta medida: la capa de coordinación entre los usuarios y los mineros que transportan el tráfico.' },
-            { tag: '02', title: 'Señalar demanda real',    body: 'Los operadores depositan $UR en proporción a su uso real. Cada depósito es una participación de convicción bloqueada en la reserva de recompra —nunca redistribuida—, por lo que es una señal costosa y respaldada por ingresos que los validadores ponderan cuando puntúan los pools.' },
+            { tag: '02', title: 'Señalar demanda real',    body: 'Los operadores depositan UR en proporción a su uso real. Cada depósito es una participación de convicción bloqueada en la reserva de recompra —nunca redistribuida—, por lo que es una señal costosa y respaldada por ingresos que los validadores ponderan cuando puntúan los pools.' },
             { tag: '03', title: 'Dirigir los pagos',        body: 'En cada período de liquidación, un operador registra una lista de pagos Merkle que reparte su pool entre sus mineros. Dirige el reparto pero nunca toma custodia: cada minero reclama su parte directamente del contrato.' },
             { tag: '04', title: 'Comenzar',                 body: 'Registra una clave de operador de red, ejecuta el servidor /verify y deposita para empezar. La admisión de operadores está controlada por el propietario durante la fase de lanzamiento.', href: 'https://ur.xyz', linkLabel: 'Documentación para operadores' }
-        ]
+        ],
+        directoryTitle: 'Operadores de red',
+        directoryNote:  'Ordenados por redes totales. Las estadísticas se leen en vivo del feed público de cada operador; los iconos enlazan a la app del operador en cada tienda.',
+        dashboard: 'Panel',
+        colOperator: 'OPERADOR',
+        colStores:   'DESCARGAR'
     },
 
     miners: {
         eyebrow: 'Mineros',
         title:   'Los mineros que transportan el tráfico.',
         intro:   'Los mineros compiten por poner a disposición de la red la mayor cantidad de subredes IPv4 /29 e IPv6 /48, cada una enrutable en todo momento para el tráfico de entrada o de salida. En otras palabras, los mineros convierten la internet pública en una red privada y anónima que cualquiera puede usar. Cada minero transporta tanto el tráfico de entrada como el de salida, ejecuta un modelo de seguridad seguro por defecto, solo enruta tráfico cifrado y recibe pago de la emisión de la subred por la capacidad enrutable que aporta. Las flotas con la mayor cobertura de subredes distintas y enrutables son promovidas a mineros de nivel superior y ganan más: todo en espacio de usuario, en hardware que ya posees.',
+        cta: 'Conviértete en minero',
         roles: [
             { tag: '01', title: 'Salida',               body: 'Los mineros de salida son las IPs de salida de la red compartida. Rechazan el tráfico que entra en conflicto con directrices regulatorias comunes como CFAA y DMCA, bloquean IPs maliciosas conocidas y solo enrutan tráfico cifrado, protegiendo tanto a los mineros como a los usuarios.' },
             { tag: '02', title: 'Entrada',              body: 'Los mineros de entrada (extensores) crean puntos de entrada que mejoran la accesibilidad en todo el mundo, usando TLS de N capas, suplantación de SNI y reenvío de confianza. Un subconjunto rotativo se expone en cada ciclo, y los clientes reintentan automáticamente los puntos de entrada que funcionaron antes.' },
@@ -134,7 +189,8 @@ export default {
     validators: {
         eyebrow: 'Validadores',
         title:   'Los validadores que miden la red.',
-        intro:   'Los validadores son independientes. Cada uno hace staking de su propio $UR y ejecuta el protocolo de verificación de enrutamiento, recorriendo continuamente cadenas de mineros asignadas por los operadores para probar el tránsito en tiempo real y medir qué mineros son los eslabones más débiles. Esa medición es la señal central por la que paga la red, y los validadores ganan dividendos nativos por producirla con precisión.',
+        intro:   'Los validadores son independientes. Cada uno hace staking de su propio UR y ejecuta el protocolo de verificación de enrutamiento, recorriendo continuamente cadenas de mineros asignadas por los operadores para probar el tránsito en tiempo real y medir qué mineros son los eslabones más débiles. Esa medición es la señal central por la que paga la red, y los validadores ganan dividendos nativos por producirla con precisión.',
+        cta: 'Conviértete en validador',
         roles: [
             { tag: '01', title: 'Recorrer las rutas',       body: 'Los validadores recorren cadenas de mineros asignadas por los operadores y recopilan un registro firmado y autoverificable de cada salto completado: prueba criptográfica del tránsito en tiempo real que cualquiera puede comprobar.' },
             { tag: '02', title: 'Puntuar la red',           body: 'En cada ciclo, un validador puntúa el pool de cada operador según la demanda y la calidad medida, y clasifica las principales flotas por amplitud de IPs enrutables, todo bajo commit-reveal. El Yuma Consensus de Bittensor convierte esas puntuaciones independientes en emisión para los mineros.' },
@@ -175,7 +231,27 @@ export default {
             { tag: 'UR-SEC1', title: 'Seguridad',
               body: 'Lista de bloqueo de puertos y lista de bloqueo de IP que protegen la red de mineros. No realiza inspección de protocolo: los mineros solo enrutan tráfico cifrado.',
               href: 'https://github.com/urnetwork/connect/blob/main/ip_security.go', linkLabel: 'ip_security.go' }
-        ]
+        ],
+        competition: {
+            eyebrow: 'Competencia de algoritmos — impulsada por Apex (SN1)',
+            body: 'Buscamos lanzar la competencia de algoritmos de Apex a fin de mes junto con el lanzamiento 25; el objetivo es una mejora medible del 10–20 % en la latencia media del algoritmo de matchmaking y enrutamiento.',
+            cta: 'Únete a la investigación'
+        },
+        datasetsLabel: 'Conjuntos de datos',
+        datasetBlock: 'Bloque {n}',
+        audits: {
+            title: 'Auditorías',
+            intro: 'Auditorías de pares del protocolo y sus implementaciones.',
+            tag: 'Auditoría de pares',
+            items: ['MASA L2 2026', 'MASA L2 2025']
+        },
+        publications: {
+            title: 'Artículos',
+            comingSoon: 'arXiv — próximamente',
+            items: [
+                { title: 'Whole Internet Encryption for the whole world' }
+            ]
+        }
     },
 
     community: {
@@ -183,9 +259,11 @@ export default {
         title:   'Las personas detrás de la red.',
         intro:   'El protocolo es abierto. La comunidad que lo construye y opera está creciendo. Aquí es donde encontrarla.',
         items: [
-            { tag: '01', title: 'Operadores de red',  body: 'Los operadores de red ejecutan servidores, depositan en la subred y venden acceso a la red.', href: 'https://ur.io', linkLabel: 'BringYour, Inc. — ur.io' },
-            { tag: '02', title: 'Discord',             body: 'Únete a la conversación: desarrollo del protocolo, soporte a mineros y discusión de la comunidad.', href: 'https://discord.gg/urnetwork', linkLabel: 'Unirse a Discord' },
-            { tag: '03', title: 'Kit de marca',        body: 'URnetwork y el logotipo del conector son marcas registradas en EE. UU. Se permite a los usuarios del protocolo usar el kit de marca como "powered by URnetwork" o mensajes de componente similares.' }
-        ]
+            { tag: '01', title: 'Discord',              body: 'Discusión general sobre el proyecto: desarrollo del protocolo, soporte a mineros y comunidad.', href: 'https://discord.gg/urnetwork', linkLabel: 'Unirse a Discord' },
+            { tag: '02', title: 'Discord de Bittensor SN', body: 'Discusión específica de Bittensor: la subred, la emisión, los validadores y el staking.', soon: 'Próximamente' },
+            { tag: '03', title: 'Kit de marca',        body: 'URnetwork y el logotipo del conector son marcas registradas en EE. UU. Se permite a los usuarios del protocolo usar el kit de marca como "powered by UR", "with URnetwork" o mensajes de componente similares.', button: { label: 'Descargar kit de marca' } }
+        ],
+        supportersTitle: 'Patrocinadores',
+        partnersTitle:   'Socios'
     }
 };
