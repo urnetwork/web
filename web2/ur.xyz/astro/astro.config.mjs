@@ -82,6 +82,9 @@ export default defineConfig({
         })
     ],
     output: 'static',
+    // flatten every route to a flat .html file (price.html, de/price.html),
+    // matching the nginx `try_files $uri $uri.html` static routing
+    build: { format: 'file' },
     outDir: path.resolve(__dirname, 'build', ENV),
     vite: {
         plugins: [urXyzContent()],

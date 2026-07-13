@@ -1,8 +1,14 @@
 /* PriceSection.css — the published price sheet page. */
 
 /* Column headers are display-ready strings: an uppercase transform would
-   turn the α unit into a capital Alpha (Α ≈ A). */
-.price-table th {
+   turn the α unit into a capital Alpha (Α ≈ A). This must beat the base
+   `.article-table th { text-transform: uppercase }` (Section.css) — which has
+   the SAME specificity, so cascade order alone would decide. The SPA bundles
+   PriceSection.css after Section.css (so `none` wins there), but the Astro
+   island bundles them in the opposite order, letting the uppercase base rule
+   win and mangle the α unit. Match both table classes so specificity — not
+   source order — decides, identically in both builds. */
+.article-table.price-table th {
     text-transform: none;
     letter-spacing: 0.06em;
 }
