@@ -1,0 +1,43 @@
+---
+import Base from '../../layouts/Base.astro';
+import DisclaimerStatic from '../../components/DisclaimerStatic.astro';
+import NavIsland from '../../islands/NavIsland.jsx';
+import Section from '../../components/Section.astro';
+import FooterStatic from '../../components/FooterStatic.astro';
+import RoadmapTrack from '@react/components/RoadmapTrack.jsx';
+import en from '@react/i18n/en.js';
+import { NON_EN_LANGS, LANGS, getDict } from '../../lib/i18n.js';
+
+import '@react/components/Nav.css';
+
+export function getStaticPaths() {
+    return NON_EN_LANGS.map(lang => ({ params: { lang } }));
+}
+
+const { lang } = Astro.params;
+const t = await getDict(lang);
+const dir = LANGS[lang]?.dir || 'ltr';
+// Localized dicts carry only the nav label; the roadmap body falls back to
+// English until translated — same idiom as [lang]/[section].astro.
+const data = t.roadmap || en.roadmap;
+---
+<Base
+    title={`${data.title} — UR`}
+    description={data.intro}
+    lang={lang}
+    dir={dir}
+>
+    <div class="app">
+        <DisclaimerStatic />
+        <NavIsland activeRoute="roadmap" lang={lang} client:load />
+
+        <main class="section-page">
+            <Section id="roadmap" eyebrow={data.eyebrow} title={data.title}>
+                <p>{data.intro}</p>
+                <RoadmapTrack data={data} />
+            </Section>
+        </main>
+
+        <FooterStatic t={t} lang={lang} />
+    </div>
+</Base>

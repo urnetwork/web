@@ -10,6 +10,7 @@ export default {
         community:  'Gemeinschaft',
         price:      'Nutzungskosten',
         docs:       'Dokumentation',
+        roadmap:    'Roadmap',
         tagline:    'Besitze deine Privatsphäre. Besitze dein Netzwerk.',
         languageMenu: 'Sprache',
         menu:         'Menü',
@@ -70,6 +71,34 @@ export default {
         usdUnavailable: 'Live-α-Preis nicht verfügbar — USD-Äquivalente ausgeblendet.',
         subscribe: 'Preisänderungen abonnieren (RSS)',
         rawFile:   'Rohe Preistabelle (price.yml)'
+    },
+
+    roadmap: {
+        eyebrow: 'Roadmap',
+        title:   'Wohin sich das Netzwerk entwickelt.',
+        intro:   'Drei Phasen, jede baut auf der vorigen auf: das Ingress-Netzwerk öffnen, UR zum Substrat machen, auf dem Unternehmen bauen, und das Eingangstor zum Internet neu errichten. Die Zeiträume sind Zielmarken, gemessen ab heute — eine Richtung, kein Versprechen.',
+        phaseLabel: 'Phase',
+        phases: [
+            {
+                no: '01',
+                date: '1–2 Monate',
+                flag: 'Startet in Kürze',
+                title: 'Zugang zum Ingress-Netzwerk',
+                body: 'Miner werden zugleich Egress und Ingress. Jeder Miner erkennt seine Umgebung automatisch und konfiguriert sich so, dass er alles tut, was er kann — er trägt Ingress-Verkehr ebenso wie Egress-Verkehr. Das Ingress-Netzwerk greift das N-Schicht-Verschlüsselungsdesign der Erweiterer wieder auf, ergänzt um neue clientseitige Logik, die iterativ Erweiterer entdeckt, die sich zeitgesteuert freischalten — so rotieren laufend frische Einstiegspunkte in Reichweite.'
+            },
+            {
+                no: '02',
+                date: '3–4 Monate',
+                title: 'Enterprise-Rollen & Autorisierung',
+                body: 'Rollenbasierter Zugriff, integriert mit OAuth und Workload Identity Federation. RBAC ist direkt ins Netzwerk eingebaut, sodass Geschäftsnetzwerke unmittelbar auf dem Protokoll aufgebaut werden können — diese Schicht treibt die Entwickler- und VPN-Anwendungsfälle von VPN.dev an. Der Reiz für diese Unternehmen: ein Netzwerk, das überall auf der Welt zugänglich und performant bleibt — damit Teilnehmer dezentraler Projekte von überall aus mitwirken können.'
+            },
+            {
+                no: '03',
+                date: '8–12 Monate',
+                title: 'Eine neue Internet-Startseite — WW.dev',
+                body: 'Ein neues Eingangstor zum Internet. Wir konzentrieren uns auf Indexierung — Push wie Pull —, einen agentenbasierten Suchindex und kleine, dichte lokale Modelle. Menschen können eine neue private Startseite festlegen; Agenten können einen offenen Suchindex nutzen, der ihnen privaten Echtzeitzugriff auf Informationen gibt — abgerechnet über Privacy Pass und x402.'
+            }
+        ]
     },
 
     legal: {

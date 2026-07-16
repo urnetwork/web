@@ -11,6 +11,7 @@ export default {
         community:  'Community',
         price:      'Usage Cost',
         docs:       'Docs',
+        roadmap:    'Roadmap',
         tagline:    'Own your privacy. Own your network.',
         languageMenu: 'Language',
         menu:         'Menu',
@@ -70,6 +71,34 @@ export default {
         usdUnavailable: 'Live α price unavailable — USD equivalents are hidden.',
         subscribe: 'Subscribe to price changes (RSS)',
         rawFile:   'Raw price sheet (price.yml)'
+    },
+
+    roadmap: {
+        eyebrow: 'Roadmap',
+        title:   'Where the network is going.',
+        intro:   'Three phases, each built on the one before it: open the ingress network, make UR the substrate businesses build on, and rebuild the front door to the internet. The timeframes are targets measured from today — a direction, not a promise.',
+        phaseLabel: 'Phase',
+        phases: [
+            {
+                no: '01',
+                date: '1–2 months',
+                flag: 'Launching soon',
+                title: 'Ingress network access',
+                body: 'Miners become both egress and ingress. Each miner auto-detects its environment and configures itself to do everything it can — carrying entry traffic as well as exit. The ingress network reuses the extenders\' N-layer encryption design, with new client-side work to iteratively discover extenders that time-unlock, so fresh entry points keep rotating into reach.'
+            },
+            {
+                no: '02',
+                date: '3–4 months',
+                title: 'Enterprise roles & authorization',
+                body: 'Role-based access, integrated with OAuth and Workload Identity Federation. RBAC is baked into the network so business networks can be built directly on top of the protocol — this is the layer powering the developer and VPN use cases of VPN.dev. The draw for those businesses: a network that stays accessible and performant anywhere in the world — so participants in decentralized projects can take part from anywhere.'
+            },
+            {
+                no: '03',
+                date: '8–12 months',
+                title: 'A new internet homepage — WW.dev',
+                body: 'A new front door to the internet. We focus on indexing — both push and pull — an agentic search index, and small, dense local models. Humans can set a new private homepage; agents can use an open search index that gives them private, real-time access to information, settled with Privacy Pass and x402.'
+            }
+        ]
     },
 
     legal: {

@@ -14,6 +14,7 @@ import Operators from './components/sections/Operators';
 import Miners from './components/sections/Miners';
 import Validators from './components/sections/Validators';
 import Community from './components/sections/Community';
+import Roadmap from './components/sections/Roadmap';
 import PriceSection from './components/PriceSection';
 import LegalSection from './components/LegalSection';
 
@@ -32,6 +33,7 @@ const SECTION_COMPONENTS = {
     validators: Validators,
     research:   Research,
     community:  Community,
+    roadmap:    Roadmap,
     price:      PriceSection,
     terms:      Terms,
     privacy:    Privacy,

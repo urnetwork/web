@@ -25,7 +25,7 @@ const ASTRO_OUT = path.join(ASTRO_DIR, "build", UR_ENV);
 const OUT = path.join(__dirname, "__parity__");
 
 // Main routes: home, the content sections, pricing, and the API explorer.
-const ROUTES = ["/", "/operators", "/miners", "/validators", "/research", "/community", "/price", "/api"];
+const ROUTES = ["/", "/operators", "/miners", "/validators", "/research", "/community", "/price", "/roadmap", "/api"];
 
 const PIXEL_TOLERANCE = 40; // desktop
 // Phones render at 3x DPR; composited/animated text vs a static node antialiases the SAME

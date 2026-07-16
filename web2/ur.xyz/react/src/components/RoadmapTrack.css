@@ -1,0 +1,135 @@
+/* RoadmapTrack.css — the vertical timeline of roadmap phases.
+   A single hairline runs down the page; each phase is a node ("stop") on it. */
+
+.roadmap {
+    list-style: none;
+    margin: 56px 0 0;
+    padding: 0;
+    position: relative;
+}
+
+.roadmap-stop {
+    position: relative;
+    padding-inline-start: 44px;
+    padding-bottom: 56px;
+}
+
+.roadmap-stop:last-child {
+    padding-bottom: 0;
+}
+
+/* The connector: a hairline centered on x = 6px. Each stop draws its own
+   segment (top → bottom, covering the padding), so the segments join into one
+   continuous line. The first segment starts at the first node; the last one
+   stops at the last node — the line spans node-to-node, nothing beyond. */
+.roadmap-stop::before {
+    content: '';
+    position: absolute;
+    inset-inline-start: 6px;
+    margin-inline-start: -0.5px;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background: rgba(214, 230, 244, 0.14);
+}
+
+.roadmap-stop:first-child::before {
+    top: 10px;
+}
+
+.roadmap-stop:last-child::before {
+    bottom: auto;
+    height: 10px;
+}
+
+/* The node sits on the line, centered at (6px, 10px). Future stops are
+   outlined; the first stop — what ships next — is filled and softly ringed. */
+.roadmap-node {
+    position: absolute;
+    inset-inline-start: 0;
+    top: 4px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: 1px solid var(--brand-ur);
+    background: var(--brand-bg);
+}
+
+.roadmap-stop:first-child .roadmap-node {
+    background: var(--brand-ur);
+    box-shadow: 0 0 0 4px rgba(237, 143, 255, 0.12);
+}
+
+/* --- Meta row: "Phase 01 · timeframe", plus an optional status flag --- */
+.roadmap-meta {
+    display: flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 6px 10px;
+    line-height: 1.2;
+    margin-bottom: 14px;
+}
+
+.roadmap-phase {
+    font-family: 'PPNeueBit', monospace;
+    font-size: 0.95rem;
+    letter-spacing: 0.05em;
+    color: var(--brand-ur);
+}
+
+.roadmap-sep {
+    color: var(--brand-ui);
+    opacity: 0.4;
+}
+
+.roadmap-date {
+    font-size: 0.68rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--brand-ui);
+    opacity: 0.6;
+}
+
+.roadmap-flag {
+    margin-inline-start: 4px;
+    font-size: 0.62rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--brand-ur);
+    padding: 3px 9px;
+    border: 1px solid rgba(237, 143, 255, 0.4);
+    border-radius: 999px;
+    line-height: 1;
+}
+
+.roadmap-title {
+    font-family: 'PPNeueMontreal', sans-serif;
+    font-weight: 400;
+    font-size: clamp(1.35rem, 2.6vw, 1.85rem);
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+    color: var(--brand-white);
+    margin: 0 0 12px;
+}
+
+/* Scoped under .roadmap to beat `.section-body p`, which otherwise imposes its
+   own bottom margin and 68ch max-width on this paragraph. */
+.roadmap .roadmap-body {
+    margin: 0;
+    max-width: 60ch;
+    font-size: 1rem;
+    line-height: 1.65;
+    color: var(--brand-ui);
+    opacity: 0.82;
+}
+
+@media (max-width: 768px) {
+    .roadmap {
+        margin-top: 40px;
+    }
+
+    .roadmap-stop {
+        padding-inline-start: 38px;
+        padding-bottom: 40px;
+    }
+}

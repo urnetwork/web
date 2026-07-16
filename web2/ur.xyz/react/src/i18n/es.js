@@ -10,6 +10,7 @@ export default {
         community:  'Comunidad',
         price:      'Costo de uso',
         docs:       'Documentación',
+        roadmap:    'Hoja de ruta',
         tagline:    'Posee tu privacidad. Posee tu red.',
         languageMenu: 'Idioma',
         menu:         'Menú',
@@ -70,6 +71,34 @@ export default {
         usdUnavailable: 'Precio de α en vivo no disponible — equivalentes en USD ocultos.',
         subscribe: 'Suscribirse a los cambios de precio (RSS)',
         rawFile:   'Tabla de precios sin procesar (price.yml)'
+    },
+
+    roadmap: {
+        eyebrow: 'Hoja de ruta',
+        title:   'Hacia dónde va la red.',
+        intro:   'Tres fases, cada una construida sobre la anterior: abrir la red de entrada, hacer de UR el sustrato sobre el que construyen las empresas y reconstruir la puerta de entrada a internet. Los plazos son objetivos medidos desde hoy: una dirección, no una promesa.',
+        phaseLabel: 'Fase',
+        phases: [
+            {
+                no: '01',
+                date: '1–2 meses',
+                flag: 'Lanzamiento próximo',
+                title: 'Acceso a la red de entrada',
+                body: 'Los mineros se convierten en salida y entrada a la vez. Cada minero detecta automáticamente su entorno y se configura para hacer todo lo que puede: transportar tráfico de entrada además del de salida. La red de entrada reutiliza el diseño de encriptación de N capas de los extensores, con nuevo trabajo del lado del cliente para descubrir de forma iterativa extensores que se desbloquean con el tiempo, de modo que nuevos puntos de entrada rotan continuamente hasta quedar al alcance.'
+            },
+            {
+                no: '02',
+                date: '3–4 meses',
+                title: 'Roles empresariales y autorización',
+                body: 'Acceso basado en roles, integrado con OAuth y Workload Identity Federation. El RBAC viene incorporado en la propia red, de modo que las redes empresariales pueden construirse directamente sobre el protocolo: esta es la capa que impulsa los casos de uso de VPN.dev para desarrolladores y VPN. El atractivo para esas empresas: una red que se mantiene accesible y con buen rendimiento en cualquier parte del mundo, para que los participantes de proyectos descentralizados puedan participar desde cualquier lugar.'
+            },
+            {
+                no: '03',
+                date: '8–12 meses',
+                title: 'Una nueva página de inicio de internet — WW.dev',
+                body: 'Una nueva puerta de entrada a internet. Nos centramos en la indexación —tanto push como pull—, un índice de búsqueda para agentes y modelos locales pequeños y densos. Las personas pueden establecer una nueva página de inicio privada; los agentes pueden usar un índice de búsqueda abierto que les da acceso privado y en tiempo real a la información, liquidado con Privacy Pass y x402.'
+            }
+        ]
     },
 
     legal: {

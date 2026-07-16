@@ -1,0 +1,33 @@
+---
+import Base from '../layouts/Base.astro';
+import DisclaimerStatic from '../components/DisclaimerStatic.astro';
+import NavIsland from '../islands/NavIsland.jsx';
+import Section from '../components/Section.astro';
+import FooterStatic from '../components/FooterStatic.astro';
+import RoadmapTrack from '@react/components/RoadmapTrack.jsx';
+import en from '@react/i18n/en.js';
+
+import '@react/components/Nav.css';
+
+const t = en;
+const data = t.roadmap;
+---
+<Base
+    title={`${data.title} — UR`}
+    description={data.intro}
+    lang="en"
+>
+    <div class="app">
+        <DisclaimerStatic />
+        <NavIsland activeRoute="roadmap" lang="en" client:load />
+
+        <main class="section-page">
+            <Section id="roadmap" eyebrow={data.eyebrow} title={data.title}>
+                <p>{data.intro}</p>
+                <RoadmapTrack data={data} />
+            </Section>
+        </main>
+
+        <FooterStatic t={t} lang="en" />
+    </div>
+</Base>

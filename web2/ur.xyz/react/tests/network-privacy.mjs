@@ -22,7 +22,7 @@ import { fileURLToPath } from "node:url";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const REACT_DIR = path.resolve(__dirname, "..");
 
-const ROUTES = ["/", "/price", "/api", "/operators", "/miners", "/validators", "/research", "/community"];
+const ROUTES = ["/", "/price", "/roadmap", "/api", "/operators", "/miners", "/validators", "/research", "/community"];
 
 const ALLOWED = ["ur.xyz", "ur.io", "bringyour.com", "ur.network", "urnetwork.com", "geckoterminal.com"];
 

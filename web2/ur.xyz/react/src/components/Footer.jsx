@@ -60,6 +60,13 @@ export default function Footer() {
                             {t.nav.price}
                         </a>
                         <a
+                            href={buildPath({ name: 'roadmap', slug: null }, code)}
+                            className="footer-link"
+                            onClick={(e) => handleSectionClick(e, 'roadmap')}
+                        >
+                            {t.nav.roadmap}
+                        </a>
+                        <a
                             href="https://github.com/urfoundation"
                             className="footer-link"
                             target="_blank"
