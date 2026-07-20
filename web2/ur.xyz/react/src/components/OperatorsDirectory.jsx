@@ -107,7 +107,9 @@ function StoreLinks({ operator, label }) {
  * The baked-in network operator registry as a table: each operator's app
  * and store listings next to the core stats read live from its public
  * feed, ranked by total networks. Unreachable feeds rank last and show
- * placeholders.
+ * placeholders. The block-scoped columns reset at every block rollover,
+ * so each also shows the operator's last finished block underneath as a
+ * stable reference (hidden until the feed publishes one).
  */
 export default function OperatorsDirectory() {
     const { t } = useLanguage();
@@ -177,9 +179,24 @@ export default function OperatorsDirectory() {
                                     </div>
                                 </td>
                                 <td>{feed ? fmtInt(feed.totalNetworks) : DASH}</td>
-                                <td>{feed ? fmtInt(feed.users) : DASH}</td>
-                                <td>{feed ? fmt(feed.dataGib) : DASH}</td>
-                                <td>{feed ? fmt(feed.demandDepositsAlpha) : DASH}</td>
+                                <td>
+                                    {feed ? fmtInt(feed.users) : DASH}
+                                    {feed && feed.prevUsers != null && (
+                                        <div className="op-stat-prev">{t.sim.prevBlock} {fmtInt(feed.prevUsers)}</div>
+                                    )}
+                                </td>
+                                <td>
+                                    {feed ? fmt(feed.dataGib) : DASH}
+                                    {feed && feed.prevDataGib != null && (
+                                        <div className="op-stat-prev">{t.sim.prevBlock} {fmt(feed.prevDataGib)}</div>
+                                    )}
+                                </td>
+                                <td>
+                                    {feed ? fmt(feed.demandDepositsAlpha) : DASH}
+                                    {feed && feed.prevDemandDepositsAlpha != null && (
+                                        <div className="op-stat-prev">{t.sim.prevBlock} {fmt(feed.prevDemandDepositsAlpha)}</div>
+                                    )}
+                                </td>
                             </tr>
                         ))}
                     </tbody>

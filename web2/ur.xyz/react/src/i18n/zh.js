@@ -48,6 +48,7 @@ export default {
 
     sim: {
         block: '区块',
+        prevBlock: '上一区块',
         blockProgressAria: '当前区块进度',
         endsAt: '于 {date} 00:00 UTC 结束。距区块结束还有 {d}天 {h}时 {m}分 {s}秒'
     },

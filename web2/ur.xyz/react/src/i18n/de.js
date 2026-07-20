@@ -50,6 +50,7 @@ export default {
 
     sim: {
         block: 'BLOCK',
+        prevBlock: 'VORHERIGER BLOCK',
         blockProgressAria: 'Fortschritt des aktuellen Blocks',
         endsAt: 'Endet um 00:00 UTC am {date}. Noch {d}T {h}h {m}min {s}s bis zum Blockende'
     },

@@ -6,8 +6,8 @@
 // allowlist.
 //
 // Allowed:
-//   - first-party: *.ur.xyz, *.ur.io (whitelisted network operators, e.g.
-//     main-grafana.ur.io), *.bringyour.com, *.ur.network, *.urnetwork.com
+//   - first-party: *.ur.xyz, *.ur.io, *.bringyour.com (whitelisted network
+//     operators, e.g. grafana.bringyour.com), *.ur.network, *.urnetwork.com
 //   - api.geckoterminal.com — CoinGecko's keyless public α→USD price feed (approved;
 //     sends no user data, just fetches public prices)
 //

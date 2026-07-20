@@ -145,6 +145,23 @@
 /* α amounts are token-pink, matching the ledger's color identity. */
 .block-toast-value.is-ur { color: var(--brand-ur); }
 
+/* The last finished block under each accumulator — the stable reference
+   while the current block counts up from zero. Hidden until the feeds
+   publish one (block 1 has no predecessor). */
+.block-toast-prev {
+    font-size: 0.52rem;
+    letter-spacing: 0.06em;
+    opacity: 0.55;
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+}
+
+.block-toast-prev-value {
+    font-family: 'PPNeueBit', monospace;
+    font-weight: bold;
+    color: var(--brand-ur);
+}
+
 /* Live countdown to the block's end (00:00 UTC). */
 .block-toast-countdown {
     margin-top: 9px;

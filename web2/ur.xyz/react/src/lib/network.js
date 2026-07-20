@@ -8,18 +8,32 @@ import { useEffect, useState } from 'react';
  * current block (7 days) plus its cumulative contract stake:
  *
  *   {
- *     "users": 125000,                   // users served this block
+ *     "users": 125000,                   // users served this block (unique top-level clients)
  *     "data_gib": 812345.5,              // data transferred this block (GiB)
  *     "total_networks": 250000,          // total networks at the operator
  *     "staked_alpha": 250000.0,          // cumulative α staked in the contract
  *     "demand_deposits_alpha": 1234.5,   // demand deposits this block (α)
  *     "miner_emissions_alpha": 5678.9,   // miner emission captured this block (α)
- *     "alpha_usd": 1.75                  // the α price in USD, as the operator observes it
+ *     "alpha_usd": 1.75,                 // the α price in USD, as the operator observes it
+ *     "countries": 123,                  // countries with a connected valid provider
+ *     "prev_users": 118000,              // ...and the same accumulators for the
+ *     "prev_data_gib": 1012345.5,        //    last FINISHED block — the stable
+ *     "prev_demand_deposits_alpha": 1100.5, // reference while the current block
+ *     "prev_miner_emissions_alpha": 5200.1  // accumulates from zero
  *   }
  *
+ * countries is informational (overlapping between operators, so never
+ * summed here); ur.io's own site reads it from this same feed. The prev_*
+ * fields are optional: they parse as null (not 0) when unpublished — e.g.
+ * during block 1, which has no finished predecessor — so the UI can hide
+ * the reference rather than misreport a zero.
+ *
  * All fields are numeric; a missing accumulator counts as 0. The endpoint
- * must be served with CORS open (Access-Control-Allow-Origin: *) since the
- * site queries it straight from the visitor's browser. The site sums every
+ * is queried straight from the visitor's browser, so it must answer with
+ * exactly one Access-Control-Allow-Origin — either * or an allowlist
+ * reflection that includes this site's origin (ur.io serves the latter
+ * from its lb; two values, e.g. an upstream * plus a proxy reflection,
+ * fail the browser's cors check). The site sums every
  * reachable feed — except alpha_usd, where it takes the mean (see
  * usePrice.js; operators can source the pool price server-side, so this
  * works even when CoinGecko is unreachable from the browser).
@@ -29,9 +43,10 @@ export const NETWORK_OPERATORS = [
         name: 'ur.io',
         siteUrl: 'https://ur.io',
         appName: 'URnetwork',
-        dashboardUrl: 'https://main-grafana.ur.io',
+        // The operator's public dashboards directory (read-only, no login)
+        dashboardUrl: 'https://grafana.bringyour.com/stats',
         githubUrl: 'https://github.com/urnetwork',
-        statsUrl: 'https://main-grafana.ur.io/stats.json',
+        statsUrl: 'https://grafana.bringyour.com/stats.json',
         // Store listings for the operator's app. Stores whose listing isn't
         // published yet point at the operator's site until one exists.
         stores: {
@@ -49,11 +64,12 @@ export const NETWORK_OPERATORS = [
 ];
 
 /**
- * The application-layer block clock: block 1 opened at 00:00 UTC on
- * July 1, 2026 and a new block starts every 7 days — block 1 was
- * July 1–8, block 2 July 8–15, and so on.
+ * The application-layer block clock: blocks are the subnet's 7-day
+ * settlement periods, and every block starts and ends at 00:00 UTC on
+ * Sunday. Block 1 opened Sunday June 28, 2026 — the Sunday of the
+ * launch week — so block 2 was July 5–12, block 3 July 12–19, and so on.
  */
-export const BLOCK_GENESIS_MS = Date.UTC(2026, 6, 1);
+export const BLOCK_GENESIS_MS = Date.UTC(2026, 5, 28);
 export const BLOCK_MS = 7 * 24 * 60 * 60 * 1000;
 
 export function blockNumberAt(nowMs = Date.now()) {
@@ -73,7 +89,10 @@ export function blockEndAt(nowMs = Date.now()) {
 }
 
 const CLOCK_TICK_MS = 30_000;
-const FEED_POLL_MS = 60_000;
+// Feed refresh: the hero simulation and stats read live totals, so poll
+// every 30s (the operator feeds cache briefly server side, so this stays
+// cheap for the operators).
+const FEED_POLL_MS = 30_000;
 const FEED_TIMEOUT_MS = 10_000;
 
 /**
@@ -111,6 +130,12 @@ export async function fetchOperatorFeed(statsUrl, signal) {
             const v = Number(body?.[key]);
             return Number.isFinite(v) ? v : 0;
         };
+        // Optional fields stay null when unpublished so the UI can hide
+        // them instead of misreporting a zero.
+        const optional = (key) => {
+            const v = Number(body?.[key]);
+            return Number.isFinite(v) ? v : null;
+        };
         const alphaUsd = Number(body?.alpha_usd);
         return {
             users: num('users'),
@@ -120,7 +145,12 @@ export async function fetchOperatorFeed(statsUrl, signal) {
             demandDepositsAlpha: num('demand_deposits_alpha'),
             minerEmissionsAlpha: num('miner_emissions_alpha'),
             // A price of 0 is no price; null marks "not published".
-            alphaUsd: Number.isFinite(alphaUsd) && alphaUsd > 0 ? alphaUsd : null
+            alphaUsd: Number.isFinite(alphaUsd) && alphaUsd > 0 ? alphaUsd : null,
+            // The last finished block (see the schema note above).
+            prevUsers: optional('prev_users'),
+            prevDataGib: optional('prev_data_gib'),
+            prevDemandDepositsAlpha: optional('prev_demand_deposits_alpha'),
+            prevMinerEmissionsAlpha: optional('prev_miner_emissions_alpha')
         };
     } finally {
         clearTimeout(timer);
@@ -130,7 +160,7 @@ export async function fetchOperatorFeed(statsUrl, signal) {
 
 /**
  * Every operator with its own live feed (not summed), refreshed every
- * minute — [{ operator, feed }] in registry order, where feed is null
+ * 30s — [{ operator, feed }] in registry order, where feed is null
  * until the operator's stats endpoint answers and keeps the last good
  * value if a later poll fails.
  */
@@ -163,7 +193,7 @@ export function useOperatorFeeds() {
 }
 
 /**
- * Sums of every reachable operator feed, refreshed every minute.
+ * Sums of every reachable operator feed, refreshed every 30s.
  *
  *   totals    — summed feed fields (null until at least one feed answers;
  *               the last good sums are kept if a later poll fails entirely)
@@ -190,6 +220,10 @@ export function useNetworkTotals() {
                 .filter(r => r.status === 'fulfilled')
                 .map(r => r.value);
 
+            // Optional fields sum null-aware: the total stays null until
+            // at least one feed publishes the field.
+            const addOptional = (a, b) => (a == null && b == null ? null : (a ?? 0) + (b ?? 0));
+
             setState(prev => ({
                 totals: ok.length === 0 ? prev.totals : ok.reduce((sum, f) => ({
                     users: sum.users + f.users,
@@ -197,8 +231,17 @@ export function useNetworkTotals() {
                     totalNetworks: sum.totalNetworks + f.totalNetworks,
                     stakedAlpha: sum.stakedAlpha + f.stakedAlpha,
                     demandDepositsAlpha: sum.demandDepositsAlpha + f.demandDepositsAlpha,
-                    minerEmissionsAlpha: sum.minerEmissionsAlpha + f.minerEmissionsAlpha
-                }), { users: 0, dataGib: 0, totalNetworks: 0, stakedAlpha: 0, demandDepositsAlpha: 0, minerEmissionsAlpha: 0 }),
+                    minerEmissionsAlpha: sum.minerEmissionsAlpha + f.minerEmissionsAlpha,
+                    prevUsers: addOptional(sum.prevUsers, f.prevUsers),
+                    prevDataGib: addOptional(sum.prevDataGib, f.prevDataGib),
+                    prevDemandDepositsAlpha: addOptional(sum.prevDemandDepositsAlpha, f.prevDemandDepositsAlpha),
+                    prevMinerEmissionsAlpha: addOptional(sum.prevMinerEmissionsAlpha, f.prevMinerEmissionsAlpha)
+                }), {
+                    users: 0, dataGib: 0, totalNetworks: 0, stakedAlpha: 0,
+                    demandDepositsAlpha: 0, minerEmissionsAlpha: 0,
+                    prevUsers: null, prevDataGib: null,
+                    prevDemandDepositsAlpha: null, prevMinerEmissionsAlpha: null
+                }),
                 loaded: ok.length,
                 operators: NETWORK_OPERATORS.length
             }));

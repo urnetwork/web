@@ -107,3 +107,14 @@
     height: 16px;
     display: block;
 }
+
+/* The operator's last finished block under each block-scoped stat — the
+   stable reference while the current block accumulates from zero. */
+.op-stat-prev {
+    margin-top: 2px;
+    font-size: 0.72em;
+    letter-spacing: 0.04em;
+    opacity: 0.55;
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+}

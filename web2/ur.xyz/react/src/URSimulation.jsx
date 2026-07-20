@@ -73,13 +73,19 @@ function useSecondTick() {
  * its top edge fills as the block elapses, the two accumulators count up
  * the miner emissions and demand deposits reported by the network
  * operators' feeds for the block so far, and a live countdown runs to
- * the block's end (always 00:00 UTC).
+ * the block's end (always 00:00 UTC). Because the accumulators reset at
+ * every rollover, each shows the last finished block underneath as a
+ * stable reference (hidden until the feeds publish one — e.g. block 1
+ * has no predecessor).
  */
 function BlockToast({ block, network }) {
     const { t, code } = useLanguage();
     const totals = network ? network.totals : null;
     const emissions = useCountUp(totals ? totals.minerEmissionsAlpha : null);
     const deposits = useCountUp(totals ? totals.demandDepositsAlpha : null);
+    // The finished block is a fixed reference — no count-up.
+    const prevEmissions = totals ? totals.prevMinerEmissionsAlpha : null;
+    const prevDeposits = totals ? totals.prevDemandDepositsAlpha : null;
     const now = useSecondTick();
 
     if (!block) return null;
@@ -124,12 +130,22 @@ function BlockToast({ block, network }) {
                     <span className="block-toast-value is-ur">
                         {emissions == null ? '—' : fmtAlpha(emissions)}
                     </span>
+                    {prevEmissions != null && (
+                        <span className="block-toast-prev">
+                            {t.sim.prevBlock} <span className="block-toast-prev-value">{fmtAlpha(prevEmissions)}</span>
+                        </span>
+                    )}
                 </div>
                 <div className="block-toast-row">
                     <span className="block-toast-label">{t.stats.demandDeposits}</span>
                     <span className="block-toast-value is-ur">
                         {deposits == null ? '—' : fmtAlpha(deposits)}
                     </span>
+                    {prevDeposits != null && (
+                        <span className="block-toast-prev">
+                            {t.sim.prevBlock} <span className="block-toast-prev-value">{fmtAlpha(prevDeposits)}</span>
+                        </span>
+                    )}
                 </div>
             </div>
             {/* aria-hidden: a per-second text change inside a role="status"

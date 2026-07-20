@@ -49,6 +49,7 @@ export default {
 
     sim: {
         block: 'كتلة',
+        prevBlock: 'الكتلة السابقة',
         blockProgressAria: 'تقدّم الكتلة الحالية',
         endsAt: 'تنتهي عند 00:00 UTC {date}. تبقّى {d}ي {h}س {m}د {s}ث حتى نهاية الكتلة'
     },
