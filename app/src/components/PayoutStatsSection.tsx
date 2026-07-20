@@ -12,6 +12,7 @@ import {
 	TrendingUp,
 	Database,
 	Star,
+	Sparkles,
 } from "lucide-react";
 import { useAuth } from "../hooks/useAuth";
 import { fetchAccountPayments, fetchAccountPoints } from "../services/api";
@@ -72,6 +73,47 @@ const PayoutStatsSection: React.FC = () => {
 		}
 		return map;
 	}, [points]);
+
+	/**
+	 * Typical gap between the gross payout the network books for a payment and
+	 * the tokens that actually land in the wallet, taken as the median over the
+	 * payments that already settled. It is a wallet/transfer fee, so it stays
+	 * roughly constant per payment rather than scaling with the amount — the
+	 * median keeps a one-off outlier from skewing the estimate. Only the most
+	 * recent payments are sampled, because the fee has changed over time and
+	 * old payouts would drag the estimate towards a fee that no longer applies.
+	 */
+	const settlementFee = useMemo(() => {
+		const FEE_SAMPLE_SIZE = 10;
+
+		const fees = payments
+			.filter((payment) => payment.token_amount && payment.payout_nano_cents)
+			.sort(
+				(a, b) =>
+					new Date(b.payment_time).getTime() -
+					new Date(a.payment_time).getTime(),
+			)
+			.slice(0, FEE_SAMPLE_SIZE)
+			.map(
+				(payment) =>
+					(payment.payout_nano_cents as number) / 1e9 -
+					payment.token_amount,
+			)
+			.filter((fee) => fee >= 0)
+			.sort((a, b) => a - b);
+
+		if (fees.length === 0) return 0;
+		return fees[Math.floor(fees.length / 2)];
+	}, [payments]);
+
+	/**
+	 * Estimated payout for a payment that has not settled yet. The network has
+	 * already booked the gross amount, so only the fee has to be predicted.
+	 */
+	const estimateFor = (payment: AccountPayment): number | null => {
+		if (payment.token_amount || !payment.payout_nano_cents) return null;
+		return Math.max(payment.payout_nano_cents / 1e9 - settlementFee, 0);
+	};
 
 	useEffect(() => {
 		if (!initialRenderRef.current || isLoading) {
@@ -174,6 +216,10 @@ const PayoutStatsSection: React.FC = () => {
 	};
 
 	const totals = calculateTotals();
+	const estimatedPending = payments.reduce(
+		(sum, payment) => sum + (estimateFor(payment) ?? 0),
+		0,
+	);
 
 	return (
 		<div className="space-y-8">
@@ -230,12 +276,22 @@ const PayoutStatsSection: React.FC = () => {
 				</div>
 			) : (
 				<div className="space-y-8">
-					<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 animate-staggerFadeUp" style={{ animationDelay: '0.2s' }}>
+					<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-6 animate-staggerFadeUp" style={{ animationDelay: '0.2s' }}>
 						<StatCard
 							title="Total USDC Earned"
 							value={`$${totals.totalPayouts.toFixed(4)}`}
 							icon={DollarSign}
 							gradient="bg-gradient-to-r from-green-600 to-emerald-600"
+						/>
+						<StatCard
+							title="Estimated Pending"
+							value={
+								estimatedPending > 0
+									? `~$${estimatedPending.toFixed(4)}`
+									: "—"
+							}
+							icon={Sparkles}
+							gradient="bg-gradient-to-r from-violet-600 to-purple-600"
 						/>
 						<StatCard
 							title="Total Points Earned"
@@ -372,7 +428,19 @@ const PayoutStatsSection: React.FC = () => {
 													{payment.token_amount.toFixed(
 														4,
 													)}{" "}
-													{payment.token_type}</> : <>&mdash;</>}
+													{payment.token_type}</> : (() => {
+														const estimate = estimateFor(payment);
+														return estimate !== null ? (
+															<span
+																className="text-violet-300"
+																title="Estimated from the booked payout minus the typical fee on your previous payments"
+															>
+																~${estimate.toFixed(4)}
+															</span>
+														) : (
+															<>&mdash;</>
+														);
+													})()}
 												</td>
 												<td className="px-6 py-4 whitespace-nowrap text-sm text-amber-400 font-medium">
 													{(() => {

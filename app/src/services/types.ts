@@ -356,6 +356,10 @@ export type AccountPayment = {
   token_amount: number;
   /** Number of bytes this payout covers */
   payout_byte_count: number;
+  /** Gross payout the network has booked for this payment, before wallet fees */
+  payout_nano_cents?: number;
+  /** ISO 8601 timestamp of when the payment was created */
+  create_time?: string;
   /** Whether payment has been completed */
   completed: boolean;
   /** Whether payment was canceled */
