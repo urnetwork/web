@@ -36,6 +36,7 @@ export default {
     // 以保留 α 字形与 GiB 单位的大小写——请直接写成最终显示形式。
     stats: {
         protocolLedger:  '子网账本',
+        refresh:         '刷新统计数据',
         blockNumber:     '区块编号',
         dataPerBlock:    '每区块总数据量 (GiB)',
         usersPerBlock:   '每区块总用户数',

@@ -38,6 +38,7 @@ export default {
     // bitte in finaler Form schreiben.
     stats: {
         protocolLedger:  'Subnet-Ledger',
+        refresh:         'Statistiken aktualisieren',
         blockNumber:     'BLOCKNUMMER',
         dataPerBlock:    'GESAMTDATEN / BLOCK (GiB)',
         usersPerBlock:   'GESAMTNUTZER / BLOCK',

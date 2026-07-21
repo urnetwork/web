@@ -38,6 +38,7 @@ export default {
     // glyph and the GiB unit keep their casing — write them display-ready.
     stats: {
         protocolLedger:  'Subnet Ledger',
+        refresh:         'Refresh stats',
         blockNumber:     'BLOCK NUMBER',
         dataPerBlock:    'TOTAL DATA / BLOCK (GiB)',
         usersPerBlock:   'TOTAL USERS / BLOCK',

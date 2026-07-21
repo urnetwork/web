@@ -38,6 +38,7 @@ export default {
     // escríbelas en su forma final.
     stats: {
         protocolLedger:  'Libro de la subred',
+        refresh:         'Actualizar estadísticas',
         blockNumber:     'NÚMERO DE BLOQUE',
         dataPerBlock:    'DATOS TOTALES / BLOQUE (GiB)',
         usersPerBlock:   'USUARIOS TOTALES / BLOQUE',

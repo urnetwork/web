@@ -37,6 +37,7 @@ export default {
     // чтобы глиф α и единица GiB сохраняли регистр — пишите их в готовом виде.
     stats: {
         protocolLedger:  'Реестр подсети',
+        refresh:         'Обновить статистику',
         blockNumber:     'НОМЕР БЛОКА',
         dataPerBlock:    'ВСЕГО ДАННЫХ / БЛОК (GiB)',
         usersPerBlock:   'ВСЕГО ПОЛЬЗОВАТЕЛЕЙ / БЛОК',

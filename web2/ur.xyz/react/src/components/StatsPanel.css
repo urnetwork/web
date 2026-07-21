@@ -72,6 +72,13 @@
        docked → ticker snap enables the transition below only while it plays. */
 }
 
+/* Disclaimer show/hide moves the nav a row down/up; the detached panel
+   follows its resting spot with the same 0.3s ease the nav itself uses.
+   Transform only — nothing else changes on that flip. */
+.stats-panel.is-reflowing {
+    transition: transform 0.3s ease;
+}
+
 /* One-shot docked → ticker snap: a single slow-in/slow-out animation, switched
    on for just its duration by the JS via the `is-snapping` class. Because --q
    is @property-registered, transitioning it eases every calc() that reads it —
@@ -85,10 +92,11 @@
         --q var(--snap-ms, 450ms) ease-in-out;
 }
 
-/* Reduced motion: keep the two discrete states, but snap between them
+/* Reduced motion: keep the discrete states, but snap between them
    instantly instead of animating. */
 @media (prefers-reduced-motion: reduce) {
-    .stats-panel.is-snapping {
+    .stats-panel.is-snapping,
+    .stats-panel.is-reflowing {
         transition: none;
     }
 }
@@ -114,6 +122,82 @@
     text-transform: uppercase;
     color: var(--brand-ui);
     font-weight: 600;
+}
+
+/* --- Refresh dial ---------------------------------------------------------
+ * Tap-to-refresh countdown ring in the panel's top-right corner (inline-end
+ * under RTL). It is positioned off the same --p/--q interpolation as the
+ * panel padding, so it rides along through every morph:
+ *   card states (--q = 0)  on the header line, opposite the eyebrow
+ *   ticker      (--q = 1)  vertically centered inside the 32px end gutter
+ * The 26px button wraps the 14px dial as a comfortable tap target. */
+.stats-refresh {
+    position: absolute;
+    width: 26px;
+    height: 26px;
+    /* The svg sits 6px inside the button. Dial targets: cards 19+4p from
+       the top / 22+6p from the end (the panel padding, on the eyebrow
+       line); ticker 50%−7px / 10px. */
+    top: calc((13px + 4px * var(--p)) * (1 - var(--q)) + (50% - 13px) * var(--q));
+    inset-inline-end: calc((16px + 6px * var(--p)) * (1 - var(--q)) + 4px * var(--q));
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    margin: 0;
+    background: none;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    color: var(--brand-ui);
+}
+
+.stats-refresh:focus-visible {
+    outline: 1px solid rgba(214, 230, 244, 0.6);
+    outline-offset: 1px;
+}
+
+.stats-refresh svg {
+    display: block;
+}
+
+.stats-refresh-track,
+.stats-refresh-arc {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.5;
+}
+
+.stats-refresh-track { opacity: 0.22; }
+.stats-refresh-arc   { opacity: 0.75; stroke-linecap: round; }
+
+.stats-refresh:hover .stats-refresh-track { opacity: 0.35; }
+.stats-refresh:hover .stats-refresh-arc   { opacity: 1; }
+
+/* Countdown fill: the arc runs this once per poll cycle (duration set
+   inline to the cycle length; restarted by remounting the arc). */
+@keyframes stats-refresh-fill {
+    from { stroke-dashoffset: var(--ring-c, 31.416px); }
+    to   { stroke-dashoffset: 0; }
+}
+
+/* Slow poll (>1s in flight): the dial rotates, turning the shortened arc
+   into a spinner. Under reduced motion the static short arc alone marks
+   the loading state. */
+.stats-refresh.is-loading svg {
+    animation: stats-refresh-spin 0.9s linear infinite;
+}
+
+@keyframes stats-refresh-spin {
+    to { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .stats-refresh.is-loading svg {
+        animation: none;
+    }
 }
 
 /* Auto-fit grid: 2 cols at 320px wide, naturally morphs to many more
@@ -184,7 +268,10 @@
         width: 100% !important;
         transform: none !important;
 
-        padding: 10px 14px;
+        /* Inline-end padding reserves the refresh dial's gutter so it never
+           sits over the last stat column. */
+        padding-block: 10px;
+        padding-inline: 14px 36px;
         background: rgba(16, 16, 16, 0.92);
         border: none;
         border-bottom: 1px solid rgba(214, 230, 244, 0.18);
@@ -201,6 +288,12 @@
 
     .stats-panel-header {
         display: none;
+    }
+
+    /* No header row on mobile: center the dial in the bar's end gutter. */
+    .stats-refresh {
+        top: calc(50% - 13px);
+        inset-inline-end: 3px;
     }
 
     .stat-grid {

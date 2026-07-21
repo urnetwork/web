@@ -37,6 +37,7 @@ export default {
     // حتى يحتفظ الرمز α والوحدة GiB بحالتهما — اكتبها بصيغتها النهائية.
     stats: {
         protocolLedger:  'سجل الشبكة الفرعية',
+        refresh:         'تحديث الإحصائيات',
         blockNumber:     'رقم الكتلة',
         dataPerBlock:    'إجمالي البيانات / كتلة (GiB)',
         usersPerBlock:   'إجمالي المستخدمين / كتلة',

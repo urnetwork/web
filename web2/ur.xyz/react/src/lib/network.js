@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 /**
  * Live network stats, aggregated from the network operators' public
@@ -90,9 +90,9 @@ export function blockEndAt(nowMs = Date.now()) {
 
 const CLOCK_TICK_MS = 30_000;
 // Feed refresh: the hero simulation and stats read live totals, so poll
-// every 30s (the operator feeds cache briefly server side, so this stays
+// every 5s (the operator feeds cache briefly server side, so this stays
 // cheap for the operators).
-const FEED_POLL_MS = 30_000;
+const FEED_POLL_MS = 5_000;
 const FEED_TIMEOUT_MS = 10_000;
 
 /**
@@ -160,7 +160,7 @@ export async function fetchOperatorFeed(statsUrl, signal) {
 
 /**
  * Every operator with its own live feed (not summed), refreshed every
- * 30s — [{ operator, feed }] in registry order, where feed is null
+ * 5s — [{ operator, feed }] in registry order, where feed is null
  * until the operator's stats endpoint answers and keeps the last good
  * value if a later poll fails.
  */
@@ -193,12 +193,21 @@ export function useOperatorFeeds() {
 }
 
 /**
- * Sums of every reachable operator feed, refreshed every 30s.
+ * Sums of every reachable operator feed, refreshed every 5s.
  *
  *   totals    — summed feed fields (null until at least one feed answers;
  *               the last good sums are kept if a later poll fails entirely)
  *   loaded    — feeds that answered on the latest poll
  *   operators — size of the baked-in operator registry
+ *   fetching  — a poll is in flight right now
+ *   lastAt    — ms timestamp when the last poll finished (null until one has)
+ *   nextAt    — ms timestamp when the next auto poll fires (null until then)
+ *   refresh   — start a poll immediately; a no-op while one is in flight
+ *
+ * Polls chain from completion (setTimeout) rather than run on a fixed
+ * interval: lastAt → nextAt then always spans one full idle cycle — which
+ * is exactly what the stats panel's countdown dial renders — and a manual
+ * refresh() restarts the cadence instead of racing a pending interval tick.
  */
 export function useNetworkTotals() {
     const [state, setState] = useState({
@@ -206,15 +215,27 @@ export function useNetworkTotals() {
         loaded: 0,
         operators: NETWORK_OPERATORS.length
     });
+    // Poll-cycle metadata, split from the totals: it flips at the start and
+    // end of every poll, and only the refresh dial reads it.
+    const [cycle, setCycle] = useState({ fetching: false, lastAt: null, nextAt: null });
+    const refreshRef = useRef(null);
 
     useEffect(() => {
         const ctrl = new AbortController();
+        let timer = 0;
+        let inFlight = false;
 
         const poll = async () => {
+            if (inFlight) return;
+            inFlight = true;
+            clearTimeout(timer);
+            setCycle(c => ({ ...c, fetching: true }));
+
             const results = await Promise.allSettled(
                 NETWORK_OPERATORS.map(op => fetchOperatorFeed(op.statsUrl, ctrl.signal))
             );
             if (ctrl.signal.aborted) return;
+            inFlight = false;
 
             const ok = results
                 .filter(r => r.status === 'fulfilled')
@@ -245,12 +266,24 @@ export function useNetworkTotals() {
                 loaded: ok.length,
                 operators: NETWORK_OPERATORS.length
             }));
+
+            const now = Date.now();
+            setCycle({ fetching: false, lastAt: now, nextAt: now + FEED_POLL_MS });
+            timer = setTimeout(poll, FEED_POLL_MS);
         };
 
+        refreshRef.current = poll;
         poll();
-        const id = setInterval(poll, FEED_POLL_MS);
-        return () => { clearInterval(id); ctrl.abort(); };
+        return () => {
+            clearTimeout(timer);
+            ctrl.abort();
+            refreshRef.current = null;
+        };
     }, []);
 
-    return state;
+    const refresh = useCallback(() => { refreshRef.current?.(); }, []);
+
+    // Keep a stable identity between data changes, as when state was
+    // returned directly — consumers may key effects on the whole object.
+    return useMemo(() => ({ ...state, ...cycle, refresh }), [state, cycle, refresh]);
 }
