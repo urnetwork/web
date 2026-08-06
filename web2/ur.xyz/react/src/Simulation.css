@@ -194,3 +194,14 @@
     .block-toast { animation: none; }
     .block-toast-progress-fill { transition: none; }
 }
+
+/* Phone legibility: the block-ticker chrome must not dip below 10px. */
+@media (max-width: 768px) {
+    .block-toast-label {
+        font-size: 0.625rem;
+    }
+
+    .block-toast-countdown {
+        font-size: 0.625rem;
+    }
+}

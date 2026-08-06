@@ -304,9 +304,16 @@
     .stat-box:nth-child(n+5) { display: none; }
 
     .stat-label {
-        font-size: 0.5rem;
+        font-size: 0.625rem;
         margin-bottom: 1px;
     }
 
     .stat-value { font-size: 0.95rem; }
+}
+
+/* Touch hit-areas: extend small controls to a ~44px tap box without any
+   visual change — the pseudo only participates in hit testing. */
+@media (pointer: coarse) {
+    .stats-refresh { position: relative; }
+    .stats-refresh::after { content: ""; position: absolute; inset: -9px; }
 }

@@ -319,3 +319,10 @@ a.card-button:hover {
     opacity: 0.45;
     cursor: default;
 }
+
+/* Touch hit-areas: extend small controls to a ~44px tap box without any
+   visual change — the pseudo only participates in hit testing. */
+@media (pointer: coarse) {
+    .card-link { position: relative; }
+    .card-link::after { content: ""; position: absolute; inset: -11px -6px; }
+}

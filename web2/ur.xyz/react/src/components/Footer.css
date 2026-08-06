@@ -135,3 +135,12 @@
         display: none;
     }
 }
+
+/* Touch hit-areas: extend small controls to a ~44px tap box without any
+   visual change — the pseudo only participates in hit testing. */
+@media (pointer: coarse) {
+    .footer-link { position: relative; }
+    .footer-link::after { content: ""; position: absolute; inset: -11px -6px; }
+    .footer-lang { position: relative; }
+    .footer-lang::after { content: ""; position: absolute; inset: -12px -8px; }
+}

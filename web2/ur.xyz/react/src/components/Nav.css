@@ -554,3 +554,10 @@
     .nav-menu-toggle { display: inline-flex; }
     .nav-drawer { display: flex; }
 }
+
+/* Touch hit-areas: extend small controls to a ~44px tap box without any
+   visual change — the pseudo only participates in hit testing. */
+@media (pointer: coarse) {
+    .nav-brand { position: relative; }
+    .nav-brand::after { content: ""; position: absolute; inset: -11px -8px; }
+}
