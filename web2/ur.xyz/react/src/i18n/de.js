@@ -107,15 +107,15 @@ export default {
         eyebrow: 'Rechtliches',
         terms: {
             title: 'Nutzungsbedingungen',
-            body:  'Die Bedingungen für die Nutzung dieser Website und der hier dokumentierten Protokollschnittstellen. Das vollständige Dokument wird derzeit finalisiert und hier veröffentlicht.'
+            body:  'Die Nutzungsbedingungen für ur.xyz, die Informationsseite zum UR-Protokoll, gehostet von BringYour, Inc.'
         },
         privacy: {
             title: 'Datenschutzerklärung',
-            body:  'Diese Website erfordert kein Konto und erhebt keine personenbezogenen Daten — die angezeigten Preis- und Netzwerkzahlen werden direkt aus öffentlichen Feeds geladen. Die vollständige Erklärung wird derzeit finalisiert und hier veröffentlicht.'
+            body:  'Wie BringYour, Inc. mit Informationen auf ur.xyz umgeht: was erhoben wird, wie es verwendet wird und wie Sie uns erreichen.'
         },
         vdp: {
             title: 'Richtlinie zur Offenlegung von Schwachstellen',
-            body:  'Wir begrüßen gutgläubige Sicherheitsforschung am Protokoll und an dieser Website. Melde Schwachstellen an support@ur.xyz. Die vollständige Richtlinie — Umfang, Safe Harbor und Offenlegungsfristen — wird derzeit finalisiert und hier veröffentlicht.'
+            body:  'So melden Sie Sicherheitslücken in Assets von BringYour, Inc. — und der Safe Harbor für Forschung in gutem Glauben.'
         }
     },
 

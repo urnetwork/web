@@ -1,6 +1,8 @@
 
 NODE_VERSION := v22.14.0
 
+.PHONY: all init clean build warp_build warp_build_image
+
 all: init clean build
 
 init:
@@ -28,7 +30,10 @@ build:
 	env GOOS=darwin GOARCH=amd64 go build -ldflags "-X main.Version=${WARP_VERSION}" -o build/darwin/amd64/
 
 warp_build:
-	$(MAKE) all
+	@echo "warp_build must be run through warpctl build so govulncheck gates image publication." >&2
+	@false
+
+warp_build_image:
 	mkdir -p build/${WARP_ENV}
 	echo "{\"version\":\"${WARP_VERSION}\",\"status\":\"ok\"}" > build/${WARP_ENV}/status.json
 	docker buildx build --progress plain \

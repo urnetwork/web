@@ -107,15 +107,15 @@ export default {
         eyebrow: 'Legal',
         terms: {
             title: 'Términos de uso',
-            body:  'Los términos que rigen el uso de este sitio y de las interfaces del protocolo que documenta. El documento completo se está finalizando y se publicará aquí.'
+            body:  'Los Términos de Servicio de ur.xyz, el sitio informativo del protocolo UR alojado por BringYour, Inc.'
         },
         privacy: {
             title: 'Política de privacidad',
-            body:  'Este sitio no requiere cuenta y no recopila información personal: las cifras de precios y de red se obtienen directamente de feeds públicos. La política completa se está finalizando y se publicará aquí.'
+            body:  'Cómo BringYour, Inc. maneja la información en ur.xyz: qué se recopila, cómo se usa y cómo contactarnos.'
         },
         vdp: {
             title: 'Política de divulgación de vulnerabilidades',
-            body:  'Damos la bienvenida a la investigación de seguridad de buena fe sobre el protocolo y este sitio. Reporta vulnerabilidades a support@ur.xyz. La política completa —alcance, salvaguardas y plazos de divulgación— se está finalizando y se publicará aquí.'
+            body:  'Cómo reportar vulnerabilidades de seguridad en los activos de BringYour, Inc., y el puerto seguro para la investigación de buena fe.'
         }
     },
 

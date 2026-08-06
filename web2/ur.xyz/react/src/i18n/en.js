@@ -107,15 +107,15 @@ export default {
         eyebrow: 'Legal',
         terms: {
             title: 'Terms of Use',
-            body:  'The terms governing use of this site and the protocol interfaces it documents. The full document is being finalized and will be published here.'
+            body:  'The Terms of Service for ur.xyz, the UR protocol information site hosted by BringYour, Inc.'
         },
         privacy: {
             title: 'Privacy Policy',
-            body:  'This site requires no account and collects no personal information — the price and network figures it shows are fetched directly from public feeds. The full policy is being finalized and will be published here.'
+            body:  'How BringYour, Inc. handles information on the ur.xyz site: what is collected, how it is used, and how to reach us.'
         },
         vdp: {
             title: 'Vulnerability Disclosure Policy',
-            body:  'We welcome good-faith security research into the protocol and this site. Report vulnerabilities to support@ur.xyz. The full policy — scope, safe harbor, and disclosure timelines — is being finalized and will be published here.'
+            body:  'How to report security vulnerabilities in BringYour, Inc. assets, and the safe harbor extended to good-faith research.'
         }
     },
 

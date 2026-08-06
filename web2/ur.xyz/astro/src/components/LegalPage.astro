@@ -9,6 +9,8 @@ import Section from './Section.astro';
 import FooterStatic from './FooterStatic.astro';
 
 import '@react/components/Nav.css';
+import '@react/components/Legal.css';
+import { LEGAL_DOCS } from '@react/data/legal';
 
 interface Props {
     t: any;
@@ -18,16 +20,20 @@ interface Props {
 }
 
 const { t, lang, dir = 'ltr', doc } = Astro.props;
-const d = t.legal[doc];
+// full document from the generated data module (docs/legal/ur.xyz/*.md is
+// canonical); the i18n entry supplies the meta description
+const d = LEGAL_DOCS[doc];
+const meta = t.legal[doc];
 ---
-<Base title={`${d.title} — UR`} description={d.body} lang={lang} dir={dir}>
+<Base title={`${d.title} — UR`} description={meta.body} lang={lang} dir={dir}>
     <div class="app">
         <DisclaimerStatic />
         <NavIsland lang={lang} client:load />
 
         <main class="section-page">
             <Section id={doc} eyebrow={t.legal.eyebrow} title={d.title}>
-                <p>{d.body}</p>
+                {d.updated && <p class="legal-updated">Last revised: {d.updated}</p>}
+                <div class="legal-doc" set:html={d.html} />
             </Section>
         </main>
 

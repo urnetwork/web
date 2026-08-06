@@ -1,0 +1,77 @@
+/* Legal document prose (terms | privacy | vdp) — rendered from the generated
+   react/src/data/legal.js on both renderers. */
+
+.legal-updated {
+    font-size: 12px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--brand-ui);
+    opacity: 0.55;
+    margin: 0 0 24px;
+}
+
+.legal-doc {
+    font-size: 15px;
+    line-height: 1.75;
+    color: var(--brand-ui);
+    max-width: 760px;
+}
+
+/* the Section header already carries the document title */
+.legal-doc h1 {
+    display: none;
+}
+
+.legal-doc h2 {
+    font-size: 19px;
+    font-weight: 700;
+    color: var(--brand-white);
+    margin: 34px 0 10px;
+}
+
+.legal-doc h3 {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--brand-white);
+    margin: 24px 0 8px;
+}
+
+.legal-doc p {
+    margin: 0 0 13px;
+}
+
+.legal-doc ul {
+    margin: 0 0 13px;
+    padding-left: 24px;
+}
+
+.legal-doc li {
+    margin-bottom: 7px;
+}
+
+.legal-doc a {
+    color: var(--brand-white);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+.legal-doc strong {
+    color: var(--brand-white);
+    font-weight: 600;
+}
+
+.legal-doc blockquote {
+    margin: 0 0 13px;
+    padding: 8px 16px;
+    border-left: 2px solid var(--brand-ur);
+    opacity: 0.85;
+}
+
+/* contract clause nesting (1. / a. / i.) */
+.legal-doc p.clause-1 {
+    margin-left: 24px;
+}
+
+.legal-doc p.clause-2 {
+    margin-left: 48px;
+}

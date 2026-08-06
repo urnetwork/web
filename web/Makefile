@@ -1,6 +1,8 @@
 
 NODE_VERSION := v22.14.0
 
+.PHONY: all init clean build warp_build warp_build_image
+
 all: init clean build gen_components
 
 # brew install pandoc
@@ -65,7 +67,10 @@ build-preview:
 	
 
 warp_build:
-	$(MAKE) all
+	@echo "warp_build must be run through warpctl build so govulncheck gates image publication." >&2
+	@false
+
+warp_build_image:
 	python ../webgen/webgen.py clean nginx/gen.py
 	python ../webgen/webgen.py build nginx/gen.py
 	mkdir -p build/${WARP_ENV}

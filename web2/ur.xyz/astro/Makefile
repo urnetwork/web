@@ -1,4 +1,4 @@
-.PHONY: build build-main build-canary sync-price clean
+.PHONY: build build-main build-canary sync-price generate-legal clean
 
 BUILD_DIR := build
 
@@ -9,12 +9,17 @@ build: build-main build-canary
 sync-price:
 	node ../scripts/sync-price.mjs
 
-build-main: sync-price
+# Regenerate react/src/data/legal.js from docs/legal/ur.xyz/*.md (the
+# canonical legal documents) so the terms/privacy/vdp pages ship current text.
+generate-legal:
+	node ../scripts/generate-legal.mjs
+
+build-main: sync-price generate-legal
 	(cd ../react && npm ci)
 	npm ci
 	UR_ENV=main npx astro build
 
-build-canary: sync-price
+build-canary: sync-price generate-legal
 	(cd ../react && npm ci)
 	npm ci
 	UR_ENV=canary npx astro build
