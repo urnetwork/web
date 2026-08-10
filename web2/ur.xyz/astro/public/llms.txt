@@ -1,0 +1,56 @@
+# UR protocol
+
+> UR is an open-source, decentralized privacy network: user traffic distributed
+> across independent miners with multi-hop routing and layered encryption,
+> coordinated on Bittensor. ur.xyz is the protocol's information site, hosted
+> by BringYour, Inc. The commercial network built on it lives at https://ur.io.
+
+## Machine-readable
+
+- [Whitepaper (markdown)](https://ur.xyz/whitepaper.md)
+- [Published usage-cost sheet (yaml)](https://ur.xyz/price.yml) — updates: [RSS](https://ur.xyz/price.rss)
+- [OpenAPI reference (yaml)](https://ur.xyz/openapi.yml)
+- [Everything in one file](https://ur.xyz/llms-full.txt)
+- For connecting an agent to the network itself (MCP server, x402): [ur.io agents guide](https://ur.io/agents.md)
+
+## Pages
+
+- [Home + whitepaper](https://ur.xyz/)
+- [Operators](https://ur.xyz/operators)
+- [Miners](https://ur.xyz/miners)
+- [Validators](https://ur.xyz/validators)
+- [Research](https://ur.xyz/research)
+- [Community](https://ur.xyz/community)
+- [Usage cost](https://ur.xyz/price)
+- [Roadmap](https://ur.xyz/roadmap)
+- [API reference](https://ur.xyz/api)
+
+## Docs
+
+- [BringYour White Paper [very rough draft]](https://ur.xyz/docs-md/archive/whitepaper.md)
+- [User Traffic Categorization through On-Device Clustering: Empowering Privacy and Control](https://ur.xyz/docs-md/changelog/2024-10-31-inspect/inspect.md)
+- [Tether: Improving Compatibility of URnetwork with the WireGuard Protocol](https://ur.xyz/docs-md/changelog/2024-10-31-tether/tether.md)
+- [Update 1](https://ur.xyz/docs-md/changelog/2024-10-31-update-1/update-1.md)
+- [Command Line Interface](https://ur.xyz/docs-md/cli.md)
+- [Economic model](https://ur.xyz/docs-md/economic-model/economic-model.md)
+- [URnetwork on Ubiquiti EdgeOS](https://ur.xyz/docs-md/edgeos.md)
+- [legal/privacy](https://ur.xyz/docs-md/legal/privacy.md)
+- [legal/terms](https://ur.xyz/docs-md/legal/terms.md)
+- [BringYour, Inc. Vulnerability Disclosure Policy](https://ur.xyz/docs-md/legal/vdp.md)
+- [Welcome to URnetwork for Agents](https://ur.xyz/docs-md/mcp/SKILL.md)
+- [Optimized Skill Document: URnetwork for AI Agents](https://ur.xyz/docs-md/mcp/SKILL2.md)
+- [Protocol Research](https://ur.xyz/docs-md/protocol/protocol-research.md)
+- [URnetwork Providers](https://ur.xyz/docs-md/provider.md)
+- [Router testing notes](https://ur.xyz/docs-md/router/testing-notes.md)
+- [URnetwork on MikroTik RouterOS](https://ur.xyz/docs-md/routeros.md)
+- [URnetwork on Raspberry Pi](https://ur.xyz/docs-md/rpi.md)
+- [How to Delete your Account](https://ur.xyz/docs-md/support/delete.md)
+- [Transparency report](https://ur.xyz/docs-md/trust-and-safety/transparency-report.md)
+- [Default Safe: Our Trust and Safety Process](https://ur.xyz/docs-md/trust-and-safety/trust-and-safety.md)
+- [Warrant Canary](https://ur.xyz/docs-md/trust-and-safety/warrant-canary.md)
+
+## Optional
+
+- [Terms of Service](https://ur.xyz/terms)
+- [Privacy Policy](https://ur.xyz/privacy)
+- [Vulnerability Disclosure](https://ur.xyz/vdp)

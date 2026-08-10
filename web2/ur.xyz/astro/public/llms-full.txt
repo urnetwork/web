@@ -1,0 +1,513 @@
+# UR protocol
+
+> UR is an open-source, decentralized privacy network: user traffic distributed
+> across independent miners with multi-hop routing and layered encryption,
+> coordinated on Bittensor. ur.xyz is the protocol's information site, hosted
+> by BringYour, Inc. The commercial network built on it lives at https://ur.io.
+
+## Machine-readable
+
+- [Whitepaper (markdown)](https://ur.xyz/whitepaper.md)
+- [Published usage-cost sheet (yaml)](https://ur.xyz/price.yml) — updates: [RSS](https://ur.xyz/price.rss)
+- [OpenAPI reference (yaml)](https://ur.xyz/openapi.yml)
+- [Everything in one file](https://ur.xyz/llms-full.txt)
+- For connecting an agent to the network itself (MCP server, x402): [ur.io agents guide](https://ur.io/agents.md)
+
+## Pages
+
+- [Home + whitepaper](https://ur.xyz/)
+- [Operators](https://ur.xyz/operators)
+- [Miners](https://ur.xyz/miners)
+- [Validators](https://ur.xyz/validators)
+- [Research](https://ur.xyz/research)
+- [Community](https://ur.xyz/community)
+- [Usage cost](https://ur.xyz/price)
+- [Roadmap](https://ur.xyz/roadmap)
+- [API reference](https://ur.xyz/api)
+
+## Docs
+
+- [BringYour White Paper [very rough draft]](https://ur.xyz/docs-md/archive/whitepaper.md)
+- [User Traffic Categorization through On-Device Clustering: Empowering Privacy and Control](https://ur.xyz/docs-md/changelog/2024-10-31-inspect/inspect.md)
+- [Tether: Improving Compatibility of URnetwork with the WireGuard Protocol](https://ur.xyz/docs-md/changelog/2024-10-31-tether/tether.md)
+- [Update 1](https://ur.xyz/docs-md/changelog/2024-10-31-update-1/update-1.md)
+- [Command Line Interface](https://ur.xyz/docs-md/cli.md)
+- [Economic model](https://ur.xyz/docs-md/economic-model/economic-model.md)
+- [URnetwork on Ubiquiti EdgeOS](https://ur.xyz/docs-md/edgeos.md)
+- [legal/privacy](https://ur.xyz/docs-md/legal/privacy.md)
+- [legal/terms](https://ur.xyz/docs-md/legal/terms.md)
+- [BringYour, Inc. Vulnerability Disclosure Policy](https://ur.xyz/docs-md/legal/vdp.md)
+- [Welcome to URnetwork for Agents](https://ur.xyz/docs-md/mcp/SKILL.md)
+- [Optimized Skill Document: URnetwork for AI Agents](https://ur.xyz/docs-md/mcp/SKILL2.md)
+- [Protocol Research](https://ur.xyz/docs-md/protocol/protocol-research.md)
+- [URnetwork Providers](https://ur.xyz/docs-md/provider.md)
+- [Router testing notes](https://ur.xyz/docs-md/router/testing-notes.md)
+- [URnetwork on MikroTik RouterOS](https://ur.xyz/docs-md/routeros.md)
+- [URnetwork on Raspberry Pi](https://ur.xyz/docs-md/rpi.md)
+- [How to Delete your Account](https://ur.xyz/docs-md/support/delete.md)
+- [Transparency report](https://ur.xyz/docs-md/trust-and-safety/transparency-report.md)
+- [Default Safe: Our Trust and Safety Process](https://ur.xyz/docs-md/trust-and-safety/trust-and-safety.md)
+- [Warrant Canary](https://ur.xyz/docs-md/trust-and-safety/warrant-canary.md)
+
+## Optional
+
+- [Terms of Service](https://ur.xyz/terms)
+- [Privacy Policy](https://ur.xyz/privacy)
+- [Vulnerability Disclosure](https://ur.xyz/vdp)
+
+---
+
+# A privacy network, coordinated on Bittensor.
+
+> Own your privacy. Own your network.
+
+## I. A decentralized privacy network
+
+UR is a decentralized privacy network. It distributes user traffic across a global network of independent miners using multi-hop routing and layered encryption, so that no single miner sees both who a user is and what they are doing. The transport is designed to resemble ordinary HTTPS — N-layer TLS encryption, SNI spoofing, and traffic indistinguishability — so the network stays reachable almost everywhere.
+
+The UR Subnet coordinates this network through on-chain incentives on Bittensor. Network operators run the servers; independent miners carry the ingress and egress traffic; and independent validators continuously walk operator-assigned chains of miners to prove real-time transit and measure which miners are the weakest links. That measurement is the core signal the network pays for.
+
+Bittensor's Yuma Consensus turns the validators' measurements into token emission, and a smart contract on the Subtensor EVM settles the payouts. The protocol is open source, and running a miner or a validator is permissionless.
+
+## II. Roles
+
+Network operators run the privacy servers and the verification endpoint. An operator deposits into the subnet, co-signs each measured path, and commits a payout list that splits its rewards among the miners attached to it. An operator directs where its rewards go but never holds anyone else's funds.
+
+Miners are the ingress and egress of the network. They run a safe-by-default security model, block known-malicious IPs, and route only encrypted traffic. A miner carries traffic for one or more operators and is paid for the routable capacity it contributes.
+
+Validators are independent. Each stakes its own UR, runs the routing-verification protocol, and scores every operator's pool by demand and measured quality. Validators earn the network's native dividends for accurate, consensus-aligned scoring — no operator owns a validator, and the set is permissionless.
+
+The subnet owner — BringYour, Inc. — governs the settlement contract and operates the network's reserve. That role is transitional: control begins centralized-but-bounded and progressively decentralizes (clause V).
+
+## III. The UR token
+
+UR is the subnet's native token — the unit of account for deposits, emission, and settlement. It is a utility token for coordinating and paying for network resources; it is not designed to represent or provide any right to profits, income, or returns.
+
+New UR is emitted by Bittensor's coinbase each cycle and split three ways:
+
+[object Object]
+
+Operators fund the network by depositing UR sized to their real usage, at a published reference rate. A deposit is a costly, revenue-backed signal of real demand — and it is conviction stake: the contract moves every deposit into a locked reserve where it compounds and is never redistributed, permanently removing UR from liquid supply in proportion to real usage. An operator's cumulative locked stake lowers the rate it must post, so committed operators can onboard with less up-front capital.
+
+Miners are paid from emission, not from deposits. Because deposits are locked rather than recycled, real usage becomes a standing, growing bid under the token instead of sell pressure, while emission follows a fixed schedule with halvings.
+
+## IV. Two ways to earn
+
+A single operator can serve well over 100,000 miners — far more than a subnet's roughly 256 on-chain slots — so the network pays miners through two tiers that run in parallel.
+
+The pool is the on-ramp. Every operator holds one on-chain slot for all of its miners; validators weight that pool by the operator's demand and its measured quality, and each miner claims its share directly from the settlement contract with a cryptographic proof. There is no slot to win and nothing to burn — it is where a miner starts and earns a baseline reward.
+
+Top-level miners are the supply apex. The roughly 200 largest fleets — ranked by how many distinct, routable exit IPs they actually serve, not by traffic volume — each claim their own on-chain slot and are paid directly by the network, with no operator in the payout path. A shared IP is split among the fleets that claim it, so breadth cannot be double-counted.
+
+The two tiers are one tournament: a miner starts in a pool, graduates to a top slot as its routable-IP breadth grows, and falls back to the pool if it slips. A governance-set share divides emission between the head and the tail.
+
+[object Object]
+
+## V. Custody, settlement, and decentralization
+
+Settlement runs on a seven-day cycle. The contract accrues each pool's emission over the period, then opens claims: miners pull their UR directly from the contract against their operator's committed payout list. Top-level miners need no settlement step — the chain pays their slot natively every cycle.
+
+No one holds anyone else's funds. The settlement contract is the sole custodian of in-transit UR, every pool payout is a direct on-chain claim, and top-level miners are paid natively to their own keys. Operators and the owner never take custody of miners' rewards.
+
+Earned claims are final. Once a settlement period is finalized, the tokens backing its claims are committed — no upgrade, pause, or administrative action can block or reverse them. The locked reserve is one-way by the same standard: no function can move funds out of it.
+
+Control decentralizes over time. The network launches with the contract upgradeable behind an owner multisig — deliberate, bounded central control for early bug-fixes — and hardens in stages: a public timelock on every change, a pause-only guardian that can stop an exploit but can never move funds or block finalized claims, and, in time, on-chain governance and an immutable settlement core.
+
+Full whitepaper: https://github.com/urfoundation/sn/
+
+---
+
+
+# Command Line Interface
+
+The following CLIs are maintained for URnetwork
+
+## provider
+
+[See the provider docs]()
+
+The provider CLI runs and manages a local egress provider.
+
+
+## tether
+
+[See the tether docs]()
+
+The tether CLI runs and manages network interfaces and protocol servers. Anything packet routing from your OS to URnetwork will use this CLI.
+
+
+## bringyourctl
+
+The bringyourctl CLI manages your own network space deployment.
+
+
+## warpctl
+
+The warpctl CLI manages continuous deployment into your own network space.
+
+
+
+
+
+
+
+
+
+
+
+---
+
+# Economic model
+
+BringYour earns revenue from user premium subscriptions. We build and operate the protocol that connects users to a global network of egress providers, which are access points to localized internets all around the world. Our goal is to have the largest network of egress providers, so that traffic from our network is indistinguishable from normal internet traffic. We designed our economic model to both 1. reward people who help run and grow the network, and 2. build a great business.
+
+Because the number of egress providers grows with the number of users, our data center costs are almost fixed. We're able to offer access for free because, simply, you’ve earned it by participating in the network to provide security and privacy to other users. This is a completely new design that lets us build a free, fast, private VPN in a transparent and ethical way.
+
+Traditional VPNs need to spend money on bandwidth and operations. To pay for this, traditional free VPNs monetize their users - your data, ads, scraping, malware, botnets. Because in our network users run the egress providers and trade bandwidth with each other, we do not have to spend money on bandwidth and operations. Instead we spend money on building the protocol, automated processes, and simple apps to scale the network.
+
+We’re focused on making the network safe, scalable, and fast. We’re continually improving our protocol to thrive in the realities of the global internet. We're also focused on premium features that matter to you, like private sharing, third-party blocking, anti-censorship, and data management. Because we charge a small subscription for premium, we're able to spend more on bandwidth and servers for our premium users.
+
+We see a future where a significant portion of internet users switch away from sketchy traditional VPNs to us, because we work better, more private, and cheaper. It’s important that we have an economic model that rewards the community and leads to a great business as we scale. If we didn't have a realistic model that leads to a great business at scale, one could conclude we also plan to monetize our users. For this reason we want to be transparent with our economic model.
+
+Our current model factors in three components:
+- Paid transfer (the old way)
+- Subsidized transfer (the new way)
+- Referral bonuses
+
+Note that with subsidized transfer, paid transfer trends to zero. We keep it in the model since that was the operation of the network from public beta launch in H1 2024 to “v0” launch in H2 2024.
+
+
+## Payments to the community
+
+We set our subsidy payment as 10% of premium revenue with a guaranteed minimum amount of $.1 per MAU. MAU does not include automation and bots. The payout amount per device is determined by the amount of data routed, weighted 75% against all global devices and 25% against devices in the same country, where all countries are weighted equally [^1]. The guaranteed minimum amount will adjust every year after launch.
+
+We set our referral bonus as 50% of the earnings of the referred user and 50% of their referral bonus.
+
+This means that we’re paying out up to 20% of our premium revenue back to the community, with a minimum amount up to $.2 per MAU.
+
+This also means that we’re targeting margins between 70-80% at scale, which is where we want to be as a business. This is competitive in the market and allows us to run as an independent company.
+
+The revenue share of paid transfer is 50%. However, the amount of paid traffic trends to zero after our launch in H2 2024.
+
+The payouts to the community are sent to each network’s active wallet, as USDC, either on Polygon or Solana. The active wallet is managed in the app, and a default user-controlled wallet can be created directly in the app.
+
+Payouts to the active wallet subtract the gas fee from the payout. The payout is held and combined with future payouts until the value minus the gas fee is positive.
+
+There is no cost to participate as a provider.
+
+
+## Phases of the company
+
+The launch of the network and community payments creates four phases of the company:
+
+0. Repeatable network
+1. Repeatable premium product
+2. Scale
+3. Profitable company
+
+In phase 0, we will focus on a network that is better than other consumer VPNs, and scaling the network in a cost efficient way. The exit is a scalable network with almost fixed operating costs.
+
+In phase 1, the premium revenue is not enough to subsidize the community payments. We’ll be in this phase as long as premium conversion per MAU is less than .2/premium price [^2]. At our current premium price of $5/month, the break-even exit of phase 1 is at 4% conversion of users to premium users. In this phase the company will focus on a repeatable premium offering that converts above the break-even rate to exit.
+
+In phase 2, the company can scale revenue with an almost fixed operating cost by scaling MAU. The company will scale faster if the conversion to premium is higher than the break-even. In this phase the company will focus on volume to cover operating costs and exit.
+
+In phase 3, the company will be profitable as it scales. At this point we will look at expanding our TAM with new premium products starting at phase 1.
+
+
+## Payout sweep
+
+Payouts are done weekly and the subsidy is computed from the previous week’s revenue and the previous month’s MAU.
+
+
+## Privacy
+
+Payment on our network is private.
+
+Transfer between a user and provider is preceded by a contract. A contract combines payment information, access control, and priority so that a user and provider can directly communicate and apply the right rules. Both user and provider close a contract, and if they agree, the contract is settled and added to the payout.
+
+Settled contracts used for a payout are removed one week after the payout. This is in line with our approach of aggressively deleting user information from our system. If there are any issues with a payout, participants must contact us within one week. 
+
+
+[^1]: As a formula, the subsidized payout to a single provider is `0.75 * sum(all contracts serviced by provider)/sum(all contracts) + (0.25 / NumberOfCountries) * sum(all contracts serviced by provider)/sum(all contracts in provider's country)`
+
+[^2]: `PremiumPrice/month * PremiumConversion * MAU = .2 * MAU/month`
+
+
+---
+
+# Protocol Research
+
+The [URnetwork protocol](https://ur.io/protocol) can be run by any network operator. The protocol is a decentralized-native, multi-IP, multi-transport protocol (as opposed to a traditional site-to-site tunnel protocol). The goal is to scale to a network of millions of providers per network operator and deliver a best-in-class experience. The "Layer 2" design allows the most sensitive data to be private. However, for transparency and research, anonymized exports of the problem space inputs and outputs are made available. 
+
+## Anonymization technique 
+
+The payout block of the network is 7 days. The data is anonymized per block. All client ids and IP subnet hashes are replaced with simple integer counter values. Additionally city meta data is not included.
+
+## Note to researchers/builders
+
+The URnetwork team would like to allow users to opt-into experimental algorithms via federated network operators. New network operators will be able to participate in the common incentive system via root contracts to reward their providers. Providers can participate across as many network operators as they want. The main app will support the option to enter an alternate network operator domain for all users. See the [New Network Operator beta form]() to receive peering credentials and transfer allocation. We plan to keep this document up to the date with the current (default) algorithm along with experimental directions. For security research please follow the [Vulnerability Disclosure Program](https://ur.io/vdp).
+
+
+## Problems
+
+| | Performance |
+|---|---|
+| Current algorithm | URTRANSPORT1 ([transport.go](https://github.com/urnetwork/connect/blob/main/transport.go) and [stream_manager.go](https://github.com/urnetwork/connect/blob/main/transfer_stream_manager.go)) The current approach is focused on accessibility, so that every person in the world can connect. Multi-hop routing is done via TCP transports through a central hop. UDP transports (H3, DNS) are supported but disabled due to real world performance issues in our setup (to be resolved). There is a multi-provider hop with peer-to-peer upgrade called stream that is supported but currently disabled. The goal is to integrate tried and try protocols (WebRTC, XRay, WireGuard) as the stream upgrade. There are two cases to optimize: 1. the next hop does not have a public ip:port, and 2. the next hop does have a public ip:port. We may want to add meta data to the matching algorithm to allow selecting hops with case 2 (speed), or 1+2 (quality). |
+| Data sets | This algorithm is most measurable by raw speed and latency tests |
+
+| | Accessibility |
+|---|---|
+| Current algorithm | UREXTENDER1 ([net_extender.go](https://github.com/urnetwork/connect/blob/main/net_extender.go)) The core network stack (the non-stream transport) supports a N-TLS (N>=2) encryption where each outer encryption uses a self-signed cert for any host name (SNI spoofing) to an intermediary IP, which forwards to either another hop or an end-to-end TLS connection to the network operator domain. Anyone can host an extender on whatever domain they want. All users from a single extender share a common rate limit which may be adjusted on a per-case basis. Extenders get added to a grant list in the protocol, which allocates a percentage of the incentive to all extenders. The [Extender Network beta form]() is the first step to get added to the grant list. The will be able to enter the first hop extender IP and choose a host name in the app (TODO) |
+| Data sets | We do not plan on collecting data of extender usage |
+
+| | Matching clients to providers |
+|---|---|
+| Current algorithm | UR-FP2 ([network_client_location_model.go#FindProviders2](https://github.com/urnetwork/server/blob/main/model/network_client_location_model.go#L2708)) A sampling algorithm that loads a 10x random sample of potential providers from memory and shuffles it proportion to `reliability * client score` to a list of finalist. The fairness of the shuffle versus provider aliasing (Sybil attack) is guaranteed by the property of `sum(reliability) <= 1` per IP subnet. |
+| Data sets | Traces of every function call including inputs and selected outputs are here (TODO) |
+
+
+| | Multi client |
+|---|---|
+| Current algorithm | UR-MULTI ([ip_remote_multi_client.go](https://github.com/urnetwork/connect/blob/main/ip_remote_multi_client.go)) A heuristic sweep based algorithm to manage a window of providers. Locks traffic into providers of the top available tier. Based on transfer-thresholds and not protocol analysis. |
+| Data sets | This runs entirely on the client side and we currently  do not have an option for users to share traces with us (TODO) |
+
+
+| | Transfer |
+|---|---|
+| Current algorithm | UR-TRANSFER ([transfer.go](https://github.com/urnetwork/connect/blob/main/transfer.go)) A reliable transfer window tuned for high latency environments. Protocol retransmits into the transfer layer are disabled since the window has reliable delivery. Distributes traffic among available transports based on ranked performance and availability of the transport. |
+| Data sets | This runs entirely on the client side and we currently  do not have an option for users to share traces with us (TODO) |
+
+
+| | IP Egress |
+|---|---|
+| Current algorithm | UR-IP ([ip.go](https://github.com/urnetwork/connect/blob/main/ip.go)) An implementation of an IP stack that runs in minimal memory. Assumes the communicate to the peer is reliable via transfer, and hence retransmits are optimized. |
+| Data set | This runs entirely on the client side and we currently  do not have an option for users to share traces with us (TODO) |
+
+
+| | Points/Token allocation |
+|---|---|
+| Current algorithm | UR-PSUB2 ([account_payout_model_plan.go](https://github.com/urnetwork/server/blob/main/model/account_payment_model_plan.go)) Points are allocated from a "subsidy" pool and distributed every 7 days proportional to data transfer "votes", reliability scores, and referrals. The data votes prioritize traffic generated from paid subscribers to  counteract gaming the totals. Multiplier bonuses are applied for certain reliability and community incentives. |
+| Data set | The inputs and outputs will be moved on chain as part of the tokenization effort. |
+
+
+| | Permission |
+|---|---|
+| Current algorithm | UR-CONTRACT ([subscription_model.go](https://github.com/urnetwork/server/blob/main/model/subscription_model.go)) Transfer between two parties (the initiator and the companion) requires a contract encrypted with the secret key of the destination client. The contract includes a fixed transfer balance held in escrow, and a permission set of the relation between the two parties. The companion can create contracts paired to the initiator for return traffic. Additionally multi-hop paths will send stream open and stream close events to intermediaries. Both the initiator and companion must close the contract after use with the acknowledged byte count. If either side does not close, or there is a disagreement, the contraction resolution process forces a result. If any side reports abuse, future transfer between the two parties is not allowed. |
+| Data set | Export of contracts and closure state so that the raw transfer statistics and traffic flows in the network can be analyzed. |
+
+
+| | Safety |
+|---|---|
+| Current algorithm | UR-SEC1 ([ip_security.go](https://github.com/urnetwork/connect/blob/main/ip_security.go)) Port block list and IP block list. Does not do protocol inspection. |
+| Data set | This runs entirely on the client side and we currently  do not have an option for users to share traces with us (TODO) |
+
+
+
+ 
+
+
+---
+
+
+# URnetwork Providers
+
+URnetwork is a decentralized VPN where egress capacity is provided by anyone who wants to participate in the network, called a provider. A provider connects to a network space, which is a distributed set of servers that manage and faciliate the network using the URnetwork [API](https://docs.ur.io/api) and [connect protocol](https://github.com/urnetwork/protocol). Users authenticate with the network space to use the network for security, privacy, anonymity, and content acccess.
+
+The main URnetwork space follows a set of trust and safety rules and an economic model that keeps the network safe for providers, and rewards providers for participating. The network is free to use with a data cap, where users can become a supporter to get a higher data cap and priority speeds. The main URnetwork space supports email, SMS, Google, and Apple authentication.
+
+[Trust and Safety Policy](https://docs.ur.io/trust-and-safety/trust-and-safety)
+
+[Economic Model](https://docs.ur.io/economic-model/economic-model)
+
+
+## Provide using an app
+
+URnetwork builds apps for popular consumer platforms. Our goal is to support as much existing hardware as possible and make it "one tap" to get set up as a provider. When you install an app, select "Provide while disconnected" from the settings to enable always-on provider. Otherwise, the provider is only active while you are connected to the network.
+
+[URnetwork apps](https://ur.io/app)
+
+
+## Provide using a binary
+
+The `provider` binary compiles to run on Linux, Windows, macOS. For information on specific IoT and router platforms see [Raspberry Pi](https://docs.ur.io/rpi), [EdgeOS](https://docs.ur.io/edgeos), and [RouterOS](https://docs.ur.io/routeros).
+
+The binary runs as any user and does not require special permissions.
+
+The binary can be compiled and deployed from source, or deployed with our pre-built docker container. Both methods are documented below.
+
+
+### Provider binary
+
+#### Windows
+
+You can install the provider using the following command in your Command Prompt (cmd.exe) or PowerShell:
+
+```
+powershell -c "irm https://raw.githubusercontent.com/urnetwork/connect/refs/heads/main/scripts/Provider_Install_Win32.ps1 | iex"
+```
+
+In case if you wish to uninstall the provider, run the following:
+
+```
+powershell -c "irm https://raw.githubusercontent.com/urnetwork/connect/refs/heads/main/scripts/Provider_Uninstall_Win32.ps1 | iex"
+```
+
+#### Linux
+
+Run the following to install the provider:
+
+```bash
+curl -fSsL https://raw.githubusercontent.com/urnetwork/connect/refs/heads/main/scripts/Provider_Install_Linux.sh | sh
+```
+
+If you wish to uninstall it:
+
+```bash
+curl -fSsL https://raw.githubusercontent.com/urnetwork/connect/refs/heads/main/scripts/Provider_Uninstall_Linux.sh | sh
+```
+
+#### macOS
+
+You'll have to build the provider binary from source, as of now. Please refer to the next section.
+
+#### Build from source
+
+Run the following commands to build the `provider` binary from source. You will need `go` version of at least 1.23[^1] and `git`.
+
+```
+mkdir urnetwork
+cd urnetwork
+git clone https://github.com/urnetwork/connect
+git clone https://github.com/urnetwork/protocol
+cd connect/provider
+go build
+# the provider binary is now at ./provider
+```
+
+#### To initialize a provider on your network, follow the steps below.
+
+1. Log into your network in the [web UI](https://ur.io/?auth). You can create a new network here also.
+2. Once logged in, there is an button in the dialog called "Copy an Auth Code". Tap that button to copy a time-limited auth code. You'll use this in the next step to generate a local JWT file.
+3. `./provider auth`. Paste the auth code at the prompt to enter the auth code.
+4. You should see output that says "Saved auth to ~/.urnetwork/jwt". Now any provider that runs in your user will be authenticated to your network. You can copy the `$HOME/.urnetwork` dir to new environments to quickly set up the provider.
+
+#### To run a provider on your network, run the command below.
+
+```
+./provider provide
+# you should see the message "Provider XXX started"
+```
+
+This runs in the foreground and provides egress capacity to the network until killed. Payouts are made to the wallet set up in the network. You can use [one of the apps](https://ur.io/app) to set up your wallet.
+
+#### To run a provider all the time in the background, follow the steps below.
+
+*Linux*
+
+If you have `systemd`, then the installer script should have automatically configured a systemd service when you installed the provider. The service is `urnetwork`, so you can use the usual `systemctl` commands to control it:
+
+```bash
+systemctl --user start urnetwork    # Start
+systemctl --user stop urnetwork     # Stop
+systemctl --user enable urnetwork   # Start on login
+systemctl --user disable urnetwork  # Disable start on login
+```
+
+*macOS*
+
+On modern macOS, background processes are managed with `launchd` using the command `launchctl` while the logs get appended to `/var/log/system.log`. The following steps set up a basic launchd unit to run the provider binary using the configuration at `$HOME/.urnetwork`.
+
+1. Download the [latest launchd template from Github](https://github.com/urnetwork/connect/provider/launchd)
+2. Edit the `/path/to/provider` to the actual provider path
+3. Edit the `$USER` to the user you want to run as
+4. Make sure for that user, `$HOME/.urnetwork` is in place
+5. `sudo cp <EDITED urnetwork-provider.plist> /Library/LaunchAgents/urnetwork-provider.plist`
+6. `sudo launchctl load /Library/LaunchAgents/urnetwork-provider.plist`
+7. `sudo launchctl start /Library/LaunchAgents/urnetwork-provider.plist`
+8. Verify the unit is running with `tail -f /var/log/system.log | grep -i provider`. You should see the message "Running on port XX"
+9. You're all set!
+
+*Windows*
+
+When you run the installation script, it will ask you whether you want to add the provider program to system startup programs list. If you do, it will start in background when your system boots up.
+It is possible to run the provider manually in the background:
+
+```
+powershell -NoProfile -WindowStyle Hidden -Command "Start-Process urnetwork.exe -ArgumentList 'provide' -WindowStyle Hidden"
+```
+
+### Provider binary on multiple platforms
+
+If you want to build the binary for multiple platforms, use the Makefile.
+
+```
+mkdir urnetwork
+cd urnetwork
+git clone https://github.com/urnetwork/connect
+git clone https://github.com/urnetwork/protocol
+cd connect/provider
+go build
+# the provider binaries are compiled into binaries at ./build/$OS/$ARCH
+# build/darwin/amd64/provider
+# build/darwin/arm64/provider
+# build/linux/amd64/provider
+# build/linux/arm64/provider
+# build/linux/arm/provider
+# build/linux/386/provider
+# build/windows/amd64/provider
+# build/windows/arm64/provider
+```
+
+Choose the `provider` binary for your OS and architecture.
+
+Note: `darwin` is for macOS
+
+Note: if you have a modern Intel or AMD processor, choose `amd64`. If you have a modern Apple or Qualcomm processor, choose `arm64`. Otherwise for Linux IoT and router platforms, run `uname -m` to find your architecture.
+
+Note: you can download pre-built binaries from the [nightly releases](https://github.com/urnetwork/connect)
+
+### Provider container
+
+We publish an image for following the warp convention to make running an up-to-date provider easier. We continuously update the image with 4 service blocks, where the last block (`g4`) has been tested the longest and hence is the most stable.
+
+| Block | Latest |
+|-------|--------|
+| `g1` | [bringyour/community-provider:g1-latest](https://hub.docker.com/r/bringyour/community-provider) |
+| `g2` | [bringyour/community-provider:g2-latest](https://hub.docker.com/r/bringyour/community-provider) |
+| `g3` | [bringyour/community-provider:g3-latest](https://hub.docker.com/r/bringyour/community-provider) |
+| `g4` | [bringyour/community-provider:g4-latest](https://hub.docker.com/r/bringyour/community-provider) |
+
+
+Note: the images are built for amd64 and arm64 architectures only.
+
+To initialize with the latest, most stable version, run the command below.
+
+```
+docker run --mount type=bind,source=$HOME/.urnetwork,target=/root/.urnetwork bringyour/community-provider:g4-latest auth
+```
+
+To run the latest, most stable version, run the command below.
+
+```
+docker run --mount type=bind,source=$HOME/.urnetwork,target=/root/.urnetwork --restart no -d bringyour/community-provider:g4-latest provide
+```
+
+If you want to run the provider in the background all the time, even if your machine reboots, simply change the `--restart no` to `--restart always`.
+
+To update your provider, just run `docker pull bringyour/community-provider:g4-latest` . A new g4 is published about once a month. You can [see the changelogs in the releases section of the Github repo](https://github.com/urnetwork/connect).
+
+
+## Main Network Space
+
+The main URnetwork space is below. Anyone can host a network space by deploying and maintaining the services in the server repo. The main network space is continuously deployed with the warp tools, where the continuous versions are committed as tags on GitHub for transparency.
+
+| Server Name | Purpose |
+|-------------|---------|
+| api.bringyour.com | API server |
+| connect.bringyour.com | Connect protocol server |
+| extender.bringyour.com | Public extender server. Users can run their own extenders in a secure location to have their own IP to access the network, which is benefitial for some network access situations. |
+
+The provider tools use the main network space by default.
+
+
+[^1]: [Download and install Go](https://go.dev/doc/install)

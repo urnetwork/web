@@ -78,8 +78,34 @@ export default defineConfig({
             i18n: {
                 defaultLocale: 'en',
                 locales: { en: 'en', ru: 'ru', ar: 'ar', zh: 'zh', de: 'de', es: 'es' }
+            },
+            serialize(item) {
+                // the head advertises an x-default alternate; the sitemap should agree
+                if (item.links?.length) {
+                    const en = item.links.find((l) => l.lang === 'en');
+                    if (en && !item.links.some((l) => l.lang === 'x-default')) {
+                        item.links.push({ lang: 'x-default', url: en.url });
+                    }
+                }
+                return item;
             }
-        })
+        }),
+        // The sitemap lib normalizes the root <loc> to the origin without a
+        // trailing slash while its own alternates (and the page canonical) use
+        // "https://ur.xyz/". Patch the written file after build.
+        {
+            name: 'sitemap-root-slash',
+            hooks: {
+                'astro:build:done': async ({ dir }) => {
+                    const { readFileSync, writeFileSync, existsSync } = await import('node:fs');
+                    const file = new URL('./sitemap-0.xml', dir);
+                    if (!existsSync(file)) return;
+                    const xml = readFileSync(file, 'utf8');
+                    const patched = xml.replace(/<loc>(https?:\/\/[^/<]+)<\/loc>/g, '<loc>$1/</loc>');
+                    if (patched !== xml) writeFileSync(file, patched);
+                },
+            },
+        },
     ],
     output: 'static',
     // flatten every route to a flat .html file (price.html, de/price.html),

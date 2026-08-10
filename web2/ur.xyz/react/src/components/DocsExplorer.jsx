@@ -16,11 +16,15 @@ import { useLanguage } from '../i18n';
  * placeholder when no slug is selected, otherwise the markdown body of
  * the requested doc.
  */
-export default function DocsExplorer({ activeRoute } = {}) {
+export default function DocsExplorer({ activeRoute, initialSlug = null } = {}) {
     const route = useRoute();
     const { code } = useLanguage();
 
-    const doc = route.slug ? findDoc(route.slug) : null;
+    // During SSR the router has no window and resolves no slug — the static
+    // build passes the page's own slug so the document body ships as HTML
+    // instead of the landing placeholder. On the client the router wins.
+    const slug = route.slug ?? initialSlug;
+    const doc = slug ? findDoc(slug) : null;
 
     // If the URL points at a slug we don't have a doc for, fall back to
     // the docs landing rather than rendering nothing. We rewrite the URL

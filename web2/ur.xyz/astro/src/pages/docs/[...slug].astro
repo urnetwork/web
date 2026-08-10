@@ -4,11 +4,35 @@ import DocsIsland from '../../islands/DocsIsland.jsx';
 import { docs } from '@react/lib/docs.js';
 
 export function getStaticPaths() {
-    return docs.map(d => ({
-        params: { slug: d.slug }
+    return docs.filter(d => d.slug).map(d => ({
+        params: { slug: d.slug },
+        props: {
+            title: d.title,
+            // first ~160 chars of the document's own prose
+            description: d.text.replace(/\s+/g, ' ').trim().slice(0, 158),
+        },
     }));
 }
+
+const { slug } = Astro.params;
+const { title, description } = Astro.props;
+
+const jsonLd = [{
+    '@type': 'TechArticle',
+    headline: title,
+    description,
+    url: `https://ur.xyz/docs/${slug}`,
+    mainEntityOfPage: `https://ur.xyz/docs/${slug}`,
+    publisher: { '@id': 'https://ur.xyz/#org' },
+    inLanguage: 'en',
+}];
 ---
-<Base title="Docs — UR" description="UR protocol documentation." lang="en">
-    <DocsIsland activeRoute="docs" lang="en" client:load />
+<Base
+    title={`${title} — UR Docs`}
+    description={description}
+    lang="en"
+    jsonLd={jsonLd}
+    alternate={{ href: `/docs-md/${slug}.md`, type: 'text/markdown' }}
+>
+    <DocsIsland activeRoute="docs" lang="en" initialSlug={slug} client:load />
 </Base>

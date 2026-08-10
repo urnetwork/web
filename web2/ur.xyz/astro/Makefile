@@ -1,4 +1,4 @@
-.PHONY: build build-main build-canary sync-price generate-legal clean
+.PHONY: build build-main build-canary sync-price generate-legal generate-agent-assets clean
 
 BUILD_DIR := build
 
@@ -14,12 +14,17 @@ sync-price:
 generate-legal:
 	node ../scripts/generate-legal.mjs
 
-build-main: sync-price generate-legal
+# Regenerate the machine-readable agent assets (whitepaper.md, docs-md mirror,
+# openapi.yml, llms.txt) so crawlers and agents always get current documents.
+generate-agent-assets:
+	node ../scripts/generate-agent-assets.mjs
+
+build-main: sync-price generate-legal generate-agent-assets
 	(cd ../react && npm ci)
 	npm ci
 	UR_ENV=main npx astro build
 
-build-canary: sync-price generate-legal
+build-canary: sync-price generate-legal generate-agent-assets
 	(cd ../react && npm ci)
 	npm ci
 	UR_ENV=canary npx astro build

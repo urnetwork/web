@@ -14,6 +14,19 @@ export function getStaticPaths() {
 
 const { lang } = Astro.params;
 const t = await getDict(lang);
+
+const jsonLd = [{
+    '@type': 'Dataset',
+    name: 'UR network usage cost — published rate sheet',
+    description: t.price.intro,
+    url: 'https://ur.xyz/price',
+    license: 'https://ur.xyz/terms',
+    creator: { '@id': 'https://ur.xyz/#org' },
+    distribution: [
+        { '@type': 'DataDownload', contentUrl: 'https://ur.xyz/price.yml', encodingFormat: 'application/yaml' },
+        { '@type': 'DataDownload', contentUrl: 'https://ur.xyz/price.rss', encodingFormat: 'application/rss+xml' },
+    ],
+}];
 const dir = LANGS[lang]?.dir || 'ltr';
 ---
 <Base
@@ -21,6 +34,9 @@ const dir = LANGS[lang]?.dir || 'ltr';
     description={t.price.intro}
     lang={lang}
     dir={dir}
+
+    jsonLd={jsonLd}
+    alternate={{ href: '/price.yml', type: 'application/yaml' }}
 >
     <!-- RSS autodiscovery: browsers and feed readers pick /price.rss up
          straight from this page. -->

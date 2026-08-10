@@ -7,6 +7,11 @@ interface Props {
     description?: string;
     lang?: string;
     dir?: string;
+    // page-specific schema.org nodes, merged into the site @graph
+    jsonLd?: object[];
+    // machine-readable alternate of this page: { href, type } (absolute or /path)
+    alternate?: { href: string; type: string } | null;
+    noindex?: boolean;
 }
 
 const {
@@ -14,11 +19,18 @@ const {
     description = 'UR — Own your privacy. Own your network.',
     lang = 'en',
     dir = 'ltr',
+    jsonLd = [],
+    alternate = null,
+    noindex = false,
 } = Astro.props;
 
 const SITE_ORIGIN = 'https://ur.xyz';
 const canonical = new URL(Astro.url.pathname, SITE_ORIGIN).href;
 const ogImage = `${SITE_ORIGIN}/ur.png`;
+const alternateHref = alternate && (alternate.href.startsWith('http') ? alternate.href : `${SITE_ORIGIN}${alternate.href}`);
+
+const OG_LOCALES = { en: 'en_US', ru: 'ru_RU', ar: 'ar_AR', zh: 'zh_CN', de: 'de_DE', es: 'es_ES' };
+const ogLocale = OG_LOCALES[lang] || OG_LOCALES.en;
 
 // Language alternates: every page exists at the same path in all six
 // languages (English at the bare path, the rest under /<lang>).
@@ -26,6 +38,40 @@ const langPrefix = new RegExp(`^/(${NON_EN_LANGS.join('|')})(?=/|$)`);
 const basePath = Astro.url.pathname.replace(langPrefix, '') || '/';
 const altHref = (l) =>
     new URL(l === 'en' ? basePath : `/${l}${basePath === '/' ? '' : basePath}`, SITE_ORIGIN).href;
+
+// Site-wide schema.org graph. The protocol is the subject; BringYour hosts the
+// site (see /terms) — the WebSite node carries that relationship, pages add
+// their own nodes (TechArticle, Dataset, …) via the jsonLd prop.
+const graph = [
+    {
+        '@type': 'Organization',
+        '@id': `${SITE_ORIGIN}/#org`,
+        name: 'UR protocol',
+        url: `${SITE_ORIGIN}/`,
+        logo: `${SITE_ORIGIN}/favicon-128.png`,
+        sameAs: ['https://github.com/urfoundation', 'https://github.com/urnetwork', 'https://ur.io/'],
+    },
+    {
+        '@type': 'WebSite',
+        '@id': `${SITE_ORIGIN}/#website`,
+        name: 'UR protocol',
+        url: `${SITE_ORIGIN}/`,
+        publisher: { '@id': `${SITE_ORIGIN}/#org` },
+        inLanguage: LANG_CODES,
+    },
+    // a flat site: every non-root page is one step below home
+    ...(basePath !== '/'
+        ? [{
+            '@type': 'BreadcrumbList',
+            itemListElement: [
+                { '@type': 'ListItem', position: 1, name: 'UR', item: `${SITE_ORIGIN}/` },
+                { '@type': 'ListItem', position: 2, name: title.replace(/\s+[—–-]\s+UR\s*$/u, ''), item: canonical },
+            ],
+        }]
+        : []),
+    ...jsonLd,
+];
+const jsonLdText = JSON.stringify({ '@context': 'https://schema.org', '@graph': graph });
 ---
 <!doctype html>
 <html lang={lang} dir={dir}>
@@ -35,11 +81,13 @@ const altHref = (l) =>
     <meta name="theme-color" content="#101010" />
     <meta name="description" content={description} />
     <meta name="application-name" content="UR" />
-    <link rel="canonical" href={canonical} />
-    {LANG_CODES.map(l => (
+    {noindex && <meta name="robots" content="noindex, nofollow" />}
+    {!noindex && <link rel="canonical" href={canonical} />}
+    {!noindex && LANG_CODES.map(l => (
         <link rel="alternate" hreflang={l} href={altHref(l)} />
     ))}
-    <link rel="alternate" hreflang="x-default" href={altHref('en')} />
+    {!noindex && <link rel="alternate" hreflang="x-default" href={altHref('en')} />}
+    {alternateHref && <link rel="alternate" type={alternate.type} href={alternateHref} />}
 
     <!-- Open Graph -->
     <meta property="og:site_name" content="UR" />
@@ -48,12 +96,20 @@ const altHref = (l) =>
     <meta property="og:type" content="website" />
     <meta property="og:url" content={canonical} />
     <meta property="og:image" content={ogImage} />
+    <meta property="og:image:width" content="474" />
+    <meta property="og:image:height" content="265" />
+    <meta property="og:image:alt" content="UR — Own your privacy. Own your network." />
+    <meta property="og:locale" content={ogLocale} />
+    {LANG_CODES.filter(l => l !== lang).map(l => (
+        <meta property="og:locale:alternate" content={OG_LOCALES[l]} />
+    ))}
 
     <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content={ogImage} />
+    <meta name="twitter:image:alt" content="UR — Own your privacy. Own your network." />
 
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
@@ -81,6 +137,8 @@ const altHref = (l) =>
     </style>
 
     <title>{title}</title>
+
+    <script type="application/ld+json" set:html={jsonLdText} />
 
     <!-- Page-specific head extras (e.g. the price page's RSS autodiscovery link). -->
     <slot name="head" />

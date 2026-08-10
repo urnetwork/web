@@ -9,11 +9,26 @@ import en from '@react/i18n/en.js';
 import '@react/components/Nav.css';
 
 const t = en;
+
+const jsonLd = [{
+    '@type': 'Dataset',
+    name: 'UR network usage cost — published rate sheet',
+    description: t.price.intro,
+    url: 'https://ur.xyz/price',
+    license: 'https://ur.xyz/terms',
+    creator: { '@id': 'https://ur.xyz/#org' },
+    distribution: [
+        { '@type': 'DataDownload', contentUrl: 'https://ur.xyz/price.yml', encodingFormat: 'application/yaml' },
+        { '@type': 'DataDownload', contentUrl: 'https://ur.xyz/price.rss', encodingFormat: 'application/rss+xml' },
+    ],
+}];
 ---
 <Base
     title={`${t.price.title} — UR`}
     description={t.price.intro}
     lang="en"
+    jsonLd={jsonLd}
+    alternate={{ href: '/price.yml', type: 'application/yaml' }}
 >
     <!-- RSS autodiscovery: browsers and feed readers pick /price.rss up
          straight from this page. -->

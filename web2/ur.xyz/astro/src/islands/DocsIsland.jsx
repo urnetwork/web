@@ -6,10 +6,10 @@ import React from 'react';
 import DocsExplorer from '@react/components/DocsExplorer.jsx';
 import { LanguageProvider } from '@react/i18n/index.jsx';
 
-export default function DocsIsland({ activeRoute, lang }) {
+export default function DocsIsland({ activeRoute, lang, initialSlug = null }) {
     return (
         <LanguageProvider initialLang={lang}>
-            <DocsExplorer activeRoute={activeRoute} />
+            <DocsExplorer activeRoute={activeRoute} initialSlug={initialSlug} />
         </LanguageProvider>
     );
 }
