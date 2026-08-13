@@ -1,436 +1,264 @@
-TERMS AND CONDITIONS FOR PROVISION OF INTERNET SERVICES:
+# TERMS OF SERVICE
 
-**THESE TERMS AND CONDITIONS CONTAIN IMPORTANT INFORMATION REGARDING
-YOUR USE OF URNETWORK SERVICES**
+**UR protocol Information Site — ur.xyz**
 
-**PLEASE READ THEM CAREFULLY**
+**Hosted by BringYour, Inc.**  
+**Last Revised: April 2026**
 
-This Terms and Conditions (the "Agreement") is entered into between the
-Customer (\"You\", \"Your\", \"Customer\") and BringYour, Inc.
-(hereinafter referred to as \"Provider\"). This Agreement includes
-URnetwork\'s Privacy Policy as set forth at
-ur.io (the "Website") and any
-restrictions, instructions, and prohibitions located on the Website or
-Mobile App (collectively, \"Agreement\"). BY INSTALLING OR USING THE
-APPLICATION OR SERVICES, YOU: (A) ACKNOWLEDGE THAT YOU HAVE READ AND
-UNDERSTAND THIS AGREEMENT; (B) REPRESENT THAT YOU ARE OF LEGAL AGE TO
-ENTER INTO A BINDING AGREEMENT; AND (C) ACCEPT THIS AGREEMENT AND AGREE
-THAT YOU ARE LEGALLY BOUND BY ITS TERMS. IF YOU DO NOT AGREE TO THESE
-TERMS, DO NOT USE THE APPLICATION AND DELETE IT FROM YOUR DEVICES.
+## IMPORTANT DISCLOSURES — READ BEFORE USING THIS SITE
 
-Customer and Provider enter into an agreement, (the "Agreement") as follows:
+**THIS SITE IS HOSTED BY BRINGYOUR, INC. FOR OPERATIONAL AND INFORMATIONAL MINISTERIAL REASONS ONLY. BRINGYOUR, INC. DOES NOT OPERATE, CONTROL, OR MANAGE THE UR PROTOCOL OTHER THAN AS SET FORTH HEREIN AND MAKES NO REPRESENTATION THAT IT WILL CONTINUE TO HOST THIS SITE INDEFINITELY. USERS SHOULD NOT RELY ON BRINGYOUR, INC.'S EFFORTS FOR THE SUCCESS OF THE PROTOCOL, THE VALUE OF THE UR TOKEN, OR THE CONTINUED AVAILABILITY OF THIS SITE.**
 
-1.  Provider has developed peer-to-peer networking technology and a
-    mobile application (the "Application") to enable Customer to access
-    its own networks or subnetworks as described on the Website or
-    Mobile App (and incorporated here by reference) (the "Service").
-    Subject to the terms of this Agreement, Provider grants you a
-    limited, non-exclusive, and nontransferable license to:
+**THIS SITE DOES NOT CONSTITUTE AN OFFER TO SELL, A SOLICITATION TO PURCHASE, OR AN INVESTMENT RECOMMENDATION REGARDING ANY SECURITY, DIGITAL ASSET, OR OTHER FINANCIAL INSTRUMENT. THE INFORMATION PROVIDED ON THIS SITE IS FOR INFORMATIONAL PURPOSES ONLY.**
 
-    a.  download, install, and use the Application for your personal use
-        on a device owned or otherwise controlled by you (\"Mobile
-        Device\") strictly in accordance with the Application\'s
-        documentation; and
+**BRINGYOUR, INC. IS NOT REGISTERED AS A BROKER-DEALER, INVESTMENT ADVISER, OR MONEY TRANSMITTER AND DOES NOT PROVIDE INVESTMENT, FINANCIAL, LEGAL, OR TAX ADVICE.**
 
-    b.  use on such Mobile Device the Services made available in or
-        otherwise accessible through the Application, strictly in
-        accordance with this Agreement
+These Terms of Service (this “**Agreement**”) govern your access to and use of the website located at ur.xyz (the “**Site**”), which is currently hosted and operated by BringYour, Inc. (“**BringYour**,” “**we**,” “**us**,” or “**our**”), a Delaware corporation. The Site is dedicated to providing informational resources about the UR protocol.
 
-2.  Application License Restrictions. You shall not:
+By accessing or using the Site, you (“**User**,” “**you**”) agree to be bound by this Agreement. If you do not agree to this Agreement, you must not access or use the Site.
 
-    a.  copy the Application, except as expressly permitted by this
-        license;
+This Agreement is distinct from, and does not govern, BringYour’s commercial services or products, which are governed separately by the Terms and Conditions for Provision of Internet Services available at [ur.io](http://ur.io).
 
-    b.  modify, translate, adapt, or otherwise create derivative works
-        or improvements, whether or not patentable, of the Application;
+## 1. Definitions
+As used in this Agreement, the following terms have the meanings set forth below:
 
-    c.  reverse engineer, disassemble, decompile, decode, or otherwise
-        attempt to derive or gain access to the source code of the
-        Application or any part thereof;
+**“BringYour”** means BringYour, Inc., a Delaware corporation, the entity currently hosting this Site.
 
-    d.  remove, delete, alter, or obscure any trademarks or any
-        copyright, trademark, patent, or other intellectual property or
-        proprietary rights notices from the Application, including any
-        copy thereof;
+**“Ministerial Role”** means BringYour’s current transitional activities with respect to the Protocol, that are administrative in nature. These include site hosting, technical coordination, and certain transitional upgrade authority.
 
-    e.  rent, lease, lend, sell, sublicense, assign, distribute,
-        publish, transfer, or otherwise make available the Application,
-        or any features or functionality of the Application, to any
-        third party for any reason, including by making the Application
-        available on a network where it is capable of being accessed by
-        more than one device at any time; or
+**“Network Operator”** means an entity that deploys Protocol smart contracts and makes Protocol services available to end users or Providers, including BringYour (in its commercial capacity at [ur.io](http://ur.io)) and any other independent operators on the Protocol.
 
-    f.  remove, disable, circumvent, or otherwise create or implement
-        any workaround to any copy protection, rights management, or
-        security features in or protecting the Application.
+**“Protocol”** means the UR protocol, an open-source, permissionless, decentralized privacy infrastructure protocol designed to enable whole-internet encryption through multi-hop routing and layered encryption, operating via smart contracts on the Solana blockchain.
 
-3.  Reservation of Rights. You acknowledge and agree that the
-    Application is provided under license, and not sold, to you. You do
-    not acquire any ownership interest in the Application under this
-    Agreement, or any other rights thereto other than to use the
-    Application in accordance with the license granted, and subject to
-    all terms, conditions, and restrictions, under this Agreement.
-    Provider and its licensors shall retain its entire right, title, and
-    interest in and to the Application, including all copyrights,
-    trademarks, and other intellectual property rights therein or
-    relating thereto, except as expressly granted to you in this
-    Agreement.
+**“Provider”** means any person or entity that contributes bandwidth, compute, egress capacity, or other network resources directly to the Protocol via Smart Contract interaction and receives UR Tokens programmatically as compensation for such contributions. Provider status arises from direct Protocol interaction, not from any agreement with BringYour. 
 
-4.  Your Contributions. If you decide to provide egress sites or
-    contribute bandwidth (as further described on the Website or Mobile
-    App ("Your Contributions"), you may receive credits (minus any
-    service fees) in the form of digital assets. These amount per
-    service or may vary depending on market conditions and timing, and
-    the digital assets may increase or decrease in value. These digital
-    assets are provided as an incidental benefit to the Service and you
-    agree that the maximum redeemable value owed by Provider for any
-    digital assets outside of the Service is \$0.01. You agree that
-    contributing egress sites or bandwidth is at your own risk and that
-    Provider is not responsible for the actions of any users or any
-    violations of agreements or laws. Please see the Website or App for
-    additional pricing or restrictions.
+“**Provider Rewards**” means UR Tokens distributed programmatically by the Protocol’s Smart Contracts to Providers as compensation for measurable resource contribution. Provider Rewards are set by the Protocol, not by BringYour or any Network Operator.
 
-5.  Service and Performance. PROVIDER WILL FURNISH THE SERVICE ON AN "AS
-    IS" AND "AS AVAILABLE" BASIS AND PROVIDER EXPRESSLY DISCLAIMS ALL
-    WARRANTIES, INCLUDING WITHOUT LIMITATION WARRANTIES OF TITLE OR
-    NON-INFRINGEMENT, OR THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
-    FITNESS FOR A PARTICULAR PURPOSE. YOUR USE OF AND RELIANCE ON THE
-    SERVICES OR ANY INFORMATION OR FEATURE PROVIDED THEREIN ARE AT YOUR
-    OWN RISK. WE WILL NOT BE RESPONSIBLE FOR ANY DAMAGES, LOSSES, OR
-    LEGAL CONSEQUENCES WHICH OCCUR AS A RESULT OF YOUR USE OF THE
-    SERVICES or YOUR CONTRIBITIONS. WE MAKE NO WARRANTY THAT THE
-    SERVICES WILL BE AVAILABLE ON A CONTINUOUS BASIS, SECURED, FREE OF
-    VIRUSES, WORMS, OTHER HARMFUL COMPONENTS, OR PROGRAM LIMITATIONS. WE
-    MAKE NO WARRANTY THAT WE WILL CORRECT ANY ERRORS, DEFECTS OR
-    OMISSIONS. WE DO NOT, EITHER EXPRESSLY OR IMPLIEDLY ASSUME ANY
-    RESPONSIBILITY FOR ANY LOSS, INJURY OR DAMAGES INCURRED AS A RESULT
-    OR IN CONNECTION WITH YOUR USE OF THE SERVICES (INCLUDING, WITHOUT
-    LIMITATION, ANY LOSS OF DATA OR OTHER DAMAGE TO DEVICE). THIS
-    DISCLAIMER SHALL APPLY TO ALL ADVICE, ASSISTANCE, DATA, INFORMATION,
-    OR SERVICE, NOW OR SUBSEQUENTLY FURNISHED, DELIVERED OR MADE
-    AVAILABLE BY PROVIDER, ITS AFFILIATES, ITS CONTRACTORS, MANAGERS,
-    MEMBERS OR THEIR RESPECTIVE EMPLOYEES OR AGENTS.
+**“Site”** means the website located at ur.xyz and all associated pages, documentation, and content hosted thereon.
 
-6.  Neither Provider, nor its agents, contractors, employees,
-    manager(s), or members (collectively referred to hereafter as
-    "Provider's Group"), will be responsible for, and Customer waives
-    and relinquishes any claim against Provider's Group for any damage,
-    loss, cost or other expense, whether direct, indirect, consequential
-    or incidental, that Customer or any third party may suffer which is
-    related to, or results from Customer's use of the Service. This
-    includes, but is not limited to, loss of data or business resulting
-    from delays, non-delivery, mis-delivery, or interruptions as a
-    result of Provider's or Customer's (in)actions. CUSTOMER EXPRESSLY
-    ASSUMES ALL RISKS ASSOCIATED WITH CUSTOMER'S USE OF THE SERVICE,
-    including but not limited to those that might occur from the
-    introduction into Customer's computer(s) or networks of viruses,
-    worms, Trojan Horses, or from unauthorized entry or entries into
-    Customer's computer(s) or any other problem, which result from use
-    of, or occur through the Service. Customer agrees to defend,
-    indemnify and hold harmless, to the extent permitted by law,
-    Provider's Group from any damage, loss, cost, or expense that may
-    occur to Customer or any third party as a result of the use of the
-    Service. Customer agrees to defend, indemnify and hold Provider's
-    Group harmless from any and all liabilities, costs, judgements and
-    expenses, including reasonable attorney's fees, related to or
-    arising from: (a) any violation of this Agreement by Customer, or by
-    a third party or parties accessing the Service through Customer; (b)
-    use of the Service or the Internet or the placement or transmission
-    of any message, information, software or other materials on the
-    Internet by Customer, or by a third party or parties accessing the
-    Service through Customer: (c) claims for infringement of patents,
-    trademarks, trade secrets or copyrights arising from Customer's use
-    or use by a third party or parties accessing the Service through
-    Customer, of equipment and software, apparatus and systems, (whether
-    or not furnished by Provider), in connection with the Service.
+**“Smart Contract(s)”** means self-executing computer code deployed on the Solana blockchain that autonomously governs and enforces the rules, economics, and operations of the Protocol without the need for human intermediation.
 
-7.  No Liability for Content. Customer acknowledges that Provider
-    exercises no control over the form, content or nature of data,
-    images, information, material or anything of whatever nature passing
-    through the connection, (hereafter collectively referred to as
-    "Data") between Customer and Provider or obtained from any Data base
-    maintained by Provider or others, except as may occur pursuant to
-    the provisions of this Agreement. Customer assumes the entire risk
-    that may arise from the use or transmission from, through or to
-    itself of any Data, WHICH MAY INCLUDE SEXUALLY EXPLICIT MATERIAL OR
-    MATERIAL OFFENSIVE OR OBSCENE TO SOME PERSONS. Provider shall have
-    no duty or obligation to advise Customer of any risk that may arise
-    from the availability, use, possession or transmission of Data or
-    provide any information relating thereto, even if at any time
-    Provider should attempt to do so. Provider does not monitor has no
-    obligation to monitor any data that passes through the Service and
-    avails itself of the rights and immunities afforded to service
-    providers under the Digital Millennium Copyright Act and Section 230
-    of the Communications Decency Act. Should Provider, become aware of
-    Data which, it, in its sole discretion, deems to be in violation of
-    this Agreement, unacceptable or undesirable, it may remove or refuse
-    to post or transmit the Data or terminate Customer's access.
-    Provider's liability for any allegedly defective service provided
-    under this Agreement shall not exceed the amount paid by Customer to
-    Provider over the past six months. The Service provided to Customer
-    shall be considered to have been accepted unless Customer shall
-    provide written notice detailing the portion or portions of the
-    Service alleged to be defective or inadequate to Provider no later
-    than ten days after the day the allegedly defective or inadequate
-    services were furnished by Provider.
+**“UR Token”** or **“Token”** means the native digital asset of the UR protocol, designed to function as a digital commodity within the Protocol’s functional crypto system for use as a payment and settlement instrument.
 
-8.  YOU EXPRESSLY ACKNOWLEDGE AND AGREE THAT IN NO EVENT WE (INCLUDING,
-    WITHOUT LIMITATION, OUR AFFILIATES AND THEIR RESPECTIVE OFFICERS,
-    DIRECTORS, EMPLOYEES AND AGENTS, VENDORS, DISTRIBUTORS, THIRD PARTY
-    LICENSORS, OR EQUIPMENT AND SERVICE PROVIDERS) SHALL BE LIABLE FOR
-    ANY DIRECT, INDIRECT, VICARIOUS, INCIDENTAL, SPECIAL, PUNITIVE,
-    CONSEQUENTIAL OR EXEMPLARY DAMAGES, INCLUDING BUT NOT LIMITED TO,
-    DAMAGES FOR LOST PROFITS, LOST BUSINESS OR LOST OPPORTUNITY,
-    BREACHES OF CONTRACT, GOODWILL, OR OTHER INTANGIBLE LOSSES (EVEN IF
-    WE HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES) OR OTHER
-    RELIEF ARISING OUT OF, OR RELATED TO, THESE TERMS, THE SERVICES, OR
-    YOUR USE OR INABILITY TO USE THE SERVICES. OUR LIABILITY SHALL NOT
-    EXCEED THE COST OF THE SERVICES. SOME STATES OR JURISDICTIONS DO NOT
-    ALLOW THE EXCLUSION OR THE LIMITATION OF LIABILITY FOR DAMAGES, IN
-    SUCH STATE OR JURISDICTIONS, OUR LIABILITY SHALL BE LIMITED TO THE
-    EXTENT PERMITTED BY LAW.
+**“User”** means any individual or entity that accesses or uses the Protocol, whether directly or through a Network Operator, to obtain privacy-preserving network services.
 
-9.  Lawful Use. Customer is solely responsible for
-    complying with all applicable laws and agreements with third parties
-    and ensuring that use of the Services does not result in breach of
-    any laws, agreements, or obligations to third parties. Customer
-    agrees that it shall only use the Services and to access networks to
-    which it has express rights or permission by the respective network
-    owner. All use of Provider's services must be for lawful purposes
-    and in accordance with any policy of any network accessed through
-    Provider. Customer shall neither use, nor permit use of Provider's
-    services in violation of any applicable federal, state or local
-    statute, law, ordinance, regulation or rule, all of which are
-    hereafter collectively referred to as "Governmental Rule". Customer
-    agrees that Provider may monitor and disclose information where
-    required to do so by law or government order. Should use of the
-    Service by Customer or by a third party or parties accessing the
-    Service through Customer, cause Provider's internet source to advise
-    Provider that it will terminate or restrict Provider's connectivity
-    to the Internet, unless some specified action is taken, Provider may
-    temporarily suspend the Service, or some part thereof, limit or
-    prevent use of the Service by a particular person, group or entity,
-    and/or terminate this Agreement. No reduction in the Service Fee
-    will be made if the Service or a part thereof is suspended or if a
-    particular person, group or entity is not permitted to use the
-    Service as provided in the previous sentence.
+## 2. Nature of This Site
+**(a) Informational Purpose.** The Site is a resource dedicated to providing public information about the UR protocol, including technical documentation, educational materials, and Protocol-related resources. The Site does not constitute a commercial offering by BringYour, Inc.
 
-10. Customer Use. Any conduct by Customer that, in
-    Provider's sole discretion, inhibits or restricts any other
-    customer, person or entity from using or enjoying Provider\'s
-    Internet Service shall entitle Provider to immediately disconnect
-    Provider\'s Internet Service to Customer and terminate this
-    Agreement without notice. Customer agrees to use Provider's Internet
-    Service only for lawful purposes. Customer may not use, or allow
-    others to use, Customer\'s Provider's Internet Service account,
-    either directly or indirectly, to:
+**(b) Hosted for Ministerial Reasons.** The Site is currently hosted by BringYour, Inc. solely for ministerial purposes arising from the pre-launch and early-launch phase of the Protocol, during which it is not yet practicable to establish decentralized or successor-entity hosting. BringYour's hosting of this Site is a Ministerial Role.
 
-    a.  post, transmit, promote, or facilitate the distribution of any
-        unlawful or illegal material, including but not limited to,
-        material that would constitute or encourage copyright or
-        trademark infringement, a criminal offense, give rise to civil
-        liability or otherwise violate any applicable local, state,
-        national or international law;
+**(c) Transition of Hosting.** BringYour intends to transition the hosting and stewardship of this Site to a decentralized arrangement, a community-governed successor, or another appropriate entity as soon as reasonably practicable. BringYour makes no guarantee as to the timeline or terms of such transition, may cease operating the Site irrespective of such transition, and Users should not rely on the continued availability of this Site or BringYour’s continued hosting thereof.
 
-    b.  post, transmit, promote, or facilitate the distribution of any
-        unsolicited advertising (including but not limited to mass or
-        bulk e-mails), promotional materials or other forms of
-        solicitation to other individuals or entities;
+**(d) No Contractual Relationship with Protocol.** This Agreement does not create any contractual or fiduciary relationship between the User and the Protocol or between the User and any Network Operator other than BringYour in its role as host of this Site. Any interaction with the Protocol — including use of Protocol services or participation as a Provider — is governed by the Protocol's Smart Contract terms and, if applicable, third-party terms (such as a Network Operator’s own terms).
 
-    c.  unlawfully access other computers or services, or to cause a
-        disruption of service to other on-line users; or
+**(e) Separation from BringYour’s Commercial Services.** This Site and these Terms are separate from and do not govern BringYour’s commercial services as a Network Operator which are governed exclusively by the Terms and Conditions at ur.io.
 
-    d.  cause disruption to Provider\'s network, nodes, or services.
+## 3. Current Status of Protocol Stewardship
+**(a) BringYour as Original Deployer.** BringYour, Inc. originally developed and deployed the UR protocol and currently holds limited transitional upgrade authority over certain Protocol Smart Contracts. This upgrade authority exists as a practical matter during the Protocol’s development and launch phase and is intended to facilitate necessary security updates, bug fixes, and technical improvements during this transitional period. 
 
-11. Notices.
+**(b) Ministerial Nature of Current Authority.** BringYour’s current upgrade authority is administrative and ministerial in nature. BringYour’s activities in its stewardship capacity, including site hosting, technical coordination, community education, and transitional upgrade authority, do not constitute the essential managerial efforts of a promoter or sponsor upon which Protocol users or Token holders should rely for profits within the meaning of the *Howey* test.          
 
-    a.  We may amend this Agreement from time to time, at our sole
-        discretion and without any notice. It is your obligation to
-        periodically review this Agreement to ensure compliance. We will
-        make a reasonable effort, at our sole discretion, to provide you
-        with a notification regarding what we believe are material
-        changes to these terms. Such material changes will take effect
-        seven (7) days after such notice was provided. Otherwise, all
-        other changes to these terms are effective as of the stated
-        \"Last Revised\" date and your continued use of the Services
-        following the Last Revised date will constitute acceptance of,
-        and agreement to be bound by, those changes. Notices or other
-        communications required or permitted to be given pursuant to
-        this Agreement shall be in writing and shall be considered as
-        properly given if sent by email or mailed by certified mail, or
-        provided through the application interface.
+**(c) Decentralization.** The Protocol is designed to function autonomously via Smart Contracts without reliance on BringYour's ongoing managerial or entrepreneurial efforts. The Protocol is fully operational without any intervention, control, or authority of BringYour. BringYour retains limited transitional upgrade authority which it intends to relinquish as soon as reasonably practicable. Upon such relinquishment, the Protocol will continue to operate as a fully decentralized system with no single person, entity, or group exercising operational, economic, or voting control.
 
-        FOR PROVIDER:
+**(d) No Guarantee of Continued Involvement.** Users are cautioned not to interpret BringYour's current transitional role as a representation or guarantee that BringYour will continue to maintain, upgrade, support, or fund the Protocol or this Site. BringYour's continued involvement is not a condition for the Protocol’s operation.
 
-        <notice@ur.io>
+**(e) No Reliance on BringYour’s Efforts.** BringYour will intentionally not engage in any managerial efforts with respect to the Protocol or Tokens, and should not be relied on by any Protocol User for any purpose (whether or not related to the Token or otherwise). Users should **not** rely on BringYour’s efforts of any kind, let alone any assumed managerial or entrepreneurial efforts (including its current upgrade authority or site hosting) for any expectation of profit from or in connection with the UR Token or the Protocol. Protocol operations and economics are determined programmatically by Smart Contracts and are outside the control of BringYour. 
 
-        with Copy to:
-        
-        BringYour, Inc.
-        2261 Market Street #5245
-        San Francisco, CA 94114
+**(f) Multiple Network Operators.** The Protocol supports and is designed to accommodate multiple independent Network Operators. BringYour is one such Network Operator and does not have exclusive rights to, control over, or responsibility for the Protocol by virtue of any of its roles. Provider and Network Operator roles are described in greater detail in Section 4 of this Agreement. Neither role is established through this Site; both arise from direct interaction with the Protocol.
 
-    b.  A party may change the address or phone numbers set out above for
-        purposes of notice under this contract by giving written notice to
-        the other party or parties hereto of such change in the same manner
-        as is provided above.
+## 4. Providers and Network Operators
+This Section describes the roles of Providers and Network Operators within the UR protocol as a matter of information only. This Section does not create a contractual relationship between any User and BringYour in any User’s capacity as a Provider or Network Operator; such roles are established solely by direct interaction with the Protocol’s Smart Contracts and, where applicable, independent agreements with Network Operators.
 
+**(a) Permissionless Participation**. The Protocol is permissionless and open to any person or entity with the necessary technical capability. Any participant may: (i) use the Protocol as a User; (ii) supply bandwidth, compute, or other network resources as a Provider; or (iii) deploy Protocol Smart Contracts and make Protocol services available to others as a Network Operator. No permission, authorization, consent, or contractual relationship with BringYour is required to assume any such role. Participation is governed exclusively by the Protocol’s open-source code and Smart Contracts.
 
-12. Default. Default under this Agreement is a
-    failure to comply with a material term or condition hereof. In the
-    event of a default, the non-defaulting party may give the other
-    party written notice specifying the default and the defaulting party
-    shall have ten (10) days thereafter in which to cure same. If the
-    default is by Customer, and not timely cured, Provider may; (i),
-    terminate service to Customer and retain all prepaid amounts,
-    or (ii) interrupt the Service until the default is cured with no
-    refund of any prepaid amounts. In addition, Provider may also
-    declare due and demand immediate payment of, any installments
-    remaining unpaid, with interest thereon at the rate of (18%) per
-    annum from the date of default in payment thereof until fully and
-    finally paid, along with reasonable attorney's fees, court costs or
-    other expenses it may incur in enforcing this Agreement. If this
-    Agreement is terminated by mutual agreement or, if Provider fails to
-    cure a noticed default, Customer's sole remedy is to cancel any
-    subscription through the applicable Application Store. Failure to
-    declare any default immediately upon occurrence, or a delay in
-    taking any action in connection therewith, shall not waive such
-    default nor any legal right or privilege to take action at any time
-    thereafter. Termination of service by Provider does not relieve
-    Customer of existing debts or obligations pursuant to this
-    Agreement.
+**(b)** **Providers**.
 
-13. Export Regulation. The Application may be
-    subject to US export control laws, including the Export Control
-    Reform Act and its associated regulations. You shall not, directly
-    or indirectly, export, re-export, or release the Application to, or
-    make the Application accessible from, any jurisdiction or country to
-    which export, re-export, or release is prohibited by law, rule, or
-    regulation. You shall comply with all applicable federal laws,
-    regulations, and rules, and complete all required undertakings
-    (including obtaining any necessary export license or other
-    governmental approval), prior to exporting, re-exporting, releasing,
-    or otherwise making the Application available outside the US.
+**(i) Nature of Role**. A Provider is any person or entity that contributes bandwidth, compute resources, egress sites, or other network capacity to the Protocol in exchange for compensation denominated in UR Tokens.
 
-14. Governing Law. This Agreement shall be
-    subject to and governed under the laws of the State of Texas. Any
-    and all obligations and payments are due and performable and
-    payable in Harris County, Texas. The parties agree that
-    jurisdiction and venue for purpose of any and all lawsuits, causes
-    of action, arbitration, or other disputes shall be in Harris
-    County, Texas.
+**(ii) Programmatic Compensation**. Provider compensation is determined entirely by the Protocol’s Smart Contracts based on each Provider’s own measurable performance, uptime, throughput, and resource contribution. BringYour does not independently set, control, adjust, or administer the reward algorithm applicable to Providers. BringYour has no discretion over the amount, timing, or receipt of Provider compensation.
 
-15. Force Majeure. Neither party shall be liable or
-    responsible to the other party for any delay, damage, loss,
-    failure or inability to perform caused by "force majeure". The
-    term "force majeure," as used in this Agreement, shall include the
-    following: an act of God, strike, act of a public enemy, war,
-    mines or other items of ordinance, blockage, public rioting,
-    lightning, fire, storm, hurricane, flood, explosions, inability to
-    obtain materials, supplies, labor permits, servitude, or rights of
-    way, acts or restraints of any governmental authority, epidemics,
-    landslides, lightning storms, earthquakes, washouts, arrests,
-    restraints of rulers and people, civil disturbances, explosions,
-    breakage or accident to machinery or lines of equipment, temporary
-    failure of equipment, freezing of equipment, and any other cause,
-    whether of the kinds specifically enumerated above or otherwise,
-    which is not reasonably within the control of the parties and
-    which by the exercise of due diligence could not reasonably be
-    prevented or overcome. Events reasonably within the control of the
-    party having the difficulty shall not constitute "force majeure"
-    and shall be remedied with the exercise of due diligence. This
-    paragraph does not apply to payments due under this Agreement.
+**(iii) Compensation Reflects Own Effort**. UR Tokens received by a Provider are compensation for that Provider’s own labor, equipment, and network resources. Provider compensation is not passive investment income and does not reflect any ongoing managerial or entrepreneurial efforts by BringYour or any other person. Differences in Provider outcomes reflect differences in each Provider’s own service provision.
 
-16. Payment. All payments are done through the applicable
-    application store such as Google's Play Store or Apple's App Store
-    (each an "Application Store") and are subject to such Application
-    Store terms with regards to charge of the Subscription,
-    cancellation, refunds all of the payment terms. For more information
-    regarding Cancellation see the applicable Application
-    Store subscription cancellation webpages.
+**(iv) Provider Risk**. Operating as a Provider involves material risks, including: legal and regulatory risks associated with providing network transit services (which may vary by jurisdiction); liability risk arising from third-party use of a Provider’s egress node; technical risks (hardware failure, bandwidth costs, uptime); smart contract risk; fluctuation in the value of UR Tokens received; potential tax liability; and more. Providers assume all such risks.
 
-17. Intellectual Property. Except as expressly granted
-    herein, we retain all right, title and interest in and to our
-    Services, as well as any content provided or made available in
-    connection with the Services (excluding Third Party Services). We
-    reserve the right to disable access to the Services by anyone who
-    uses them to infringe intellectual property rights.
+**(v) Independent Deployment**. Providers may participate using software or hardware they themselves develop or procure. Providers are not required to use software or hardware sold by BringYour to participate in the Protocol. Any use of BringYour software or hardware is governed separately by the terms at ur.io and is not a condition of Provider participation in the Protocol.
 
-18. Provider reserves the right, at any time and from time to time, at
-    its own discretion, to add Services, to modify, suspend, terminate
-    or discontinue any or all the Services, or any part thereof or any
-    user's access thereto. Where we assume that such change may affects
-    an existing Service, we will provide you with a prior written notice
-    and you may be able to terminate the Service. We may, at any time
-    and at our sole discretion, change, modify, add, or remove features
-    and functionality of our Services without notice. You hereby agree
-    that we may automatically download and install updates, from time to
-    time, without prior notification. These updates are designed to
-    improve, enhance, and further develop the Services. You agree to
-    receive such updates as part of your use of the Services. If we
-    believe that such updates or upgrades shall materially affect your
-    use of the Services or your rights, we will make a reasonable effort
-    to provide notification to you of such.
+**(vi) Tax and Regulatory Responsibility**. Providers are solely responsible for determining the tax and regulatory consequences of Provider activity in their jurisdiction, including any obligations relating to income recognition, money transmission, telecommunications licensing, or data protection. BringYour makes no representation as to such consequences and provides no tax, legal, or regulatory advice to Providers.
 
-19. Indemnification. You hereby expressly agree to
-    indemnify, defend, and hold us (including our affiliates,
-    subsidiaries, successors, contractors, employees, directors, agents,
-    suppliers, licensors, service providers and partners) harmless from
-    any and all claims, damages, obligations, losses, liabilities,
-    costs, debts, and expenses (including but not limited to attorney
-    fees) arising from: (i) your use of any of our Services; (ii) your
-    violation and/or breach of any term of these Terms; and (iii) any
-    damage of any sort, whether direct, indirect, special or
-    consequential, you may cause to any third party which relates to
-    your use of the Services (including your violation of any third
-    party rights).
+**(vii) No Agency or Affiliation**. Providers are independent participants in the Protocol. Providers are not employees, agents, partners, joint venturers, or affiliates of BringYour. No Provider is authorized to make representations on behalf of BringYour, the Protocol, or the UR Token.
 
-20. Termination. This Agreement, the license provided
-    herein, and Customer\'s right to use Provider\'s Internet Service
-    may be terminated by Provider at any time for violations of
-    provisions contained in this Agreement, and most specifically, if
-    Customer violates any of the terms of Section 13 of this Agreement.
-    Customer may terminate this Agreement at any time deleting all apps
-    or software and notifying Provider.
+**(c) Network Operators.**
 
-21. Binding Agreement. This agreement shall be binding
-    upon and inure to the benefit of the parties, their respective
-    heirs, executors, administrators, legal representatives, successors
-    and assigns, except that it may not be assigned by Customer.
+**(i) Nature of Role**. A Network Operator is any person or entity that deploys Protocol Smart Contracts at scale and makes Protocol services available to end users, whether by reselling bandwidth, offering VPN or other privacy services, building developer tools, or otherwise. Network Operators are sophisticated participants capable of coordinating and deploying significant volumes of Smart Contracts on the Protocol.
 
-22. Arbitration. Any controversy or claim arising out of
-    or relating to this contract, or the breach thereof, shall be
-    settled by arbitration administered by the American Arbitration
-    Association in accordance with its Commercial \[or other\]
-    Arbitration Rules, and judgment on the award rendered by the
-    arbitrator(s) may be entered in any court having jurisdiction
-    thereof.
+**(ii) Permissionless Operator Participation**. Any qualifying person or entity may operate as a Network Operator. No permission, license, or agreement with BringYour is required. BringYour does not grant, approve, or recognize Network Operator status, and does not maintain any exclusive list of “approved” Network Operators.
 
-23. Severability. If any provision of this
-    Agreement is illegal or unenforceable under applicable law, the
-    remainder of the provision will be amended to achieve as closely as
-    possible the effect of the original term and all other provisions of
-    this Agreement will continue in full force and effect.
+**(iii) Multiple Independent Operators**. The Protocol is designed to accommodate multiple independent Network Operators. BringYour is one Network Operator among others, including community-driven and independent operators that participate in, and are expected to continue joining, the Protocol. 
 
-24. Waiver. No failure to exercise, and no delay
-    in exercising, on the part of either party, any right or any power
-    hereunder shall operate as a waiver thereof, nor shall any single or
-    partial exercise of any right or power hereunder preclude further
-    exercise of that or any other right hereunder. In the event of a
-    conflict between this Agreement and any applicable purchase or other
-    terms, the terms of this Agreement shall govern.
+**(iv) Network Operator Obligations**. Each Network Operator is solely responsible for: (A) compliance with applicable laws in each jurisdiction in which it operates, including telecommunications, privacy, consumer protection, money transmission, securities, sanctions, and tax laws; (B) obtaining all necessary licenses, registrations, and authorizations; (C) establishing its own terms of service, privacy policies, and legal relationships with its end users; (D) acquiring UR Tokens (through permissible means in its jurisdiction) as may be needed to facilitate Smart Contract deployment within the Protocol; and (E) the performance, security, and lawful operation of its own services. BringYour has no supervisory, contractual, or fiduciary relationship with other Network Operators and exercises no control over their operations.
 
-25. This document and the Privacy Policy and any other policies on the
-    Website or Mobile App constitute the entire agreement between
-    Provider and Customer. This agreement may not be modified except in
-    writing and when signed by duly authorized representatives of
-    Provider and Customer. In the event Customer issues a purchase
-    order, memorandum, specifications or other instrument covering the
-    services provided, such purchase order, memorandum, specifications,
-    or instrument is for Customer's internal purposes only, and any and
-    all terms and conditions contained therein, whether printed or
-    written, shall not be of any force or effect as between the parties
-    to this Agreement. All parties hereby acknowledge that they have
-    read and understood this Agreement and any attachments and exhibits
-    thereto. This agreement is effective as of the Commencement Date,
-    and remains in effect until terminated pursuant to its terms.
+**(v) No Token Market Influence.** To the extent a Network Operator (including BringYour in its capacity as such) acquires or uses UR Tokens to facilitate Smart Contract deployment, such activity reflects the operational requirements of the Network Operator’s own services. Such activity is not, and shall not be construed as, a mechanism intended to support, influence, or maintain the market price of the UR Token. 
+
+**(d) No Reliance on BringYour**. Neither Users, Providers nor Network Operators or any other entity should rely on BringYour’s efforts for the success of their participation in the Protocol, the value of any UR Tokens they receive or hold, or the continued operation of the Protocol. All Protocol operations and economics are determined programmatically by Smart Contracts and are outside BringYour’s control other than as set forth herein with regard to upgrade authority. 
+
+**(e) No Direct Legal Relationship Through This Site**. This Site is informational only. Visiting, reading, or using this Site does not make any User a Provider, Network Operator, Protocol participant, or counterparty to BringYour, the Protocol, or any other Network Operator other than as set forth herein. Such roles are assumed solely through direct, voluntary interaction with the Protocol’s Smart Contracts and, where applicable, through independent agreements with Network Operators or software/hardware vendors.
+
+**(f) Information Subject to Change**. Information on this Site regarding Providers and Network Operators describes the Protocol’s current design and is subject to change through the Protocol’s permissionless governance and open-source development. BringYour is not obligated to update this Site to reflect such changes and makes no representation as to the future design of Provider or Network Operator roles.
+
+## 5. UR Token — Non-Investment Disclosure
+**(a) Digital Commodity.** The UR Token is designed to function as a digital asset within a functional crypto system. The Token serves as: (i) a payment and settlement instrument within the Protocol; (ii) a unit of account for Smart Contract-based bandwidth transactions between Users and Providers; and (iii) compensation to Providers for their own bandwidth and resource contributions. The Token is not designed to represent or provide any right to profits, income, dividends, or returns from BringYour’s or any other party's management of a business enterprise.
+
+**(b) Not an Investment Contract or Security.** The UR Token is not offered or sold by BringYour as part of an investment contract, as a security, or as a financial instrument subject to registration under the U.S. Securities Act of 1933 or the U.S. Securities Exchange Act of 1934\. BringYour makes no representations or promises constituting essential managerial efforts upon which any purchaser, recipient, or holder of the Token should reasonably expect profits within the meaning of the *Howey* test and related guidance or law. 
+
+**(c) Consumptive Use Instrument.** The UR Token is intended solely for consumptive use in connection with the Protocol: as a mechanism for accessing Protocol services, compensating Providers for services rendered, and facilitating economic activity within the Protocol’s decentralized architecture. Token rewards received by Providers are compensation for those Providers’ own labor and resources and are not passive investment income.
+
+**(d) Value Not Derived from BringYour’s Efforts.** The value of the UR Token, to the extent any exists, is derived from the programmatic operation of the Protocol as a functional crypto system and from supply and demand dynamics — not from BringYour’s managerial or entrepreneurial efforts as developer, Network Operator, or in any other capacity. No party should acquire, hold, or treat the Token with an expectation of profit derived from BringYour’s efforts. BringYour does not intend to engage in any such efforts, including activities or efforts to support or influence the price of the Token; although it may engage in transactions related to the Token with respect to its limited role as a Network Operator, User, or Provider. 
+
+**(e) No Price Representations.** BringYour makes no representations or warranties regarding the UR Token’s price, market capitalization, trading volume, exchange listings, future appreciation, liquidity, or future market availability. Any secondary market activity in the UR Token is subject to forces entirely outside BringYour’s control and is not supported, endorsed, or guaranteed by BringYour.
+
+**(f) This Site Is Not a Solicitation.** Nothing on this Site constitutes an offer to sell, a solicitation of an offer to buy, or a recommendation to acquire the UR Token or any other digital asset or security. Any information provided on this Site regarding the Token is for informational and educational purposes only.
+
+**(g) Regulatory Status Varies by Jurisdiction.** The regulatory status of the UR Token may vary across jurisdictions. Users are solely responsible for determining the regulatory status of the Token in their jurisdiction and for complying with all applicable laws in connection with any acquisition, holding, use, or transfer of the Token. Nothing on this Site constitutes legal, financial, tax, or investment advice.
+
+**(h) Token Distribution**. Information regarding the Token’s distribution, genesis allocation, and circulating supply may be available in the Protocol documentation accessible on this Site, and is provided solely for transparency and  informational purposes and is not intended to be investment-related information or advice. 
+
+## 6. Secondary Market Links — Non-Solicitation and Broker-Dealer Disclosure
+**(a) Informational Links Only.** To the extent this Site provides links to secondary market venues where UR Tokens may be traded , such links are provided for informational convenience only. The inclusion of any such link does not constitute an endorsement of the linked venue, a recommendation to transact, or a representation by BringYour regarding the suitability, safety, or legality of transacting on such a venue.
+
+**(b) No Broker-Dealer Registration.** BringYour, Inc. is not registered as a broker-dealer with the U.S. Securities and Exchange Commission (“**SEC**”) and does not solicit, recommend, facilitate, or route transactions in UR Tokens or any other digital asset. Nothing on this Site constitutes broker-dealer activity within the meaning of Section 15 of the Securities Exchange Act of 1934\.
+
+**(c) No Custody.** BringYour does not take custody of User assets and does not exercise any discretion over the routing or execution of User transactions, which are entirely programmatic.
+
+**(d) Self-Custodial Transactions.** Users who transact in UR Tokens through secondary market venues and/or the Protocol do so through their own self-custodial wallets and bear all associated risks, including smart contract risk, slippage, liquidity risk, counterparty risk, and regulatory risk.
+
+**(e) Objective Parameters.** Any default transaction parameters presented on or through this Site in connection with secondary market links are based on objective market data and are fully customizable by Users. BringYour does not set, influence, or benefit from any particular transaction routing.
+
+**(f) Conditional Linking.** BringYour reserves the right to remove, modify, or add links to secondary market venues at any time, including in response to changes in applicable law, regulatory guidance, or BringYour's own assessment of legal risk. The availability of any secondary market link on this Site is expressly conditioned on BringYour's ongoing determination that such link is permissible under applicable law and regulatory guidance.
+
+## 7. Separation of Roles
+**(a) No Confusion of Roles.** Users should not interpret statements on this Site regarding the Protocol as representations by BringYour in its capacity as a commercial Network Operator, and vice versa. BringYour's commercial interests as a Network Operator are separate from and do not determine the Protocol’s design, economics, or governance. The Protocol operates fully independently of BringYour’s efforts with respect to either of these roles. 
+
+**(b) Multiple Operators.** The Protocol supports multiple independent Network Operators, and BringYour does not have exclusive commercial rights to the Protocol. Community-driven and independent Network Operators currently participate and will continue to join the Protocol. The existence of multiple Network Operators reflects the Protocol's permissionless and decentralized design.
+
+**(c) Statements on This Site.** Statements on this Site regarding the Protocol, including technical documentation, educational materials, and governance information, reflect BringYour’s current understanding of the Protocol and are provided in BringYour's Ministerial Role as informational host. Such statements should not be interpreted as representations by BringYour regarding the Protocol's future performance, governance decisions made by third parties, or the value of the UR Token. As discussed herein, BringYour intends to wind-down its operations with respect to the Site and role with respect to the Protocol and as a result, this Site may no longer be current or accurate with respect to the Protocol’s operations which are open-source and outside of the control of BringYour. 
+
+## 8. Cross-Site and Third-Party Statements Disclaimer
+**(a) Related Sites.** Statements, documentation, and other materials and any related sites or social media accounts maintained by or on behalf of BringYour are provided for informational and technical reference purposes only. Such materials do not constitute representations or promises by BringYour, Inc. regarding the future value, performance, or investment characteristics of the Protocol or the UR Token, and no reliance should be placed thereon for investment or financial purposes.
+
+**(b) Third-Party Content.** This Site may link to or reference third-party websites, publications, or resources. BringYour does not endorse, control, or take responsibility for any third-party content, and the inclusion of any link does not imply BringYour's endorsement.
+
+**(c) Open-Source Contributions.** The Protocol's codebase is open-source and may be modified, forked, or deployed by third parties. BringYour is not responsible for, and makes no representations regarding, any third-party modifications, forks, or deployments of Protocol code.
+
+**(d) Third-Party Blockchain Disclaimer.** The Protocol operates on the Solana blockchain and relies on third-party infrastructure that BringYour does not control, including the Solana network itself, validators, RPC providers, and related tooling. BringYour is not responsible for any failure, congestion, fork, downtime, security incident, or change in the Solana network or other third-party infrastructure, or for any loss or harm arising therefrom.
+
+## 9. Informational Nature of Content; No Warranties
+**(a) For Information Only.** All content on this Site, including technical documentation, protocol descriptions, economic model explanations, and educational materials, is provided for informational purposes only. BringYour makes no warranty, representation, or guarantee as to the accuracy, completeness, timeliness, reliability, or fitness for any particular purpose of any information on this Site.
+
+**(b) Protocol May Change.** The Protocol is a self-operating, changing, open-source system. Protocol parameters, economics, governance mechanisms, and technical features may be modified. Information on this Site may not reflect the most current state of the Protocol. BringYour is not obligated to update Site content to reflect Protocol changes.
+
+**(c) No Professional Advice.** Nothing on this Site constitutes legal, financial, investment, tax, accounting, technical, or any other professional advice. Users should consult qualified professionals before making any decisions related to the Protocol, the UR Token, or any related technology.
+
+**(d) No Warranty of Availability.** BringYour does not warrant that this Site will be available at all times, uninterrupted, error-free, or free of malicious code. BringYour reserves the right to suspend, modify, or discontinue the Site at any time without notice.
+
+**(e) Forward-Looking Statements**. Information on this Site may include forward-looking statements regarding the Protocol’s development, BringYour’s plans, potential future features, governance transitions, or ecosystem participation. Forward-looking statements are based on current expectations and assumptions and are subject to significant risks and uncertainties, including technical, regulatory, market, and governance risks. Actual outcomes may differ materially from forward-looking statements. BringYour undertakes no obligation to update any forward-looking statement. Users should not place undue reliance on any forward-looking statement, and no forward-looking statement constitutes a representation or promise by BringYour for purposes of the Howey-test analysis or any investment contract analysis.
+
+## 10. OFAC and Sanctions Compliance
+**(a) Representations.** By accessing this Site, User represents and warrants that:
+
+(i) User is not a Specially Designated National or Blocked Person under any sanctions program administered by the U.S. Office of Foreign Assets Control (“**OFAC**”) or any equivalent authority in User’s jurisdiction;
+
+(ii) User is not located in, organized under the laws of, or ordinarily resident in any country or territory subject to comprehensive U.S. government sanctions (including, as of the date hereof, Cuba, Iran, North Korea, Syria, and the Crimea, Donetsk, and Luhansk regions of Ukraine, subject to revision by applicable authorities);
+
+(iii) User is located in a jurisdiction where use of the Protocol and UR Token is in compliance with applicable law; 
+
+(iv) User is not using this Site to facilitate access to the Protocol or the UR Token for or on behalf of any sanctioned person or entity or otherwise in a manner that fails to comply with applicable law; and
+
+(v) User will immediately cease accessing this Site and the Protocol if User becomes subject to any applicable sanctions or failure to comply with applicable law.
+
+**(b) Restriction of Access.** BringYour reserves the right to restrict access to this Site and any secondary market links from specific geographic regions or to specific persons as required by applicable law, including sanctions law, at any time and without prior notice.
+
+## 11. Acceptable Use
+Users may access this Site only for lawful purposes and in accordance with these Terms. Users may not:
+
+(a) use this Site in any manner that violates any applicable federal, state, local, or international law or regulation;
+
+(b) use this Site to transmit or distribute malware, viruses, Trojan horses, or other malicious or harmful code;
+
+(c) use this Site to engage in any activity that infringes upon or violates the intellectual property rights of BringYour or any third party;
+
+(d) attempt to gain unauthorized access to any portion of this Site, BringYour's systems, or any third-party systems connected to this Site;
+
+(e) use automated means (bots, scrapers, crawlers) to access, monitor, or copy any portion of this Site without BringYour's express written consent;
+
+(f) use this Site to engage in any form of fraudulent activity, market manipulation, or conduct intended to artificially influence the price or perception of the UR Token;
+
+(g) use this Site to provide misleading or false information to other users about the Protocol or the UR Token; or
+
+(h) use this Site in any manner that could damage, disable, overburden, or impair BringYour's infrastructure or interfere with other users' access to the Site.
+
+BringYour reserves the right to disable access to this Site for any User who violates these Terms, without notice and without liability.
+
+## 12. Intellectual Property
+**(a) Site Content.** BringYour retains all right, title, and interest in and to all content on this Site that is proprietary to BringYour, including text, graphics, logos, trade names, and software not licensed as open-source. No right, title, or interest in such content is transferred to you by your use of the Site.
+
+**(b) Protocol Code.** The Protocol's codebase is open-source and is made available pursuant to the applicable open-source license(s) governing the Protocol. Nothing in this Agreement limits your rights under any applicable open-source license.
+
+**(c) UR Token Marks.** The “URnetwork,” “UR,” “BringYour,” and associated names, logos, and marks are proprietary to BringYour, Inc. Use of these marks in any manner not expressly authorized by BringYour is prohibited.
+
+**(d) User License.** Subject to these Terms, BringYour grants you a limited, non-exclusive, non-transferable license to access and use the Site for its intended informational purposes only.
+
+## 13. Limitation of Liability
+**(a) DISCLAIMER.** TO THE FULLEST EXTENT PERMITTED BY APPLICABLE LAW, BRINGYOUR, INC. AND ITS OFFICERS, DIRECTORS, EMPLOYEES, AGENTS, AFFILIATES, AND SUCCESSORS (COLLECTIVELY, “**BRINGYOUR PARTIES**”) SHALL NOT BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, PUNITIVE, OR EXEMPLARY DAMAGES, INCLUDING BUT NOT LIMITED TO DAMAGES FOR ECONOMIC LOSS, LOST PROFITS, LOST DATA, BUSINESS INTERRUPTION, LOSS OF GOODWILL, OR ANY OTHER TANGIBLE OR INTANGIBLE LOSSES, ARISING OUT OF OR IN CONNECTION WITH: (I) YOUR ACCESS TO OR USE OF (OR INABILITY TO ACCESS OR USE) THIS SITE OR THE PROTOCOL; (II) ANY INFORMATION OR CONTENT OBTAINED FROM THIS SITE OR THE PROTOCOL; (III) THE PROTOCOL'S OPERATION, SECURITY, OR AVAILABILITY; (IV) USE OF OR FLUCTUATION IN THE VALUE OR LIQUIDITY OF THE UR TOKEN; (V) ANY TRANSACTIONS CONDUCTED THROUGH THIRD-PARTY VENUES LINKED FROM THIS SITE OR VIA THE PROTOCOL; OR (VI) ANY UNAUTHORIZED ACCESS TO OR USE OF BRINGYOUR'S SERVERS OR ANY PERSONAL INFORMATION STORED THEREIN.
+
+**(b) AGGREGATE CAP.** TO THE FULLEST EXTENT PERMITTED BY APPLICABLE LAW, BRINGYOUR’S TOTAL AGGREGATE LIABILITY TO YOU FOR ANY AND ALL CLAIMS ARISING OUT OF OR RELATED TO THESE TERMS OR YOUR USE OF THIS SITE OR THE PROTOCOL SHALL NOT EXCEED ONE HUNDRED DOLLARS (USD $100).
+
+**(c) BASIS OF BARGAIN.** THE LIMITATIONS SET FORTH IN THIS SECTION REFLECT A REASONABLE ALLOCATION OF RISK. BRINGYOUR WOULD NOT PROVIDE ACCESS TO THIS SITE NOR LAUNCH THE PROTOCOL WITHOUT THESE LIMITATIONS. SOME JURISDICTIONS DO NOT ALLOW THE EXCLUSION OR LIMITATION OF CERTAIN DAMAGES; IN SUCH JURISDICTIONS, BRINGYOUR'S LIABILITY SHALL BE LIMITED TO THE FULLEST EXTENT PERMITTED BY LAW.
+
+## 14. Indemnification
+You agree to indemnify, defend, and hold harmless BringYour Parties from and against any and all claims, liabilities, damages, losses, costs, and expenses (including reasonable attorneys’ fees) arising out of or relating to: (a) your access to or use of this Site and the Protocol; (b) your violation of any term of this Agreement; (c) your violation of any applicable law or regulation; (d) any false or misleading representation made by you in connection with your use of this Site or the Protocol; or (e) any claim by a third party arising from your access to or use of this Site.
+
+## 15. Amendments
+BringYour may amend these Terms at any time at its sole discretion. We will make a reasonable effort to provide notice of material changes, which will take effect seven (7) days after notice is provided. All other changes are effective as of the stated “Last Revised” date. Your continued access to or use of the Site following any amendment constitutes acceptance of the amended Terms. If you do not agree to any amendment, you must cease using the Site.
+
+## 16. Governing Law
+This Agreement shall be governed by and construed in accordance with the laws of the State of Delaware, without giving effect to any choice of law or conflict of law provisions. Any legal action or proceeding not subject to arbitration under Section 17 shall be brought exclusively in the state or federal courts located in the State of Delaware, and the parties hereby consent to personal jurisdiction and venue in such courts.
+
+## 17. Dispute Resolution and Arbitration
+**(a) Agreement to Arbitrate.** PLEASE READ THIS SECTION CAREFULLY. IT AFFECTS YOUR LEGAL RIGHTS. EXCEPT AS SET FORTH BELOW, YOU AND BRINGYOUR AGREE THAT ANY DISPUTE, CLAIM, OR CONTROVERSY ARISING OUT OF OR RELATING TO THESE TERMS, THIS SITE, THE PROTOCOL, THE UR TOKEN (TO THE EXTENT ANY DISPUTE INVOLVES BRINGYOUR AS A PARTY), OR THE BREACH, TERMINATION, ENFORCEMENT, INTERPRETATION, OR VALIDITY HEREOF (COLLECTIVELY, “**DISPUTES**”) SHALL BE RESOLVED SOLELY BY BINDING ARBITRATION ON AN INDIVIDUAL BASIS. BY AGREEING TO ARBITRATION, YOU AND BRINGYOUR ARE EACH WAIVING THE RIGHT TO A TRIAL BY JURY AND THE RIGHT TO PARTICIPATE IN A CLASS ACTION, CLASS ARBITRATION, OR REPRESENTATIVE ACTION.
+
+**(b) Arbitration Rules and Procedure.** Any arbitration shall be administered by the **American Arbitration Association (“AAA”)** under its **Consumer Arbitration Rules and Mediation Procedures (as may be amended)** (the “**AAA Consumer Rules**”), available at [www.adr.org](http://www.adr.org). The seat of arbitration shall be Wilmington, Delaware. Hearings shall be conducted virtually by videoconference or telephone as the default format, unless the arbitrator determines that an in-person hearing is warranted. The arbitrator may award any form of individual relief available at law or in equity, consistent with the limitations in these Terms. The arbitrator's decision shall be final and binding and may be entered as a judgment in any court of competent jurisdiction.
+
+**(c) Class Action Waiver.** TO THE FULLEST EXTENT PERMITTED BY LAW, ALL DISPUTES MUST BE BROUGHT IN THE PARTIES' INDIVIDUAL CAPACITY ONLY AND NOT AS A PLAINTIFF OR CLASS MEMBER IN ANY CLASS, COLLECTIVE, CONSOLIDATED, OR REPRESENTATIVE ACTION. THE ARBITRATOR SHALL NOT HAVE AUTHORITY TO CONSOLIDATE MORE THAN ONE PERSON'S CLAIMS OR TO OTHERWISE PRESIDE OVER ANY CLASS, COLLECTIVE, OR REPRESENTATIVE PROCEEDING.
+
+**(d) Small Claims Carve-Out.** Either party may elect to bring an individual Dispute that qualifies for small claims court in a small claims court of competent jurisdiction, provided the Dispute remains in that court and is not removed or appealed to a court of general jurisdiction.
+
+**(e) Injunctive Relief.** Either party may seek emergency injunctive or equitable relief from a court of competent jurisdiction to prevent imminent irreparable harm, without waiving the right to arbitrate the underlying Dispute.
+
+**(f) Governing Law for Arbitration.** The Federal Arbitration Act (9 U.S.C. § 1 et seq.) governs the interpretation and enforcement of this arbitration agreement.
+
+**(g) Opt-Out.** If you do not wish to be subject to this arbitration agreement, you may opt out by sending written notice to [notice@ur.xyz](mailto:notice@ur.xyz) within thirty (30) days of first accessing this Site after the effective date of these Terms. Your opt-out notice must include your name, address, and a clear statement that you do not wish to resolve Disputes through arbitration.
+
+## 18. Miscellaneous
+**(a) Severability.** If any provision of this Agreement is found illegal or unenforceable, such provision shall be modified to the minimum extent necessary to make it enforceable, and the remaining provisions shall continue in full force and effect.
+
+**(b) Waiver.** No failure or delay by BringYour in exercising any right under this Agreement shall constitute a waiver of that right.
+
+**(c) Force Majeure.** BringYour shall not be liable for any failure or delay in performing its obligations under this Agreement to the extent caused by circumstances beyond its reasonable control, including acts of God, natural disasters, pandemics, war, acts of terrorism, government action, power failures, telecommunications failures, cyberattacks, blockchain network failures, or other causes not reasonably within BringYour's control.
+
+**(d) Entire Agreement.** This Agreement constitutes the entire agreement between BringYour and User with respect to User's access to and use of this Site and supersedes all prior and contemporaneous agreements, understandings, and representations with respect to the subject matter hereof.
+
+**(e) No Third-Party Beneficiaries.** This Agreement is for the sole benefit of BringYour and Users. Nothing in this Agreement shall create or be deemed to create any rights in any third party.
+
+**(f) Assignment.** BringYour may assign this Agreement or any of its rights hereunder without restriction. You may not assign this Agreement or any of your rights hereunder without BringYour's prior written consent.
+
+**(g) Notices.** Notices to BringYour under this Agreement should be sent to:
+
+[notice@ur.xyz](mailto:notice@ur.xyz)
+
+BringYour, Inc.  
+2261 Market Street \#5245  
+San Francisco, CA 94114
+
+**(h) Contact for Legal Process.** BringYour, Inc. is incorporated in Delaware. For service of process, BringYour's registered agent in Delaware may be obtained from the Delaware Division of Corporations.
+
+*© 2026 BringYour, Inc. All rights reserved. This document is provided for informational purposes and does not constitute legal, financial, or investment advice.*

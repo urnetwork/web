@@ -7,7 +7,7 @@ import './Legal.css';
 /**
  * LegalSection — a legal document page (terms | privacy | vdp). The full
  * documents render from the generated react/src/data/legal.js; the canonical
- * text lives in docs/legal/ur.xyz/*.md. English only by design — a translated
+ * text lives in docs/legal/*.md. English only by design — a translated
  * contract would be a different contract — so only the chrome (eyebrow) is
  * localized.
  */

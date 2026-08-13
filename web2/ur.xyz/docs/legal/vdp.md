@@ -39,7 +39,7 @@ In participating in our vulnerability disclosure program in good faith, we ask t
 
 ## Official Channels 
 
-Please report security issues via <security@ur.io>, providing all relevant information. The more details you provide, the easier it will be for us to triage and fix the issue.
+Please report security issues via <security@ur.xyz>, providing all relevant information. The more details you provide, the easier it will be for us to triage and fix the issue.
 
 ## Safe Harbor
 

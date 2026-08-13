@@ -1,4 +1,4 @@
-.PHONY: build build-main build-canary sync-price generate-legal generate-agent-assets clean
+.PHONY: build build-main build-canary sync-price generate-legal generate-agent-assets sync-public clean
 
 BUILD_DIR := build
 
@@ -9,7 +9,7 @@ build: build-main build-canary
 sync-price:
 	node ../scripts/sync-price.mjs
 
-# Regenerate react/src/data/legal.js from docs/legal/ur.xyz/*.md (the
+# Regenerate react/src/data/legal.js from docs/legal/*.md (this site's
 # canonical legal documents) so the terms/privacy/vdp pages ship current text.
 generate-legal:
 	node ../scripts/generate-legal.mjs
@@ -19,12 +19,20 @@ generate-legal:
 generate-agent-assets:
 	node ../scripts/generate-agent-assets.mjs
 
-build-main: sync-price generate-legal generate-agent-assets
+# Mirror every static asset from react/public into astro/public. Astro only
+# serves its own public/, so an image added on the react side is missing from
+# the astro build until it is copied — a silent failure that ships a broken
+# <img>. Additive, so the agent assets generated straight into astro/public
+# above are untouched; astro's own robots.txt is preserved by name.
+sync-public:
+	node scripts/sync-public.mjs
+
+build-main: sync-price generate-legal generate-agent-assets sync-public
 	(cd ../react && npm ci)
 	npm ci
 	UR_ENV=main npx astro build
 
-build-canary: sync-price generate-legal generate-agent-assets
+build-canary: sync-price generate-legal generate-agent-assets sync-public
 	(cd ../react && npm ci)
 	npm ci
 	UR_ENV=canary npx astro build

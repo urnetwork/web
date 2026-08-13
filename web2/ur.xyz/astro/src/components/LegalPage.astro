@@ -20,7 +20,7 @@ interface Props {
 }
 
 const { t, lang, dir = 'ltr', doc } = Astro.props;
-// full document from the generated data module (docs/legal/ur.xyz/*.md is
+// full document from the generated data module (docs/legal/*.md is
 // canonical); the i18n entry supplies the meta description
 const d = LEGAL_DOCS[doc];
 const meta = t.legal[doc];
