@@ -28,6 +28,7 @@ function buildPath(name, l) {
                 {SECTION_ROUTES.map(name => (
                     <a href={buildPath(name, lang)} class="footer-link">{t.nav[name]}</a>
                 ))}
+                {lang === 'en' && <a href="/investors" class="footer-link">Investors</a>}
                 <a href={buildPath('docs', lang)} class="footer-link">{t.nav.docs}</a>
                 <a href={buildPath('price', lang)} class="footer-link">{t.nav.price}</a>
                 <a href={buildPath('roadmap', lang)} class="footer-link">{t.nav.roadmap}</a>

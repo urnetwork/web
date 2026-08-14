@@ -1,0 +1,240 @@
+.investor-letter-page {
+    --letter-shell: min(860px, calc(100vw - 64px));
+    --letter-body: min(680px, calc(100vw - 64px));
+    --letter-line: rgba(214, 230, 244, 0.14);
+    --letter-line-strong: rgba(214, 230, 244, 0.23);
+    --letter-soft: rgba(214, 230, 244, 0.74);
+    --letter-muted: rgba(214, 230, 244, 0.5);
+    padding-top: calc(var(--nav-height) * 2);
+    background: var(--brand-bg);
+}
+
+.investor-letter-page h1,
+.investor-letter-page h2,
+.investor-letter-page p {
+    margin-top: 0;
+}
+
+.letter-shell {
+    width: var(--letter-shell);
+    margin-inline: auto;
+}
+
+.letter-back-row {
+    padding-top: 38px;
+}
+
+.letter-back,
+.letter-end a {
+    display: inline-flex;
+    min-height: 44px;
+    align-items: center;
+    gap: 9px;
+    color: var(--letter-soft);
+    font-size: 0.8rem;
+    text-decoration: none;
+}
+
+.letter-back span,
+.letter-end span {
+    color: var(--brand-ur);
+    font-size: 1rem;
+    transition: transform 0.16s ease;
+}
+
+.letter-back:hover span,
+.letter-back:focus-visible span,
+.letter-end a:hover span,
+.letter-end a:focus-visible span {
+    transform: translateX(-3px);
+}
+
+.investor-letter-page a:focus-visible {
+    outline: 2px solid var(--brand-ur);
+    outline-offset: 4px;
+}
+
+.letter-heading {
+    padding-block: 42px 54px;
+    border-bottom: 1px solid var(--letter-line-strong);
+}
+
+.letter-kicker {
+    margin-bottom: 22px;
+    color: var(--brand-ur);
+    font-family: 'PPNeueBit', monospace;
+    font-size: 0.94rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+.letter-heading h1 {
+    max-width: 850px;
+    margin-bottom: 28px;
+    color: var(--brand-white);
+    font-size: clamp(3.25rem, 6vw, 4.6rem);
+    font-weight: 400;
+    letter-spacing: -0.052em;
+    line-height: 0.99;
+}
+
+.letter-dek {
+    max-width: 720px;
+    margin-bottom: 34px;
+    color: var(--letter-soft);
+    font-size: 1.28rem;
+    line-height: 1.5;
+}
+
+.letter-meta {
+    display: flex;
+    gap: 24px;
+    color: var(--letter-muted);
+    font-size: 0.76rem;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+}
+
+.letter-body {
+    width: var(--letter-body);
+    margin: 68px auto 0;
+}
+
+.letter-body p {
+    margin-bottom: 28px;
+    color: var(--letter-soft);
+    font-size: 1.08rem;
+    line-height: 1.78;
+}
+
+.letter-body .letter-lead {
+    color: var(--brand-ui);
+    font-size: 1.34rem;
+    line-height: 1.62;
+}
+
+.letter-body h2 {
+    margin: 62px 0 21px;
+    color: var(--brand-white);
+    font-size: 1.88rem;
+    font-weight: 400;
+    letter-spacing: -0.03em;
+    line-height: 1.15;
+}
+
+.letter-body blockquote {
+    margin: 46px 0;
+    padding: 4px 0 4px 28px;
+    border-left: 3px solid var(--brand-ur);
+}
+
+.letter-body blockquote p {
+    margin: 0;
+    color: var(--brand-white);
+    font-size: 1.86rem;
+    letter-spacing: -0.025em;
+    line-height: 1.25;
+}
+
+.letter-body ul {
+    margin: 4px 0 34px;
+    padding-left: 23px;
+}
+
+.letter-body li {
+    margin: 12px 0;
+    padding-left: 7px;
+    color: var(--letter-soft);
+    font-size: 1.08rem;
+    line-height: 1.62;
+}
+
+.letter-body li::marker {
+    color: var(--brand-ur);
+}
+
+.letter-body .letter-sign-off {
+    margin-top: 54px;
+    color: var(--brand-white);
+}
+
+.letter-end,
+.letter-disclosure {
+    width: var(--letter-body);
+    margin-inline: auto;
+}
+
+.letter-end {
+    margin-top: 72px;
+    padding-top: 28px;
+    border-top: 1px solid var(--letter-line-strong);
+}
+
+.letter-disclosure {
+    margin-top: 38px;
+    padding-bottom: 66px;
+    color: var(--letter-muted);
+    font-size: 0.7rem;
+    line-height: 1.55;
+}
+
+@media (max-width: 720px) {
+    .investor-letter-page {
+        --letter-shell: calc(100vw - 28px);
+        --letter-body: calc(100vw - 28px);
+    }
+
+    .letter-back-row {
+        padding-top: 28px;
+    }
+
+    .letter-heading {
+        padding-block: 30px 42px;
+    }
+
+    .letter-heading h1 {
+        font-size: clamp(2.7rem, 12vw, 3.5rem);
+    }
+
+    .letter-dek {
+        font-size: 1.12rem;
+    }
+
+    .letter-body {
+        margin-top: 48px;
+    }
+
+    .letter-body p {
+        font-size: 1.02rem;
+        line-height: 1.72;
+    }
+
+    .letter-body .letter-lead {
+        font-size: 1.2rem;
+    }
+
+    .letter-body h2 {
+        margin-top: 49px;
+        font-size: 1.7rem;
+    }
+
+    .letter-body blockquote {
+        margin: 38px 0;
+        padding-left: 20px;
+    }
+
+    .letter-body blockquote p {
+        font-size: 1.6rem;
+    }
+
+    .letter-body li {
+        font-size: 1.02rem;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .letter-back span,
+    .letter-end span {
+        transition: none;
+    }
+}
