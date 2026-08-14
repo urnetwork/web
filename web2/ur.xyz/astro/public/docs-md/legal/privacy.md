@@ -4,7 +4,7 @@ Last modified: May 8, 2025
 
 ## Introduction
 
-BringYour, Inc. (**"Company"** or **"We"**) respect your privacy and are committed to protecting it through our compliance with this policy.
+UR Foundation (**"Company"** or **"We"**) respect your privacy and are committed to protecting it through our compliance with this policy.
 
 This policy describes the types of information we may collect from you or that you may provide when you visit the ur.xyz website (our "Products") and our practices for collecting, using, maintaining, protecting, and disclosing that information.
 

@@ -9,29 +9,6 @@ Our trust and safety process is how we create a network for all users to safely 
 The process we use is to combine an automated "frontline" with a catch-all "backline" abuse audit process that preserves privacy. Most issues are resolved automatically by the frontline, which involves a mix of protocol and economic incentives. It involves turning off protocols associated with botnets and copyright abuse, while keeping web and app traffic uncensored and free. All levels are opt-out, meaning there are ways for providers to change the rules. Our stance is that we want to have a safe default, but allow users to have freedom of choice.
 
 
-## Warrant canary
-
-If the [warrant canary](https://docs.ur.io/trust-and-safety/warrant-canary) exists, it means that we confirm:
-
-- BringYour has never turned over our encryption or authentication keys or our customers' encryption or authentication keys to anyone.
-
-- BringYour has never installed any law enforcement software or equipment anywhere on our network.
-
-- BringYour has never provided any law enforcement organization a feed of our customers' content transiting our network.
-
-- BringYour has never modified network content at the request of law enforcement or another third party.
-
-- BringYour has never weakened, compromised, or subverted any of its encryption at the request of law enforcement or another third party.
-
-
-
-## Transparency report
-
-We publish [quarterly statistics](https://docs.ur.io/trust-and-safety/transparency-report) of the number and type of abuse reports, decryptions of the abuse logs, and type of outcomes.
-
-
-
-
 ## Frontline protocol and economic incentives
 
 The frontline are automated rules embedded within the clients and providers. If the client and provider mutually agree to change the rules, it is possible to use different rules. However, it is not possible for one party to to change the rules without the other party, and a mismatch in rules will raise a contract dispute. In this way these rules are the default, but there are ways that two parties can opt-out of the rules. Our stance is that we want to have a safe default, but allow users to have freedom of choice. We explain the directions to change the rules at the end.

@@ -1,12 +1,12 @@
-# BringYour, Inc. Vulnerability Disclosure Policy
+# UR Foundation Vulnerability Disclosure Policy
 
 ## Introduction
 
-BringYour, Inc. welcomes feedback from security researchers and the general public to help improve our security. If you believe you have discovered a vulnerability, privacy issue, exposed data, or other security issues in any of our assets, we want to hear from you. This policy outlines steps for reporting vulnerabilities to us, what we expect, what you can expect from us.
+UR Foundation welcomes feedback from security researchers and the general public to help improve our security. If you believe you have discovered a vulnerability, privacy issue, exposed data, or other security issues in any of our assets, we want to hear from you. This policy outlines steps for reporting vulnerabilities to us, what we expect, what you can expect from us.
 
 ## Systems in Scope
 
-This policy applies to any digital assets owned, operated, or maintained by BringYour, Inc.
+This policy applies to any digital assets owned, operated, or maintained by UR Foundation.
 
 ## Out of Scope
 

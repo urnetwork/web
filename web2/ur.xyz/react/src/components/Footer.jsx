@@ -7,7 +7,7 @@ import { buildPath, navigate, SECTION_ROUTES } from '../router';
  * Footer
  *
  * Minimal footer with the brand mark, section links, external links,
- * copyright, a language selector row, and a short disclaimer.
+ * the source licence, a language selector row, and a short disclaimer.
  * Per the sitemap, all sections should be linked in the footer.
  */
 export default function Footer() {
@@ -90,7 +90,14 @@ export default function Footer() {
                     </nav>
 
                     <div className="footer-meta">
-                        {t.footer.copyright}
+                        <a
+                            href="https://github.com/urnetwork/web/blob/main/LICENSE"
+                            className="footer-meta-link"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                        >
+                            {t.footer.license}
+                        </a>
                     </div>
                 </div>
 

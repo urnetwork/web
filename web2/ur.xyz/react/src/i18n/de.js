@@ -25,7 +25,7 @@ export default {
     footer: {
         github:     'GitHub',
         contact:    'Kontakt',
-        copyright:  '© 2026 BringYour, Inc.',
+        license:    'MPLv2',
         disclaimer: 'Diese Website ist ein quelloffenes Utility-Protokoll, getragen von einer Gemeinschaft von Teilnehmern, und wird getrennt vom Netzbetreiber betrieben, der den Zugang zum Netzwerk verkauft.',
         languagesAria: 'Sprachen',
         terms:      'Nutzungsbedingungen',
@@ -107,15 +107,15 @@ export default {
         eyebrow: 'Rechtliches',
         terms: {
             title: 'Nutzungsbedingungen',
-            body:  'Die Nutzungsbedingungen für ur.xyz, die Informationsseite zum UR-Protokoll, gehostet von BringYour, Inc.'
+            body:  'Die Nutzungsbedingungen für ur.xyz, die Informationsseite zum UR-Protokoll, gehostet von UR Foundation.'
         },
         privacy: {
             title: 'Datenschutzerklärung',
-            body:  'Wie BringYour, Inc. mit Informationen auf ur.xyz umgeht: was erhoben wird, wie es verwendet wird und wie Sie uns erreichen.'
+            body:  'Wie UR Foundation mit Informationen auf ur.xyz umgeht: was erhoben wird, wie es verwendet wird und wie Sie uns erreichen.'
         },
         vdp: {
             title: 'Richtlinie zur Offenlegung von Schwachstellen',
-            body:  'So melden Sie Sicherheitslücken in Assets von BringYour, Inc. — und der Safe Harbor für Forschung in gutem Glauben.'
+            body:  'So melden Sie Sicherheitslücken in Assets von UR Foundation — und der Safe Harbor für Forschung in gutem Glauben.'
         }
     },
 

@@ -36,7 +36,7 @@
 - [URnetwork on Ubiquiti EdgeOS](https://ur.xyz/docs-md/edgeos.md)
 - [ur.xyz Privacy Policy](https://ur.xyz/docs-md/legal/privacy.md)
 - [TERMS OF SERVICE](https://ur.xyz/docs-md/legal/terms.md)
-- [BringYour, Inc. Vulnerability Disclosure Policy](https://ur.xyz/docs-md/legal/vdp.md)
+- [UR Foundation Vulnerability Disclosure Policy](https://ur.xyz/docs-md/legal/vdp.md)
 - [Welcome to URnetwork for Agents](https://ur.xyz/docs-md/mcp/SKILL.md)
 - [Optimized Skill Document: URnetwork for AI Agents](https://ur.xyz/docs-md/mcp/SKILL2.md)
 - [Protocol Research](https://ur.xyz/docs-md/protocol/protocol-research.md)
@@ -45,9 +45,7 @@
 - [URnetwork on MikroTik RouterOS](https://ur.xyz/docs-md/routeros.md)
 - [URnetwork on Raspberry Pi](https://ur.xyz/docs-md/rpi.md)
 - [How to Delete your Account](https://ur.xyz/docs-md/support/delete.md)
-- [Transparency report](https://ur.xyz/docs-md/trust-and-safety/transparency-report.md)
 - [Default Safe: Our Trust and Safety Process](https://ur.xyz/docs-md/trust-and-safety/trust-and-safety.md)
-- [Warrant Canary](https://ur.xyz/docs-md/trust-and-safety/warrant-canary.md)
 
 ## Optional
 

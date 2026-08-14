@@ -24,7 +24,7 @@ export default {
     footer: {
         github:     'GitHub',
         contact:    '联系',
-        copyright:  '© 2026 BringYour, Inc.',
+        license:    'MPLv2',
         disclaimer: '本网站是一个由参与者社区提供支持的开源实用协议，与销售网络访问权的网络运营商分开运行。',
         languagesAria: '语言',
         terms:      '使用条款',
@@ -105,15 +105,15 @@ export default {
         eyebrow: '法律',
         terms: {
             title: '使用条款',
-            body:  'ur.xyz（由 BringYour, Inc. 托管的 UR 协议信息网站）的服务条款。'
+            body:  'ur.xyz（由 UR Foundation 托管的 UR 协议信息网站）的服务条款。'
         },
         privacy: {
             title: '隐私政策',
-            body:  'BringYour, Inc. 如何处理 ur.xyz 上的信息：收集什么、如何使用以及如何联系我们。'
+            body:  'UR Foundation 如何处理 ur.xyz 上的信息：收集什么、如何使用以及如何联系我们。'
         },
         vdp: {
             title: '漏洞披露政策',
-            body:  '如何报告 BringYour, Inc. 资产中的安全漏洞，以及善意研究的安全港政策。'
+            body:  '如何报告 UR Foundation 资产中的安全漏洞，以及善意研究的安全港政策。'
         }
     },
 

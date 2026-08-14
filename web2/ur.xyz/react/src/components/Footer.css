@@ -120,6 +120,22 @@
     opacity: 0.5;
 }
 
+/* The licence id keeps its own casing — "MPLv2", not "MPLV2" — so it opts out
+   of the uppercasing .footer-meta applies to everything else. */
+.footer-meta-link {
+    text-transform: none;
+    text-decoration: none;
+    color: inherit;
+    border-bottom: 1px solid transparent;
+    padding-bottom: 2px;
+    transition: color 0.2s ease, border-color 0.2s ease;
+}
+
+.footer-meta-link:hover {
+    color: var(--brand-white);
+    border-bottom-color: var(--brand-ur);
+}
+
 @media (max-width: 768px) {
     .footer {
         padding: 40px 20px 48px;

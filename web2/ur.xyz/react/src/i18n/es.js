@@ -25,7 +25,7 @@ export default {
     footer: {
         github:     'GitHub',
         contact:    'Contacto',
-        copyright:  '© 2026 BringYour, Inc.',
+        license:    'MPLv2',
         disclaimer: 'Este sitio es un protocolo de utilidad de código abierto impulsado por una comunidad de participantes, operado de forma independiente al operador de red que vende el acceso a la red.',
         languagesAria: 'Idiomas',
         terms:      'Términos de uso',
@@ -107,15 +107,15 @@ export default {
         eyebrow: 'Legal',
         terms: {
             title: 'Términos de uso',
-            body:  'Los Términos de Servicio de ur.xyz, el sitio informativo del protocolo UR alojado por BringYour, Inc.'
+            body:  'Los Términos de Servicio de ur.xyz, el sitio informativo del protocolo UR alojado por UR Foundation.'
         },
         privacy: {
             title: 'Política de privacidad',
-            body:  'Cómo BringYour, Inc. maneja la información en ur.xyz: qué se recopila, cómo se usa y cómo contactarnos.'
+            body:  'Cómo UR Foundation maneja la información en ur.xyz: qué se recopila, cómo se usa y cómo contactarnos.'
         },
         vdp: {
             title: 'Política de divulgación de vulnerabilidades',
-            body:  'Cómo reportar vulnerabilidades de seguridad en los activos de BringYour, Inc., y el puerto seguro para la investigación de buena fe.'
+            body:  'Cómo reportar vulnerabilidades de seguridad en los activos de UR Foundation, y el puerto seguro para la investigación de buena fe.'
         }
     },
 
