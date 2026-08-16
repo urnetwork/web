@@ -1,0 +1,214 @@
+---
+import Base from '../layouts/Base.astro';
+import DisclaimerStatic from '../components/DisclaimerStatic.astro';
+import FooterStatic from '../components/FooterStatic.astro';
+import NavIsland from '../islands/NavIsland.jsx';
+import en from '@react/i18n/en.js';
+import { investorCentre, externalResources } from '../lib/investors.js';
+
+import '@react/components/Nav.css';
+import '../components/InvestorCentre.css';
+
+const t = en;
+const { featured, updates, materials, metrics } = investorCentre;
+---
+<Base
+    title="Investor Centre | UR"
+    description="UR investor updates, materials, metrics and public research."
+    lang="en"
+    noindex
+>
+    <div class="app">
+        <DisclaimerStatic />
+        <NavIsland activeRoute="investors" lang="en" client:load />
+
+        <main id="main" class="investor-page">
+            <header class="investor-hero investor-shell">
+                <h1>Investor Centre</h1>
+                <p class="investor-updated">
+                    <span aria-hidden="true"></span>
+                    Updated <time datetime={investorCentre.updatedIso}>{investorCentre.updated}</time>
+                </p>
+            </header>
+
+            <section class="investor-about investor-shell" aria-labelledby="about-ur">
+                <h2 id="about-ur">About UR</h2>
+                <p>{investorCentre.about}</p>
+            </section>
+
+            <section class="investor-library investor-shell" aria-labelledby="investor-resources">
+                <h2 id="investor-resources">Investor resources</h2>
+
+                <a class="featured-letter" href={featured.href}>
+                    <p class="resource-meta">
+                        <time datetime={featured.dateIso}>{featured.date}</time>
+                        <span aria-hidden="true">·</span>
+                        {featured.kind}
+                        <span aria-hidden="true">·</span>
+                        {featured.readTime}
+                    </p>
+                    <div class="featured-letter__content">
+                        <h3>{featured.title}</h3>
+                        <div class="featured-letter__details">
+                            <p>{featured.summary}</p>
+                            <span class="text-action">Read the letter <i aria-hidden="true">→</i></span>
+                        </div>
+                    </div>
+                </a>
+
+                <div class="resource-columns">
+                    <section class="resource-group" aria-labelledby="latest-updates">
+                        <h3 id="latest-updates">Latest updates</h3>
+                        <div class="resource-list">
+                            {updates.map(item => (
+                                <a
+                                    class="resource-row"
+                                    href={item.href}
+                                    target={item.external ? '_blank' : undefined}
+                                    rel={item.external ? 'noopener noreferrer' : undefined}
+                                >
+                                    <span class={`format-icon format-icon--${item.format.toLowerCase()}`} aria-hidden="true"></span>
+                                    <span class="resource-row__copy">
+                                        <strong>{item.title}</strong>
+                                        <small>{item.date} · {item.format}</small>
+                                    </span>
+                                    <span class="resource-arrow" aria-hidden="true">{item.external ? '↗' : '→'}</span>
+                                </a>
+                            ))}
+                        </div>
+                    </section>
+
+                    <section class="resource-group" aria-labelledby="materials">
+                        <h3 id="materials">Materials</h3>
+                        <div class="resource-list">
+                            {materials.map(item => item.href ? (
+                                <a class="resource-row" href={item.href}>
+                                    <span class="format-icon format-icon--document" aria-hidden="true"></span>
+                                    <span class="resource-row__copy">
+                                        <strong>{item.title}</strong>
+                                        <small>{[item.detail, item.readTime].filter(Boolean).join(' · ')}</small>
+                                    </span>
+                                    <span class="resource-arrow" aria-hidden="true">↗</span>
+                                </a>
+                            ) : (
+                                <div class="resource-row resource-row--static">
+                                    <span class="format-icon format-icon--document" aria-hidden="true"></span>
+                                    <span class="resource-row__copy">
+                                        <strong>{item.title}</strong>
+                                        <small>{[item.detail, item.readTime].filter(Boolean).join(' · ')}</small>
+                                    </span>
+                                    <span class="resource-arrow" aria-hidden="true">↗</span>
+                                </div>
+                            ))}
+                        </div>
+                    </section>
+                </div>
+            </section>
+
+            <section class="investor-metrics investor-shell" aria-labelledby="metrics-title">
+                <h2 id="metrics-title">Metrics</h2>
+                <div class="metric-grid">
+                    {metrics.map(metric => (
+                        <article class="metric">
+                            <p class="metric__label">{metric.label}</p>
+                            <p class="metric__value">
+                                <strong>
+                                    <span data-count={metric.value} data-decimals={metric.decimals}>{metric.value}</span>
+                                    {metric.suffix && <span class="metric__suffix"> {metric.suffix}</span>}
+                                </strong>
+                                {metric.usd && <small>({metric.usd})</small>}
+                            </p>
+                            <p class="metric__context">{metric.context}</p>
+                            <p class="metric__change">{metric.change}</p>
+                        </article>
+                    ))}
+                </div>
+            </section>
+
+            <section class="investor-explore investor-shell" aria-label="Network and research resources">
+                <div class="explore-panel">
+                    <h2>Explore the network</h2>
+                    <p>Follow network performance on the UR Dashboard and view subnet market data through TaoMarketCap and taostats.</p>
+                    <nav class="network-links" aria-label="Network data sources">
+                        <a href={externalResources.dashboard} target="_blank" rel="noopener noreferrer">
+                            UR Dashboard <span aria-hidden="true">↗</span>
+                        </a>
+                        <a class="network-brand network-brand--tmc" href={externalResources.taoMarketCap} target="_blank" rel="noopener noreferrer">
+                            <img src="/investors/taomarketcap.svg" alt="TaoMarketCap" />
+                            <span aria-hidden="true">↗</span>
+                        </a>
+                        <a class="network-brand network-brand--taostats" href={externalResources.taostats} target="_blank" rel="noopener noreferrer">
+                            <img src="/investors/taostats.svg" alt="taostats" />
+                            <span aria-hidden="true">↗</span>
+                        </a>
+                    </nav>
+                </div>
+
+                <div class="explore-panel explore-panel--research">
+                    <h2>Research UR</h2>
+                    <p>Ask ChatGPT or Claude about UR's products, research, subnet development, published updates and public materials.</p>
+                    <nav class="research-links" aria-label="Research UR with AI">
+                        <a href={externalResources.chatgpt} target="_blank" rel="noopener noreferrer">
+                            <img src="/investors/openai.svg" alt="" width="16" height="16" />
+                            ChatGPT
+                        </a>
+                        <a href={externalResources.claude} target="_blank" rel="noopener noreferrer">
+                            <img src="/investors/claude.svg" alt="" width="16" height="16" />
+                            Claude
+                        </a>
+                    </nav>
+                </div>
+            </section>
+
+            <aside class="investor-disclosure investor-shell" aria-label="Investment disclaimer">
+                This material is provided for informational purposes only and does not constitute an offer, solicitation or investment advice.
+            </aside>
+        </main>
+
+        <FooterStatic t={t} lang="en" />
+    </div>
+</Base>
+
+<script>
+    const counters = Array.from(document.querySelectorAll('[data-count]'));
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    const formatCounter = (value, decimals) => value.toLocaleString('en-US', {
+        minimumFractionDigits: decimals,
+        maximumFractionDigits: decimals,
+    });
+
+    const finishCounter = (element) => {
+        const value = Number(element.dataset.count);
+        const decimals = Number(element.dataset.decimals || 0);
+        element.textContent = formatCounter(value, decimals);
+    };
+
+    const animateCounter = (element) => {
+        const target = Number(element.dataset.count);
+        const decimals = Number(element.dataset.decimals || 0);
+        const duration = 900;
+        const started = performance.now();
+
+        const frame = (now) => {
+            const progress = Math.min((now - started) / duration, 1);
+            const eased = 1 - Math.pow(1 - progress, 3);
+            element.textContent = formatCounter(target * eased, decimals);
+            if (progress < 1) requestAnimationFrame(frame);
+        };
+
+        requestAnimationFrame(frame);
+    };
+
+    if (reduceMotion || !('IntersectionObserver' in window)) {
+        counters.forEach(finishCounter);
+    } else if (counters.length) {
+        const metricSection = document.querySelector('.investor-metrics');
+        const observer = new IntersectionObserver((entries) => {
+            if (!entries.some(entry => entry.isIntersecting)) return;
+            counters.forEach(animateCounter);
+            observer.disconnect();
+        }, { threshold: 0.3 });
+        if (metricSection) observer.observe(metricSection);
+    }
+</script>

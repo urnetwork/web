@@ -320,7 +320,7 @@ export default function Nav({ disclaimerVisible, activeRoute }) {
 
                 <PriceTicker t={t} code={code} price={price} denom={denom} setDenom={setDenom} />
 
-                {/* Hamburger — only shown ≤900px (see Nav.css). */}
+                {/* Hamburger is shown at compact desktop and tablet widths (see Nav.css). */}
                 <button
                     type="button"
                     ref={menuBtnRef}
@@ -335,7 +335,7 @@ export default function Nav({ disclaimerVisible, activeRoute }) {
             </div>
         </header>
 
-            {/* Mobile navigation drawer (≤900px). Rendered as a sibling of the
+            {/* Compact navigation drawer. Rendered as a sibling of the
                 header — NOT inside it — because the nav's backdrop-filter makes
                 it the containing block for fixed descendants, which would pin
                 the drawer to the 64px bar instead of the viewport. Always in the
@@ -421,6 +421,14 @@ function PrimaryLinks({ t, code, route, onHome, whitepaperActive, onWhitepaper, 
                     {t.nav[name]}
                 </a>
             ))}
+            {code === 'en' && (
+                <a
+                    href="/investors"
+                    className={`nav-link ${route.name === 'investors' ? 'is-active' : ''}`}
+                >
+                    Investors
+                </a>
+            )}
             <a
                 href={buildPath({ name: 'docs', slug: null }, code)}
                 className={`nav-link ${route.name === 'docs' || route.name === 'api' ? 'is-active' : ''}`}

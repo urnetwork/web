@@ -542,8 +542,9 @@
     .nav-inner > .nav-cta .nav-spark { width: auto; flex: 0 0 auto; }
 }
 
-/* Below 900px the entire link cluster collapses into the drawer. */
-@media (max-width: 900px) {
+/* Collapse before the full link cluster and usage pill begin to compete for
+   space on tablet and compact laptop widths. */
+@media (max-width: 1120px) {
     .nav-inner { padding: 0 18px; gap: 16px; }
     .nav-logo { height: 22px; }
 

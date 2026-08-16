@@ -1,0 +1,97 @@
+---
+import Base from '../../layouts/Base.astro';
+import DisclaimerStatic from '../../components/DisclaimerStatic.astro';
+import FooterStatic from '../../components/FooterStatic.astro';
+import NavIsland from '../../islands/NavIsland.jsx';
+import en from '@react/i18n/en.js';
+
+import '@react/components/Nav.css';
+import '../../components/InvestorLetter.css';
+
+const t = en;
+---
+<Base
+    title="August Investment Letter | UR"
+    description="The August 2026 investment letter from UR."
+    lang="en"
+    noindex
+>
+    <div class="app">
+        <DisclaimerStatic />
+        <NavIsland activeRoute="investors" lang="en" client:load />
+
+        <main id="letter" class="investor-letter-page">
+            <div class="letter-shell letter-back-row">
+                <a class="letter-back" href="/investors"><span aria-hidden="true">←</span> Investor Centre</a>
+            </div>
+
+            <header class="letter-heading letter-shell">
+                <p class="letter-kicker">August Investment Letter</p>
+                <h1>The network should belong to the people who make it useful.</h1>
+                <p class="letter-dek">Why UR built product demand before the subnet, how usage becomes conviction, and what we will report from here.</p>
+                <div class="letter-meta">
+                    <time datetime="2026-08-13">13 August 2026</time>
+                    <span>4 min read</span>
+                </div>
+            </header>
+
+            <article class="letter-body">
+                <p class="letter-lead">UR began with a practical premise: demand for private, reliable connectivity already exists. The opportunity is not to invent that demand, but to route it through infrastructure owned and operated by the people who make the network useful.</p>
+
+                <p>That premise shaped the order in which we built. We started with products people could use, then developed the network that could serve them. Today, ur.io, vpn.dev and ww.dev are designed to purchase capacity from the same underlying provider network. The products create demand; the subnet measures the work; providers compete to deliver it.</p>
+
+                <h2>Demand before emissions</h2>
+
+                <p>Many networks begin with supply. Incentives attract infrastructure, and the hope is that applications and users arrive later. UR is taking the opposite route. We want product activity to be visible in the economics of the subnet from the beginning.</p>
+
+                <p>Over the latest 30-day period, UR products deposited α18,420 to purchase network capacity and the network transferred 39.6 TB of data. Those figures will move as products, routing and measurement mature. What matters is the relationship between them: product usage should create measurable demand for the network rather than sit beside it as a separate story.</p>
+
+                <blockquote>
+                    <p>The network is valuable when independent supply meets demand that would exist without the incentive system.</p>
+                </blockquote>
+
+                <h2>What conviction tells us</h2>
+
+                <p>Total conviction directed toward UR is currently α1.42 million. Of that amount, α640,000 comes from the owner coldkey and the balance comes from external participants. We publish both figures because the total is more useful when its composition is visible.</p>
+
+                <p>Conviction is a signal, not a conclusion. It reflects capital choosing to remain committed over time, but it does not replace product performance, network quality or transparent reporting. We will continue to present conviction alongside the demand and usage that give the signal context.</p>
+
+                <h2>A smaller, more useful reporting surface</h2>
+
+                <p>This Investor Centre is intended to be the shortest path to the information that matters. Investors should not have to reconstruct the state of UR from Discord, Telegram, X and a collection of dashboards.</p>
+
+                <p>Our regular updates will focus on a compact set of questions:</p>
+
+                <ul>
+                    <li>How much product demand reached the network?</li>
+                    <li>How much useful traffic did the network carry?</li>
+                    <li>How is conviction changing, and who is contributing it?</li>
+                    <li>What changed in the products, research and network?</li>
+                    <li>What risks or dependencies deserve attention?</li>
+                </ul>
+
+                <p>Live market data belongs on specialist tools. Detailed network telemetry belongs on the UR Dashboard. This page will remain curated: current signals at the top, the latest written and video updates, and a small library of primary materials.</p>
+
+                <h2>What comes next</h2>
+
+                <p>Our near-term work is focused on connecting more product activity to measurable network demand, improving the quality of provider-side reporting and making the relationship between usage and subnet economics easier to verify.</p>
+
+                <p>We will also keep improving the quality of the public record. That includes dated updates, durable links, definitions beside the metrics and source material that can be examined directly or queried through the research tools linked from the Investor Centre.</p>
+
+                <p>The objective is straightforward: fewer claims that require trust, and more evidence that can be checked.</p>
+
+                <p class="letter-sign-off">The UR team</p>
+            </article>
+
+            <nav class="letter-end" aria-label="Return to Investor Centre">
+                <a href="/investors"><span aria-hidden="true">←</span> Back to Investor Centre</a>
+            </nav>
+
+            <aside class="letter-disclosure" aria-label="Investment disclaimer">
+                This material is provided for informational purposes only and does not constitute an offer, solicitation or investment advice.
+            </aside>
+        </main>
+
+        <FooterStatic t={t} lang="en" />
+    </div>
+</Base>
