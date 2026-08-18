@@ -1,5 +1,6 @@
 import React from 'react';
 import './CommunityFoot.css';
+import { PARTNERS, SUPPORTERS } from '../lib/organizations';
 
 /**
  * Supporter / partner logo walls at the bottom of the community page.
@@ -10,16 +11,6 @@ import './CommunityFoot.css';
  * (dict passed as `t`), so the Astro build renders it statically per
  * language and the React SPA reuses it.
  */
-const SUPPORTERS = [
-    { name: 'URnetwork', href: 'https://ur.io', logo: '/orgs/urnetwork.svg' },
-    { name: 'Pylon Partners', href: 'https://pylon.partners' }
-];
-
-const PARTNERS = [
-    { name: 'TAO.com', href: 'https://tao.com', logo: '/orgs/tao.png', showName: true },
-    { name: 'Macrocosmos', href: 'https://www.macrocosmos.ai', logo: '/orgs/macrocosmos.svg' }
-];
-
 function OrgWall({ title, orgs }) {
     return (
         <div className="community-orgs">

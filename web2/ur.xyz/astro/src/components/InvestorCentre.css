@@ -90,6 +90,11 @@
     line-height: 1.52;
 }
 
+.investor-about__copy {
+    display: grid;
+    gap: 1.15em;
+}
+
 .investor-library {
     padding-block: 54px 66px;
     border-top: 1px solid var(--investor-line-strong);

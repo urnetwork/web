@@ -1,7 +1,6 @@
 # ur.xyz — the UR protocol information site. Open by default, for people and
 # for agents.
 # LLM guide: https://ur.xyz/llms.txt  (single-fetch: https://ur.xyz/llms-full.txt)
-# Machine-readable price sheet: https://ur.xyz/price.yml  (RSS: /price.rss)
 
 User-agent: *
 Allow: /

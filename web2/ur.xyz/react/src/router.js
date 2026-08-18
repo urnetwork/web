@@ -32,7 +32,7 @@ export function splitPath(pathname) {
 }
 
 /** Section names that map 1:1 to top-level paths (e.g. /providers). */
-export const SECTION_ROUTES = ['operators', 'miners', 'validators', 'research', 'community'];
+export const SECTION_ROUTES = ['operators', 'miners', 'validators', 'research'];
 
 /** Legal documents — top-level paths, linked from the footer only. */
 export const LEGAL_ROUTES = ['terms', 'privacy', 'vdp'];
@@ -54,7 +54,6 @@ export function parseRoute(pathname) {
     }
     if (bare === 'api') return { name: 'api', slug: null };
     if (bare === 'price') return { name: 'price', slug: null };
-    if (bare === 'roadmap') return { name: 'roadmap', slug: null };
     if (LEGAL_SET.has(bare)) return { name: bare, slug: null };
     return { name: 'home', slug: null };
 }
@@ -72,7 +71,6 @@ export function buildPath(route, lang) {
     }
     if (route.name === 'api') return `${prefix}/api`;
     if (route.name === 'price') return `${prefix}/price`;
-    if (route.name === 'roadmap') return `${prefix}/roadmap`;
     if (LEGAL_SET.has(route.name)) return `${prefix}/${route.name}`;
     return prefix || '/';
 }

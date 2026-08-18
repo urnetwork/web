@@ -1,10 +1,10 @@
 ---
 import Base from '../../layouts/Base.astro';
 import DisclaimerStatic from '../../components/DisclaimerStatic.astro';
-import Section from '../../components/Section.astro';
-import WhitepaperClauses from '../../components/WhitepaperClauses.astro';
 import FooterStatic from '../../components/FooterStatic.astro';
+import RoleBlocks from '../../components/RoleBlocks.astro';
 import HeroIsland from '../../islands/HeroIsland.jsx';
+import HomepageIntro from '@react/components/HomepageIntro.jsx';
 import NetworkDiagram from '@react/components/NetworkDiagram.jsx';
 import { NON_EN_LANGS, LANGS, getDict } from '../../lib/i18n.js';
 
@@ -16,18 +16,27 @@ const { lang } = Astro.params;
 const t = await getDict(lang);
 const dir = LANGS[lang]?.dir || 'ltr';
 ---
-<Base title={`UR — ${t.nav.tagline}`} lang={lang} dir={dir} alternate={{ href: '/whitepaper.md', type: 'text/markdown' }}>
+<Base title={`UR | ${t.nav.tagline}`} lang={lang} dir={dir}>
     <div class="app">
-        <DisclaimerStatic />
+        <DisclaimerStatic t={t} />
         <HeroIsland lang={lang} client:load />
 
-        <main>
-            <Section id="whitepaper" eyebrow={t.whitepaper.eyebrow} title={t.whitepaper.title} variant="whitepaper">
+        <main class="landing-main">
+            <HomepageIntro copy={t} />
+            <section class="landing-overview" aria-label={t.homepage.diagramAria}>
                 <NetworkDiagram client:load active="subnet" lang={lang} />
-                <WhitepaperClauses clauses={t.whitepaper.clauses} source={t.whitepaper.source} />
-            </Section>
+                <RoleBlocks t={t} lang={lang} />
+            </section>
         </main>
 
         <FooterStatic t={t} lang={lang} />
     </div>
 </Base>
+
+<style>
+    .landing-main { position: relative; background: var(--brand-bg); }
+    .landing-overview { width: min(1180px, calc(100% - 64px)); margin: 0 auto; padding: 120px 0 0; }
+    @media (max-width: 767px) {
+        .landing-overview { width: calc(100% - 40px); padding-top: 88px; }
+    }
+</style>

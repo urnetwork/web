@@ -3,7 +3,7 @@
 // everywhere else too.
 export default {
     nav: {
-        whitepaper: 'Whitepaper',
+        whitepaper: 'Litepaper',
         operators:  'Operators',
         miners:     'Miners',
         validators: 'Validators',
@@ -12,6 +12,7 @@ export default {
         price:      'Usage Cost',
         docs:       'Docs',
         roadmap:    'Roadmap',
+        network:    'Network',
         tagline:    'Own your privacy. Own your network.',
         languageMenu: 'Language',
         menu:         'Menu',
@@ -31,7 +32,44 @@ export default {
         languagesAria: 'Languages',
         terms:      'Terms of Use',
         privacy:    'Privacy Policy',
-        vdp:        'VDP'
+        vdp:        'VDP',
+        protocol:   'Protocol',
+        community:  'Community',
+        legal:      'Legal',
+        learn:      'Learn',
+        resources:  'Resources',
+        connect:    'Connect',
+        bittensorDiscord: 'Bittensor Discord',
+        brandKit:   'Brand kit'
+    },
+
+    disclaimer: {
+        before: 'UR is an open source protocol powering network infrastructure, maintained by its community. For URnetwork products (eg: VPN), go to'
+    },
+
+    homepage: {
+        intro: 'UR subnet is a privacy network built on Bittensor. The subnet pays the people who use and contribute to it. Operators run servers and deposit alpha to route traffic. Miners carry encrypted traffic and earn emissions. Validators re-measure the network, verify accuracy, and earn emissions.',
+        diagramAria: 'How the UR network works',
+        rolesEyebrow: 'Participate in the network',
+        rolesTitle: 'Three roles. One measured network.',
+        roles: {
+            operators: {
+                name: 'Operators',
+                body: "Operators run the privacy servers and the verification endpoint. They deposit against expected traffic, co-sign each measured path, and commit the payout list that splits rewards among their miners. Deposits go into a locked reserve, and operators never hold anyone else's funds.",
+                explore: 'Explore Operators'
+            },
+            miners: {
+                name: 'Miners',
+                body: 'Miners carry the traffic. They run nodes that route encrypted traffic for one or more operators, and they are paid from subnet emissions based on the capacity they contribute.',
+                explore: 'Explore Miners'
+            },
+            validators: {
+                name: 'Validators',
+                body: 'Validators re-measure the network. They run the routing-verification protocol and score each operator pool on demand and measured quality. They earn subnet emissions for accurate scoring.',
+                explore: 'Explore Validators'
+            }
+        },
+        whitepaperCta: 'For more detail, read the litepaper'
     },
 
     // Stat labels are rendered verbatim (no CSS text-transform) so the α
@@ -46,7 +84,8 @@ export default {
         stakedInContract:'STAKED IN CONTRACT (α)',
         demandDeposits:  'DEMAND DEPOSITS / BLOCK (α)',
         minerEmissions:  'MINER EMISSIONS / BLOCK (α)',
-        networkOperators:'NETWORK OPERATORS'
+        networkOperators:'NETWORK OPERATORS',
+        testnet:         'Status: TESTNET. Data shows testnet values only.'
     },
 
     sim: {
@@ -120,7 +159,7 @@ export default {
     },
 
     whitepaper: {
-        eyebrow: 'Whitepaper',
+        eyebrow: 'Litepaper',
         title:   'A privacy network, coordinated on Bittensor.',
         clauses: [
             {
@@ -139,7 +178,7 @@ export default {
                     'Network operators run the privacy servers and the verification endpoint. An operator deposits into the subnet, co-signs each measured path, and commits a payout list that splits its rewards among the miners attached to it. An operator directs where its rewards go but never holds anyone else\'s funds.',
                     'Miners are the ingress and egress of the network. They run a safe-by-default security model, block known-malicious IPs, and route only encrypted traffic. A miner carries traffic for one or more operators and is paid for the routable capacity it contributes.',
                     'Validators are independent. Each stakes its own UR, runs the routing-verification protocol, and scores every operator\'s pool by demand and measured quality. Validators earn the network\'s native dividends for accurate, consensus-aligned scoring — no operator owns a validator, and the set is permissionless.',
-                    'The subnet owner — BringYour, Inc. — governs the settlement contract and operates the network\'s reserve. That role is transitional: control begins centralized-but-bounded and progressively decentralizes (clause V).'
+                    'The Subnet Owner governs the settlement contract and operates the network\'s reserve. That role is transitional: control begins centralized-but-bounded and progressively decentralizes (clause V).'
                 ]
             },
             {
@@ -149,7 +188,7 @@ export default {
                     'UR is the subnet\'s native token — the unit of account for deposits, emission, and settlement. It is a utility token for coordinating and paying for network resources; it is not designed to represent or provide any right to profits, income, or returns.',
                     'New UR is emitted by Bittensor\'s coinbase each cycle and split three ways:',
                     { type: 'table', head: ['Stream', 'Share', 'Recipients'], rows: [
-                        ['Owner',      '18%', 'BringYour, Inc. — subnet owner and network reserve'],
+                        ['Owner',      '18%', 'Subnet Owner'],
                         ['Miners',     '41%', 'Miners — through operator pools and top-level miner slots'],
                         ['Validators', '41%', 'Independent validators — native dividends for accurate scoring']
                     ]},
@@ -182,7 +221,6 @@ export default {
                 ]
             }
         ],
-        source: { label: 'Read the full whitepaper', href: 'https://github.com/urfoundation/sn/' }
     },
 
     operators: {
@@ -194,7 +232,7 @@ export default {
             { tag: '01', title: 'Run the servers',    body: 'Operators run the privacy servers and the /verify endpoint that co-signs each measured path — the coordination layer between users and the miners that carry the traffic.' },
             { tag: '02', title: 'Signal real demand',  body: 'Operators deposit UR sized to their real usage. Every deposit is conviction stake locked in the buyback reserve — never redistributed — so it is a costly, revenue-backed signal that validators weight when they score the pools.' },
             { tag: '03', title: 'Direct the payouts',  body: 'Each settlement period an operator commits a Merkle payout list that splits its pool among its miners. It directs the split but never takes custody — every miner claims its share directly from the contract.' },
-            { tag: '04', title: 'Get started',         body: 'Register a network-operator key, run the /verify server, and deposit to begin. Operator admission is owner-gated during the launch phase.', href: 'https://ur.xyz', linkLabel: 'Operator docs' }
+            { tag: '04', title: 'Get started',         body: 'Register a network-operator key, run the /verify server, and deposit to begin. Operator admission is owner-gated during the launch phase.' }
         ],
         directoryTitle: 'Network operators',
         directoryNote:  'Ranked by total networks. Stats are read live from each operator\'s public feed; the icons link to the operator\'s app on each store.',
@@ -265,8 +303,8 @@ export default {
         ],
         competition: {
             eyebrow: 'Algo competition — powered by Apex (SN1)',
-            body: 'Aiming to ship the Apex algo competition by end of month with the 25 launch; targeting a measurable 10–20% average latency improvement on the matchmaking / routing algorithm.',
-            cta: 'Join Research'
+            body: 'Upcoming Apex algo competition with subnet launch; targeting a measurable 10–20% average latency improvement on the matchmaking / routing algorithm.',
+            cta: 'Coming soon'
         },
         datasetsLabel: 'Datasets',
         datasetBlock: 'Block {n}',

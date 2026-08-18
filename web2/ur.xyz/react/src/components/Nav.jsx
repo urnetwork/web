@@ -1,108 +1,33 @@
 import React, { useEffect, useRef, useState } from 'react';
 import './Nav.css';
 import { useLanguage, LANG_ORDER } from '../i18n';
-import { buildPath, navigate, useRoute, SECTION_ROUTES } from '../router';
-import { useAlphaPrice, usePriceDenom } from '../lib/usePrice';
+import { buildPath, navigate, useRoute } from '../router';
+import { useAlphaPrice } from '../lib/usePrice';
 
-// Header sections that appear as nav links — each maps to its own page.
-const NAV_SECTIONS = SECTION_ROUTES;
+const NETWORK_LINKS = [
+    'operators',
+    'miners',
+    'validators',
+];
 
-const SPARK_W = 78;
-const SPARK_H = 14;
-
-// Plausible-looking baselines for the seeded fake history. The first real
-// sample from the simulation will simply slide in from the right, dropping
-// the oldest seeded value off the left.
-const SEED_BASE = { gb: 0.0008, user: 0.025 };
-
-// Display the price rounded to at most 2 decimal places. A "<" or ">"
-// prefix indicates that the actual value is below or above the rounded
-// display, so a fixed-width slot can communicate sub-cent movement
-// without ever lengthening the string.
-const fmtCost = (n) => {
-    if (!isFinite(n)) return '0';
-    const rounded = Math.round(n * 100) / 100;
-    const str = rounded.toFixed(2).replace(/\.?0+$/, '') || '0';
-    const eps = 1e-9;
-    let prefix = '';
-    if (n < rounded - eps) prefix = '<';
-    else if (n > rounded + eps) prefix = '>';
-    return prefix + str;
-};
-
-function Sparkline({ series, width = SPARK_W, height = SPARK_H }) {
-    if (series.length < 2) {
-        return (
-            <svg
-                className="nav-spark-svg"
-                width={width}
-                height={height}
-                viewBox={`0 0 ${width} ${height}`}
-            />
-        );
-    }
-
-    const min = Math.min(...series);
-    const max = Math.max(...series);
-    const range = Math.max(max - min, 1e-9);
-    // A constant series (the α price is fixed until the sheet changes)
-    // draws as a centered flat line rather than hugging the bottom edge.
-    const flat = max - min < 1e-12;
-    const padY = 1.5;
-
-    const points = series
-        .map((v, i) => {
-            const x = (i / (series.length - 1)) * width;
-            const y = flat
-                ? height / 2
-                : height - padY - ((v - min) / range) * (height - 2 * padY);
-            return `${x.toFixed(2)},${y.toFixed(2)}`;
-        })
-        .join(' ');
-
-    return (
-        <svg
-            className="nav-spark-svg"
-            width={width}
-            height={height}
-            viewBox={`0 0 ${width} ${height}`}
-            preserveAspectRatio="none"
-        >
-            <polyline
-                fill="none"
-                stroke="#F8F8F8"
-                strokeWidth="1"
-                strokeLinejoin="round"
-                strokeLinecap="round"
-                points={points}
-            />
-        </svg>
-    );
-}
-
-/**
- * Compact language switcher — a button labeled with the current code
- * that opens a small dropdown listing every supported language.
- */
 function LanguageSelector() {
-    const { code, setLang, langs, order } = useLanguage();
-    const { t } = useLanguage();
+    const { code, setLang, langs, order, t } = useLanguage();
     const [open, setOpen] = useState(false);
     const ref = useRef(null);
 
     useEffect(() => {
-        if (!open) return;
-        const onPointer = (e) => {
-            if (ref.current && !ref.current.contains(e.target)) setOpen(false);
+        if (!open) return undefined;
+        const closeOutside = (event) => {
+            if (ref.current && !ref.current.contains(event.target)) setOpen(false);
         };
-        const onKey = (e) => {
-            if (e.key === 'Escape') setOpen(false);
+        const closeOnEscape = (event) => {
+            if (event.key === 'Escape') setOpen(false);
         };
-        document.addEventListener('mousedown', onPointer);
-        document.addEventListener('keydown', onKey);
+        document.addEventListener('mousedown', closeOutside);
+        document.addEventListener('keydown', closeOnEscape);
         return () => {
-            document.removeEventListener('mousedown', onPointer);
-            document.removeEventListener('keydown', onKey);
+            document.removeEventListener('mousedown', closeOutside);
+            document.removeEventListener('keydown', closeOnEscape);
         };
     }, [open]);
 
@@ -111,29 +36,27 @@ function LanguageSelector() {
             <button
                 type="button"
                 className="nav-lang-toggle"
-                onClick={() => setOpen(o => !o)}
+                onClick={() => setOpen(value => !value)}
                 aria-haspopup="listbox"
                 aria-expanded={open}
-                aria-label={t.nav.languageMenu}
+                aria-label={t.nav.languageMenu || 'Choose language'}
             >
                 {langs[code].label}
-                <span className="nav-lang-caret" aria-hidden="true">▾</span>
+                <span aria-hidden="true">{'\u25BE'}</span>
             </button>
-
             {open && (
-                <ul className="nav-lang-menu" role="listbox" aria-label={t.nav.languageMenu}>
-                    {(order || LANG_ORDER).map(c => (
-                        <li key={c}>
+                <ul className="nav-lang-menu" role="listbox" aria-label={t.nav.languageMenu || 'Choose language'}>
+                    {(order || LANG_ORDER).map(language => (
+                        <li key={language}>
                             <button
                                 type="button"
                                 role="option"
-                                aria-selected={c === code}
-                                lang={c}
-                                className={`nav-lang-item ${c === code ? 'is-active' : ''}`}
-                                onClick={() => { setLang(c); setOpen(false); }}
+                                aria-selected={language === code}
+                                className={language === code ? 'is-active' : ''}
+                                onClick={() => { setLang(language); setOpen(false); }}
                             >
-                                <span className="nav-lang-item-code">{langs[c].label}</span>
-                                <span className="nav-lang-item-name">{langs[c].name}</span>
+                                <span>{langs[language].label}</span>
+                                <small>{langs[language].name}</small>
                             </button>
                         </li>
                     ))}
@@ -143,387 +66,240 @@ function LanguageSelector() {
     );
 }
 
-/**
- * Nav
- *
- * Fixed top navigation. Contains the URnetwork logo, the brand tagline,
- * route links to each section page, a language selector, and the Price
- * pill with the published network price on the far right.
- *
- * The nav sits below the Disclaimer bar. When the disclaimer is visible
- * (at the top of the page) the nav shifts down by --nav-height via the
- * `nav-below-disclaimer` class passed in from the parent.
- */
-export default function Nav({ disclaimerVisible, activeRoute }) {
-    const { t, code, setLang, langs } = useLanguage();
-    const route = activeRoute ? { name: activeRoute, slug: null } : useRoute();
-    const onHome = route.name === 'home';
-    const [scrolled, setScrolled] = useState(false);
-    const [whitepaperActive, setWhitepaperActive] = useState(false);
-    const [menuOpen, setMenuOpen] = useState(false);
-    const menuBtnRef = useRef(null);
-    const drawerRef = useRef(null);
-    // One shared feed + denomination for the desktop pill and the drawer
-    // copy, so they can't drift apart or double-poll.
-    const price = useAlphaPrice({ series: true });
-    const [denom, setDenom] = usePriceDenom();
+function NetworkMenu({ code, route, t, mobile = false }) {
+    const detailsRef = useRef(null);
+    const closeTimerRef = useRef(0);
+    const active = NETWORK_LINKS.includes(route.name);
 
-    // While the mobile drawer is open: lock background scroll, wire
-    // Escape-to-close, trap Tab within the drawer, and restore focus to the
-    // control that opened it once it closes.
+    const openOnHover = () => {
+        if (mobile || !window.matchMedia('(hover: hover)').matches) return;
+        window.clearTimeout(closeTimerRef.current);
+        detailsRef.current?.setAttribute('open', '');
+    };
+
+    const closeAfterHover = () => {
+        if (mobile || !window.matchMedia('(hover: hover)').matches) return;
+        window.clearTimeout(closeTimerRef.current);
+        closeTimerRef.current = window.setTimeout(() => {
+            if (!detailsRef.current?.matches(':focus-within')) {
+                detailsRef.current?.removeAttribute('open');
+            }
+        }, 140);
+    };
+
+    useEffect(() => {
+        if (mobile) return undefined;
+        const closeOutside = (event) => {
+            if (detailsRef.current && !detailsRef.current.contains(event.target)) {
+                detailsRef.current.removeAttribute('open');
+            }
+        };
+        const closeOnEscape = (event) => {
+            if (event.key === 'Escape' && detailsRef.current) detailsRef.current.removeAttribute('open');
+        };
+        document.addEventListener('mousedown', closeOutside);
+        document.addEventListener('keydown', closeOnEscape);
+        return () => {
+            document.removeEventListener('mousedown', closeOutside);
+            document.removeEventListener('keydown', closeOnEscape);
+            window.clearTimeout(closeTimerRef.current);
+        };
+    }, [mobile]);
+
+    return (
+        <details
+            className={`nav-network ${active ? 'is-active' : ''}`}
+            ref={detailsRef}
+            open={mobile || undefined}
+            onMouseEnter={openOnHover}
+            onMouseLeave={closeAfterHover}
+        >
+            <summary>{t.nav.network} <span aria-hidden="true">{'\u25BE'}</span></summary>
+            <div className="nav-network-menu">
+                {NETWORK_LINKS.map(name => (
+                    <a
+                        key={name}
+                        href={buildPath({ name, slug: null }, code)}
+                        className={route.name === name ? 'is-active' : ''}
+                    >
+                        {t.nav[name]}
+                    </a>
+                ))}
+            </div>
+        </details>
+    );
+}
+
+function PricePill({ code, price, t }) {
+    const tier0 = price.sheet?.tiers?.[0] || null;
+    const value = tier0?.alphaPerGib != null && price.alphaUsd != null
+        ? tier0.alphaPerGib * price.alphaUsd
+        : null;
+    const formatted = value == null
+        ? '0'
+        : value < 0.01
+            ? value.toFixed(4).replace(/0+$/, '').replace(/\.$/, '')
+            : value.toFixed(2).replace(/\.00$/, '');
+
+    return (
+        <a
+            className="nav-price"
+            href={buildPath({ name: 'price', slug: null }, code)}
+            aria-label={`${t.nav.price}: $${formatted} per GiB`}
+        >
+            <span className="nav-price-label">{t.nav.price}</span>
+            <span className="nav-price-value">${formatted} / GiB</span>
+        </a>
+    );
+}
+
+export default function Nav({ disclaimerVisible, activeRoute }) {
+    const { code, setLang, langs, t } = useLanguage();
+    const detectedRoute = useRoute();
+    const route = activeRoute ? { name: activeRoute, slug: null } : detectedRoute;
+    const [scrolled, setScrolled] = useState(false);
+    const [menuOpen, setMenuOpen] = useState(false);
+    const menuButtonRef = useRef(null);
+    const drawerRef = useRef(null);
+
+    useEffect(() => {
+        let frame = 0;
+        const update = () => {
+            if (frame) return;
+            frame = requestAnimationFrame(() => {
+                frame = 0;
+                setScrolled(window.scrollY > 8);
+            });
+        };
+        update();
+        window.addEventListener('scroll', update, { passive: true });
+        return () => {
+            window.removeEventListener('scroll', update);
+            if (frame) cancelAnimationFrame(frame);
+        };
+    }, []);
+
     useEffect(() => {
         if (!menuOpen) return undefined;
         const drawer = drawerRef.current;
-        const opener = menuBtnRef.current;
+        const opener = menuButtonRef.current;
+        const focusable = () => drawer
+            ? Array.from(drawer.querySelectorAll('a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])'))
+                .filter(element => element.offsetWidth > 0 || element.offsetHeight > 0)
+            : [];
+        const closeButton = drawer?.querySelector('.nav-menu-toggle');
+        (closeButton || focusable()[0] || drawer)?.focus();
 
-        // Visible, focusable controls inside the drawer, in DOM order.
-        const focusable = () =>
-            drawer
-                ? Array.from(drawer.querySelectorAll(
-                      'a[href], button:not([disabled]), input, [tabindex]:not([tabindex="-1"])'
-                  )).filter(el => el.offsetWidth > 0 || el.offsetHeight > 0)
-                : [];
-
-        // Move focus into the drawer — its close button.
-        const closeBtn = drawer && drawer.querySelector('.nav-drawer-bar .nav-menu-toggle');
-        (closeBtn || focusable()[0] || drawer)?.focus();
-
-        const onKey = (e) => {
-            if (e.key === 'Escape') { setMenuOpen(false); return; }
-            if (e.key !== 'Tab') return;
+        const onKey = (event) => {
+            if (event.key === 'Escape') {
+                setMenuOpen(false);
+                return;
+            }
+            if (event.key !== 'Tab') return;
             const list = focusable();
-            if (list.length === 0) return;
+            if (!list.length) return;
             const first = list[0];
             const last = list[list.length - 1];
-            if (e.shiftKey && document.activeElement === first) {
-                e.preventDefault();
+            if (event.shiftKey && document.activeElement === first) {
+                event.preventDefault();
                 last.focus();
-            } else if (!e.shiftKey && document.activeElement === last) {
-                e.preventDefault();
+            } else if (!event.shiftKey && document.activeElement === last) {
+                event.preventDefault();
                 first.focus();
             }
         };
-        document.addEventListener('keydown', onKey);
-        const prevOverflow = document.body.style.overflow;
-        document.body.style.overflow = 'hidden';
 
+        const previousOverflow = document.body.style.overflow;
+        document.body.style.overflow = 'hidden';
+        document.addEventListener('keydown', onKey);
         return () => {
+            document.body.style.overflow = previousOverflow;
             document.removeEventListener('keydown', onKey);
-            document.body.style.overflow = prevOverflow;
-            // Return focus to the opener, if it is still in the document.
             if (opener && document.contains(opener)) opener.focus();
         };
     }, [menuOpen]);
 
-    // Any route change (a followed link, or browser back/forward) closes it.
-    useEffect(() => { setMenuOpen(false); }, [route.name]);
-
-    useEffect(() => {
-        if (!onHome) {
-            setScrolled(true);
-            setWhitepaperActive(false);
-            return undefined;
-        }
-
-        let raf = 0;
-        const onScroll = () => {
-            if (raf) return;
-            raf = requestAnimationFrame(() => {
-                raf = 0;
-                setScrolled(window.scrollY > 8);
-
-                // Track when the whitepaper section is in view.
-                const el = document.getElementById('whitepaper');
-                if (el) {
-                    const rect = el.getBoundingClientRect();
-                    setWhitepaperActive(rect.top - 120 <= 0);
-                }
-            });
-        };
-        onScroll();
-        window.addEventListener('scroll', onScroll, { passive: true });
-        return () => {
-            window.removeEventListener('scroll', onScroll);
-            if (raf) cancelAnimationFrame(raf);
-        };
-    }, [onHome]);
-
-    /** Navigate to a section route page. */
-    const handleLinkClick = (e, name) => {
-        e.preventDefault();
+    const homeHref = buildPath({ name: 'home' }, code);
+    const goHome = (event) => {
+        event.preventDefault();
         setMenuOpen(false);
-        navigate(buildPath({ name, slug: null }, code));
-    };
-
-    /**
-     * Whitepaper lives on the home page — scroll to it. If we are on
-     * another page, navigate home first and defer the scroll.
-     */
-    const handleWhitepaperClick = (e) => {
-        e.preventDefault();
-        setMenuOpen(false);
-        if (!onHome) {
-            navigate(buildPath({ name: 'home' }, code));
-            requestAnimationFrame(() => {
-                const el = document.getElementById('whitepaper');
-                if (el) {
-                    const top = el.getBoundingClientRect().top + window.scrollY - 64;
-                    window.scrollTo({ top });
-                }
-            });
-            return;
-        }
-        const el = document.getElementById('whitepaper');
-        if (!el) return;
-        const top = el.getBoundingClientRect().top + window.scrollY - 64;
-        window.scrollTo({ top, behavior: 'smooth' });
-    };
-
-    const handleBrandClick = (e) => {
-        e.preventDefault();
-        setMenuOpen(false);
-        if (onHome) {
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        } else {
-            navigate(buildPath({ name: 'home' }, code));
-        }
+        if (route.name === 'home') window.scrollTo({ top: 0, behavior: 'smooth' });
+        else navigate(homeHref);
     };
 
     const navClass = [
         'nav',
         scrolled ? 'nav-scrolled' : '',
-        disclaimerVisible ? 'nav-below-disclaimer' : ''
+        disclaimerVisible ? 'nav-below-disclaimer' : '',
     ].filter(Boolean).join(' ');
 
     return (
         <>
-        <header className={navClass}>
-            <div className="nav-inner">
-                <a
-                    href={buildPath({ name: 'home' }, code)}
-                    className="nav-brand"
-                    onClick={handleBrandClick}
-                >
-                    <img src="/ur.svg" alt="URnetwork" className="nav-logo" />
-                    <span className="nav-tagline">{t.nav.tagline}</span>
-                </a>
+            <header className={navClass}>
+                <div className="nav-inner">
+                    <a className="nav-brand" href={homeHref} onClick={goHome}>
+                        <img src="/ur.svg" alt="UR" className="nav-logo" />
+                    </a>
 
-                <nav className="nav-links" aria-label="Primary">
-                    <PrimaryLinks
-                        t={t} code={code} route={route} onHome={onHome}
-                        whitepaperActive={whitepaperActive}
-                        onWhitepaper={handleWhitepaperClick} onLink={handleLinkClick}
-                    />
-                </nav>
+                    <nav className="nav-links" aria-label="Primary navigation">
+                        <NetworkMenu code={code} route={route} t={t} />
+                        <a href={buildPath({ name: 'research', slug: null }, code)} className={route.name === 'research' ? 'is-active' : ''}>{t.nav.research}</a>
+                        {code === 'en' && <a href="/investors" className={route.name === 'investors' ? 'is-active' : ''}>Investors</a>}
+                        <a href={buildPath({ name: 'docs', slug: null }, code)} className={route.name === 'docs' || route.name === 'api' ? 'is-active' : ''}>{t.nav.docs}</a>
+                    </nav>
 
-                <LanguageSelector />
+                    <div className="nav-actions">
+                        <LanguageSelector />
+                        <button
+                            type="button"
+                            ref={menuButtonRef}
+                            className={`nav-menu-toggle ${menuOpen ? 'is-open' : ''}`}
+                            aria-label={menuOpen ? (t.nav.closeMenu || 'Close menu') : (t.nav.menu || 'Open menu')}
+                            aria-expanded={menuOpen}
+                            aria-controls="nav-drawer"
+                            onClick={() => setMenuOpen(value => !value)}
+                        >
+                            <span /><span /><span />
+                        </button>
+                    </div>
+                </div>
+            </header>
 
-                <PriceTicker t={t} code={code} price={price} denom={denom} setDenom={setDenom} />
-
-                {/* Hamburger is shown at compact desktop and tablet widths (see Nav.css). */}
-                <button
-                    type="button"
-                    ref={menuBtnRef}
-                    className={`nav-menu-toggle ${menuOpen ? 'is-open' : ''}`}
-                    aria-label={menuOpen ? t.nav.closeMenu : t.nav.menu}
-                    aria-expanded={menuOpen}
-                    aria-controls="nav-drawer"
-                    onClick={() => setMenuOpen(o => !o)}
-                >
-                    <span className="nav-menu-icon" aria-hidden="true"><span /><span /><span /></span>
-                </button>
-            </div>
-        </header>
-
-            {/* Compact navigation drawer. Rendered as a sibling of the
-                header — NOT inside it — because the nav's backdrop-filter makes
-                it the containing block for fixed descendants, which would pin
-                the drawer to the 64px bar instead of the viewport. Always in the
-                DOM; the is-open class drives the transition and, when closed,
-                removes it from the tab order via visibility:hidden. */}
             <div
                 id="nav-drawer"
                 ref={drawerRef}
                 className={`nav-drawer ${menuOpen ? 'is-open' : ''}`}
                 role="dialog"
                 aria-modal="true"
-                aria-label={t.nav.menu}
+                aria-label="Site menu"
             >
                 <div className="nav-drawer-bar">
-                    <a
-                        href={buildPath({ name: 'home' }, code)}
-                        className="nav-brand"
-                        onClick={handleBrandClick}
-                    >
-                        <img src="/ur.svg" alt="URnetwork" className="nav-logo" />
-                    </a>
-                    <button
-                        type="button"
-                        className="nav-menu-toggle is-open"
-                        aria-label={t.nav.closeMenu}
-                        onClick={() => setMenuOpen(false)}
-                    >
-                        <span className="nav-menu-icon" aria-hidden="true"><span /><span /><span /></span>
+                    <a className="nav-brand" href={homeHref} onClick={goHome}><img src="/ur.svg" alt="UR" className="nav-logo" /></a>
+                    <button type="button" className="nav-menu-toggle is-open" aria-label="Close menu" onClick={() => setMenuOpen(false)}>
+                        <span /><span /><span />
                     </button>
                 </div>
-
-                <nav className="nav-drawer-links" aria-label="Primary">
-                    <PrimaryLinks
-                        t={t} code={code} route={route} onHome={onHome}
-                        whitepaperActive={whitepaperActive}
-                        onWhitepaper={handleWhitepaperClick} onLink={handleLinkClick}
-                    />
+                <nav className="nav-drawer-links" aria-label="Mobile navigation">
+                    <NetworkMenu code={code} route={route} t={t} mobile />
+                    <a href={buildPath({ name: 'research', slug: null }, code)}>{t.nav.research}</a>
+                    {code === 'en' && <a href="/investors">Investors</a>}
+                    <a href={buildPath({ name: 'docs', slug: null }, code)}>{t.nav.docs}</a>
                 </nav>
-
                 <div className="nav-drawer-foot">
-                    <PriceTicker t={t} code={code} price={price} denom={denom} setDenom={setDenom} />
-                    <nav className="nav-drawer-langs" aria-label={t.nav.languageMenu}>
-                        {LANG_ORDER.map(c => (
+                    <nav className="nav-drawer-langs" aria-label={t.footer.languagesAria}>
+                        {LANG_ORDER.map(language => (
                             <button
-                                key={c}
+                                key={language}
                                 type="button"
-                                lang={c}
-                                className={`nav-drawer-lang ${c === code ? 'is-active' : ''}`}
-                                onClick={() => { setLang(c); setMenuOpen(false); }}
+                                className={language === code ? 'is-active' : ''}
+                                onClick={() => { setLang(language); setMenuOpen(false); }}
                             >
-                                {langs[c].label}
+                                {langs[language].label}
                             </button>
                         ))}
                     </nav>
                 </div>
             </div>
         </>
-    );
-}
-
-/**
- * Primary section links. Shared verbatim by the desktop bar (.nav-links)
- * and the mobile drawer (.nav-drawer-links); the two contexts restyle the
- * same .nav-link markup via their parent selector.
- */
-function PrimaryLinks({ t, code, route, onHome, whitepaperActive, onWhitepaper, onLink }) {
-    return (
-        <>
-            <a
-                href={`${buildPath({ name: 'home' }, code)}#whitepaper`}
-                className={`nav-link ${onHome && whitepaperActive ? 'is-active' : ''}`}
-                onClick={onWhitepaper}
-            >
-                {t.nav.whitepaper}
-            </a>
-            {NAV_SECTIONS.map(name => (
-                <a
-                    key={name}
-                    href={buildPath({ name, slug: null }, code)}
-                    className={`nav-link ${route.name === name ? 'is-active' : ''}`}
-                    onClick={(e) => onLink(e, name)}
-                >
-                    {t.nav[name]}
-                </a>
-            ))}
-            {code === 'en' && (
-                <a
-                    href="/investors"
-                    className={`nav-link ${route.name === 'investors' ? 'is-active' : ''}`}
-                >
-                    Investors
-                </a>
-            )}
-            <a
-                href={buildPath({ name: 'docs', slug: null }, code)}
-                className={`nav-link ${route.name === 'docs' || route.name === 'api' ? 'is-active' : ''}`}
-                onClick={(e) => onLink(e, 'docs')}
-            >
-                {t.nav.docs}
-            </a>
-        </>
-    );
-}
-
-/**
- * The Price pill — the published 0-tier price from /price.yml, shown in
- * USD (default; resolved against the network's price feeds) or in α via
- * the denomination toggle, with a real 24h sparkline. Tapping anywhere
- * on the pill except the toggle opens the price page: a stretched link
- * covers the pill, the passive spans let clicks fall through to it, and
- * the toggle sits above it with its own hit area.
- */
-function PriceTicker({ t, code, price, denom, setDenom }) {
-    const { sheet, alphaUsd, closes } = price;
-    const tier0 = sheet?.tiers?.[0] || null;
-
-    const value = (alphaPer) => {
-        if (alphaPer == null) return null;
-        if (denom === 'alpha') return alphaPer;
-        return alphaUsd == null ? null : alphaPer * alphaUsd;
-    };
-
-    const series = (alphaPer) => {
-        if (alphaPer == null) return [];
-        if (denom === 'usd' && closes && closes.length >= 2) {
-            return closes.map(usd => usd * alphaPer);
-        }
-        // In α the price is fixed until the sheet changes — a flat line.
-        return [alphaPer, alphaPer];
-    };
-
-    const unit = denom === 'alpha' ? 'α' : 'USD';
-    const priceHref = buildPath({ name: 'price', slug: null }, code);
-    const handleOpen = (e) => {
-        e.preventDefault();
-        navigate(priceHref);
-    };
-
-    return (
-        <div className="nav-cta">
-            <a
-                className="nav-cta-hit"
-                href={priceHref}
-                onClick={handleOpen}
-                aria-label={t.nav.ctaAria}
-            />
-
-            <span className="nav-cta-label">{t.nav.price}</span>
-
-            <div className="nav-denom" role="group" aria-label={t.nav.denomAria}>
-                <button
-                    type="button"
-                    className={denom === 'usd' ? 'is-active' : ''}
-                    aria-pressed={denom === 'usd'}
-                    onClick={() => setDenom('usd')}
-                >
-                    USD
-                </button>
-                <button
-                    type="button"
-                    className={denom === 'alpha' ? 'is-active' : ''}
-                    aria-pressed={denom === 'alpha'}
-                    onClick={() => setDenom('alpha')}
-                >
-                    α
-                </button>
-            </div>
-
-            <div className="nav-cta-sparks">
-                <div className="nav-spark">
-                    <div className="nav-spark-meta">
-                        <span className="nav-spark-label">{unit}/GiB</span>
-                        <span className="nav-spark-value">
-                            {value(tier0?.alphaPerGib) == null ? '—' : fmtCost(value(tier0?.alphaPerGib))}
-                        </span>
-                    </div>
-                    <Sparkline series={series(tier0?.alphaPerGib)} />
-                </div>
-                <div className="nav-spark">
-                    <div className="nav-spark-meta">
-                        <span className="nav-spark-label">{unit}/user</span>
-                        <span className="nav-spark-value">
-                            {value(tier0?.alphaPerUser) == null ? '—' : fmtCost(value(tier0?.alphaPerUser))}
-                        </span>
-                    </div>
-                    <Sparkline series={series(tier0?.alphaPerUser)} />
-                </div>
-            </div>
-        </div>
     );
 }

@@ -42,14 +42,14 @@ export default function DocsExplorer({ activeRoute, initialSlug = null } = {}) {
             <Disclaimer visible={disclaimerVisible} />
             <Nav disclaimerVisible={disclaimerVisible} activeRoute={activeRoute} />
             <Explorer kind="docs">
-                {!doc ? <DocsLanding /> : <DocBody doc={doc} />}
+                {!doc ? <DocsLanding code={code} /> : <DocBody doc={doc} />}
             </Explorer>
             <Footer />
         </div>
     );
 }
 
-function DocsLanding() {
+function DocsLanding({ code }) {
     return (
         <>
             <header className="explorer-page-header">
@@ -57,21 +57,21 @@ function DocsLanding() {
                 <h1 className="explorer-page-title">URnetwork docs</h1>
                 <p className="explorer-page-meta">
                     {ALL_DOCS.length} documents across {docGroups.length} sections.
-                    Pick one from the sidebar, or jump straight to the API reference.
+                    Pick one from the sidebar or use search.
                 </p>
             </header>
 
             <div className="md">
                 <p className="md-p">
+                    <a className="md-a" href={buildPath({ name: 'docs', slug: 'litepaper' }, code)}>
+                        Read the UR litepaper →
+                    </a>
+                </p>
+                <p className="md-p">
                     Welcome to the URnetwork docs. Everything that explains how
                     to hack on, run, or extend the network lives here, organised
                     by topic on the left. Use the search box to jump straight to
-                    a doc or an API endpoint by name.
-                </p>
-                <p className="md-p">
-                    The API reference is rendered from the OpenAPI document we
-                    publish alongside the protocol. Open it from the top of the
-                    sidebar.
+                    a document by name.
                 </p>
             </div>
         </>

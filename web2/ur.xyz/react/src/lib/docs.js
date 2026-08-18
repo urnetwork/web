@@ -17,6 +17,26 @@ import { extractTitle, markdownToText } from './markdown.jsx';
  */
 
 const RAW_DOCS = Array.isArray(rawDocs) ? rawDocs : [];
+const HIDDEN_DOC_SLUGS = new Set([
+    'edgeos',
+    'routeros',
+    'rpi',
+    'economic-model/economic-model',
+    'cli',
+    'archive/whitepaper',
+    'mcp/SKILL',
+    'mcp/SKILL2',
+    'router/testing-notes',
+    'changelog/2024-10-31-inspect/inspect',
+    'changelog/2024-10-31-tether/tether',
+    'changelog/2024-10-31-update-1/update-1'
+]);
+
+const DOC_TITLE_OVERRIDES = {
+    'legal/terms': 'Terms of Service',
+    'legal/privacy': 'Privacy Policy',
+    'legal/vdp': 'VDP'
+};
 
 /**
  * Folders we deliberately want at the top of the sidebar. Anything not
@@ -102,13 +122,14 @@ const DOCS = RAW_DOCS
         return {
             slug,
             path,
-            title: extractTitle(content, titleFromPath(path)),
+            title: DOC_TITLE_OVERRIDES[slug] || extractTitle(content, titleFromPath(path)),
             group: groupFor(path),
             content,
             text: markdownToText(content)
         };
     })
-    .filter(d => d.slug !== undefined && d.slug !== null);
+    .filter(d => d.slug !== undefined && d.slug !== null)
+    .filter(d => !HIDDEN_DOC_SLUGS.has(d.slug));
 
 // De-duplicate by slug. The first entry wins which, given the sort order
 // in the virtual module (walk-order), gives us the README before any

@@ -1,15 +1,9 @@
 ---
-import Base from '../../../layouts/Base.astro';
-import DocsIsland from '../../../islands/DocsIsland.jsx';
-import { NON_EN_LANGS, LANGS } from '../../../lib/i18n.js';
+import { NON_EN_LANGS } from '../../../lib/i18n.js';
 
 export function getStaticPaths() {
     return NON_EN_LANGS.map(lang => ({ params: { lang } }));
 }
 
-const { lang } = Astro.params;
-const dir = LANGS[lang]?.dir || 'ltr';
+return Astro.redirect('/docs', 301);
 ---
-<Base title="Docs — UR" lang={lang} dir={dir}>
-    <DocsIsland activeRoute="docs" lang={lang} client:load />
-</Base>

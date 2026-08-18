@@ -20,12 +20,14 @@ import { fileURLToPath } from "node:url";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const REACT_DIR = path.resolve(__dirname, "..");
 const ASTRO_DIR = path.resolve(__dirname, "../../astro");
+const VITE_BIN = path.join(REACT_DIR, "node_modules/vite/bin/vite.js");
+const ASTRO_BIN = path.join(ASTRO_DIR, "node_modules/astro/astro.js");
 const UR_ENV = process.env.UR_ENV || "main";
 const ASTRO_OUT = path.join(ASTRO_DIR, "build", UR_ENV);
 const OUT = path.join(__dirname, "__parity__");
 
-// Main routes: home, the content sections, pricing, and the API explorer.
-const ROUTES = ["/", "/operators", "/miners", "/validators", "/research", "/community", "/price", "/roadmap", "/api", "/terms", "/privacy", "/vdp"];
+// Routes shared by the React implementation and the Astro static build.
+const ROUTES = ["/", "/operators", "/miners", "/validators", "/research", "/docs", "/terms", "/privacy", "/vdp"];
 
 const PIXEL_TOLERANCE = 40; // desktop
 // Phones render at 3x DPR; composited/animated text vs a static node antialiases the SAME
@@ -152,14 +154,14 @@ async function main() {
 
   if (!fs.existsSync(path.join(ASTRO_OUT, "index.html"))) {
     console.log(`building astro islands output (build/${UR_ENV} missing)…`);
-    const r = spawnSync("npm", ["run", "build"], { cwd: ASTRO_DIR, env: { ...process.env, UR_ENV, UR_SKIP_PARITY: "1" }, stdio: "inherit" });
+    const r = spawnSync(process.execPath, [ASTRO_BIN, "build"], { cwd: ASTRO_DIR, env: { ...process.env, UR_ENV, UR_SKIP_PARITY: "1" }, stdio: "inherit" });
     if (r.status !== 0) { console.error("astro build failed"); process.exit(1); }
   }
 
   const reactPort = await freePort();
   const astroPort = await freePort();
-  const reactSrv = startServer("npx", ["vite", "--port", String(reactPort), "--strictPort"], REACT_DIR, reactPort);
-  const astroSrv = startServer("npx", ["astro", "preview", "--port", String(astroPort)], ASTRO_DIR, astroPort);
+  const reactSrv = startServer(process.execPath, [VITE_BIN, "--port", String(reactPort), "--strictPort"], REACT_DIR, reactPort);
+  const astroSrv = startServer(process.execPath, [ASTRO_BIN, "preview", "--port", String(astroPort)], ASTRO_DIR, astroPort);
   const cleanup = () => { try { reactSrv.kill(); } catch {} try { astroSrv.kill(); } catch {} };
   process.on("exit", cleanup);
 
@@ -168,7 +170,9 @@ async function main() {
   await waitFor(reactBase + "/");
   await waitFor(astroBase + "/");
 
-  const browser = await chromium.launch();
+  const browser = await chromium.launch(process.env.PLAYWRIGHT_EXECUTABLE_PATH
+    ? { executablePath: process.env.PLAYWRIGHT_EXECUTABLE_PATH }
+    : {});
   let failures = 0, total = 0;
   for (const profile of PROFILES) {
     const dpr = profile.deviceScaleFactor > 1 ? ` @${profile.deviceScaleFactor}x` : "";

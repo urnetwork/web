@@ -25,7 +25,7 @@ export default function HeroIsland({ lang }) {
             <StatsPanel
                 block={block}
                 network={network}
-                anchorId="whitepaper"
+                anchorId="stats-anchor"
                 disclaimerVisible={disclaimerVisible}
             />
         </LanguageProvider>

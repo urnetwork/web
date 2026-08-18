@@ -387,9 +387,9 @@ export function markdownToText(src) {
  */
 export function extractTitle(src, fallback) {
     if (src) {
-        for (const line of src.split('\n')) {
-            const m = line.match(HEADING_RE);
-            if (m) return m[2].trim().replace(/<[^>]+>/g, '');
+        for (const line of src.replace(/\r\n?/g, '\n').split('\n')) {
+            const m = line.match(/^#\s+(.+)$/);
+            if (m) return m[1].trim().replace(/<[^>]+>/g, '');
         }
     }
     return fallback;

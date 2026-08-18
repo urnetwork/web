@@ -1,29 +1,24 @@
 export const investorCentre = {
-    updated: '13 August 2026',
-    updatedIso: '2026-08-13',
-    about:
-        'Our mission is to make privacy the default for every user by providing the encryption layer for the open internet. We are building a user-powered network and a privacy product suite designed to serve people, not surveil them. Anyone, anywhere should be able to access the internet freely.',
+    updated: '18 August 2026',
+    updatedIso: '2026-08-18',
+    about: [
+        'Our mission is to make privacy the default for every user by providing the encryption layer for the open internet. We are building a user-powered network and a privacy product suite designed to serve people, not surveil them.',
+        'Anyone, anywhere should be able to access the internet freely.',
+    ],
     featured: {
-        date: '13 August 2026',
-        dateIso: '2026-08-13',
+        date: '18 August 2026',
+        dateIso: '2026-08-18',
         kind: 'Letter',
-        readTime: '4 min read',
-        title: 'August Investment Letter',
+        readTime: '6 min read',
+        title: 'Our Letter to Bittensor',
         summary:
-            'Why UR built product demand before the subnet, how usage becomes conviction, and what we will report from here.',
+            'A letter from Jack and Brien on launching UR (SN25), growing a global network of residential operators, and building a free and open internet together.',
         href: '/investors/august-investment-letter',
     },
     updates: [
         {
-            title: 'August Livestream',
-            date: '28 August 2026',
-            format: 'Video',
-            href: 'https://www.youtube.com/',
-            external: true,
-        },
-        {
-            title: 'August Investment Letter',
-            date: '13 August 2026',
+            title: 'Our Letter to Bittensor',
+            date: '18 August 2026',
             format: 'Written',
             href: '/investors/august-investment-letter',
             external: false,
@@ -37,10 +32,10 @@ export const investorCentre = {
             href: null,
         },
         {
-            title: 'UR Subnet Whitepaper',
+            title: 'UR Litepaper',
             detail: null,
             readTime: '12 min read',
-            href: '/whitepaper.md',
+            href: '/docs/litepaper',
         },
     ],
     metrics: [
@@ -84,7 +79,7 @@ Begin with UR's published sources:
 
 Treat these as the project's own published claims, then verify material claims against primary or independently observable sources:
 
-- Subnet code and whitepaper: https://github.com/urfoundation/sn
+- Subnet code: https://github.com/urfoundation/sn
 - Network software and applications: https://github.com/urnetwork
 - On-chain explorers: https://taostats.io and https://taomarketcap.com
 

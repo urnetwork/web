@@ -1,47 +1,17 @@
 ---
-import Base from '../../../layouts/Base.astro';
-import DocsIsland from '../../../islands/DocsIsland.jsx';
-import { NON_EN_LANGS, LANGS } from '../../../lib/i18n.js';
+import { NON_EN_LANGS } from '../../../lib/i18n.js';
 import { docs } from '@react/lib/docs.js';
 
 export function getStaticPaths() {
     const paths = [];
     for (const lang of NON_EN_LANGS) {
-        for (const d of docs.filter(d => d.slug)) {
-            paths.push({
-                params: { lang, slug: d.slug },
-                props: {
-                    title: d.title,
-                    description: d.text.replace(/\s+/g, ' ').trim().slice(0, 158),
-                },
-            });
+        for (const doc of docs.filter(doc => doc.slug)) {
+            paths.push({ params: { lang, slug: doc.slug } });
         }
     }
     return paths;
 }
 
-const { lang, slug } = Astro.params;
-const { title, description } = Astro.props;
-const dir = LANGS[lang]?.dir || 'ltr';
-
-const jsonLd = [{
-    '@type': 'TechArticle',
-    headline: title,
-    description,
-    url: `https://ur.xyz/${lang}/docs/${slug}`,
-    mainEntityOfPage: `https://ur.xyz/${lang}/docs/${slug}`,
-    publisher: { '@id': 'https://ur.xyz/#org' },
-    // the documents themselves are English
-    inLanguage: 'en',
-}];
+const { slug } = Astro.params;
+return Astro.redirect(`/docs/${slug}`, 301);
 ---
-<Base
-    title={`${title} — UR Docs`}
-    description={description}
-    lang={lang}
-    dir={dir}
-    jsonLd={jsonLd}
-    alternate={{ href: `/docs-md/${slug}.md`, type: 'text/markdown' }}
->
-    <DocsIsland activeRoute="docs" lang={lang} initialSlug={slug} client:load />
-</Base>

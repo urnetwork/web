@@ -22,7 +22,7 @@
 // Wired into the Makefile's build targets, which run `npx astro build` and so
 // never execute a package.json prebuild step.
 
-import { cpSync, existsSync, readdirSync, statSync } from "node:fs";
+import { cpSync, existsSync, readdirSync, rmSync, statSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -39,6 +39,11 @@ const REACT_PUBLIC = path.resolve(__dirname, "../../react/public");
 // silently downgrade the policy, so it is excluded rather than copied.
 const ASTRO_OWNED = new Set(["robots.txt"]);
 
+// Pricing is retired from the public site for now. Keep the source and sync
+// implementation available, but never let stale/generated feed files leak
+// back into a production build through the public-directory mirror.
+const RETIRED_PUBLIC = new Set(["price.yml", "price.rss"]);
+
 const SKIP = new Set([".DS_Store"]);
 
 if (!existsSync(REACT_PUBLIC)) {
@@ -51,6 +56,11 @@ const skipped = [];
 
 for (const name of readdirSync(REACT_PUBLIC)) {
   if (name.startsWith(".") || SKIP.has(name)) continue;
+  if (RETIRED_PUBLIC.has(name)) {
+    rmSync(path.join(ASTRO_PUBLIC, name), { force: true });
+    skipped.push(name);
+    continue;
+  }
   if (ASTRO_OWNED.has(name)) {
     skipped.push(name);
     continue;

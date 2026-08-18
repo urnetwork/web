@@ -1,16 +1,13 @@
 // Network privacy guard for ur.xyz.
 //
 // On normal browsing the site must contact ONLY first-party hosts plus the explicitly
-// allowed price feed. No analytics, no telemetry, no unexpected third-party data. This
+// allowed first-party feeds. No analytics, no telemetry, no unexpected third-party data. This
 // loads the main routes, records every host contacted, and fails on anything not on the
 // allowlist.
 //
 // Allowed:
 //   - first-party: *.ur.xyz, *.ur.io, *.bringyour.com (whitelisted network
 //     operators, e.g. grafana.bringyour.com), *.ur.network, *.urnetwork.com
-//   - api.geckoterminal.com — CoinGecko's keyless public α→USD price feed (approved;
-//     sends no user data, just fetches public prices)
-//
 // SSO / WalletConnect / payment SDKs are intentionally NOT allowlisted — they may load
 // only inside their own flows, which this test does not trigger.
 import { chromium } from "playwright-core";
@@ -21,10 +18,11 @@ import { fileURLToPath } from "node:url";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const REACT_DIR = path.resolve(__dirname, "..");
+const VITE_BIN = path.join(REACT_DIR, "node_modules/vite/bin/vite.js");
 
-const ROUTES = ["/", "/price", "/roadmap", "/api", "/operators", "/miners", "/validators", "/research", "/community"];
+const ROUTES = ["/", "/operators", "/miners", "/validators", "/research", "/docs", "/terms", "/privacy", "/vdp"];
 
-const ALLOWED = ["ur.xyz", "ur.io", "bringyour.com", "ur.network", "urnetwork.com", "geckoterminal.com"];
+const ALLOWED = ["ur.xyz", "ur.io", "bringyour.com", "ur.network", "urnetwork.com"];
 
 function isAllowed(host) {
   if (host.startsWith("localhost") || host.startsWith("127.")) return true;
@@ -56,12 +54,14 @@ async function main() {
     process.exit(0);
   }
   const port = await freePort();
-  const srv = spawn("npx", ["vite", "--port", String(port), "--strictPort"], { cwd: REACT_DIR, stdio: "ignore" });
+  const srv = spawn(process.execPath, [VITE_BIN, "--port", String(port), "--strictPort"], { cwd: REACT_DIR, stdio: "ignore" });
   process.on("exit", () => { try { srv.kill(); } catch {} });
   const base = `http://localhost:${port}`;
   await waitFor(base + "/");
 
-  const browser = await chromium.launch();
+  const browser = await chromium.launch(process.env.PLAYWRIGHT_EXECUTABLE_PATH
+    ? { executablePath: process.env.PLAYWRIGHT_EXECUTABLE_PATH }
+    : {});
   const offenders = new Map();
   const allHosts = new Set();
 

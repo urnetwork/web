@@ -13,44 +13,6 @@ const COLORS = {
     ui: '#D6E6F4'
 };
 
-const fmtAlpha = (n) =>
-    Number(n || 0).toLocaleString(undefined, {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2
-    });
-
-/**
- * Animate a displayed number toward `target` with an ease-out ramp each
- * time the target moves — the "counting up" of the block accumulators.
- * Returns null until the first real target arrives.
- */
-function useCountUp(target) {
-    const [display, setDisplay] = useState(null);
-    const displayRef = useRef(0);
-    const rafRef = useRef(0);
-
-    useEffect(() => {
-        if (target == null) return undefined;
-        const from = displayRef.current;
-        const start = performance.now();
-        const DURATION = 900;
-
-        cancelAnimationFrame(rafRef.current);
-        const tick = (now) => {
-            const p = Math.min(1, (now - start) / DURATION);
-            const eased = 1 - Math.pow(1 - p, 3);
-            const v = from + (target - from) * eased;
-            displayRef.current = v;
-            setDisplay(v);
-            if (p < 1) rafRef.current = requestAnimationFrame(tick);
-        };
-        rafRef.current = requestAnimationFrame(tick);
-        return () => cancelAnimationFrame(rafRef.current);
-    }, [target]);
-
-    return display;
-}
-
 /**
  * A once-per-second wall clock, started client-side only (null during
  * SSR and the hydration render, so the static build stays deterministic).
@@ -70,22 +32,11 @@ function useSecondTick() {
  * BlockToast
  *
  * Persistent progress card for the current block (7 days). The bar along
- * its top edge fills as the block elapses, the two accumulators count up
- * the miner emissions and demand deposits reported by the network
- * operators' feeds for the block so far, and a live countdown runs to
- * the block's end (always 00:00 UTC). Because the accumulators reset at
- * every rollover, each shows the last finished block underneath as a
- * stable reference (hidden until the feeds publish one — e.g. block 1
- * has no predecessor).
+ * its top edge fills as the block elapses and a live countdown runs to
+ * the block's end (always 00:00 UTC).
  */
 function BlockToast({ block, network }) {
     const { t, code } = useLanguage();
-    const totals = network ? network.totals : null;
-    const emissions = useCountUp(totals ? totals.minerEmissionsAlpha : null);
-    const deposits = useCountUp(totals ? totals.demandDepositsAlpha : null);
-    // The finished block is a fixed reference — no count-up.
-    const prevEmissions = totals ? totals.prevMinerEmissionsAlpha : null;
-    const prevDeposits = totals ? totals.prevDemandDepositsAlpha : null;
     const now = useSecondTick();
 
     if (!block) return null;
@@ -96,7 +47,9 @@ function BlockToast({ block, network }) {
     let blockNumber = block.number;
     let countdown = null;
     if (now != null) {
-        blockNumber = blockNumberAt(now);
+        blockNumber = Number.isFinite(network?.blockNumber)
+            ? network.blockNumber
+            : blockNumberAt(now);
         const end = blockEndAt(now);
         const left = Math.max(0, end - now);
         const endDate = new Date(end).toLocaleDateString(code, {
@@ -123,30 +76,6 @@ function BlockToast({ block, network }) {
             <div className="block-toast-head">
                 <span className="block-toast-title">⚡ {t.sim.block} #{blockNumber}</span>
                 <span className="block-toast-pct">{Math.floor(pct)}%</span>
-            </div>
-            <div className="block-toast-rows">
-                <div className="block-toast-row">
-                    <span className="block-toast-label">{t.stats.minerEmissions}</span>
-                    <span className="block-toast-value is-ur">
-                        {emissions == null ? '—' : fmtAlpha(emissions)}
-                    </span>
-                    {prevEmissions != null && (
-                        <span className="block-toast-prev">
-                            {t.sim.prevBlock} <span className="block-toast-prev-value">{fmtAlpha(prevEmissions)}</span>
-                        </span>
-                    )}
-                </div>
-                <div className="block-toast-row">
-                    <span className="block-toast-label">{t.stats.demandDeposits}</span>
-                    <span className="block-toast-value is-ur">
-                        {deposits == null ? '—' : fmtAlpha(deposits)}
-                    </span>
-                    {prevDeposits != null && (
-                        <span className="block-toast-prev">
-                            {t.sim.prevBlock} <span className="block-toast-prev-value">{fmtAlpha(prevDeposits)}</span>
-                        </span>
-                    )}
-                </div>
             </div>
             {/* aria-hidden: a per-second text change inside a role="status"
                 live region would be announced continuously. */}

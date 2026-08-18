@@ -28,7 +28,7 @@ As used in this Agreement, the following terms have the meanings set forth below
 
 **“Network Operator”** means an entity that deploys Protocol smart contracts and makes Protocol services available to end users or Providers, including the Foundation (in its commercial capacity at [ur.io](http://ur.io)) and any other independent operators on the Protocol.
 
-**“Protocol”** means the UR protocol, an open-source, permissionless, decentralized privacy infrastructure protocol designed to enable whole-internet encryption through multi-hop routing and layered encryption, operating via smart contracts on the Solana blockchain.
+**“Protocol”** means the UR protocol, an open-source, permissionless, decentralized privacy infrastructure protocol designed to enable whole-internet encryption through multi-hop routing and layered encryption.
 
 **“Provider”** means any person or entity that contributes bandwidth, compute, egress capacity, or other network resources directly to the Protocol via Smart Contract interaction and receives UR Tokens programmatically as compensation for such contributions. Provider status arises from direct Protocol interaction, not from any agreement with the Foundation. 
 
@@ -36,7 +36,7 @@ As used in this Agreement, the following terms have the meanings set forth below
 
 **“Site”** means the website located at ur.xyz and all associated pages, documentation, and content hosted thereon.
 
-**“Smart Contract(s)”** means self-executing computer code deployed on the Solana blockchain that autonomously governs and enforces the rules, economics, and operations of the Protocol without the need for human intermediation.
+**“Smart Contract(s)”** means self-executing computer code that autonomously governs and enforces rules, economics, and operations without the need for human intermediation.
 
 **“UR Token”** or **“Token”** means the native digital asset of the UR protocol, designed to function as a digital commodity within the Protocol’s functional crypto system for use as a payment and settlement instrument.
 
@@ -148,8 +148,6 @@ This Section describes the roles of Providers and Network Operators within the U
 **(b) Third-Party Content.** This Site may link to or reference third-party websites, publications, or resources. The Foundation does not endorse, control, or take responsibility for any third-party content, and the inclusion of any link does not imply the Foundation's endorsement.
 
 **(c) Open-Source Contributions.** The Protocol's codebase is open-source and may be modified, forked, or deployed by third parties. The Foundation is not responsible for, and makes no representations regarding, any third-party modifications, forks, or deployments of Protocol code.
-
-**(d) Third-Party Blockchain Disclaimer.** The Protocol operates on the Solana blockchain and relies on third-party infrastructure that the Foundation does not control, including the Solana network itself, validators, RPC providers, and related tooling. The Foundation is not responsible for any failure, congestion, fork, downtime, security incident, or change in the Solana network or other third-party infrastructure, or for any loss or harm arising therefrom.
 
 ## 9. Informational Nature of Content; No Warranties
 **(a) For Information Only.** All content on this Site, including technical documentation, protocol descriptions, economic model explanations, and educational materials, is provided for informational purposes only. The Foundation makes no warranty, representation, or guarantee as to the accuracy, completeness, timeliness, reliability, or fitness for any particular purpose of any information on this Site.

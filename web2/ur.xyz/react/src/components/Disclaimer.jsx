@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import './Disclaimer.css';
+import { useLanguage } from '../i18n';
 
 /**
  * Hook that tracks whether the disclaimer bar should be visible (i.e.
@@ -37,27 +38,13 @@ export function useDisclaimerVisible() {
  * stay in sync with the disclaimer's position.
  */
 export default function Disclaimer({ visible }) {
-    const [href, setHref] = useState('https://ur.io');
-
-    useEffect(() => {
-        const host = window.location.hostname;
-        if (host === 'preview.ur.xyz' || host === 'localhost') {
-            setHref('https://preview.ur.io');
-        }
-    }, []);
+    const { t } = useLanguage();
 
     return (
         <div className={`disclaimer ${visible ? '' : 'disclaimer-hidden'}`}>
-            <a
-                href={href}
-                className="disclaimer-link"
-                target="_blank"
-                rel="noopener noreferrer"
-            >
-                This site is an open source utility protocol powered by a
-                community of participants, run separately from the network
-                operator that sells access to the network at https://ur.io.
-            </a>
+            <p className="disclaimer-copy">
+                <span>{t.disclaimer.before}</span><a href="https://ur.io" target="_blank" rel="noopener noreferrer">ur.io</a>
+            </p>
         </div>
     );
 }

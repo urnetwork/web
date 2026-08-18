@@ -1,564 +1,324 @@
-/* Nav.css — fixed top navigation */
-
 .nav {
     position: fixed;
+    z-index: 50;
     top: 0;
     left: 0;
     right: 0;
     height: var(--nav-height);
-    z-index: 50;
-    display: flex;
-    align-items: center;
-    background: rgba(16, 16, 16, 0.55);
-    backdrop-filter: blur(14px);
-    -webkit-backdrop-filter: blur(14px);
+    color: var(--brand-ui);
+    background: rgba(16, 16, 16, 0.2);
     border-bottom: 1px solid transparent;
-    transition: background 0.25s ease, border-color 0.25s ease, top 0.3s ease;
+    transition: top 0.3s ease, background-color 0.3s ease, border-color 0.3s ease;
 }
-
-.nav-below-disclaimer {
-    top: var(--nav-height);
-}
-
-.nav-scrolled {
-    background: rgba(16, 16, 16, 0.85);
-    border-bottom-color: rgba(214, 230, 244, 0.12);
+.nav.nav-below-disclaimer { top: var(--nav-height); }
+.nav.nav-scrolled {
+    background: rgba(16, 16, 16, 0.94);
+    border-bottom-color: rgba(214, 230, 244, 0.1);
+    backdrop-filter: blur(18px);
 }
 
 .nav-inner {
     width: 100%;
+    height: 100%;
     max-width: 1440px;
     margin: 0 auto;
     padding: 0 32px;
-    display: flex;
+    box-sizing: border-box;
+    display: grid;
+    grid-template-columns: minmax(190px, 1fr) auto minmax(190px, 1fr);
     align-items: center;
-    justify-content: space-between;
-    gap: 32px;
+    gap: 24px;
 }
 
-/* --- Brand --- */
 .nav-brand {
-    display: flex;
+    display: inline-flex;
     align-items: center;
-    gap: 18px;
-    text-decoration: none;
-    color: inherit;
+    justify-self: start;
     flex: 0 0 auto;
 }
 
-.nav-logo {
-    height: 26px;
-    width: auto;
-    display: block;
-}
+.nav-logo { width: auto; height: 26px; display: block; }
 
-.nav-tagline {
-    font-family: 'PPNeueMontreal', sans-serif;
-    font-size: 0.7rem;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: var(--brand-ui);
-    opacity: 0.75;
-    border-left: 1px solid rgba(214, 230, 244, 0.18);
-    padding-left: 18px;
-    line-height: 1.2;
-}
-
-/* --- Links --- */
 .nav-links {
     display: flex;
     align-items: center;
-    gap: 28px;
+    justify-content: center;
+    justify-self: center;
+    gap: clamp(20px, 2.4vw, 38px);
 }
 
-.nav-link {
-    font-family: 'PPNeueMontreal', sans-serif;
-    font-size: 0.78rem;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    text-decoration: none;
+.nav-links > a,
+.nav-network > summary,
+.nav-lang-toggle {
     color: var(--brand-ui);
-    opacity: 0.7;
-    padding: 6px 0;
-    position: relative;
-    transition: opacity 0.2s ease, color 0.2s ease;
+    font-family: 'PPNeueMontreal', system-ui, sans-serif;
+    font-size: 0.72rem;
+    letter-spacing: 0.09em;
+    line-height: 1;
+    text-decoration: none;
+    text-transform: uppercase;
     white-space: nowrap;
 }
 
-.nav-link::after {
+.nav-links > a,
+.nav-network > summary {
+    position: relative;
+    padding: 10px 0;
+    opacity: 0.72;
+    transition: color 0.2s ease, opacity 0.2s ease;
+}
+
+.nav-links > a::after,
+.nav-network > summary::after {
     content: '';
     position: absolute;
-    left: 0;
     right: 0;
-    bottom: 0;
+    bottom: 3px;
+    left: 0;
     height: 1px;
     background: var(--brand-ur);
-    transform: scaleX(0);
-    transform-origin: left center;
-    transition: transform 0.25s ease;
+    box-shadow: 0 0 10px rgba(237, 143, 255, 0.65);
+    opacity: 0;
+    transform: scaleX(0.25);
+    transition: opacity 0.2s ease, transform 0.2s ease;
 }
 
-.nav-link:hover {
+.nav-links > a:hover,
+.nav-links > a.is-active,
+.nav-network > summary:hover,
+.nav-network.is-active > summary,
+.nav-network[open] > summary { color: var(--brand-white); opacity: 1; }
+
+.nav-links > a:hover::after,
+.nav-links > a.is-active::after,
+.nav-network > summary:hover::after,
+.nav-network.is-active > summary::after,
+.nav-network[open] > summary::after {
     opacity: 1;
-    color: var(--brand-white);
-}
-
-.nav-link.is-active {
-    opacity: 1;
-    color: var(--brand-white);
-}
-
-.nav-link.is-active::after {
     transform: scaleX(1);
 }
 
-/* --- Language selector --- */
-.nav-lang {
-    position: relative;
-    margin-left: 4px;
-    flex: 0 0 auto;
-}
-
-.nav-lang-toggle {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    background: transparent;
-    border: none;
+.nav-network { position: relative; }
+.nav-network > summary {
+    list-style: none;
     cursor: pointer;
+}
+.nav-network > summary::-webkit-details-marker { display: none; }
+.nav-network > summary span { display: inline-block; margin-left: 6px; color: var(--brand-ur); transition: transform 0.2s ease; }
+.nav-network[open] > summary span { transform: rotate(180deg); }
+
+.nav-network-menu {
+    position: absolute;
+    top: calc(100% + 22px);
+    left: -20px;
+    min-width: 190px;
+    padding: 10px;
+    background: rgba(16, 16, 16, 0.98);
+    border: 1px solid rgba(214, 230, 244, 0.14);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.38);
+}
+
+.nav-network-menu::before {
+    content: '';
+    position: absolute;
+    right: 0;
+    bottom: 100%;
+    left: 0;
+    height: 22px;
+}
+
+.nav-network-menu a {
+    display: block;
+    padding: 12px 10px;
     color: var(--brand-ui);
-    font-family: 'PPNeueMontreal', sans-serif;
-    font-size: 0.78rem;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    opacity: 0.7;
-    padding: 6px 4px;
-    transition: opacity 0.2s ease, color 0.2s ease;
+    font-size: 0.82rem;
+    letter-spacing: 0.04em;
+    text-decoration: none;
 }
-
-.nav-lang-toggle:hover,
-.nav-lang-toggle[aria-expanded="true"] {
-    opacity: 1;
+.nav-network-menu a:hover,
+.nav-network-menu a.is-active {
     color: var(--brand-white);
+    background: rgba(237, 143, 255, 0.07);
+    box-shadow: inset 2px 0 0 var(--brand-ur);
 }
 
-.nav-lang-caret {
-    font-size: 0.6rem;
-    line-height: 1;
-    opacity: 0.8;
+.nav-actions { display: flex; align-items: center; justify-self: end; gap: 14px; }
+.nav-lang { position: relative; }
+.nav-lang-toggle {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    min-height: 40px;
+    padding: 0 10px;
+    color: var(--brand-ui);
+    background: transparent;
+    border: 0;
+    cursor: pointer;
 }
+.nav-lang-toggle span { color: var(--brand-ur); }
 
 .nav-lang-menu {
     position: absolute;
-    top: calc(100% + 8px);
+    top: calc(100% + 10px);
     right: 0;
+    width: 210px;
     margin: 0;
-    padding: 6px;
+    padding: 8px;
     list-style: none;
-    background: rgba(16, 16, 16, 0.96);
-    backdrop-filter: blur(14px);
-    -webkit-backdrop-filter: blur(14px);
-    border: 1px solid rgba(214, 230, 244, 0.18);
-    border-radius: 10px;
-    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
-    min-width: 156px;
-    z-index: 60;
+    background: #101010;
+    border: 1px solid rgba(214, 230, 244, 0.14);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.38);
 }
-
-.nav-lang-menu li {
-    list-style: none;
-}
-
-.nav-lang-item {
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: 12px;
+.nav-lang-menu button {
     width: 100%;
-    background: transparent;
-    border: none;
-    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    gap: 18px;
+    padding: 10px;
     color: var(--brand-ui);
-    font-family: 'PPNeueMontreal', sans-serif;
+    background: transparent;
+    border: 0;
     text-align: left;
-    padding: 7px 12px;
-    border-radius: 6px;
-    opacity: 0.75;
-    transition: opacity 0.15s ease, background 0.15s ease, color 0.15s ease;
+    cursor: pointer;
 }
+.nav-lang-menu button:hover,
+.nav-lang-menu button.is-active { color: var(--brand-white); background: rgba(214, 230, 244, 0.06); }
+.nav-lang-menu small { opacity: 0.55; }
 
-.nav-lang-item:hover {
-    opacity: 1;
-    background: rgba(214, 230, 244, 0.06);
-    color: var(--brand-white);
-}
-
-.nav-lang-item.is-active {
-    opacity: 1;
-    color: var(--brand-ur);
-}
-
-.nav-lang-item-code {
-    font-size: 0.7rem;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-}
-
-.nav-lang-item-name {
-    font-size: 0.7rem;
-    opacity: 0.7;
-}
-
-[dir="rtl"] .nav-lang-menu {
-    right: auto;
-    left: 0;
-}
-
-/* --- Primary CTA (Price label + denomination toggle + sparklines wrapped
-       in one bordered pill) ---
-   The whole pill opens the price page: a stretched link (.nav-cta-hit)
-   covers it, the label and sparklines let pointer events fall through to
-   that link, and only the denomination toggle keeps its own hit area. */
-.nav-cta {
-    position: relative;
+.nav-price {
     display: inline-flex;
     align-items: center;
     gap: 12px;
-    padding: 6px 14px;
-    margin-left: 8px;
-    border: 1px solid rgba(214, 230, 244, 0.35);
-    border-radius: 999px;
-    background: transparent;
+    min-height: 42px;
+    padding: 0 15px;
     color: var(--brand-white);
+    background: rgba(214, 230, 244, 0.07);
+    border: 1px solid rgba(214, 230, 244, 0.2);
+    border-radius: 999px;
     text-decoration: none;
-    flex: 0 0 auto;
-    transition: border-color 0.2s ease, background 0.2s ease;
+    white-space: nowrap;
 }
-
-.nav-cta-hit {
-    position: absolute;
-    inset: 0;
-    z-index: 0;
-    border-radius: 999px;
-    cursor: pointer;
-}
-
-.nav-cta-hit:focus-visible {
-    outline: 1px solid var(--brand-ur);
-    outline-offset: 2px;
-}
-
-.nav-cta-label,
-.nav-cta-sparks {
-    position: relative;
-    z-index: 1;
-    pointer-events: none;
-}
-
-.nav-denom {
-    position: relative;
-    z-index: 2;
-}
-
-.nav-cta:hover {
-    border-color: var(--brand-ur);
-    background: rgba(237, 143, 255, 0.06);
-}
-
-.nav-cta.is-active {
-    border-color: var(--brand-ur);
-}
-
-.nav-cta-label {
-    font-family: 'PPNeueMontreal', sans-serif;
-    font-size: 0.78rem;
+.nav-price:hover { border-color: var(--brand-ur); }
+.nav-price-label {
+    color: var(--brand-ui);
+    font-size: 0.62rem;
     letter-spacing: 0.1em;
     text-transform: uppercase;
+    opacity: 0.75;
+}
+.nav-price-value {
     color: var(--brand-white);
-    white-space: nowrap;
-}
-
-/* USD / α denomination toggle. */
-.nav-denom {
-    display: inline-flex;
-    align-items: center;
-    gap: 2px;
-    padding: 2px;
-    border: 1px solid rgba(214, 230, 244, 0.25);
-    border-radius: 999px;
-    flex: 0 0 auto;
-}
-
-[dir="rtl"] .nav-denom { direction: ltr; }
-
-.nav-denom button {
-    background: transparent;
-    border: none;
-    border-radius: 999px;
-    cursor: pointer;
-    color: var(--brand-ui);
-    font-family: 'PPNeueMontreal', sans-serif;
-    font-size: 0.55rem;
-    letter-spacing: 0.08em;
-    line-height: 1;
-    padding: 3px 7px;
-    opacity: 0.6;
-    transition: opacity 0.15s ease, background 0.15s ease, color 0.15s ease;
-}
-
-.nav-denom button:hover { opacity: 1; }
-
-.nav-denom button.is-active {
-    opacity: 1;
-    color: #101010;
-    background: var(--brand-white);
-}
-
-.nav-cta-sparks {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-
-.nav-spark {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    gap: 2px;
-    width: 82px;
-    flex: 0 0 82px;
-}
-
-.nav-spark-meta {
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: 6px;
-    font-family: 'PPNeueMontreal', sans-serif;
-    line-height: 1;
-}
-
-.nav-spark-label {
-    font-size: 0.5rem;
-    /* No text-transform: the unit strings ("USD/GiB", "α/GiB") are rendered
-       verbatim — uppercasing would turn α into a capital Alpha (Α ≈ A). */
-    letter-spacing: 0.1em;
-    color: var(--brand-white);
-    opacity: 0.55;
-    white-space: nowrap;
-}
-
-.nav-spark-value {
     font-family: 'PPNeueBit', monospace;
-    font-size: 0.78rem;
-    color: var(--brand-white);
+    font-size: 0.82rem;
+    letter-spacing: 0.025em;
     font-variant-numeric: tabular-nums;
-    line-height: 1;
 }
 
-.nav-spark-svg {
-    display: block;
-    width: 100%;
-    height: 14px;
-    overflow: visible;
-}
-
-/* --- Mobile menu toggle (hamburger) --- */
-/* Hidden on desktop; revealed ≤900px where the link cluster collapses. */
 .nav-menu-toggle {
-    display: none;
-    align-items: center;
-    justify-content: center;
-    width: 42px;
-    height: 42px;
-    margin-left: 6px;
-    padding: 0;
-    background: transparent;
-    border: none;
-    cursor: pointer;
-    color: var(--brand-white);
-    flex: 0 0 auto;
-    -webkit-tap-highlight-color: transparent;
-}
-
-.nav-menu-icon {
     position: relative;
-    display: block;
-    width: 22px;
-    height: 14px;
-}
-
-.nav-menu-icon span {
-    position: absolute;
-    left: 0;
-    width: 100%;
-    height: 1.5px;
-    background: currentColor;
-    border-radius: 2px;
-    transition: transform 0.25s ease, opacity 0.2s ease, top 0.25s ease;
-}
-
-.nav-menu-icon span:nth-child(1) { top: 0; }
-.nav-menu-icon span:nth-child(2) { top: 6.25px; }
-.nav-menu-icon span:nth-child(3) { top: 12.5px; }
-
-.nav-menu-toggle.is-open .nav-menu-icon span:nth-child(1) { top: 6.25px; transform: rotate(45deg); }
-.nav-menu-toggle.is-open .nav-menu-icon span:nth-child(2) { opacity: 0; }
-.nav-menu-toggle.is-open .nav-menu-icon span:nth-child(3) { top: 6.25px; transform: rotate(-45deg); }
-
-/* --- Mobile drawer --- */
-/* Full-screen overlay above the disclaimer + nav; carries its own brand bar
-   so it doesn't depend on their (disclaimer-dependent) offsets. Enabled at
-   ≤900px; on desktop it is display:none and can never appear. */
-.nav-drawer {
     display: none;
+    width: 44px;
+    height: 44px;
+    padding: 12px 9px;
+    flex-direction: column;
+    justify-content: center;
+    gap: 5px;
+    background: transparent;
+    border: 0;
+    cursor: pointer;
+}
+.nav-menu-toggle span {
+    display: block;
+    width: 24px;
+    height: 1px;
+    background: var(--brand-ui);
+    transition: transform 0.2s ease, opacity 0.2s ease;
+}
+.nav-menu-toggle.is-open span:nth-child(1) { transform: translateY(6px) rotate(45deg); }
+.nav-menu-toggle.is-open span:nth-child(2) { opacity: 0; }
+.nav-menu-toggle.is-open span:nth-child(3) { transform: translateY(-6px) rotate(-45deg); }
+
+.nav-drawer {
     position: fixed;
+    z-index: 100;
     inset: 0;
-    z-index: 60;
+    display: none;
     flex-direction: column;
-    background: rgba(16, 16, 16, 0.98);
-    backdrop-filter: blur(18px);
-    -webkit-backdrop-filter: blur(18px);
-
-    /* Closed: faded out, lifted slightly, and removed from the tab order. */
-    opacity: 0;
+    padding: 0 20px 24px;
+    box-sizing: border-box;
+    color: var(--brand-ui);
+    background: var(--brand-bg);
     visibility: hidden;
-    transform: translateY(-8px);
-    transition: opacity 0.25s ease, transform 0.25s ease, visibility 0s linear 0.25s;
-}
-
-.nav-drawer.is-open {
-    opacity: 1;
-    visibility: visible;
-    transform: translateY(0);
-    transition: opacity 0.25s ease, transform 0.25s ease, visibility 0s;
-}
-
-.nav-drawer-bar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    height: var(--nav-height);
-    padding: 0 18px;
-    flex: 0 0 auto;
-    border-bottom: 1px solid rgba(214, 230, 244, 0.10);
-}
-
-.nav-drawer-links {
-    display: flex;
-    flex-direction: column;
-    padding: 6px 0;
-    flex: 1 1 auto;
+    opacity: 0;
+    transform: translateY(-12px);
+    transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s;
     overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
 }
+.nav-drawer.is-open { visibility: visible; opacity: 1; transform: none; }
+.nav-drawer-bar { height: var(--nav-height); display: flex; align-items: center; justify-content: space-between; }
+.nav-drawer-bar .nav-menu-toggle { display: flex; }
 
-/* The same .nav-link markup as the desktop bar, restyled into tall rows. */
-.nav-drawer-links .nav-link {
-    font-size: 1.3rem;
-    letter-spacing: 0.01em;
+.nav-drawer-links { padding: 30px 0 36px; }
+.nav-drawer-links > a,
+.nav-drawer-links .nav-network > summary {
+    display: block;
+    padding: 18px 0;
+    color: var(--brand-white);
+    font-size: clamp(1.9rem, 9vw, 3.2rem);
+    font-weight: 500;
+    letter-spacing: -0.035em;
+    line-height: 1;
+    text-decoration: none;
     text-transform: none;
-    opacity: 0.85;
-    padding: 15px 24px;          /* ≥44px tap target */
-    white-space: normal;
+    opacity: 1;
 }
-
-.nav-drawer-links .nav-link::after { display: none; }
-.nav-drawer-links .nav-link.is-active { color: var(--brand-ur); opacity: 1; }
+.nav-drawer-links .nav-network > summary { pointer-events: none; }
+.nav-drawer-links .nav-network > summary span { display: none; }
+.nav-drawer-links .nav-network-menu {
+    position: static;
+    min-width: 0;
+    padding: 0 0 18px 18px;
+    background: transparent;
+    border: 0;
+    box-shadow: none;
+}
+.nav-drawer-links .nav-network-menu a {
+    padding: 10px 0;
+    color: var(--brand-ui);
+    font-size: 1.05rem;
+    letter-spacing: 0;
+}
 
 .nav-drawer-foot {
-    flex: 0 0 auto;
-    display: flex;
-    flex-direction: column;
-    gap: 18px;
-    padding: 20px 24px calc(24px + env(safe-area-inset-bottom, 0px));
-    border-top: 1px solid rgba(214, 230, 244, 0.10);
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 24px;
+    margin-top: auto;
+    padding-top: 24px;
+    border-top: 1px solid rgba(214, 230, 244, 0.14);
 }
-
-.nav-drawer-foot .nav-cta {
-    margin: 0;
-    align-self: flex-start;
-}
-
-.nav-drawer-langs {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px 6px;
-}
-
-.nav-drawer-lang {
-    background: transparent;
-    border: 1px solid rgba(214, 230, 244, 0.18);
-    border-radius: 999px;
+.nav-drawer-foot .nav-price { justify-content: center; width: fit-content; }
+.nav-drawer-langs { display: flex; flex-wrap: wrap; gap: 8px 18px; }
+.nav-drawer-langs button {
+    padding: 8px 0;
     color: var(--brand-ui);
-    font-family: 'PPNeueMontreal', sans-serif;
-    font-size: 0.72rem;
-    letter-spacing: 0.1em;
+    background: transparent;
+    border: 0;
+    font-size: 0.75rem;
+    letter-spacing: 0.08em;
     text-transform: uppercase;
-    opacity: 0.7;
-    padding: 8px 15px;
-    cursor: pointer;
-    transition: border-color 0.2s ease, color 0.2s ease, opacity 0.2s ease;
 }
+.nav-drawer-langs button.is-active { color: var(--brand-white); border-bottom: 1px solid var(--brand-ur); }
 
-.nav-drawer-lang:hover { opacity: 1; color: var(--brand-white); }
-
-.nav-drawer-lang.is-active {
-    opacity: 1;
-    color: var(--brand-white);
-    border-color: var(--brand-ur);
-}
-
-[dir="rtl"] .nav-drawer-links .nav-link { text-align: right; }
-
-@media (prefers-reduced-motion: reduce) {
-    .nav-drawer { transition: opacity 0.01s, visibility 0s; }
-    .nav-menu-icon span { transition: none; }
-}
-
-/* --- Responsive --- */
-
-/* Full bar = brand tagline + roomy spacing. The tagline is ~260px wide, so
-   it only coexists with all 7 links + language + the Usage ticker above
-   ~1520px. Below that we drop the tagline and tighten spacing (the "compact"
-   bar) — otherwise the rightmost Usage pill clips off-screen, which is what
-   used to happen on 1280/1366 laptops. */
-@media (max-width: 1520px) {
-    .nav-tagline { display: none; }
-    .nav-links { gap: 20px; }
-    .nav-link { font-size: 0.72rem; }
-    .nav-cta { gap: 10px; padding: 6px 12px; }
-    .nav-cta-sparks { gap: 10px; }
-    .nav-spark { width: 76px; flex: 0 0 76px; }
-}
-
-/* The sparkline graphs are the widest optional piece — and the pill grew a
-   denomination toggle and a raw link — so drop the graphs from the top bar
-   well above the hamburger threshold. The labeled price values stay until
-   the whole cluster collapses into the drawer; the drawer's copy of the
-   pill keeps its graphs. */
-@media (max-width: 1240px) {
-    .nav-inner > .nav-cta .nav-spark-svg { display: none; }
-    .nav-inner > .nav-cta .nav-spark { width: auto; flex: 0 0 auto; }
-}
-
-/* Collapse before the full link cluster and usage pill begin to compete for
-   space on tablet and compact laptop widths. */
-@media (max-width: 1120px) {
-    .nav-inner { padding: 0 18px; gap: 16px; }
-    .nav-logo { height: 22px; }
-
-    .nav-inner > .nav-links,
-    .nav-inner > .nav-lang,
-    .nav-inner > .nav-cta { display: none; }
-
-    .nav-menu-toggle { display: inline-flex; }
+@media (max-width: 1020px) {
+    .nav-inner { grid-template-columns: 1fr auto; }
+    .nav-links,
+    .nav-actions > .nav-lang,
+    .nav-actions > .nav-price { display: none; }
+    .nav-menu-toggle { display: flex; }
     .nav-drawer { display: flex; }
 }
 
-/* Touch hit-areas: extend small controls to a ~44px tap box without any
-   visual change — the pseudo only participates in hit testing. */
-@media (pointer: coarse) {
-    .nav-brand { position: relative; }
-    .nav-brand::after { content: ""; position: absolute; inset: -11px -8px; }
+@media (max-width: 480px) {
+    .nav-inner { padding: 0 20px; }
 }

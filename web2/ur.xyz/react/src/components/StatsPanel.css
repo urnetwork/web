@@ -4,8 +4,8 @@
  * section, and finally into a full-width ticker bar pinned beneath the nav.
  *
  * The JS layer drives:
- *   --p          : 0 → 1 detach → dock progress
- *   --q          : 0 → 1 dock → sticky/ticker progress
+ *   --p          : 0 â†’ 1 detach â†’ dock progress
+ *   --q          : 0 â†’ 1 dock â†’ sticky/ticker progress
  *   transform    : translate3d(left, top, 0)
  *   width        : interpolated between detached/docked/full
  *
@@ -14,17 +14,16 @@
  * each of its three positions.
  */
 
-/* --q must be a registered <number> so the docked → ticker snap can
+/* --q must be a registered <number> so the docked â†’ ticker snap can
    transition it; every calc() below that reads --q then eases in lockstep.
    It MUST inherit: descendants (.stats-panel-header, .stat-grid, .stat-label,
-   .stat-value) read --q too, and only an inherited value reaches them — which
+   .stat-value) read --q too, and only an inherited value reaches them â€” which
    is also how the plain custom property behaved before registration. */
 @property --q {
     syntax: '<number>';
     inherits: true;
     initial-value: 0;
 }
-
 .stats-panel {
     --p: 0;
     --q: 0;
@@ -39,8 +38,8 @@
     box-sizing: border-box;
 
     /* Padding interpolates across all three states.
-       Vertical:   detached 20 → docked 24 → ticker 6
-       Horizontal: detached 22 → docked 28 → ticker 32 */
+       Vertical:   detached 20 â†’ docked 24 â†’ ticker 6
+       Horizontal: detached 22 â†’ docked 28 â†’ ticker 32 */
     padding:
         calc((20px + 4px * var(--p)) * (1 - var(--q)) + 6px * var(--q))
         calc((22px + 6px * var(--p)) * (1 - var(--q)) + 32px * var(--q));
@@ -68,21 +67,21 @@
     font-family: 'PPNeueMontreal', sans-serif;
 
     will-change: transform, width;
-    /* Detached → docked is scrubbed per-frame (no transition here). The
-       docked → ticker snap enables the transition below only while it plays. */
+    /* Detached â†’ docked is scrubbed per-frame (no transition here). The
+       docked â†’ ticker snap enables the transition below only while it plays. */
 }
 
 /* Disclaimer show/hide moves the nav a row down/up; the detached panel
    follows its resting spot with the same 0.3s ease the nav itself uses.
-   Transform only — nothing else changes on that flip. */
+   Transform only â€” nothing else changes on that flip. */
 .stats-panel.is-reflowing {
     transition: transform 0.3s ease;
 }
 
-/* One-shot docked → ticker snap: a single slow-in/slow-out animation, switched
+/* One-shot docked â†’ ticker snap: a single slow-in/slow-out animation, switched
    on for just its duration by the JS via the `is-snapping` class. Because --q
-   is @property-registered, transitioning it eases every calc() that reads it —
-   padding, borders, glow, header collapse, font sizes — across in lockstep with
+   is @property-registered, transitioning it eases every calc() that reads it â€”
+   padding, borders, glow, header collapse, font sizes â€” across in lockstep with
    the transform/width. Transform and width share the same timing, so the panel
    stays centered throughout the expansion. */
 .stats-panel.is-snapping {
@@ -109,7 +108,7 @@
     gap: 16px;
     overflow: hidden;
 
-    max-height: calc(40px * (1 - var(--q)));
+    max-height: calc(58px * (1 - var(--q)));
     opacity: calc(1 - var(--q));
     padding-bottom: calc(12px * (1 - var(--q)));
     margin-bottom: calc(14px * (1 - var(--q)));
@@ -122,6 +121,17 @@
     text-transform: uppercase;
     color: var(--brand-ui);
     font-weight: 600;
+}
+
+.stats-testnet {
+    max-width: 190px;
+    padding-inline-end: 24px;
+    color: var(--brand-ur);
+    font-size: 0.6rem;
+    line-height: 1.35;
+    letter-spacing: 0.06em;
+    text-align: end;
+    text-transform: uppercase;
 }
 
 /* --- Refresh dial ---------------------------------------------------------
@@ -137,7 +147,7 @@
     height: 26px;
     /* The svg sits 6px inside the button. Dial targets: cards 19+4p from
        the top / 22+6p from the end (the panel padding, on the eyebrow
-       line); ticker 50%−7px / 10px. */
+       line); ticker 50%âˆ’7px / 10px. */
     top: calc((13px + 4px * var(--p)) * (1 - var(--q)) + (50% - 13px) * var(--q));
     inset-inline-end: calc((16px + 6px * var(--p)) * (1 - var(--q)) + 4px * var(--q));
 
@@ -222,9 +232,9 @@
 .stat-label {
     /* Slight tightening for ticker form. */
     font-size: calc(0.58rem * (1 - var(--q)) + 0.55rem * var(--q));
-    /* No text-transform: the i18n label strings are display-ready — an
-       uppercase transform would turn the α unit into a capital Alpha
-       (Α, indistinguishable from a Latin A) and GiB into GIB. */
+    /* No text-transform: the i18n label strings are display-ready â€” an
+       uppercase transform would turn the Î± unit into a capital Alpha
+       (Î‘, indistinguishable from a Latin A) and GiB into GIB. */
     letter-spacing: 0.08em;
     opacity: 0.7;
     margin-bottom: calc(4px * (1 - var(--q)) + 2px * var(--q));
@@ -287,8 +297,14 @@
     }
 
     .stats-panel-header {
-        display: none;
+        display: block;
+        max-height: none;
+        margin: 0 0 8px;
+        padding: 0 0 7px;
     }
+
+    .stats-panel-eyebrow { display: none; }
+    .stats-testnet { display: block; max-width: none; padding-inline-end: 0; font-size: 0.56rem; text-align: start; }
 
     /* No header row on mobile: center the dial in the bar's end gutter. */
     .stats-refresh {
@@ -312,7 +328,7 @@
 }
 
 /* Touch hit-areas: extend small controls to a ~44px tap box without any
-   visual change — the pseudo only participates in hit testing. */
+   visual change â€” the pseudo only participates in hit testing. */
 @media (pointer: coarse) {
     .stats-refresh { position: relative; }
     .stats-refresh::after { content: ""; position: absolute; inset: -9px; }

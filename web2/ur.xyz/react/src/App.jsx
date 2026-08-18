@@ -4,17 +4,16 @@ import './App.css';
 import Disclaimer, { useDisclaimerVisible } from './components/Disclaimer';
 import Nav from './components/Nav';
 import Hero from './components/Hero';
+import HomepageIntro from './components/HomepageIntro';
 import StatsPanel from './components/StatsPanel';
 import Footer from './components/Footer';
 import { useBlockClock, useNetworkTotals } from './lib/network';
 
-import Whitepaper from './components/sections/Whitepaper';
+import LandingOverview from './components/LandingOverview';
 import Research from './components/sections/Research';
 import Operators from './components/sections/Operators';
 import Miners from './components/sections/Miners';
 import Validators from './components/sections/Validators';
-import Community from './components/sections/Community';
-import Roadmap from './components/sections/Roadmap';
 import PriceSection from './components/PriceSection';
 import LegalSection from './components/LegalSection';
 
@@ -32,8 +31,6 @@ const SECTION_COMPONENTS = {
     miners:     Miners,
     validators: Validators,
     research:   Research,
-    community:  Community,
-    roadmap:    Roadmap,
     price:      PriceSection,
     terms:      Terms,
     privacy:    Privacy,
@@ -62,10 +59,9 @@ export default function App() {
 /**
  * HomePage
  *
- * The landing page: simulation hero, protocol ledger stats panel that
- * morphs as you scroll, and the whitepaper section. The scroll transition
- * between the simulation and whitepaper is preserved — the StatsPanel
- * detaches from the hero, docks at the whitepaper section, then expands
+ * The landing page: simulation hero, protocol ledger stats panel, overview,
+ * and role cards. The StatsPanel detaches from the hero, docks at the
+ * homepage introduction, then expands
  * into a sticky ticker bar.
  */
 function HomePage() {
@@ -81,12 +77,13 @@ function HomePage() {
             <StatsPanel
                 block={block}
                 network={network}
-                anchorId="whitepaper"
+                anchorId="stats-anchor"
                 disclaimerVisible={disclaimerVisible}
             />
 
-            <main>
-                <Whitepaper />
+            <main className="landing-main">
+                <HomepageIntro />
+                <LandingOverview />
             </main>
 
             <Footer />

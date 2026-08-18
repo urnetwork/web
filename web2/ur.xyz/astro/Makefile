@@ -27,12 +27,12 @@ generate-agent-assets:
 sync-public:
 	node scripts/sync-public.mjs
 
-build-main: sync-price generate-legal generate-agent-assets sync-public
+build-main: generate-legal generate-agent-assets sync-public
 	(cd ../react && npm ci)
 	npm ci
 	UR_ENV=main npx astro build
 
-build-canary: sync-price generate-legal generate-agent-assets sync-public
+build-canary: generate-legal generate-agent-assets sync-public
 	(cd ../react && npm ci)
 	npm ci
 	UR_ENV=canary npx astro build

@@ -2,6 +2,9 @@
 import Base from '../../layouts/Base.astro';
 import DisclaimerStatic from '../../components/DisclaimerStatic.astro';
 import FooterStatic from '../../components/FooterStatic.astro';
+import CoverageExhibit from '../../components/investors/CoverageExhibit.astro';
+import SubnetFlowExhibit from '../../components/investors/SubnetFlowExhibit.astro';
+import NetworkStackExhibit from '../../components/investors/NetworkStackExhibit.astro';
 import NavIsland from '../../islands/NavIsland.jsx';
 import en from '@react/i18n/en.js';
 
@@ -11,8 +14,8 @@ import '../../components/InvestorLetter.css';
 const t = en;
 ---
 <Base
-    title="August Investment Letter | UR"
-    description="The August 2026 investment letter from UR."
+    title="Our Letter to Bittensor | UR"
+    description="UR's August 2026 letter to the Bittensor community."
     lang="en"
     noindex
 >
@@ -26,61 +29,82 @@ const t = en;
             </div>
 
             <header class="letter-heading letter-shell">
-                <p class="letter-kicker">August Investment Letter</p>
-                <h1>The network should belong to the people who make it useful.</h1>
-                <p class="letter-dek">Why UR built product demand before the subnet, how usage becomes conviction, and what we will report from here.</p>
+                <p class="letter-kicker">Our Letter to Bittensor</p>
+                <h1>Letter to Bittensor</h1>
                 <div class="letter-meta">
-                    <time datetime="2026-08-13">13 August 2026</time>
-                    <span>4 min read</span>
+                    <time datetime="2026-08-18">18 August 2026</time>
+                    <span>6 min read</span>
                 </div>
             </header>
 
             <article class="letter-body">
-                <p class="letter-lead">UR began with a practical premise: demand for private, reliable connectivity already exists. The opportunity is not to invent that demand, but to route it through infrastructure owned and operated by the people who make the network useful.</p>
+                <p class="letter-salutation">Dear friends in Bittensor,</p>
 
-                <p>That premise shaped the order in which we built. We started with products people could use, then developed the network that could serve them. Today, ur.io, vpn.dev and ww.dev are designed to purchase capacity from the same underlying provider network. The products create demand; the subnet measures the work; providers compete to deliver it.</p>
+                <p>Today, I am very proud to be launching UR (SN25) with dear friends Brien Colwell and Keith Singery. Three months ago, in Stockholm, Brien and I came together to discuss the necessity of a free and open internet for all, a mission which Brien has singularly dedicated himself to for the last two years.</p>
 
-                <h2>Demand before emissions</h2>
+                <p>On 8 January 2026, Iran shut down access to foreign websites, splitting families in Iran, preventing contact between them and their loved ones. This was a breakthrough month for URnetwork, whose VPN product ur.io, reached all-time-high MAUs, and provided a lifeline for users; One user in Tehran put it plainly: “This is the only VPN that works”</p>
 
-                <p>Many networks begin with supply. Incentives attract infrastructure, and the hope is that applications and users arrive later. UR is taking the opposite route. We want product activity to be visible in the economics of the subnet from the beginning.</p>
+                <p>At Pylon Partners, my job is to identify and commercialise important technologies that should exist in the world. Beyond pioneering new technology which has enabled a rotating fleet of residential IP addresses to exist, Brien has singlehandedly created a community of 80k+ network providers servicing 350k+ MAUs – only possible with the power of opensource; for a team to execute a rotating connection between IP addresses AND ensure performance which doesn't turn off the user is exceedingly difficult as technological primitive, all done within the last two years.</p>
 
-                <p>Over the latest 30-day period, UR products deposited α18,420 to purchase network capacity and the network transferred 39.6 TB of data. Those figures will move as products, routing and measurement mature. What matters is the relationship between them: product usage should create measurable demand for the network rather than sit beside it as a separate story.</p>
+                <p>In order for URnetwork to service 1bn+ people, we need to build the strongest network in the world, and we need you, the people of Bittensor, to help us on this mission.</p>
 
-                <blockquote>
-                    <p>The network is valuable when independent supply meets demand that would exist without the incentive system.</p>
-                </blockquote>
+                <hr class="letter-divider" />
 
-                <h2>What conviction tells us</h2>
+                <p>Across many sessions in Sweden in May, Brien spoke about his time early in his career at Palantir, building their Gov V1 platform, which contributed to this generation of surveillance and military technologies, lasting only 18 months before heading to NYU to study computational art. He talked about how he felt creating technology that thought the worst of humanity, and how he wanted to instill optimism for what technology could do in empowering human freedom, not belittle it.</p>
 
-                <p>Total conviction directed toward UR is currently α1.42 million. Of that amount, α640,000 comes from the owner coldkey and the balance comes from external participants. We publish both figures because the total is more useful when its composition is visible.</p>
+                <p>It became abundantly clear to us that in order to build this open internet for humans (and agents), we needed to scale this rotating fleet of residential exit nodes, and then to develop new applications which enables this unique form of internet access. Together, we reflected on the state of the world, and what it took to pursue this mission for freedom, and we concluded that Bittensor would be critical for our progress.</p>
 
-                <p>Conviction is a signal, not a conclusion. It reflects capital choosing to remain committed over time, but it does not replace product performance, network quality or transparent reporting. We will continue to present conviction alongside the demand and usage that give the signal context.</p>
+                <CoverageExhibit />
 
-                <h2>A smaller, more useful reporting surface</h2>
+                <p>To move our network to Bittensor will involve turning our community of IP providers into a competitive live market, which we believe can deepen network density and raise IP quality; a stronger network which makes experience better for users, and the open internet more accessible.</p>
 
-                <p>This Investor Centre is intended to be the shortest path to the information that matters. Investors should not have to reconstruct the state of UR from Discord, Telegram, X and a collection of dashboards.</p>
+                <p>Our mission is to create a free and open internet, and we need your help to achieve this.</p>
 
-                <p>Our regular updates will focus on a compact set of questions:</p>
+                <h2>Overview</h2>
+
+                <p>Your IP address is your online identity; Every site you visit sees the address your traffic left from, tied to your household, your city, your personal history. You did not pick it: your ISP assigned it and logged it. Today, the internet we know sorts people by that address: prices, content, search results and outright access can be decided by where your traffic exits. The more you can be identified, the more you can be targeted; the tools for modern day tracking and oppression.</p>
+
+                <p>At the core of UR is the concept of exit nodes: when traffic leaves through clean IP addresses, changing constantly, no single party holds both your identity and your destinations; the correlation that makes surveillance possible can never be assembled. Most classically, this concept is leveraged for VPNs, which enable users to exit through centralised data centres operated by companies like Nord and Express; I won’t go into why these VPNs have failed this generation, this would involve a much longer letter.</p>
+
+                <p>Beyond governmental surveillance, there is this exponential demand for residential access on the back of AI; agents need to reach the web on their user's behalf and labs need to gather the data they train on, yet companies like Cloudflare have begun blocking crawlers by default and charging for passage, which turns the nodes to access the internet a scarce resource everyone is suddenly competing for.</p>
+
+                <h2>UR Subnet</h2>
+
+                <p>Today, UR is a supply side marketplace for 80k+ IP providers. On Bittensor, top miners will have their own UIDs, and long tail miners will be pooled under miner UIDs. Network Operators (“NOs”) run their own servers to host users, they are billed in SN25 for leveraging bandwidth from the subnet. Validators check traffic to verify real usage.</p>
+
+                <SubnetFlowExhibit />
+
+                <p>A miner runs UR software on a phone, laptop, Raspberry Pi and lets strangers' traffic exit through their home connection. They are paid for the bytes they carry, for staying available even in hours when nothing routes through them and they are paid more if they sit in a country where the network is thin.</p>
+
+                <p>Here are some details on core technologies we have had to create to even make this possible and service our active user base. Firstly, URtransport carries traffic across multiple transports and multiple addresses at once, auto-negotiating which to use, so a session survives a home connection that drops, throttles or sits behind a filtered network. Secondly, URmatching caps how much reliability any single address range can contribute, so an attacker who spins up a thousand nodes in one subnet gains nothing, including distributing traffic evenly, to reveal less about who is talking to whom, and to be auditable rather than taken on trust. Please read through our docs, we are incredibly passionate about all of this.</p>
+
+                <h2>Network Operators</h2>
+
+                <p>Foundational to UR is the concept of Network Operators, who are the subnets demand side; Network Operators own the users, product, brand, billing and buy capacity from SN25 to facilitate their services. NOs are billed on two axes: (1) monthly active users served and (2) gigabytes moved per day, paid to the subnet in alpha.</p>
+
+                <p>With our first Network Operator, ur.io, the residential fleet facilitates proxy access to the internet for many people around the world, but looking forward, we see a world where commercial buyers can leverage the global fleet to create legitimate origin (real person, real place) for variety of use cases including:</p>
 
                 <ul>
-                    <li>How much product demand reached the network?</li>
-                    <li>How much useful traffic did the network carry?</li>
-                    <li>How is conviction changing, and who is contributing it?</li>
-                    <li>What changed in the products, research and network?</li>
-                    <li>What risks or dependencies deserve attention?</li>
+                    <li><strong>Residential crawling:</strong> sell web crawl from residential fleet for model training</li>
+                    <li><strong>Geofenced price intel:</strong> retail i.e. airline pricing geofenced; aggregators buy IP to compare prices</li>
+                    <li><strong>Agent egress layer:</strong> route through exit nodes, overcomes anti-bot which test IP</li>
                 </ul>
 
-                <p>Live market data belongs on specialist tools. Detailed network telemetry belongs on the UR Dashboard. This page will remain curated: current signals at the top, the latest written and video updates, and a small library of primary materials.</p>
+                <p>Ultimately, more operators means more paid traffic, generates more revenue, recruits more households, which improves coverage, which makes the network more valuable to the next operator.</p>
 
-                <h2>What comes next</h2>
+                <NetworkStackExhibit />
 
-                <p>Our near-term work is focused on connecting more product activity to measurable network demand, improving the quality of provider-side reporting and making the relationship between usage and subnet economics easier to verify.</p>
+                <hr class="letter-divider" />
 
-                <p>We will also keep improving the quality of the public record. That includes dated updates, durable links, definitions beside the metrics and source material that can be examined directly or queried through the research tools linked from the Investor Centre.</p>
+                <h2>Closing</h2>
 
-                <p>The objective is straightforward: fewer claims that require trust, and more evidence that can be checked.</p>
+                <p>As I close, I want to express a debt of gratitude to some of our dear friends which have influenced all that we do today: Keith, Max Sebti from SCORE, Micaela Bazo from NOVA, Ken Miyachi from Bitmind, Gyles Foster from Tensora, Michael White from Karis Capital and so many more who have welcomed us to the Bittensor movement; for you, we will fight to keep the mission of Bittensor alive.</p>
 
-                <p class="letter-sign-off">The UR team</p>
+                <p>The ultimate goal for UR (SN25) is to enable a free and open internet; We are trying to keep the internet open at a critical moment in the world where it seems like the people of the world are more censored and surveilled than ever. We hope together, with our friends of Bittensor, we can keep the dream of an open and free internet alive.</p>
+
+                <p>I personally hope that all the hard work and effort contributing to building UR can help change lives for people around the world; I hope that in a few years, Brien and I can look at our kids and say: this is what we spent our time fighting for. This is for our families, our communities and our future.</p>
+
+                <p class="letter-sign-off">Much Love,<br />Jack and Brien</p>
             </article>
 
             <nav class="letter-end" aria-label="Return to Investor Centre">

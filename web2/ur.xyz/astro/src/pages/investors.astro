@@ -11,10 +11,11 @@ import '../components/InvestorCentre.css';
 
 const t = en;
 const { featured, updates, materials, metrics } = investorCentre;
+const SHOW_METRICS = false;
 ---
 <Base
     title="Investor Centre | UR"
-    description="UR investor updates, materials, metrics and public research."
+    description="UR investor updates, materials and public research."
     lang="en"
     noindex
 >
@@ -33,7 +34,9 @@ const { featured, updates, materials, metrics } = investorCentre;
 
             <section class="investor-about investor-shell" aria-labelledby="about-ur">
                 <h2 id="about-ur">About UR</h2>
-                <p>{investorCentre.about}</p>
+                <div class="investor-about__copy">
+                    {investorCentre.about.map(paragraph => <p>{paragraph}</p>)}
+                </div>
             </section>
 
             <section class="investor-library investor-shell" aria-labelledby="investor-resources">
@@ -57,8 +60,8 @@ const { featured, updates, materials, metrics } = investorCentre;
                 </a>
 
                 <div class="resource-columns">
-                    <section class="resource-group" aria-labelledby="latest-updates">
-                        <h3 id="latest-updates">Latest updates</h3>
+                    <section class="resource-group" aria-labelledby="management-updates">
+                        <h3 id="management-updates">Management updates</h3>
                         <div class="resource-list">
                             {updates.map(item => (
                                 <a
@@ -97,7 +100,6 @@ const { featured, updates, materials, metrics } = investorCentre;
                                         <strong>{item.title}</strong>
                                         <small>{[item.detail, item.readTime].filter(Boolean).join(' · ')}</small>
                                     </span>
-                                    <span class="resource-arrow" aria-hidden="true">↗</span>
                                 </div>
                             ))}
                         </div>
@@ -105,7 +107,7 @@ const { featured, updates, materials, metrics } = investorCentre;
                 </div>
             </section>
 
-            <section class="investor-metrics investor-shell" aria-labelledby="metrics-title">
+            {SHOW_METRICS && <section class="investor-metrics investor-shell" aria-labelledby="metrics-title">
                 <h2 id="metrics-title">Metrics</h2>
                 <div class="metric-grid">
                     {metrics.map(metric => (
@@ -123,7 +125,7 @@ const { featured, updates, materials, metrics } = investorCentre;
                         </article>
                     ))}
                 </div>
-            </section>
+            </section>}
 
             <section class="investor-explore investor-shell" aria-label="Network and research resources">
                 <div class="explore-panel">

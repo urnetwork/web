@@ -1,7 +1,7 @@
 // 简体中文 — 逐键镜像 en.js 的结构；若在 en.js 新增键，请在此同步添加。
 export default {
     nav: {
-        whitepaper: '白皮书',
+        whitepaper: 'Litepaper',
         operators:  '运营商',
         miners:     '矿工',
         validators: '验证者',
@@ -10,6 +10,7 @@ export default {
         price:      '使用成本',
         docs:       '文档',
         roadmap:    '路线图',
+        network:    '网络',
         tagline:    '掌控你的隐私，掌控你的网络。',
         languageMenu: '语言',
         menu:         '菜单',
@@ -29,7 +30,32 @@ export default {
         languagesAria: '语言',
         terms:      '使用条款',
         privacy:    '隐私政策',
-        vdp:        'VDP'
+        vdp:        'VDP',
+        protocol:   '协议',
+        community:  '社区',
+        legal:      '法律',
+        learn:      '了解',
+        resources:  '资源',
+        connect:    '联系',
+        bittensorDiscord: 'Bittensor Discord',
+        brandKit:   '品牌资料包'
+    },
+
+    disclaimer: {
+        before: 'UR 是一个为网络基础设施提供动力、由社区维护的开源协议。如需 URnetwork 产品（例如 VPN），请访问'
+    },
+
+    homepage: {
+        intro: 'UR 子网是构建在 Bittensor 上的隐私网络。子网会奖励使用网络并为其做出贡献的人。运营商运行服务器并存入 alpha 以路由流量。矿工承载加密流量并获得排放奖励。验证者重新测量网络、验证准确性并获得排放奖励。',
+        diagramAria: 'UR 网络的工作方式',
+        rolesEyebrow: '参与网络',
+        rolesTitle: '三种角色。一个可测量的网络。',
+        roles: {
+            operators: { name: '运营商', body: '运营商运行隐私服务器和验证端点。他们根据预期流量存入资金，共同签署每条测量路径，并提交将奖励分配给旗下矿工的支付清单。存款进入锁定储备，运营商从不托管他人的资金。', explore: '了解运营商' },
+            miners: { name: '矿工', body: '矿工承载流量。他们运行节点，为一个或多个运营商路由加密流量，并根据所贡献的容量从子网排放中获得奖励。', explore: '了解矿工' },
+            validators: { name: '验证者', body: '验证者重新测量网络。他们运行路由验证协议，并按需求和实测质量为每个运营商池评分。准确评分可获得子网排放奖励。', explore: '了解验证者' }
+        },
+        whitepaperCta: '阅读 Litepaper 了解更多详情'
     },
 
     // 统计标签按原样渲染（无 CSS text-transform），
@@ -44,7 +70,8 @@ export default {
         stakedInContract:'合约质押量 (α)',
         demandDeposits:  '每区块需求存款 (α)',
         minerEmissions:  '每区块矿工排放 (α)',
-        networkOperators:'网络运营商'
+        networkOperators:'网络运营商',
+        testnet:         '状态：TESTNET。仅显示测试网数据。'
     },
 
     sim: {
@@ -118,7 +145,7 @@ export default {
     },
 
     whitepaper: {
-        eyebrow: '白皮书',
+        eyebrow: 'Litepaper',
         title:   '在 Bittensor 上协调的隐私网络。',
         clauses: [
             {
@@ -137,7 +164,7 @@ export default {
                     '网络运营商运行隐私服务器和验证端点。运营商向子网存入资金，为每一条被测量的路径共同签名，并提交一份支付清单，将其奖励在附属于它的各矿工之间进行分配。运营商指定其奖励的去向，但从不持有任何他人的资金。',
                     '矿工是网络的入口与出口。他们运行默认安全的安全模型，阻止已知的恶意 IP，并且只路由加密流量。矿工为一个或多个运营商承载流量，并因其贡献的可路由容量而获得报酬。',
                     '验证方是独立的。每个验证方质押自己的 UR，运行路由验证协议，并按需求与实测质量为每个运营商的池评分。验证方因准确且与共识一致的评分而赚取网络的原生分红——没有任何运营商拥有验证方，且验证方集合是无需许可的。',
-                    '子网所有者——BringYour, Inc.——治理结算合约并运营网络的储备。该角色是过渡性的：控制权在初期是中心化但有边界的，并逐步走向去中心化（条款 V）。'
+                    '子网所有者治理结算合约并运营网络储备。该角色是过渡性的：控制权在初期是中心化但有边界的，并逐步走向去中心化（条款 V）。'
                 ]
             },
             {
@@ -147,7 +174,7 @@ export default {
                     'UR 是子网的原生代币——存入、排放与结算的记账单位。它是一种用于协调和支付网络资源的实用型代币；它并非旨在代表或提供任何对利润、收入或回报的权利。',
                     '每个周期，新的 UR 由 Bittensor 的 coinbase 排放，并按三种方式分配：',
                     { type: 'table', head: ['流向', '份额', '接收方'], rows: [
-                        ['所有者',   '18%', 'BringYour, Inc.——子网所有者与网络储备'],
+                        ['所有者',   '18%', '子网所有者'],
                         ['矿工',     '41%', '矿工——通过运营商池和顶级矿工槽位'],
                         ['验证方',   '41%', '独立验证方——因准确评分而获得的原生分红']
                     ]},
@@ -180,7 +207,6 @@ export default {
                 ]
             }
         ],
-        source: { label: '阅读完整白皮书', href: 'https://github.com/urfoundation/sn/' }
     },
 
     operators: {
@@ -264,7 +290,7 @@ export default {
         competition: {
             eyebrow: '算法竞赛——由 Apex (SN1) 提供支持',
             body: '目标在本月底随 25 发布上线 Apex 算法竞赛；力争在撮合/路由算法上实现可测量的 10–20% 平均延迟改进。',
-            cta: '加入研究'
+            cta: '即将推出'
         },
         datasetsLabel: '数据集',
         datasetBlock: '区块 {n}',

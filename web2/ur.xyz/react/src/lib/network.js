@@ -28,7 +28,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
  * during block 1, which has no finished predecessor — so the UI can hide
  * the reference rather than misreport a zero.
  *
- * All fields are numeric; a missing accumulator counts as 0. The endpoint
+ * All fields are numeric; missing values remain null so the UI can clearly
+ * distinguish unavailable data from a measured zero. The endpoint
  * is queried straight from the visitor's browser, so it must answer with
  * exactly one Access-Control-Allow-Origin — either * or an allowlist
  * reflection that includes this site's origin (ur.io serves the latter
@@ -126,24 +127,20 @@ export async function fetchOperatorFeed(statsUrl, signal) {
         const res = await fetch(statsUrl, { signal: ctrl.signal, mode: 'cors' });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const body = await res.json();
-        const num = (key) => {
-            const v = Number(body?.[key]);
-            return Number.isFinite(v) ? v : 0;
-        };
-        // Optional fields stay null when unpublished so the UI can hide
-        // them instead of misreporting a zero.
         const optional = (key) => {
+            if (body?.[key] == null || body?.[key] === '') return null;
             const v = Number(body?.[key]);
             return Number.isFinite(v) ? v : null;
         };
         const alphaUsd = Number(body?.alpha_usd);
         return {
-            users: num('users'),
-            dataGib: num('data_gib'),
-            totalNetworks: num('total_networks'),
-            stakedAlpha: num('staked_alpha'),
-            demandDepositsAlpha: num('demand_deposits_alpha'),
-            minerEmissionsAlpha: num('miner_emissions_alpha'),
+            blockNumber: optional('block'),
+            users: optional('users'),
+            dataGib: optional('data_gib'),
+            totalNetworks: optional('total_networks'),
+            stakedAlpha: optional('staked_alpha'),
+            demandDepositsAlpha: optional('demand_deposits_alpha'),
+            minerEmissionsAlpha: optional('miner_emissions_alpha'),
             // A price of 0 is no price; null marks "not published".
             alphaUsd: Number.isFinite(alphaUsd) && alphaUsd > 0 ? alphaUsd : null,
             // The last finished block (see the schema note above).
@@ -212,6 +209,7 @@ export function useOperatorFeeds() {
 export function useNetworkTotals() {
     const [state, setState] = useState({
         totals: null,
+        blockNumber: null,
         loaded: 0,
         operators: NETWORK_OPERATORS.length
     });
@@ -247,22 +245,25 @@ export function useNetworkTotals() {
 
             setState(prev => ({
                 totals: ok.length === 0 ? prev.totals : ok.reduce((sum, f) => ({
-                    users: sum.users + f.users,
-                    dataGib: sum.dataGib + f.dataGib,
-                    totalNetworks: sum.totalNetworks + f.totalNetworks,
-                    stakedAlpha: sum.stakedAlpha + f.stakedAlpha,
-                    demandDepositsAlpha: sum.demandDepositsAlpha + f.demandDepositsAlpha,
-                    minerEmissionsAlpha: sum.minerEmissionsAlpha + f.minerEmissionsAlpha,
+                    users: addOptional(sum.users, f.users),
+                    dataGib: addOptional(sum.dataGib, f.dataGib),
+                    totalNetworks: addOptional(sum.totalNetworks, f.totalNetworks),
+                    stakedAlpha: addOptional(sum.stakedAlpha, f.stakedAlpha),
+                    demandDepositsAlpha: addOptional(sum.demandDepositsAlpha, f.demandDepositsAlpha),
+                    minerEmissionsAlpha: addOptional(sum.minerEmissionsAlpha, f.minerEmissionsAlpha),
                     prevUsers: addOptional(sum.prevUsers, f.prevUsers),
                     prevDataGib: addOptional(sum.prevDataGib, f.prevDataGib),
                     prevDemandDepositsAlpha: addOptional(sum.prevDemandDepositsAlpha, f.prevDemandDepositsAlpha),
                     prevMinerEmissionsAlpha: addOptional(sum.prevMinerEmissionsAlpha, f.prevMinerEmissionsAlpha)
                 }), {
-                    users: 0, dataGib: 0, totalNetworks: 0, stakedAlpha: 0,
-                    demandDepositsAlpha: 0, minerEmissionsAlpha: 0,
+                    users: null, dataGib: null, totalNetworks: null, stakedAlpha: null,
+                    demandDepositsAlpha: null, minerEmissionsAlpha: null,
                     prevUsers: null, prevDataGib: null,
                     prevDemandDepositsAlpha: null, prevMinerEmissionsAlpha: null
                 }),
+                blockNumber: ok.length === 0
+                    ? prev.blockNumber
+                    : (ok.map(f => f.blockNumber).filter(Number.isFinite).sort((a, b) => b - a)[0] ?? prev.blockNumber),
                 loaded: ok.length,
                 operators: NETWORK_OPERATORS.length
             }));

@@ -178,21 +178,21 @@ export default function OperatorsDirectory() {
                                         <StoreLinks operator={operator} label={s.colStores} />
                                     </div>
                                 </td>
-                                <td>{feed ? fmtInt(feed.totalNetworks) : DASH}</td>
+                                <td>{feed?.totalNetworks != null ? fmtInt(feed.totalNetworks) : DASH}</td>
                                 <td>
-                                    {feed ? fmtInt(feed.users) : DASH}
+                                    {feed?.users != null ? fmtInt(feed.users) : DASH}
                                     {feed && feed.prevUsers != null && (
                                         <div className="op-stat-prev">{t.sim.prevBlock} {fmtInt(feed.prevUsers)}</div>
                                     )}
                                 </td>
                                 <td>
-                                    {feed ? fmt(feed.dataGib) : DASH}
+                                    {feed?.dataGib != null ? fmt(feed.dataGib) : DASH}
                                     {feed && feed.prevDataGib != null && (
                                         <div className="op-stat-prev">{t.sim.prevBlock} {fmt(feed.prevDataGib)}</div>
                                     )}
                                 </td>
                                 <td>
-                                    {feed ? fmt(feed.demandDepositsAlpha) : DASH}
+                                    {feed?.demandDepositsAlpha != null ? fmt(feed.demandDepositsAlpha) : DASH}
                                     {feed && feed.prevDemandDepositsAlpha != null && (
                                         <div className="op-stat-prev">{t.sim.prevBlock} {fmt(feed.prevDemandDepositsAlpha)}</div>
                                     )}
