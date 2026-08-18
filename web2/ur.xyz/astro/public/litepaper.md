@@ -1,6 +1,6 @@
 # A privacy network, coordinated on Bittensor.
 
-> Own your privacy. Own your network.
+> Own ur privacy. Own the network.
 
 ## I. A decentralized privacy network
 

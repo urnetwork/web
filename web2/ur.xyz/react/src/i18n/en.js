@@ -13,7 +13,7 @@ export default {
         docs:       'Docs',
         roadmap:    'Roadmap',
         network:    'Network',
-        tagline:    'Own your privacy. Own your network.',
+        tagline:    'Own ur privacy. Own the network.',
         languageMenu: 'Language',
         menu:         'Menu',
         closeMenu:    'Close menu',
@@ -250,7 +250,7 @@ export default {
             { tag: '01', title: 'Egress',              body: 'Egress miners are the exit IPs of the shared network. They reject traffic that conflicts with common regulation directions like CFAA and DMCA, block known-malicious IPs, and route only encrypted traffic — protecting both miners and users.' },
             { tag: '02', title: 'Ingress',             body: 'Ingress miners (extenders) create entry points that improve reachability worldwide — using N-layer TLS, SNI spoofing, and trusted forwarding. A rotating subset is exposed each cycle, and clients automatically retry the entry points that worked before.' },
             { tag: '03', title: 'Measured and matched',body: 'Independent validators walk chains of miners to prove real-time transit and measure liveness and quality. Miners are ranked by that measurement and by speed, and each operator runs its own matchmaking between users and miners.' },
-            { tag: '04', title: 'Earn from emission',  body: 'Miners are paid from the subnet\'s emission. Inside an operator\'s pool you claim your share each settlement by proof — a low-barrier baseline reward, with no slot to win and nothing to burn.', href: 'https://docs.ur.io/provider', linkLabel: 'Miner docs' },
+            { tag: '04', title: 'Earn from emission',  body: 'Miners are paid from the subnet\'s emission. Inside an operator\'s pool you claim your share each settlement by proof — a low-barrier baseline reward, with no slot to win and nothing to burn.', href: '/docs/provider', linkLabel: 'Miner docs' },
             { tag: '05', title: 'Compete for the top',  body: 'Miners compete on reach. The network ranks fleets by how many distinct, routable exit IPs they actually serve — not by traffic volume — and the roughly 200 with the broadest coverage are promoted to top-level miners: their own on-chain slot, paid natively, earning more. Shared IPs are split among the fleets that claim them, so unique coverage is what wins — grow your distinct-IP breadth to climb, and if your reach slips you fall back to the pool.' }
         ]
     },

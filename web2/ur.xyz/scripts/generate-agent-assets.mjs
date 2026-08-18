@@ -102,7 +102,7 @@ const llms = `# UR protocol
 > UR is an open-source, decentralized privacy network: user traffic distributed
 > across independent miners with multi-hop routing and layered encryption,
 > coordinated on Bittensor. ur.xyz is the protocol's information site, hosted
-> by BringYour, Inc. The commercial network built on it lives at https://ur.io.
+> by UR Foundation. The commercial network built on it lives at https://ur.io.
 
 ## Machine-readable
 

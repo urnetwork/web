@@ -80,6 +80,20 @@ export default defineConfig({
                 locales: { en: 'en', ru: 'ru', ar: 'ar', zh: 'zh', de: 'de', es: 'es' }
             },
             serialize(item) {
+                const pathname = new URL(item.url).pathname;
+                const isEnglishOnlyDocsRedirect = /^\/(ru|ar|zh|de|es)\/docs(?:\/|$)/.test(pathname);
+                const isRetiredAlias = pathname === '/docs/whitepaper' || pathname === '/investors/august-investment-letter';
+                if (isEnglishOnlyDocsRedirect || isRetiredAlias) return undefined;
+
+                // Docs and investor content are English-only. Do not advertise
+                // nonexistent or redirecting locale versions of those pages.
+                if (
+                    pathname === '/docs' || pathname.startsWith('/docs/') ||
+                    pathname === '/investors' || pathname.startsWith('/investors/')
+                ) {
+                    item.links = undefined;
+                }
+
                 // the head advertises an x-default alternate; the sitemap should agree
                 if (item.links?.length) {
                     const en = item.links.find((l) => l.lang === 'en');
