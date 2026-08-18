@@ -2,7 +2,7 @@
 
 # Default Safe: Our Trust and Safety Process
 
-This page outlines our process as of May 2024. This file is versioned so that you can track changes. For input and feedback please join [our Discord](https://bringyour.com/discord).
+This page outlines our process as of May 2024. This file is versioned so that you can track changes. For input and feedback please join [our Discord](https://discord.gg/urnetwork).
 
 Our trust and safety process is how we create a network for all users to safely participate with the most access and the most privacy possible. At BringYour our goal is to create a network where everyone can participate knowing they will be safe, and users are confident their traffic is uncensored, anonymous, and encrypted. 
 

@@ -1,13 +1,11 @@
 
 # URnetwork Providers
 
-URnetwork is a decentralized VPN where egress capacity is provided by anyone who wants to participate in the network, called a provider. A provider connects to a network space, which is a distributed set of servers that manage and faciliate the network using the URnetwork [API](https://docs.ur.io/api) and [connect protocol](https://github.com/urnetwork/protocol). Users authenticate with the network space to use the network for security, privacy, anonymity, and content acccess.
+URnetwork is a decentralized VPN where egress capacity is provided by anyone who wants to participate in the network, called a provider. A provider connects to a network space, which is a distributed set of servers that manage and faciliate the network using the open-source [connect protocol](https://github.com/urnetwork/protocol). Users authenticate with the network space to use the network for security, privacy, anonymity, and content acccess.
 
 The main URnetwork space follows a set of trust and safety rules and an economic model that keeps the network safe for providers, and rewards providers for participating. The network is free to use with a data cap, where users can become a supporter to get a higher data cap and priority speeds. The main URnetwork space supports email, SMS, Google, and Apple authentication.
 
-[Trust and Safety Policy](https://docs.ur.io/trust-and-safety/trust-and-safety)
-
-[Economic Model](https://docs.ur.io/economic-model/economic-model)
+[Trust and Safety Policy](/docs/trust-and-safety/trust-and-safety)
 
 
 ## Provide using an app
@@ -19,7 +17,7 @@ URnetwork builds apps for popular consumer platforms. Our goal is to support as 
 
 ## Provide using a binary
 
-The `provider` binary compiles to run on Linux, Windows, macOS. For information on specific IoT and router platforms see [Raspberry Pi](https://docs.ur.io/rpi), [EdgeOS](https://docs.ur.io/edgeos), and [RouterOS](https://docs.ur.io/routeros).
+The `provider` binary compiles to run on Linux, Windows, and macOS.
 
 The binary runs as any user and does not require special permissions.
 

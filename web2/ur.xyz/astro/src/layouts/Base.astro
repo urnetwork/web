@@ -25,17 +25,27 @@ const {
 } = Astro.props;
 
 const SITE_ORIGIN = 'https://ur.xyz';
-const canonical = new URL(Astro.url.pathname, SITE_ORIGIN).href;
+// Static builds use file-format routes (`/research.html`, `/ar.html`) while
+// the public server exposes clean URLs. Publish the public form in canonical,
+// Open Graph, breadcrumbs and language alternates.
+const publicPath = Astro.url.pathname
+    .replace(/\/index\.html$/, '/')
+    .replace(/\.html$/, '') || '/';
+const canonical = new URL(publicPath, SITE_ORIGIN).href;
 const ogImage = `${SITE_ORIGIN}/ur.png`;
 const alternateHref = alternate && (alternate.href.startsWith('http') ? alternate.href : `${SITE_ORIGIN}${alternate.href}`);
 
 const OG_LOCALES = { en: 'en_US', ru: 'ru_RU', ar: 'ar_AR', zh: 'zh_CN', de: 'de_DE', es: 'es_ES' };
 const ogLocale = OG_LOCALES[lang] || OG_LOCALES.en;
 
-// Language alternates: every page exists at the same path in all six
+// Language alternates: localized pages use the same path in all six
 // languages (English at the bare path, the rest under /<lang>).
 const langPrefix = new RegExp(`^/(${NON_EN_LANGS.join('|')})(?=/|$)`);
-const basePath = Astro.url.pathname.replace(langPrefix, '') || '/';
+const basePath = publicPath.replace(langPrefix, '') || '/';
+const hasLocalizedVersion = !(
+    basePath === '/docs' || basePath.startsWith('/docs/') ||
+    basePath === '/investors' || basePath.startsWith('/investors/')
+);
 const altHref = (l) =>
     new URL(l === 'en' ? basePath : `/${l}${basePath === '/' ? '' : basePath}`, SITE_ORIGIN).href;
 
@@ -83,10 +93,10 @@ const jsonLdText = JSON.stringify({ '@context': 'https://schema.org', '@graph': 
     <meta name="application-name" content="UR" />
     {noindex && <meta name="robots" content="noindex, nofollow" />}
     {!noindex && <link rel="canonical" href={canonical} />}
-    {!noindex && LANG_CODES.map(l => (
+    {!noindex && hasLocalizedVersion && LANG_CODES.map(l => (
         <link rel="alternate" hreflang={l} href={altHref(l)} />
     ))}
-    {!noindex && <link rel="alternate" hreflang="x-default" href={altHref('en')} />}
+    {!noindex && hasLocalizedVersion && <link rel="alternate" hreflang="x-default" href={altHref('en')} />}
     {alternateHref && <link rel="alternate" type={alternate.type} href={alternateHref} />}
 
     <!-- Open Graph -->

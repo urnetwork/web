@@ -4,7 +4,7 @@ import { useLanguage, LANG_ORDER, pathForLang } from '../i18n';
 import { buildPath } from '../router';
 
 const GENERAL_DISCORD = 'https://discord.gg/urnetwork';
-const X_URL = 'https://x.com/yo_ur_network';
+const X_URL = 'https://x.com/urnetwork';
 const GITHUB_URL = 'https://github.com/urfoundation/sn';
 const PRODUCT_URL = 'https://ur.io';
 const BRAND_KIT = 'https://drive.google.com/drive/folders/1086NAso9dA9ytMC0Dg5LoKZ4RSxgcXD8?usp=sharing';

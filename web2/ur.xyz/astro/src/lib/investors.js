@@ -13,14 +13,14 @@ export const investorCentre = {
         title: 'Our Letter to Bittensor',
         summary:
             'A letter from Jack and Brien on launching UR (SN25), growing a global network of residential operators, and building a free and open internet together.',
-        href: '/investors/august-investment-letter',
+        href: '/investors/our-letter-to-bittensor',
     },
     updates: [
         {
             title: 'Our Letter to Bittensor',
             date: '18 August 2026',
             format: 'Written',
-            href: '/investors/august-investment-letter',
+            href: '/investors/our-letter-to-bittensor',
             external: false,
         },
     ],
@@ -75,7 +75,7 @@ Begin with UR's published sources:
 
 - Machine-readable protocol source: https://ur.xyz/llms-full.txt
 - Investor Centre: https://ur.xyz/investors
-- Latest investment letter: https://ur.xyz/investors/august-investment-letter
+- Latest investment letter: https://ur.xyz/investors/our-letter-to-bittensor
 
 Treat these as the project's own published claims, then verify material claims against primary or independently observable sources:
 
@@ -93,7 +93,7 @@ Assess:
 
 Use α and τ correctly. Timestamp every USD conversion and identify the price source.
 
-Clearly distinguish verified facts, project-reported claims and your own inferences. Cite the exact source and publication date for every material claim. If sources conflict, explain the conflict and prioritize the newest primary evidence. Do not infer that something is live merely because it appears in code, a whitepaper or a roadmap.
+Clearly distinguish verified facts, project-reported claims and your own inferences. Cite the exact source and publication date for every material claim. If sources conflict, explain the conflict and prioritize the newest primary evidence. Do not infer that something is live merely because it appears in code, a litepaper or a roadmap.
 
 Structure the response as:
 
@@ -109,8 +109,8 @@ Do not provide a price prediction or buy/sell recommendation.`;
 
 export const externalResources = {
     dashboard: 'https://grafana.bringyour.com/stats',
-    taoMarketCap: 'https://taomarketcap.com/',
-    taostats: 'https://taostats.io/subnets',
+    taoMarketCap: 'https://taomarketcap.com/subnets/25',
+    taostats: 'https://taostats.io/subnets/25',
     chatgpt: `https://chatgpt.com/?q=${encodeURIComponent(investorResearchPrompt)}`,
     claude: `https://claude.ai/new?q=${encodeURIComponent(investorResearchPrompt)}`,
 };
