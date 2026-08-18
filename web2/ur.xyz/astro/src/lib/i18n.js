@@ -34,4 +34,4 @@ export async function getDict(code) {
 }
 
 /** Sections that have their own page route. */
-export const SECTION_ROUTES = ['operators', 'miners', 'validators', 'research', 'community'];
+export const SECTION_ROUTES = ['operators', 'miners', 'validators', 'research'];

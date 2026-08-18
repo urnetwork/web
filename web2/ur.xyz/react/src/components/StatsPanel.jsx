@@ -10,9 +10,6 @@ const fmt = (num) =>
 
 const fmtInt = (num) => Math.floor(Number(num || 0)).toLocaleString();
 
-// Placeholder while no operator feed has answered yet.
-const DASH = '—';
-
 // Stat values glide between readings: a 2s ease-in-out count from the old
 // number to the new one.
 const COUNT_MS = 2000;
@@ -22,10 +19,8 @@ const easeInOutCubic = (t) =>
 // Count interpolation runs in each quantity's integer sub-unit — the
 // underlying whole thing being counted — and the stat's own formatter
 // rounds it for display as it normally would. Data is a byte quantity
-// published in GiB, so it counts in whole bytes; α amounts count in
-// hundredths (the displayed precision); plain counts in whole units.
+// published in GiB, so it counts in whole bytes; plain counts use whole units.
 const GIB_BYTES = 2 ** 30;
-const CENTI = 100;
 
 /**
  * useCountUp
@@ -306,14 +301,10 @@ export default function StatsPanel({ block, network, anchorId = 'whitepaper', di
             </div>
 
             <div className="stat-grid">
-                <Stat label={t.stats.blockNumber}      value={block ? block.number : 1}                   format={(n) => `#${n}`} tone="ur"                       />
+                <Stat label={t.stats.blockNumber}      value={network?.blockNumber ?? block?.number ?? null} format={(n) => `#${n}`} tone="ur"                    />
                 <Stat label={t.stats.dataPerBlock}     value={totals ? totals.dataGib : null}             format={fmt}            tone="data"  scale={GIB_BYTES} />
                 <Stat label={t.stats.usersPerBlock}    value={totals ? totals.users : null}               format={fmtInt}         tone="usd"                      />
                 <Stat label={t.stats.totalNetworks}    value={totals ? totals.totalNetworks : null}       format={fmtInt}         tone="white"                    />
-                <Stat label={t.stats.stakedInContract} value={totals ? totals.stakedAlpha : null}         format={fmt}            tone="ur"    scale={CENTI}     />
-                <Stat label={t.stats.demandDeposits}   value={totals ? totals.demandDepositsAlpha : null} format={fmt}            tone="ur"    scale={CENTI}     />
-                <Stat label={t.stats.minerEmissions}   value={totals ? totals.minerEmissionsAlpha : null} format={fmt}            tone="ur"    scale={CENTI}     />
-                <Stat label={t.stats.networkOperators} value={network ? network.operators : 0}            format={fmtInt}         tone="white"                    />
             </div>
         </aside>
     );
@@ -324,7 +315,7 @@ function Stat({ label, value, format, scale, tone }) {
     return (
         <div className="stat-box">
             <div className="stat-label">{label}</div>
-            <div className={`stat-value tone-${tone}`}>{shown == null ? DASH : format(shown)}</div>
+            <div className={`stat-value tone-${tone}`}>{shown == null ? '—' : format(shown)}</div>
         </div>
     );
 }

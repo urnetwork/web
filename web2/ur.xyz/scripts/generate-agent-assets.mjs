@@ -1,14 +1,12 @@
 /**
  * Generates ur.xyz's machine-readable agent assets into astro/public/:
  *
- *   whitepaper.md      — the home page's whitepaper, from the SAME i18n source
- *                        the page renders (no drift)
+ *   litepaper.md       — the protocol overview, generated from the same
+ *                        canonical i18n source (no drift)
  *   docs-md/<slug>.md  — the raw markdown of every docs page (the docs
  *                        explorer is a client island; these give crawlers and
  *                        agents the actual documents, and each docs page links
  *                        its own via <link rel="alternate" type="text/markdown">)
- *   openapi.yml        — the OpenAPI document the /api explorer renders
- *                        (copied from build/bringyour.yml when present)
  *   llms.txt           — the llms.txt-convention map of the site
  *   llms-full.txt      — single-fetch: llms.txt + the whitepaper + key docs
  *
@@ -18,30 +16,28 @@
 
 import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync, copyFileSync, rmSync } from "node:fs";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, "..");
 const DOCS_DIR = path.join(ROOT, "docs");
 const PUBLIC = path.join(ROOT, "astro", "public");
-const OPENAPI = path.join(ROOT, "build", "bringyour.yml");
 
-// ── the whitepaper, from the i18n english dictionary (the page's own source) ──
-const en = (await import(path.join(ROOT, "react/src/i18n/en.js"))).default;
+// ── the litepaper, from the canonical English protocol overview ───────────────
+const en = (await import(pathToFileURL(path.join(ROOT, "react/src/i18n/en.js")).href)).default;
 const w = en.whitepaper;
 
-const whitepaperMd = `# ${w.title}
+const litepaperMd = `# ${w.title}
 
 > ${en.nav?.tagline || "Own your privacy. Own your network."}
 
 ${w.clauses
   .map((c) => `## ${c.numeral} ${c.title}\n\n${(Array.isArray(c.body) ? c.body : [c.body]).join("\n\n")}`)
   .join("\n\n")}
-
-Full whitepaper: ${w.source?.href || "https://github.com/urfoundation/sn/"}
 `;
-writeFileSync(path.join(PUBLIC, "whitepaper.md"), whitepaperMd);
-console.log("wrote whitepaper.md");
+rmSync(path.join(PUBLIC, "whitepaper.md"), { force: true });
+writeFileSync(path.join(PUBLIC, "litepaper.md"), litepaperMd);
+console.log("wrote litepaper.md");
 
 // ── docs markdown mirror (same slug scheme as react/src/lib/docs.js) ──
 function walk(dir) {
@@ -68,10 +64,24 @@ mkdirSync(outDir, { recursive: true });
 
 const seen = new Set();
 const docIndex = [];
+const HIDDEN_DOC_SLUGS = new Set([
+  "edgeos",
+  "routeros",
+  "rpi",
+  "economic-model/economic-model",
+  "cli",
+  "archive/whitepaper",
+  "mcp/SKILL",
+  "mcp/SKILL2",
+  "router/testing-notes",
+  "changelog/2024-10-31-inspect/inspect",
+  "changelog/2024-10-31-tether/tether",
+  "changelog/2024-10-31-update-1/update-1"
+]);
 for (const abs of walk(DOCS_DIR)) {
   const rel = path.relative(DOCS_DIR, abs).replace(/\\/g, "/");
   const slug = slugFor(rel);
-  if (!slug || seen.has(slug)) continue; // root README + first-wins dedupe, like the lib
+  if (!slug || seen.has(slug) || HIDDEN_DOC_SLUGS.has(slug)) continue; // root README + first-wins dedupe, like the lib
   seen.add(slug);
   const target = path.join(outDir, `${slug}.md`);
   mkdirSync(path.dirname(target), { recursive: true });
@@ -82,15 +92,9 @@ for (const abs of walk(DOCS_DIR)) {
 docIndex.sort((a, b) => a.slug.localeCompare(b.slug));
 console.log(`mirrored ${docIndex.length} docs into docs-md/`);
 
-// ── openapi ──
-let hasOpenapi = false;
-if (existsSync(OPENAPI)) {
-  copyFileSync(OPENAPI, path.join(PUBLIC, "openapi.yml"));
-  hasOpenapi = true;
-  console.log("copied openapi.yml");
-} else {
-  console.log("openapi source absent (build/bringyour.yml) — skipped");
-}
+// The retired API explorer and its stale public specification remain in the
+// source history, but are not part of the published ur.xyz surface.
+rmSync(path.join(PUBLIC, "openapi.yml"), { force: true });
 
 // ── llms.txt ──
 const llms = `# UR protocol
@@ -102,22 +106,18 @@ const llms = `# UR protocol
 
 ## Machine-readable
 
-- [Whitepaper (markdown)](https://ur.xyz/whitepaper.md)
-- [Published usage-cost sheet (yaml)](https://ur.xyz/price.yml) — updates: [RSS](https://ur.xyz/price.rss)
-${hasOpenapi ? "- [OpenAPI reference (yaml)](https://ur.xyz/openapi.yml)\n" : ""}- [Everything in one file](https://ur.xyz/llms-full.txt)
+- [Litepaper](https://ur.xyz/docs/litepaper)
+- [Litepaper (raw markdown)](https://ur.xyz/litepaper.md)
+- [Everything in one file](https://ur.xyz/llms-full.txt)
 - For connecting an agent to the network itself (MCP server, x402): [ur.io agents guide](https://ur.io/agents.md)
 
 ## Pages
 
-- [Home + whitepaper](https://ur.xyz/)
+- [Home](https://ur.xyz/)
 - [Operators](https://ur.xyz/operators)
 - [Miners](https://ur.xyz/miners)
 - [Validators](https://ur.xyz/validators)
 - [Research](https://ur.xyz/research)
-- [Community](https://ur.xyz/community)
-- [Usage cost](https://ur.xyz/price)
-- [Roadmap](https://ur.xyz/roadmap)
-- [API reference](https://ur.xyz/api)
 
 ## Docs
 
@@ -132,12 +132,12 @@ ${docIndex.map((d) => `- [${d.title}](https://ur.xyz/docs-md/${d.slug}.md)`).joi
 writeFileSync(path.join(PUBLIC, "llms.txt"), llms);
 console.log("wrote llms.txt");
 
-// llms-full: the map + whitepaper + the highest-signal docs inline
-const KEY_DOCS = ["economic-model", "protocol", "cli", "provider"];
+// llms-full: the map + litepaper + the highest-signal docs inline
+const KEY_DOCS = ["protocol", "provider"];
 const inlined = docIndex
   .filter((d) => KEY_DOCS.some((k) => d.slug === k || d.slug.startsWith(`${k}/`)))
   .slice(0, 8)
   .map((d) => readFileSync(path.join(outDir, `${d.slug}.md`), "utf8"))
   .join("\n\n---\n\n");
-writeFileSync(path.join(PUBLIC, "llms-full.txt"), `${llms}\n---\n\n${whitepaperMd}\n---\n\n${inlined}`);
+writeFileSync(path.join(PUBLIC, "llms-full.txt"), `${llms}\n---\n\n${litepaperMd}\n---\n\n${inlined}`);
 console.log("wrote llms-full.txt");

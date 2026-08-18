@@ -92,10 +92,10 @@ export default function Explorer({ kind, apiGroups, apiOperations, children }) {
                     <input
                         type="search"
                         className="explorer-search-input"
-                        placeholder="Search docs and API"
+                        placeholder={kind === 'api' ? 'Search API' : 'Search docs'}
                         value={query}
                         onChange={(e) => setQuery(e.target.value)}
-                        aria-label="Search docs and API"
+                        aria-label={kind === 'api' ? 'Search API' : 'Search docs'}
                     />
                 </div>
 
@@ -127,14 +127,16 @@ export default function Explorer({ kind, apiGroups, apiOperations, children }) {
 
                 {!results && (
                     <nav className="explorer-nav" aria-label="Documentation sections">
-                        <button
-                            type="button"
-                            className={`explorer-link explorer-link-api ${isApiActive ? 'is-active' : ''}`}
-                            onClick={() => navigate(buildPath({ name: 'api' }, code))}
-                        >
-                            <span className="explorer-link-eyebrow">API</span>
-                            <span className="explorer-link-title">REST reference</span>
-                        </button>
+                        {kind === 'api' && (
+                            <button
+                                type="button"
+                                className={`explorer-link explorer-link-api ${isApiActive ? 'is-active' : ''}`}
+                                onClick={() => navigate(buildPath({ name: 'api' }, code))}
+                            >
+                                <span className="explorer-link-eyebrow">API</span>
+                                <span className="explorer-link-title">REST reference</span>
+                            </button>
+                        )}
 
                         {kind === 'api' && Array.isArray(apiGroups) && apiGroups.map(group => (
                             <div key={group.id} className="explorer-group">

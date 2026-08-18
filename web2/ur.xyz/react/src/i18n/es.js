@@ -2,7 +2,7 @@
 // Si se añade una clave allí, hay que añadirla también aquí.
 export default {
     nav: {
-        whitepaper: 'Whitepaper',
+        whitepaper: 'Litepaper',
         operators:  'Operadores',
         miners:     'Mineros',
         validators: 'Validadores',
@@ -11,6 +11,7 @@ export default {
         price:      'Costo de uso',
         docs:       'Documentación',
         roadmap:    'Hoja de ruta',
+        network:    'Red',
         tagline:    'Posee tu privacidad. Posee tu red.',
         languageMenu: 'Idioma',
         menu:         'Menú',
@@ -30,7 +31,32 @@ export default {
         languagesAria: 'Idiomas',
         terms:      'Términos de uso',
         privacy:    'Privacidad',
-        vdp:        'VDP'
+        vdp:        'VDP',
+        protocol:   'Protocolo',
+        community:  'Comunidad',
+        legal:      'Legal',
+        learn:      'Conocer',
+        resources:  'Recursos',
+        connect:    'Conectar',
+        bittensorDiscord: 'Discord de Bittensor',
+        brandKit:   'Kit de marca'
+    },
+
+    disclaimer: {
+        before: 'UR es un protocolo de código abierto que impulsa infraestructura de red y es mantenido por su comunidad. Para productos de URnetwork (por ejemplo, VPN), visita'
+    },
+
+    homepage: {
+        intro: 'La subred UR es una red de privacidad construida sobre Bittensor. La subred recompensa a quienes la usan y contribuyen a ella. Los operadores ejecutan servidores y depositan alpha para enrutar tráfico. Los mineros transportan tráfico cifrado y reciben emisiones. Los validadores vuelven a medir la red, verifican su precisión y reciben emisiones.',
+        diagramAria: 'Cómo funciona la red UR',
+        rolesEyebrow: 'Participa en la red',
+        rolesTitle: 'Tres roles. Una red medida.',
+        roles: {
+            operators: { name: 'Operadores', body: 'Los operadores ejecutan los servidores de privacidad y el endpoint de verificación. Depositan según el tráfico esperado, firman conjuntamente cada ruta medida y confirman la lista de pagos que divide las recompensas entre sus mineros. Los depósitos pasan a una reserva bloqueada y los operadores nunca custodian fondos ajenos.', explore: 'Explorar Operadores' },
+            miners: { name: 'Mineros', body: 'Los mineros transportan el tráfico. Ejecutan nodos que enrutan tráfico cifrado para uno o más operadores y reciben emisiones de la subred según la capacidad que aportan.', explore: 'Explorar Mineros' },
+            validators: { name: 'Validadores', body: 'Los validadores vuelven a medir la red. Ejecutan el protocolo de verificación de rutas y puntúan cada pool de operador según la demanda y la calidad medida. Reciben emisiones de la subred por puntuar con precisión.', explore: 'Explorar Validadores' }
+        },
+        whitepaperCta: 'Para más detalles, lee el litepaper'
     },
 
     // Las etiquetas de estadísticas se muestran tal cual (sin text-transform
@@ -46,7 +72,8 @@ export default {
         stakedInContract:'EN STAKE EN EL CONTRATO (α)',
         demandDeposits:  'DEPÓSITOS DE DEMANDA / BLOQUE (α)',
         minerEmissions:  'EMISIÓN DE MINEROS / BLOQUE (α)',
-        networkOperators:'OPERADORES DE RED'
+        networkOperators:'OPERADORES DE RED',
+        testnet:         'Estado: TESTNET. Solo se muestran valores de la red de prueba.'
     },
 
     sim: {
@@ -120,7 +147,7 @@ export default {
     },
 
     whitepaper: {
-        eyebrow: 'Whitepaper',
+        eyebrow: 'Litepaper',
         title:   'Una red de privacidad, coordinada en Bittensor.',
         clauses: [
             {
@@ -139,7 +166,7 @@ export default {
                     'Los operadores de red ejecutan los servidores de privacidad y el punto de verificación. Un operador deposita en la subred, co-firma cada ruta medida y registra una lista de pagos que reparte sus recompensas entre los mineros asociados a él. Un operador dirige a dónde van sus recompensas, pero nunca custodia los fondos de nadie más.',
                     'Los mineros son la entrada y la salida de la red. Ejecutan un modelo de seguridad seguro por defecto, bloquean IPs maliciosas conocidas y solo enrutan tráfico cifrado. Un minero transporta tráfico para uno o más operadores y recibe pago por la capacidad enrutable que aporta.',
                     'Los validadores son independientes. Cada uno hace staking de su propio UR, ejecuta el protocolo de verificación de enrutamiento y puntúa el pool de cada operador según la demanda y la calidad medida. Los validadores ganan los dividendos nativos de la red por una puntuación precisa y alineada con el consenso: ningún operador posee un validador, y el conjunto es sin permisos.',
-                    'El propietario de la subred —BringYour, Inc.— gobierna el contrato de liquidación y opera la reserva de la red. Ese rol es transitorio: el control comienza centralizado pero acotado y se descentraliza progresivamente (cláusula V).'
+                    'El propietario de la subred gobierna el contrato de liquidación y opera la reserva de la red. Ese rol es transitorio: el control comienza centralizado pero acotado y se descentraliza progresivamente (cláusula V).'
                 ]
             },
             {
@@ -149,7 +176,7 @@ export default {
                     'UR es el token nativo de la subred: la unidad de cuenta para depósitos, emisión y liquidación. Es un token de utilidad para coordinar y pagar recursos de la red; no está diseñado para representar ni otorgar ningún derecho a ganancias, ingresos o rendimientos.',
                     'Bittensor emite nuevo UR mediante su coinbase en cada ciclo y se reparte en tres flujos:',
                     { type: 'table', head: ['Flujo', 'Cuota', 'Destinatarios'], rows: [
-                        ['Propietario', '18%', 'BringYour, Inc. — propietario de la subred y reserva de la red'],
+                        ['Propietario', '18%', 'Propietario de la subred'],
                         ['Mineros',     '41%', 'Mineros — a través de los pools de operadores y los slots de mineros de nivel superior'],
                         ['Validadores', '41%', 'Validadores independientes — dividendos nativos por una puntuación precisa']
                     ]},
@@ -182,7 +209,6 @@ export default {
                 ]
             }
         ],
-        source: { label: 'Lee el whitepaper completo', href: 'https://github.com/urfoundation/sn/' }
     },
 
     operators: {
@@ -266,7 +292,7 @@ export default {
         competition: {
             eyebrow: 'Competencia de algoritmos — impulsada por Apex (SN1)',
             body: 'Buscamos lanzar la competencia de algoritmos de Apex a fin de mes junto con el lanzamiento 25; el objetivo es una mejora medible del 10–20 % en la latencia media del algoritmo de matchmaking y enrutamiento.',
-            cta: 'Únete a la investigación'
+            cta: 'Próximamente'
         },
         datasetsLabel: 'Conjuntos de datos',
         datasetBlock: 'Bloque {n}',

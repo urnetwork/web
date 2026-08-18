@@ -9,8 +9,7 @@ import NetworkDiagram from '@react/components/NetworkDiagram.jsx';
 import MinerSim from '@react/components/MinerSim.jsx';
 import ValidatorSim from '@react/components/ValidatorSim.jsx';
 import OperatorsDirectoryIsland from '../../islands/OperatorsDirectoryIsland.jsx';
-import { ResearchCompetition, ResearchCardGrid, ResearchFoot } from '@react/components/ResearchExtras.jsx';
-import { CommunityFoot } from '@react/components/CommunityFoot.jsx';
+import { ResearchCompetition, ResearchDocsLink, ResearchCardGrid, ResearchFoot } from '@react/components/ResearchExtras.jsx';
 import en from '@react/i18n/en.js';
 import { NON_EN_LANGS, LANGS, SECTION_ROUTES, getDict } from '../../lib/i18n.js';
 
@@ -42,13 +41,14 @@ const showDiagram = ROLE_SECTIONS.includes(section);
     dir={dir}
 >
     <div class="app">
-        <DisclaimerStatic />
+        <DisclaimerStatic t={t} />
         <NavIsland activeRoute={section} lang={lang} client:load />
 
         <main class="section-page">
             <Section id={section} eyebrow={sectionData.eyebrow} title={sectionData.title}>
                 {section === 'research' && <ResearchCompetition t={t} />}
                 <p>{sectionData.intro}</p>
+                {section === 'research' && <ResearchDocsLink t={t} href={`/${lang}/docs/protocol/protocol-research`} />}
                 {showDiagram && <NetworkDiagram client:load active={section} lang={lang} ctaLabel={sectionData.cta} />}
                 {section === 'research'
                     ? <ResearchCardGrid t={t} />
@@ -57,7 +57,6 @@ const showDiagram = ROLE_SECTIONS.includes(section);
                 {section === 'miners' && <MinerSim client:visible />}
                 {section === 'validators' && <ValidatorSim client:visible />}
                 {section === 'research' && <ResearchFoot t={t} />}
-                {section === 'community' && <CommunityFoot t={t} />}
             </Section>
         </main>
 

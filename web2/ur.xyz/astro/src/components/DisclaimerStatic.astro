@@ -1,19 +1,13 @@
 ---
-/**
- * Static disclaimer bar. Visibility is toggled by the scroll listener.
- * The nav offset is handled by the React Nav island via useDisclaimerVisible().
- *
- * Styles are defined here (not imported from the React CSS) so they are
- * Astro-scoped and identical on every page regardless of which React
- * island CSS bundles are loaded.
- */
+import en from '@react/i18n/en.js';
+
+interface Props { t?: any; }
+const { t = en } = Astro.props;
 ---
 <div class="disclaimer" id="disclaimer-bar">
-    <a href="https://ur.io" class="disclaimer-link" target="_blank" rel="noopener noreferrer">
-        This site is an open source utility protocol powered by a
-        community of participants, run separately from the network
-        operator that sells access to the network at https://ur.io.
-    </a>
+    <p class="disclaimer-copy">
+        <span>{t.disclaimer.before}</span><a href="https://ur.io" target="_blank" rel="noopener noreferrer">ur.io</a>
+    </p>
 </div>
 
 <style is:global>
@@ -27,57 +21,40 @@
         background: rgba(16, 16, 16, 0.92);
         border-bottom: 1px solid rgba(214, 230, 244, 0.08);
         transition: transform 0.3s ease;
-        /* The nav and stats offsets assume a fixed disclaimer height, so clip
-           rather than let unusually long copy spill onto the nav below. */
         overflow: hidden;
     }
-    .disclaimer-hidden {
-        transform: translateY(-100%);
-    }
-    .disclaimer-link {
+    .disclaimer-hidden { transform: translateY(-100%); }
+    .disclaimer-copy {
         display: flex;
         align-items: center;
         justify-content: center;
+        column-gap: 0.35em;
         width: 100%;
         height: 100%;
         box-sizing: border-box;
+        margin: 0;
+        padding: 0 32px;
+        color: var(--brand-ui);
         font-family: 'PPNeueMontreal', sans-serif;
         font-size: 0.68rem;
-        letter-spacing: 0.04em;
-        color: var(--brand-ui);
-        opacity: 0.6;
-        text-decoration: none;
-        text-align: center;
-        padding: 0 32px;
         line-height: 1.4;
-        transition: opacity 0.2s ease, background-color 0.2s ease;
+        letter-spacing: 0.04em;
+        opacity: 0.6;
+        text-align: center;
+        transition: opacity 0.2s ease;
     }
-    .disclaimer-link:hover {
-        opacity: 1;
-        background: rgba(214, 230, 244, 0.06);
-    }
+    .disclaimer-copy:hover { opacity: 1; }
+    .disclaimer-copy a { color: var(--brand-white); text-underline-offset: 2px; }
     @media (max-width: 768px) {
-        .disclaimer-link {
-            font-size: 0.58rem;
-            line-height: 1.35;
-            padding: 0 18px;
-        }
+        .disclaimer-copy { padding: 0 18px; font-size: 0.6875rem; line-height: 1.35; }
     }
     @media (max-width: 360px) {
-        .disclaimer-link {
-            font-size: 0.54rem;
-            padding: 0 14px;
-        }
+        .disclaimer-copy { padding: 0 14px; font-size: 0.6875rem; }
     }
 </style>
 
 <script>
     const bar = document.getElementById('disclaimer-bar');
-    const link = bar && bar.querySelector('.disclaimer-link');
-    const host = window.location.hostname;
-    if (link && (host === 'preview.ur.xyz' || host === 'localhost')) {
-        link.setAttribute('href', 'https://preview.ur.io');
-    }
     let raf = 0;
     function update() {
         raf = 0;

@@ -2,7 +2,7 @@
 // Wird dort ein Schlüssel hinzugefügt, muss er auch hier ergänzt werden.
 export default {
     nav: {
-        whitepaper: 'Whitepaper',
+        whitepaper: 'Litepaper',
         operators:  'Betreiber',
         miners:     'Miner',
         validators: 'Validatoren',
@@ -11,6 +11,7 @@ export default {
         price:      'Nutzungskosten',
         docs:       'Dokumentation',
         roadmap:    'Roadmap',
+        network:    'Netzwerk',
         tagline:    'Besitze deine Privatsphäre. Besitze dein Netzwerk.',
         languageMenu: 'Sprache',
         menu:         'Menü',
@@ -30,7 +31,32 @@ export default {
         languagesAria: 'Sprachen',
         terms:      'Nutzungsbedingungen',
         privacy:    'Datenschutz',
-        vdp:        'VDP'
+        vdp:        'VDP',
+        protocol:   'Protokoll',
+        community:  'Community',
+        legal:      'Rechtliches',
+        learn:      'Entdecken',
+        resources:  'Ressourcen',
+        connect:    'Kontakt',
+        bittensorDiscord: 'Bittensor Discord',
+        brandKit:   'Brand Kit'
+    },
+
+    disclaimer: {
+        before: 'UR ist ein Open-Source-Protokoll für Netzwerkinfrastruktur und wird von seiner Community gepflegt. URnetwork-Produkte (z. B. VPN) findest du unter'
+    },
+
+    homepage: {
+        intro: 'Das UR-Subnet ist ein auf Bittensor aufgebautes Datenschutznetzwerk. Das Subnet belohnt Menschen, die es nutzen und dazu beitragen. Betreiber führen Server aus und hinterlegen Alpha, um Datenverkehr zu routen. Miner transportieren verschlüsselten Datenverkehr und erhalten Emissionen. Validatoren vermessen das Netzwerk erneut, prüfen die Genauigkeit und erhalten Emissionen.',
+        diagramAria: 'So funktioniert das UR-Netzwerk',
+        rolesEyebrow: 'Am Netzwerk teilnehmen',
+        rolesTitle: 'Drei Rollen. Ein vermessenes Netzwerk.',
+        roles: {
+            operators: { name: 'Betreiber', body: 'Betreiber führen die Datenschutzserver und den Verifizierungsendpunkt aus. Sie hinterlegen Einlagen für den erwarteten Datenverkehr, signieren jeden vermessenen Pfad mit und bestätigen die Auszahlungsliste, die Belohnungen unter ihren Minern aufteilt. Einlagen fließen in eine gesperrte Reserve; Betreiber verwahren niemals fremde Mittel.', explore: 'Betreiber entdecken' },
+            miners: { name: 'Miner', body: 'Miner transportieren den Datenverkehr. Sie betreiben Nodes, die verschlüsselten Datenverkehr für einen oder mehrere Betreiber routen, und werden entsprechend ihrer bereitgestellten Kapazität aus den Subnet-Emissionen bezahlt.', explore: 'Miner entdecken' },
+            validators: { name: 'Validatoren', body: 'Validatoren vermessen das Netzwerk erneut. Sie führen das Routing-Verifizierungsprotokoll aus und bewerten jeden Betreiber-Pool nach Nachfrage und gemessener Qualität. Für genaue Bewertungen erhalten sie Subnet-Emissionen.', explore: 'Validatoren entdecken' }
+        },
+        whitepaperCta: 'Weitere Details stehen im Litepaper'
     },
 
     // Statistik-Labels werden unverändert gerendert (kein CSS text-transform),
@@ -46,7 +72,8 @@ export default {
         stakedInContract:'IM VERTRAG GESTAKT (α)',
         demandDeposits:  'NACHFRAGE-EINLAGEN / BLOCK (α)',
         minerEmissions:  'MINER-EMISSION / BLOCK (α)',
-        networkOperators:'NETZBETREIBER'
+        networkOperators:'NETZBETREIBER',
+        testnet:         'Status: TESTNET. Es werden nur Testnet-Werte angezeigt.'
     },
 
     sim: {
@@ -120,7 +147,7 @@ export default {
     },
 
     whitepaper: {
-        eyebrow: 'Whitepaper',
+        eyebrow: 'Litepaper',
         title:   'Ein Datenschutznetzwerk, koordiniert auf Bittensor.',
         clauses: [
             {
@@ -139,7 +166,7 @@ export default {
                     'Netzbetreiber betreiben die Datenschutzserver und den Verifizierungsendpunkt. Ein Betreiber zahlt in das Subnet ein, signiert jeden gemessenen Pfad mit und legt eine Auszahlungsliste fest, die seine Belohnungen auf die ihm zugeordneten Miner aufteilt. Ein Betreiber bestimmt, wohin seine Belohnungen fließen, verwahrt aber niemals fremde Gelder.',
                     'Miner sind der Ingress und Egress des Netzwerks. Sie betreiben ein standardmäßig sicheres Sicherheitsmodell, blockieren bekannte bösartige IPs und leiten nur verschlüsselten Verkehr weiter. Ein Miner trägt Verkehr für einen oder mehrere Betreiber und wird für die routbare Kapazität bezahlt, die er beisteuert.',
                     'Validatoren sind unabhängig. Jeder setzt sein eigenes UR ein, führt das Routing-Verifizierungsprotokoll aus und bewertet den Pool jedes Betreibers nach Nachfrage und gemessener Qualität. Validatoren verdienen die nativen Dividenden des Netzwerks für genaue, konsenskonforme Bewertung — kein Betreiber besitzt einen Validator, und die Menge ist erlaubnisfrei.',
-                    'Der Subnet-Eigentümer — BringYour, Inc. — verwaltet den Abrechnungsvertrag und betreibt die Reserve des Netzwerks. Diese Rolle ist übergangsweise: Die Kontrolle beginnt zentralisiert, aber begrenzt und dezentralisiert sich schrittweise (Abschnitt V).'
+                    'Der Subnet-Eigentümer verwaltet den Abrechnungsvertrag und betreibt die Reserve des Netzwerks. Diese Rolle ist übergangsweise: Die Kontrolle beginnt zentralisiert, aber begrenzt und dezentralisiert sich schrittweise (Abschnitt V).'
                 ]
             },
             {
@@ -149,7 +176,7 @@ export default {
                     'UR ist der native Token des Subnets — die Recheneinheit für Einzahlungen, Emission und Abrechnung. Es ist ein Utility-Token zur Koordinierung und Bezahlung von Netzwerkressourcen; es ist nicht dafür konzipiert, irgendein Recht auf Gewinne, Einkommen oder Renditen darzustellen oder zu gewähren.',
                     'Neues UR wird von Bittensors Coinbase in jedem Zyklus emittiert und dreifach aufgeteilt:',
                     { type: 'table', head: ['Strom', 'Anteil', 'Empfänger'], rows: [
-                        ['Eigentümer', '18%', 'BringYour, Inc. — Subnet-Eigentümer und Netzwerkreserve'],
+                        ['Eigentümer', '18%', 'Subnet-Eigentümer'],
                         ['Miner',      '41%', 'Miner — über Betreiber-Pools und Top-Level-Miner-Slots'],
                         ['Validatoren','41%', 'Unabhängige Validatoren — native Dividenden für genaue Bewertung']
                     ]},
@@ -182,7 +209,6 @@ export default {
                 ]
             }
         ],
-        source: { label: 'Das vollständige Whitepaper lesen', href: 'https://github.com/urfoundation/sn/' }
     },
 
     operators: {
@@ -266,7 +292,7 @@ export default {
         competition: {
             eyebrow: 'Algo-Wettbewerb — powered by Apex (SN1)',
             body: 'Der Apex-Algo-Wettbewerb soll bis Monatsende mit dem 25-Launch starten; Ziel ist eine messbare Verbesserung der mittleren Latenz des Matchmaking-/Routing-Algorithmus um 10–20 %.',
-            cta: 'Der Forschung beitreten'
+            cta: 'Demnächst'
         },
         datasetsLabel: 'Datensätze',
         datasetBlock: 'Block {n}',

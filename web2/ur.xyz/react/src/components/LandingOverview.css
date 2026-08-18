@@ -1,0 +1,30 @@
+.landing-main { position: relative; background: var(--brand-bg); }
+.landing-overview { width: min(1180px, calc(100% - 64px)); margin: 0 auto; padding: 120px 0 0; }
+.roles { padding: 32px 0 180px; }
+.roles-heading { display: grid; grid-template-columns: minmax(160px, 0.65fr) minmax(0, 2fr); gap: 40px; padding-bottom: 56px; }
+.roles-eyebrow,
+.role-number { margin: 0; color: var(--brand-ur); font-size: 0.72rem; letter-spacing: 0.13em; text-transform: uppercase; }
+.roles h2 { margin: 0; max-width: 720px; color: var(--brand-white); font-size: clamp(2.25rem, 5vw, 5rem); font-weight: 500; line-height: 0.98; letter-spacing: -0.045em; }
+.roles-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border-top: 1px solid rgba(214, 230, 244, 0.16); border-bottom: 1px solid rgba(214, 230, 244, 0.16); }
+.role-card { display: flex; min-height: 420px; flex-direction: column; padding: 28px 30px 32px; }
+.role-card + .role-card { border-left: 1px solid rgba(214, 230, 244, 0.16); }
+.role-card h3 { margin: 78px 0 24px; color: var(--brand-white); font-size: clamp(1.8rem, 3vw, 2.6rem); font-weight: 500; letter-spacing: -0.035em; }
+.role-card > p:not(.role-number) { margin: 0; color: var(--brand-ui); font-size: 0.98rem; line-height: 1.65; }
+.role-card a,
+.roles-cta { color: var(--brand-white); text-decoration: none; }
+.role-card a { margin-top: auto; padding-top: 32px; font-size: 0.78rem; letter-spacing: 0.08em; text-transform: uppercase; }
+.role-card a span,
+.roles-cta span { color: var(--brand-ur); }
+.roles-cta { display: inline-block; margin-top: 56px; padding-bottom: 8px; font-size: clamp(1.25rem, 2.4vw, 2rem); letter-spacing: -0.025em; border-bottom: 1px solid rgba(237, 143, 255, 0.55); }
+
+@media (max-width: 860px) {
+    .roles-heading { grid-template-columns: 1fr; gap: 20px; }
+    .roles-grid { grid-template-columns: 1fr; }
+    .role-card { min-height: 0; padding: 28px 0 36px; }
+    .role-card + .role-card { border-top: 1px solid rgba(214, 230, 244, 0.16); border-left: 0; }
+    .role-card h3 { margin-top: 42px; }
+    .role-card a { margin-top: 40px; }
+}
+@media (max-width: 767px) {
+    .landing-overview { width: calc(100% - 40px); padding-top: 88px; }
+}
