@@ -35,9 +35,8 @@ build:
 	pandoc -f markdown -t plain ${BRINGYOUR_HOME}/docs/legal/privacy.md -o bringyour.com/build/privacy.txt
 	pandoc -f markdown -t plain ${BRINGYOUR_HOME}/docs/legal/terms.md -o bringyour.com/build/terms.txt
 	pandoc -f markdown -t plain ${BRINGYOUR_HOME}/docs/legal/vdp.md -o bringyour.com/build/vdp.txt
-	# include altstore assets
-# 	cp -r ../altstore bringyour.com/build/altstore
-# 	cp -r ${WARP_HOME}/release/apple/stores/altstore/ bringyour.com/build/altstore/
+	# temporarily exclude the AltStore archive from the web deployment
+	rm -rf bringyour.com/build/altstore
 	(. ${NVM_DIR}/nvm.sh && \
 		nvm use ${NODE_VERSION} && \
 		python ../webgen/webgen.py build ur.network/gen.py)

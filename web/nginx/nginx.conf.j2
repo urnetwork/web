@@ -93,6 +93,20 @@ http {
 
     server {
         listen 80;
+        server_name www.ur.io;
+
+        return 301 https://ur.io$request_uri;
+    }
+
+    server {
+        listen 80;
+        server_name www.ur.xyz;
+
+        return 301 https://ur.xyz$request_uri;
+    }
+
+    server {
+        listen 80;
         server_name ur.io preview.ur.io;
 
         absolute_redirect off;
