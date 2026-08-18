@@ -93,24 +93,7 @@ http {
 
     server {
         listen 80;
-        server_name ur.xyz;
-
-        absolute_redirect off;
-
-        location / {
-            try_files $uri $uri.html $uri/ $uri/index.html =404;
-            alias /www/ur.xyz/;
-
-            # always check for updates in the background
-            add_header 'Cache-Control' 'max-age=0, stale-while-revalidate=86400';
-            add_header 'Last-Modified' '{{ http_last_modified }}';
-            add_header 'ETag' '"{{ http_etag }}"';
-        }
-    }
-
-    server {
-        listen 80;
-        server_name preview.ur.io;
+        server_name ur.io preview.ur.io;
 
         absolute_redirect off;
 
@@ -127,7 +110,7 @@ http {
 
     server {
         listen 80;
-        server_name preview.ur.xyz;
+        server_name ur.xyz preview.ur.xyz;
 
         absolute_redirect off;
 
