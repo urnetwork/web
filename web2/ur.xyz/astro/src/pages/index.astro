@@ -4,6 +4,7 @@ import DisclaimerStatic from '../components/DisclaimerStatic.astro';
 import FooterStatic from '../components/FooterStatic.astro';
 import RoleBlocks from '../components/RoleBlocks.astro';
 import HeroIsland from '../islands/HeroIsland.jsx';
+import LaunchVideoIsland from '../islands/LaunchVideoIsland.jsx';
 import HomepageIntro from '@react/components/HomepageIntro.jsx';
 import NetworkDiagram from '@react/components/NetworkDiagram.jsx';
 import en from '@react/i18n/en.js';
@@ -24,6 +25,7 @@ const t = en;
         </main>
 
         <FooterStatic t={t} lang="en" />
+        <LaunchVideoIsland lang="en" client:load />
     </div>
 </Base>
 

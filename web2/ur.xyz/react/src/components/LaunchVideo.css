@@ -1,0 +1,201 @@
+/* Cinematic full-screen overlay for the launch film. A black scrim fades in
+   first, then the letterboxed frame settles with a slight scale; the close
+   and sound affordances appear only after the entrance. Sits above every
+   fixed element on the site (the mobile nav tops out at z-index 100). */
+
+.lv-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 200;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #050506;
+    font-family: 'PPNeueMontreal', system-ui, sans-serif;
+}
+.lv-overlay:focus { outline: none; }
+.lv-overlay.is-open { animation: lv-fade-in 0.9s cubic-bezier(0.33, 0, 0.2, 1) both; }
+.lv-overlay.is-closing { animation: lv-fade-out 0.48s cubic-bezier(0.45, 0, 0.55, 1) both; pointer-events: none; }
+
+.lv-frame {
+    position: relative;
+    width: min(1600px, 93vw, calc(78vh * 16 / 9));
+    width: min(1600px, 93vw, calc(78dvh * 16 / 9));
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+    background: #000;
+    border: 1px solid rgba(214, 230, 244, 0.1);
+    border-radius: 12px;
+    box-shadow: 0 40px 120px rgba(0, 0, 0, 0.55);
+}
+.lv-overlay.is-open .lv-frame { animation: lv-frame-in 1.15s cubic-bezier(0.16, 1, 0.3, 1) 0.18s both; }
+.lv-overlay.is-closing .lv-frame { animation: lv-frame-out 0.48s cubic-bezier(0.45, 0, 0.55, 1) both; }
+
+.lv-video {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    cursor: pointer;
+}
+
+/* Thin playhead along the bottom edge of the frame. Timelines stay LTR
+   even in RTL locales, like every media player. */
+.lv-progress {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 3px;
+    direction: ltr;
+    background: rgba(248, 248, 248, 0.12);
+}
+.lv-progress-fill {
+    height: 100%;
+    background: var(--brand-ur);
+    transform: scaleX(0);
+    transform-origin: 0 50%;
+    transition: transform 0.3s linear;
+}
+
+.lv-close {
+    position: absolute;
+    top: calc(18px + env(safe-area-inset-top, 0px));
+    inset-inline-end: calc(18px + env(safe-area-inset-right, 0px));
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    color: var(--brand-ui);
+    background: rgba(16, 16, 16, 0.55);
+    border: 1px solid rgba(214, 230, 244, 0.18);
+    border-radius: 50%;
+    cursor: pointer;
+    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(8px);
+    transition: color 0.2s ease, border-color 0.2s ease, background-color 0.2s ease;
+}
+.lv-overlay.is-open .lv-close { animation: lv-fade-in 0.5s ease 0.85s both; }
+/* Re-mounted inside the fullscreened frame: appear promptly, no entrance delay. */
+.lv-overlay.is-open .lv-frame .lv-close { animation: lv-fade-in 0.3s ease both; }
+.lv-close:hover { color: var(--brand-white); border-color: var(--brand-ur); background: rgba(237, 143, 255, 0.07); }
+.lv-close svg { width: 20px; height: 20px; fill: currentColor; }
+
+.lv-sound {
+    position: absolute;
+    bottom: 20px;
+    inset-inline-start: 20px;
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    padding: 11px 18px;
+    color: var(--brand-white);
+    background: rgba(10, 10, 12, 0.6);
+    border: 1px solid rgba(214, 230, 244, 0.22);
+    border-radius: 999px;
+    font-family: inherit;
+    font-size: 0.72rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    cursor: pointer;
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+    animation: lv-fade-in 0.5s ease 0.95s both;
+    transition: border-color 0.2s ease, background-color 0.2s ease;
+}
+.lv-sound:hover { border-color: var(--brand-ur); background: rgba(237, 143, 255, 0.1); }
+.lv-sound svg { width: 16px; height: 16px; fill: currentColor; }
+
+.lv-play {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 84px;
+    height: 84px;
+    padding: 0;
+    color: var(--brand-white);
+    background: rgba(10, 10, 12, 0.55);
+    border: 1px solid rgba(214, 230, 244, 0.25);
+    border-radius: 50%;
+    cursor: pointer;
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+    animation: lv-fade-in 0.35s ease both;
+    transition: color 0.2s ease, border-color 0.2s ease, background-color 0.2s ease;
+}
+.lv-play:hover { color: var(--brand-white); border-color: var(--brand-ur); background: rgba(237, 143, 255, 0.12); }
+.lv-play svg { width: 30px; height: 30px; fill: currentColor; margin-left: 5px; }
+
+.lv-fullscreen {
+    position: absolute;
+    bottom: 20px;
+    inset-inline-end: 20px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 42px;
+    height: 42px;
+    padding: 0;
+    color: var(--brand-ui);
+    background: rgba(10, 10, 12, 0.6);
+    border: 1px solid rgba(214, 230, 244, 0.22);
+    border-radius: 50%;
+    cursor: pointer;
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+    animation: lv-fade-in 0.5s ease 0.95s both;
+    transition: color 0.2s ease, border-color 0.2s ease, background-color 0.2s ease;
+}
+.lv-fullscreen:hover { color: var(--brand-white); border-color: var(--brand-ur); background: rgba(237, 143, 255, 0.1); }
+.lv-fullscreen svg { width: 18px; height: 18px; fill: currentColor; }
+
+/* Fullscreened frame: edge to edge, letterbox instead of crop on screens
+   that are not 16:9. Prefixed twin below — an unknown pseudo-class would
+   invalidate a combined selector list, so the rules stay separate. */
+.lv-frame:fullscreen { width: 100%; height: 100%; border: 0; border-radius: 0; box-shadow: none; }
+.lv-frame:fullscreen .lv-video { object-fit: contain; }
+.lv-frame:-webkit-full-screen { width: 100%; height: 100%; border: 0; border-radius: 0; box-shadow: none; }
+.lv-frame:-webkit-full-screen .lv-video { object-fit: contain; }
+
+.lv-close:focus-visible,
+.lv-sound:focus-visible,
+.lv-play:focus-visible,
+.lv-fullscreen:focus-visible {
+    outline: 1px solid var(--brand-ur);
+    outline-offset: 2px;
+}
+
+@keyframes lv-fade-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes lv-fade-out { from { opacity: 1; } to { opacity: 0; } }
+@keyframes lv-frame-in {
+    from { opacity: 0; transform: scale(1.045); }
+    to   { opacity: 1; transform: scale(1); }
+}
+@keyframes lv-frame-out {
+    from { opacity: 1; transform: scale(1); }
+    to   { opacity: 0.35; transform: scale(0.985); }
+}
+
+@media (max-width: 700px) {
+    .lv-frame { border-radius: 8px; }
+    .lv-sound { bottom: 14px; inset-inline-start: 14px; padding: 10px 15px; }
+    .lv-fullscreen { bottom: 14px; inset-inline-end: 14px; width: 38px; height: 38px; }
+}
+
+/* Reduced motion: quick opacity-only fades, no scale choreography. (The
+   overlay also never auto-opens for these visitors — see LaunchVideo.jsx.) */
+@media (prefers-reduced-motion: reduce) {
+    .lv-overlay.is-open { animation: lv-fade-in 0.2s ease both; }
+    .lv-overlay.is-closing { animation: lv-fade-out 0.2s ease both; }
+    .lv-overlay.is-open .lv-frame { animation: lv-fade-in 0.2s ease both; }
+    .lv-overlay.is-closing .lv-frame { animation: lv-fade-out 0.2s ease both; }
+    .lv-overlay.is-open .lv-close,
+    .lv-sound,
+    .lv-play { animation: lv-fade-in 0.2s ease both; }
+}

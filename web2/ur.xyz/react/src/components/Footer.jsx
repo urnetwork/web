@@ -2,6 +2,7 @@ import React from 'react';
 import './Footer.css';
 import { useLanguage, LANG_ORDER, pathForLang } from '../i18n';
 import { buildPath } from '../router';
+import { LAUNCH_VIDEO_HASH } from './LaunchVideo';
 
 const GENERAL_DISCORD = 'https://discord.gg/urnetwork';
 const X_URL = 'https://x.com/urnetwork';
@@ -45,6 +46,7 @@ export default function Footer() {
 
                 <nav className="footer-column" aria-label={t.footer.resources}>
                     <h2>{t.footer.resources}</h2>
+                    <a href={`${path('home')}${LAUNCH_VIDEO_HASH}`}>{t.footer.launchVideo}</a>
                     <a href={BRAND_KIT} target="_blank" rel="noopener noreferrer">{t.footer.brandKit}</a>
                     {code === 'en' && <a href="/investors">Investor Centre</a>}
                 </nav>

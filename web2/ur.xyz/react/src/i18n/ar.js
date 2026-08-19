@@ -39,11 +39,21 @@ export default {
         resources:  'الموارد',
         connect:    'تواصل',
         bittensorDiscord: 'Discord الخاص بـ Bittensor',
-        brandKit:   'حزمة العلامة التجارية'
+        brandKit:   'حزمة العلامة التجارية',
+        launchVideo: 'فيديو الإطلاق'
     },
 
     disclaimer: {
         before: 'UR بروتوكول مفتوح المصدر يدعم البنية التحتية للشبكات ويتولى مجتمعه صيانته. لمنتجات URnetwork (مثل VPN)، انتقل إلى'
+    },
+
+    launchVideo: {
+        aria:  'فيديو إطلاق UR',
+        close: 'إغلاق الفيديو',
+        sound: 'اضغط لتشغيل الصوت',
+        play:  'تشغيل الفيديو',
+        fullscreen: 'ملء الشاشة',
+        exitFullscreen: 'الخروج من ملء الشاشة'
     },
 
     homepage: {

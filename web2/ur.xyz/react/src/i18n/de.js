@@ -39,11 +39,21 @@ export default {
         resources:  'Ressourcen',
         connect:    'Kontakt',
         bittensorDiscord: 'Bittensor Discord',
-        brandKit:   'Brand Kit'
+        brandKit:   'Brand Kit',
+        launchVideo: 'Launch-Video'
     },
 
     disclaimer: {
         before: 'UR ist ein Open-Source-Protokoll für Netzwerkinfrastruktur und wird von seiner Community gepflegt. URnetwork-Produkte (z. B. VPN) findest du unter'
+    },
+
+    launchVideo: {
+        aria:  'UR Launch-Video',
+        close: 'Video schließen',
+        sound: 'Für Ton tippen',
+        play:  'Video abspielen',
+        fullscreen: 'Vollbild',
+        exitFullscreen: 'Vollbild beenden'
     },
 
     homepage: {

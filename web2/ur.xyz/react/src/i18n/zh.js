@@ -38,11 +38,21 @@ export default {
         resources:  '资源',
         connect:    '联系',
         bittensorDiscord: 'Bittensor Discord',
-        brandKit:   '品牌资料包'
+        brandKit:   '品牌资料包',
+        launchVideo: '发布视频'
     },
 
     disclaimer: {
         before: 'UR 是一个为网络基础设施提供动力、由社区维护的开源协议。如需 URnetwork 产品（例如 VPN），请访问'
+    },
+
+    launchVideo: {
+        aria:  'UR 发布视频',
+        close: '关闭视频',
+        sound: '点按开启声音',
+        play:  '播放视频',
+        fullscreen: '全屏',
+        exitFullscreen: '退出全屏'
     },
 
     homepage: {

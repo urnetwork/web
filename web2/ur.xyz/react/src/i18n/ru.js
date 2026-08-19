@@ -39,11 +39,21 @@ export default {
         resources:  'Ресурсы',
         connect:    'Связаться',
         bittensorDiscord: 'Discord Bittensor',
-        brandKit:   'Бренд-кит'
+        brandKit:   'Бренд-кит',
+        launchVideo: 'Видео запуска'
     },
 
     disclaimer: {
         before: 'UR — это протокол с открытым исходным кодом для сетевой инфраструктуры, поддерживаемый сообществом. Продукты URnetwork (например, VPN) доступны на'
+    },
+
+    launchVideo: {
+        aria:  'Видео запуска UR',
+        close: 'Закрыть видео',
+        sound: 'Включить звук',
+        play:  'Смотреть видео',
+        fullscreen: 'Во весь экран',
+        exitFullscreen: 'Выйти из полноэкранного режима'
     },
 
     homepage: {

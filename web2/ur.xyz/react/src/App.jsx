@@ -7,6 +7,7 @@ import Hero from './components/Hero';
 import HomepageIntro from './components/HomepageIntro';
 import StatsPanel from './components/StatsPanel';
 import Footer from './components/Footer';
+import LaunchVideo from './components/LaunchVideo';
 import { useBlockClock, useNetworkTotals } from './lib/network';
 
 import LandingOverview from './components/LandingOverview';
@@ -87,6 +88,7 @@ function HomePage() {
             </main>
 
             <Footer />
+            <LaunchVideo />
         </div>
     );
 }

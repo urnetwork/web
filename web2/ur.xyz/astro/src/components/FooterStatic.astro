@@ -36,6 +36,7 @@ function path(name: string, slug: string | null = null) {
 
         <nav class="footer-column" aria-label={t.footer.resources}>
             <h2>{t.footer.resources}</h2>
+            <a href={`${path('home')}#launch-video`}>{t.footer.launchVideo}</a>
             <a href={BRAND_KIT} target="_blank" rel="noopener noreferrer">{t.footer.brandKit}</a>
             {lang === 'en' && <a href="/investors">Investor Centre</a>}
         </nav>

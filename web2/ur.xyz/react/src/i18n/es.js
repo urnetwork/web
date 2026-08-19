@@ -39,11 +39,21 @@ export default {
         resources:  'Recursos',
         connect:    'Conectar',
         bittensorDiscord: 'Discord de Bittensor',
-        brandKit:   'Kit de marca'
+        brandKit:   'Kit de marca',
+        launchVideo: 'Video de lanzamiento'
     },
 
     disclaimer: {
         before: 'UR es un protocolo de código abierto que impulsa infraestructura de red y es mantenido por su comunidad. Para productos de URnetwork (por ejemplo, VPN), visita'
+    },
+
+    launchVideo: {
+        aria:  'Video de lanzamiento de UR',
+        close: 'Cerrar video',
+        sound: 'Toca para activar el sonido',
+        play:  'Reproducir video',
+        fullscreen: 'Pantalla completa',
+        exitFullscreen: 'Salir de pantalla completa'
     },
 
     homepage: {

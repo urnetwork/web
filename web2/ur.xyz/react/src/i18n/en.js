@@ -40,11 +40,21 @@ export default {
         resources:  'Resources',
         connect:    'Connect',
         bittensorDiscord: 'Bittensor Discord',
-        brandKit:   'Brand kit'
+        brandKit:   'Brand kit',
+        launchVideo: 'Launch video'
     },
 
     disclaimer: {
         before: 'UR is an open source protocol powering network infrastructure, maintained by its community. For URnetwork products (eg: VPN), go to'
+    },
+
+    launchVideo: {
+        aria:  'UR launch video',
+        close: 'Close video',
+        sound: 'Tap for sound',
+        play:  'Play video',
+        fullscreen: 'Fullscreen',
+        exitFullscreen: 'Exit fullscreen'
     },
 
     homepage: {
