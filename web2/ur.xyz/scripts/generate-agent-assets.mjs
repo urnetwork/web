@@ -1,8 +1,10 @@
 /**
  * Generates ur.xyz's machine-readable agent assets into astro/public/:
  *
- *   litepaper.md       — the protocol overview, generated from the same
- *                        canonical i18n source (no drift)
+ *   litepaper.md       — a verbatim copy of docs/litepaper.md, which is the
+ *                        single source for the litepaper: /docs/litepaper
+ *                        renders that same file, so the page a person reads and
+ *                        the file an agent fetches cannot drift apart
  *   docs-md/<slug>.md  — the raw markdown of every docs page (the docs
  *                        explorer is a client island; these give crawlers and
  *                        agents the actual documents, and each docs page links
@@ -23,18 +25,11 @@ const ROOT = path.resolve(__dirname, "..");
 const DOCS_DIR = path.join(ROOT, "docs");
 const PUBLIC = path.join(ROOT, "astro", "public");
 
-// ── the litepaper, from the canonical English protocol overview ───────────────
-const en = (await import(pathToFileURL(path.join(ROOT, "react/src/i18n/en.js")).href)).default;
-const w = en.whitepaper;
-
-const litepaperMd = `# ${w.title}
-
-> ${en.nav?.tagline || "Own your privacy. Own your network."}
-
-${w.clauses
-  .map((c) => `## ${c.numeral} ${c.title}\n\n${(Array.isArray(c.body) ? c.body : [c.body]).join("\n\n")}`)
-  .join("\n\n")}
-`;
+// ─ the litepaper, copied straight from the canonical markdown ─────────────
+// docs/litepaper.md is what /docs/litepaper renders, so it is the one source.
+// Anything appended here (the living-document notice, for one) is already in
+// that file and comes along for free.
+const litepaperMd = readFileSync(path.join(DOCS_DIR, "litepaper.md"), "utf8").trimEnd() + "\n";
 rmSync(path.join(PUBLIC, "whitepaper.md"), { force: true });
 writeFileSync(path.join(PUBLIC, "litepaper.md"), litepaperMd);
 console.log("wrote litepaper.md");

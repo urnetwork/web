@@ -72,3 +72,7 @@ Settled contracts used for a payout are removed one week after the payout. This 
 [^1]: As a formula, the subsidized payout to a single provider is `0.75 * sum(all contracts serviced by provider)/sum(all contracts) + (0.25 / NumberOfCountries) * sum(all contracts serviced by provider)/sum(all contracts in provider's country)`
 
 [^2]: `PremiumPrice/month * PremiumConversion * MAU = .2 * MAU/month`
+
+---
+
+_This is a living document. Testnet will inform how the network evolves, and the design described here, including the incentive mechanism, may change as we iterate._

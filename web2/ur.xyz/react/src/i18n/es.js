@@ -62,7 +62,7 @@ export default {
         rolesEyebrow: 'Participa en la red',
         rolesTitle: 'Tres roles. Una red medida.',
         roles: {
-            operators: { name: 'Operadores', body: 'Los operadores ejecutan los servidores de privacidad y el endpoint de verificación. Depositan según el tráfico esperado, firman conjuntamente cada ruta medida y confirman la lista de pagos que divide las recompensas entre sus mineros. Los depósitos pasan a una reserva bloqueada y los operadores nunca custodian fondos ajenos.', explore: 'Explorar Operadores' },
+            operators: { name: 'Operadores', body: 'Los operadores ejecutan los servidores de privacidad y el endpoint de verificación. Depositan según el tráfico esperado, firman conjuntamente cada ruta medida y confirman la lista de pagos que divide las recompensas entre sus mineros. Los depósitos pasan a una reserva y los operadores nunca custodian fondos ajenos.', explore: 'Explorar Operadores' },
             miners: { name: 'Mineros', body: 'Los mineros transportan el tráfico. Ejecutan nodos que enrutan tráfico cifrado para uno o más operadores y reciben emisiones de la subred según la capacidad que aportan.', explore: 'Explorar Mineros' },
             validators: { name: 'Validadores', body: 'Los validadores vuelven a medir la red. Ejecutan el protocolo de verificación de rutas y puntúan cada pool de operador según la demanda y la calidad medida. Reciben emisiones de la subred por puntuar con precisión.', explore: 'Explorar Validadores' }
         },
@@ -156,79 +156,14 @@ export default {
         }
     },
 
-    whitepaper: {
-        eyebrow: 'Litepaper',
-        title:   'Una red de privacidad, coordinada en Bittensor.',
-        clauses: [
-            {
-                numeral: 'I.',
-                title:   'Una red de privacidad descentralizada',
-                body: [
-                    'UR es una red de privacidad descentralizada. Distribuye el tráfico de los usuarios a través de una red global de mineros independientes mediante enrutamiento multi-salto y encriptación por capas, de modo que ningún minero individual ve al mismo tiempo quién es un usuario y qué está haciendo. El transporte está diseñado para asemejarse al tráfico HTTPS ordinario —encriptación TLS de N capas, suplantación de SNI e indistinguibilidad del tráfico— de modo que la red permanece accesible en casi todas partes.',
-                    'La UR Subnet coordina esta red mediante incentivos on-chain en Bittensor. Los operadores de red ejecutan los servidores; los mineros independientes transportan el tráfico de entrada y de salida; y los validadores independientes recorren continuamente cadenas de mineros asignadas por los operadores para probar el tránsito en tiempo real y medir qué mineros son los eslabones más débiles. Esa medición es la señal central por la que paga la red.',
-                    'El Yuma Consensus de Bittensor convierte las mediciones de los validadores en emisión de tokens, y un contrato inteligente en la Subtensor EVM liquida los pagos. El protocolo es de código abierto, y ejecutar un minero o un validador es sin permisos.'
-                ]
-            },
-            {
-                numeral: 'II.',
-                title:   'Roles',
-                body: [
-                    'Los operadores de red ejecutan los servidores de privacidad y el punto de verificación. Un operador deposita en la subred, co-firma cada ruta medida y registra una lista de pagos que reparte sus recompensas entre los mineros asociados a él. Un operador dirige a dónde van sus recompensas, pero nunca custodia los fondos de nadie más.',
-                    'Los mineros son la entrada y la salida de la red. Ejecutan un modelo de seguridad seguro por defecto, bloquean IPs maliciosas conocidas y solo enrutan tráfico cifrado. Un minero transporta tráfico para uno o más operadores y recibe pago por la capacidad enrutable que aporta.',
-                    'Los validadores son independientes. Cada uno hace staking de su propio UR, ejecuta el protocolo de verificación de enrutamiento y puntúa el pool de cada operador según la demanda y la calidad medida. Los validadores ganan los dividendos nativos de la red por una puntuación precisa y alineada con el consenso: ningún operador posee un validador, y el conjunto es sin permisos.',
-                    'El propietario de la subred gobierna el contrato de liquidación y opera la reserva de la red. Ese rol es transitorio: el control comienza centralizado pero acotado y se descentraliza progresivamente (cláusula V).'
-                ]
-            },
-            {
-                numeral: 'III.',
-                title:   'El token UR',
-                body: [
-                    'UR es el token nativo de la subred: la unidad de cuenta para depósitos, emisión y liquidación. Es un token de utilidad para coordinar y pagar recursos de la red; no está diseñado para representar ni otorgar ningún derecho a ganancias, ingresos o rendimientos.',
-                    'Bittensor emite nuevo UR mediante su coinbase en cada ciclo y se reparte en tres flujos:',
-                    { type: 'table', head: ['Flujo', 'Cuota', 'Destinatarios'], rows: [
-                        ['Propietario', '18%', 'Propietario de la subred'],
-                        ['Mineros',     '41%', 'Mineros — a través de los pools de operadores y los slots de mineros de nivel superior'],
-                        ['Validadores', '41%', 'Validadores independientes — dividendos nativos por una puntuación precisa']
-                    ]},
-                    'Los operadores financian la red depositando UR en proporción a su uso real, a una tasa de referencia publicada. Un depósito es una señal costosa y respaldada por ingresos de demanda real, y a la vez una participación de convicción: el contrato traslada cada depósito a una reserva bloqueada donde se acumula y nunca se redistribuye, retirando permanentemente UR del suministro líquido en proporción al uso real. La participación bloqueada acumulada de un operador reduce la tasa que debe aportar, de modo que los operadores comprometidos pueden incorporarse con menos capital inicial.',
-                    'A los mineros se les paga con la emisión, no con los depósitos. Como los depósitos se bloquean en lugar de reciclarse, el uso real se convierte en un soporte de compra permanente y creciente para el token en lugar de presión vendedora, mientras que la emisión sigue un calendario fijo con halvings.'
-                ]
-            },
-            {
-                numeral: 'IV.',
-                title:   'Dos formas de ganar',
-                body: [
-                    'Un solo operador puede dar servicio a mucho más de 100,000 mineros —muchos más que los aproximadamente 256 slots on-chain de una subred—, por lo que la red paga a los mineros mediante dos niveles que funcionan en paralelo.',
-                    'El pool es la vía de entrada. Cada operador mantiene un único slot on-chain para todos sus mineros; los validadores ponderan ese pool según la demanda del operador y su calidad medida, y cada minero reclama su parte directamente del contrato de liquidación con una prueba criptográfica. No hay ningún slot que ganar ni nada que quemar: es donde un minero comienza y gana una recompensa base.',
-                    'Los mineros de nivel superior son el vértice de la oferta. Las aproximadamente 200 flotas más grandes —clasificadas por cuántas IPs de salida distintas y enrutables prestan realmente, no por volumen de tráfico— reclaman cada una su propio slot on-chain y reciben pago directamente de la red, sin ningún operador en la ruta de pago. Una IP compartida se reparte entre las flotas que la reclaman, de modo que la amplitud no puede contarse dos veces.',
-                    'Los dos niveles son un mismo torneo: un minero comienza en un pool, asciende a un slot superior a medida que crece su amplitud de IPs enrutables, y vuelve al pool si retrocede. Una cuota fijada por la gobernanza divide la emisión entre la cabeza y la cola.',
-                    { type: 'list', items: [
-                        'Nivel de pool — la vía de entrada: únete a un operador sin slot y sin coste de registro; los validadores ponderan el pool según la demanda y la calidad; cada minero reclama su parte mediante prueba en cada período de liquidación.',
-                        'Mineros de nivel superior — el vértice: las ~200 flotas con la cobertura de IPs enrutables más amplia reclaman su propio slot y reciben pago directamente de la red, sin operador, sin pool y sin intermediario.'
-                    ]}
-                ]
-            },
-            {
-                numeral: 'V.',
-                title:   'Custodia, liquidación y descentralización',
-                body: [
-                    'La liquidación se ejecuta en un ciclo de siete días. El contrato acumula la emisión de cada pool durante el período y luego abre las reclamaciones: los mineros retiran su UR directamente del contrato contra la lista de pagos comprometida por su operador. Los mineros de nivel superior no necesitan ningún paso de liquidación: la cadena paga su slot de forma nativa en cada ciclo.',
-                    'Nadie custodia los fondos de nadie más. El contrato de liquidación es el único custodio del UR en tránsito, cada pago de pool es una reclamación on-chain directa, y a los mineros de nivel superior se les paga de forma nativa a sus propias claves. Los operadores y el propietario nunca toman custodia de las recompensas de los mineros.',
-                    'Las reclamaciones ganadas son definitivas. Una vez que un período de liquidación se finaliza, los tokens que respaldan sus reclamaciones quedan comprometidos: ninguna actualización, pausa o acción administrativa puede bloquearlas ni revertirlas. La reserva bloqueada es unidireccional por el mismo estándar: ninguna función puede retirar fondos de ella.',
-                    'El control se descentraliza con el tiempo. La red se lanza con el contrato actualizable tras un multisig del propietario —un control central deliberado y acotado para corregir errores tempranos— y se refuerza por etapas: un timelock público en cada cambio, un guardián que solo puede pausar y que puede detener un exploit pero nunca mover fondos ni bloquear reclamaciones finalizadas, y, con el tiempo, gobernanza on-chain y un núcleo de liquidación inmutable.'
-                ]
-            }
-        ],
-    },
-
-    operators: {
+operators: {
         eyebrow: 'Operadores',
         title:   'Los operadores que ejecutan la red.',
-        intro:   'Los operadores de red ejecutan los servidores de privacidad y el punto de verificación. Un operador deposita en la subred como una señal costosa y respaldada por ingresos de demanda real, ejecuta el protocolo de verificación de enrutamiento que co-firma cada ruta medida, y registra la lista de pagos que reparte sus recompensas entre los mineros asociados a él. Los operadores dirigen a dónde van las recompensas, pero nunca custodian los fondos de nadie más.',
+        intro:   'Los operadores de red ejecutan los servidores de privacidad y el punto de verificación. Un operador deposita en la subred como una señal respaldada por ingresos de demanda real, ejecuta el protocolo de verificación de enrutamiento que co-firma cada ruta medida, y registra la lista de pagos que reparte sus recompensas entre los mineros asociados a él. Los operadores dirigen a dónde van las recompensas, pero nunca custodian los fondos de nadie más.',
         cta: 'Conviértete en operador de red',
         roles: [
             { tag: '01', title: 'Ejecutar los servidores', body: 'Los operadores ejecutan los servidores de privacidad y el punto /verify que co-firma cada ruta medida: la capa de coordinación entre los usuarios y los mineros que transportan el tráfico.' },
-            { tag: '02', title: 'Señalar demanda real',    body: 'Los operadores depositan UR en proporción a su uso real. Cada depósito es una participación de convicción bloqueada en la reserva de recompra —nunca redistribuida—, por lo que es una señal costosa y respaldada por ingresos que los validadores ponderan cuando puntúan los pools.' },
+            { tag: '02', title: 'Señalar demanda real',    body: 'A los operadores se les factura en alpha en proporción a su uso real. Cada depósito pasa a una reserva como una señal respaldada por ingresos que los validadores ponderan cuando puntúan los pools.' },
             { tag: '03', title: 'Dirigir los pagos',        body: 'En cada período de liquidación, un operador registra una lista de pagos Merkle que reparte su pool entre sus mineros. Dirige el reparto pero nunca toma custodia: cada minero reclama su parte directamente del contrato.' },
             { tag: '04', title: 'Comenzar',                 body: 'Registra una clave de operador de red, ejecuta el servidor /verify y deposita para empezar. La admisión de operadores está controlada por el propietario durante la fase de lanzamiento.' }
         ],

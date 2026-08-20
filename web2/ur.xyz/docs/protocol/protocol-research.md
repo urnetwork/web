@@ -90,3 +90,7 @@ Implementation: [subscription_model.go](https://github.com/urnetwork/server/blob
 The current safety layer uses port and IP block lists. It does not inspect application protocols.
 
 Implementation: [ip_security.go](https://github.com/urnetwork/connect/blob/main/ip_security.go).
+
+---
+
+_This is a living document. Testnet will inform how the network evolves, and the design described here, including the incentive mechanism, may change as we iterate._

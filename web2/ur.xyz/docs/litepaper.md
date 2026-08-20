@@ -32,9 +32,9 @@ New UR is emitted by Bittensor's coinbase each cycle and split three ways:
 | Miners | 41% | Miners through operator pools and top-level miner slots |
 | Validators | 41% | Independent validators, receiving native dividends for accurate scoring |
 
-Operators fund the network by depositing UR sized to their real usage, at a published reference rate. A deposit is a costly, revenue-backed signal of real demand and conviction stake: the contract moves every deposit into a locked reserve where it compounds and is never redistributed, permanently removing UR from liquid supply in proportion to real usage. An operator's cumulative locked stake lowers the rate it must post, so committed operators can onboard with less up-front capital.
+Operators fund the network by depositing UR sized to their real usage, at a published reference rate. A deposit is a revenue-backed signal of real demand: the contract moves every deposit into the subnet reserve. An operator's cumulative deposits lower the rate it must post, so committed operators can onboard with less up-front capital.
 
-Miners are paid from emission, not from deposits. Because deposits are locked rather than recycled, real usage becomes a standing, growing bid under the token instead of sell pressure, while emission follows a fixed schedule with halvings.
+Miners are paid from emission, not from deposits. Because deposits accumulate in the reserve rather than being recycled into payouts, real usage adds demand for the token, while emission follows a fixed schedule with halvings.
 
 ## IV. Two ways to earn
 
@@ -55,6 +55,10 @@ Settlement runs on a seven-day cycle. The contract accrues each pool's emission 
 
 No one holds anyone else's funds. The settlement contract is the sole custodian of in-transit UR, every pool payout is a direct on-chain claim, and top-level miners are paid natively to their own keys. Operators and the owner never take custody of miners' rewards.
 
-Earned claims are final. Once a settlement period is finalized, the tokens backing its claims are committed. No upgrade, pause, or administrative action can block or reverse them. The locked reserve is one-way by the same standard: no function can move funds out of it.
+Earned claims are final. Once a settlement period is finalized, the tokens backing its claims are committed. No upgrade, pause, or administrative action can block or reverse them.
 
 Control decentralizes over time. The network launches with the contract upgradeable behind an owner multisig, providing deliberate, bounded central control for early bug fixes, and hardens in stages: a public timelock on every change, a pause-only guardian that can stop an exploit but can never move funds or block finalized claims, and, in time, on-chain governance and an immutable settlement core.
+
+---
+
+_This is a living document. Testnet will inform how the network evolves, and the design described here, including the incentive mechanism, may change as we iterate._

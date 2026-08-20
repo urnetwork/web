@@ -62,7 +62,7 @@ export default {
         rolesEyebrow: 'Am Netzwerk teilnehmen',
         rolesTitle: 'Drei Rollen. Ein vermessenes Netzwerk.',
         roles: {
-            operators: { name: 'Betreiber', body: 'Betreiber führen die Datenschutzserver und den Verifizierungsendpunkt aus. Sie hinterlegen Einlagen für den erwarteten Datenverkehr, signieren jeden vermessenen Pfad mit und bestätigen die Auszahlungsliste, die Belohnungen unter ihren Minern aufteilt. Einlagen fließen in eine gesperrte Reserve; Betreiber verwahren niemals fremde Mittel.', explore: 'Betreiber entdecken' },
+            operators: { name: 'Betreiber', body: 'Betreiber führen die Datenschutzserver und den Verifizierungsendpunkt aus. Sie hinterlegen Einlagen für den erwarteten Datenverkehr, signieren jeden vermessenen Pfad mit und bestätigen die Auszahlungsliste, die Belohnungen unter ihren Minern aufteilt. Einlagen fließen in eine Reserve; Betreiber verwahren niemals fremde Mittel.', explore: 'Betreiber entdecken' },
             miners: { name: 'Miner', body: 'Miner transportieren den Datenverkehr. Sie betreiben Nodes, die verschlüsselten Datenverkehr für einen oder mehrere Betreiber routen, und werden entsprechend ihrer bereitgestellten Kapazität aus den Subnet-Emissionen bezahlt.', explore: 'Miner entdecken' },
             validators: { name: 'Validatoren', body: 'Validatoren vermessen das Netzwerk erneut. Sie führen das Routing-Verifizierungsprotokoll aus und bewerten jeden Betreiber-Pool nach Nachfrage und gemessener Qualität. Für genaue Bewertungen erhalten sie Subnet-Emissionen.', explore: 'Validatoren entdecken' }
         },
@@ -156,79 +156,14 @@ export default {
         }
     },
 
-    whitepaper: {
-        eyebrow: 'Litepaper',
-        title:   'Ein Datenschutznetzwerk, koordiniert auf Bittensor.',
-        clauses: [
-            {
-                numeral: 'I.',
-                title:   'Ein dezentrales Datenschutznetzwerk',
-                body: [
-                    'UR ist ein dezentrales Datenschutznetzwerk. Es verteilt den Nutzerverkehr über ein globales Netzwerk unabhängiger Miner mittels Multi-Hop-Routing und geschichteter Verschlüsselung, sodass kein einzelner Miner zugleich sieht, wer ein Nutzer ist und was er tut. Der Transport ist so konzipiert, dass er gewöhnlichem HTTPS ähnelt — N-Schicht-TLS-Verschlüsselung, SNI-Spoofing und Verkehrsununterscheidbarkeit — damit das Netzwerk nahezu überall erreichbar bleibt.',
-                    'Das UR Subnet koordiniert dieses Netzwerk über On-Chain-Anreize auf Bittensor. Netzbetreiber betreiben die Server; unabhängige Miner tragen den Ingress- und Egress-Verkehr; und unabhängige Validatoren durchlaufen fortlaufend vom Betreiber zugewiesene Ketten von Minern, um Echtzeit-Transit nachzuweisen und zu messen, welche Miner die schwächsten Glieder sind. Diese Messung ist das zentrale Signal, für das das Netzwerk zahlt.',
-                    'Bittensors Yuma Consensus verwandelt die Messungen der Validatoren in Token-Emission, und ein Smart Contract auf der Subtensor EVM wickelt die Auszahlungen ab. Das Protokoll ist quelloffen, und der Betrieb eines Miners oder eines Validators ist erlaubnisfrei.'
-                ]
-            },
-            {
-                numeral: 'II.',
-                title:   'Rollen',
-                body: [
-                    'Netzbetreiber betreiben die Datenschutzserver und den Verifizierungsendpunkt. Ein Betreiber zahlt in das Subnet ein, signiert jeden gemessenen Pfad mit und legt eine Auszahlungsliste fest, die seine Belohnungen auf die ihm zugeordneten Miner aufteilt. Ein Betreiber bestimmt, wohin seine Belohnungen fließen, verwahrt aber niemals fremde Gelder.',
-                    'Miner sind der Ingress und Egress des Netzwerks. Sie betreiben ein standardmäßig sicheres Sicherheitsmodell, blockieren bekannte bösartige IPs und leiten nur verschlüsselten Verkehr weiter. Ein Miner trägt Verkehr für einen oder mehrere Betreiber und wird für die routbare Kapazität bezahlt, die er beisteuert.',
-                    'Validatoren sind unabhängig. Jeder setzt sein eigenes UR ein, führt das Routing-Verifizierungsprotokoll aus und bewertet den Pool jedes Betreibers nach Nachfrage und gemessener Qualität. Validatoren verdienen die nativen Dividenden des Netzwerks für genaue, konsenskonforme Bewertung — kein Betreiber besitzt einen Validator, und die Menge ist erlaubnisfrei.',
-                    'Der Subnet-Eigentümer verwaltet den Abrechnungsvertrag und betreibt die Reserve des Netzwerks. Diese Rolle ist übergangsweise: Die Kontrolle beginnt zentralisiert, aber begrenzt und dezentralisiert sich schrittweise (Abschnitt V).'
-                ]
-            },
-            {
-                numeral: 'III.',
-                title:   'Der UR-Token',
-                body: [
-                    'UR ist der native Token des Subnets — die Recheneinheit für Einzahlungen, Emission und Abrechnung. Es ist ein Utility-Token zur Koordinierung und Bezahlung von Netzwerkressourcen; es ist nicht dafür konzipiert, irgendein Recht auf Gewinne, Einkommen oder Renditen darzustellen oder zu gewähren.',
-                    'Neues UR wird von Bittensors Coinbase in jedem Zyklus emittiert und dreifach aufgeteilt:',
-                    { type: 'table', head: ['Strom', 'Anteil', 'Empfänger'], rows: [
-                        ['Eigentümer', '18%', 'Subnet-Eigentümer'],
-                        ['Miner',      '41%', 'Miner — über Betreiber-Pools und Top-Level-Miner-Slots'],
-                        ['Validatoren','41%', 'Unabhängige Validatoren — native Dividenden für genaue Bewertung']
-                    ]},
-                    'Betreiber finanzieren das Netzwerk, indem sie UR in Höhe ihrer tatsächlichen Nutzung zu einem veröffentlichten Referenzsatz einzahlen. Eine Einzahlung ist ein kostspieliges, umsatzgedecktes Signal echter Nachfrage — und sie ist Überzeugungseinsatz (Conviction Stake): Der Vertrag überführt jede Einzahlung in eine gesperrte Reserve, wo sie anwächst und niemals umverteilt wird, wodurch UR im Verhältnis zur tatsächlichen Nutzung dauerhaft aus dem liquiden Angebot entfernt wird. Der kumulierte gesperrte Einsatz eines Betreibers senkt den Satz, den er hinterlegen muss, sodass engagierte Betreiber mit weniger Vorabkapital einsteigen können.',
-                    'Miner werden aus der Emission bezahlt, nicht aus Einzahlungen. Da Einzahlungen gesperrt statt wiederverwendet werden, wird tatsächliche Nutzung zu einem dauerhaften, wachsenden Kaufgebot unter dem Token statt zu Verkaufsdruck, während die Emission einem festen Zeitplan mit Halbierungen folgt.'
-                ]
-            },
-            {
-                numeral: 'IV.',
-                title:   'Zwei Wege zu verdienen',
-                body: [
-                    'Ein einzelner Betreiber kann weit über 100.000 Miner bedienen — weit mehr als die rund 256 On-Chain-Slots eines Subnets — daher bezahlt das Netzwerk Miner über zwei parallel laufende Stufen.',
-                    'Der Pool ist der Einstieg. Jeder Betreiber hält einen On-Chain-Slot für alle seine Miner; Validatoren gewichten diesen Pool nach der Nachfrage des Betreibers und seiner gemessenen Qualität, und jeder Miner beansprucht seinen Anteil direkt vom Abrechnungsvertrag mit einem kryptografischen Nachweis. Es gibt keinen Slot zu gewinnen und nichts zu verbrennen — hier beginnt ein Miner und verdient eine Grundbelohnung.',
-                    'Top-Level-Miner sind die Spitze des Angebots. Die rund 200 größten Flotten — eingestuft danach, wie viele verschiedene, routbare Exit-IPs sie tatsächlich bedienen, nicht nach Verkehrsvolumen — beanspruchen jeweils ihren eigenen On-Chain-Slot und werden direkt vom Netzwerk bezahlt, ohne Betreiber im Auszahlungspfad. Eine gemeinsam genutzte IP wird auf die Flotten aufgeteilt, die sie beanspruchen, sodass Breite nicht doppelt gezählt werden kann.',
-                    'Die zwei Stufen sind ein einziges Turnier: Ein Miner beginnt in einem Pool, steigt zu einem Top-Slot auf, wenn seine routbare IP-Breite wächst, und fällt in den Pool zurück, wenn er abrutscht. Ein per Governance festgelegter Anteil teilt die Emission zwischen Spitze und Ausläufer auf.',
-                    { type: 'list', items: [
-                        'Pool-Stufe — der Einstieg: einem Betreiber ohne Slot und ohne Registrierungskosten beitreten; Validatoren gewichten den Pool nach Nachfrage und Qualität; jeder Miner beansprucht seinen Anteil per Nachweis in jedem Abrechnungszeitraum.',
-                        'Top-Level-Miner — die Spitze: die ~200 Flotten mit der breitesten routbaren IP-Abdeckung beanspruchen ihren eigenen Slot und werden direkt vom Netzwerk bezahlt, ohne Betreiber, ohne Pool und ohne Zwischenhändler.'
-                    ]}
-                ]
-            },
-            {
-                numeral: 'V.',
-                title:   'Verwahrung, Abrechnung und Dezentralisierung',
-                body: [
-                    'Die Abrechnung läuft in einem Sieben-Tage-Zyklus. Der Vertrag sammelt die Emission jedes Pools über den Zeitraum an und öffnet dann die Ansprüche: Miner beziehen ihr UR direkt vom Vertrag gegen die festgelegte Auszahlungsliste ihres Betreibers. Top-Level-Miner benötigen keinen Abrechnungsschritt — die Chain bezahlt ihren Slot in jedem Zyklus nativ.',
-                    'Niemand verwahrt fremde Gelder. Der Abrechnungsvertrag ist der alleinige Verwahrer von in Transit befindlichem UR, jede Pool-Auszahlung ist ein direkter On-Chain-Anspruch, und Top-Level-Miner werden nativ auf ihre eigenen Schlüssel bezahlt. Betreiber und der Eigentümer nehmen niemals die Belohnungen der Miner in Verwahrung.',
-                    'Verdiente Ansprüche sind endgültig. Sobald ein Abrechnungszeitraum finalisiert ist, sind die Token, die seine Ansprüche decken, verbindlich festgelegt — kein Upgrade, keine Pause und keine administrative Maßnahme kann sie blockieren oder rückgängig machen. Die gesperrte Reserve ist nach demselben Maßstab einseitig: Keine Funktion kann Gelder aus ihr herausbewegen.',
-                    'Die Kontrolle dezentralisiert sich mit der Zeit. Das Netzwerk startet mit einem hinter einer Eigentümer-Multisig aktualisierbaren Vertrag — bewusste, begrenzte zentrale Kontrolle für frühe Fehlerbehebungen — und wird stufenweise gehärtet: ein öffentlicher Timelock für jede Änderung, ein reiner Pause-Guardian, der einen Exploit stoppen, aber niemals Gelder bewegen oder finalisierte Ansprüche blockieren kann, und mit der Zeit On-Chain-Governance sowie ein unveränderlicher Abrechnungskern.'
-                ]
-            }
-        ],
-    },
-
-    operators: {
+operators: {
         eyebrow: 'Betreiber',
         title:   'Die Betreiber, die das Netzwerk betreiben.',
-        intro:   'Netzbetreiber betreiben die Datenschutzserver und den Verifizierungsendpunkt. Ein Betreiber zahlt als kostspieliges, umsatzgedecktes Signal echter Nachfrage in das Subnet ein, führt das Routing-Verifizierungsprotokoll aus, das jeden gemessenen Pfad mitsigniert, und legt die Auszahlungsliste fest, die seine Belohnungen auf die ihm zugeordneten Miner aufteilt. Betreiber bestimmen, wohin Belohnungen fließen, verwahren aber niemals fremde Gelder.',
+        intro:   'Netzbetreiber betreiben die Datenschutzserver und den Verifizierungsendpunkt. Ein Betreiber zahlt als umsatzgedecktes Signal echter Nachfrage in das Subnet ein, führt das Routing-Verifizierungsprotokoll aus, das jeden gemessenen Pfad mitsigniert, und legt die Auszahlungsliste fest, die seine Belohnungen auf die ihm zugeordneten Miner aufteilt. Betreiber bestimmen, wohin Belohnungen fließen, verwahren aber niemals fremde Gelder.',
         cta: 'Netzbetreiber werden',
         roles: [
             { tag: '01', title: 'Die Server betreiben',    body: 'Betreiber betreiben die Datenschutzserver und den /verify-Endpunkt, der jeden gemessenen Pfad mitsigniert — die Koordinationsschicht zwischen Nutzern und den Minern, die den Verkehr tragen.' },
-            { tag: '02', title: 'Echte Nachfrage signalisieren',  body: 'Betreiber zahlen UR in Höhe ihrer tatsächlichen Nutzung ein. Jede Einzahlung ist Überzeugungseinsatz, gesperrt in der Rückkaufreserve — niemals umverteilt —, also ein kostspieliges, umsatzgedecktes Signal, das Validatoren gewichten, wenn sie die Pools bewerten.' },
+            { tag: '02', title: 'Echte Nachfrage signalisieren',  body: 'Betreibern wird Alpha in Höhe ihrer tatsächlichen Nutzung berechnet. Jede Einzahlung fließt in eine Reserve als umsatzgedecktes Signal, das Validatoren gewichten, wenn sie die Pools bewerten.' },
             { tag: '03', title: 'Die Auszahlungen steuern',  body: 'In jedem Abrechnungszeitraum legt ein Betreiber eine Merkle-Auszahlungsliste fest, die seinen Pool auf seine Miner aufteilt. Er steuert die Aufteilung, nimmt aber niemals etwas in Verwahrung — jeder Miner beansprucht seinen Anteil direkt vom Vertrag.' },
             { tag: '04', title: 'Erste Schritte',         body: 'Registriere einen Netzbetreiber-Schlüssel, betreibe den /verify-Server und zahle ein, um zu beginnen. Die Zulassung von Betreibern erfolgt während der Startphase durch den Eigentümer.' }
         ],
