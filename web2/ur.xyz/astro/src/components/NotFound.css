@@ -1,0 +1,64 @@
+/* NotFound.css — the 404 page.
+ *
+ * Deliberately spare. The nav and footer already carry every destination on
+ * the site, so the page itself only has to say what happened and offer the
+ * way back.
+ */
+
+.notfound-page {
+    display: flex;
+    min-height: 62vh;
+    flex-direction: column;
+    justify-content: center;
+    width: min(720px, calc(100vw - 48px));
+    margin-inline: auto;
+    padding-block: calc(var(--nav-height) * 2) 96px;
+}
+
+.notfound-code {
+    margin: 0 0 18px;
+    color: var(--brand-ur);
+    font-family: 'PPNeueBit', monospace;
+    font-size: clamp(4rem, 12vw, 7.5rem);
+    line-height: 0.9;
+    letter-spacing: 0.02em;
+}
+
+.notfound-page h1 {
+    margin: 0 0 14px;
+    color: var(--brand-white);
+    font-size: clamp(1.9rem, 4vw, 2.8rem);
+    font-weight: 400;
+    letter-spacing: -0.03em;
+    line-height: 1.05;
+}
+
+.notfound-lede {
+    max-width: 46ch;
+    margin: 0 0 30px;
+    color: rgba(214, 230, 244, 0.74);
+    font-size: 1.05rem;
+    line-height: 1.6;
+}
+
+.notfound-home {
+    align-self: flex-start;
+    color: var(--brand-ui);
+    font-size: 0.95rem;
+    text-decoration: none;
+    border-bottom: 1px solid rgba(214, 230, 244, 0.35);
+    padding-bottom: 2px;
+    transition: color 0.16s ease, border-color 0.16s ease;
+}
+
+.notfound-home:hover,
+.notfound-home:focus-visible {
+    color: var(--brand-white);
+    border-bottom-color: var(--brand-ur);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .notfound-home {
+        transition: none;
+    }
+}

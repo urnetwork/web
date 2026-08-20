@@ -37,7 +37,12 @@ const REACT_PUBLIC = path.resolve(__dirname, "../../react/public");
 // open-to-agents policy, plus pointers to llms.txt and the price sheet.
 // react/public/robots.txt is the older four-line version. Mirroring would
 // silently downgrade the policy, so it is excluded rather than copied.
-const ASTRO_OWNED = new Set(["robots.txt"]);
+//
+// _redirects: the react copy is an SPA catch-all (`/*  /index.html  200`),
+// right for a client-routed single-page app and wrong here. Mirroring it makes
+// 404.html unreachable and answers every dead link with the homepage at 200.
+// Astro's copy is deliberately rule-free; see the comment in that file.
+const ASTRO_OWNED = new Set(["robots.txt", "_redirects"]);
 
 // Pricing is retired from the public site for now. Keep the source and sync
 // implementation available, but never let stale/generated feed files leak

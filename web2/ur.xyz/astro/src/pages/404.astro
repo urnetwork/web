@@ -1,11 +1,30 @@
 ---
 // 404 — static not-found page. noindex: an error page is never a search result.
+// Carries the nav and footer like every other route, so a dead link leaves the
+// visitor somewhere they can navigate from.
 import Base from '../layouts/Base.astro';
+import DisclaimerStatic from '../components/DisclaimerStatic.astro';
+import FooterStatic from '../components/FooterStatic.astro';
+import NavIsland from '../islands/NavIsland.jsx';
+import en from '@react/i18n/en.js';
+
+import '@react/components/Nav.css';
+import '../components/NotFound.css';
+
+const t = en;
 ---
 <Base title="Page not found — UR" description="This page does not exist." lang="en" noindex>
-    <div style="min-height: 60vh; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; text-align: center; padding: 48px 20px;">
-        <p style="font-size: 64px; margin: 0; font-family: 'PPNeueBit', monospace;">404</p>
-        <p style="opacity: 0.7; margin: 0;">This page does not exist.</p>
-        <a href="/" style="margin-top: 8px; text-decoration: underline;">Back to UR</a>
+    <div class="app">
+        <DisclaimerStatic />
+        <NavIsland lang="en" client:load />
+
+        <main id="main" class="notfound-page">
+            <p class="notfound-code" aria-hidden="true">404</p>
+            <h1>This page does not exist.</h1>
+            <p class="notfound-lede">The link may be out of date, or the page may have moved.</p>
+            <a class="notfound-home" href="/">Back to home</a>
+        </main>
+
+        <FooterStatic t={t} lang="en" />
     </div>
 </Base>
