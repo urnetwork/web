@@ -55,7 +55,9 @@
     border-radius: 6px;
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
-    box-shadow: 0 8px 28px rgba(0, 0, 0, 0.35);
+    /* No drop shadow: black at 35% over the flat #101010 page only spans
+       rgb(16) -> rgb(11), so the blur bands into a visible rounded outline
+       echoing the card instead of fading out. Border + blur carry it. */
 
     padding: 13px 18px 11px;
     font-family: 'PPNeueMontreal', sans-serif;

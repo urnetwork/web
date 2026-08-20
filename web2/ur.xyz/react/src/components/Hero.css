@@ -17,17 +17,21 @@
 
 /* A subtle fade at the bottom of the hero softens the boundary between the
    simulation and the whitepaper section, so the stats panel feels like it
-   genuinely detaches from the canvas as it slides down. */
-.hero-fade {
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    height: 160px;
-    background: linear-gradient(to bottom,
-        rgba(16, 16, 16, 0) 0%,
-        rgba(16, 16, 16, 0.65) 60%,
-        rgba(16, 16, 16, 1) 100%);
-    pointer-events: none;
-    z-index: 2;
+   genuinely detaches from the canvas as it slides down.
+
+   This is a mask on the canvas, not a scrim laid over it. A scrim of
+   rgba(16,16,16,a) has to be composited across the full 160px rectangle even
+   though the hero ground underneath is already exactly #101010 — and the
+   compositor rounds that blend to 15 for some values of a, so the "invisible"
+   fade printed ~6px horizontal stripes across the bottom of the hero. Masking
+   touches alpha instead: the simulation clears to transparent (URSimulation
+   .jsx), so the empty areas stay at alpha 0 and pass the ground through
+   untouched, while the particles genuinely fade out. */
+.hero .sim-canvas {
+    -webkit-mask-image: linear-gradient(to bottom,
+        #000 calc(100% - 160px),
+        transparent 100%);
+    mask-image: linear-gradient(to bottom,
+        #000 calc(100% - 160px),
+        transparent 100%);
 }

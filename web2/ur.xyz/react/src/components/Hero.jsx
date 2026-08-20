@@ -13,7 +13,6 @@ export default function Hero({ block, network }) {
     return (
         <section className="hero" aria-label="Network simulation">
             <URSimulation block={block} network={network} />
-            <div className="hero-fade" aria-hidden="true" />
         </section>
     );
 }

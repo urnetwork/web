@@ -188,8 +188,12 @@ export default function URSimulation({ block, network }) {
         }
 
         function animate() {
-            ctx.fillStyle = COLORS.bg;
-            ctx.fillRect(0, 0, width, height);
+            // Clear to transparent, not to an opaque bg fill. The hero paints
+            // the same colour behind the canvas, so this looks identical — but
+            // it leaves the empty areas at alpha 0, which lets Hero.css fade the
+            // canvas out with a mask without the compositor having to blend
+            // #101010 over #101010 across a whole rectangle. See Hero.css.
+            ctx.clearRect(0, 0, width, height);
             rotation += 0.002;
 
             // Demand: users buying data via OPS. A fixed cadence — the

@@ -53,12 +53,14 @@
     border-right:  1px solid rgba(214, 230, 244, calc((0.18 + 0.12 * var(--p)) * (1 - var(--q))));
     border-bottom: 1px solid rgba(214, 230, 244, calc(0.18 + 0.12 * var(--p)));
 
-    /* Glow + drop shadow fade out into the ticker. */
-    box-shadow:
-        0 0 calc(40px + 30px * var(--p))
-            rgba(214, 230, 244, calc((0.06 + 0.04 * var(--p)) * (1 - var(--q)))),
-        0 calc(8px + 12px * var(--p)) calc(40px + 30px * var(--p))
-            rgba(0, 0, 0, calc((0.3 + 0.15 * var(--p)) * (1 - var(--q))));
+    /* No glow, no drop shadow. The page sits on flat #101010, so a soft
+       shadow has almost no range to fade through: a 6% white glow spans
+       rgb(16) -> rgb(28) and a 30% black one spans rgb(16) -> rgb(11).
+       Twelve (or five) 8-bit steps stretched over 40px quantise into
+       visible concentric contour rings around the panel rather than a
+       gradient. The 1px border, the translucent fill and the backdrop
+       blur already lift the panel off the simulation behind it. */
+    box-shadow: none;
 
     backdrop-filter: blur(14px);
     -webkit-backdrop-filter: blur(14px);

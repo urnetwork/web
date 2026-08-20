@@ -107,6 +107,13 @@
 .nav-network > summary span { display: inline-block; margin-left: 6px; color: var(--brand-ur); transition: transform 0.2s ease; }
 .nav-network[open] > summary span { transform: rotate(180deg); }
 
+/* A closed <details> only skips its contents in Chrome — the menu box itself
+   still paints, so the border and the 60px shadow were being drawn under the
+   NETWORK item at all times. Take it out of the render entirely when closed. */
+.nav-network:not([open]) .nav-network-menu {
+    display: none;
+}
+
 .nav-network-menu {
     position: absolute;
     top: calc(100% + 22px);
@@ -115,7 +122,9 @@
     padding: 10px;
     background: rgba(16, 16, 16, 0.98);
     border: 1px solid rgba(214, 230, 244, 0.14);
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.38);
+    /* No drop shadow: black at 38% over the near-black page spans rgb(16) to
+       rgb(10), and six 8-bit steps across 60px band into visible contour rings
+       instead of a fade. The border and opaque fill do the separating. */
 }
 
 .nav-network-menu::before {
@@ -167,7 +176,7 @@
     list-style: none;
     background: #101010;
     border: 1px solid rgba(214, 230, 244, 0.14);
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.38);
+    /* Same banding as the network menu above; the border carries it. */
 }
 .nav-lang-menu button {
     width: 100%;
