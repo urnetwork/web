@@ -18,34 +18,17 @@ export const investorCentre = {
         pdfHref: '/investors/our-letter-to-bittensor.pdf',
     },
     updates: [
-        // Same letter, two ways to take it. `format` keys the icon; the row
-        // shows `formatLabel` so the pair reads as a deliberate choice rather
-        // than as the same document listed twice.
         {
             title: 'Our Letter to Bittensor',
             date: '18 August 2026',
             format: 'Written',
-            formatLabel: 'Read online',
+            readTime: '6 min read',
             href: '/investors/our-letter-to-bittensor',
+            pdfHref: '/investors/our-letter-to-bittensor.pdf',
             external: false,
-        },
-        {
-            title: 'Our Letter to Bittensor',
-            date: '18 August 2026',
-            format: 'PDF',
-            formatLabel: 'Download PDF',
-            href: '/investors/our-letter-to-bittensor.pdf',
-            external: false,
-            download: true,
         },
     ],
     materials: [
-        {
-            title: 'Investor Deck',
-            detail: 'Coming soon',
-            readTime: null,
-            href: null,
-        },
         {
             title: 'UR Litepaper',
             detail: null,

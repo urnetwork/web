@@ -63,20 +63,22 @@ const SHOW_METRICS = false;
                         <h3 id="management-updates">Management updates</h3>
                         <div class="resource-list">
                             {updates.map(item => (
-                                <a
-                                    class="resource-row"
-                                    href={item.href}
-                                    download={item.download ? true : undefined}
-                                    target={item.external ? '_blank' : undefined}
-                                    rel={item.external ? 'noopener noreferrer' : undefined}
-                                >
+                                <div class="resource-row">
                                     <span class={`format-icon format-icon--${item.format.toLowerCase()}`} aria-hidden="true"></span>
                                     <span class="resource-row__copy">
-                                        <strong>{item.title}</strong>
-                                        <small>{item.date} · {item.formatLabel || item.format}</small>
+                                        <a
+                                            class="resource-row__title"
+                                            href={item.href}
+                                            target={item.external ? '_blank' : undefined}
+                                            rel={item.external ? 'noopener noreferrer' : undefined}
+                                        >{item.title}</a>
+                                        <small>
+                                            {[item.date, item.readTime].filter(Boolean).join(' · ')}
+                                            {item.pdfHref && <> · <a class="resource-dl" href={item.pdfHref} download>Download PDF</a></>}
+                                        </small>
                                     </span>
-                                    <span class="resource-arrow" aria-hidden="true">{item.external ? '↗' : item.download ? '↓' : '→'}</span>
-                                </a>
+                                    <span class="resource-arrow" aria-hidden="true">{item.external ? '↗' : '→'}</span>
+                                </div>
                             ))}
                         </div>
                     </section>
@@ -85,14 +87,17 @@ const SHOW_METRICS = false;
                         <h3 id="materials">Materials</h3>
                         <div class="resource-list">
                             {materials.map(item => item.href ? (
-                                <a class="resource-row" href={item.href}>
+                                <div class="resource-row">
                                     <span class="format-icon format-icon--document" aria-hidden="true"></span>
                                     <span class="resource-row__copy">
-                                        <strong>{item.title}</strong>
-                                        <small>{[item.detail, item.readTime].filter(Boolean).join(' · ')}</small>
+                                        <a class="resource-row__title" href={item.href}>{item.title}</a>
+                                        <small>
+                                            {[item.detail, item.readTime].filter(Boolean).join(' · ')}
+                                            {item.pdfHref && <> · <a class="resource-dl" href={item.pdfHref} download>Download PDF</a></>}
+                                        </small>
                                     </span>
-                                    <span class="resource-arrow" aria-hidden="true">↗</span>
-                                </a>
+                                    <span class="resource-arrow" aria-hidden="true">→</span>
+                                </div>
                             ) : (
                                 <div class="resource-row resource-row--static">
                                     <span class="format-icon format-icon--document" aria-hidden="true"></span>

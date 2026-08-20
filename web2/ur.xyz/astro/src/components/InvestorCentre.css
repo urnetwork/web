@@ -216,7 +216,13 @@
     letter-spacing: -0.025em;
 }
 
+/* One row per document. The row is the link to read or view it; the download
+   is a quiet second link in the metadata line, in the same type as the rest
+   of that line. The site has no boxed buttons in lists, so it should not read
+   as a button. The title link is stretched over the whole row; the download
+   sits above it so it stays separately clickable. */
 .resource-row {
+    position: relative;
     display: grid;
     min-height: 86px;
     grid-template-columns: 28px minmax(0, 1fr) 20px;
@@ -229,11 +235,47 @@
     transition: padding 0.18s ease, background 0.18s ease;
 }
 
+/* Same type as the <strong> it replaced, so only the download link is new. */
+.resource-row__title {
+    overflow: hidden;
+    color: var(--brand-white);
+    font-size: 0.91rem;
+    font-weight: 400;
+    text-decoration: none;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Stretched link: anywhere on the row opens the document. */
+.resource-row__title::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+}
+
+.resource-dl {
+    position: relative;   /* above the stretched link */
+    z-index: 1;
+    color: var(--investor-muted);
+    text-decoration: none;
+    border-bottom: 1px solid rgba(214, 230, 244, 0.28);
+    transition: color 0.16s ease, border-color 0.16s ease;
+}
+
+.resource-dl:hover,
+.resource-dl:focus-visible {
+    color: var(--brand-white);
+    border-bottom-color: var(--brand-ur);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .resource-dl { transition: none; }
+}
 .resource-row:last-child {
     border-bottom: 1px solid var(--investor-line);
 }
 
-a.resource-row:hover {
+.resource-row:not(.resource-row--static):hover {
     padding-inline: 22px;
     background: rgba(214, 230, 244, 0.035);
 }
