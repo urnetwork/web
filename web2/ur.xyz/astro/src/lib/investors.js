@@ -14,14 +14,29 @@ export const investorCentre = {
         summary:
             'A letter from Jack and Brien on launching UR (SN25), growing a global network of residential operators, and building a free and open internet together.',
         href: '/investors/our-letter-to-bittensor',
+        // Reprinted from the letter page itself by `make letter-pdf`.
+        pdfHref: '/investors/our-letter-to-bittensor.pdf',
     },
     updates: [
+        // Same letter, two ways to take it. `format` keys the icon; the row
+        // shows `formatLabel` so the pair reads as a deliberate choice rather
+        // than as the same document listed twice.
         {
             title: 'Our Letter to Bittensor',
             date: '18 August 2026',
             format: 'Written',
+            formatLabel: 'Read online',
             href: '/investors/our-letter-to-bittensor',
             external: false,
+        },
+        {
+            title: 'Our Letter to Bittensor',
+            date: '18 August 2026',
+            format: 'PDF',
+            formatLabel: 'Download PDF',
+            href: '/investors/our-letter-to-bittensor.pdf',
+            external: false,
+            download: true,
         },
     ],
     materials: [

@@ -7,11 +7,13 @@ import SubnetFlowExhibit from '../../components/investors/SubnetFlowExhibit.astr
 import NetworkStackExhibit from '../../components/investors/NetworkStackExhibit.astro';
 import NavIsland from '../../islands/NavIsland.jsx';
 import en from '@react/i18n/en.js';
+import { investorCentre } from '../../lib/investors.js';
 
 import '@react/components/Nav.css';
 import '../../components/InvestorLetter.css';
 
 const t = en;
+const { featured } = investorCentre;
 ---
 <Base
     title="Our Letter to Bittensor | UR"
@@ -28,11 +30,21 @@ const t = en;
             </div>
 
             <header class="letter-heading letter-shell">
+                {/* Print only. Gives the download a masthead so it reads as a
+                    document issued by the Investor Centre rather than a page
+                    that happened to be sent to a printer. */}
+                <div class="letter-masthead" aria-hidden="true">
+                    <img src="/ur.svg" alt="" class="letter-masthead__mark" />
+                    <span>Investor Centre &middot; ur.xyz/investors</span>
+                </div>
                 <p class="letter-kicker">Our Letter to Bittensor</p>
                 <h1>Our Letter to Bittensor</h1>
                 <div class="letter-meta">
                     <time datetime="2026-08-18">Aug 18, 2026</time>
                     <span>6 min read</span>
+                    <a class="letter-download" href={featured.pdfHref} download>
+                        Download PDF <i aria-hidden="true">↓</i>
+                    </a>
                 </div>
             </header>
 

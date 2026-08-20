@@ -282,6 +282,22 @@ a.resource-row:hover {
     box-shadow: 0 3px 0 currentColor;
 }
 
+/* PDF reads as the document sheet with an arrow dropping out of it. */
+.format-icon--pdf::before {
+    content: '';
+    width: 9px;
+    height: 11px;
+    border: 1px solid currentColor;
+    border-radius: 1px;
+}
+
+.format-icon--pdf::after {
+    content: '↓';
+    position: absolute;
+    font-size: 8px;
+    line-height: 1;
+}
+
 .resource-row__copy {
     display: flex;
     min-width: 0;

@@ -66,15 +66,16 @@ const SHOW_METRICS = false;
                                 <a
                                     class="resource-row"
                                     href={item.href}
+                                    download={item.download ? true : undefined}
                                     target={item.external ? '_blank' : undefined}
                                     rel={item.external ? 'noopener noreferrer' : undefined}
                                 >
                                     <span class={`format-icon format-icon--${item.format.toLowerCase()}`} aria-hidden="true"></span>
                                     <span class="resource-row__copy">
                                         <strong>{item.title}</strong>
-                                        <small>{item.date} · {item.format}</small>
+                                        <small>{item.date} · {item.formatLabel || item.format}</small>
                                     </span>
-                                    <span class="resource-arrow" aria-hidden="true">{item.external ? '↗' : '→'}</span>
+                                    <span class="resource-arrow" aria-hidden="true">{item.external ? '↗' : item.download ? '↓' : '→'}</span>
                                 </a>
                             ))}
                         </div>

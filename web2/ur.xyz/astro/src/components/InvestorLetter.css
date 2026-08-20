@@ -54,6 +54,12 @@
     outline-offset: 4px;
 }
 
+/* Print-only furniture (see the letter page). Hidden on screen; @media print
+   below turns it on. */
+.letter-masthead {
+    display: none;
+}
+
 .letter-heading {
     padding-block: 42px 54px;
     border-bottom: 1px solid var(--letter-line-strong);
@@ -523,7 +529,7 @@
     line-height: 1.55;
 }
 
-@media (max-width: 720px) {
+@media screen and (max-width: 720px) {
     .investor-letter-page {
         --letter-shell: calc(100vw - 28px);
         --letter-body: calc(100vw - 28px);
@@ -617,4 +623,346 @@
     .letter-end span {
         transition: none;
     }
+}
+
+/* ---------------------------------------------------------------------------
+   Download as PDF
+   The meta row carries the action so it sits with the date and read time
+   rather than competing with the headline.
+   --------------------------------------------------------------------------- */
+
+.letter-meta {
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.letter-download {
+    display: inline-flex;
+    min-height: 44px;
+    align-items: center;
+    gap: 9px;
+    margin-inline-start: auto;
+    padding-inline: 16px;
+    border: 1px solid var(--letter-line-strong);
+    color: var(--letter-soft);
+    font-size: 0.76rem;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    text-decoration: none;
+    transition: border-color 0.16s ease, color 0.16s ease;
+}
+
+.letter-download:hover,
+.letter-download:focus-visible {
+    border-color: var(--brand-ur);
+    color: var(--brand-white);
+}
+
+/* The arrow nudges down on hover — a download, not a link onward. */
+.letter-download i {
+    font-style: normal;
+    color: var(--brand-ur);
+    transition: transform 0.16s ease;
+}
+
+.letter-download:hover i,
+.letter-download:focus-visible i {
+    transform: translateY(2px);
+}
+
+@media screen and (max-width: 720px) {
+    .letter-download {
+        margin-inline-start: 0;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .letter-download i {
+        transition: none;
+    }
+}
+
+/* ---------------------------------------------------------------------------
+   Print
+   Also the source of truth for the generated PDF: scripts/generate-letter-pdf.mjs
+   prints this same page through Chromium, which renders print media. Any change
+   here changes the downloadable file, so the two can never drift.
+   --------------------------------------------------------------------------- */
+
+@media print {
+    /* The whole palette assumes a near-black page. Invert the four brand
+       tokens rather than chasing every rule that reads them: pale blue UI
+       text and the pink accent both vanish on white otherwise. */
+    :root {
+        --brand-bg: #ffffff;
+        --brand-white: #101010;
+        --brand-ui: #1c1c1c;
+        --brand-ur: #8e2fb0;
+    }
+
+    .disclaimer,
+    .nav,
+    .letter-back-row,
+    .letter-end,
+    .letter-download,
+    .footer,
+    /* The eyebrow repeats the headline word for word. On screen it is a colour
+       accent above a huge display line; at print size the two sit close enough
+       to read as the title printed twice. The masthead does that job here. */
+    .letter-kicker {
+        display: none !important;
+    }
+
+    .investor-letter-page {
+        /* One column for the masthead, the title and the prose so they share a
+           single left edge — a heading flush to the page margin above indented
+           body copy reads as a mistake on paper. Only the exhibits break out
+           past it, which is the same relationship the screen layout has. */
+        --letter-shell: 74%;
+        --letter-body: 74%;
+        --letter-line: rgba(16, 16, 16, 0.16);
+        --letter-line-strong: rgba(16, 16, 16, 0.3);
+        --letter-soft: #1c1c1c;
+        --letter-muted: #5a5a5a;
+        padding-top: 0;
+        background: #ffffff;
+    }
+
+    .investor-letter-page,
+    .investor-letter-page p,
+    .investor-letter-page li {
+        color: #1c1c1c;
+        font-size: 10.5pt;
+        line-height: 1.62;
+    }
+
+    /* Screen leaves 28px between paragraphs — more than a full line at print
+       size, which reads as drift rather than separation. */
+    .investor-letter-page p {
+        margin-bottom: 11pt;
+    }
+
+    /* Screen sets 54px / 38px / 66px of air around the closing block, which is
+       a large share of a page at print size. */
+    .letter-body .letter-sign-off {
+        margin-top: 18pt;
+    }
+
+    .letter-disclosure {
+        margin-top: 14pt;
+        padding-bottom: 0;
+    }
+
+    /* Colour, and never strand a heading at the foot of a page. */
+    .investor-letter-page h2,
+    .investor-letter-page h3 {
+        color: #101010;
+        break-after: avoid;
+    }
+
+    /* --- masthead ------------------------------------------------------- */
+
+    .letter-masthead {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid rgba(16, 16, 16, 0.3);
+        color: #5a5a5a;
+        font-size: 7.5pt;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+    }
+
+    /* The wordmark ships as #F8F8F8 for the dark site, so it is invisible on
+       paper. It is flat monochrome, so inverting it is exact. */
+    .letter-masthead__mark {
+        width: 34px;
+        height: auto;
+        filter: invert(1);
+    }
+
+    .letter-masthead span {
+        margin-inline-start: auto;
+    }
+
+    /* --- title ---------------------------------------------------------- */
+
+    .letter-heading {
+        padding-block: 0 18px;
+        border-bottom-width: 1px;
+    }
+
+    .investor-letter-page h1 {
+        margin: 26pt 0 14pt;
+        color: #101010;
+        font-size: 30pt;
+        letter-spacing: -0.03em;
+        line-height: 1.02;
+    }
+
+    .letter-meta {
+        gap: 18px;
+        color: #5a5a5a;
+        font-size: 7.5pt;
+        letter-spacing: 0.12em;
+    }
+
+    .letter-body {
+        margin-top: 26pt;
+    }
+
+    .letter-salutation {
+        font-size: 11.5pt !important;
+    }
+
+    .letter-body h2 {
+        margin: 20pt 0 9pt;
+        font-size: 15pt;
+    }
+
+    .letter-divider {
+        margin: 16pt 0;
+        border-color: rgba(16, 16, 16, 0.18);
+    }
+
+    /* Never split these across a page break. */
+    .letter-salutation,
+    .letter-sign-off,
+    .letter-disclosure,
+    .coverage-panel,
+    .letter-flow,
+    .letter-stack {
+        break-inside: avoid;
+    }
+
+    /* On screen this exhibit is 840px wide inside a horizontal scroller.
+       Paper cannot scroll, so it would print clipped at the right edge —
+       A4 less the @page margins is only ~673px. Scale it to fit instead of
+       reflowing the four columns, which would crush the labels. */
+    .letter-stack-scroll {
+        overflow: visible;
+        padding-bottom: 0;
+    }
+
+    .letter-stack {
+        /* 840px of grid into the 637px the exhibit gets on A4. */
+        zoom: 0.75;
+    }
+
+    /* The lime accent (#E2FF00) is a dark-mode colour: at 38-58% alpha on white
+       the route lines and the "core" panel borders all but disappear. Swap in a
+       darker olive of the same hue so the emphasis survives on paper. */
+    .coverage-map__routes {
+        stroke: rgba(122, 138, 0, 0.85);
+        stroke-width: 1.4;
+    }
+
+    .letter-flow__stage--core,
+    .letter-stack__subnet {
+        border-color: rgba(122, 138, 0, 0.7);
+        background: rgba(226, 255, 0, 0.09);
+    }
+
+    /* --- exhibits ------------------------------------------------------- */
+
+    .letter-exhibit {
+        /* margin-block only — the shorthand would reset the margin-left: 50%
+           that, with the translateX(-50%), is what breaks the exhibit out of
+           the reading column. */
+        margin-block: 20pt;
+        /* Keep the caption with its figure. Without this the heading strands
+           at the foot of a page and the maps start the next one. Every
+           exhibit is well under a page tall, so this always has somewhere
+           to go. */
+        break-inside: avoid;
+    }
+
+    /* The exhibit caption is not a section heading — at print size the screen
+       clamp lands it on top of h2, so it competes with the letter's own
+       structure. Step it back below the body's headings. */
+    .letter-exhibit__heading {
+        margin-bottom: 16pt;
+        padding-bottom: 10pt;
+    }
+
+    .letter-exhibit__heading strong {
+        font-size: 12pt;
+        line-height: 1.25;
+    }
+
+    .letter-exhibit__heading small {
+        color: #5a5a5a;
+        font-size: 8.5pt;
+    }
+
+    .coverage-comparison {
+        gap: 20pt;
+    }
+
+    .coverage-panel__eyebrow {
+        font-size: 7.5pt !important;
+    }
+
+    .coverage-panel h3 {
+        font-size: 10.5pt;
+    }
+
+    .coverage-panel > p:not(.coverage-panel__eyebrow) {
+        /* Screen reserves a flat 42px so both maps start on the same line;
+           at print size that is the wrong number, but the reserve still has
+           to exist — the before caption runs to two lines and the after
+           caption to one, and without it the two plates sit at different
+           heights. Two lines of this size, expressed in ems so it tracks. */
+        min-height: 2.9em;
+        margin-bottom: 8pt !important;
+        font-size: 8.5pt !important;
+    }
+
+    /* The maps read as washed-out grey boxes on paper: the land dots inherit a
+       pale-blue-on-black tint and the panel fill is a near-invisible wash.
+       Print them as clean white plates with the land dark enough to hold. */
+    .coverage-map {
+        padding: 6px;
+        border-color: rgba(16, 16, 16, 0.22);
+        color: rgba(16, 16, 16, 0.62);
+        background: #ffffff;
+    }
+
+    /* Nodes sit on top of the land dots; a paper-coloured keyline stops them
+       merging into the pattern. */
+    .coverage-map__nodes circle {
+        stroke: #ffffff;
+        stroke-width: 1.1;
+        paint-order: stroke fill;
+    }
+
+    .letter-flow__stage {
+        min-height: 0;
+        padding: 14pt;
+        background: rgba(16, 16, 16, 0.025);
+    }
+
+    .letter-flow__stage strong {
+        font-size: 10.5pt;
+    }
+
+    .letter-flow__stage span,
+    .letter-flow__stage small {
+        font-size: 8.5pt;
+    }
+
+    /* Spell out link targets that the reader cannot click on paper. */
+    .letter-body a[href^='http']::after {
+        content: ' (' attr(href) ')';
+        color: #565656;
+        font-size: 9pt;
+        word-break: break-all;
+    }
+}
+
+@page {
+    size: A4;
+    /* Room at the foot for the running line the generator stamps there. */
+    margin: 18mm 16mm 20mm;
 }
