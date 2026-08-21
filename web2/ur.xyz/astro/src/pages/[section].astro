@@ -11,6 +11,7 @@ import ValidatorSim from '@react/components/ValidatorSim.jsx';
 import OperatorsDirectoryIsland from '../islands/OperatorsDirectoryIsland.jsx';
 import { ResearchCompetition, ResearchDocsLink, ResearchCardGrid, ResearchFoot } from '@react/components/ResearchExtras.jsx';
 import en from '@react/i18n/en.js';
+import { sentenceClamp } from '../lib/meta.js';
 import { SECTION_ROUTES } from '../lib/i18n.js';
 
 import '@react/components/Nav.css';
@@ -29,7 +30,7 @@ const showDiagram = ROLE_SECTIONS.includes(section);
 ---
 <Base
     title={`${sectionData.title} — UR`}
-    description={sectionData.intro}
+    description={sentenceClamp(sectionData.intro)}
     lang="en"
 >
     <div class="app">
@@ -37,11 +38,11 @@ const showDiagram = ROLE_SECTIONS.includes(section);
         <NavIsland activeRoute={section} lang="en" client:load />
 
         <main class="section-page">
-            <Section id={section} eyebrow={sectionData.eyebrow} title={sectionData.title}>
+            <Section id={section} eyebrow={sectionData.eyebrow} title={sectionData.title} headingLevel="h1">
                 {section === 'research' && <ResearchCompetition t={t} />}
                 <p>{sectionData.intro}</p>
                 {section === 'research' && <ResearchDocsLink t={t} href="/docs/protocol/protocol-research" />}
-                {showDiagram && <NetworkDiagram client:load active={section} lang="en" ctaLabel={sectionData.cta} />}
+                {showDiagram && <NetworkDiagram client:visible={{rootMargin: "200px"}} active={section} lang="en" ctaLabel={sectionData.cta} />}
                 {section === 'research'
                     ? <ResearchCardGrid t={t} />
                     : <CardGrid items={items} />}

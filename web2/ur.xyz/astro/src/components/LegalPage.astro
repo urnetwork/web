@@ -25,13 +25,13 @@ const { t, lang, dir = 'ltr', doc } = Astro.props;
 const d = LEGAL_DOCS[doc];
 const meta = t.legal[doc];
 ---
-<Base title={`${d.title} — UR`} description={meta.body} lang={lang} dir={dir}>
+<Base title={`${meta.title || d.title} — UR`} description={meta.body} lang={lang} dir={dir}>
     <div class="app">
         <DisclaimerStatic />
         <NavIsland lang={lang} client:load />
 
         <main class="section-page">
-            <Section id={doc} eyebrow={t.legal.eyebrow} title={d.title}>
+            <Section id={doc} eyebrow={t.legal.eyebrow} title={d.title} headingLevel="h1">
                 {d.updated && <p class="legal-updated">Last revised: {d.updated}</p>}
                 <div class="legal-doc" set:html={d.html} />
             </Section>

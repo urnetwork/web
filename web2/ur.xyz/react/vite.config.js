@@ -93,6 +93,11 @@ function urXyzContent() {
 
 // https://vitejs.dev/config/
 export default defineConfig({
+    build: {
+        // the i18n module top-level-awaits the language dictionary (see
+        // src/i18n/index.jsx); TLA needs es2022 output
+        target: 'es2022'
+    },
     plugins: [react(), urXyzContent()],
     server: {
         port: 5173,

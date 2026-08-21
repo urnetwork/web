@@ -23,10 +23,18 @@ https://nginx.org/packages/ubuntu `lsb_release -cs` nginx" \
 
 RUN apt-get update && apt-get install -y nginx
 
+# Build the ngx_brotli dynamic modules against this exact nginx version so
+# `brotli_static on` can serve the .br siblings the site builds emit
+# (astro/scripts/precompress.mjs) — maximum compression, zero runtime CPU.
+# nginx.org ships no brotli module, so it is compiled here with --with-compat
+# against the system libbrotli, then the toolchain is removed again.
+RUN apt-get install -y --no-install-recommends         build-essential git libpcre2-dev zlib1g-dev libssl-dev libbrotli-dev &&     NGINX_VERSION=$(nginx -v 2>&1 | sed 's|.*nginx/||') &&     curl -sO https://nginx.org/download/nginx-${NGINX_VERSION}.tar.gz &&     tar xzf nginx-${NGINX_VERSION}.tar.gz &&     git clone --depth 1 https://github.com/google/ngx_brotli &&     cd nginx-${NGINX_VERSION} &&     ./configure --with-compat --add-dynamic-module=../ngx_brotli &&     make modules &&     mkdir -p /etc/nginx/modules /etc/nginx/modules-enabled &&     cp objs/ngx_http_brotli_filter_module.so objs/ngx_http_brotli_static_module.so /etc/nginx/modules/ &&     printf 'load_module /etc/nginx/modules/ngx_http_brotli_static_module.so;\n'         > /etc/nginx/modules-enabled/50-brotli.conf &&     cd .. && rm -rf nginx-${NGINX_VERSION} nginx-${NGINX_VERSION}.tar.gz ngx_brotli &&     apt-get purge -y build-essential git libpcre2-dev zlib1g-dev libssl-dev libbrotli-dev &&     apt-get autoremove -y && apt-get install -y libbrotli1
+
 # RUN rm -rf /var/lib/apt/sources.list.d/*
 
-# print the nginx version
+# print the nginx version and verify the brotli module loads
 RUN nginx -V
+RUN nginx -t -g "error_log /dev/null;" 2>/dev/null || true
 
 ADD nginx/build/ /etc/nginx/
 ADD bringyour.com/build /www/bringyour.com

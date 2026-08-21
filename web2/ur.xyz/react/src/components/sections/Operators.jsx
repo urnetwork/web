@@ -8,7 +8,7 @@ export default function Operators() {
     const { t, code } = useLanguage();
     const s = t.operators;
     return (
-        <Section id="operators" eyebrow={s.eyebrow} title={s.title}>
+        <Section id="operators" eyebrow={s.eyebrow} title={s.title} headingLevel="h1">
             <p>{s.intro}</p>
             <NetworkDiagram active="operators" lang={code} ctaLabel={s.cta} />
             <div className="card-grid">

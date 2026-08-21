@@ -9,7 +9,6 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PROJECT_ROOT = path.resolve(__dirname, '..');
 const REACT_SRC = path.resolve(PROJECT_ROOT, 'react/src');
 const DOCS_DIR = path.join(PROJECT_ROOT, 'docs');
-const OPENAPI_PATH = path.join(PROJECT_ROOT, 'build', 'bringyour.yml');
 
 /** Walk a directory and return absolute paths of every file matching `ext`. */
 function walk(dir, ext) {
@@ -25,21 +24,17 @@ function walk(dir, ext) {
 }
 
 /**
- * Vite plugin that exposes the same virtual modules the React app uses:
- *   virtual:ur-docs    — the docs/ markdown corpus
- *   virtual:ur-openapi — the build/bringyour.yml OpenAPI document
+ * Vite plugin that exposes the same virtual module the React app uses:
+ *   virtual:ur-docs — the docs/ markdown corpus
+ * (virtual:ur-openapi was retired with the /api explorer.)
  */
 function urXyzContent() {
     const DOCS_ID = 'virtual:ur-docs';
     const RESOLVED_DOCS_ID = '\0' + DOCS_ID;
-    const API_ID = 'virtual:ur-openapi';
-    const RESOLVED_API_ID = '\0' + API_ID;
-
     return {
         name: 'ur-xyz-content',
         resolveId(id) {
             if (id === DOCS_ID) return RESOLVED_DOCS_ID;
-            if (id === API_ID) return RESOLVED_API_ID;
             return null;
         },
         load(id) {
@@ -51,15 +46,51 @@ function urXyzContent() {
                 }));
                 return `export default ${JSON.stringify(docs)};`;
             }
-            if (id === RESOLVED_API_ID) {
-                const yml = fs.existsSync(OPENAPI_PATH)
-                    ? fs.readFileSync(OPENAPI_PATH, 'utf8')
-                    : '';
-                return `export default ${JSON.stringify(yml)};`;
-            }
             return null;
         }
     };
+}
+
+// ── real <lastmod> values (the sitemap carried none at all) ──
+import { execFileSync } from 'node:child_process';
+import { slugFor, HIDDEN_DOC_SLUGS } from '../react/src/lib/docs-shared.js';
+import { investorCentre } from './src/lib/investors.js';
+
+function lastCommitted(cwd, rel) {
+    try {
+        const out = execFileSync('git', ['-C', cwd, 'log', '-1', '--pretty=format:%cs', '--', rel], {
+            encoding: 'utf8',
+            stdio: ['ignore', 'pipe', 'ignore'],
+        }).trim();
+        return out || null;
+    } catch {
+        return null;
+    }
+}
+
+// docs: each document's own last change
+const DOC_DATES = new Map();
+for (const abs of walk(DOCS_DIR, '.md')) {
+    const rel = path.relative(DOCS_DIR, abs).replace(/\\/g, '/');
+    const slug = slugFor(rel);
+    if (!slug || HIDDEN_DOC_SLUGS.has(slug) || DOC_DATES.has(slug)) continue;
+    const d = lastCommitted(DOCS_DIR, rel);
+    if (d) DOC_DATES.set(slug, d);
+}
+const DOCS_UPDATED = [...DOC_DATES.values()].sort().at(-1) || null;
+
+// sections + homepages: the language's dictionary is the content source
+const LANG_DATES = {};
+for (const l of ['en', 'ru', 'ar', 'zh', 'de', 'es']) {
+    const d = lastCommitted(path.join(REACT_SRC, 'i18n'), `${l}.js`);
+    if (d) LANG_DATES[l] = d;
+}
+
+const LETTER_DATE = investorCentre?.featured?.dateIso || null;
+const LEGAL_DATES = {};
+for (const doc of ['terms', 'privacy', 'vdp']) {
+    const d = lastCommitted(path.join(PROJECT_ROOT, 'docs', 'legal'), `${doc}.md`);
+    if (d) LEGAL_DATES[doc] = d;
 }
 
 const ENV = process.env.UR_ENV || 'main';
@@ -75,12 +106,38 @@ export default defineConfig({
         // Sitemap with per-page hreflang alternates — every page exists in
         // all six languages at the same path under its /<lang> prefix.
         sitemap({
+            customPages: [
+                'https://ur.xyz/investors/our-letter-to-bittensor.pdf',
+                'https://ur.xyz/audits/masa-l2-2025.pdf',
+            ],
             i18n: {
                 defaultLocale: 'en',
                 locales: { en: 'en', ru: 'ru', ar: 'ar', zh: 'zh', de: 'de', es: 'es' }
             },
             serialize(item) {
                 const pathname = new URL(item.url).pathname;
+                const langMatch = pathname.match(/^\/(ru|ar|zh|de|es)(?=\/|$)/);
+                const lang = langMatch ? langMatch[1] : 'en';
+                const basePath = pathname.replace(/^\/(?:ru|ar|zh|de|es)(?=\/|$)/, '') || '/';
+                const docMatch = basePath.match(/^\/docs\/(.+)$/);
+                const legalMatch = basePath.match(/^\/(terms|privacy|vdp)$/);
+                if (docMatch || basePath === '/docs' || legalMatch) {
+                    // docs/legal dates come from the corpus git history ONLY —
+                    // when the docs submodule gitlink is broken (this checkout's
+                    // is; see SEO3.md I-items) they get NO lastmod rather than
+                    // a mislabeled dictionary date.
+                    const d = docMatch
+                        ? DOC_DATES.get(docMatch[1])
+                        : legalMatch
+                          ? LEGAL_DATES[legalMatch[1]]
+                          : DOCS_UPDATED;
+                    if (d) item.lastmod = d;
+                } else if (basePath.startsWith('/investors') && LETTER_DATE) {
+                    item.lastmod = LETTER_DATE;
+                } else if (LANG_DATES[lang]) {
+                    // home + sections: the language dictionary is the copy source
+                    item.lastmod = LANG_DATES[lang];
+                }
                 const isEnglishOnlyDocsRedirect = /^\/(ru|ar|zh|de|es)\/docs(?:\/|$)/.test(pathname);
                 const isRetiredAlias = pathname === '/docs/whitepaper' || pathname === '/investors/august-investment-letter';
                 if (isEnglishOnlyDocsRedirect || isRetiredAlias) return undefined;
@@ -139,6 +196,11 @@ export default defineConfig({
         // Allow imports from the react/ source tree
         server: {
             fs: { allow: [PROJECT_ROOT] }
+        },
+        build: {
+            // the i18n module top-level-awaits the page language's dictionary
+            // so hydration cannot start with missing strings; TLA needs es2022
+            target: 'es2022'
         }
     }
 });

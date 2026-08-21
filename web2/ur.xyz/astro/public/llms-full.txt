@@ -19,9 +19,12 @@
 - [Miners](https://ur.xyz/miners)
 - [Validators](https://ur.xyz/validators)
 - [Research](https://ur.xyz/research)
+- [Investor Centre](https://ur.xyz/investors): letters, materials, and public research
+- [Our Letter to Bittensor](https://ur.xyz/investors/our-letter-to-bittensor) ([PDF](https://ur.xyz/investors/our-letter-to-bittensor.pdf)): the August 2026 launch letter
 
 ## Docs
 
+- [Documentation index](https://ur.xyz/docs)
 - [ur.xyz Privacy Policy](https://ur.xyz/docs-md/legal/privacy.md)
 - [TERMS OF SERVICE](https://ur.xyz/docs-md/legal/terms.md)
 - [UR Foundation Vulnerability Disclosure Policy](https://ur.xyz/docs-md/legal/vdp.md)
@@ -33,6 +36,7 @@
 
 ## Optional
 
+- [MASA L2 2025 audit (PDF)](https://ur.xyz/audits/masa-l2-2025.pdf): third-party peer audit
 - [Terms of Service](https://ur.xyz/terms)
 - [Privacy Policy](https://ur.xyz/privacy)
 - [Vulnerability Disclosure](https://ur.xyz/vdp)

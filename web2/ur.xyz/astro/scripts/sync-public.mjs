@@ -42,6 +42,10 @@ const REACT_PUBLIC = path.resolve(__dirname, "../../react/public");
 // right for a client-routed single-page app and wrong here. Mirroring it makes
 // 404.html unreachable and answers every dead link with the homepage at 200.
 // Astro's copy is deliberately rule-free; see the comment in that file.
+// robots.txt: the astro copy (AI-crawler allowlist) must never be replaced by
+// react's 4-line version. _redirects: react's SPA catch-all must never ship —
+// no astro copy exists at all any more (nginx serves the 404; nothing reads
+// a _redirects file on this host).
 const ASTRO_OWNED = new Set(["robots.txt", "_redirects"]);
 
 // Pricing is retired from the public site for now. Keep the source and sync

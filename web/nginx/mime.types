@@ -10,7 +10,9 @@ types {
     application/rss+xml                              rss;
 
     text/mathml                                      mml;
+    text/markdown                                    md markdown;
     text/plain                                       txt;
+    application/yaml                                 yml yaml;
     text/vnd.sun.j2me.app-descriptor                 jad;
     text/vnd.wap.wml                                 wml;
     text/x-component                                 htc;

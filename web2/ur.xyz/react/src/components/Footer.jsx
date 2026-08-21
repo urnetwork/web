@@ -32,9 +32,9 @@ export default function Footer() {
             <div className="footer-directory">
                 <nav className="footer-column" aria-label={t.footer.learn}>
                     <h2>{t.footer.learn}</h2>
-                    <a href={path('docs')}>{t.nav.docs}</a>
+                    <a href="/docs">{t.nav.docs}</a>
                     <a href={path('research')}>{t.nav.research}</a>
-                    <a href={path('docs', 'litepaper')}>{t.nav.whitepaper}</a>
+                    <a href="/docs/litepaper">{t.nav.whitepaper}</a>
                 </nav>
 
                 <nav className="footer-column" aria-label={t.nav.network}>
@@ -48,6 +48,7 @@ export default function Footer() {
                     <h2>{t.footer.resources}</h2>
                     <a href={`${path('home')}${LAUNCH_VIDEO_HASH}`}>{t.footer.launchVideo}</a>
                     <a href={BRAND_KIT} target="_blank" rel="noopener noreferrer">{t.footer.brandKit}</a>
+                    <a href="/llms.txt">llms.txt</a>
                     {code === 'en' && <a href="/investors">Investor Centre</a>}
                 </nav>
             </div>

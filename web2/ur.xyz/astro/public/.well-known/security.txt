@@ -1,0 +1,5 @@
+Contact: https://ur.xyz/vdp
+Expires: 2027-08-20T00:00:00.000Z
+Preferred-Languages: en
+Canonical: https://ur.xyz/.well-known/security.txt
+Policy: https://ur.xyz/vdp

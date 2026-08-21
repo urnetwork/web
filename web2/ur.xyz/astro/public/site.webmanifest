@@ -1,0 +1,14 @@
+{
+  "name": "UR protocol",
+  "short_name": "UR",
+  "description": "The UR protocol — a decentralized privacy network coordinated on Bittensor.",
+  "start_url": "/",
+  "display": "browser",
+  "background_color": "#101010",
+  "theme_color": "#101010",
+  "icons": [
+    { "src": "/favicon-128.png", "type": "image/png", "sizes": "128x128" },
+    { "src": "/favicon-180.png", "type": "image/png", "sizes": "180x180" },
+    { "src": "/apple-touch-icon.png", "type": "image/png", "sizes": "192x192" }
+  ]
+}

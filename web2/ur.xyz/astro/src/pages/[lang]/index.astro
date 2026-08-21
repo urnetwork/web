@@ -8,6 +8,7 @@ import LaunchVideoIsland from '../../islands/LaunchVideoIsland.jsx';
 import HomepageIntro from '@react/components/HomepageIntro.jsx';
 import NetworkDiagram from '@react/components/NetworkDiagram.jsx';
 import { NON_EN_LANGS, LANGS, getDict } from '../../lib/i18n.js';
+import { sentenceClamp } from '../../lib/meta.js';
 
 export function getStaticPaths() {
     return NON_EN_LANGS.map(lang => ({ params: { lang } }));
@@ -16,8 +17,22 @@ export function getStaticPaths() {
 const { lang } = Astro.params;
 const t = await getDict(lang);
 const dir = LANGS[lang]?.dir || 'ltr';
+const description = sentenceClamp(t.homepage.intro);
+const videoJsonLd = [{
+    '@type': 'VideoObject',
+    '@id': 'https://ur.xyz/#launch-video',
+    name: `UR — ${t.nav.tagline}`,
+    description,
+    thumbnailUrl: 'https://ur.xyz/launch-video-poster.jpg',
+    contentUrl: 'https://ur.xyz/launch-video.mp4',
+    uploadDate: '2026-08-19',
+    duration: 'PT1M13S',
+    width: 1920,
+    height: 1080,
+    publisher: { '@id': 'https://ur.xyz/#org' },
+}];
 ---
-<Base title={`UR | ${t.nav.tagline}`} lang={lang} dir={dir}>
+<Base title={`UR | ${t.nav.tagline}`} description={description} jsonLd={videoJsonLd} lang={lang} dir={dir}>
     <div class="app">
         <DisclaimerStatic t={t} />
         <HeroIsland lang={lang} client:load />
@@ -25,13 +40,13 @@ const dir = LANGS[lang]?.dir || 'ltr';
         <main class="landing-main">
             <HomepageIntro copy={t} />
             <section class="landing-overview" aria-label={t.homepage.diagramAria}>
-                <NetworkDiagram client:load active="subnet" lang={lang} />
+                <NetworkDiagram client:visible={{rootMargin: "200px"}} active="subnet" lang={lang} />
                 <RoleBlocks t={t} lang={lang} />
             </section>
         </main>
 
         <FooterStatic t={t} lang={lang} />
-        <LaunchVideoIsland lang={lang} client:load />
+        <LaunchVideoIsland lang={lang} client:visible={{rootMargin: "200px"}} />
     </div>
 </Base>
 

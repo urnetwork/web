@@ -7,7 +7,7 @@ import { ResearchCompetition, ResearchDocsLink, ResearchCardGrid, ResearchFoot }
 export default function Research() {
     const { t, code } = useLanguage();
     return (
-        <Section id="research" eyebrow={t.research.eyebrow} title={t.research.title}>
+        <Section id="research" eyebrow={t.research.eyebrow} title={t.research.title} headingLevel="h1">
             <ResearchCompetition t={t} />
             <p>{t.research.intro}</p>
             <ResearchDocsLink t={t} href={buildPath({ name: 'docs', slug: 'protocol/protocol-research' }, code)} />

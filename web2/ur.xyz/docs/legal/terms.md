@@ -17,7 +17,7 @@ These Terms of Service (this “**Agreement**”) govern your access to and use 
 
 By accessing or using the Site, you (“**User**,” “**you**”) agree to be bound by this Agreement. If you do not agree to this Agreement, you must not access or use the Site.
 
-This Agreement is distinct from, and does not govern, the Foundation’s commercial services or products, which are governed separately by the Terms and Conditions for Provision of Internet Services available at [ur.io](http://ur.io).
+This Agreement is distinct from, and does not govern, the Foundation’s commercial services or products, which are governed separately by the Terms and Conditions for Provision of Internet Services available at [ur.io](https://ur.io).
 
 ## 1. Definitions
 As used in this Agreement, the following terms have the meanings set forth below:
@@ -26,7 +26,7 @@ As used in this Agreement, the following terms have the meanings set forth below
 
 **“Ministerial Role”** means the Foundation’s current transitional activities with respect to the Protocol, that are administrative in nature. These include site hosting, technical coordination, and certain transitional upgrade authority.
 
-**“Network Operator”** means an entity that deploys Protocol smart contracts and makes Protocol services available to end users or Providers, including the Foundation (in its commercial capacity at [ur.io](http://ur.io)) and any other independent operators on the Protocol.
+**“Network Operator”** means an entity that deploys Protocol smart contracts and makes Protocol services available to end users or Providers, including the Foundation (in its commercial capacity at [ur.io](https://ur.io)) and any other independent operators on the Protocol.
 
 **“Protocol”** means the UR protocol, an open-source, permissionless, decentralized privacy infrastructure protocol designed to enable whole-internet encryption through multi-hop routing and layered encryption.
 
@@ -224,7 +224,7 @@ This Agreement shall be governed by and construed in accordance with the laws of
 ## 17. Dispute Resolution and Arbitration
 **(a) Agreement to Arbitrate.** PLEASE READ THIS SECTION CAREFULLY. IT AFFECTS YOUR LEGAL RIGHTS. EXCEPT AS SET FORTH BELOW, YOU AND THE FOUNDATION AGREE THAT ANY DISPUTE, CLAIM, OR CONTROVERSY ARISING OUT OF OR RELATING TO THESE TERMS, THIS SITE, THE PROTOCOL, THE UR TOKEN (TO THE EXTENT ANY DISPUTE INVOLVES THE FOUNDATION AS A PARTY), OR THE BREACH, TERMINATION, ENFORCEMENT, INTERPRETATION, OR VALIDITY HEREOF (COLLECTIVELY, “**DISPUTES**”) SHALL BE RESOLVED SOLELY BY BINDING ARBITRATION ON AN INDIVIDUAL BASIS. BY AGREEING TO ARBITRATION, YOU AND THE FOUNDATION ARE EACH WAIVING THE RIGHT TO A TRIAL BY JURY AND THE RIGHT TO PARTICIPATE IN A CLASS ACTION, CLASS ARBITRATION, OR REPRESENTATIVE ACTION.
 
-**(b) Arbitration Rules and Procedure.** Any arbitration shall be administered by the **American Arbitration Association (“AAA”)** under its **Consumer Arbitration Rules and Mediation Procedures (as may be amended)** (the “**AAA Consumer Rules**”), available at [www.adr.org](http://www.adr.org). The seat of arbitration shall be Wilmington, Delaware. Hearings shall be conducted virtually by videoconference or telephone as the default format, unless the arbitrator determines that an in-person hearing is warranted. The arbitrator may award any form of individual relief available at law or in equity, consistent with the limitations in these Terms. The arbitrator's decision shall be final and binding and may be entered as a judgment in any court of competent jurisdiction.
+**(b) Arbitration Rules and Procedure.** Any arbitration shall be administered by the **American Arbitration Association (“AAA”)** under its **Consumer Arbitration Rules and Mediation Procedures (as may be amended)** (the “**AAA Consumer Rules**”), available at [www.adr.org](https://www.adr.org). The seat of arbitration shall be Wilmington, Delaware. Hearings shall be conducted virtually by videoconference or telephone as the default format, unless the arbitrator determines that an in-person hearing is warranted. The arbitrator may award any form of individual relief available at law or in equity, consistent with the limitations in these Terms. The arbitrator's decision shall be final and binding and may be entered as a judgment in any court of competent jurisdiction.
 
 **(c) Class Action Waiver.** TO THE FULLEST EXTENT PERMITTED BY LAW, ALL DISPUTES MUST BE BROUGHT IN THE PARTIES' INDIVIDUAL CAPACITY ONLY AND NOT AS A PLAINTIFF OR CLASS MEMBER IN ANY CLASS, COLLECTIVE, CONSOLIDATED, OR REPRESENTATIVE ACTION. THE ARBITRATOR SHALL NOT HAVE AUTHORITY TO CONSOLIDATE MORE THAN ONE PERSON'S CLAIMS OR TO OTHERWISE PRESIDE OVER ANY CLASS, COLLECTIVE, OR REPRESENTATIVE PROCEEDING.
 

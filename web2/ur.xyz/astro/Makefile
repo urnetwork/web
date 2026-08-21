@@ -1,13 +1,10 @@
-.PHONY: build build-main build-canary sync-price generate-legal generate-agent-assets letter-pdf sync-public clean
+.PHONY: build build-main build-canary generate-legal generate-agent-assets letter-pdf sync-public gates clean
 
 BUILD_DIR := build
 
 build: build-main build-canary
 
 # Pull the published price sheet from the sn repo (override with SN_DIR=...)
-# and regenerate price.yml / price.rss in both public/ directories.
-sync-price:
-	node ../scripts/sync-price.mjs
 
 # Regenerate react/src/data/legal.js from docs/legal/*.md (this site's
 # canonical legal documents) so the terms/privacy/vdp pages ship current text.
@@ -35,15 +32,32 @@ letter-pdf:
 sync-public:
 	node scripts/sync-public.mjs
 
+# The gate battery runs against the finished build dir. `npx astro build`
+# never fires npm lifecycle hooks, so the gates are wired here explicitly —
+# the visual-parity postbuild had been wired only in package.json and
+# therefore ran on NO real build path, which is how an Aug-19 build shipped
+# the SPA _redirects catch-all and a missing letter PDF (SEO3.md §H2).
+gates:
+	node ../react/tests/visual-parity.mjs
+	node ../react/tests/network-privacy.mjs
+	node scripts/link-audit.mjs build/$(UR_ENV_DIR)
+	node scripts/seo-audit.mjs build/$(UR_ENV_DIR)
+
 build-main: generate-legal generate-agent-assets sync-public
 	(cd ../react && npm ci)
 	npm ci
 	UR_ENV=main npx astro build
+	node scripts/modulepreload.mjs build/main
+	$(MAKE) gates UR_ENV_DIR=main
+	node scripts/precompress.mjs build/main
 
 build-canary: generate-legal generate-agent-assets sync-public
 	(cd ../react && npm ci)
 	npm ci
 	UR_ENV=canary npx astro build
+	node scripts/modulepreload.mjs build/canary
+	$(MAKE) gates UR_ENV_DIR=canary
+	node scripts/precompress.mjs build/canary
 
 clean:
 	rm -rf $(BUILD_DIR)/main $(BUILD_DIR)/canary

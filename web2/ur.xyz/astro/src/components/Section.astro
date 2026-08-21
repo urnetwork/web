@@ -6,16 +6,20 @@ interface Props {
     eyebrow?: string;
     title: string;
     variant?: string;
+    // "h1" on the page-level section (the routed section pages, legal pages);
+    // .section-title zeroes margins, so the levels render identically.
+    headingLevel?: 'h1' | 'h2';
 }
 
-const { id, eyebrow, title, variant } = Astro.props;
+const { id, eyebrow, title, variant, headingLevel = 'h2' } = Astro.props;
+const Heading = headingLevel;
 const cls = `section ${variant ? `section-${variant}` : ''}`;
 ---
 <section id={id} class={cls}>
     <div class="section-inner">
         <header class="section-header">
             {eyebrow && <span class="section-eyebrow">{eyebrow}</span>}
-            <h2 class="section-title">{title}</h2>
+            <Heading class="section-title">{title}</Heading>
             <div class="section-rule" aria-hidden="true"></div>
         </header>
         <div class="section-body">

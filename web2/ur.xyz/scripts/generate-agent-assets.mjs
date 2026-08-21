@@ -19,6 +19,7 @@
 import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync, copyFileSync, rmSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
+import { HIDDEN_DOC_SLUGS, slugFor } from "../react/src/lib/docs-shared.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, "..");
@@ -46,11 +47,37 @@ function walk(dir) {
   }
   return out;
 }
-function slugFor(rel) {
-  let s = rel.replace(/\.md$/i, "");
-  s = s.replace(/\/README$/i, "");
-  if (s === "README") s = "";
-  return s;
+
+
+// Images referenced by the documents (relative paths like
+// "DeleteAccountAndroid.png" in support/delete.md) resolve against the
+// rendered page's /docs/<dir>/ URL — mirror them there, or the page ships
+// broken <img>s (it did: the delete-account walkthrough's two screenshots
+// 404'd in production).
+{
+  const IMG_EXT = new Set([".png", ".jpg", ".jpeg", ".gif", ".svg", ".webp"]);
+  const imgOut = path.join(PUBLIC, "docs");
+  rmSync(imgOut, { recursive: true, force: true });
+  let n = 0;
+  // walk() above only returns .md files — a raw walk finds the assets
+  const rawWalk = (dir, out = []) => {
+    for (const e of readdirSync(dir, { withFileTypes: true })) {
+      if (e.name.startsWith(".")) continue;
+      const q = path.join(dir, e.name);
+      if (e.isDirectory()) rawWalk(q, out);
+      else out.push(q);
+    }
+    return out;
+  };
+  for (const abs of rawWalk(DOCS_DIR)) {
+    if (!IMG_EXT.has(path.extname(abs).toLowerCase())) continue;
+    const rel = path.relative(DOCS_DIR, abs).replace(/\\/g, "/");
+    const dest = path.join(imgOut, rel);
+    mkdirSync(path.dirname(dest), { recursive: true });
+    copyFileSync(abs, dest);
+    n++;
+  }
+  console.log(`mirrored ${n} docs image(s) into public/docs/`);
 }
 
 const outDir = path.join(PUBLIC, "docs-md");
@@ -59,20 +86,7 @@ mkdirSync(outDir, { recursive: true });
 
 const seen = new Set();
 const docIndex = [];
-const HIDDEN_DOC_SLUGS = new Set([
-  "edgeos",
-  "routeros",
-  "rpi",
-  "economic-model/economic-model",
-  "cli",
-  "archive/whitepaper",
-  "mcp/SKILL",
-  "mcp/SKILL2",
-  "router/testing-notes",
-  "changelog/2024-10-31-inspect/inspect",
-  "changelog/2024-10-31-tether/tether",
-  "changelog/2024-10-31-update-1/update-1"
-]);
+
 for (const abs of walk(DOCS_DIR)) {
   const rel = path.relative(DOCS_DIR, abs).replace(/\\/g, "/");
   const slug = slugFor(rel);
@@ -113,13 +127,17 @@ const llms = `# UR protocol
 - [Miners](https://ur.xyz/miners)
 - [Validators](https://ur.xyz/validators)
 - [Research](https://ur.xyz/research)
+- [Investor Centre](https://ur.xyz/investors): letters, materials, and public research
+- [Our Letter to Bittensor](https://ur.xyz/investors/our-letter-to-bittensor) ([PDF](https://ur.xyz/investors/our-letter-to-bittensor.pdf)): the August 2026 launch letter
 
 ## Docs
 
+- [Documentation index](https://ur.xyz/docs)
 ${docIndex.map((d) => `- [${d.title}](https://ur.xyz/docs-md/${d.slug}.md)`).join("\n")}
 
 ## Optional
 
+- [MASA L2 2025 audit (PDF)](https://ur.xyz/audits/masa-l2-2025.pdf): third-party peer audit
 - [Terms of Service](https://ur.xyz/terms)
 - [Privacy Policy](https://ur.xyz/privacy)
 - [Vulnerability Disclosure](https://ur.xyz/vdp)

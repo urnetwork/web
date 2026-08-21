@@ -1,7 +1,33 @@
 ---
 import Base from '../../layouts/Base.astro';
 import DocsIsland from '../../islands/DocsIsland.jsx';
+import { docs } from '@react/lib/docs.js';
+
+const listed = docs.filter(d => d.slug);
+const jsonLd = [{
+    '@type': 'CollectionPage',
+    '@id': 'https://ur.xyz/docs#docs',
+    name: 'UR protocol documentation',
+    url: 'https://ur.xyz/docs',
+    inLanguage: 'en',
+    isPartOf: { '@id': 'https://ur.xyz/#website' },
+    mainEntity: {
+        '@type': 'ItemList',
+        numberOfItems: listed.length,
+        itemListElement: listed.map((d, i) => ({
+            '@type': 'ListItem',
+            position: i + 1,
+            name: d.title,
+            url: `https://ur.xyz/docs/${d.slug}`,
+        })),
+    },
+}];
 ---
-<Base title="Docs — UR" description="UR protocol documentation." lang="en">
+<Base
+    title="Docs — UR"
+    description="UR protocol documentation: the litepaper, protocol research, provider guides, trust and safety, and the legal corpus — every page with a markdown twin."
+    lang="en"
+    jsonLd={jsonLd}
+>
     <DocsIsland activeRoute="docs" lang="en" client:load />
 </Base>

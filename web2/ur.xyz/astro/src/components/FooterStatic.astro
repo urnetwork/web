@@ -22,9 +22,10 @@ function path(name: string, slug: string | null = null) {
     <div class="footer-directory">
         <nav class="footer-column" aria-label={t.footer.learn}>
             <h2>{t.footer.learn}</h2>
-            <a href={path('docs')}>{t.nav.docs}</a>
+            {/* docs are English-only — a localized href only reached them through a redirect stub */}
+            <a href="/docs">{t.nav.docs}</a>
             <a href={path('research')}>{t.nav.research}</a>
-            <a href={path('docs', 'litepaper')}>{t.nav.whitepaper}</a>
+            <a href="/docs/litepaper">{t.nav.whitepaper}</a>
         </nav>
 
         <nav class="footer-column" aria-label={t.nav.network}>
@@ -38,6 +39,8 @@ function path(name: string, slug: string | null = null) {
             <h2>{t.footer.resources}</h2>
             <a href={`${path('home')}#launch-video`}>{t.footer.launchVideo}</a>
             <a href={BRAND_KIT} target="_blank" rel="noopener noreferrer">{t.footer.brandKit}</a>
+            {/* machine-readable site map for agents (the llms.txt convention) */}
+            <a href="/llms.txt">llms.txt</a>
             {lang === 'en' && <a href="/investors">Investor Centre</a>}
         </nav>
     </div>

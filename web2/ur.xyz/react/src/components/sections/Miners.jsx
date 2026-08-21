@@ -8,7 +8,7 @@ export default function Miners() {
     const { t, code } = useLanguage();
     const s = t.miners;
     return (
-        <Section id="miners" eyebrow={s.eyebrow} title={s.title}>
+        <Section id="miners" eyebrow={s.eyebrow} title={s.title} headingLevel="h1">
             <p>{s.intro}</p>
             <NetworkDiagram active="miners" lang={code} ctaLabel={s.cta} />
             <div className="card-grid">

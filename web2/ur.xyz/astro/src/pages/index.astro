@@ -8,10 +8,27 @@ import LaunchVideoIsland from '../islands/LaunchVideoIsland.jsx';
 import HomepageIntro from '@react/components/HomepageIntro.jsx';
 import NetworkDiagram from '@react/components/NetworkDiagram.jsx';
 import en from '@react/i18n/en.js';
+import { sentenceClamp } from '../lib/meta.js';
 
 const t = en;
+const description = sentenceClamp(t.homepage.intro);
+// The launch film the page plays (LaunchVideoIsland) — findable in structured
+// data even though the player mounts on interaction.
+const videoJsonLd = [{
+    '@type': 'VideoObject',
+    '@id': 'https://ur.xyz/#launch-video',
+    name: `UR — ${t.nav.tagline}`,
+    description,
+    thumbnailUrl: 'https://ur.xyz/launch-video-poster.jpg',
+    contentUrl: 'https://ur.xyz/launch-video.mp4',
+    uploadDate: '2026-08-19',
+    duration: 'PT1M13S',
+    width: 1920,
+    height: 1080,
+    publisher: { '@id': 'https://ur.xyz/#org' },
+}];
 ---
-<Base title="UR | Own ur privacy. Own the network." lang="en">
+<Base title="UR | Own ur privacy. Own the network." description={description} jsonLd={videoJsonLd} lang="en">
     <div class="app">
         <DisclaimerStatic t={t} />
         <HeroIsland lang="en" client:load />
@@ -19,13 +36,13 @@ const t = en;
         <main class="landing-main">
             <HomepageIntro copy={t} />
             <section class="landing-overview" aria-label={t.homepage.diagramAria}>
-                <NetworkDiagram client:load active="subnet" lang="en" />
+                <NetworkDiagram client:visible={{rootMargin: "200px"}} active="subnet" lang="en" />
                 <RoleBlocks t={t} lang="en" />
             </section>
         </main>
 
         <FooterStatic t={t} lang="en" />
-        <LaunchVideoIsland lang="en" client:load />
+        <LaunchVideoIsland lang="en" client:visible={{rootMargin: "200px"}} />
     </div>
 </Base>
 

@@ -130,28 +130,6 @@ function NetworkMenu({ code, route, t, mobile = false }) {
     );
 }
 
-function PricePill({ code, price, t }) {
-    const tier0 = price.sheet?.tiers?.[0] || null;
-    const value = tier0?.alphaPerGib != null && price.alphaUsd != null
-        ? tier0.alphaPerGib * price.alphaUsd
-        : null;
-    const formatted = value == null
-        ? '0'
-        : value < 0.01
-            ? value.toFixed(4).replace(/0+$/, '').replace(/\.$/, '')
-            : value.toFixed(2).replace(/\.00$/, '');
-
-    return (
-        <a
-            className="nav-price"
-            href={buildPath({ name: 'price', slug: null }, code)}
-            aria-label={`${t.nav.price}: $${formatted} per GiB`}
-        >
-            <span className="nav-price-label">{t.nav.price}</span>
-            <span className="nav-price-value">${formatted} / GiB</span>
-        </a>
-    );
-}
 
 export default function Nav({ disclaimerVisible, activeRoute }) {
     const { code, setLang, langs, t } = useLanguage();
@@ -245,7 +223,7 @@ export default function Nav({ disclaimerVisible, activeRoute }) {
                         <NetworkMenu code={code} route={route} t={t} />
                         <a href={buildPath({ name: 'research', slug: null }, code)} className={route.name === 'research' ? 'is-active' : ''}>{t.nav.research}</a>
                         {code === 'en' && <a href="/investors" className={route.name === 'investors' ? 'is-active' : ''}>Investors</a>}
-                        <a href={buildPath({ name: 'docs', slug: null }, code)} className={route.name === 'docs' || route.name === 'api' ? 'is-active' : ''}>{t.nav.docs}</a>
+                        <a href={"/docs"} className={route.name === 'docs' || route.name === 'api' ? 'is-active' : ''}>{t.nav.docs}</a>
                     </nav>
 
                     <div className="nav-actions">
@@ -283,7 +261,7 @@ export default function Nav({ disclaimerVisible, activeRoute }) {
                     <NetworkMenu code={code} route={route} t={t} mobile />
                     <a href={buildPath({ name: 'research', slug: null }, code)}>{t.nav.research}</a>
                     {code === 'en' && <a href="/investors">Investors</a>}
-                    <a href={buildPath({ name: 'docs', slug: null }, code)}>{t.nav.docs}</a>
+                    <a href={"/docs"}>{t.nav.docs}</a>
                 </nav>
                 <div className="nav-drawer-foot">
                     <nav className="nav-drawer-langs" aria-label={t.footer.languagesAria}>

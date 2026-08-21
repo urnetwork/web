@@ -15,7 +15,7 @@ export default function LegalSection({ doc }) {
     const { t } = useLanguage();
     const d = LEGAL_DOCS[doc];
     return (
-        <Section id={doc} eyebrow={t.legal.eyebrow} title={d.title}>
+        <Section id={doc} eyebrow={t.legal.eyebrow} title={d.title} headingLevel="h1">
             {d.updated && <p className="legal-updated">Last revised: {d.updated}</p>}
             {/* build-time trusted content: our own documents, our own converter */}
             <div className="legal-doc" dangerouslySetInnerHTML={{ __html: d.html }} />

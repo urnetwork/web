@@ -1,13 +1,42 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 
-import en from './en';
-import ru from './ru';
-import ar from './ar';
-import zh from './zh';
-import de from './de';
-import es from './es';
-
 import { parseRoute, buildPath } from '../router';
+
+// Dictionaries load per language. The old shape imported all six statically,
+// which put ~147 KB of dictionary text in the JS of every page.
+// - On the server / at build every language loads eagerly: each page renders
+//   once per language.
+// - On the client only the document's language (plus English, the fallback)
+//   loads before hydration — top-level await, so hydration cannot start with
+//   missing strings.
+// - A client-side language switch (the SPA, or the astro switcher's pushState
+//   path) loads the missing dictionary before switching.
+const dictLoaders = import.meta.glob('./{en,ru,ar,zh,de,es}.js');
+const dicts = {};
+
+function langOfFile(file) {
+    return file.slice('./'.length, -'.js'.length);
+}
+
+async function loadDict(code) {
+    if (dicts[code]) return dicts[code];
+    const loader = dictLoaders[`./${code}.js`];
+    if (!loader) return null;
+    dicts[code] = (await loader()).default;
+    return dicts[code];
+}
+
+if (import.meta.env.SSR) {
+    const eager = import.meta.glob('./{en,ru,ar,zh,de,es}.js', { eager: true });
+    for (const [file, mod] of Object.entries(eager)) {
+        dicts[langOfFile(file)] = mod.default;
+    }
+} else {
+    const docLang = (document.documentElement.lang || 'en').slice(0, 2).toLowerCase();
+    await Promise.all(
+        [...new Set(['en', docLang])].map((code) => loadDict(code))
+    );
+}
 
 /**
  * Catalog of supported languages. Each entry carries the BCP-47 code,
@@ -16,12 +45,12 @@ import { parseRoute, buildPath } from '../router';
  * direction for `<html dir>`.
  */
 export const LANGS = {
-    en: { code: 'en', label: 'EN', name: 'English',  dict: en, dir: 'ltr' },
-    ru: { code: 'ru', label: 'RU', name: 'Русский',  dict: ru, dir: 'ltr' },
-    ar: { code: 'ar', label: 'AR', name: 'العربية',  dict: ar, dir: 'rtl' },
-    zh: { code: 'zh', label: 'ZH', name: '中文',      dict: zh, dir: 'ltr' },
-    de: { code: 'de', label: 'DE', name: 'Deutsch',  dict: de, dir: 'ltr' },
-    es: { code: 'es', label: 'ES', name: 'Español',  dict: es, dir: 'ltr' }
+    en: { code: 'en', label: 'EN', name: 'English', dir: 'ltr' },
+    ru: { code: 'ru', label: 'RU', name: 'Русский', dir: 'ltr' },
+    ar: { code: 'ar', label: 'AR', name: 'العربية', dir: 'rtl' },
+    zh: { code: 'zh', label: 'ZH', name: '中文', dir: 'ltr' },
+    de: { code: 'de', label: 'DE', name: 'Deutsch', dir: 'ltr' },
+    es: { code: 'es', label: 'ES', name: 'Español', dir: 'ltr' }
 };
 
 // Display order in the switcher matches the order requested by product.
@@ -98,7 +127,9 @@ export function applyHtmlAttributes(code) {
 
 const LanguageContext = createContext({
     code: DEFAULT_LANG,
-    t: en,
+    // every surface renders inside LanguageProvider; this default only guards
+    // accidental out-of-provider use
+    t: {},
     setLang: () => {}
 });
 
@@ -121,8 +152,8 @@ export function LanguageProvider({ children, initialLang }) {
     // Browser back/forward navigation between language URLs.
     useEffect(() => {
         const onPopState = () => {
-            const urlLang = parseLangFromPath();
-            setCode(urlLang || DEFAULT_LANG);
+            const urlLang = parseLangFromPath() || DEFAULT_LANG;
+            loadDict(urlLang).then(() => setCode(urlLang));
         };
         window.addEventListener('popstate', onPopState);
         return () => window.removeEventListener('popstate', onPopState);
@@ -141,18 +172,22 @@ export function LanguageProvider({ children, initialLang }) {
         try { window.localStorage.setItem(LANG_KEY, newCode); } catch (e) {}
         // Preserve the current route (home / docs / api) when switching
         // languages so a visitor reading /docs/protocol-research in
-        // English doesn't get bounced to the localised home page.
-        const route = parseRoute(window.location.pathname);
-        const path = buildPath(route, newCode);
-        if (window.location.pathname !== path) {
-            window.history.pushState(null, '', path);
-        }
-        setCode(newCode);
+        // English doesn't get bounced to the localised home page. The
+        // dictionary loads before the switch so no frame renders with
+        // missing strings.
+        loadDict(newCode).then(() => {
+            const route = parseRoute(window.location.pathname);
+            const path = buildPath(route, newCode);
+            if (window.location.pathname !== path) {
+                window.history.pushState(null, '', path);
+            }
+            setCode(newCode);
+        });
     };
 
     const value = {
         code,
-        t: (LANGS[code] && LANGS[code].dict) || en,
+        t: dicts[code] || dicts[DEFAULT_LANG] || {},
         setLang,
         langs: LANGS,
         order: LANG_ORDER

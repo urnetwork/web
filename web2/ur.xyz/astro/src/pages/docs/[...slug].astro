@@ -2,20 +2,41 @@
 import Base from '../../layouts/Base.astro';
 import DocsIsland from '../../islands/DocsIsland.jsx';
 import { docs } from '@react/lib/docs.js';
+import { docDescription } from '../../lib/meta.js';
+import { execFileSync } from 'node:child_process';
+import path from 'node:path';
 
 export function getStaticPaths() {
+    // Defined INSIDE getStaticPaths: Astro executes this function hoisted out
+    // of the frontmatter, so outer consts are not in scope here. And the
+    // hoisted module runs from the BUILD dir, so import.meta.url is useless
+    // for finding the corpus — anchor on the build cwd (astro/) instead.
+    const DOCS_DIR = path.resolve(process.cwd(), '../docs');
+    // last committed change per source document — the honest dateModified
+    const lastCommitted = (rel) => {
+        try {
+            const out = execFileSync('git', ['-C', DOCS_DIR, 'log', '-1', '--pretty=format:%cs', '--', rel], {
+                encoding: 'utf8',
+                stdio: ['ignore', 'pipe', 'ignore'],
+            }).trim();
+            return out || null;
+        } catch {
+            return null;
+        }
+    };
     return docs.filter(d => d.slug).map(d => ({
         params: { slug: d.slug },
         props: {
             title: d.title,
-            // first ~160 chars of the document's own prose
-            description: d.text.replace(/\s+/g, ' ').trim().slice(0, 158),
+            // whole-sentence, markdown-free (the raw slice leaked "> " and cut mid-word)
+            description: docDescription(d.content, d.title),
+            updated: lastCommitted(d.path),
         },
     }));
 }
 
 const { slug } = Astro.params;
-const { title, description } = Astro.props;
+const { title, description, updated } = Astro.props;
 
 const jsonLd = [{
     '@type': 'TechArticle',
@@ -24,7 +45,14 @@ const jsonLd = [{
     url: `https://ur.xyz/docs/${slug}`,
     mainEntityOfPage: `https://ur.xyz/docs/${slug}`,
     publisher: { '@id': 'https://ur.xyz/#org' },
+    author: { '@id': 'https://ur.xyz/#org' },
     inLanguage: 'en',
+    ...(updated ? { dateModified: updated } : {}),
+    encoding: {
+        '@type': 'MediaObject',
+        encodingFormat: 'text/markdown',
+        contentUrl: `https://ur.xyz/docs-md/${slug}.md`,
+    },
 }];
 ---
 <Base

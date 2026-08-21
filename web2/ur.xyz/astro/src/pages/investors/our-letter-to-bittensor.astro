@@ -14,11 +14,38 @@ import '../../components/InvestorLetter.css';
 
 const t = en;
 const { featured } = investorCentre;
+// The letter is an article: dated, authored, downloadable — say so in
+// structured data instead of presenting it as a generic web page.
+const letterJsonLd = [{
+    '@type': 'Article',
+    '@id': 'https://ur.xyz/investors/our-letter-to-bittensor#article',
+    headline: featured.title,
+    description: featured.summary,
+    datePublished: featured.dateIso,
+    author: { '@type': 'Person', name: 'Jack Ai-Leung' },
+    publisher: { '@id': 'https://ur.xyz/#org' },
+    mainEntityOfPage: 'https://ur.xyz/investors/our-letter-to-bittensor',
+    url: 'https://ur.xyz/investors/our-letter-to-bittensor',
+    image: 'https://ur.xyz/investors/og-letter.png',
+    ...(featured.pdfHref
+        ? {
+              encoding: {
+                  '@type': 'MediaObject',
+                  encodingFormat: 'application/pdf',
+                  contentUrl: `https://ur.xyz${featured.pdfHref}`,
+              },
+          }
+        : {}),
+}];
 ---
 <Base
     title="Our Letter to Bittensor | UR"
-    description="UR's August 2026 letter to the Bittensor community."
+    description={featured.summary}
     lang="en"
+    ogType="article"
+    article={{ publishedTime: featured.dateIso, author: 'Jack Ai-Leung' }}
+    ogImage="/investors/og-letter.png"
+    jsonLd={letterJsonLd}
 >
     <div class="app">
         <DisclaimerStatic />

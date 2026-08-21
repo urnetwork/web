@@ -111,7 +111,7 @@ const LoginExtension: React.FC = () => {
       logExtensionAuthEvent('approve', extension_name, extension_version, isVerified);
 
       // Send the auth code directly to the browser-managed extension redirect.
-      // It never touches beta.app.ur.network after this point.
+      // It never touches manager.bringyour.com after this point.
       window.location.replace(
         `${redirect_uri}#code=${encodeURIComponent(response.auth_code)}&state=${encodeURIComponent(state)}`
       );

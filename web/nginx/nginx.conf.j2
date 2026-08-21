@@ -39,7 +39,43 @@ http {
     # Gzip Settings
     ##
 
+    # text/html is always compressed when gzip is on; everything else must be
+    # listed. Without gzip_types, CSS/JS/SVG/sitemaps/llms.txt/markdown all went
+    # over the wire uncompressed. woff2/png/mp4 are pre-compressed — leave out.
     gzip on;
+    gzip_comp_level 6;
+    gzip_min_length 512;
+    gzip_vary on;
+    # precompressed siblings from the site builds (astro/scripts/precompress.mjs
+    # emits .br at brotli-11 and .gz at gzip-9 next to every text asset):
+    # maximum-compression bytes with zero runtime CPU. brotli_static comes from
+    # the ngx_brotli module compiled in the image (web/web/Dockerfile); the LB
+    # forwards Accept-Encoding and passes encoded responses through untouched.
+    gzip_static on;
+    brotli_static on;
+    gzip_types
+        text/css
+        application/javascript
+        text/xml
+        application/xml
+        application/rss+xml
+        application/atom+xml
+        image/svg+xml
+        text/plain
+        text/markdown
+        application/yaml
+        application/json
+        application/manifest+json
+        application/wasm;
+
+    # preview.* serves the same bytes as the public host. The HTML canonicals
+    # already point at the public origin; this header keeps the duplicate host
+    # out of indexes entirely. An empty value means the header is not sent.
+    map $host $ur_preview_robots {
+        default          "";
+        preview.ur.io    "noindex, nofollow";
+        preview.ur.xyz   "noindex, nofollow";
+    }
 
     server {
         listen 80 default_server;
@@ -76,23 +112,6 @@ http {
 
     server {
         listen 80;
-        server_name ur.network;
-
-        absolute_redirect off;
-
-        location / {
-            try_files $uri $uri.html $uri/ $uri/index.html =404;
-            alias /www/ur.network/;
-
-            # always check for updates in the background
-            add_header 'Cache-Control' 'max-age=0, stale-while-revalidate=86400';
-            add_header 'Last-Modified' '{{ http_last_modified }}';
-            add_header 'ETag' '"{{ http_etag }}"';
-        }
-    }
-
-    server {
-        listen 80;
         server_name www.ur.io;
 
         return 301 https://ur.io$request_uri;
@@ -110,15 +129,76 @@ http {
         server_name ur.io preview.ur.io;
 
         absolute_redirect off;
+        root /www/preview.ur.io;
+
+        # A missing path serves the site's own 404 page with a real 404 status
+        # instead of nginx's stock page. The page ships noindex.
+        error_page 404 /404.html;
+
+        # Exact match beats the .html-canonicalization regex below, and
+        # `internal` keeps direct hits on /404.html out of the duplicate-URL
+        # space: externally it 404s (which serves this same file via
+        # error_page), internally it renders the branded page.
+        location = /404.html {
+            internal;
+            add_header 'Cache-Control' 'no-cache';
+        }
+
+        # The build is flat files (products.html), but the public URL space is
+        # clean (/products). Collapse the .html twins and trailing-slash
+        # variants onto the canonical form with real 301s.
+        location = /index.html {
+            return 301 /;
+        }
+
+        # The feed is advertised everywhere as /blog/rss.xml; the bare /blog/rss
+        # twin used to ship as a byte-identical duplicate.
+        location = /blog/rss {
+            return 301 /blog/rss.xml;
+        }
+
+        # Universal Links / password AutoFill discovery. Apple fetches this
+        # extensionless path and wants JSON.
+        location = /.well-known/apple-app-site-association {
+            default_type application/json;
+            add_header 'Cache-Control' 'max-age=3600';
+        }
+
+        # Content-hashed bundles never change under the same name.
+        location ^~ /_astro/ {
+            add_header 'Cache-Control' 'public, max-age=31536000, immutable';
+            add_header 'X-Robots-Tag' $ur_preview_robots always;
+        }
+
+        location ~ ^(?<clean>.+)/$ {
+            return 301 $clean$is_args$args;
+        }
+
+        location ~ ^(?<clean>.+)\.html$ {
+            return 301 $clean$is_args$args;
+        }
+
+        # Media and fonts: stable-named, safe to hold for a month.
+        location ~* \.(?:png|jpe?g|webp|avif|gif|svg|ico|woff2?|ttf|mp4|mp3|wasm)$ {
+            add_header 'Cache-Control' 'public, max-age=2592000, stale-while-revalidate=86400';
+            add_header 'X-Robots-Tag' $ur_preview_robots always;
+        }
+
+        # Machine-readable surfaces (sitemaps, feeds, llms.txt, markdown
+        # twins, openapi): fresh within the hour without hammering.
+        location ~* \.(?:xml|txt|md|ya?ml|json)$ {
+            add_header 'Cache-Control' 'public, max-age=3600, stale-while-revalidate=86400';
+            add_header 'X-Robots-Tag' $ur_preview_robots always;
+        }
 
         location / {
             try_files $uri $uri.html $uri/ $uri/index.html =404;
-            alias /www/preview.ur.io/;
 
             # always check for updates in the background
             add_header 'Cache-Control' 'max-age=0, stale-while-revalidate=86400';
             add_header 'Last-Modified' '{{ http_last_modified }}';
             add_header 'ETag' '"{{ http_etag }}"';
+            add_header 'X-Robots-Tag' $ur_preview_robots always;
         }
     }
 
@@ -127,15 +207,68 @@ http {
         server_name ur.xyz preview.ur.xyz;
 
         absolute_redirect off;
+        root /www/preview.ur.xyz;
+
+        # A missing path serves the site's own 404 page with a real 404 status
+        # instead of nginx's stock page. The page ships noindex.
+        error_page 404 /404.html;
+
+        location = /404.html {
+            internal;
+            add_header 'Cache-Control' 'no-cache';
+        }
+
+        location = /index.html {
+            return 301 /;
+        }
+
+        # Retired aliases: the build ships noindex meta-refresh stubs as a
+        # fallback, but a real 301 passes signals properly and skips a hop.
+        location = /docs/whitepaper {
+            return 301 /docs/litepaper;
+        }
+
+        location = /investors/august-investment-letter {
+            return 301 /investors/our-letter-to-bittensor;
+        }
+
+        # Docs are English-only; the localized docs URLs are redirect stubs.
+        # Serve the redirect at the HTTP layer instead of via meta refresh.
+        location ~ ^/(?:ru|ar|zh|de|es)/docs(?<docpath>/.*)?$ {
+            return 301 /docs$docpath;
+        }
+
+        location ^~ /_astro/ {
+            add_header 'Cache-Control' 'public, max-age=31536000, immutable';
+            add_header 'X-Robots-Tag' $ur_preview_robots always;
+        }
+
+        location ~ ^(?<clean>.+)/$ {
+            return 301 $clean$is_args$args;
+        }
+
+        location ~ ^(?<clean>.+)\.html$ {
+            return 301 $clean$is_args$args;
+        }
+
+        location ~* \.(?:png|jpe?g|webp|avif|gif|svg|ico|woff2?|ttf|mp4|mp3|pdf)$ {
+            add_header 'Cache-Control' 'public, max-age=2592000, stale-while-revalidate=86400';
+            add_header 'X-Robots-Tag' $ur_preview_robots always;
+        }
+
+        location ~* \.(?:xml|txt|md|ya?ml|json)$ {
+            add_header 'Cache-Control' 'public, max-age=3600, stale-while-revalidate=86400';
+            add_header 'X-Robots-Tag' $ur_preview_robots always;
+        }
 
         location / {
             try_files $uri $uri.html $uri/ $uri/index.html =404;
-            alias /www/preview.ur.xyz/;
 
             # always check for updates in the background
             add_header 'Cache-Control' 'max-age=0, stale-while-revalidate=86400';
             add_header 'Last-Modified' '{{ http_last_modified }}';
             add_header 'ETag' '"{{ http_etag }}"';
+            add_header 'X-Robots-Tag' $ur_preview_robots always;
         }
     }
 }

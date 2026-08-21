@@ -17,20 +17,7 @@ import { extractTitle, markdownToText } from './markdown.jsx';
  */
 
 const RAW_DOCS = Array.isArray(rawDocs) ? rawDocs : [];
-const HIDDEN_DOC_SLUGS = new Set([
-    'edgeos',
-    'routeros',
-    'rpi',
-    'economic-model/economic-model',
-    'cli',
-    'archive/whitepaper',
-    'mcp/SKILL',
-    'mcp/SKILL2',
-    'router/testing-notes',
-    'changelog/2024-10-31-inspect/inspect',
-    'changelog/2024-10-31-tether/tether',
-    'changelog/2024-10-31-update-1/update-1'
-]);
+import { HIDDEN_DOC_SLUGS, slugFor } from './docs-shared.js';
 
 const DOC_TITLE_OVERRIDES = {
     'legal/terms': 'Terms of Service',
@@ -88,13 +75,7 @@ const GROUP_LABELS = {
     '_root':            'Overview'
 };
 
-function slugFor(filePath) {
-    // Drop the extension; collapse README.md into the parent directory.
-    let s = filePath.replace(/\.md$/i, '');
-    s = s.replace(/\/README$/i, '');
-    if (s === 'README') s = '';
-    return s;
-}
+
 
 function titleFromPath(filePath) {
     const base = filePath.replace(/\.md$/i, '').split('/').pop();

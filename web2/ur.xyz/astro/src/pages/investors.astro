@@ -12,11 +12,33 @@ import '../components/InvestorCentre.css';
 const t = en;
 const { featured, updates, materials, metrics } = investorCentre;
 const SHOW_METRICS = false;
+const centreDocs = [featured, ...updates, ...materials].filter(
+    (d, i, arr) => d && arr.findIndex((x) => x.href === d.href) === i,
+);
+const centreJsonLd = [{
+    '@type': 'CollectionPage',
+    '@id': 'https://ur.xyz/investors#centre',
+    name: 'Investor Centre',
+    url: 'https://ur.xyz/investors',
+    inLanguage: 'en',
+    isPartOf: { '@id': 'https://ur.xyz/#website' },
+    mainEntity: {
+        '@type': 'ItemList',
+        numberOfItems: centreDocs.length,
+        itemListElement: centreDocs.map((d, i) => ({
+            '@type': 'ListItem',
+            position: i + 1,
+            name: d.title,
+            url: `https://ur.xyz${d.href}`,
+        })),
+    },
+}];
 ---
 <Base
     title="Investor Centre | UR"
-    description="UR investor updates, materials and public research."
+    description="UR investor updates, materials, and public research — letters, the litepaper, and third-party audits, with live network dashboards."
     lang="en"
+    jsonLd={centreJsonLd}
 >
     <div class="app">
         <DisclaimerStatic />

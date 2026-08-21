@@ -8,7 +8,7 @@ export default function Validators() {
     const { t, code } = useLanguage();
     const s = t.validators;
     return (
-        <Section id="validators" eyebrow={s.eyebrow} title={s.title}>
+        <Section id="validators" eyebrow={s.eyebrow} title={s.title} headingLevel="h1">
             <p>{s.intro}</p>
             <NetworkDiagram active="validators" lang={code} ctaLabel={s.cta} />
             <div className="card-grid">
