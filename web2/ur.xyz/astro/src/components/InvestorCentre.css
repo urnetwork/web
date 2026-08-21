@@ -143,7 +143,12 @@
 
 .featured-letter__content {
     display: grid;
-    grid-template-columns: minmax(0, 1.25fr) minmax(280px, 0.75fr);
+    /* The summary column is capped rather than fractional: it only ever holds
+       a few lines of text, so give it the width that reads well and let the
+       title take whatever is left. Splitting by ratio instead left the title
+       with far more room than it needs and pushed the summary to four tight
+       lines. */
+    grid-template-columns: minmax(0, 1fr) minmax(280px, 360px);
     align-items: center;
     gap: 58px;
     margin-block: auto;
@@ -560,6 +565,13 @@
 @media (max-width: 1040px) {
     .investor-page {
         --investor-width: calc(100vw - 48px);
+    }
+
+    /* Below full width there is no longer enough room to hand the summary a
+       fixed 360px without squeezing the title into two lines, so share the
+       row by ratio again and let the summary run to an extra line. */
+    .featured-letter__content {
+        grid-template-columns: minmax(0, 1.25fr) minmax(280px, 0.75fr);
     }
 }
 

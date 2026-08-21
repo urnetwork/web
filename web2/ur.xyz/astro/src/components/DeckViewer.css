@@ -1,0 +1,318 @@
+/* DeckViewer.css — the slide viewer on /investors/deck.
+ *
+ * Built to read as a deck rather than a column of images: one fixed-aspect
+ * stage that never changes size between slides, so nothing on the page moves
+ * as you click through.
+ */
+
+.deck-page {
+    --deck-shell: min(1180px, calc(100vw - 64px));
+    padding-top: calc(var(--nav-height) * 2);
+    background: var(--brand-bg);
+}
+
+.deck-shell {
+    width: var(--deck-shell);
+    margin-inline: auto;
+}
+
+/* --- heading, mirroring the letter ------------------------------------- */
+
+.deck-back-row {
+    padding-top: 38px;
+}
+
+.deck-back {
+    display: inline-flex;
+    min-height: 44px;
+    align-items: center;
+    gap: 9px;
+    color: rgba(214, 230, 244, 0.74);
+    font-size: 0.8rem;
+    text-decoration: none;
+}
+
+.deck-back span {
+    color: var(--brand-ur);
+    font-size: 1rem;
+    transition: transform 0.16s ease;
+}
+
+.deck-back:hover span,
+.deck-back:focus-visible span {
+    transform: translateX(-3px);
+}
+
+.deck-heading {
+    padding-block: 42px 30px;
+}
+
+.deck-heading h1 {
+    max-width: 850px;
+    margin: 0 0 26px;
+    color: var(--brand-white);
+    font-size: clamp(2.6rem, 5vw, 4rem);
+    font-weight: 400;
+    letter-spacing: -0.045em;
+    line-height: 1;
+}
+
+.deck-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 24px;
+    color: rgba(214, 230, 244, 0.5);
+    font-size: 0.76rem;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+}
+
+/* Same affordance and position as the letter's Download PDF. */
+.deck-download {
+    display: inline-flex;
+    min-height: 44px;
+    align-items: center;
+    gap: 9px;
+    margin-inline-start: auto;
+    padding-inline: 16px;
+    border: 1px solid rgba(214, 230, 244, 0.23);
+    color: rgba(214, 230, 244, 0.74);
+    font-size: 0.76rem;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    text-decoration: none;
+    transition: border-color 0.16s ease, color 0.16s ease;
+}
+
+.deck-download:hover,
+.deck-download:focus-visible {
+    border-color: var(--brand-ur);
+    color: var(--brand-white);
+}
+
+.deck-download i {
+    font-style: normal;
+    color: var(--brand-ur);
+    transition: transform 0.16s ease;
+}
+
+.deck-download:hover i {
+    transform: translateY(2px);
+}
+
+/* --- the stage ---------------------------------------------------------- */
+
+.deck-stage {
+    position: relative;
+    aspect-ratio: 16 / 9;
+    width: 100%;
+    overflow: hidden;
+    border: 1px solid rgba(214, 230, 244, 0.18);
+    background: #0b0b0b;
+}
+
+.deck-slide {
+    position: absolute;
+    inset: 0;
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    opacity: 0;
+    transition: opacity 0.22s ease;
+    pointer-events: none;
+}
+
+.deck-slide.is-current {
+    opacity: 1;
+}
+
+/* Click the left or right half of the stage to move through the deck. */
+.deck-hit {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 34%;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+    appearance: none;
+}
+
+.deck-hit--prev { left: 0; cursor: w-resize; }
+.deck-hit--next { right: 0; cursor: e-resize; }
+
+.deck-hit:focus-visible {
+    outline: 2px solid var(--brand-ur);
+    outline-offset: -4px;
+}
+
+/* --- controls under the stage ------------------------------------------ */
+
+.deck-controls {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    margin-top: 18px;
+}
+
+.deck-arrow {
+    display: inline-flex;
+    width: 44px;
+    height: 44px;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgba(214, 230, 244, 0.23);
+    background: transparent;
+    color: var(--brand-ui);
+    font-size: 1rem;
+    cursor: pointer;
+    transition: border-color 0.16s ease, color 0.16s ease, opacity 0.16s ease;
+}
+
+.deck-arrow:hover:not(:disabled),
+.deck-arrow:focus-visible:not(:disabled) {
+    border-color: var(--brand-ur);
+    color: var(--brand-white);
+}
+
+.deck-arrow:disabled {
+    opacity: 0.3;
+    cursor: default;
+}
+
+.deck-count {
+    color: rgba(214, 230, 244, 0.74);
+    font-family: 'PPNeueBit', monospace;
+    font-size: 1.05rem;
+    letter-spacing: 0.08em;
+    font-variant-numeric: tabular-nums;
+}
+
+/* One tick per slide: position at a glance, and a jump target. */
+.deck-ticks {
+    display: flex;
+    flex: 1;
+    gap: 6px;
+    align-items: center;
+}
+
+/* The rail should read as a 3px line, but a 3px-tall button is a fiddly
+   target with a mouse and an unusable one on a phone. The bar is drawn as a
+   pseudo-element so the button itself can be 24px of transparent height. */
+.deck-tick {
+    position: relative;
+    flex: 1;
+    height: 24px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+}
+
+.deck-tick::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    right: 0;
+    left: 0;
+    height: 3px;
+    background: rgba(214, 230, 244, 0.16);
+    transform: translateY(-50%);
+    transition: background 0.16s ease;
+}
+
+.deck-tick:hover::after,
+.deck-tick:focus-visible::after {
+    background: rgba(214, 230, 244, 0.4);
+}
+
+.deck-tick.is-current::after {
+    background: var(--brand-ur);
+}
+
+.deck-fullscreen {
+    display: inline-flex;
+    min-height: 44px;
+    align-items: center;
+    padding-inline: 14px;
+    border: 1px solid rgba(214, 230, 244, 0.23);
+    background: transparent;
+    color: rgba(214, 230, 244, 0.74);
+    font-family: inherit;
+    font-size: 0.72rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: border-color 0.16s ease, color 0.16s ease;
+}
+
+.deck-fullscreen:hover,
+.deck-fullscreen:focus-visible {
+    border-color: var(--brand-ur);
+    color: var(--brand-white);
+}
+
+.deck-hint {
+    margin: 14px 0 0;
+    color: rgba(214, 230, 244, 0.4);
+    font-size: 0.78rem;
+}
+
+.deck-hint kbd {
+    padding: 1px 6px;
+    border: 1px solid rgba(214, 230, 244, 0.2);
+    font-family: 'PPNeueBit', monospace;
+    font-size: 0.85em;
+}
+
+.deck-outro {
+    padding-block: 54px 96px;
+}
+
+/* Fullscreen: the stage becomes the whole screen, controls overlay the foot. */
+.deck-stage:fullscreen {
+    aspect-ratio: auto;
+    width: 100vw;
+    height: 100vh;
+    border: 0;
+    background: #000;
+}
+
+.deck-stage:fullscreen .deck-slide {
+    object-fit: contain;
+}
+
+@media (max-width: 720px) {
+    .deck-page {
+        --deck-shell: calc(100vw - 28px);
+    }
+
+    .deck-download {
+        margin-inline-start: 0;
+    }
+
+    .deck-controls {
+        flex-wrap: wrap;
+    }
+
+    .deck-ticks {
+        order: 3;
+        flex-basis: 100%;
+    }
+
+    /* Tapping the stage edges is unreliable next to a scroll gesture. */
+    .deck-hit {
+        display: none;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .deck-slide,
+    .deck-back span,
+    .deck-download i {
+        transition: none;
+    }
+}

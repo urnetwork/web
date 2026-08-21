@@ -1,34 +1,76 @@
+// The investor deck. Slides and the PDF are both produced from the Google
+// Slides export by `make deck-slides`: images land in astro/public/investors/
+// deck/ numbered 01..slideCount, and the PDF is the download for people who
+// want the file to keep or forward. slideCount must match what that script
+// prints, or the viewer will ask for a slide that is not there.
+//
+// One object, referenced from three places on the page, so the slide count and
+// the date cannot drift apart between the featured card and the viewer.
+const deck = {
+    kind: 'Deck',
+    title: 'Introduction to UR (SN25)',
+    summary:
+        'How UR works, what is live today, the projects in research, and the opportunity for network operators to build on the subnet to compound demand.',
+    date: '21 August 2026',
+    dateIso: '2026-08-21',
+    readTime: '11 slides',
+    cta: 'View the deck',
+    href: '/investors/deck',
+    pdfHref: '/investors/ur-investor-deck.pdf',
+    slideBase: '/investors/deck',
+    slideExt: 'webp',
+    slideCount: 11,
+};
+
+const letter = {
+    kind: 'Letter',
+    title: 'Our Letter to Bittensor',
+    summary:
+        'A letter from Jack and Brien on launching UR (SN25), growing a global network of residential operators, and building a free and open internet together.',
+    date: '18 August 2026',
+    dateIso: '2026-08-18',
+    readTime: '6 min read',
+    cta: 'Read the letter',
+    href: '/investors/our-letter-to-bittensor',
+    // Reprinted from the letter page itself by `make letter-pdf`.
+    pdfHref: '/investors/our-letter-to-bittensor.pdf',
+};
+
 export const investorCentre = {
-    updated: '18 August 2026',
-    updatedIso: '2026-08-18',
+    updated: '21 August 2026',
+    updatedIso: '2026-08-21',
     about: [
         'Our mission is to make privacy the default for every user by providing the encryption layer for the open internet. We are building a user-powered network and a privacy product suite designed to serve people, not surveil them.',
         'Anyone, anywhere should be able to access the internet freely.',
     ],
-    featured: {
-        date: '18 August 2026',
-        dateIso: '2026-08-18',
-        kind: 'Letter',
-        readTime: '6 min read',
-        title: 'Our Letter to Bittensor',
-        summary:
-            'A letter from Jack and Brien on launching UR (SN25), growing a global network of residential operators, and building a free and open internet together.',
-        href: '/investors/our-letter-to-bittensor',
-        // Reprinted from the letter page itself by `make letter-pdf`.
-        pdfHref: '/investors/our-letter-to-bittensor.pdf',
-    },
+    // `featured` is whichever document leads the Investor Centre and will
+    // change again. Anything that means one specific document must name it:
+    // a page that reads `featured` gets retitled and re-pointed the next time
+    // the card changes, which is how the letter page briefly offered the deck
+    // PDF as its own download.
+    featured: deck,
+    deck,
+    letter,
+
     updates: [
         {
-            title: 'Our Letter to Bittensor',
-            date: '18 August 2026',
+            title: letter.title,
+            date: letter.date,
             format: 'Written',
-            readTime: '6 min read',
-            href: '/investors/our-letter-to-bittensor',
-            pdfHref: '/investors/our-letter-to-bittensor.pdf',
+            readTime: letter.readTime,
+            href: letter.href,
+            pdfHref: letter.pdfHref,
             external: false,
         },
     ],
     materials: [
+        {
+            title: deck.title,
+            detail: null,
+            readTime: deck.readTime,
+            href: deck.href,
+            pdfHref: deck.pdfHref,
+        },
         {
             title: 'UR Litepaper',
             detail: null,

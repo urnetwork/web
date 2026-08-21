@@ -1,0 +1,167 @@
+---
+// The investor deck, viewable in the browser. Slides are served as images from
+// astro/public/investors/deck/, so viewing the deck downloads nothing but the
+// page's own assets — no third-party embed, and nothing that would put a
+// Google host into the network-privacy test's contacted-hosts list.
+import Base from '../../layouts/Base.astro';
+import DisclaimerStatic from '../../components/DisclaimerStatic.astro';
+import FooterStatic from '../../components/FooterStatic.astro';
+import NavIsland from '../../islands/NavIsland.jsx';
+import en from '@react/i18n/en.js';
+import { investorCentre } from '../../lib/investors.js';
+
+import '@react/components/Nav.css';
+import '../../components/DeckViewer.css';
+
+const t = en;
+const { deck } = investorCentre;
+const slides = Array.from({ length: deck.slideCount }, (_, i) => ({
+    n: i + 1,
+    src: `${deck.slideBase}/${String(i + 1).padStart(2, '0')}.${deck.slideExt}`,
+}));
+---
+<Base
+    title={`${deck.title} | UR`}
+    description={deck.summary}
+    lang="en"
+>
+    <div class="app">
+        <DisclaimerStatic />
+        <NavIsland activeRoute="investors" lang="en" client:load />
+
+        <main id="main" class="deck-page">
+            <div class="deck-shell deck-back-row">
+                <a class="deck-back" href="/investors"><span aria-hidden="true">←</span> Investor Centre</a>
+            </div>
+
+            <header class="deck-heading deck-shell">
+                <h1>{deck.title}</h1>
+                <div class="deck-meta">
+                    <time datetime={deck.dateIso}>{deck.date}</time>
+                    <span>{deck.slideCount} slides</span>
+                    <a class="deck-download" href={deck.pdfHref} download>
+                        Download PDF <i aria-hidden="true">↓</i>
+                    </a>
+                </div>
+            </header>
+
+            <div class="deck-shell">
+                <div class="deck-stage" id="deck-stage">
+                    {slides.map(s => (
+                        <img
+                            class:list={['deck-slide', s.n === 1 && 'is-current']}
+                            src={s.src}
+                            alt={`Slide ${s.n} of ${deck.slideCount}`}
+                            data-slide={s.n}
+                            loading={s.n <= 2 ? 'eager' : 'lazy'}
+                            decoding="async"
+                        />
+                    ))}
+                    <button class="deck-hit deck-hit--prev" type="button" data-deck-prev aria-label="Previous slide"></button>
+                    <button class="deck-hit deck-hit--next" type="button" data-deck-next aria-label="Next slide"></button>
+                </div>
+
+                <div class="deck-controls">
+                    <button class="deck-arrow" type="button" data-deck-prev aria-label="Previous slide">←</button>
+                    <button class="deck-arrow" type="button" data-deck-next aria-label="Next slide">→</button>
+                    <span class="deck-count" data-deck-count aria-live="polite">01 / {String(deck.slideCount).padStart(2, '0')}</span>
+                    {/* A group of jump buttons, not a tablist: the slides are
+                        not tabpanels, and claiming tab semantics without them
+                        makes a screen reader announce controls it cannot then
+                        resolve. */}
+                    <div class="deck-ticks" role="group" aria-label="Jump to slide">
+                        {slides.map(s => (
+                            <button
+                                class:list={['deck-tick', s.n === 1 && 'is-current']}
+                                type="button"
+                                data-deck-go={s.n}
+                                aria-label={`Go to slide ${s.n}`}
+                                aria-current={s.n === 1 ? 'true' : undefined}
+                            ></button>
+                        ))}
+                    </div>
+                    <button class="deck-fullscreen" type="button" data-deck-fullscreen>Fullscreen</button>
+                </div>
+
+                <p class="deck-hint">
+                    Use <kbd>←</kbd> <kbd>→</kbd> to move through the deck, <kbd>F</kbd> for fullscreen.
+                </p>
+            </div>
+
+            <div class="deck-shell deck-outro">
+                <a class="deck-back" href="/investors"><span aria-hidden="true">←</span> Back to Investor Centre</a>
+            </div>
+        </main>
+
+        <FooterStatic t={t} lang="en" />
+    </div>
+</Base>
+
+<script>
+    const stage = document.getElementById('deck-stage');
+    if (stage) {
+        const slides = [...stage.querySelectorAll('.deck-slide')];
+        const ticks = [...document.querySelectorAll('[data-deck-go]')];
+        const count = document.querySelector('[data-deck-count]');
+        const total = slides.length;
+        const pad = (n) => String(n).padStart(2, '0');
+        let current = 1;
+
+        function show(n, pushHash = true) {
+            current = Math.min(Math.max(n, 1), total);
+            slides.forEach((s) => s.classList.toggle('is-current', Number(s.dataset.slide) === current));
+            ticks.forEach((t, i) => {
+                const on = i + 1 === current;
+                t.classList.toggle('is-current', on);
+                if (on) t.setAttribute('aria-current', 'true');
+                else t.removeAttribute('aria-current');
+            });
+            if (count) count.textContent = `${pad(current)} / ${pad(total)}`;
+            document.querySelectorAll('[data-deck-prev]').forEach((b) => (b.disabled = current === 1));
+            document.querySelectorAll('[data-deck-next]').forEach((b) => (b.disabled = current === total));
+            // The next slide is the one about to be needed; fetch it now so the
+            // click after this one paints immediately.
+            const ahead = slides[current];
+            if (ahead) ahead.loading = 'eager';
+            if (pushHash) history.replaceState(null, '', `#${current}`);
+        }
+
+        function slideFromHash() {
+            const n = Number(location.hash.slice(1));
+            return Number.isInteger(n) && n > 0 ? n : 1;
+        }
+
+        document.querySelectorAll('[data-deck-prev]').forEach((b) => b.addEventListener('click', () => show(current - 1)));
+        document.querySelectorAll('[data-deck-next]').forEach((b) => b.addEventListener('click', () => show(current + 1)));
+        ticks.forEach((t) => t.addEventListener('click', () => show(Number(t.dataset.deckGo))));
+
+        document.addEventListener('keydown', (e) => {
+            if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+            if (e.key === 'ArrowRight' || e.key === 'PageDown') { e.preventDefault(); show(current + 1); }
+            else if (e.key === 'ArrowLeft' || e.key === 'PageUp') { e.preventDefault(); show(current - 1); }
+            else if (e.key === 'Home') { e.preventDefault(); show(1); }
+            else if (e.key === 'End') { e.preventDefault(); show(total); }
+            else if (e.key === 'f' || e.key === 'F') { e.preventDefault(); toggleFullscreen(); }
+        });
+
+        function toggleFullscreen() {
+            if (document.fullscreenElement) document.exitFullscreen();
+            else stage.requestFullscreen?.();
+        }
+        document.querySelector('[data-deck-fullscreen]')?.addEventListener('click', toggleFullscreen);
+
+        // Deep link: /investors/deck#7 opens on that slide. Also honour a hash
+        // that changes while the page is open, so following a #7 link from
+        // someone who is already here moves the deck instead of doing nothing:
+        // that is a same-document navigation and never re-runs this script.
+        window.addEventListener('hashchange', () => show(slideFromHash(), false));
+        show(slideFromHash(), false);
+
+        // The whole deck is a couple of MB. Once the page itself has settled,
+        // pull the rest in the background so jumping to a far slide by tick or
+        // by holding an arrow key never lands on an empty stage.
+        const preloadRest = () => slides.forEach((s) => { s.loading = 'eager'; });
+        if (document.readyState === 'complete') preloadRest();
+        else window.addEventListener('load', preloadRest, { once: true });
+    }
+</script>

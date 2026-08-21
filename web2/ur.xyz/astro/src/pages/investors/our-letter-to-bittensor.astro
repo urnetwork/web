@@ -13,26 +13,26 @@ import '@react/components/Nav.css';
 import '../../components/InvestorLetter.css';
 
 const t = en;
-const { featured } = investorCentre;
+const { letter } = investorCentre;
 // The letter is an article: dated, authored, downloadable — say so in
 // structured data instead of presenting it as a generic web page.
 const letterJsonLd = [{
     '@type': 'Article',
     '@id': 'https://ur.xyz/investors/our-letter-to-bittensor#article',
-    headline: featured.title,
-    description: featured.summary,
-    datePublished: featured.dateIso,
+    headline: letter.title,
+    description: letter.summary,
+    datePublished: letter.dateIso,
     author: { '@type': 'Person', name: 'Jack Ai-Leung' },
     publisher: { '@id': 'https://ur.xyz/#org' },
     mainEntityOfPage: 'https://ur.xyz/investors/our-letter-to-bittensor',
     url: 'https://ur.xyz/investors/our-letter-to-bittensor',
     image: 'https://ur.xyz/investors/og-letter.png',
-    ...(featured.pdfHref
+    ...(letter.pdfHref
         ? {
               encoding: {
                   '@type': 'MediaObject',
                   encodingFormat: 'application/pdf',
-                  contentUrl: `https://ur.xyz${featured.pdfHref}`,
+                  contentUrl: `https://ur.xyz${letter.pdfHref}`,
               },
           }
         : {}),
@@ -40,10 +40,10 @@ const letterJsonLd = [{
 ---
 <Base
     title="Our Letter to Bittensor | UR"
-    description={featured.summary}
+    description={letter.summary}
     lang="en"
     ogType="article"
-    article={{ publishedTime: featured.dateIso, author: 'Jack Ai-Leung' }}
+    article={{ publishedTime: letter.dateIso, author: 'Jack Ai-Leung' }}
     ogImage="/investors/og-letter.png"
     jsonLd={letterJsonLd}
 >
@@ -69,7 +69,7 @@ const letterJsonLd = [{
                 <div class="letter-meta">
                     <time datetime="2026-08-18">Aug 18, 2026</time>
                     <span>6 min read</span>
-                    <a class="letter-download" href={featured.pdfHref} download>
+                    <a class="letter-download" href={letter.pdfHref} download>
                         Download PDF <i aria-hidden="true">↓</i>
                     </a>
                 </div>

@@ -1,4 +1,4 @@
-.PHONY: build build-main build-canary generate-legal generate-agent-assets letter-pdf sync-public gates clean
+.PHONY: build build-main build-canary generate-legal generate-agent-assets letter-pdf deck-slides sync-public gates clean
 
 BUILD_DIR := build
 
@@ -23,6 +23,14 @@ generate-agent-assets:
 # the letter copy or its print styles change, and commit the result.
 letter-pdf:
 	node ../scripts/generate-letter-pdf.mjs --rebuild
+
+# Rasterise the investor deck PDF into astro/public/investors/deck/*.webp and
+# place the PDF itself as the download. Pass the export from Google Slides:
+#   make deck-slides DECK=~/Downloads/deck.pdf
+# Needs the same Chromium as letter-pdf, so it is likewise not part of build-*.
+# Update deck.slideCount in src/lib/investors.js to the count it prints.
+deck-slides:
+	node ../scripts/generate-deck-slides.mjs "$(DECK)"
 
 # Mirror every static asset from react/public into astro/public. Astro only
 # serves its own public/, so an image added on the react side is missing from
