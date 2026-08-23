@@ -59,6 +59,12 @@ RUN find /www/preview.ur.io -type f -exec chmod ugo=r {} +
 RUN find /srv/warp/status -type d -exec chmod ugo=rx {} +
 RUN find /srv/warp/status -type f -exec chmod ugo=r {} +
 
+# Exercise the rendered nginx config and real site files during every image
+# build. Syntax-only validation did not catch a host-specific redirect loop at
+# the canonical roots.
+COPY --chmod=755 nginx-smoke-test.sh /usr/local/sbin/nginx-smoke-test
+RUN /usr/local/sbin/nginx-smoke-test
+
 COPY build/$TARGETPLATFORM/web /usr/local/sbin/web
 
 # see https://ubuntu.com/blog/avoiding-dropped-connections-in-nginx-containers-with-stopsignal-sigquit

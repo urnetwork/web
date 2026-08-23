@@ -144,6 +144,21 @@ http {
             add_header 'Cache-Control' 'no-cache';
         }
 
+        # Serve the homepage file in this exact location. Letting `location /`
+        # resolve the document root as a directory invokes nginx's index
+        # module, which internally redirects to /index.html. That internal
+        # lookup must not enter the public /index.html canonical redirect
+        # below, or / permanently redirects to itself.
+        location = / {
+            try_files /index.html =404;
+
+            # always check for updates in the background
+            add_header 'Cache-Control' 'max-age=0, stale-while-revalidate=86400';
+            add_header 'Last-Modified' '{{ http_last_modified }}';
+            add_header 'ETag' '"{{ http_etag }}"';
+            add_header 'X-Robots-Tag' $ur_preview_robots always;
+        }
+
         # The build is flat files (products.html), but the public URL space is
         # clean (/products). Collapse the .html twins and trailing-slash
         # variants onto the canonical form with real 301s.
@@ -216,6 +231,18 @@ http {
         location = /404.html {
             internal;
             add_header 'Cache-Control' 'no-cache';
+        }
+
+        # Keep the homepage lookup in this location rather than internally
+        # redirecting it through the public /index.html canonical redirect.
+        location = / {
+            try_files /index.html =404;
+
+            # always check for updates in the background
+            add_header 'Cache-Control' 'max-age=0, stale-while-revalidate=86400';
+            add_header 'Last-Modified' '{{ http_last_modified }}';
+            add_header 'ETag' '"{{ http_etag }}"';
+            add_header 'X-Robots-Tag' $ur_preview_robots always;
         }
 
         location = /index.html {

@@ -1,0 +1,82 @@
+#!/usr/bin/env bash
+
+# Build-time HTTP smoke test for the host-based static-site routes. This runs
+# inside the final image after the rendered nginx config and site files have
+# been copied, so it catches behavior that `nginx -t` cannot (notably internal
+# redirects between / and /index.html).
+set -euo pipefail
+
+test_dir=$(mktemp -d)
+
+cleanup() {
+    nginx -s quit >/dev/null 2>&1 || true
+    rm -rf "$test_dir"
+}
+trap cleanup EXIT
+
+fail() {
+    printf 'nginx smoke test: %s\n' "$*" >&2
+    exit 1
+}
+
+expect_response() {
+    local host=$1
+    local path=$2
+    local expected_status=$3
+    local expected_location=${4:-}
+    local key=${host//./_}
+    local headers="$test_dir/${key}.headers"
+    local body="$test_dir/${key}.body"
+    local status
+    local location
+
+    status=$(curl --silent --show-error \
+        --output "$body" \
+        --dump-header "$headers" \
+        --write-out '%{http_code}' \
+        --header "Host: $host" \
+        "http://127.0.0.1${path}")
+
+    if [[ "$status" != "$expected_status" ]]; then
+        fail "$host$path returned $status, expected $expected_status"
+    fi
+
+    if [[ "$expected_status" == 200 && ! -s "$body" ]]; then
+        fail "$host$path returned an empty successful response"
+    fi
+
+    if [[ -n "$expected_location" ]]; then
+        location=$(awk 'BEGIN { IGNORECASE=1 } /^Location:/ { gsub(/\r/, "", $2); print $2; exit }' "$headers")
+        if [[ "$location" != "$expected_location" ]]; then
+            fail "$host$path redirected to ${location:-<missing>}, expected $expected_location"
+        fi
+    fi
+}
+
+nginx -t
+nginx
+
+ready=false
+for _ in $(seq 1 50); do
+    if curl --silent --fail --header 'Host: bringyour.com' \
+        http://127.0.0.1/status >/dev/null; then
+        ready=true
+        break
+    fi
+    sleep 0.1
+done
+[[ "$ready" == true ]] || fail 'nginx did not become ready'
+
+for host in ur.io preview.ur.io ur.xyz preview.ur.xyz; do
+    expect_response "$host" / 200
+    expect_response "$host" '/?smoke=1' 200
+    expect_response "$host" /index.html 301 /
+    expect_response "$host" '/index.html?smoke=1' 301 /
+done
+
+expect_response ur.io /products 200
+expect_response ur.xyz /investors 200
+expect_response www.ur.io / 301 https://ur.io/
+expect_response www.ur.xyz / 301 https://ur.xyz/
+
+printf 'nginx smoke test: canonical roots and redirects passed\n'
