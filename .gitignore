@@ -3,6 +3,8 @@
 **/build.*
 **/__pycache__
 !.github/workflows/build.yml
+# The Build on UR page is a standalone static page; **/build.* would swallow it.
+!web2/ur.xyz/astro/public/build.html
 app/app
 web/web
 /venv

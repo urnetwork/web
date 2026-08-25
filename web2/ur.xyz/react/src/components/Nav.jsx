@@ -222,6 +222,7 @@ export default function Nav({ disclaimerVisible, activeRoute }) {
                     <nav className="nav-links" aria-label="Primary navigation">
                         <NetworkMenu code={code} route={route} t={t} />
                         <a href={buildPath({ name: 'research', slug: null }, code)} className={route.name === 'research' ? 'is-active' : ''}>{t.nav.research}</a>
+                        {code === 'en' && <a href="/build" className={route.name === 'build' ? 'is-active' : ''}>Build</a>}
                         {code === 'en' && <a href="/investors" className={route.name === 'investors' ? 'is-active' : ''}>Investors</a>}
                         <a href={"/docs"} className={route.name === 'docs' || route.name === 'api' ? 'is-active' : ''}>{t.nav.docs}</a>
                     </nav>
@@ -260,6 +261,7 @@ export default function Nav({ disclaimerVisible, activeRoute }) {
                 <nav className="nav-drawer-links" aria-label="Mobile navigation">
                     <NetworkMenu code={code} route={route} t={t} mobile />
                     <a href={buildPath({ name: 'research', slug: null }, code)}>{t.nav.research}</a>
+                    {code === 'en' && <a href="/build">Build</a>}
                     {code === 'en' && <a href="/investors">Investors</a>}
                     <a href={"/docs"}>{t.nav.docs}</a>
                 </nav>
