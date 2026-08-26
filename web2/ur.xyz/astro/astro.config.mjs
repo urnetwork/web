@@ -87,6 +87,7 @@ for (const l of ['en', 'ru', 'ar', 'zh', 'de', 'es']) {
 }
 
 const LETTER_DATE = investorCentre?.featured?.dateIso || null;
+const BUILD_DATE = lastCommitted(__dirname, 'public/build.html');
 const LEGAL_DATES = {};
 for (const doc of ['terms', 'privacy', 'vdp']) {
     const d = lastCommitted(path.join(PROJECT_ROOT, 'docs', 'legal'), `${doc}.md`);
@@ -107,6 +108,7 @@ export default defineConfig({
         // all six languages at the same path under its /<lang> prefix.
         sitemap({
             customPages: [
+                'https://ur.xyz/build',
                 'https://ur.xyz/investors/our-letter-to-bittensor.pdf',
                 'https://ur.xyz/audits/masa-l2-2025.pdf',
             ],
@@ -134,6 +136,8 @@ export default defineConfig({
                     if (d) item.lastmod = d;
                 } else if (basePath.startsWith('/investors') && LETTER_DATE) {
                     item.lastmod = LETTER_DATE;
+                } else if (basePath === '/build' && BUILD_DATE) {
+                    item.lastmod = BUILD_DATE;
                 } else if (LANG_DATES[lang]) {
                     // home + sections: the language dictionary is the copy source
                     item.lastmod = LANG_DATES[lang];
@@ -142,9 +146,10 @@ export default defineConfig({
                 const isRetiredAlias = pathname === '/docs/whitepaper' || pathname === '/investors/august-investment-letter';
                 if (isEnglishOnlyDocsRedirect || isRetiredAlias) return undefined;
 
-                // Docs and investor content are English-only. Do not advertise
+                // Build, docs, and investor content are English-only. Do not advertise
                 // nonexistent or redirecting locale versions of those pages.
                 if (
+                    pathname === '/build' ||
                     pathname === '/docs' || pathname.startsWith('/docs/') ||
                     pathname === '/investors' || pathname.startsWith('/investors/')
                 ) {
