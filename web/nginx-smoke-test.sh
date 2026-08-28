@@ -60,7 +60,7 @@ nginx >"$analytics_log" 2>"$nginx_error_log"
 
 ready=false
 for _ in $(seq 1 50); do
-    if curl --silent --fail --header 'Host: bringyour.com' \
+    if curl --silent --fail --header 'Host: status.invalid' \
         http://127.0.0.1/status >/dev/null; then
         ready=true
         break
@@ -68,6 +68,7 @@ for _ in $(seq 1 50); do
     sleep 0.1
 done
 [[ "$ready" == true ]] || fail 'nginx did not become ready'
+expect_response status.invalid /status 200
 
 for host in ur.io preview.ur.io ur.xyz preview.ur.xyz; do
     expect_response "$host" / 200
@@ -80,6 +81,16 @@ expect_response ur.io /products 200
 expect_response ur.xyz /investors 200
 expect_response www.ur.io / 301 https://ur.io/
 expect_response www.ur.xyz / 301 https://ur.xyz/
+
+for host in bringyour.com www.bringyour.com ur.network www.ur.network; do
+    expect_response "$host" / 301 https://ur.io/
+    expect_response "$host" '/legacy/path?smoke=1' 301 'https://ur.io/legacy/path?smoke=1'
+done
+
+expect_response bringyour.com /status 200
+for host in www.bringyour.com ur.network www.ur.network; do
+    expect_response "$host" /status 301 https://ur.io/status
+done
 
 # A synthetic edge request proves the only emitted page-view fields are the
 # normalized path, country bucket, and classified source. Deliberately put

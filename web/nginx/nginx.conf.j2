@@ -171,26 +171,30 @@ http {
         }
     }
 
-    # this is the default domain so it must have the /status route
+    # TLS terminates at the public load balancer, which forwards the original
+    # Host header to this HTTP listener. Keep the load-balancer status endpoint
+    # on the bringyour.com apex, but retire the rest of the legacy site.
     server {
         listen 80;
-        server_name bringyour.com *.bringyour.com;
+        server_name bringyour.com;
 
-        absolute_redirect off;
-
-        location =/status {
+        location = /status {
             alias /srv/warp/status/status.json;
             add_header 'Content-Type' 'application/json';
         }
-        location / {
-            try_files $uri $uri.html $uri/ $uri/index.html =404;
-            alias /www/bringyour.com/;
 
-            # always check for updates in the background
-            add_header 'Cache-Control' 'max-age=0, stale-while-revalidate=86400';
-            add_header 'Last-Modified' '{{ http_last_modified }}';
-            add_header 'ETag' '"{{ http_etag }}"';
+        location / {
+            return 301 https://ur.io$request_uri;
         }
+    }
+
+    # The legacy hosts use the same redirect for requests that entered through
+    # either the public HTTP or HTTPS listener.
+    server {
+        listen 80;
+        server_name www.bringyour.com ur.network www.ur.network;
+
+        return 301 https://ur.io$request_uri;
     }
 
     server {
