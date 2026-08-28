@@ -15,13 +15,16 @@ import { spawn, spawnSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 import net from "node:net";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const REACT_DIR = path.resolve(__dirname, "..");
 const ASTRO_DIR = path.resolve(__dirname, "../../astro");
 const VITE_BIN = path.join(REACT_DIR, "node_modules/vite/bin/vite.js");
-const ASTRO_BIN = path.join(ASTRO_DIR, "node_modules/astro/astro.js");
+const ASTRO_PACKAGE = path.join(ASTRO_DIR, "node_modules/astro/package.json");
+const ASTRO_PACKAGE_JSON = JSON.parse(fs.readFileSync(ASTRO_PACKAGE, "utf8"));
+const ASTRO_ENTRY = path.resolve(path.dirname(ASTRO_PACKAGE), ASTRO_PACKAGE_JSON.exports["."]);
+const { preview: startAstroPreview } = await import(pathToFileURL(ASTRO_ENTRY).href);
 const UR_ENV = process.env.UR_ENV || "main";
 const ASTRO_OUT = path.join(ASTRO_DIR, "build", UR_ENV);
 const OUT = path.join(__dirname, "__parity__");
@@ -161,9 +164,18 @@ async function main() {
   const reactPort = await freePort();
   const astroPort = await freePort();
   const reactSrv = startServer(process.execPath, [VITE_BIN, "--port", String(reactPort), "--strictPort"], REACT_DIR, reactPort);
-  const astroSrv = startServer(process.execPath, [ASTRO_BIN, "preview", "--port", String(astroPort)], ASTRO_DIR, astroPort);
-  const cleanup = () => { try { reactSrv.kill(); } catch {} try { astroSrv.kill(); } catch {} };
-  process.on("exit", cleanup);
+  // Use Astro's public JavaScript API so Astro 7's agent-aware CLI cannot
+  // detach the preview server from the harness that owns its lifecycle.
+  const astroSrv = await startAstroPreview({
+    root: ASTRO_DIR,
+    server: { port: astroPort },
+    logLevel: "silent",
+  });
+  const cleanup = async () => {
+    try { reactSrv.kill(); } catch {}
+    try { await astroSrv.stop(); } catch {}
+  };
+  process.on("exit", () => { try { reactSrv.kill(); } catch {} });
 
   const reactBase = `http://localhost:${reactPort}`;
   const astroBase = `http://localhost:${astroPort}`;
@@ -192,7 +204,7 @@ async function main() {
     }
   }
   await browser.close();
-  cleanup();
+  await cleanup();
 
   console.log(`\n${total - failures}/${total} route×device renders pixel-identical (threshold ${THRESHOLD * 100}%, ${PROFILES.length} screens × ${ROUTES.length} routes). Artifacts: ${OUT}`);
   process.exit(failures && !process.argv.includes("--update") ? 1 : 0);

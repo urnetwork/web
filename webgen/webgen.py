@@ -160,7 +160,8 @@ def build(dirpath, minify=True, validate=True):
             os.path.join(build_dirpath, parent_dirpath, f'{process_filename}.tmp')
         )
         p = subprocess.run([
-            'cleancss',
+            'lightningcss',
+            '--minify',
             '-o', out_path,
             os.path.join(build_dirpath, parent_dirpath, f'{process_filename}.tmp')
         ])

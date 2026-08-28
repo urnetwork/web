@@ -1,5 +1,5 @@
 
-NODE_VERSION := v22.14.0
+NODE_VERSION := v22.23.2
 MMM_HOME := ${WARP_HOME}/mmm
 BRINGYOUR_SITE_DIR := ${MMM_HOME}/bringyour.com
 UR_NETWORK_SITE_DIR := ${MMM_HOME}/ur.network
@@ -17,7 +17,7 @@ init:
 		nvm exec ${NODE_VERSION} npm install html-validate -g && \
 		nvm exec ${NODE_VERSION} npm install html-minifier -g && \
 		nvm exec ${NODE_VERSION} npm install uglify-js -g && \
-		nvm exec ${NODE_VERSION} npm install clean-css-cli -g && \
+		nvm exec ${NODE_VERSION} npm install lightningcss-cli -g && \
 		nvm exec ${NODE_VERSION} npm install purgecss -g)
 	go clean -cache
 	go clean -modcache
