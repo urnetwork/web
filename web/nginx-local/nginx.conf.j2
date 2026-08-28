@@ -48,7 +48,7 @@ http {
 
         location / {
             try_files $uri $uri.html $uri/ =404;
-            alias {{ bringyour_home }}/web/bringyour.com/build/;
+            alias {{ bringyour_home }}/web/web/build/bringyour.com/;
         }
     }
     server {
@@ -59,7 +59,7 @@ http {
 
         location / {
             try_files $uri $uri.html $uri/ =404;
-            alias {{ bringyour_home }}/web/bringyour.com/build/;
+            alias {{ bringyour_home }}/web/web/build/bringyour.com/;
 
             add_header 'Cache-Control' 'no-cache';
         }

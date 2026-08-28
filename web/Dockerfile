@@ -37,9 +37,8 @@ RUN nginx -V
 RUN nginx -t -g "error_log /dev/null;" 2>/dev/null || true
 
 ADD nginx/build/ /etc/nginx/
-ADD bringyour.com/build /www/bringyour.com
-ADD ur.network/build /www/ur.network
-ADD ur.xyz/build /www/ur.xyz
+ADD build/bringyour.com /www/bringyour.com
+ADD build/ur.network /www/ur.network
 ADD build/preview.ur.xyz /www/preview.ur.xyz
 ADD build/preview.ur.io /www/preview.ur.io
 
@@ -50,8 +49,6 @@ RUN find /www/bringyour.com -type d -exec chmod ugo=rx {} +
 RUN find /www/bringyour.com -type f -exec chmod ugo=r {} +
 RUN find /www/ur.network -type d -exec chmod ugo=rx {} +
 RUN find /www/ur.network -type f -exec chmod ugo=r {} +
-RUN find /www/ur.xyz -type d -exec chmod ugo=rx {} +
-RUN find /www/ur.xyz -type f -exec chmod ugo=r {} +
 RUN find /www/preview.ur.xyz -type d -exec chmod ugo=rx {} +
 RUN find /www/preview.ur.xyz -type f -exec chmod ugo=r {} +
 RUN find /www/preview.ur.io -type d -exec chmod ugo=rx {} +

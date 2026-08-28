@@ -1,9 +1,13 @@
 
 NODE_VERSION := v22.14.0
+MMM_HOME := ${WARP_HOME}/mmm
+BRINGYOUR_SITE_DIR := ${MMM_HOME}/bringyour.com
+UR_NETWORK_SITE_DIR := ${MMM_HOME}/ur.network
+UR_IO_SITE_DIR := ${MMM_HOME}/ur.io
 
-.PHONY: all init clean build warp_build warp_build_image
+.PHONY: all init clean build build_external_sites check_external_sites build-preview warp_build warp_build_image
 
-all: init clean build gen_components
+all: init clean build
 
 # brew install pandoc
 init:
@@ -19,30 +23,39 @@ init:
 	go clean -modcache
 
 clean:
-	python ../webgen/webgen.py clean bringyour.com/gen.py
-	python ../webgen/webgen.py clean ur.network/gen.py
-	python ../webgen/webgen.py clean ur.xyz/gen.py
+	if [ -f "${BRINGYOUR_SITE_DIR}/gen.py" ]; then python ../webgen/webgen.py clean "${BRINGYOUR_SITE_DIR}/gen.py"; fi
+	if [ -f "${UR_NETWORK_SITE_DIR}/gen.py" ]; then python ../webgen/webgen.py clean "${UR_NETWORK_SITE_DIR}/gen.py"; fi
 	rm -rf build
 
-build:
+check_external_sites:
+	test -f "${BRINGYOUR_SITE_DIR}/gen.py"
+	test -f "${UR_NETWORK_SITE_DIR}/gen.py"
+	test -f "${UR_IO_SITE_DIR}/astro/Makefile"
+
+build_external_sites: check_external_sites
 	(. ${NVM_DIR}/nvm.sh && \
 		nvm use ${NODE_VERSION} && \
-		python ../webgen/webgen.py build bringyour.com/gen.py)
+		python ../webgen/webgen.py build "${BRINGYOUR_SITE_DIR}/gen.py")
 	# generate the api docs into the latest build
-	npx -y @redocly/cli build-docs ${BRINGYOUR_HOME}/connect/api/bringyour.yml -o bringyour.com/build/api.html
-# 	npx -y @redocly/cli build-docs ${BRINGYOUR_HOME}/connect/api/gpt.yml -o bringyour.com/build/gpt.html
+	npx -y @redocly/cli build-docs ${BRINGYOUR_HOME}/connect/api/bringyour.yml -o "${BRINGYOUR_SITE_DIR}/build/api.html"
+# 	npx -y @redocly/cli build-docs ${BRINGYOUR_HOME}/connect/api/gpt.yml -o "${BRINGYOUR_SITE_DIR}/build/gpt.html"
 	# include the legal documents verbatim as per privacytxt.dev
-	pandoc -f markdown -t plain ${BRINGYOUR_HOME}/docs/legal/privacy.md -o bringyour.com/build/privacy.txt
-	pandoc -f markdown -t plain ${BRINGYOUR_HOME}/docs/legal/terms.md -o bringyour.com/build/terms.txt
-	pandoc -f markdown -t plain ${BRINGYOUR_HOME}/docs/legal/vdp.md -o bringyour.com/build/vdp.txt
+	pandoc -f markdown -t plain ${BRINGYOUR_HOME}/docs/legal/privacy.md -o "${BRINGYOUR_SITE_DIR}/build/privacy.txt"
+	pandoc -f markdown -t plain ${BRINGYOUR_HOME}/docs/legal/terms.md -o "${BRINGYOUR_SITE_DIR}/build/terms.txt"
+	pandoc -f markdown -t plain ${BRINGYOUR_HOME}/docs/legal/vdp.md -o "${BRINGYOUR_SITE_DIR}/build/vdp.txt"
 	# temporarily exclude the AltStore archive from the web deployment
-	rm -rf bringyour.com/build/altstore
+	rm -rf "${BRINGYOUR_SITE_DIR}/build/altstore"
 	(. ${NVM_DIR}/nvm.sh && \
 		nvm use ${NODE_VERSION} && \
-		python ../webgen/webgen.py build ur.network/gen.py)
-	(. ${NVM_DIR}/nvm.sh && \
-		nvm use ${NODE_VERSION} && \
-		python ../webgen/webgen.py build ur.xyz/gen.py)
+		python ../webgen/webgen.py build "${UR_NETWORK_SITE_DIR}/gen.py")
+	# Docker can only ADD files from this repository's build context. Mirror the
+	# externally owned mmm sites into the same staging tree used by mmm/ur.io.
+	rm -rf build/bringyour.com build/ur.network
+	mkdir -p build
+	cp -R -L "${BRINGYOUR_SITE_DIR}/build" build/bringyour.com
+	cp -R -L "${UR_NETWORK_SITE_DIR}/build" build/ur.network
+
+build: build_external_sites
 	env GOOS=linux GOARCH=arm64 go build -ldflags "-X main.Version=${WARP_VERSION}" -o build/linux/arm64/
 	env GOOS=linux GOARCH=amd64 go build -ldflags "-X main.Version=${WARP_VERSION}" -o build/linux/amd64/
 	env GOOS=darwin GOARCH=arm64 go build -ldflags "-X main.Version=${WARP_VERSION}" -o build/darwin/arm64/
@@ -58,11 +71,9 @@ build-preview:
 		cp -r build/main ${BRINGYOUR_HOME}/web/web/build/preview.ur.xyz)
 	(. ${NVM_DIR}/nvm.sh && \
 		nvm use ${NODE_VERSION} && \
-		if [[ -e "${WARP_HOME}/mmm" ]]; then \
-			cd ${WARP_HOME}/mmm/ur.io/astro && \
-			make clean build-main && \
-			cp -r build/main ${BRINGYOUR_HOME}/web/web/build/preview.ur.io; \
-		fi)
+		cd ${UR_IO_SITE_DIR}/astro && \
+		make clean build-main && \
+		cp -r build/main ${BRINGYOUR_HOME}/web/web/build/preview.ur.io)
 	
 
 warp_build:
@@ -82,27 +93,6 @@ warp_build_image:
 		--no-cache \
 		--push \
 		.
-
-
-# COMPONENTS
-
-gen_components:
-	$(MAKE) gen_my_ip_info
-	$(MAKE) gen_my_ip_widget
-
-gen_my_ip_info:
-	# Outputs build artifacts to ./build
-	(cd components/whereami/my-ip-info && . ${NVM_DIR}/nvm.sh && \
-		nvm exec ${NODE_VERSION} npm ci && \
-		nvm exec ${NODE_VERSION} npm run build)
-	cp components/whereami/my-ip-info/dist/my-ip-info.js bringyour.com/build/lib-ur/
-
-gen_my_ip_widget:
-	# Outputs build artifacts to ./build
-	(cd components/whereami/my-ip-widget && . ${NVM_DIR}/nvm.sh && \
-		nvm exec ${NODE_VERSION} npm ci && \
-		nvm exec ${NODE_VERSION} npm run build)
-	cp components/whereami/my-ip-widget/dist/my-ip-widget.js bringyour.com/build/lib-ur/
 
 
 # LOCAL DEVELOPMENT
