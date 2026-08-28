@@ -7,6 +7,8 @@
 set -euo pipefail
 
 test_dir=$(mktemp -d)
+analytics_log="$test_dir/analytics.log"
+nginx_error_log="$test_dir/nginx-error.log"
 
 cleanup() {
     nginx -s quit >/dev/null 2>&1 || true
@@ -54,7 +56,7 @@ expect_response() {
 }
 
 nginx -t
-nginx
+nginx >"$analytics_log" 2>"$nginx_error_log"
 
 ready=false
 for _ in $(seq 1 50); do
@@ -79,4 +81,38 @@ expect_response ur.xyz /investors 200
 expect_response www.ur.io / 301 https://ur.io/
 expect_response www.ur.xyz / 301 https://ur.xyz/
 
-printf 'nginx smoke test: canonical roots and redirects passed\n'
+# A synthetic edge request proves the only emitted page-view fields are the
+# normalized path, country bucket, and classified source. Deliberately put
+# secrets in every discarded surface so a regression is caught at image build.
+curl --silent --show-error --fail \
+    --output /dev/null \
+    --header 'Host: ur.io' \
+    --header 'CF-Ray: 0123456789abcdef-DFW' \
+    --header 'CF-IPCountry: US' \
+    --header 'Referer: https://www.google.com/search?q=must-not-leak' \
+    --header 'Cookie: analytics-secret=must-not-leak' \
+    --user-agent 'must-not-leak-user-agent' \
+    'http://127.0.0.1/products?private=must-not-leak'
+
+for _ in $(seq 1 50); do
+    if grep -q '"path":"/products".*"region":"US".*"source":"search".*"engine":"google"' "$analytics_log"; then
+        break
+    fi
+    sleep 0.1
+done
+
+grep -q '"event":"web_page_view"' "$analytics_log" || fail 'privacy-safe page-view event was not emitted'
+grep -q '"path":"/products".*"region":"US".*"source":"search".*"engine":"google"' "$analytics_log" || \
+    fail 'edge country or referrer classification was not emitted correctly'
+
+for forbidden in must-not-leak 127.0.0.1 analytics-secret private= q= google.com/search; do
+    if grep -Fq "$forbidden" "$analytics_log"; then
+        fail "analytics log retained forbidden request data: $forbidden"
+    fi
+done
+
+if grep -q '"site":"preview\.' "$analytics_log"; then
+    fail 'preview traffic was emitted as a public page view'
+fi
+
+printf 'nginx smoke test: canonical routes and privacy-safe analytics passed\n'

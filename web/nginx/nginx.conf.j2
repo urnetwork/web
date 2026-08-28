@@ -32,7 +32,90 @@ http {
     # Logging Settings
     ##
 
-    access_log /dev/stdout;
+    # Privacy-safe page analytics. Cloudflare resolves the client address to a
+    # country before the request reaches us. The origin never exports the
+    # address (or a hash of it): it accepts only a structurally valid country
+    # code accompanied by a Cloudflare Ray id, and otherwise records ZZ.
+    #
+    # Keep the public origins Cloudflare-only. These headers are metadata, not
+    # authentication, so a directly reachable origin would let a caller spoof
+    # the aggregate country bucket (still without exposing a user identifier).
+    map "$http_cf_ray:$http_cf_ipcountry" $analytics_region {
+        default "ZZ";
+        "~^[0-9A-Fa-f]{16,32}-[A-Za-z]{3}:(?<analytics_country>[A-Z]{2})$" $analytics_country;
+    }
+
+    # Reduce Referer to a small source/engine vocabulary in nginx memory. The
+    # original value never enters stdout, a queue, Prometheus, or Loki.
+    map $http_referer $analytics_source {
+        default "referral";
+        "" "direct";
+
+        ~*^https?://([^/]+\.)?gemini\.google\.com(?::[0-9]+)?(?:/|$) "ai";
+        ~*^https?://([^/]+\.)?(chatgpt\.com|chat\.openai\.com)(?::[0-9]+)?(?:/|$) "ai";
+        ~*^https?://([^/]+\.)?claude\.ai(?::[0-9]+)?(?:/|$) "ai";
+        ~*^https?://([^/]+\.)?copilot\.microsoft\.com(?::[0-9]+)?(?:/|$) "ai";
+        ~*^https?://([^/]+\.)?perplexity\.ai(?::[0-9]+)?(?:/|$) "ai";
+        ~*^https?://([^/]+\.)?grok\.com(?::[0-9]+)?(?:/|$) "ai";
+        ~*^https?://([^/]+\.)?meta\.ai(?::[0-9]+)?(?:/|$) "ai";
+        ~*^https?://([^/]+\.)?you\.com(?::[0-9]+)?(?:/|$) "ai";
+        ~*^https?://([^/]+\.)?poe\.com(?::[0-9]+)?(?:/|$) "ai";
+
+        ~*^https?://([^/]+\.)?google\.[^/:]+(?::[0-9]+)?(?:/|$) "search";
+        ~*^https?://([^/]+\.)?bing\.com(?::[0-9]+)?(?:/|$) "search";
+        ~*^https?://([^/]+\.)?duckduckgo\.com(?::[0-9]+)?(?:/|$) "search";
+        ~*^https?://([^/]+\.)?baidu\.com(?::[0-9]+)?(?:/|$) "search";
+        ~*^https?://([^/]+\.)?yandex\.[^/:]+(?::[0-9]+)?(?:/|$) "search";
+    }
+
+    map $http_referer $analytics_engine {
+        default "other";
+        "" "none";
+
+        ~*^https?://([^/]+\.)?gemini\.google\.com(?::[0-9]+)?(?:/|$) "gemini";
+        ~*^https?://([^/]+\.)?(chatgpt\.com|chat\.openai\.com)(?::[0-9]+)?(?:/|$) "openai";
+        ~*^https?://([^/]+\.)?claude\.ai(?::[0-9]+)?(?:/|$) "anthropic";
+        ~*^https?://([^/]+\.)?copilot\.microsoft\.com(?::[0-9]+)?(?:/|$) "copilot";
+        ~*^https?://([^/]+\.)?perplexity\.ai(?::[0-9]+)?(?:/|$) "perplexity";
+        ~*^https?://([^/]+\.)?grok\.com(?::[0-9]+)?(?:/|$) "xai";
+        ~*^https?://([^/]+\.)?meta\.ai(?::[0-9]+)?(?:/|$) "meta";
+        ~*^https?://([^/]+\.)?you\.com(?::[0-9]+)?(?:/|$) "you";
+        ~*^https?://([^/]+\.)?poe\.com(?::[0-9]+)?(?:/|$) "poe";
+
+        ~*^https?://([^/]+\.)?google\.[^/:]+(?::[0-9]+)?(?:/|$) "google";
+        ~*^https?://([^/]+\.)?bing\.com(?::[0-9]+)?(?:/|$) "bing";
+        ~*^https?://([^/]+\.)?duckduckgo\.com(?::[0-9]+)?(?:/|$) "duckduckgo";
+        ~*^https?://([^/]+\.)?baidu\.com(?::[0-9]+)?(?:/|$) "baidu";
+        ~*^https?://([^/]+\.)?yandex\.[^/:]+(?::[0-9]+)?(?:/|$) "yandex";
+    }
+
+    map $host $analytics_site {
+        default "";
+        ur.io "ur.io";
+        ur.xyz "ur.xyz";
+    }
+
+    # $uri follows internal try_files redirects (for example /products becomes
+    # /products.html). Derive the public path from immutable $request_uri and
+    # stop before the query delimiter, so neither the query nor the internal
+    # filename can reach analytics.
+    map $request_uri $analytics_path {
+        default "/";
+        "~^(?<analytics_public_path>[^?]*)(?:[?].*)?$" $analytics_public_path;
+    }
+
+    # Count only successful public HTML GETs. Static assets, previews,
+    # redirects, errors, and health checks are excluded.
+    map "$request_method:$status:$sent_http_content_type:$analytics_site" $analytics_page_view {
+        default 0;
+        "~^GET:2[0-9][0-9]:text/html(?:;[^:]*)?:(?:ur\.io|ur\.xyz)$" 1;
+    }
+
+    log_format privacy_safe_page_view escape=json
+        '{"event":"web_page_view","privacy_safe":true,'
+        '"site":"$analytics_site","path":"$analytics_path","region":"$analytics_region",'
+        '"source":"$analytics_source","engine":"$analytics_engine"}';
+    access_log /dev/stdout privacy_safe_page_view if=$analytics_page_view;
     error_log stderr;
 
     ##
