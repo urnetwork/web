@@ -96,7 +96,9 @@ export default defineConfig({
     build: {
         // the i18n module top-level-awaits the language dictionary (see
         // src/i18n/index.jsx); TLA needs es2022 output
-        target: 'es2022'
+        target: 'es2022',
+        outDir: 'dist',
+        sourcemap: true
     },
     plugins: [react(), urXyzContent()],
     server: {
@@ -109,9 +111,5 @@ export default defineConfig({
         fs: {
             allow: [PROJECT_ROOT]
         }
-    },
-    build: {
-        outDir: 'dist',
-        sourcemap: true
     }
 });
