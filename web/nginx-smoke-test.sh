@@ -87,7 +87,28 @@ for host in bringyour.com www.bringyour.com ur.network www.ur.network; do
     expect_response "$host" '/legacy/path?smoke=1' 301 'https://ur.io/legacy/path?smoke=1'
 done
 
+# CloudFront rewrites bringyour.com origin requests to main-web.bringyour.com.
+# Legacy pages still redirect, while the images embedded by server email
+# templates must remain byte-bearing 200 responses under both identities.
+for host in main-web.bringyour.com main-web.ur.network; do
+    expect_response "$host" / 301 https://ur.io/
+    expect_response "$host" '/legacy/path?smoke=1' 301 'https://ur.io/legacy/path?smoke=1'
+done
+for host in bringyour.com main-web.bringyour.com; do
+    for asset in \
+        bringyour-wordmark-bg-240.jpg \
+        ur-wordmark-bg-240.jpg \
+        ur-welcome-header-1080.jpg \
+        welcome-header-1080.jpg \
+        urnetwork-goodbye-vpn.gif \
+        urnetwork-spin.gif; do
+        expect_response "$host" "/res/emails/$asset" 200
+    done
+    expect_response "$host" /res/emails/not-present.png 404
+done
+
 expect_response bringyour.com /status 200
+expect_response main-web.bringyour.com /status 200
 for host in www.bringyour.com ur.network www.ur.network; do
     expect_response "$host" /status 301 https://ur.io/status
 done

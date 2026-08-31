@@ -171,16 +171,27 @@ http {
         }
     }
 
-    # TLS terminates at the public load balancer, which forwards the original
-    # Host header to this HTTP listener. Keep the load-balancer status endpoint
-    # on the bringyour.com apex, but retire the rest of the legacy site.
+    # TLS terminates at the public load balancer. Direct ingress forwards the
+    # public Host, while the bringyour.com CDN deliberately normalizes its
+    # origin Host to main-web.bringyour.com. Keep the load-balancer status
+    # endpoint and the transactional-email images available under either
+    # identity, but retire the rest of the legacy site.
     server {
         listen 80;
-        server_name bringyour.com;
+        server_name bringyour.com main-web.bringyour.com main-web.ur.network;
+
+        root /www/bringyour.com;
 
         location = /status {
             alias /srv/warp/status/status.json;
             add_header 'Content-Type' 'application/json';
+        }
+
+        # Server email templates use these stable absolute URLs. They remain a
+        # live dependency after the legacy HTML site redirects to ur.io.
+        location ^~ /res/emails/ {
+            try_files $uri =404;
+            add_header 'Cache-Control' 'public, max-age=2592000, stale-while-revalidate=86400';
         }
 
         location / {
