@@ -287,7 +287,7 @@
 
 @media (max-width: 720px) {
     .deck-page {
-        --deck-shell: calc(100vw - 28px);
+        --deck-shell: calc(100vw - (var(--page-gutter) * 2));
     }
 
     .deck-download {
@@ -301,6 +301,18 @@
     .deck-ticks {
         order: 3;
         flex-basis: 100%;
+        overflow-x: auto;
+        padding-bottom: 4px;
+        scroll-snap-type: x proximity;
+        scrollbar-width: none;
+    }
+
+    .deck-ticks::-webkit-scrollbar { display: none; }
+
+    .deck-tick {
+        flex: 0 0 44px;
+        height: 44px;
+        scroll-snap-align: start;
     }
 
     /* Tapping the stage edges is unreliable next to a scroll gesture. */

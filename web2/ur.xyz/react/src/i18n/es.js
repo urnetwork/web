@@ -44,6 +44,8 @@ export default {
     },
 
     disclaimer: {
+        protocol: 'UR es un protocolo de código abierto que impulsa infraestructura de red y es mantenido por su comunidad.',
+        products: 'Para productos de URnetwork (por ejemplo, VPN), visita ur.io',
         before: 'UR es un protocolo de código abierto que impulsa infraestructura de red y es mantenido por su comunidad. Para productos de URnetwork (por ejemplo, VPN), visita'
     },
 

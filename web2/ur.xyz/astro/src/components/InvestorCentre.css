@@ -619,7 +619,7 @@
 
 @media (max-width: 560px) {
     .investor-page {
-        --investor-width: calc(100vw - 28px);
+        --investor-width: calc(100vw - (var(--page-gutter) * 2));
     }
 
     .investor-hero {

@@ -28,6 +28,11 @@
     line-height: 1.35;
     text-decoration: none;
 }
+.footer-column a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+}
 .footer-column a:hover { color: var(--brand-white); }
 .footer-pending { opacity: 0.42; }
 .footer-pending small { margin-left: 6px; font-size: 0.58rem; letter-spacing: 0.08em; text-transform: uppercase; }
@@ -44,8 +49,8 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 42px;
-    height: 42px;
+    width: 44px;
+    height: 44px;
     box-sizing: border-box;
     color: var(--brand-ui);
     background: rgba(214, 230, 244, 0.04);
@@ -79,6 +84,11 @@
 .footer-utility p { margin: 0; font-size: 0.7rem; letter-spacing: 0.08em; text-transform: uppercase; opacity: 0.55; }
 .footer-legal { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px 22px; }
 .footer-legal a {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 44px;
+    min-height: 44px;
     color: var(--brand-ui);
     font-size: 0.66rem;
     letter-spacing: 0.06em;
@@ -88,6 +98,11 @@
 .footer-legal a:hover { color: var(--brand-white); opacity: 1; }
 .footer-langs { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 10px 18px; }
 .footer-lang {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 44px;
+    min-height: 44px;
     color: var(--brand-ui);
     font-size: 0.66rem;
     letter-spacing: 0.1em;
@@ -116,6 +131,7 @@
     .footer-column h2 { margin-bottom: 14px; }
     .footer-socials { justify-content: flex-start; flex-wrap: wrap; }
     .footer-utility { align-items: flex-start; }
-    .footer-legal { gap: 10px 18px; }
+    .footer-legal { gap: 0 18px; }
     .footer-langs { justify-content: flex-start; }
+    .footer-langs { gap: 0 18px; }
 }

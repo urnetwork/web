@@ -283,7 +283,7 @@
         /* Inline-end padding reserves the refresh dial's gutter so it never
            sits over the last stat column. */
         padding-block: 10px;
-        padding-inline: 14px 36px;
+        padding-inline: var(--page-gutter) 52px;
         background: rgba(16, 16, 16, 0.92);
         border: none;
         border-bottom: 1px solid rgba(214, 230, 244, 0.18);
@@ -310,13 +310,15 @@
 
     /* No header row on mobile: center the dial in the bar's end gutter. */
     .stats-refresh {
-        top: calc(50% - 13px);
-        inset-inline-end: 3px;
+        top: calc(50% - 22px);
+        inset-inline-end: 4px;
+        width: 44px;
+        height: 44px;
     }
 
     .stat-grid {
-        grid-template-columns: repeat(4, 1fr);
-        gap: 6px 12px;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 8px 16px;
     }
 
     .stat-box:nth-child(n+5) { display: none; }
@@ -324,14 +326,18 @@
     .stat-label {
         font-size: 0.625rem;
         margin-bottom: 1px;
+        line-height: 1.2;
+        white-space: normal;
+        overflow: visible;
+        text-overflow: clip;
     }
 
-    .stat-value { font-size: 0.95rem; }
+    .stat-value { font-size: 1rem; }
 }
 
 /* Touch hit-areas: extend small controls to a ~44px tap box without any
    visual change â€” the pseudo only participates in hit testing. */
 @media (pointer: coarse) {
-    .stats-refresh { position: relative; }
+    .stats-refresh { position: absolute; }
     .stats-refresh::after { content: ""; position: absolute; inset: -9px; }
 }

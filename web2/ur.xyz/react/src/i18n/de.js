@@ -44,6 +44,8 @@ export default {
     },
 
     disclaimer: {
+        protocol: 'UR ist ein Open-Source-Protokoll für Netzwerkinfrastruktur und wird von seiner Community gepflegt.',
+        products: 'URnetwork-Produkte (z. B. VPN) findest du unter ur.io',
         before: 'UR ist ein Open-Source-Protokoll für Netzwerkinfrastruktur und wird von seiner Community gepflegt. URnetwork-Produkte (z. B. VPN) findest du unter'
     },
 

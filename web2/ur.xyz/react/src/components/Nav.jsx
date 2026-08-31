@@ -187,10 +187,13 @@ export default function Nav({ disclaimerVisible, activeRoute }) {
             }
         };
 
+        const previousRootOverflow = document.documentElement.style.overflow;
         const previousOverflow = document.body.style.overflow;
+        document.documentElement.style.overflow = 'hidden';
         document.body.style.overflow = 'hidden';
         document.addEventListener('keydown', onKey);
         return () => {
+            document.documentElement.style.overflow = previousRootOverflow;
             document.body.style.overflow = previousOverflow;
             document.removeEventListener('keydown', onKey);
             if (opener && document.contains(opener)) opener.focus();

@@ -649,6 +649,8 @@
     html[data-version="12"] .stage-meta{left:24px;right:24px;top:18px;font-size:10px}
     html[data-version="12"] .component-key,html[data-version="12"] .stage-controls,html[data-version="12"] .simulation-control{display:none!important}
     html[data-version="12"] .architecture-readout{position:absolute;z-index:46;top:52px;right:24px;display:block!important;width:328px;margin:0;padding:17px 19px 18px;border:1px solid rgba(214,230,244,.16);border-radius:12px;background:rgba(12,15,19,.93);box-shadow:0 20px 44px rgba(0,0,0,.5),inset 0 1px 0 rgba(214,230,244,.05);backdrop-filter:blur(14px);pointer-events:none}
+    html[data-version="12"] .architecture-readout-head{display:block}
+    html[data-version="12"] .architecture-readout-close{display:none}
     html[data-version="12"] .architecture-readout small{display:block;margin-bottom:9px;padding-bottom:9px;border-bottom:1px solid rgba(214,230,244,.1);color:#8b979f;text-transform:uppercase}
     html[data-version="12"] .architecture-readout h4{margin:0;color:#e5ebee;font-size:19px;font-weight:400;line-height:1.1}
     html[data-version="12"] .architecture-readout p{margin:7px 0 0;color:#929fa7;font-size:13px;line-height:1.45}
@@ -1159,10 +1161,10 @@
     .footer-column{display:flex;flex-direction:column;align-items:flex-start;gap:14px;padding-left:clamp(0px,4vw,62px)}
     .footer-column+ .footer-column{border-left:1px solid rgba(214,230,244,.12)}
     .footer-column h2{margin:0 0 20px;color:var(--pink);font-size:.7rem;font-weight:500;letter-spacing:.12em;text-transform:uppercase}
-    .footer-column a{color:var(--ink);font-size:clamp(1rem,1.5vw,1.25rem);line-height:1.35;text-decoration:none}
+    .footer-column a{display:inline-flex;align-items:center;min-height:44px;color:var(--ink);font-size:clamp(1rem,1.5vw,1.25rem);line-height:1.35;text-decoration:none}
     .footer-column a:hover{color:var(--white)}
     .footer-socials{display:flex;align-items:center;justify-content:center;gap:12px;padding:24px 0;border-bottom:1px solid rgba(214,230,244,.12)}
-    .footer-socials>a{display:inline-flex;align-items:center;justify-content:center;width:42px;height:42px;color:var(--ink);border:1px solid rgba(214,230,244,.16);border-radius:50%;background:rgba(214,230,244,.04);text-decoration:none;transition:color .2s,border-color .2s,background-color .2s}
+    .footer-socials>a{display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;color:var(--ink);border:1px solid rgba(214,230,244,.16);border-radius:50%;background:rgba(214,230,244,.04);text-decoration:none;transition:color .2s,border-color .2s,background-color .2s}
     .footer-socials>a:hover{color:var(--white);border-color:var(--pink);background:rgba(237,143,255,.07)}
     .footer-socials svg{width:18px;height:18px;fill:currentColor}
     .footer-socials>.footer-product-link{width:auto;padding:0 16px;border-radius:999px;font-size:.82rem;letter-spacing:.04em}
@@ -1170,7 +1172,7 @@
     .footer-utility{display:grid;grid-template-columns:minmax(max-content,1fr) auto minmax(max-content,1fr);align-items:center;gap:32px;padding-top:30px}
     .footer-utility p{margin:0;font-size:.7rem;letter-spacing:.08em;text-transform:uppercase;opacity:.55}
     .footer-legal{display:flex;flex-wrap:wrap;justify-content:center;gap:10px 22px}
-    .footer-legal a,.footer-lang{color:var(--ink);font-size:.66rem;letter-spacing:.06em;text-decoration:none;opacity:.55}
+    .footer-legal a,.footer-lang{display:inline-flex;align-items:center;justify-content:center;min-width:44px;min-height:44px;color:var(--ink);font-size:.66rem;letter-spacing:.06em;text-decoration:none;opacity:.55}
     .footer-legal a:hover,.footer-lang:hover,.footer-lang.is-active{color:var(--white);opacity:1}
     .footer-langs{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:10px 18px}
     .footer-lang{letter-spacing:.1em;text-transform:uppercase}
@@ -1200,6 +1202,268 @@
       .footer-socials{justify-content:flex-start;flex-wrap:wrap}
       .footer-utility{align-items:flex-start}
     }
+
+    @media(max-width:1020px) and (min-width:701px){
+      html[data-version="12"] .terminal3-asset{
+        transform:translate(-50%,-50%) scale(.86);
+      }
+      html[data-version="12"] .proof-strip span{
+        height:70px;
+        justify-content:center;
+      }
+    }
+
+    /* Mobile polish: one content edge, one section-divider owner, complete
+       opportunity controls, and an architecture model that stays in-frame. */
+    @media(max-width:700px){
+      .notice a,
+      .nav-brand,
+      .footer-column a,
+      .footer-legal a,
+      .footer-lang{display:inline-flex;align-items:center;min-height:44px}
+      .nav-brand{min-width:44px}
+      .footer-socials>a{width:44px;height:44px}
+      .footer-legal,.footer-langs{gap:0 18px}
+
+      html[data-version="12"] .hero.shell,
+      html[data-version="12"] .theatre>.shell,
+      html[data-version="12"] .proof-v12 .shell,
+      html[data-version="12"] .flows.shell,
+      html[data-version="12"] .cta .shell{width:calc(100% - 40px)}
+
+      html[data-version="12"] .op-tabs{
+        display:grid;
+        grid-template-columns:repeat(2,minmax(0,1fr));
+        gap:1px;
+        margin-top:20px;
+        padding:0;
+        overflow:visible;
+        border:1px solid var(--rule);
+        background:var(--rule);
+        scroll-snap-type:none;
+      }
+      html[data-version="12"] .op-tabs button{
+        display:grid;
+        grid-template-columns:auto minmax(0,1fr);
+        gap:8px;
+        min-width:0;
+        min-height:64px;
+        padding:10px 12px;
+        border:0!important;
+        background:#0d0f12;
+        scroll-snap-align:none;
+      }
+      html[data-version="12"] .op-tabs b{grid-column:auto;font-size:11px}
+      html[data-version="12"] .op-tabs span{margin:0;font-size:13px;line-height:1.2}
+      html[data-version="12"] .op-tabs i{top:10px;right:10px}
+
+      html[data-version="12"] .terminal3-asset{
+        top:43%;
+        transform:translate(-50%,-50%) scale(.43);
+      }
+      html[data-version="12"] .model-stage[data-focus] .terminal3-asset{top:46%}
+      html[data-version="12"] .architecture-readout{
+        top:44px;
+        left:auto;
+        right:10px;
+        width:min(280px,calc(100% - 20px));
+        padding:13px 14px 14px;
+        border-color:rgba(214,230,244,.18);
+        border-radius:10px;
+        background:rgba(9,12,15,.94);
+        box-shadow:0 12px 28px rgba(0,0,0,.42),inset 0 1px 0 rgba(214,230,244,.05);
+        pointer-events:auto;
+      }
+      html[data-version="12"] .architecture-readout-head{
+        position:absolute;
+        top:3px;
+        right:3px;
+        display:block;
+        min-height:0;
+        margin:0;
+      }
+      html[data-version="12"] .architecture-readout small{display:none}
+      html[data-version="12"] .architecture-readout h4{
+        margin-top:0;
+        padding-right:32px;
+        font-size:16px;
+        line-height:1.2;
+      }
+      html[data-version="12"] .architecture-readout p{
+        display:block;
+        margin-top:7px;
+        color:#a8b3ba;
+        font-size:13px;
+        line-height:1.45;
+      }
+      html[data-version="12"] .architecture-readout-close{
+        position:relative;
+        display:grid;
+        flex:0 0 36px;
+        width:36px;
+        height:36px;
+        place-items:center;
+        border:0;
+        border-radius:50%;
+        background:transparent;
+        color:#aeb9bf;
+        cursor:pointer;
+        touch-action:manipulation;
+      }
+      html[data-version="12"] .architecture-readout-close:before{content:"";position:absolute;inset:-4px}
+      html[data-version="12"] .architecture-readout-close svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round}
+      html[data-version="12"] .architecture-readout-close:hover,
+      html[data-version="12"] .architecture-readout-close:focus-visible{
+        background:rgba(214,230,244,.08);
+        color:#fff;
+        outline:1px solid var(--accent);
+        outline-offset:1px;
+      }
+
+      html[data-version="12"] .proof-strip{
+        margin-top:32px;
+        padding:0;
+        border-top:1px solid var(--rule);
+      }
+      html[data-version="12"] .proof-strip span{
+        height:104px;
+        justify-content:center;
+        gap:7px;
+        padding:18px 0!important;
+        border:0!important;
+        color:#a3aeb5;
+        font-size:.68rem;
+        letter-spacing:.16em;
+      }
+      html[data-version="12"] .proof-strip span+span{
+        border-top:1px solid var(--rule)!important;
+      }
+      html[data-version="12"] .proof-strip span:first-child{
+        padding-top:18px!important;
+      }
+      html[data-version="12"] .proof-strip b{
+        font-size:clamp(2.25rem,12vw,3rem);
+        line-height:1;
+      }
+
+      html[data-version="12"] .theatre,
+      html[data-version="12"] .proof-v12,
+      html[data-version="12"] .flows,
+      html[data-version="12"] .cta{
+        padding-top:64px;
+        padding-bottom:64px;
+        border:0;
+        border-top:1px solid var(--rule);
+      }
+      html[data-version="12"] .flows{
+        position:relative;
+        border-top:0;
+      }
+      html[data-version="12"] .flows:before{
+        content:"";
+        position:absolute;
+        top:0;
+        left:50%;
+        width:100vw;
+        border-top:1px solid var(--rule);
+        transform:translateX(-50%);
+      }
+      html[data-version="12"] .responsibility-grid{gap:0}
+      html[data-version="12"] .responsibility-grid article{
+        min-height:0;
+        padding:28px 0!important;
+        border:0!important;
+      }
+      html[data-version="12"] .responsibility-grid article+article{
+        padding-top:32px!important;
+        border-top:1px solid var(--rule)!important;
+      }
+      html[data-version="12"] .proof-chain-v12 span{
+        padding:18px 0!important;
+        border:0!important;
+      }
+      html[data-version="12"] .proof-chain-v12 span+span{
+        border-top:1px solid var(--rule)!important;
+      }
+    }
+    @media(max-width:1020px){
+      html:has(.nav-mobile[open]),
+      body:has(.nav-mobile[open]){overflow:hidden}
+      .nav:has(.nav-mobile[open]){z-index:1000;backdrop-filter:none!important}
+      .nav-mobile[open]>summary{position:fixed;z-index:102;top:10px;right:20px}
+      .nav-mobile[open]>summary i{background:transparent}
+      .nav-mobile[open]>summary i:before{top:0;transform:rotate(45deg)}
+      .nav-mobile[open]>summary i:after{top:0;transform:rotate(-45deg)}
+      .nav-mobile:not([open])>.nav-mobile-menu{display:none!important}
+      .nav-mobile[open]>.nav-mobile-menu{
+        position:fixed;
+        z-index:100;
+        inset:0;
+        display:flex!important;
+        width:auto;
+        padding:0 20px 28px;
+        flex-direction:column;
+        overflow-y:auto;
+        overscroll-behavior:contain;
+        scrollbar-width:none;
+        background:#101010;
+        border:0;
+      }
+      .nav-mobile-menu::-webkit-scrollbar{display:none}
+      .nav-mobile-menu .nav-mobile-brand{
+        display:flex;
+        flex:0 0 64px;
+        min-height:64px;
+        align-items:center;
+        width:max-content;
+        padding:0;
+        background:transparent;
+      }
+      .nav-mobile-menu .nav-mobile-brand img{display:block;width:auto;height:26px}
+      .nav-mobile-links{padding:24px 0 36px}
+      .nav-mobile-links>a,
+      .nav-mobile-network>span{
+        display:block;
+        padding:18px 0;
+        color:var(--white);
+        font-size:clamp(1.9rem,9vw,3.2rem);
+        font-weight:500;
+        line-height:1;
+        letter-spacing:-.035em;
+        text-decoration:none;
+      }
+      .nav-mobile-network a{
+        display:block;
+        margin-left:18px;
+        padding:11px 14px;
+        color:var(--ink);
+        font-size:1.05rem;
+        letter-spacing:0;
+        text-decoration:none;
+      }
+      .nav-mobile-network a:hover,
+      .nav-mobile-network a:focus-visible,
+      .nav-mobile-network a.is-active{
+        color:var(--white);
+        background:rgba(237,143,255,.07);
+        box-shadow:inset 2px 0 0 var(--pink);
+      }
+    }
+    @media(max-width:700px){
+      html[data-version="12"] .system-rail-v11{grid-template-columns:1fr}
+      html[data-version="12"] .system-rail-v11 .simulation-readout{display:none}
+      html[data-version="12"] .system-rail-v11 .stage-scrub{
+        grid-template-columns:auto minmax(0,1fr) auto;
+        gap:7px;
+      }
+      html[data-version="12"] .proof-chain-v12{border-top:0;margin-top:28px}
+      html[data-version="12"] .proof-chain-v12 span:first-child{padding-top:0!important}
+    }
+    @media(max-width:360px){
+      html[data-version="12"] .terminal3-asset{
+        transform:translate(-50%,-50%) scale(.337);
+      }
+    }
   </style>
 </head>
 <body>
@@ -1211,7 +1475,7 @@
         <details class="nav-network"><summary>NETWORK <span aria-hidden="true">▾</span></summary><div class="nav-network-menu"><a href="/operators">Operators</a><a href="/miners">Miners</a><a href="/validators">Validators</a></div></details>
         <a href="/research">RESEARCH</a><a class="is-active" href="/build">BUILD</a><a href="/investors">INVESTORS</a><a href="/docs">DOCS</a>
       </nav>
-      <div class="nav-actions"><span class="nav-lang-toggle">EN <span aria-hidden="true">▾</span></span><details class="nav-mobile"><summary aria-label="Open site menu"><i aria-hidden="true"></i></summary><nav class="nav-mobile-menu" aria-label="Mobile navigation"><a href="/operators">Network</a><a href="/research">Research</a><a class="is-active" href="/build">Build</a><a href="/investors">Investors</a><a href="/docs">Docs</a></nav></details></div>
+      <div class="nav-actions"><span class="nav-lang-toggle">EN <span aria-hidden="true">▾</span></span><details class="nav-mobile"><summary aria-label="Open site menu"><i aria-hidden="true"></i></summary><nav class="nav-mobile-menu" aria-label="Mobile navigation"><a class="nav-mobile-brand" href="/" aria-label="UR"><img src="/ur.svg" alt="UR"></a><div class="nav-mobile-links"><div class="nav-mobile-network"><span>Network</span><a href="/operators">Operators</a><a href="/miners">Miners</a><a href="/validators">Validators</a></div><a href="/research">Research</a><a class="is-active" href="/build">Build</a><a href="/investors">Investors</a><a href="/docs">Docs</a></div></nav></details></div>
     </div>
   </header>
   <main>
@@ -1331,7 +1595,7 @@
           <div class="flow-key"><span style="--c:var(--accent)"><i></i>TRAFFIC</span><span style="--c:#eff7bb"><i></i>VERIFICATION</span><span style="--c:#ed8fff"><i></i>ECONOMICS</span></div><div class="simulation-control" aria-live="polite"><button type="button" data-run-simulation aria-pressed="false"><i aria-hidden="true" data-glyph="play">▶</i><span>TRACE ONE SESSION</span></button><div class="simulation-readout"><output data-simulation-status>WATCH ONE PRODUCT SESSION ROUTE + VALIDATE</output><ol aria-label="System trace steps"><li data-sim-step="traffic"><b>01</b> ROUTE</li><li data-sim-step="quality"><b>02</b> VALIDATE</li></ol></div></div>
         </div>
 
-        <aside class="readout" id="opportunity-readout" role="tabpanel" aria-live="polite"><div class="readout-top"><span data-example>EXAMPLE 01</span><span>ONE OF MANY</span></div><div class="readout-category" data-category>PRIVACY PRODUCT</div><h3 data-title>White-label VPN</h3><p class="readout-lede" data-teaser></p><div class="profile"><div><b>DEMAND SHAPE</b><span data-demand></span></div><div><b>NETWORK RELIANCE</b><span data-reliance></span></div></div><div class="readout-explainer"><article><b>THE PRODUCT</b><p data-readout-proposition></p></article><article><b>HOW IT USES SN25</b><p data-readout-subnet></p></article></div><div class="architecture-readout"><small>SELECTED LAYER</small><h4 data-component-name>Complete operator system</h4><p data-component-detail>Use the slider to pull the customer product away from the operator services and shared SN25 architecture underneath. Select any labelled layer to isolate its role.</p><b data-component-short>ONE PRODUCT · ONE SHARED FOUNDATION</b></div><button class="readout-brief" type="button" data-open-brief aria-expanded="false" aria-controls="architecture-brief">EXPLORE THIS OPPORTUNITY <span aria-hidden="true">+</span></button><button class="brief-toggle" type="button" aria-expanded="false" aria-controls="architecture-brief"><span>READ FULL OPPORTUNITY BRIEF</span><i aria-hidden="true">+</i></button></aside>
+        <aside class="readout" id="opportunity-readout" role="tabpanel" aria-live="polite"><div class="readout-top"><span data-example>EXAMPLE 01</span><span>ONE OF MANY</span></div><div class="readout-category" data-category>PRIVACY PRODUCT</div><h3 data-title>White-label VPN</h3><p class="readout-lede" data-teaser></p><div class="profile"><div><b>DEMAND SHAPE</b><span data-demand></span></div><div><b>NETWORK RELIANCE</b><span data-reliance></span></div></div><div class="readout-explainer"><article><b>THE PRODUCT</b><p data-readout-proposition></p></article><article><b>HOW IT USES SN25</b><p data-readout-subnet></p></article></div><div class="architecture-readout" aria-live="polite" aria-atomic="true"><div class="architecture-readout-head"><small>SELECTED LAYER</small><button class="architecture-readout-close" type="button" data-close-layer aria-label="Close selected layer details"><svg viewBox="0 0 18 18" aria-hidden="true"><path d="M3 3l12 12M15 3L3 15"/></svg></button></div><h4 data-component-name>Complete operator system</h4><p data-component-detail>Use the slider to pull the customer product away from the operator services and shared SN25 architecture underneath. Select any labelled layer to isolate its role.</p><b data-component-short>ONE PRODUCT · ONE SHARED FOUNDATION</b></div><button class="readout-brief" type="button" data-open-brief aria-expanded="false" aria-controls="architecture-brief">EXPLORE THIS OPPORTUNITY <span aria-hidden="true">+</span></button><button class="brief-toggle" type="button" aria-expanded="false" aria-controls="architecture-brief"><span>READ FULL OPPORTUNITY BRIEF</span><i aria-hidden="true">+</i></button></aside>
       </div>
       <nav class="component-key" aria-label="Inspect architecture components"></nav>
       </div>
@@ -1517,7 +1781,7 @@
     function renderTerminalWorld(){const world=model==='terminal3'?terminal3World:terminalWorld;if(!world)return;const rx=lerp(model==='terminal3'?(isBuilderEdition?24:28):42,model==='terminal3'?(isBuilderEdition?14:19):38,terminalP)+terminalParX,rz=lerp(model==='terminal3'?(isBuilderEdition?-7:-9):-16,model==='terminal3'?(isBuilderEdition?-2.5:-4):-12,terminalP)+terminalParZ;world.style.transform=`translate(-50%,-50%) rotateX(${rx.toFixed(2)}deg) rotateZ(${rz.toFixed(2)}deg)`}
     function applyTerminalProgress(value){
       if(model!=='terminal'&&model!=='terminal3')return;terminalP=clamp01(value);terminalStage.dataset.progress=terminalP.toFixed(3);terminalScrub.value=String(Math.round(terminalP*1000));terminalScrub.style.setProperty('--scrub-p',terminalP.toFixed(3));terminalOutput.value=`${Math.round(terminalP*100)}%`;terminalScrub.setAttribute('aria-valuetext',terminalP<.04?'Network Operator product assembled':terminalP>.96?'Three network planes fully revealed':`${Math.round(terminalP*100)} percent exploded`);if(model==='terminal3'){const traceReady=terminalP>=.34;terminalStage.classList.toggle('trace-ready',traceReady);if(!traceReady)resetNetworkSimulation(true)}
-      if(isBuilderEdition&&!scrubDragging){const mobile=matchMedia('(max-width:700px)').matches,compact=matchMedia('(max-width:1080px)').matches;const minH=mobile?650:compact?760:800,maxH=mobile?760:compact?980:1040;terminalStage.style.setProperty('--stage-height',`${Math.round(lerp(minH,maxH,terminalP))}px`)}
+      if(isBuilderEdition&&!scrubDragging){const mobile=matchMedia('(max-width:700px)').matches,compact=matchMedia('(max-width:1080px)').matches;const minH=mobile?560:compact?760:800,maxH=mobile?720:compact?980:1040;terminalStage.style.setProperty('--stage-height',`${Math.round(lerp(minH,maxH,terminalP))}px`)}
       const scene=model==='terminal3'?'.scene-terminal3':'.scene-terminal';const layers=model==='terminal3'?(isBuilderEdition?(matchMedia('(max-width:700px)').matches?terminal3LayersV11Mobile:terminal3LayersV11):terminal3Layers):terminalLayers;const callouts=model==='terminal3'?terminal3Callouts:terminalCallouts;
       layers.forEach(L=>{const sp=easeLayer(subProgress(terminalP,L.range[0],L.range[1]));const x=lerp(L.from[0],L.to[0],sp),y=lerp(L.from[1],L.to[1],sp),z=lerp(L.from[2],L.to[2],sp),rot=lerp(L.fromR||0,L.toR||0,sp),scale=lerp(L.fromS||1,L.toS||1,sp);q(`${scene} ${L.selector}`).style.transform=`translate3d(${x.toFixed(1)}px,${y.toFixed(1)}px,${z.toFixed(1)}px) rotateZ(${rot.toFixed(2)}deg) scale(${scale.toFixed(3)})`});
       callouts.forEach(([selector,threshold])=>q(`${scene} ${selector}`).classList.toggle('is-revealed',terminalP>=threshold));const flow=model==='terminal3'?null:q(`${scene} svg`);if(flow)flow.style.opacity=String(subProgress(terminalP,.08,.48));renderTerminalWorld();
@@ -1544,9 +1808,9 @@
       {key:'subnetbase',n:'03',verb:'COORDINATES',name:'SN25 shared foundation',short:'The common coordination and incentive layer.',detail:'SN25 coordinates access to the provider network, service measurement and the incentive system supporting useful supply.'}
     ];
     const terminal3ComponentsV12=[
-      {key:'operatorproduct',n:'01',verb:'CHANGES',name:'Network Operator product',short:'The product, audience and customer relationship change.',detail:'The operator owns the customer experience, users, identity, policy, billing, support and the reason for network demand to exist. This plane changes with every opportunity.'},
-      {key:'network',n:'02',verb:'ROUTES + MEASURES',name:'Residential routing network',short:'Miner UIDs organise supply; validators measure separately.',detail:'Residential providers participate as miners, directly or through pools, supplying routable capacity under miner UIDs. Encrypted traffic moves through those paths while validators measure uptime, transfer and proof-of-transit separately.'},
-      {key:'subnetbase',n:'03',verb:'COORDINATES',name:'UR Subnet (SN25)',short:'Access, measurement, incentives and settlement.',detail:'SN25 coordinates operator demand, validator measurement, miner incentives and settlement. It is shared infrastructure beneath every Network Operator, not the customer product above it.'}
+      {key:'operatorproduct',n:'01',verb:'CHANGES',name:'Network Operator product',short:'The product, audience and customer relationship change.',mobileDetail:'Owns the product experience, users, policy, billing and support. This plane changes with each opportunity.',detail:'The operator owns the customer experience, users, identity, policy, billing, support and the reason for network demand to exist. This plane changes with every opportunity.'},
+      {key:'network',n:'02',verb:'ROUTES + MEASURES',name:'Residential routing network',short:'Miner UIDs organise supply; validators measure separately.',mobileDetail:'Miner UIDs organise residential routes while validators measure uptime, transfer and proof-of-transit separately.',detail:'Residential providers participate as miners, directly or through pools, supplying routable capacity under miner UIDs. Encrypted traffic moves through those paths while validators measure uptime, transfer and proof-of-transit separately.'},
+      {key:'subnetbase',n:'03',verb:'COORDINATES',name:'UR Subnet (SN25)',short:'Access, measurement, incentives and settlement.',mobileDetail:'Coordinates operator demand, measurement, miner incentives and settlement beneath every operator product.',detail:'SN25 coordinates operator demand, validator measurement, miner incentives and settlement. It is shared infrastructure beneath every Network Operator, not the customer product above it.'}
     ];
     const activeComponents=model==='terminal3'?(isV12?terminal3ComponentsV12:isV11?terminal3ComponentsV11:terminal3Components):DATA.components;
     const allButton=document.createElement('button');allButton.type='button';allButton.dataset.component='';allButton.setAttribute('aria-pressed','true');allButton.style.setProperty('--cc','#d6e6f4');allButton.innerHTML=`<b>00 / ALL</b><strong>${model==='terminal3'?'Complete three-plane system':'Complete system'}</strong><span>Show all architecture functions.</span>`;componentKey.appendChild(allButton);
@@ -1575,9 +1839,11 @@
       const stage=q('[data-stage]');if(key)stage.dataset.focus=key;else delete stage.dataset.focus;
       qa('[data-component]').forEach(el=>{if(el.closest('.component-key')||el.matches('.piece,.callout'))el.setAttribute('aria-pressed',el.dataset.component===key?'true':'false')});
       q('[data-show-all]').setAttribute('aria-pressed',String(!key));
-      const c=activeComponents.find(x=>x.key===key);const defaultDetail=model==='terminal3'?(isBuilderEdition?'The selected operator product sits above the shared provider network and SN25 foundation. Move the reveal slider to separate the system, then select a plane to understand its role.':'The terminal has three planes: the changing Network Operator product, the shared provider-and-validator network, and the shared SN25 protocol and economic foundation. Drag the reveal control to separate them.'):model==='terminal'?'The terminal starts as the complete customer-facing product. Drag the reveal control to separate its product screen, operator services and shared SN25 architecture, then select a labelled layer to inspect its role.':'Open the gateway to see the product module above the operator control plane and shared SN25 foundation. Select any labelled layer to isolate its role.';q('[data-component-name]').textContent=c?c.name:model==='terminal3'?(isBuilderEdition?'Product above shared infrastructure':'Complete three-plane system'):'Complete operator system';q('[data-component-detail]').textContent=c?c.detail:defaultDetail;q('[data-component-short]').textContent=c?`${c.n} / ${c.verb} · ${c.short}`:model==='terminal3'?'ONE OPERATOR PRODUCT · TWO SHARED PLANES':model==='terminal'?'ONE RECOGNISABLE PRODUCT · ONE SHARED FOUNDATION':'ONE PRODUCT MODULE · ONE SHARED FOUNDATION';q('.architecture-readout').style.setProperty('--component-color',c?colors[c.key]:'#d6e6f4');
+      const c=activeComponents.find(x=>x.key===key);const defaultDetail=model==='terminal3'?(isBuilderEdition?'The selected operator product sits above the shared provider network and SN25 foundation. Move the reveal slider to separate the system, then select a plane to understand its role.':'The terminal has three planes: the changing Network Operator product, the shared provider-and-validator network, and the shared SN25 protocol and economic foundation. Drag the reveal control to separate them.'):model==='terminal'?'The terminal starts as the complete customer-facing product. Drag the reveal control to separate its product screen, operator services and shared SN25 architecture, then select a labelled layer to inspect its role.':'Open the gateway to see the product module above the operator control plane and shared SN25 foundation. Select any labelled layer to isolate its role.';const componentDetail=c?(matchMedia('(max-width:700px)').matches&&c.mobileDetail?c.mobileDetail:c.detail):defaultDetail;q('[data-component-name]').textContent=c?c.name:model==='terminal3'?(isBuilderEdition?'Product above shared infrastructure':'Complete three-plane system'):'Complete operator system';q('[data-component-detail]').textContent=componentDetail;q('[data-component-short]').textContent=c?`${c.n} / ${c.verb} · ${c.short}`:model==='terminal3'?'ONE OPERATOR PRODUCT · TWO SHARED PLANES':model==='terminal'?'ONE RECOGNISABLE PRODUCT · ONE SHARED FOUNDATION':'ONE PRODUCT MODULE · ONE SHARED FOUNDATION';q('.architecture-readout').style.setProperty('--component-color',c?colors[c.key]:'#d6e6f4');
     }
     qa('.piece,.callout').forEach(el=>{el.type='button'});qa('.component-key button,.piece,.callout').forEach(el=>el.addEventListener('click',()=>{const key=el.dataset.component||'';focusComponent(isBuilderEdition&&q('[data-stage]').dataset.focus===key?'':key)}));
+    q('.architecture-readout').addEventListener('click',e=>e.stopPropagation());
+    q('[data-close-layer]').addEventListener('click',()=>{const selectedLayer=qa('.scene.is-active .piece[aria-pressed="true"],.scene.is-active .callout[aria-pressed="true"]').find(el=>el.offsetParent!==null);focusComponent('');selectedLayer?.focus()});
     if(isBuilderEdition)terminalStage.addEventListener('click',e=>{if(!e.target.closest('[data-component],.system-rail-v11'))focusComponent('')});
     q('[data-show-all]').addEventListener('click',()=>focusComponent(''));
     qa('.stage-controls button[data-view]').forEach(b=>b.addEventListener('click',()=>{q('[data-stage]').dataset.view=b.dataset.view;qa('.stage-controls button[data-view]').forEach(x=>x.setAttribute('aria-pressed',x===b?'true':'false'))}));

@@ -43,6 +43,8 @@ export default {
     },
 
     disclaimer: {
+        protocol: 'UR 是一个为网络基础设施提供动力、由社区维护的开源协议。',
+        products: '如需 URnetwork 产品（例如 VPN），请访问 ur.io',
         before: 'UR 是一个为网络基础设施提供动力、由社区维护的开源协议。如需 URnetwork 产品（例如 VPN），请访问'
     },
 

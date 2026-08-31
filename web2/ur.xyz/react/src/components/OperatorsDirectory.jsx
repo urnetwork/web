@@ -142,7 +142,7 @@ export default function OperatorsDirectory() {
                                 {/* Identity cell: operator, its app, and the app's
                                     store listings together, so the stores can never
                                     scroll out of view on a wide stats table. */}
-                                <td className="op-ident">
+                                <td className="op-ident" data-label={s.colOperator}>
                                     <div className="op-links">
                                         <a
                                             className="op-name"
@@ -178,20 +178,20 @@ export default function OperatorsDirectory() {
                                         <StoreLinks operator={operator} label={s.colStores} />
                                     </div>
                                 </td>
-                                <td>{feed?.totalNetworks != null ? fmtInt(feed.totalNetworks) : DASH}</td>
-                                <td>
+                                <td data-label={t.stats.totalNetworks}>{feed?.totalNetworks != null ? fmtInt(feed.totalNetworks) : DASH}</td>
+                                <td data-label={t.stats.usersPerBlock}>
                                     {feed?.users != null ? fmtInt(feed.users) : DASH}
                                     {feed && feed.prevUsers != null && (
                                         <div className="op-stat-prev">{t.sim.prevBlock} {fmtInt(feed.prevUsers)}</div>
                                     )}
                                 </td>
-                                <td>
+                                <td data-label={t.stats.dataPerBlock}>
                                     {feed?.dataGib != null ? fmt(feed.dataGib) : DASH}
                                     {feed && feed.prevDataGib != null && (
                                         <div className="op-stat-prev">{t.sim.prevBlock} {fmt(feed.prevDataGib)}</div>
                                     )}
                                 </td>
-                                <td>
+                                <td data-label={t.stats.demandDeposits}>
                                     {feed?.demandDepositsAlpha != null ? fmt(feed.demandDepositsAlpha) : DASH}
                                     {feed && feed.prevDemandDepositsAlpha != null && (
                                         <div className="op-stat-prev">{t.sim.prevBlock} {fmt(feed.prevDemandDepositsAlpha)}</div>

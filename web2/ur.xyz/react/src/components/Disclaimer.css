@@ -42,7 +42,13 @@
     opacity: 1;
 }
 
-.disclaimer-copy a { color: var(--brand-white); text-underline-offset: 2px; }
+.disclaimer-copy a {
+    display: inline-flex;
+    min-height: 44px;
+    align-items: center;
+    color: var(--brand-white);
+    text-underline-offset: 2px;
+}
 
 @media (max-width: 768px) {
     .disclaimer-copy {

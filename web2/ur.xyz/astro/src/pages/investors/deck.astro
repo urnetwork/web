@@ -102,6 +102,7 @@ const slides = Array.from({ length: deck.slideCount }, (_, i) => ({
     if (stage) {
         const slides = [...stage.querySelectorAll('.deck-slide')];
         const ticks = [...document.querySelectorAll('[data-deck-go]')];
+        const tickRail = document.querySelector('.deck-ticks');
         const count = document.querySelector('[data-deck-count]');
         const total = slides.length;
         const pad = (n) => String(n).padStart(2, '0');
@@ -116,6 +117,14 @@ const slides = Array.from({ length: deck.slideCount }, (_, i) => ({
                 if (on) t.setAttribute('aria-current', 'true');
                 else t.removeAttribute('aria-current');
             });
+            const activeTick = ticks[current - 1];
+            if (tickRail && activeTick && tickRail.scrollWidth > tickRail.clientWidth) {
+                const left = activeTick.offsetLeft - ((tickRail.clientWidth - activeTick.offsetWidth) / 2);
+                tickRail.scrollTo({
+                    left: Math.max(0, left),
+                    behavior: pushHash && !matchMedia('(prefers-reduced-motion: reduce)').matches ? 'smooth' : 'auto',
+                });
+            }
             if (count) count.textContent = `${pad(current)} / ${pad(total)}`;
             document.querySelectorAll('[data-deck-prev]').forEach((b) => (b.disabled = current === 1));
             document.querySelectorAll('[data-deck-next]').forEach((b) => (b.disabled = current === total));

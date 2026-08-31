@@ -45,6 +45,8 @@ export default {
     },
 
     disclaimer: {
+        protocol: 'UR is an open source protocol powering network infrastructure, maintained by its community.',
+        products: 'For URnetwork products (eg. VPN), go to ur.io',
         before: 'UR is an open source protocol powering network infrastructure, maintained by its community. For URnetwork products (eg: VPN), go to'
     },
 

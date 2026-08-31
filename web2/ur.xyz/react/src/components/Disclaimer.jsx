@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import './Disclaimer.css';
 import { useLanguage } from '../i18n';
+import { getDisclaimerCopy } from '../i18n/disclaimer.js';
 
 /**
  * Hook that tracks whether the disclaimer bar should be visible (i.e.
@@ -39,11 +40,13 @@ export function useDisclaimerVisible() {
  */
 export default function Disclaimer({ visible }) {
     const { t } = useLanguage();
+    const copy = getDisclaimerCopy(t.disclaimer);
 
     return (
         <div className={`disclaimer ${visible ? '' : 'disclaimer-hidden'}`}>
             <p className="disclaimer-copy">
-                <span>{t.disclaimer.before}</span><a href="https://ur.io" target="_blank" rel="noopener noreferrer">ur.io</a>
+                <span>{copy.protocol}</span>
+                <a href="https://ur.io" target="_blank" rel="noopener noreferrer">{copy.products}</a>
             </p>
         </div>
     );

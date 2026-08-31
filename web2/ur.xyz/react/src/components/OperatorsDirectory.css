@@ -118,3 +118,87 @@
     white-space: nowrap;
     font-variant-numeric: tabular-nums;
 }
+
+@media (max-width: 600px) {
+    .operators-directory .article-table-wrap {
+        overflow: visible;
+    }
+
+    .operators-table,
+    .operators-table tbody,
+    .operators-table tr,
+    .operators-table td {
+        display: block;
+        width: 100%;
+    }
+
+    .operators-table thead {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        overflow: hidden;
+        clip: rect(0 0 0 0);
+        white-space: nowrap;
+        border: 0;
+    }
+
+    .operators-table tr {
+        padding: 16px 0;
+        border-top: 1px solid rgba(214, 230, 244, 0.16);
+    }
+
+    .operators-table td {
+        display: grid;
+        grid-template-columns: minmax(112px, 0.9fr) minmax(0, 1.1fr);
+        gap: 16px;
+        padding: 11px 0;
+        border: 0;
+        text-align: end;
+        white-space: normal;
+    }
+
+    .operators-table td::before {
+        content: attr(data-label);
+        color: rgba(214, 230, 244, 0.62);
+        font-size: 0.72rem;
+        letter-spacing: 0.06em;
+        line-height: 1.35;
+        text-align: start;
+    }
+
+    .operators-table .op-ident {
+        display: block;
+        min-width: 0;
+        padding-top: 6px;
+        text-align: start;
+    }
+
+    .operators-table .op-ident::before {
+        display: block;
+        margin-bottom: 12px;
+    }
+
+    .op-links,
+    .op-stores {
+        flex-wrap: wrap;
+    }
+
+    .op-app {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .op-stores {
+        gap: 8px;
+    }
+
+    .op-store {
+        width: 44px;
+        height: 44px;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid rgba(214, 230, 244, 0.14);
+        border-radius: 50%;
+    }
+}
