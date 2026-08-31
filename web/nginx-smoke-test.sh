@@ -55,6 +55,70 @@ expect_response() {
     fi
 }
 
+expect_ip_json() {
+    local label=$1
+    local expected_ip=$2
+    shift 2
+
+    local headers="$test_dir/ip-${label}.headers"
+    local body="$test_dir/ip-${label}.body"
+    local status
+    local content_type
+    local cache_control
+    local expected_body="{\"ip\":\"${expected_ip}\"}"
+
+    status=$(curl --silent --show-error \
+        --output "$body" \
+        --dump-header "$headers" \
+        --write-out '%{http_code}' \
+        --header 'Host: ur.io' \
+        --header 'Accept: application/json' \
+        "$@" \
+        'http://127.0.0.1/ip')
+
+    [[ "$status" == 200 ]] || fail "ur.io/ip JSON ($label) returned $status, expected 200"
+    [[ "$(<"$body")" == "$expected_body" ]] || \
+        fail "ur.io/ip JSON ($label) returned $(<"$body"), expected $expected_body"
+
+    content_type=$(awk 'BEGIN { IGNORECASE=1 } /^Content-Type:/ { gsub(/\r/, "", $2); print $2; exit }' "$headers")
+    [[ "$content_type" == application/json ]] || \
+        fail "ur.io/ip JSON ($label) content type was ${content_type:-<missing>}"
+
+    cache_control=$(awk 'BEGIN { IGNORECASE=1 } /^Cache-Control:/ { sub(/^[^:]+:[[:space:]]*/, ""); gsub(/\r/, ""); print; exit }' "$headers")
+    [[ "$cache_control" == no-store ]] || \
+        fail "ur.io/ip JSON ($label) cache control was ${cache_control:-<missing>}"
+
+    grep -Eiq '^Vary:.*(^|[,[:space:]])Accept([,[:space:]]|$)' "$headers" || \
+        fail "ur.io/ip JSON ($label) did not vary on Accept"
+}
+
+expect_ip_html() {
+    local label=$1
+    local accept=$2
+    local headers="$test_dir/ip-html-${label}.headers"
+    local body="$test_dir/ip-html-${label}.body"
+    local status
+    local content_type
+
+    status=$(curl --silent --show-error \
+        --output "$body" \
+        --dump-header "$headers" \
+        --write-out '%{http_code}' \
+        --header 'Host: ur.io' \
+        --header "Accept: $accept" \
+        'http://127.0.0.1/ip')
+
+    [[ "$status" == 200 ]] || fail "ur.io/ip HTML ($label) returned $status, expected 200"
+    [[ -s "$body" ]] || fail "ur.io/ip HTML ($label) returned an empty response"
+
+    content_type=$(awk 'BEGIN { IGNORECASE=1 } /^Content-Type:/ { gsub(/\r/, "", $2); print $2; exit }' "$headers")
+    [[ "$content_type" == text/html ]] || \
+        fail "ur.io/ip HTML ($label) content type was ${content_type:-<missing>}"
+
+    grep -Eiq '^Vary:.*(^|[,[:space:]])Accept([,[:space:]]|$)' "$headers" || \
+        fail "ur.io/ip HTML ($label) did not vary on Accept"
+}
+
 nginx -t
 nginx >"$analytics_log" 2>"$nginx_error_log"
 
@@ -78,6 +142,7 @@ for host in ur.io preview.ur.io ur.xyz preview.ur.xyz; do
 done
 
 expect_response ur.io /products 200
+expect_response ur.io /ip 200
 expect_response ur.xyz /investors 200
 expect_response www.ur.io / 301 https://ur.io/
 expect_response www.ur.xyz / 301 https://ur.xyz/
@@ -112,6 +177,18 @@ expect_response main-web.bringyour.com /status 200
 for host in www.bringyour.com ur.network www.ur.network; do
     expect_response "$host" /status 301 https://ur.io/status
 done
+
+# /ip remains HTML for browsers, but negotiates a tiny, non-cacheable JSON
+# response for API clients. Cloudflare is authoritative on the public host;
+# Warp's bracketed address is the direct/preview fallback.
+expect_ip_html browser 'text/html,application/xhtml+xml,*/*;q=0.8'
+expect_ip_html json-disabled 'application/json;q=0, text/html'
+expect_ip_json cloudflare-v4 203.0.113.9 \
+    --header 'CF-Ray: 0123456789abcdef-DFW' \
+    --header 'CF-Connecting-IP: 203.0.113.9' \
+    --header 'X-UR-Forwarded-For: 198.51.100.20:41001'
+expect_ip_json warp-v6 2001:db8::7 \
+    --header 'X-UR-Forwarded-For: [2001:db8::7]:41002'
 
 # A synthetic edge request proves the only emitted page-view fields are the
 # normalized path, country bucket, and classified source. Deliberately put

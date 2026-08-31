@@ -45,6 +45,52 @@ http {
         "~^[0-9A-Fa-f]{16,32}-[A-Za-z]{3}:(?<analytics_country>[A-Z]{2})$" $analytics_country;
     }
 
+    # /ip has a small machine-readable representation in addition to its HTML
+    # page. Cloudflare terminates the public ur.io connection, so its
+    # CF-Connecting-IP is the address the caller actually used; require a
+    # structurally valid Ray id before considering that header. Direct and
+    # preview traffic falls back to Warp's ingress-owned ip:port header, then
+    # finally to the socket peer. Every accepted character is JSON-safe.
+    map "$http_cf_ray:$http_cf_connecting_ip" $cloudflare_client_ip {
+        default "";
+        "~^[0-9A-Fa-f]{16,32}-[A-Za-z]{3}:(?<cf_client_ipv4>(?:[0-9]{1,3}\.){3}[0-9]{1,3})$" $cf_client_ipv4;
+        "~^[0-9A-Fa-f]{16,32}-[A-Za-z]{3}:(?<cf_client_ipv6>[0-9A-Fa-f:.]*:[0-9A-Fa-f:.]+)$" $cf_client_ipv6;
+    }
+
+    map $http_x_ur_forwarded_for $forwarded_client_ip {
+        default "";
+        "~^(?<forwarded_client_ipv4>(?:[0-9]{1,3}\.){3}[0-9]{1,3}):[0-9]{1,5}$" $forwarded_client_ipv4;
+        "~^\[(?<forwarded_client_ipv6>[0-9A-Fa-f:.]*:[0-9A-Fa-f:.]+)\]:[0-9]{1,5}$" $forwarded_client_ipv6;
+        # Compatibility with the pre-bracketing Warp header. Its contract made
+        # the final decimal group the source port, so split at the last colon.
+        "~^(?<forwarded_client_legacy_ipv6>[0-9A-Fa-f:.]*:[0-9A-Fa-f:.]+):[0-9]{1,5}$" $forwarded_client_legacy_ipv6;
+    }
+
+    map $cloudflare_client_ip $preferred_client_ip {
+        default $cloudflare_client_ip;
+        "" $forwarded_client_ip;
+    }
+
+    map $preferred_client_ip $ip_response_address {
+        default $preferred_client_ip;
+        "" $remote_addr;
+    }
+
+    # Accept is the response-content negotiation header. A request-body
+    # Content-Type on this GET route does not select the representation.
+    # Honor application/json and structured +json media types unless that
+    # media range was explicitly disabled with q=0.
+    map $http_accept $accepts_json {
+        default 0;
+        "~*(?:^|,)[[:space:]]*application/(?:[a-z0-9!#$&^_.+-]+\+)?json(?:(?:[[:space:]]*;)(?![^,]*\bq=0(?:\.0*)?(?![0-9.]))[^,]*)?[[:space:]]*(?:,|$)" 1;
+    }
+
+    map "$request_method:$accepts_json" $ip_json_requested {
+        default 0;
+        "GET:1" 1;
+        "HEAD:1" 1;
+    }
+
     # Reduce Referer to a small source/engine vocabulary in nginx memory. The
     # original value never enters stdout, a queue, Prometheus, or Loki.
     map $http_referer $analytics_source {
@@ -262,6 +308,32 @@ http {
         # variants onto the canonical form with real 301s.
         location = /index.html {
             return 301 /;
+        }
+
+        # Keep /ip a browser page by default, while giving command-line and API
+        # clients a one-field representation through ordinary HTTP content
+        # negotiation. The internal status never escapes this server block.
+        location = /ip {
+            error_page 418 = @ip_json;
+            if ($ip_json_requested) {
+                return 418;
+            }
+
+            try_files /ip.html =404;
+
+            add_header 'Cache-Control' 'max-age=0, stale-while-revalidate=86400';
+            add_header 'Last-Modified' '{{ http_last_modified }}';
+            add_header 'ETag' '"{{ http_etag }}"';
+            add_header 'Vary' 'Accept' always;
+            add_header 'X-Robots-Tag' $ur_preview_robots always;
+        }
+
+        location @ip_json {
+            default_type application/json;
+            add_header 'Cache-Control' 'no-store' always;
+            add_header 'Vary' 'Accept' always;
+            add_header 'X-Robots-Tag' $ur_preview_robots always;
+            return 200 '{"ip":"$ip_response_address"}';
         }
 
         # The feed is advertised everywhere as /blog/rss.xml; the bare /blog/rss
