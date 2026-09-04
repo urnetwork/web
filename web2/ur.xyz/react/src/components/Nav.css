@@ -287,11 +287,12 @@
     opacity: 1;
 }
 .nav-drawer-links .nav-network > summary { pointer-events: none; }
+.nav-drawer-links .nav-network > summary::after { display: none; }
 .nav-drawer-links .nav-network > summary span { display: none; }
 .nav-drawer-links .nav-network-menu {
     position: static;
     min-width: 0;
-    padding: 0 0 18px 18px;
+    padding: 4px 0 4px 18px;
     background: transparent;
     border: 0;
     box-shadow: none;
@@ -301,6 +302,19 @@
     color: var(--brand-ui);
     font-size: 1.05rem;
     letter-spacing: 0;
+}
+.nav-drawer-links .nav-network-menu a:hover,
+.nav-drawer-links .nav-network-menu a.is-active {
+    color: var(--brand-white);
+    background: transparent;
+    box-shadow: none;
+}
+.nav-drawer-links .nav-network-menu a.is-active { color: var(--brand-ur); }
+.nav-drawer-links .nav-network + a { padding-top: 12px; }
+.nav-drawer-links > a.is-active {
+    padding-left: 16px;
+    background: rgba(237, 143, 255, 0.07);
+    box-shadow: inset 2px 0 0 var(--brand-ur);
 }
 
 .nav-drawer-foot {
