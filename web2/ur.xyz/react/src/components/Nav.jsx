@@ -121,6 +121,7 @@ function NetworkMenu({ code, route, t, mobile = false }) {
                         key={name}
                         href={buildPath({ name, slug: null }, code)}
                         className={route.name === name ? 'is-active' : ''}
+                        aria-current={route.name === name ? 'page' : undefined}
                     >
                         {t.nav[name]}
                     </a>
@@ -131,10 +132,11 @@ function NetworkMenu({ code, route, t, mobile = false }) {
 }
 
 
-export default function Nav({ disclaimerVisible, activeRoute }) {
+export default function Nav({ disclaimerVisible, activeRoute, aboutHref }) {
     const { code, setLang, langs, t } = useLanguage();
     const detectedRoute = useRoute();
     const route = activeRoute ? { name: activeRoute, slug: null } : detectedRoute;
+    const resolvedAboutHref = aboutHref ?? (code === 'en' ? '/about' : null);
     const [scrolled, setScrolled] = useState(false);
     const [menuOpen, setMenuOpen] = useState(false);
     const menuButtonRef = useRef(null);
@@ -224,10 +226,11 @@ export default function Nav({ disclaimerVisible, activeRoute }) {
 
                     <nav className="nav-links" aria-label="Primary navigation">
                         <NetworkMenu code={code} route={route} t={t} />
-                        <a href={buildPath({ name: 'research', slug: null }, code)} className={route.name === 'research' ? 'is-active' : ''}>{t.nav.research}</a>
-                        {code === 'en' && <a href="/build" className={route.name === 'build' ? 'is-active' : ''}>Build</a>}
-                        {code === 'en' && <a href="/investors" className={route.name === 'investors' ? 'is-active' : ''}>Investors</a>}
-                        <a href={"/docs"} className={route.name === 'docs' || route.name === 'api' ? 'is-active' : ''}>{t.nav.docs}</a>
+                        <a href={buildPath({ name: 'research', slug: null }, code)} className={route.name === 'research' ? 'is-active' : ''} aria-current={route.name === 'research' ? 'page' : undefined}>{t.nav.research}</a>
+                        {code === 'en' && <a href="/build" className={route.name === 'build' ? 'is-active' : ''} aria-current={route.name === 'build' ? 'page' : undefined}>Build</a>}
+                        {code === 'en' && <a href="/investors" className={route.name === 'investors' ? 'is-active' : ''} aria-current={route.name === 'investors' ? 'page' : undefined}>Investors</a>}
+                        {resolvedAboutHref && <a href={resolvedAboutHref} className={route.name === 'about' ? 'is-active' : ''} aria-current={route.name === 'about' ? 'page' : undefined}>About</a>}
+                        <a href={"/docs"} className={route.name === 'docs' || route.name === 'api' ? 'is-active' : ''} aria-current={route.name === 'docs' || route.name === 'api' ? 'page' : undefined}>{t.nav.docs}</a>
                     </nav>
 
                     <div className="nav-actions">
@@ -263,10 +266,11 @@ export default function Nav({ disclaimerVisible, activeRoute }) {
                 </div>
                 <nav className="nav-drawer-links" aria-label="Mobile navigation">
                     <NetworkMenu code={code} route={route} t={t} mobile />
-                    <a href={buildPath({ name: 'research', slug: null }, code)}>{t.nav.research}</a>
-                    {code === 'en' && <a href="/build">Build</a>}
-                    {code === 'en' && <a href="/investors">Investors</a>}
-                    <a href={"/docs"}>{t.nav.docs}</a>
+                    <a href={buildPath({ name: 'research', slug: null }, code)} className={route.name === 'research' ? 'is-active' : ''} aria-current={route.name === 'research' ? 'page' : undefined}>{t.nav.research}</a>
+                    {code === 'en' && <a href="/build" className={route.name === 'build' ? 'is-active' : ''} aria-current={route.name === 'build' ? 'page' : undefined}>Build</a>}
+                    {code === 'en' && <a href="/investors" className={route.name === 'investors' ? 'is-active' : ''} aria-current={route.name === 'investors' ? 'page' : undefined}>Investors</a>}
+                    {resolvedAboutHref && <a href={resolvedAboutHref} className={route.name === 'about' ? 'is-active' : ''} aria-current={route.name === 'about' ? 'page' : undefined}>About</a>}
+                    <a href={"/docs"} className={route.name === 'docs' || route.name === 'api' ? 'is-active' : ''} aria-current={route.name === 'docs' || route.name === 'api' ? 'page' : undefined}>{t.nav.docs}</a>
                 </nav>
                 <div className="nav-drawer-foot">
                     <nav className="nav-drawer-langs" aria-label={t.footer.languagesAria}>
@@ -275,6 +279,7 @@ export default function Nav({ disclaimerVisible, activeRoute }) {
                                 key={language}
                                 type="button"
                                 className={language === code ? 'is-active' : ''}
+                                aria-pressed={language === code}
                                 onClick={() => { setLang(language); setMenuOpen(false); }}
                             >
                                 {langs[language].label}

@@ -7,12 +7,12 @@ import Nav from '@react/components/Nav.jsx';
 import { useDisclaimerVisible } from '@react/components/Disclaimer.jsx';
 import { LanguageProvider } from '@react/i18n/index.jsx';
 
-export default function NavIsland({ activeRoute, lang }) {
+export default function NavIsland({ activeRoute, lang, aboutHref }) {
     const disclaimerVisible = useDisclaimerVisible();
 
     return (
         <LanguageProvider initialLang={lang}>
-            <Nav disclaimerVisible={disclaimerVisible} activeRoute={activeRoute} />
+            <Nav disclaimerVisible={disclaimerVisible} activeRoute={activeRoute} aboutHref={aboutHref} />
         </LanguageProvider>
     );
 }

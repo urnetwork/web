@@ -39,6 +39,7 @@ export default function Footer() {
                     <a href="/docs">{t.nav.docs}</a>
                     {code === 'en' && <a href="/build">Build on UR</a>}
                     <a href={path('research')}>{t.nav.research}</a>
+                    {code === 'en' && <a href="/about">About</a>}
                     <a href="/docs/litepaper">{t.nav.whitepaper}</a>
                 </nav>
 

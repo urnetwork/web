@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",
-    "postbuild": "node scripts/modulepreload.mjs build/main && node ../react/tests/visual-parity.mjs && node ../react/tests/network-privacy.mjs",
+    "postbuild": "node scripts/modulepreload.mjs build/main && node ../react/tests/visual-parity.mjs && node ../react/tests/responsive-shell.mjs && node ../react/tests/network-privacy.mjs",
     "preview": "astro preview"
   },
   "dependencies": {

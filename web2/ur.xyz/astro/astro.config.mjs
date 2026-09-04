@@ -9,6 +9,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PROJECT_ROOT = path.resolve(__dirname, '..');
 const REACT_SRC = path.resolve(PROJECT_ROOT, 'react/src');
 const DOCS_DIR = path.join(PROJECT_ROOT, 'docs');
+const RESPONSIVE_PREVIEW = path.join(__dirname, 'dev', 'responsive-preview.html');
 
 /** Walk a directory and return absolute paths of every file matching `ext`. */
 function walk(dir, ext) {
@@ -48,6 +49,33 @@ function urXyzContent() {
             }
             return null;
         }
+    };
+}
+
+/** Development-only routes for the Build clean URL and responsive preview tool. */
+function urXyzDevRoutes() {
+    return {
+        name: 'ur-xyz-dev-routes',
+        configureServer(server) {
+            server.middlewares.use((req, res, next) => {
+                if (!req.url) return next();
+                const queryIndex = req.url.indexOf('?');
+                const pathname = queryIndex === -1 ? req.url : req.url.slice(0, queryIndex);
+                const query = queryIndex === -1 ? '' : req.url.slice(queryIndex);
+                if (pathname === '/responsive-preview' || pathname === '/responsive-preview/') {
+                    if (!fs.existsSync(RESPONSIVE_PREVIEW)) return next();
+                    res.statusCode = 200;
+                    res.setHeader('Content-Type', 'text/html; charset=utf-8');
+                    res.setHeader('Cache-Control', 'no-store');
+                    res.end(fs.readFileSync(RESPONSIVE_PREVIEW, 'utf8'));
+                    return;
+                }
+                if (pathname === '/build' || pathname === '/build/') {
+                    req.url = `/build.html${query}`;
+                }
+                return next();
+            });
+        },
     };
 }
 
@@ -189,7 +217,7 @@ export default defineConfig({
     build: { format: 'file' },
     outDir: path.resolve(__dirname, 'build', ENV),
     vite: {
-        plugins: [urXyzContent()],
+        plugins: [urXyzContent(), urXyzDevRoutes()],
         resolve: {
             alias: {
                 '@react': REACT_SRC

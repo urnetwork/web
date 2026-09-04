@@ -1,0 +1,417 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>UR Responsive Preview</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --background: #0d0d0d;
+      --surface: #151515;
+      --surface-raised: #1d1d1d;
+      --text: #f4f4f4;
+      --muted: #a0a5aa;
+      --rule: #343434;
+      --accent: #ed8fff;
+      --accent-soft: rgba(237, 143, 255, 0.12);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+
+    html,
+    body { min-width: 320px; min-height: 100%; }
+
+    body {
+      min-height: 100dvh;
+      margin: 0;
+      overflow: hidden;
+      color: var(--text);
+      background: var(--background);
+    }
+
+    button,
+    input { font: inherit; }
+
+    button { cursor: pointer; }
+
+    .preview-app {
+      display: grid;
+      grid-template-rows: auto minmax(0, 1fr);
+      min-height: 100dvh;
+    }
+
+    .preview-toolbar {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      min-height: 72px;
+      align-items: center;
+      gap: 16px;
+      padding: 12px 18px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--rule);
+    }
+
+    .preview-brand {
+      display: flex;
+      flex: 0 0 auto;
+      align-items: center;
+      gap: 9px;
+      margin-block: 0;
+      margin-right: auto;
+      font-size: 0.86rem;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .preview-brand::before {
+      width: 9px;
+      height: 9px;
+      background: var(--accent);
+      border-radius: 50%;
+      content: "";
+      box-shadow: 0 0 16px rgba(237, 143, 255, 0.55);
+    }
+
+    .page-form {
+      display: flex;
+      min-width: min(340px, 38vw);
+      align-items: end;
+      gap: 8px;
+    }
+
+    .page-field {
+      display: grid;
+      flex: 1 1 auto;
+      gap: 5px;
+      min-width: 0;
+      color: var(--muted);
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .page-field input {
+      width: 100%;
+      min-height: 44px;
+      padding: 0 12px;
+      color: var(--text);
+      background: var(--background);
+      border: 1px solid var(--rule);
+      border-radius: 7px;
+      font-size: 1rem;
+      letter-spacing: normal;
+      text-transform: none;
+    }
+
+    .control-button,
+    .device-button {
+      min-height: 44px;
+      padding: 0 14px;
+      color: var(--muted);
+      background: transparent;
+      border: 1px solid var(--rule);
+      border-radius: 7px;
+      transition: color 160ms ease, background 160ms ease, border-color 160ms ease;
+    }
+
+    .control-button:hover,
+    .device-button:hover { color: var(--text); border-color: #666; }
+
+    .control-button:focus-visible,
+    .device-button:focus-visible,
+    .page-field input:focus-visible,
+    .open-page:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+
+    .device-controls {
+      display: flex;
+      flex: 0 0 auto;
+      gap: 8px;
+    }
+
+    .device-button[aria-pressed="true"] {
+      color: var(--text);
+      background: var(--accent-soft);
+      border-color: var(--accent);
+    }
+
+    .open-page {
+      display: inline-flex;
+      min-width: 44px;
+      min-height: 44px;
+      align-items: center;
+      justify-content: center;
+      color: var(--text);
+      text-decoration: none;
+      background: var(--surface-raised);
+      border: 1px solid var(--rule);
+      border-radius: 7px;
+    }
+
+    .preview-stage {
+      position: relative;
+      display: grid;
+      min-height: 0;
+      place-items: center;
+      overflow: hidden;
+      padding: 18px;
+      background:
+        linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px),
+        var(--background);
+      background-size: 24px 24px;
+    }
+
+    .preview-fit {
+      position: relative;
+      flex: 0 0 auto;
+    }
+
+    .preview-device {
+      position: absolute;
+      inset: 0 auto auto 0;
+      overflow: hidden;
+      transform-origin: top left;
+      background: #090909;
+      border: 1px solid #454545;
+      border-radius: 18px;
+      box-shadow: 0 22px 70px rgba(0, 0, 0, 0.48);
+    }
+
+    .preview-device[data-device="desktop"] { border-radius: 10px; }
+    .preview-device[data-device="tablet"] { border-radius: 14px; }
+
+    .preview-window-bar {
+      display: flex;
+      height: 36px;
+      align-items: center;
+      gap: 7px;
+      padding: 0 12px;
+      color: #aaa;
+      background: #181818;
+      border-bottom: 1px solid #333;
+      font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+      font-size: 11px;
+    }
+
+    .preview-window-bar i {
+      width: 7px;
+      height: 7px;
+      flex: 0 0 7px;
+      background: #747474;
+      border-radius: 50%;
+    }
+
+    .preview-address {
+      min-width: 0;
+      margin-left: 5px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .preview-size {
+      margin-left: auto;
+      white-space: nowrap;
+    }
+
+    .site-frame {
+      display: block;
+      background: #0d0d0d;
+      border: 0;
+    }
+
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    @media (max-width: 900px) {
+      .preview-toolbar { flex-wrap: wrap; }
+      .preview-brand { width: 100%; }
+      .page-form { flex: 1 1 100%; min-width: 0; }
+      .device-controls { flex: 1 1 auto; }
+      .device-button { flex: 1 1 auto; padding-inline: 10px; }
+    }
+
+    @media (max-width: 560px) {
+      .preview-toolbar { gap: 10px; padding: 10px; }
+      .preview-brand { margin-bottom: 2px; }
+      .device-controls { width: 100%; }
+      .open-page { flex: 1 0 44px; }
+      .preview-stage { padding: 10px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .control-button,
+      .device-button { transition: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="preview-app">
+    <header class="preview-toolbar">
+      <h1 class="preview-brand">UR responsive preview</h1>
+
+      <form class="page-form" data-page-form>
+        <label class="page-field" for="preview-path">
+          Page
+          <input id="preview-path" name="path" type="text" value="/about" list="preview-routes" autocomplete="off" spellcheck="false">
+        </label>
+        <datalist id="preview-routes">
+          <option value="/about">About</option>
+          <option value="/build">Build</option>
+          <option value="/investors">Investor Centre</option>
+          <option value="/">Home</option>
+          <option value="/operators">Operators</option>
+          <option value="/miners">Miners</option>
+          <option value="/validators">Validators</option>
+          <option value="/research">Research</option>
+          <option value="/docs">Docs</option>
+          <option value="/team-prototype?variant=G">Team prototype G</option>
+        </datalist>
+        <button class="control-button" type="submit">Go</button>
+      </form>
+
+      <div class="device-controls" role="group" aria-label="Viewport size">
+        <button class="device-button" type="button" data-device-button="mobile" aria-pressed="true">Mobile</button>
+        <button class="device-button" type="button" data-device-button="tablet" aria-pressed="false">Tablet</button>
+        <button class="device-button" type="button" data-device-button="desktop" aria-pressed="false">Desktop</button>
+      </div>
+
+      <button class="control-button" type="button" data-refresh>Reload</button>
+      <a class="open-page" href="/about" target="_blank" rel="noopener" data-open-page aria-label="Open previewed page in a new tab"><span aria-hidden="true">↗</span></a>
+    </header>
+
+    <main class="preview-stage" data-stage>
+      <div class="preview-fit" data-fit>
+        <section class="preview-device" data-device="mobile" data-device-frame aria-label="Live website preview">
+          <div class="preview-window-bar" aria-hidden="true">
+            <i></i><i></i><i></i>
+            <span class="preview-address" data-address>/about</span>
+            <span class="preview-size" data-size>393 × 659</span>
+          </div>
+          <iframe class="site-frame" src="/about" title="UR website responsive preview" data-site-frame></iframe>
+        </section>
+      </div>
+      <p class="sr-only" aria-live="polite" data-status>Showing About at mobile size.</p>
+    </main>
+  </div>
+
+  <script>
+    (() => {
+      const devices = {
+        mobile: { label: 'mobile', width: 393, height: 659 },
+        tablet: { label: 'tablet', width: 768, height: 1024 },
+        desktop: { label: 'desktop', width: 1280, height: 900 }
+      };
+
+      const barHeight = 36;
+      const form = document.querySelector('[data-page-form]');
+      const pathInput = document.querySelector('#preview-path');
+      const buttons = [...document.querySelectorAll('[data-device-button]')];
+      const stage = document.querySelector('[data-stage]');
+      const fit = document.querySelector('[data-fit]');
+      const deviceFrame = document.querySelector('[data-device-frame]');
+      const siteFrame = document.querySelector('[data-site-frame]');
+      const address = document.querySelector('[data-address]');
+      const size = document.querySelector('[data-size]');
+      const status = document.querySelector('[data-status]');
+      const refresh = document.querySelector('[data-refresh]');
+      const openPage = document.querySelector('[data-open-page]');
+      const initialParams = new URLSearchParams(location.search);
+      let selectedDevice = devices[initialParams.get('device')] ? initialParams.get('device') : 'mobile';
+      let selectedPath = initialParams.get('path') || '/about';
+
+      const normalizePath = (value) => {
+        const trimmed = value.trim();
+        if (!trimmed) return '/about';
+        const prefixed = trimmed.startsWith('/') ? trimmed : `/${trimmed}`;
+        const target = new URL(prefixed, location.origin);
+        return `${target.pathname}${target.search}${target.hash}`;
+      };
+
+      const saveState = () => {
+        const url = new URL(location.href);
+        url.searchParams.set('path', selectedPath);
+        url.searchParams.set('device', selectedDevice);
+        history.replaceState(null, '', url);
+      };
+
+      const fitDevice = () => {
+        const viewport = devices[selectedDevice];
+        const availableWidth = Math.max(1, stage.clientWidth - 36);
+        const availableHeight = Math.max(1, stage.clientHeight - 36);
+        const outerHeight = viewport.height + barHeight;
+        const scale = Math.min(1, availableWidth / viewport.width, availableHeight / outerHeight);
+
+        fit.style.width = `${Math.round(viewport.width * scale)}px`;
+        fit.style.height = `${Math.round(outerHeight * scale)}px`;
+        deviceFrame.style.width = `${viewport.width}px`;
+        deviceFrame.style.height = `${outerHeight}px`;
+        deviceFrame.style.transform = `scale(${scale})`;
+        deviceFrame.dataset.device = selectedDevice;
+        siteFrame.style.width = `${viewport.width}px`;
+        siteFrame.style.height = `${viewport.height}px`;
+        size.textContent = `${viewport.width} × ${viewport.height}`;
+      };
+
+      const renderState = ({ reloadFrame = false } = {}) => {
+        const viewport = devices[selectedDevice];
+        pathInput.value = selectedPath;
+        address.textContent = selectedPath;
+        openPage.href = selectedPath;
+
+        buttons.forEach((button) => {
+          const active = button.dataset.deviceButton === selectedDevice;
+          button.setAttribute('aria-pressed', String(active));
+        });
+
+        if (reloadFrame || siteFrame.getAttribute('src') !== selectedPath) {
+          siteFrame.src = selectedPath;
+        }
+
+        status.textContent = `Showing ${selectedPath} at ${viewport.label} size.`;
+        fitDevice();
+        saveState();
+      };
+
+      form.addEventListener('submit', (event) => {
+        event.preventDefault();
+        selectedPath = normalizePath(pathInput.value);
+        renderState({ reloadFrame: true });
+      });
+
+      buttons.forEach((button) => {
+        button.addEventListener('click', () => {
+          selectedDevice = button.dataset.deviceButton;
+          renderState();
+        });
+      });
+
+      refresh.addEventListener('click', () => {
+        renderState({ reloadFrame: true });
+      });
+
+      new ResizeObserver(fitDevice).observe(stage);
+      selectedPath = normalizePath(selectedPath);
+      renderState({ reloadFrame: true });
+    })();
+  </script>
+</body>
+</html>

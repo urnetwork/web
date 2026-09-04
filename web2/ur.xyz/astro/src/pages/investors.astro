@@ -46,7 +46,11 @@ const centreJsonLd = [{
 
         <main id="main" class="investor-page">
             <header class="investor-hero investor-shell">
-                <h1>Investor Centre</h1>
+                <div class="investor-hero__title">
+                    <span class="investor-eyebrow">Investors</span>
+                    <h1>Investor Centre</h1>
+                    <div class="investor-hero__rule" aria-hidden="true"></div>
+                </div>
                 <p class="investor-updated">
                     <span aria-hidden="true"></span>
                     Updated <time datetime={investorCentre.updatedIso}>{investorCentre.updated}</time>
