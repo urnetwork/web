@@ -8,6 +8,7 @@ import ar from '@react/i18n/ar.js';
 import zh from '@react/i18n/zh.js';
 import de from '@react/i18n/de.js';
 import es from '@react/i18n/es.js';
+import { SITE_LANG_CODES } from './route-localization.js';
 
 export { en, ru, ar, zh, de, es };
 
@@ -20,7 +21,7 @@ export const LANGS = {
     es: { label: 'ES', name: 'Español',  dir: 'ltr' },
 };
 
-export const LANG_CODES = Object.keys(LANGS);
+export const LANG_CODES = [...SITE_LANG_CODES];
 export const NON_EN_LANGS = LANG_CODES.filter(c => c !== 'en');
 export const DEFAULT_LANG = 'en';
 

@@ -4,6 +4,7 @@ import { fileURLToPath } from 'node:url';
 import { defineConfig } from 'astro/config';
 import react from '@astrojs/react';
 import sitemap from '@astrojs/sitemap';
+import { basePathFor, hasLocalizedVersion, langForPath } from './src/lib/route-localization.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PROJECT_ROOT = path.resolve(__dirname, '..');
@@ -116,6 +117,7 @@ for (const l of ['en', 'ru', 'ar', 'zh', 'de', 'es']) {
 
 const LETTER_DATE = investorCentre?.featured?.dateIso || null;
 const BUILD_DATE = lastCommitted(__dirname, 'public/build.html');
+const ABOUT_DATE = lastCommitted(__dirname, 'src/pages/about.astro');
 const LEGAL_DATES = {};
 for (const doc of ['terms', 'privacy', 'vdp']) {
     const d = lastCommitted(path.join(PROJECT_ROOT, 'docs', 'legal'), `${doc}.md`);
@@ -132,8 +134,7 @@ export default defineConfig({
     site: 'https://ur.xyz',
     integrations: [
         react(),
-        // Sitemap with per-page hreflang alternates — every page exists in
-        // all six languages at the same path under its /<lang> prefix.
+        // Sitemap with alternates only for routes backed by translated pages.
         sitemap({
             customPages: [
                 'https://ur.xyz/build',
@@ -146,9 +147,9 @@ export default defineConfig({
             },
             serialize(item) {
                 const pathname = new URL(item.url).pathname;
-                const langMatch = pathname.match(/^\/(ru|ar|zh|de|es)(?=\/|$)/);
-                const lang = langMatch ? langMatch[1] : 'en';
-                const basePath = pathname.replace(/^\/(?:ru|ar|zh|de|es)(?=\/|$)/, '') || '/';
+                const lang = langForPath(pathname);
+                const basePath = basePathFor(pathname);
+                const localized = hasLocalizedVersion(basePath);
                 const docMatch = basePath.match(/^\/docs\/(.+)$/);
                 const legalMatch = basePath.match(/^\/(terms|privacy|vdp)$/);
                 if (docMatch || basePath === '/docs' || legalMatch) {
@@ -166,21 +167,20 @@ export default defineConfig({
                     item.lastmod = LETTER_DATE;
                 } else if (basePath === '/build' && BUILD_DATE) {
                     item.lastmod = BUILD_DATE;
-                } else if (LANG_DATES[lang]) {
+                } else if (basePath === '/about' && ABOUT_DATE) {
+                    item.lastmod = ABOUT_DATE;
+                } else if (localized && LANG_DATES[lang]) {
                     // home + sections: the language dictionary is the copy source
                     item.lastmod = LANG_DATES[lang];
                 }
-                const isEnglishOnlyDocsRedirect = /^\/(ru|ar|zh|de|es)\/docs(?:\/|$)/.test(pathname);
+                const isUnlocalizedAlias = lang !== 'en' && !localized;
                 const isRetiredAlias = pathname === '/docs/whitepaper' || pathname === '/investors/august-investment-letter';
-                if (isEnglishOnlyDocsRedirect || isRetiredAlias) return undefined;
+                if (isUnlocalizedAlias || isRetiredAlias) return undefined;
 
-                // Build, docs, and investor content are English-only. Do not advertise
-                // nonexistent or redirecting locale versions of those pages.
-                if (
-                    pathname === '/build' ||
-                    pathname === '/docs' || pathname.startsWith('/docs/') ||
-                    pathname === '/investors' || pathname.startsWith('/investors/')
-                ) {
+                // English-only pages have no hreflang cluster. This includes
+                // future routes until they are explicitly added to the shared
+                // localized-route list alongside real translated pages.
+                if (!localized) {
                     item.links = undefined;
                 }
 
