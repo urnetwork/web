@@ -36,6 +36,7 @@ export default function DocsExplorer({ activeRoute, initialSlug = null } = {}) {
     }, [route.slug, doc, code]);
 
     const disclaimerVisible = useDisclaimerVisible();
+    const currentPath = initialSlug ? `/docs/${initialSlug}` : '/docs';
 
     return (
         <div className="app">
@@ -44,7 +45,7 @@ export default function DocsExplorer({ activeRoute, initialSlug = null } = {}) {
             <Explorer kind="docs">
                 {!doc ? <DocsLanding code={code} /> : <DocBody doc={doc} />}
             </Explorer>
-            <Footer />
+            <Footer currentPath={currentPath} />
         </div>
     );
 }

@@ -1,4 +1,9 @@
 import { useEffect, useState } from 'react';
+import {
+    SITE_LANG_CODES,
+    basePathFor,
+    resolveLanguageDestination,
+} from '../../astro/src/lib/route-localization.js';
 
 /**
  * Tiny client-side router for ur.xyz.
@@ -16,7 +21,7 @@ import { useEffect, useState } from 'react';
  * LanguageProvider) re-read the URL on the same tick.
  */
 
-export const SUPPORTED_LANGS = ['en', 'ru', 'ar', 'zh', 'de', 'es'];
+export const SUPPORTED_LANGS = SITE_LANG_CODES;
 
 const SUPPORTED_LANG_SET = new Set(SUPPORTED_LANGS);
 const LANG_RE = /^\/([a-z]{2})(?=\/|$)/i;
@@ -55,7 +60,17 @@ export function parseRoute(pathname) {
     if (bare === 'api') return { name: 'api', slug: null };
     if (bare === 'price') return { name: 'price', slug: null };
     if (LEGAL_SET.has(bare)) return { name: bare, slug: null };
-    return { name: 'home', slug: null };
+    if (bare === 'about' || bare === 'build' || bare === 'investors') return { name: bare, slug: null };
+    if (bare.startsWith('investors/')) return { name: 'investors', slug: bare.slice('investors/'.length) };
+    return { name: 'unknown', slug: null, path: basePathFor(pathname) };
+}
+
+export function pathForRoute(route) {
+    if (!route || route.name === 'home') return '/';
+    if (route.name === 'unknown') return route.path || '/404';
+    if (route.name === 'docs') return route.slug ? `/docs/${route.slug}` : '/docs';
+    if (route.name === 'investors') return route.slug ? `/investors/${route.slug}` : '/investors';
+    return `/${route.name}`;
 }
 
 /**
@@ -63,16 +78,7 @@ export function parseRoute(pathname) {
  * at the bare path, every other language carries its `/<lang>` prefix.
  */
 export function buildPath(route, lang) {
-    const prefix = lang && lang !== 'en' ? `/${lang}` : '';
-    if (!route || route.name === 'home') return prefix || '/';
-    if (SECTION_SET.has(route.name)) return `${prefix}/${route.name}`;
-    if (route.name === 'docs') {
-        return route.slug ? `${prefix}/docs/${route.slug}` : `${prefix}/docs`;
-    }
-    if (route.name === 'api') return `${prefix}/api`;
-    if (route.name === 'price') return `${prefix}/price`;
-    if (LEGAL_SET.has(route.name)) return `${prefix}/${route.name}`;
-    return prefix || '/';
+    return resolveLanguageDestination(pathForRoute(route), lang).href;
 }
 
 export function useRoute() {

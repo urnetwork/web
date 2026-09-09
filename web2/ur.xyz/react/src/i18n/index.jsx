@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 
-import { parseRoute, buildPath } from '../router';
+import { resolveLanguageDestination } from '../../../astro/src/lib/route-localization.js';
 
 // Dictionaries load per language. The old shape imported all six statically,
 // which put ~147 KB of dictionary text in the JS of every page.
@@ -84,15 +84,8 @@ export function parseLangFromPath(pathname) {
  *
  *   1. URL — if /xx is a supported code, that wins (lets people share
  *      a direct link to a specific language).
- *   2. localStorage — if the visitor has previously made an explicit
- *      choice via the switcher, honour it.
- *   3. Browser language — `navigator.language` slice; only used if it
- *      maps to a language we ship.
- *   4. Default — English.
- *
- * The returned `fromUrl` flag tells the caller whether the URL already
- * agrees with the chosen language; if not, the caller is responsible
- * for syncing the URL via history.replaceState.
+ * An unprefixed URL is an explicit English URL. Saved preferences never
+ * override it or silently change page identity.
  */
 export function resolveInitialLang() {
     if (typeof window === 'undefined') {
@@ -102,15 +95,7 @@ export function resolveInitialLang() {
     const urlLang = parseLangFromPath();
     if (urlLang) return { code: urlLang, fromUrl: true };
 
-    let stored = null;
-    try { stored = window.localStorage.getItem(LANG_KEY); } catch (e) { /* private mode */ }
-    if (stored && LANGS[stored]) return { code: stored, fromUrl: false };
-
-    const nav = (window.navigator && (window.navigator.language || window.navigator.userLanguage)) || '';
-    const browser = nav.slice(0, 2).toLowerCase();
-    if (LANGS[browser]) return { code: browser, fromUrl: false };
-
-    return { code: DEFAULT_LANG, fromUrl: false };
+    return { code: DEFAULT_LANG, fromUrl: true };
 }
 
 /**
@@ -170,18 +155,22 @@ export function LanguageProvider({ children, initialLang }) {
             return;
         }
         try { window.localStorage.setItem(LANG_KEY, newCode); } catch (e) {}
-        // Preserve the current route (home / docs / api) when switching
-        // languages so a visitor reading /docs/protocol-research in
-        // English doesn't get bounced to the localised home page. The
-        // dictionary loads before the switch so no frame renders with
-        // missing strings.
+        const destination = resolveLanguageDestination(window.location.href, newCode);
+
+        // Astro pages are separate static documents. Loading the resolved URL
+        // keeps their content, metadata and hydrated islands in agreement.
+        if (window.__ASTRO_STATIC__) {
+            window.location.assign(destination.href);
+            return;
+        }
+
+        // The development SPA follows the same policy but can update in place.
         loadDict(newCode).then(() => {
-            const route = parseRoute(window.location.pathname);
-            const path = buildPath(route, newCode);
-            if (window.location.pathname !== path) {
-                window.history.pushState(null, '', path);
+            if (window.location.pathname + window.location.search + window.location.hash !== destination.href) {
+                window.history.pushState(null, '', destination.href);
             }
             setCode(newCode);
+            window.dispatchEvent(new PopStateEvent('popstate'));
         });
     };
 

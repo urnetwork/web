@@ -97,6 +97,8 @@
 }
 .footer-legal a:hover { color: var(--brand-white); opacity: 1; }
 .footer-langs { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 10px 18px; }
+.footer-language-availability { margin: 0; color: var(--brand-ui); font-size: 0.75rem; }
+.footer-language-availability strong { margin-right: 0.45em; color: var(--brand-ur); letter-spacing: 0.08em; }
 .footer-lang {
     display: inline-flex;
     align-items: center;

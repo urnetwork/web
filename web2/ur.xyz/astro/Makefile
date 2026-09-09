@@ -53,6 +53,8 @@ install-playwright-browser:
 gates: install-playwright-browser
 	node --test scripts/route-localization.test.mjs
 	node ../react/tests/visual-parity.mjs
+	node ../react/tests/responsive-shell.mjs
+	node ../react/tests/localization.mjs
 	node ../react/tests/network-privacy.mjs
 	node scripts/link-audit.mjs build/$(UR_ENV_DIR)
 	node scripts/seo-audit.mjs build/$(UR_ENV_DIR)

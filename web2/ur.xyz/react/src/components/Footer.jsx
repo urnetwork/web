@@ -1,7 +1,8 @@
 import React from 'react';
 import './Footer.css';
-import { useLanguage, LANG_ORDER, pathForLang } from '../i18n';
-import { buildPath } from '../router';
+import { useLanguage, LANG_ORDER } from '../i18n';
+import { buildPath, pathForRoute, useRoute } from '../router';
+import { resolveLanguageDestination, routeAvailability } from '../../../astro/src/lib/route-localization.js';
 import { LAUNCH_VIDEO_HASH } from './LaunchVideo';
 
 const GENERAL_DISCORD = 'https://discord.gg/urnetwork';
@@ -26,8 +27,11 @@ function SocialIcon({ name }) {
     );
 }
 
-export default function Footer() {
+export default function Footer({ currentPath: currentPathProp = null }) {
     const { code, setLang, langs, t } = useLanguage();
+    const route = useRoute();
+    const currentPath = currentPathProp || pathForRoute(route);
+    const translated = routeAvailability(currentPath).kind === 'translated';
     const year = new Date().getFullYear();
     const path = (name, slug = null) => buildPath({ name, slug }, code);
 
@@ -36,11 +40,11 @@ export default function Footer() {
             <div className="footer-directory">
                 <nav className="footer-column" aria-label={t.footer.learn}>
                     <h2>{t.footer.learn}</h2>
-                    <a href="/docs">{t.nav.docs}</a>
-                    {code === 'en' && <a href="/build">Build on UR</a>}
+                    <a href="/docs" aria-label={`${t.nav.docs} — available in English`}>{t.nav.docs} <span className="english-only-mark" lang="en">EN</span></a>
+                    <a href="/build" aria-label="Build on UR — available in English">Build on UR <span className="english-only-mark" lang="en">EN</span></a>
                     <a href={path('research')}>{t.nav.research}</a>
-                    {code === 'en' && <a href="/about">About</a>}
-                    <a href="/docs/litepaper">{t.nav.whitepaper}</a>
+                    <a href="/about" aria-label="About — available in English">About <span className="english-only-mark" lang="en">EN</span></a>
+                    <a href="/docs/litepaper" aria-label={`${t.nav.whitepaper} — available in English`}>{t.nav.whitepaper} <span className="english-only-mark" lang="en">EN</span></a>
                 </nav>
 
                 <nav className="footer-column" aria-label={t.nav.network}>
@@ -54,7 +58,7 @@ export default function Footer() {
                     <h2>{t.footer.resources}</h2>
                     <a href={`${path('home')}${LAUNCH_VIDEO_HASH}`}>{t.footer.launchVideo}</a>
                     <a href={BRAND_KIT} target="_blank" rel="noopener noreferrer">{t.footer.brandKit}</a>
-                    {code === 'en' && <a href="/investors">Investor Centre</a>}
+                    <a href="/investors" aria-label="Investor Centre — available in English">Investor Centre <span className="english-only-mark" lang="en">EN</span></a>
                     <a href="/llms.txt">llms.txt</a>
                 </nav>
             </div>
@@ -70,23 +74,28 @@ export default function Footer() {
             <div className="footer-utility">
                 <p>© {year} UR Foundation</p>
                 <nav className="footer-legal" aria-label={t.footer.legal}>
-                    <a href={path('terms')}>{t.footer.terms}</a>
-                    <a href={path('privacy')}>{t.footer.privacy}</a>
-                    <a href={path('vdp')}>{t.footer.vdp}</a>
+                    <a href="/terms" aria-label={`${t.footer.terms} — available in English`}>{t.footer.terms} <span className="english-only-mark" lang="en">EN</span></a>
+                    <a href="/privacy" aria-label={`${t.footer.privacy} — available in English`}>{t.footer.privacy} <span className="english-only-mark" lang="en">EN</span></a>
+                    <a href="/vdp" aria-label={`${t.footer.vdp} — available in English`}>{t.footer.vdp} <span className="english-only-mark" lang="en">EN</span></a>
                 </nav>
-                <nav className="footer-langs" aria-label={t.footer.languagesAria}>
-                    {LANG_ORDER.map(language => (
-                        <a
-                            key={language}
-                            href={pathForLang(language)}
-                            lang={language}
-                            className={`footer-lang ${language === code ? 'is-active' : ''}`}
-                            onClick={(event) => { event.preventDefault(); setLang(language); }}
-                        >
-                            {langs[language].label}
-                        </a>
-                    ))}
-                </nav>
+                {translated ? (
+                    <nav className="footer-langs" aria-label={t.footer.languagesAria}>
+                        {LANG_ORDER.map(language => (
+                            <a
+                                key={language}
+                                href={resolveLanguageDestination(currentPath, language).href}
+                                lang={language}
+                                className={`footer-lang ${language === code ? 'is-active' : ''}`}
+                                aria-current={language === code ? 'page' : undefined}
+                                onClick={(event) => { event.preventDefault(); setLang(language); }}
+                            >
+                                {langs[language].label}
+                            </a>
+                        ))}
+                    </nav>
+                ) : (
+                    <p className="footer-language-availability" lang="en"><strong>EN</strong> Available in English</p>
+                )}
             </div>
         </footer>
     );
