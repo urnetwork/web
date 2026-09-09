@@ -217,6 +217,8 @@ async function main() {
       const source = language === 'en' ? '/de/operators' : '/operators';
       const expectedPath = language === 'en' ? '/operators' : `/${language}/operators`;
       await page.goto(`${base}${source}?view=map#network`);
+      assert(await page.locator(`.footer-langs a[lang="${language}"]`).getAttribute('href') === `${expectedPath}?view=map#network`,
+        `footer ${language} new-tab target lost query or fragment`);
       await page.locator(`.footer-langs a[lang="${language}"]`).click();
       await page.waitForURL((url) => url.pathname === expectedPath && url.search === '?view=map' && url.hash === '#network');
       const footerStatefulUrl = new URL(page.url());
