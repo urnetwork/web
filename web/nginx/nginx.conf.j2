@@ -355,6 +355,15 @@ http {
             add_header 'X-Robots-Tag' $ur_preview_robots always;
         }
 
+        # The onboarding emails' feedback links carry their token in the
+        # path (/f/<token>?r=n); the site builds one page for all of them
+        # (astro src/pages/f.astro → /f.html) and the island reads the token.
+        location ^~ /f/ {
+            try_files /f.html =404;
+            add_header 'Cache-Control' 'max-age=0, stale-while-revalidate=86400';
+            add_header 'X-Robots-Tag' 'noindex, nofollow' always;
+        }
+
         location ~ ^(?<clean>.+)/$ {
             return 301 $clean$is_args$args;
         }
