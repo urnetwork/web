@@ -77,7 +77,7 @@ function path(name: string, slug: string | null = null) {
         {translated ? (
             <nav class="footer-langs" aria-label={t.footer.languagesAria}>
                 {LANG_CODES.map(code => (
-                    <a href={resolveLanguageDestination(currentPath, code).href} lang={code} class={`footer-lang ${code === lang ? 'is-active' : ''}`} aria-current={code === lang ? 'page' : undefined}>
+                    <a href={resolveLanguageDestination(currentPath, code).href} lang={code} data-footer-language={code} class={`footer-lang ${code === lang ? 'is-active' : ''}`} aria-current={code === lang ? 'page' : undefined}>
                         {LANGS[code].label}
                     </a>
                 ))}
@@ -87,3 +87,21 @@ function path(name: string, slug: string | null = null) {
         )}
     </div>
 </footer>
+
+<script>
+    import { resolveLanguageDestination } from '../lib/route-localization.js';
+
+    for (const link of document.querySelectorAll('[data-footer-language]')) {
+        link.addEventListener('click', (event) => {
+            if (!(event instanceof MouseEvent) || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+            if (!(link instanceof HTMLAnchorElement)) return;
+
+            const language = link.dataset.footerLanguage;
+            if (!language) return;
+
+            event.preventDefault();
+            try { window.localStorage.setItem('ur.xyz.lang', language); } catch {}
+            window.location.assign(resolveLanguageDestination(window.location.href, language).href);
+        });
+    }
+</script>

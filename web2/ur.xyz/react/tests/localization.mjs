@@ -8,12 +8,19 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { routeAvailability } from '../../astro/src/lib/route-localization.js';
+import ar from '../src/i18n/ar.js';
+import de from '../src/i18n/de.js';
+import en from '../src/i18n/en.js';
+import es from '../src/i18n/es.js';
+import ru from '../src/i18n/ru.js';
+import zh from '../src/i18n/zh.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ASTRO_DIR = path.resolve(__dirname, '../../astro');
 const UR_ENV = process.env.UR_ENV || 'main';
 const ROOT = path.join(ASTRO_DIR, 'build', UR_ENV);
 const LANGS = ['en', 'ru', 'ar', 'zh', 'de', 'es'];
+const COPY = { en, ru, ar, zh, de, es };
 const TRANSLATED_ROUTES = ['/', '/operators', '/miners', '/validators', '/research'];
 const ENGLISH_ONLY_ROUTES = [
   '/about',
@@ -112,6 +119,29 @@ async function chooseDesktopLanguage(page, language) {
   await page.waitForLoadState('domcontentloaded');
 }
 
+function localizedRoute(route, language) {
+  if (language === 'en') return route;
+  return route === '/' ? `/${language}` : `/${language}${route}`;
+}
+
+function expectedCopy(route, language) {
+  const dictionary = COPY[language];
+  if (route === '/') {
+    return {
+      heading: dictionary.nav.tagline,
+      body: dictionary.homepage.intro,
+      bodySelector: '.homepage-intro p',
+    };
+  }
+
+  const section = route.slice(1);
+  return {
+    heading: dictionary[section].title,
+    body: dictionary[section].intro,
+    bodySelector: `#${section} .section-body > p`,
+  };
+}
+
 async function main() {
   assert(fs.existsSync(path.join(ROOT, 'index.html')), `missing build output at ${ROOT}`);
 
@@ -140,9 +170,18 @@ async function main() {
     assert(await page.locator('html').getAttribute('lang') === 'en', 'explicit English URL did not remain English');
 
     const englishHeading = await page.locator('h1').innerText();
-    await chooseDesktopLanguage(page, 'de');
-    assert(new URL(page.url()).pathname === '/de/operators', 'desktop selector lost the Operators route');
-    assert(await page.locator('html').getAttribute('lang') === 'de', 'German destination has the wrong lang');
+    for (const language of LANGS.slice(1)) {
+      await page.goto(base + '/operators');
+      await chooseDesktopLanguage(page, language);
+      assert(new URL(page.url()).pathname === `/${language}/operators`,
+        `desktop ${language} choice lost the Operators route`);
+      assert(await page.locator('html').getAttribute('lang') === language,
+        `desktop ${language} choice loaded the wrong document language`);
+      assert(await page.locator('h1').innerText() === COPY[language].operators.title,
+        `desktop ${language} choice loaded the wrong Operators content`);
+    }
+
+    await page.goto(base + '/de/operators');
     assert(await page.locator('h1').innerText() !== englishHeading, 'German destination retained the English heading');
     await page.reload({ waitUntil: 'domcontentloaded' });
     assert(new URL(page.url()).pathname === '/de/operators', 'refresh lost the localized route');
@@ -174,11 +213,40 @@ async function main() {
     assert(await page.locator('.footer-legal a[href="/terms"]').count() === 1,
       'localized footer does not link to authoritative English legal URL');
 
-    for (const route of TRANSLATED_ROUTES) {
-      await page.goto(base + route);
-      assert(await page.locator('.nav-lang-toggle').count() === 1, `${route} has no desktop language selector`);
-      assert(await page.locator('.nav-language-availability').count() === 0, `${route} is incorrectly labeled English-only`);
+    for (const language of LANGS) {
+      const source = language === 'en' ? '/de/operators' : '/operators';
+      const expectedPath = language === 'en' ? '/operators' : `/${language}/operators`;
+      await page.goto(`${base}${source}?view=map#network`);
+      await page.locator(`.footer-langs a[lang="${language}"]`).click();
+      await page.waitForURL((url) => url.pathname === expectedPath && url.search === '?view=map' && url.hash === '#network');
+      const footerStatefulUrl = new URL(page.url());
+      assert(footerStatefulUrl.pathname === expectedPath, `footer ${language} switch lost page identity`);
+      assert(footerStatefulUrl.search === '?view=map' && footerStatefulUrl.hash === '#network',
+        `footer ${language} switch lost query or fragment`);
     }
+
+    for (const route of TRANSLATED_ROUTES) {
+      for (const language of LANGS) {
+        await page.goto(base + localizedRoute(route, language));
+        const expected = expectedCopy(route, language);
+        assert(await page.locator('html').getAttribute('lang') === language,
+          `${localizedRoute(route, language)} has the wrong document language`);
+        assert((await page.locator('h1').innerText()).trim() === expected.heading,
+          `${localizedRoute(route, language)} has the wrong translated heading`);
+        assert((await page.locator(expected.bodySelector).first().innerText()).trim() === expected.body,
+          `${localizedRoute(route, language)} has the wrong translated body copy`);
+        assert(await page.locator('.nav-lang-toggle').count() === 1,
+          `${localizedRoute(route, language)} has no desktop language selector`);
+        assert(await page.locator('.nav-language-availability').count() === 0,
+          `${localizedRoute(route, language)} is incorrectly labeled English-only`);
+      }
+    }
+
+    await page.goto(base + '/es');
+    await chooseDesktopLanguage(page, 'en');
+    assert(new URL(page.url()).pathname === '/', 'homepage return-to-English did not preserve page identity');
+    assert((await page.locator('h1').innerText()).trim() === en.nav.tagline,
+      'homepage return-to-English loaded the wrong content');
 
     for (const route of ENGLISH_ONLY_ROUTES) {
       await page.goto(base + route, { waitUntil: 'domcontentloaded' });
