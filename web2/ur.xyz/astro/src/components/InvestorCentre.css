@@ -116,9 +116,87 @@
     gap: 1.15em;
 }
 
-.investor-library {
-    padding-block: 54px 66px;
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+.investor-views {
     border-top: 1px solid var(--investor-line-strong);
+}
+
+.investor-view-tabs {
+    display: flex;
+    gap: 34px;
+    border-bottom: 1px solid var(--investor-line);
+}
+
+.investor-view-tab {
+    min-height: 58px;
+    padding: 2px 0 0;
+    border: 0;
+    border-bottom: 2px solid transparent;
+    background: transparent;
+    color: var(--investor-muted);
+    font-size: 0.86rem;
+    cursor: pointer;
+    transition: color 0.16s ease, border-color 0.16s ease;
+}
+
+.investor-view-tab:hover {
+    color: var(--brand-white);
+}
+
+.investor-view-tab[aria-selected='true'] {
+    border-bottom-color: var(--brand-ur);
+    color: var(--brand-white);
+}
+
+.investor-view-tab:focus-visible,
+.archive-shortcut:focus-visible,
+.archive-controls input:focus-visible,
+.archive-controls select:focus-visible {
+    outline: 2px solid var(--brand-ur);
+    outline-offset: 3px;
+}
+
+.investor-view-panel[hidden] {
+    display: none;
+}
+
+.investor-section-heading {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 24px;
+    margin-bottom: 25px;
+}
+
+.investor-archive__heading h2,
+.investor-section-heading h2 {
+    margin: 0;
+    color: var(--brand-white);
+    font-size: 1.75rem;
+    font-weight: 400;
+    letter-spacing: -0.035em;
+    line-height: 1.15;
+}
+
+.investor-section-heading > span {
+    color: var(--investor-muted);
+    font-size: 0.72rem;
+}
+
+.investor-library {
+    /* stacked directly above .investor-archive now that the tabs are gone,
+       so the gap between them is owned solely by the archive padding-top */
+    padding-block: 54px 0;
 }
 
 .investor-library > h2 {
@@ -128,7 +206,7 @@
 .featured-letter {
     position: relative;
     display: flex;
-    min-height: 250px;
+    min-height: 270px;
     flex-direction: column;
     padding: 36px 42px 38px;
     overflow: hidden;
@@ -148,9 +226,6 @@
 }
 
 .resource-meta {
-    position: absolute;
-    top: 36px;
-    left: 42px;
     margin: 0;
     color: var(--investor-muted);
     font-size: 0.73rem;
@@ -170,10 +245,9 @@
        with far more room than it needs and pushed the summary to four tight
        lines. */
     grid-template-columns: minmax(0, 1fr) minmax(280px, 360px);
-    align-items: center;
+    align-items: start;
     gap: 58px;
-    margin-block: auto;
-    padding-top: 32px;
+    margin-top: 34px;
 }
 
 .featured-letter h3 {
@@ -225,8 +299,8 @@
 .resource-columns {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 34px;
-    margin-top: 34px;
+    gap: 48px;
+    margin-top: 40px;
 }
 
 .resource-group {
@@ -235,66 +309,258 @@
 
 .resource-group > h3 {
     margin: 0;
-    padding: 9px 2px 18px;
+    padding: 8px 0 18px;
+    border-bottom: 1px solid var(--investor-line);
     color: var(--brand-white);
     font-size: 1.22rem;
     font-weight: 400;
     letter-spacing: -0.025em;
 }
 
-/* One row per document. The row is the link to read or view it; the download
-   is a quiet second link in the metadata line, in the same type as the rest
-   of that line. The site has no boxed buttons in lists, so it should not read
-   as a button. The title link is stretched over the whole row; the download
-   sits above it so it stays separately clickable. */
-.resource-row {
-    position: relative;
-    display: grid;
-    min-height: 86px;
-    grid-template-columns: 28px minmax(0, 1fr) 20px;
-    align-items: center;
-    gap: 15px;
-    padding: 17px 18px;
-    border-top: 1px solid var(--investor-line);
-    color: inherit;
-    text-decoration: none;
-    transition: padding 0.18s ease, background 0.18s ease;
+.resource-list {
+    padding: 0;
 }
 
-/* Same type as the <strong> it replaced, so only the download link is new. */
-.resource-row__title {
-    overflow: hidden;
-    color: var(--brand-white);
-    font-size: 0.91rem;
-    font-weight: 400;
-    text-decoration: none;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-/* Stretched link: anywhere on the row opens the document. */
-.resource-row__title::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-}
-
-.resource-dl {
-    position: relative;   /* above the stretched link */
-    z-index: 1;
+.archive-shortcut {
     display: inline-flex;
     min-height: 44px;
     align-items: center;
+    gap: 12px;
+    margin-top: 26px;
+    padding: 0 0 3px;
+    border: 0;
+    border-bottom: 1px solid var(--investor-muted);
+    background: transparent;
+    color: var(--brand-white);
+    font-size: 0.78rem;
+    text-align: left;
+    cursor: pointer;
+}
+
+.archive-shortcut span {
+    color: var(--brand-ur);
+    transition: transform 0.18s ease;
+}
+
+.archive-shortcut:hover span {
+    transform: translateX(3px);
+}
+
+.investor-archive {
+    padding-block: 56px 72px;
+}
+
+.investor-archive__heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 32px;
+    margin-bottom: 20px;
+}
+
+.investor-archive__heading h2 {
+    margin: 0;
+    color: var(--brand-white);
+    font-size: clamp(1.8rem, 3.5vw, 2.35rem);
+    font-weight: 400;
+    letter-spacing: -0.04em;
+}
+
+.investor-archive__heading p {
+    margin: 0;
     color: var(--investor-muted);
+    font-size: 0.8rem;
+}
+
+.investor-archive__heading > span {
+    padding-bottom: 2px;
+    color: var(--investor-muted);
+    font-size: 0.7rem;
+    white-space: nowrap;
+}
+
+.archive-controls {
+    display: grid;
+    grid-template-columns: minmax(220px, 1fr) 190px auto;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 19px;
+}
+
+.archive-controls label,
+.archive-controls input,
+.archive-controls select {
+    min-width: 0;
+}
+
+.archive-controls input,
+.archive-controls select {
+    width: 100%;
+    min-height: 44px;
+    padding-inline: 14px;
+    border: 1px solid var(--investor-line);
+    border-radius: 4px;
+    background: var(--investor-panel);
+    color: var(--brand-white);
+    font-size: 0.8rem;
+}
+
+.archive-controls input::placeholder {
+    color: var(--investor-muted);
+}
+
+.archive-controls select {
+    color-scheme: dark;
+}
+
+.archive-count {
+    margin: 0 0 0 15px;
+    color: var(--investor-muted);
+    font-size: 0.72rem;
+    white-space: nowrap;
+}
+
+.archive-count strong {
+    color: var(--investor-soft);
+    font-weight: 400;
+}
+
+.archive-list {
+    border-top: 1px solid var(--investor-line-strong);
+}
+
+.archive-row {
+    display: grid;
+    min-height: 74px;
+    grid-template-columns: 130px 135px minmax(0, 1fr) 72px;
+    gap: 16px;
+    align-items: center;
+    border-bottom: 1px solid var(--investor-line);
+}
+
+.archive-row:not(.archive-row--heading) {
+    transition: background 0.16s ease;
+}
+
+.archive-row:not(.archive-row--heading):hover {
+    background: rgba(214, 230, 244, 0.025);
+}
+
+.archive-row--heading {
+    min-height: 38px;
+    color: var(--investor-muted);
+    font-size: 0.65rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+}
+
+.archive-row time {
+    color: var(--investor-muted);
+    font-size: 0.72rem;
+}
+
+.archive-row__kind {
+    color: var(--brand-ur);
+    font-size: 0.68rem;
+    letter-spacing: 0.055em;
+    text-transform: uppercase;
+}
+
+.archive-row__title {
+    min-width: 0;
+}
+
+.archive-row__title a {
+    display: inline-flex;
+    min-height: 24px;
+    align-items: center;
+    color: var(--brand-white);
+    font-size: 0.88rem;
+    line-height: 1.35;
     text-decoration: none;
-    border-bottom: 1px solid rgba(214, 230, 244, 0.28);
-    transition: color 0.16s ease, border-color 0.16s ease;
+}
+
+.archive-row__title a:hover {
+    text-decoration: underline;
+    text-decoration-color: var(--brand-ur);
+    text-underline-offset: 5px;
+}
+
+.archive-row__title small {
+    display: block;
+    margin-top: 5px;
+    color: var(--investor-muted);
+    font-size: 0.68rem;
+}
+
+.archive-row__format {
+    justify-self: end;
+}
+
+.archive-row__format a {
+    display: inline-flex;
+    min-height: 44px;
+    align-items: center;
+    gap: 7px;
+    color: var(--brand-ur);
+    font-size: 0.72rem;
+    text-decoration: none;
+}
+
+.archive-empty {
+    margin: 0;
+    padding: 34px 0;
+    border-bottom: 1px solid var(--investor-line);
+    color: var(--investor-muted);
+    font-size: 0.82rem;
+}
+
+/* Each document is one simple three-column row: icon, copy, open action.
+   Secondary downloads stay beside the metadata they describe. */
+.resource-row {
+    position: relative;
+    display: grid;
+    min-height: 92px;
+    grid-template-columns: 28px minmax(0, 1fr) 44px;
+    align-items: center;
+    gap: 16px;
+    padding-block: 18px;
+    border-bottom: 1px solid var(--investor-line);
+    color: inherit;
+    text-decoration: none;
+    transition: background 0.18s ease;
+}
+
+.resource-row__title {
+    min-width: 0;
+    color: var(--brand-white);
+    font-size: 0.91rem;
+    font-weight: 400;
+    line-height: 1.38;
+    text-decoration: none;
+}
+
+.resource-dl {
+    position: relative;
+    display: inline;
+    color: var(--investor-muted);
+    text-decoration-line: underline;
+    text-decoration-color: rgba(214, 230, 244, 0.28);
+    text-underline-offset: 4px;
+    white-space: nowrap;
+    transition: color 0.16s ease, text-decoration-color 0.16s ease;
+}
+
+.resource-dl::after {
+    content: '';
+    position: absolute;
+    inset: -14px -6px;
 }
 
 .resource-dl:hover,
 .resource-dl:focus-visible {
     color: var(--brand-white);
-    border-bottom-color: var(--brand-ur);
+    text-decoration-color: var(--brand-ur);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -305,7 +571,6 @@
 }
 
 .resource-row:not(.resource-row--static):hover {
-    padding-inline: 22px;
     background: rgba(214, 230, 244, 0.035);
 }
 
@@ -373,7 +638,7 @@
     display: flex;
     min-width: 0;
     flex-direction: column;
-    gap: 5px;
+    gap: 6px;
 }
 
 .resource-row__copy strong {
@@ -385,15 +650,36 @@
     white-space: nowrap;
 }
 
+.resource-row__meta,
 .resource-row__copy small {
+    min-width: 0;
     color: var(--investor-muted);
     font-size: 0.72rem;
+    line-height: 1.45;
+}
+
+.resource-row__actions {
+    display: contents;
+}
+
+.resource-open {
+    box-sizing: border-box;
+    display: grid;
+    width: 44px;
+    height: 44px;
+    place-items: center end;
+    color: var(--brand-ur);
+    text-decoration: none;
 }
 
 .resource-arrow {
-    justify-self: end;
     color: var(--brand-ur);
     font-size: 0.9rem;
+    transition: transform 0.18s ease;
+}
+
+.resource-open:hover .resource-arrow {
+    transform: translateX(3px);
 }
 
 .investor-metrics {
@@ -580,7 +866,7 @@
 }
 
 .investor-disclosure {
-    padding-block: 30px 34px;
+    padding-block: 24px 42px;
     color: var(--investor-muted);
     font-size: 0.7rem;
     line-height: 1.55;
@@ -605,10 +891,6 @@
         gap: 22px;
     }
 
-    .resource-meta {
-        position: static;
-    }
-
     .featured-letter__content {
         grid-template-columns: 1fr;
         gap: 24px;
@@ -618,6 +900,11 @@
     .metric-grid,
     .investor-explore {
         grid-template-columns: 1fr;
+    }
+
+    .archive-row {
+        grid-template-columns: 112px 112px minmax(0, 1fr) 64px;
+        gap: 12px;
     }
 
     .metric {
@@ -674,8 +961,28 @@
         line-height: 1.58;
     }
 
+    .investor-view-tabs {
+        gap: 24px;
+    }
+
+    .investor-view-tab {
+        max-width: 190px;
+        font-size: 0.8rem;
+        line-height: 1.3;
+        text-align: left;
+    }
+
+    .investor-section-heading {
+        display: block;
+    }
+
+    .investor-section-heading > span {
+        display: block;
+        margin-top: 8px;
+    }
+
     .investor-library {
-        padding-block: 44px 54px;
+        padding-block: 44px 0;
     }
 
     .featured-letter {
@@ -694,16 +1001,71 @@
     }
 
     .resource-columns {
-        gap: 34px;
+        gap: 16px;
         margin-top: 30px;
     }
 
-    .resource-row {
-        padding-inline: 4px;
+    .investor-archive__heading {
+        display: block;
     }
 
-    a.resource-row:hover {
-        padding-inline: 8px;
+    .investor-archive__heading > span {
+        display: block;
+        margin-top: 12px;
+    }
+
+    .archive-controls {
+        grid-template-columns: 1fr auto;
+    }
+
+    .archive-search {
+        grid-column: 1 / -1;
+    }
+
+    .archive-count {
+        margin-left: 4px;
+    }
+
+    .archive-row--heading {
+        display: none;
+    }
+
+    .archive-row:not(.archive-row--heading) {
+        min-height: 94px;
+        grid-template-columns: 84px minmax(0, 1fr) auto;
+        grid-template-rows: auto auto;
+        gap: 4px 12px;
+        padding-block: 16px;
+    }
+
+    .archive-row time {
+        grid-column: 1;
+        grid-row: 1 / 3;
+        align-self: start;
+        padding-top: 2px;
+    }
+
+    .archive-row__kind {
+        grid-column: 2;
+        grid-row: 1;
+        align-self: end;
+    }
+
+    .archive-row__title {
+        grid-column: 2;
+        grid-row: 2;
+        align-self: start;
+    }
+
+    .archive-row__format {
+        grid-column: 3;
+        grid-row: 1 / 3;
+        align-self: center;
+    }
+
+    .resource-row {
+        grid-template-columns: 28px minmax(0, 1fr) 44px;
+        padding-block: 17px;
     }
 
     .investor-metrics {
@@ -731,6 +1093,16 @@
     .network-links a,
     .research-links a,
     .network-brand img {
+        transition: none;
+    }
+
+    .resource-arrow {
+        transition: none;
+    }
+
+    .investor-view-tab,
+    .archive-shortcut span,
+    .archive-row {
         transition: none;
     }
 }

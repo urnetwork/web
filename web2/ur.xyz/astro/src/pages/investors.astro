@@ -10,8 +10,18 @@ import '@react/components/Nav.css';
 import '../components/InvestorCentre.css';
 
 const t = en;
-const { featured, updates, materials, metrics } = investorCentre;
+const { featured, deck, updates, materials, metrics } = investorCentre;
 const SHOW_METRICS = false;
+const archiveItems = [...updates, ...materials.map(item => ({
+    ...item,
+    date: item.href === deck.href ? deck.date : 'Not dated',
+    dateIso: item.href === deck.href ? deck.dateIso : null,
+    kind: item.href === deck.href ? deck.kind : 'Link',
+    format: item.pdfHref ? 'PDF' : 'Web',
+}))]
+    .filter((item, index, items) => items.findIndex(candidate => candidate.href === item.href) === index)
+    .sort((a, b) => (b.dateIso || '').localeCompare(a.dateIso || ''));
+const archiveKinds = [...new Set(archiveItems.map(item => item.kind))];
 const centreDocs = [featured, ...updates, ...materials].filter(
     (d, i, arr) => d && arr.findIndex((x) => x.href === d.href) === i,
 );
@@ -36,7 +46,7 @@ const centreJsonLd = [{
 ---
 <Base
     title="Investor Centre | UR"
-    description="UR investor updates, materials, and public research — letters, the litepaper, and third-party audits, with live network dashboards."
+    description="UR investor updates, materials, and public research: letters, the litepaper, and third-party audits, with live network dashboards."
     lang="en"
     jsonLd={centreJsonLd}
 >
@@ -64,79 +74,78 @@ const centreJsonLd = [{
                 </div>
             </section>
 
-            <section class="investor-library investor-shell" aria-labelledby="investor-resources">
-                <h2 id="investor-resources">Investor resources</h2>
+            <div class="investor-views investor-shell" data-investor-views>
 
-                <a class="featured-letter" href={featured.href}>
-                    <p class="resource-meta">
-                        <time datetime={featured.dateIso}>{featured.date}</time>
-                        <span aria-hidden="true">·</span>
-                        {featured.kind}
-                        <span aria-hidden="true">·</span>
-                        {featured.readTime}
-                    </p>
-                    <div class="featured-letter__content">
-                        <h3>{featured.title}</h3>
-                        <div class="featured-letter__details">
-                            <p>{featured.summary}</p>
-                            <span class="text-action">{featured.cta} <i aria-hidden="true">→</i></span>
-                        </div>
+                <section class="investor-library">
+                    <div class="investor-section-heading">
+                        <h2>Latest from UR</h2>
+                        <span>Curated overview</span>
                     </div>
-                </a>
 
-                <div class="resource-columns">
-                    <section class="resource-group" aria-labelledby="management-updates">
-                        <h3 id="management-updates">Management updates</h3>
-                        <div class="resource-list">
-                            {updates.map(item => (
-                                <div class="resource-row">
-                                    <span class={`format-icon format-icon--${item.format.toLowerCase()}`} aria-hidden="true"></span>
-                                    <span class="resource-row__copy">
-                                        <a
-                                            class="resource-row__title"
-                                            href={item.href}
-                                            target={item.external ? '_blank' : undefined}
-                                            rel={item.external ? 'noopener noreferrer' : undefined}
-                                        >{item.title}</a>
-                                        <small>
-                                            {[item.date, item.readTime].filter(Boolean).join(' · ')}
-                                            {item.pdfHref && <> · <a class="resource-dl" href={item.pdfHref} download>Download PDF</a></>}
-                                        </small>
-                                    </span>
-                                    <span class="resource-arrow" aria-hidden="true">{item.external ? '↗' : '→'}</span>
-                                </div>
-                            ))}
+                    <a class="featured-letter" href={featured.href}>
+                        <p class="resource-meta">
+                            <time datetime={featured.dateIso}>{featured.date}</time>
+                            <span aria-hidden="true">·</span>
+                            {featured.kind}
+                            <span aria-hidden="true">·</span>
+                            {featured.readTime}
+                        </p>
+                        <div class="featured-letter__content">
+                            <h3>{featured.title}</h3>
+                            <div class="featured-letter__details">
+                                <p>{featured.summary}</p>
+                                <span class="text-action">{featured.cta} <i aria-hidden="true">→</i></span>
+                            </div>
                         </div>
-                    </section>
+                    </a>
 
-                    <section class="resource-group" aria-labelledby="materials">
-                        <h3 id="materials">Materials</h3>
-                        <div class="resource-list">
-                            {materials.map(item => item.href ? (
-                                <div class="resource-row">
-                                    <span class="format-icon format-icon--document" aria-hidden="true"></span>
-                                    <span class="resource-row__copy">
-                                        <a class="resource-row__title" href={item.href}>{item.title}</a>
-                                        <small>
-                                            {[item.detail, item.readTime].filter(Boolean).join(' · ')}
-                                            {item.pdfHref && <> · <a class="resource-dl" href={item.pdfHref} download>Download PDF</a></>}
-                                        </small>
-                                    </span>
-                                    <span class="resource-arrow" aria-hidden="true">→</span>
-                                </div>
-                            ) : (
-                                <div class="resource-row resource-row--static">
-                                    <span class="format-icon format-icon--document" aria-hidden="true"></span>
-                                    <span class="resource-row__copy">
-                                        <strong>{item.title}</strong>
-                                        <small>{[item.detail, item.readTime].filter(Boolean).join(' · ')}</small>
-                                    </span>
-                                </div>
-                            ))}
+                </section>
+
+                <section class="investor-archive" id="announcements" aria-labelledby="all-investor-materials">
+                    <div class="investor-archive__heading">
+                        <div>
+                            <h2 id="all-investor-materials">All investor materials</h2>
+                            <p>Browse announcements, letters, decks and reference materials.</p>
                         </div>
-                    </section>
-                </div>
-            </section>
+                        <span>Updated {investorCentre.updated}</span>
+                    </div>
+
+                    <div class="archive-controls" aria-label="Filter investor materials">
+                        <label class="archive-search">
+                            <span class="sr-only">Search investor materials</span>
+                            <input type="search" placeholder="Search titles" data-archive-search />
+                        </label>
+                        <label>
+                            <span class="sr-only">Filter by type</span>
+                            <select data-archive-kind>
+                                <option value="all">All types</option>
+                                {archiveKinds.map(kind => <option value={kind.toLowerCase()}>{kind}</option>)}
+                            </select>
+                        </label>
+                        <p class="archive-count" aria-live="polite"><strong data-archive-count>{archiveItems.length}</strong> items</p>
+                    </div>
+
+                    <div class="archive-list" data-archive-list>
+                        <div class="archive-row archive-row--heading" aria-hidden="true">
+                            <span>Date</span><span>Type</span><span>Title</span><span>Format</span>
+                        </div>
+                        {archiveItems.map(item => (
+                            <article class="archive-row" data-archive-item data-kind={item.kind.toLowerCase()}>
+                                <time datetime={item.dateIso || undefined}>{item.date}</time>
+                                <span class="archive-row__kind">{item.kind}</span>
+                                <div class="archive-row__title">
+                                    <a href={item.href}>{item.title}</a>
+                                    <small>{item.readTime || item.detail}</small>
+                                </div>
+                                <div class="archive-row__format">
+                                    {item.pdfHref ? <a href={item.pdfHref} download>PDF <span aria-hidden="true">↓</span></a> : <a href={item.href}>Read <span aria-hidden="true">→</span></a>}
+                                </div>
+                            </article>
+                        ))}
+                    </div>
+                    <p class="archive-empty" data-archive-empty hidden>No investor materials match those filters.</p>
+                </section>
+            </div>
 
             {SHOW_METRICS && <section class="investor-metrics investor-shell" aria-labelledby="metrics-title">
                 <h2 id="metrics-title">Metrics</h2>
@@ -203,6 +212,32 @@ const centreJsonLd = [{
 </Base>
 
 <script>
+    const archiveSearch = document.querySelector('[data-archive-search]');
+    const archiveKind = document.querySelector('[data-archive-kind]');
+    const archiveItems = Array.from(document.querySelectorAll('[data-archive-item]'));
+    const archiveCount = document.querySelector('[data-archive-count]');
+    const archiveEmpty = document.querySelector('[data-archive-empty]');
+
+    const filterArchive = () => {
+        const query = archiveSearch?.value.trim().toLowerCase() || '';
+        const kind = archiveKind?.value || 'all';
+        let visibleCount = 0;
+
+        archiveItems.forEach(item => {
+            const matchesQuery = !query || item.textContent.toLowerCase().includes(query);
+            const matchesKind = kind === 'all' || item.dataset.kind === kind;
+            const visible = matchesQuery && matchesKind;
+            item.hidden = !visible;
+            if (visible) visibleCount += 1;
+        });
+
+        if (archiveCount) archiveCount.textContent = String(visibleCount);
+        if (archiveEmpty) archiveEmpty.hidden = visibleCount !== 0;
+    };
+
+    archiveSearch?.addEventListener('input', filterArchive);
+    archiveKind?.addEventListener('change', filterArchive);
+
     const counters = Array.from(document.querySelectorAll('[data-count]'));
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 

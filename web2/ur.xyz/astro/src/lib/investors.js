@@ -36,26 +36,53 @@ const letter = {
     pdfHref: '/investors/our-letter-to-bittensor.pdf',
 };
 
+const convictionAnnouncement = {
+    kind: 'Announcement',
+    title: 'UR team locks 550,000 alpha in perpetuity',
+    summary:
+        'Approximately US$1.44 million locked in perpetual conviction, taking total locked alpha behind SN25 to 27.1 per cent of circulating supply.',
+    date: '9 September 2026',
+    dateIso: '2026-09-09',
+    readTime: '3 min read',
+    cta: 'Read the announcement',
+    href: '/investors/conviction-lock',
+    pdfHref: '/investors/ur-conviction-lock-announcement.pdf',
+};
+
 export const investorCentre = {
-    updated: '21 August 2026',
-    updatedIso: '2026-08-21',
+    updated: '9 September 2026',
+    updatedIso: '2026-09-09',
     about: [
         'Our mission is to make privacy the default for every user by providing the encryption layer for the open internet. We are building a user-powered network and a privacy product suite designed to serve people, not surveil them.',
-        'Anyone, anywhere should be able to access the internet freely.',
+        'Anyone, anywhere should be able to access the internet freely and privately.',
     ],
     // `featured` is whichever document leads the Investor Centre and will
     // change again. Anything that means one specific document must name it:
     // a page that reads `featured` gets retitled and re-pointed the next time
     // the card changes, which is how the letter page briefly offered the deck
     // PDF as its own download.
-    featured: deck,
+    featured: convictionAnnouncement,
     deck,
     letter,
+    convictionAnnouncement,
 
     updates: [
         {
+            title: convictionAnnouncement.title,
+            date: convictionAnnouncement.date,
+            dateIso: convictionAnnouncement.dateIso,
+            kind: convictionAnnouncement.kind,
+            format: 'Written',
+            readTime: convictionAnnouncement.readTime,
+            href: convictionAnnouncement.href,
+            pdfHref: convictionAnnouncement.pdfHref,
+            external: false,
+        },
+        {
             title: letter.title,
             date: letter.date,
+            dateIso: letter.dateIso,
+            kind: letter.kind,
             format: 'Written',
             readTime: letter.readTime,
             href: letter.href,

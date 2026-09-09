@@ -24,7 +24,7 @@ interface Props {
 
 const {
     title,
-    description = 'UR — Own your privacy. Own your network.',
+    description = 'UR: Own your privacy. Own your network.',
     lang = 'en',
     dir = 'ltr',
     jsonLd = [],
@@ -45,7 +45,7 @@ const publicPath = publicPathFor(Astro.url.pathname);
 const canonical = new URL(publicPath, SITE_ORIGIN).href;
 // scripts/generate-og.mjs renders the 1200×630 card; pages can override
 const ogImage = `${SITE_ORIGIN}${ogImageProp || '/og.png'}`;
-const ogAlt = `UR — ${description.length <= 120 ? description : title}`;
+const ogAlt = `UR: ${description.length <= 120 ? description : title}`;
 const alternateHref = alternate && (alternate.href.startsWith('http') ? alternate.href : `${SITE_ORIGIN}${alternate.href}`);
 
 const OG_LOCALES = { en: 'en_US', ru: 'ru_RU', ar: 'ar_AR', zh: 'zh_CN', de: 'de_DE', es: 'es_ES' };
