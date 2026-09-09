@@ -1,6 +1,7 @@
 ---
 import '@react/components/Footer.css';
 import { LANGS, LANG_CODES } from '../lib/i18n.js';
+import { hasLocalizedVersion, resolveLanguageDestination } from '../lib/route-localization.js';
 
 interface Props { t: any; lang: string; }
 const { t, lang } = Astro.props;
@@ -11,6 +12,8 @@ const X_URL = 'https://x.com/urnetwork';
 const GITHUB_URL = 'https://github.com/urfoundation/sn';
 const PRODUCT_URL = 'https://ur.io';
 const BRAND_KIT = 'https://drive.google.com/drive/folders/1086NAso9dA9ytMC0Dg5LoKZ4RSxgcXD8?usp=sharing';
+const currentPath = Astro.url.pathname;
+const translated = hasLocalizedVersion(currentPath);
 
 function path(name: string, slug: string | null = null) {
     const prefix = lang && lang !== 'en' ? `/${lang}` : '';
@@ -24,11 +27,11 @@ function path(name: string, slug: string | null = null) {
         <nav class="footer-column" aria-label={t.footer.learn}>
             <h2>{t.footer.learn}</h2>
             {/* docs are English-only — a localized href only reached them through a redirect stub */}
-            <a href="/docs">{t.nav.docs}</a>
-            {lang === 'en' && <a href="/build">Build on UR</a>}
+            <a href="/docs" aria-label={`${t.nav.docs} — available in English`}>{t.nav.docs} <span class="english-only-mark" lang="en">EN</span></a>
+            <a href="/build" aria-label="Build on UR — available in English">Build on UR <span class="english-only-mark" lang="en">EN</span></a>
             <a href={path('research')}>{t.nav.research}</a>
-            {lang === 'en' && <a href="/about">About</a>}
-            <a href="/docs/litepaper">{t.nav.whitepaper}</a>
+            <a href="/about" aria-label="About — available in English">About <span class="english-only-mark" lang="en">EN</span></a>
+            <a href="/docs/litepaper" aria-label={`${t.nav.whitepaper} — available in English`}>{t.nav.whitepaper} <span class="english-only-mark" lang="en">EN</span></a>
         </nav>
 
         <nav class="footer-column" aria-label={t.nav.network}>
@@ -42,7 +45,7 @@ function path(name: string, slug: string | null = null) {
             <h2>{t.footer.resources}</h2>
             <a href={`${path('home')}#launch-video`}>{t.footer.launchVideo}</a>
             <a href={BRAND_KIT} target="_blank" rel="noopener noreferrer">{t.footer.brandKit}</a>
-            {lang === 'en' && <a href="/investors">Investor Centre</a>}
+            <a href="/investors" aria-label="Investor Centre — available in English">Investor Centre <span class="english-only-mark" lang="en">EN</span></a>
             {/* machine-readable site map for agents (the llms.txt convention) */}
             <a href="/llms.txt">llms.txt</a>
         </nav>
@@ -67,16 +70,57 @@ function path(name: string, slug: string | null = null) {
     <div class="footer-utility">
         <p>© {year} UR Foundation</p>
         <nav class="footer-legal" aria-label={t.footer.legal}>
-            <a href={path('terms')}>{t.footer.terms}</a>
-            <a href={path('privacy')}>{t.footer.privacy}</a>
-            <a href={path('vdp')}>{t.footer.vdp}</a>
+            <a href="/terms" aria-label={`${t.footer.terms} — available in English`}>{t.footer.terms} <span class="english-only-mark" lang="en">EN</span></a>
+            <a href="/privacy" aria-label={`${t.footer.privacy} — available in English`}>{t.footer.privacy} <span class="english-only-mark" lang="en">EN</span></a>
+            <a href="/vdp" aria-label={`${t.footer.vdp} — available in English`}>{t.footer.vdp} <span class="english-only-mark" lang="en">EN</span></a>
         </nav>
-        <nav class="footer-langs" aria-label={t.footer.languagesAria}>
-            {LANG_CODES.map(code => (
-                <a href={code === 'en' ? '/' : `/${code}`} lang={code} class={`footer-lang ${code === lang ? 'is-active' : ''}`}>
-                    {LANGS[code].label}
-                </a>
-            ))}
-        </nav>
+        {translated ? (
+            <nav class="footer-langs" aria-label={t.footer.languagesAria}>
+                {LANG_CODES.map(code => (
+                    <a href={resolveLanguageDestination(currentPath, code).href} lang={code} data-footer-language={code} class={`footer-lang ${code === lang ? 'is-active' : ''}`} aria-current={code === lang ? 'page' : undefined}>
+                        {LANGS[code].label}
+                    </a>
+                ))}
+            </nav>
+        ) : (
+            <p class="footer-language-availability" lang="en"><strong>EN</strong> Available in English</p>
+        )}
     </div>
 </footer>
+
+<script>
+    import { resolveLanguageDestination } from '../lib/route-localization.js';
+
+    const footerLanguageLinks = document.querySelectorAll<HTMLAnchorElement>('[data-footer-language]');
+
+    function synchronizeFooterLanguageLinks() {
+        for (const link of footerLanguageLinks) {
+            const language = link.dataset.footerLanguage;
+            if (language) link.setAttribute('href', resolveLanguageDestination(window.location.href, language).href);
+        }
+    }
+
+    synchronizeFooterLanguageLinks();
+    window.addEventListener('hashchange', synchronizeFooterLanguageLinks);
+    window.addEventListener('popstate', synchronizeFooterLanguageLinks);
+
+    for (const link of footerLanguageLinks) {
+        // Refresh immediately before native new-tab gestures as well as when
+        // browser history changes without a full document navigation.
+        link.addEventListener('pointerdown', synchronizeFooterLanguageLinks);
+        link.addEventListener('contextmenu', synchronizeFooterLanguageLinks);
+        link.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter') synchronizeFooterLanguageLinks();
+        });
+        link.addEventListener('click', (event) => {
+            if (!(event instanceof MouseEvent) || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+
+            const language = link.dataset.footerLanguage;
+            if (!language) return;
+
+            event.preventDefault();
+            try { window.localStorage.setItem('ur.xyz.lang', language); } catch {}
+            window.location.assign(resolveLanguageDestination(window.location.href, language).href);
+        });
+    }
+</script>

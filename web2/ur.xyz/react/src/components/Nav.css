@@ -168,6 +168,27 @@
 }
 .nav-lang-toggle span { color: var(--brand-ur); }
 
+.nav-language-availability {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 40px;
+    color: var(--brand-ui);
+    font-size: 0.68rem;
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+}
+.nav-language-availability strong,
+.english-only-mark {
+    color: var(--brand-ur);
+    font-size: 0.62rem;
+    letter-spacing: 0.08em;
+}
+.english-only-mark {
+    margin-inline-start: 0.28em;
+    vertical-align: super;
+}
+
 .nav-lang-menu {
     position: absolute;
     top: calc(100% + 10px);
@@ -180,9 +201,10 @@
     border: 1px solid rgba(214, 230, 244, 0.14);
     /* Same banding as the network menu above; the border carries it. */
 }
-.nav-lang-menu button {
+.nav-lang-menu a {
     width: 100%;
     display: flex;
+    box-sizing: border-box;
     justify-content: space-between;
     gap: 18px;
     padding: 10px;
@@ -190,10 +212,11 @@
     background: transparent;
     border: 0;
     text-align: left;
+    text-decoration: none;
     cursor: pointer;
 }
-.nav-lang-menu button:hover,
-.nav-lang-menu button.is-active { color: var(--brand-white); background: rgba(214, 230, 244, 0.06); }
+.nav-lang-menu a:hover,
+.nav-lang-menu a.is-active { color: var(--brand-white); background: rgba(214, 230, 244, 0.06); }
 .nav-lang-menu small { opacity: 0.55; }
 
 .nav-price {
@@ -327,7 +350,10 @@
 }
 .nav-drawer-foot .nav-price { justify-content: center; width: fit-content; }
 .nav-drawer-langs { display: flex; flex-wrap: wrap; gap: 8px 18px; }
-.nav-drawer-langs button {
+.nav-drawer-langs a {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     min-width: 44px;
     min-height: 44px;
     padding: 8px;
@@ -337,8 +363,10 @@
     font-size: 0.75rem;
     letter-spacing: 0.08em;
     text-transform: uppercase;
+    text-decoration: none;
 }
-.nav-drawer-langs button.is-active { color: var(--brand-white); border-bottom: 1px solid var(--brand-ur); }
+.nav-drawer-langs a.is-active { color: var(--brand-white); border-bottom: 1px solid var(--brand-ur); }
+.nav-drawer-foot > .nav-language-availability { min-height: 44px; }
 
 @media (max-width: 1020px) {
     .nav-inner { grid-template-columns: 1fr auto; }

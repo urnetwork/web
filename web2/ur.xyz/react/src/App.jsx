@@ -50,11 +50,24 @@ export default function App() {
 
     if (route.name === 'docs') return <DocsExplorer />;
     if (route.name === 'api')  return <ApiExplorer />;
+    if (route.name === 'home') return <HomePage />;
 
     const SectionComponent = SECTION_COMPONENTS[route.name];
     if (SectionComponent) return <SectionPage Component={SectionComponent} />;
 
-    return <HomePage />;
+    return <NotFoundPage />;
+}
+
+function NotFoundPage() {
+    const disclaimerVisible = useDisclaimerVisible();
+    return (
+        <div className="app">
+            <Disclaimer visible={disclaimerVisible} />
+            <Nav disclaimerVisible={disclaimerVisible} activeRoute="unknown" />
+            <main className="section-page"><h1>This page does not exist.</h1></main>
+            <Footer currentPath="/404" />
+        </div>
+    );
 }
 
 /**

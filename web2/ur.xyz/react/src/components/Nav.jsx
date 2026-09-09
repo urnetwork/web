@@ -1,7 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
 import './Nav.css';
 import { useLanguage, LANG_ORDER } from '../i18n';
-import { buildPath, navigate, useRoute } from '../router';
+import { buildPath, navigate, pathForRoute, useRoute } from '../router';
+import { resolveLanguageDestination, routeAvailability } from '../../../astro/src/lib/route-localization.js';
 import { useAlphaPrice } from '../lib/usePrice';
 
 const NETWORK_LINKS = [
@@ -10,7 +11,16 @@ const NETWORK_LINKS = [
     'validators',
 ];
 
-function LanguageSelector() {
+function EnglishAvailability({ compact = false }) {
+    return (
+        <div className={`nav-language-availability ${compact ? 'is-compact' : ''}`} lang="en">
+            <strong>EN</strong>
+            <span>Available in English</span>
+        </div>
+    );
+}
+
+function LanguageSelector({ currentPath }) {
     const { code, setLang, langs, order, t } = useLanguage();
     const [open, setOpen] = useState(false);
     const ref = useRef(null);
@@ -21,7 +31,10 @@ function LanguageSelector() {
             if (ref.current && !ref.current.contains(event.target)) setOpen(false);
         };
         const closeOnEscape = (event) => {
-            if (event.key === 'Escape') setOpen(false);
+            if (event.key === 'Escape') {
+                setOpen(false);
+                ref.current?.querySelector('.nav-lang-toggle')?.focus();
+            }
         };
         document.addEventListener('mousedown', closeOutside);
         document.addEventListener('keydown', closeOnEscape);
@@ -31,38 +44,55 @@ function LanguageSelector() {
         };
     }, [open]);
 
+    if (routeAvailability(currentPath).kind !== 'translated') {
+        return <EnglishAvailability />;
+    }
+
     return (
         <div className="nav-lang" ref={ref}>
             <button
                 type="button"
                 className="nav-lang-toggle"
                 onClick={() => setOpen(value => !value)}
-                aria-haspopup="listbox"
                 aria-expanded={open}
+                aria-controls="nav-language-menu"
                 aria-label={t.nav.languageMenu || 'Choose language'}
             >
                 {langs[code].label}
                 <span aria-hidden="true">{'\u25BE'}</span>
             </button>
             {open && (
-                <ul className="nav-lang-menu" role="listbox" aria-label={t.nav.languageMenu || 'Choose language'}>
+                <ul id="nav-language-menu" className="nav-lang-menu" aria-label={t.nav.languageMenu || 'Choose language'}>
                     {(order || LANG_ORDER).map(language => (
                         <li key={language}>
-                            <button
-                                type="button"
-                                role="option"
-                                aria-selected={language === code}
+                            <a
+                                href={resolveLanguageDestination(currentPath, language).href}
+                                lang={language}
+                                aria-current={language === code ? 'page' : undefined}
                                 className={language === code ? 'is-active' : ''}
-                                onClick={() => { setLang(language); setOpen(false); }}
+                                onClick={(event) => {
+                                    event.preventDefault();
+                                    setLang(language);
+                                    setOpen(false);
+                                }}
                             >
                                 <span>{langs[language].label}</span>
                                 <small>{langs[language].name}</small>
-                            </button>
+                            </a>
                         </li>
                     ))}
                 </ul>
             )}
         </div>
+    );
+}
+
+function EnglishOnlyLink({ href, active, children }) {
+    const label = `${children} — available in English`;
+    return (
+        <a href={href} className={active ? 'is-active' : ''} aria-current={active ? 'page' : undefined} aria-label={label}>
+            {children} <span className="english-only-mark" lang="en">EN</span>
+        </a>
     );
 }
 
@@ -136,6 +166,7 @@ export default function Nav({ disclaimerVisible, activeRoute, aboutHref }) {
     const { code, setLang, langs, t } = useLanguage();
     const detectedRoute = useRoute();
     const route = activeRoute ? { name: activeRoute, slug: null } : detectedRoute;
+    const currentPath = pathForRoute(route);
     const resolvedAboutHref = aboutHref ?? (code === 'en' ? '/about' : null);
     const [scrolled, setScrolled] = useState(false);
     const [menuOpen, setMenuOpen] = useState(false);
@@ -227,14 +258,14 @@ export default function Nav({ disclaimerVisible, activeRoute, aboutHref }) {
                     <nav className="nav-links" aria-label="Primary navigation">
                         <NetworkMenu code={code} route={route} t={t} />
                         <a href={buildPath({ name: 'research', slug: null }, code)} className={route.name === 'research' ? 'is-active' : ''} aria-current={route.name === 'research' ? 'page' : undefined}>{t.nav.research}</a>
-                        {code === 'en' && <a href="/build" className={route.name === 'build' ? 'is-active' : ''} aria-current={route.name === 'build' ? 'page' : undefined}>Build</a>}
-                        {code === 'en' && <a href="/investors" className={route.name === 'investors' ? 'is-active' : ''} aria-current={route.name === 'investors' ? 'page' : undefined}>Investors</a>}
-                        {resolvedAboutHref && <a href={resolvedAboutHref} className={route.name === 'about' ? 'is-active' : ''} aria-current={route.name === 'about' ? 'page' : undefined}>About</a>}
-                        <a href={"/docs"} className={route.name === 'docs' || route.name === 'api' ? 'is-active' : ''} aria-current={route.name === 'docs' || route.name === 'api' ? 'page' : undefined}>{t.nav.docs}</a>
+                        <EnglishOnlyLink href="/build" active={route.name === 'build'}>Build</EnglishOnlyLink>
+                        <EnglishOnlyLink href="/investors" active={route.name === 'investors'}>Investors</EnglishOnlyLink>
+                        <EnglishOnlyLink href={resolvedAboutHref || '/about'} active={route.name === 'about'}>About</EnglishOnlyLink>
+                        <EnglishOnlyLink href="/docs" active={route.name === 'docs' || route.name === 'api'}>{t.nav.docs}</EnglishOnlyLink>
                     </nav>
 
                     <div className="nav-actions">
-                        <LanguageSelector />
+                        <LanguageSelector currentPath={currentPath} />
                         <button
                             type="button"
                             ref={menuButtonRef}
@@ -267,25 +298,32 @@ export default function Nav({ disclaimerVisible, activeRoute, aboutHref }) {
                 <nav className="nav-drawer-links" aria-label="Mobile navigation">
                     <NetworkMenu code={code} route={route} t={t} mobile />
                     <a href={buildPath({ name: 'research', slug: null }, code)} className={route.name === 'research' ? 'is-active' : ''} aria-current={route.name === 'research' ? 'page' : undefined}>{t.nav.research}</a>
-                    {code === 'en' && <a href="/build" className={route.name === 'build' ? 'is-active' : ''} aria-current={route.name === 'build' ? 'page' : undefined}>Build</a>}
-                    {code === 'en' && <a href="/investors" className={route.name === 'investors' ? 'is-active' : ''} aria-current={route.name === 'investors' ? 'page' : undefined}>Investors</a>}
-                    {resolvedAboutHref && <a href={resolvedAboutHref} className={route.name === 'about' ? 'is-active' : ''} aria-current={route.name === 'about' ? 'page' : undefined}>About</a>}
-                    <a href={"/docs"} className={route.name === 'docs' || route.name === 'api' ? 'is-active' : ''} aria-current={route.name === 'docs' || route.name === 'api' ? 'page' : undefined}>{t.nav.docs}</a>
+                    <EnglishOnlyLink href="/build" active={route.name === 'build'}>Build</EnglishOnlyLink>
+                    <EnglishOnlyLink href="/investors" active={route.name === 'investors'}>Investors</EnglishOnlyLink>
+                    <EnglishOnlyLink href={resolvedAboutHref || '/about'} active={route.name === 'about'}>About</EnglishOnlyLink>
+                    <EnglishOnlyLink href="/docs" active={route.name === 'docs' || route.name === 'api'}>{t.nav.docs}</EnglishOnlyLink>
                 </nav>
                 <div className="nav-drawer-foot">
-                    <nav className="nav-drawer-langs" aria-label={t.footer.languagesAria}>
-                        {LANG_ORDER.map(language => (
-                            <button
-                                key={language}
-                                type="button"
-                                className={language === code ? 'is-active' : ''}
-                                aria-pressed={language === code}
-                                onClick={() => { setLang(language); setMenuOpen(false); }}
-                            >
-                                {langs[language].label}
-                            </button>
-                        ))}
-                    </nav>
+                    {routeAvailability(currentPath).kind === 'translated' ? (
+                        <nav className="nav-drawer-langs" aria-label={t.footer.languagesAria}>
+                            {LANG_ORDER.map(language => (
+                                <a
+                                    key={language}
+                                    href={resolveLanguageDestination(currentPath, language).href}
+                                    lang={language}
+                                    className={language === code ? 'is-active' : ''}
+                                    aria-current={language === code ? 'page' : undefined}
+                                    onClick={(event) => {
+                                        event.preventDefault();
+                                        setLang(language);
+                                        setMenuOpen(false);
+                                    }}
+                                >
+                                    {langs[language].label}
+                                </a>
+                            ))}
+                        </nav>
+                    ) : <EnglishAvailability compact />}
                 </div>
             </div>
         </>

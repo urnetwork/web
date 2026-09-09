@@ -10,6 +10,18 @@
     margin: 0 0 24px;
 }
 
+.legal-language-availability {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 0 18px;
+    padding: 7px 10px;
+    color: var(--brand-ui);
+    border: 1px solid rgba(214, 230, 244, 0.2);
+    font-size: 12px;
+}
+.legal-language-availability strong { color: var(--brand-ur); letter-spacing: 0.08em; }
+
 .legal-doc {
     font-size: 15px;
     line-height: 1.75;

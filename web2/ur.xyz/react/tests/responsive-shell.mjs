@@ -83,7 +83,7 @@ function assert(condition, message) {
 }
 
 function linkName(value) {
-  return value.trim().toLowerCase();
+  return value.trim().toLowerCase().replace(/\s+en$/, '');
 }
 
 async function visible(locator) {
@@ -169,10 +169,17 @@ async function auditPage(browser, base, route, profile) {
       assert(networkRhythm.activeShadow === 'none', `${route} active Network link still renders a table-like side rule`);
     }
 
+    const translated = ['/', '/operators', '/miners', '/validators', '/research'].includes(route);
     const languages = page.locator('[role="dialog"][aria-label="Site menu"] nav[aria-label="Languages"]');
-    assert(await visible(languages), `${route} mobile menu has no language choices`);
-    const languageOrder = (await languages.locator('a,button').allTextContents()).map(linkName);
-    assert(JSON.stringify(languageOrder) === JSON.stringify(LANGUAGE_ORDER), `${route} language order is ${languageOrder.join(', ')}`);
+    if (translated) {
+      assert(await visible(languages), `${route} mobile menu has no language choices`);
+      const languageOrder = (await languages.locator('a,button').allTextContents()).map(linkName);
+      assert(JSON.stringify(languageOrder) === JSON.stringify(LANGUAGE_ORDER), `${route} language order is ${languageOrder.join(', ')}`);
+    } else {
+      assert(await languages.count() === 0, `${route} advertises unavailable mobile translations`);
+      assert(await visible(page.locator('[role="dialog"][aria-label="Site menu"] .nav-language-availability')),
+        `${route} has no English-only mobile indicator`);
+    }
 
     await page.keyboard.press('Escape');
     await page.waitForTimeout(250);
