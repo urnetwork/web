@@ -115,7 +115,15 @@ for (const l of ['en', 'ru', 'ar', 'zh', 'de', 'es']) {
     if (d) LANG_DATES[l] = d;
 }
 
-const LETTER_DATE = investorCentre?.featured?.dateIso || null;
+// Each investor document dates itself. Stamping the whole subtree with
+// `featured`'s date told crawlers the deck and the letter changed on the day
+// an unrelated announcement was published.
+const INVESTOR_DATES = {
+    '/investors': investorCentre?.updatedIso || null,
+    '/investors/deck': investorCentre?.deck?.dateIso || null,
+    '/investors/our-letter-to-bittensor': investorCentre?.letter?.dateIso || null,
+    '/investors/conviction-lock': investorCentre?.convictionAnnouncement?.dateIso || null,
+};
 const BUILD_DATE = lastCommitted(__dirname, 'public/build.html');
 const ABOUT_DATE = lastCommitted(__dirname, 'src/pages/about.astro');
 const LEGAL_DATES = {};
@@ -163,8 +171,8 @@ export default defineConfig({
                           ? LEGAL_DATES[legalMatch[1]]
                           : DOCS_UPDATED;
                     if (d) item.lastmod = d;
-                } else if (basePath.startsWith('/investors') && LETTER_DATE) {
-                    item.lastmod = LETTER_DATE;
+                } else if (basePath.startsWith('/investors') && INVESTOR_DATES[basePath]) {
+                    item.lastmod = INVESTOR_DATES[basePath];
                 } else if (basePath === '/build' && BUILD_DATE) {
                     item.lastmod = BUILD_DATE;
                 } else if (basePath === '/about' && ABOUT_DATE) {

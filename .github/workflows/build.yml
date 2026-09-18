@@ -15,10 +15,10 @@ jobs:
           node-version: latest
 
       - name: Install Packages
-        run: cd app && npm i
+        run: cd manager && npm i
 
       - name: Build
-        run: cd app && npm run build
+        run: cd manager && npm run build
 
       - name: Lint
-        run: cd app && npm run lint
+        run: cd manager && npm run lint

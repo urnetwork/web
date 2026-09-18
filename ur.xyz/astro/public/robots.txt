@@ -46,4 +46,21 @@ Allow: /
 User-agent: meta-externalagent
 Allow: /
 
+User-agent: Amazonbot
+Allow: /
+
+User-agent: DuckAssistBot
+Allow: /
+
+# Distinct from meta-externalagent: this one fetches a link a person asked
+# Meta AI about, rather than crawling in bulk.
+User-agent: Meta-ExternalFetcher
+Allow: /
+
+User-agent: Timpibot
+Allow: /
+
+User-agent: cohere-ai
+Allow: /
+
 Sitemap: https://ur.xyz/sitemap-index.xml

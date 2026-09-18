@@ -21,6 +21,9 @@
 - [Research](https://ur.xyz/research)
 - [Investor Centre](https://ur.xyz/investors): letters, materials, and public research
 - [Our Letter to Bittensor](https://ur.xyz/investors/our-letter-to-bittensor) ([PDF](https://ur.xyz/investors/our-letter-to-bittensor.pdf)): the August 2026 launch letter
+- [UR team locks 550,000 alpha in perpetuity](https://ur.xyz/investors/conviction-lock) ([PDF](https://ur.xyz/investors/ur-conviction-lock-announcement.pdf)): the September 2026 conviction announcement
+- [Introduction to UR (SN25)](https://ur.xyz/investors/deck) ([PDF](https://ur.xyz/investors/ur-investor-deck.pdf)): the investor deck
+- [About](https://ur.xyz/about): the core contributors building the protocol
 
 ## Docs
 

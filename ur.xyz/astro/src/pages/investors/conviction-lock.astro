@@ -4,19 +4,56 @@ import DisclaimerStatic from '../../components/DisclaimerStatic.astro';
 import FooterStatic from '../../components/FooterStatic.astro';
 import NavIsland from '../../islands/NavIsland.jsx';
 import en from '@react/i18n/en.js';
+import { investorCentre } from '../../lib/investors.js';
 
 import '@react/components/Nav.css';
 import '../../components/InvestorAnnouncement.css';
 
 const t = en;
-const pdfHref = '/investors/ur-conviction-lock-announcement.pdf';
+// Named explicitly rather than read from `featured`: this page is the
+// conviction announcement whatever the Investor Centre leads with next.
+const announcement = investorCentre.convictionAnnouncement;
+const pdfHref = announcement.pdfHref;
+
+// One headline for the <title>, the <h1> and the structured data, so the
+// three cannot drift apart. The Investor Centre card carries its own shorter
+// phrasing (lib/investors.js) — the wording difference is editorial and is
+// left alone here.
+const headline = 'UR team locks 550,000 alpha in perpetual conviction';
+const description =
+    "UR's management team has locked 550,000 alpha under perpetual conviction, taking total locked alpha behind SN25 to 27.1 per cent of circulating supply.";
+
+// Dated, authored and downloadable: an Article, like the letter beside it,
+// rather than a generic web page (SEO3 G5).
+const announcementJsonLd = [{
+    '@type': 'Article',
+    '@id': 'https://ur.xyz/investors/conviction-lock#article',
+    headline,
+    description,
+    datePublished: announcement.dateIso,
+    author: { '@type': 'Organization', name: 'UR Foundation' },
+    publisher: { '@id': 'https://ur.xyz/#org' },
+    mainEntityOfPage: 'https://ur.xyz/investors/conviction-lock',
+    url: 'https://ur.xyz/investors/conviction-lock',
+    image: 'https://ur.xyz/og.png',
+    ...(pdfHref
+        ? {
+              encoding: {
+                  '@type': 'MediaObject',
+                  encodingFormat: 'application/pdf',
+                  contentUrl: `https://ur.xyz${pdfHref}`,
+              },
+          }
+        : {}),
+}];
 ---
 <Base
-    title="UR team locks 550,000 alpha in perpetual conviction | UR"
-    description="UR's management team has locked 550,000 alpha under perpetual conviction, taking total locked alpha behind SN25 to 27.1 per cent of circulating supply."
+    title={`${headline} | UR`}
+    description={description}
     lang="en"
     ogType="article"
-    article={{ publishedTime: '2026-09-09', author: 'UR Foundation' }}
+    article={{ publishedTime: announcement.dateIso, author: 'UR Foundation' }}
+    jsonLd={announcementJsonLd}
 >
     <div class="app">
         <DisclaimerStatic />
@@ -39,7 +76,7 @@ const pdfHref = '/investors/ur-conviction-lock-announcement.pdf';
                     <span aria-hidden="true"></span>
                     Network announcement
                 </p>
-                <h1>UR team locks 550,000 alpha in perpetual conviction</h1>
+                <h1>{headline}</h1>
                 <div class="announcement-summary-meta">
                     <div class="announcement-issuer">
                         <span class="announcement-issuer__mark" aria-hidden="true">
@@ -51,7 +88,7 @@ const pdfHref = '/investors/ur-conviction-lock-announcement.pdf';
                         </span>
                     </div>
                     <p>
-                        <span>Dated <time datetime="2026-09-09">9 September 2026</time></span>
+                        <span>Dated <time datetime={announcement.dateIso}>{announcement.date}</time></span>
                         <span>3 min read</span>
                     </p>
                 </div>

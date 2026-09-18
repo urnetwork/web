@@ -53,6 +53,8 @@ const slides = Array.from({ length: deck.slideCount }, (_, i) => ({
                             src={s.src}
                             alt={`Slide ${s.n} of ${deck.slideCount}`}
                             data-slide={s.n}
+                            width="2560"
+                            height="1440"
                             loading={s.n <= 2 ? 'eager' : 'lazy'}
                             decoding="async"
                         />

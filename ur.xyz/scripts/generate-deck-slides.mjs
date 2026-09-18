@@ -50,7 +50,7 @@ function resolveOrDie(name, hint) {
     }
 }
 
-const pdfjsEntry = resolveOrDie('pdfjs-dist/build/pdf.mjs', 'Run `npm ci` in web2/ur.xyz/react.');
+const pdfjsEntry = resolveOrDie('pdfjs-dist/build/pdf.mjs', 'Run `npm ci` in ur.xyz/react.');
 const pdfjsDir = path.dirname(pdfjsEntry);
 const { chromium } = require('playwright-core');
 

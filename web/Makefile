@@ -43,8 +43,6 @@ build_external_sites: check_external_sites
 	pandoc -f markdown -t plain ${BRINGYOUR_HOME}/docs/legal/privacy.md -o "${BRINGYOUR_SITE_DIR}/build/privacy.txt"
 	pandoc -f markdown -t plain ${BRINGYOUR_HOME}/docs/legal/terms.md -o "${BRINGYOUR_SITE_DIR}/build/terms.txt"
 	pandoc -f markdown -t plain ${BRINGYOUR_HOME}/docs/legal/vdp.md -o "${BRINGYOUR_SITE_DIR}/build/vdp.txt"
-	# temporarily exclude the AltStore archive from the web deployment
-	rm -rf "${BRINGYOUR_SITE_DIR}/build/altstore"
 	(. ${NVM_DIR}/nvm.sh && \
 		nvm use ${NODE_VERSION} && \
 		python ../webgen/webgen.py build "${UR_NETWORK_SITE_DIR}/gen.py")
@@ -66,7 +64,7 @@ build-preview:
 	mkdir -p build
 	(. ${NVM_DIR}/nvm.sh && \
 		nvm use ${NODE_VERSION} && \
-		cd ${BRINGYOUR_HOME}/web/web2/ur.xyz/astro && \
+		cd ${BRINGYOUR_HOME}/web/ur.xyz/astro && \
 		make clean build-main && \
 		cp -r build/main ${BRINGYOUR_HOME}/web/web/build/preview.ur.xyz)
 	(. ${NVM_DIR}/nvm.sh && \

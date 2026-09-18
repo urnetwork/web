@@ -33,8 +33,8 @@ ADD dist /www/app
 
 COPY build/${WARP_ENV}/status.json /srv/warp/status/status.json
 
-COPY build/$TARGETPLATFORM/app /usr/local/sbin/app
+COPY build/$TARGETPLATFORM/manager /usr/local/sbin/manager
 
 # see https://ubuntu.com/blog/avoiding-dropped-connections-in-nginx-containers-with-stopsignal-sigquit
 STOPSIGNAL SIGQUIT
-CMD ["/usr/local/sbin/app"]
+CMD ["/usr/local/sbin/manager"]
