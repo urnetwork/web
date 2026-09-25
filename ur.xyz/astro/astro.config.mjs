@@ -123,6 +123,7 @@ const INVESTOR_DATES = {
     '/investors/deck': investorCentre?.deck?.dateIso || null,
     '/investors/our-letter-to-bittensor': investorCentre?.letter?.dateIso || null,
     '/investors/conviction-lock': investorCentre?.convictionAnnouncement?.dateIso || null,
+    '/investors/letter-to-tokenholders-september-2026': investorCentre?.tokenholderLetter?.dateIso || null,
 };
 const BUILD_DATE = lastCommitted(__dirname, 'public/build.html');
 const ABOUT_DATE = lastCommitted(__dirname, 'src/pages/about.astro');
@@ -147,6 +148,7 @@ export default defineConfig({
             customPages: [
                 'https://ur.xyz/build',
                 'https://ur.xyz/investors/our-letter-to-bittensor.pdf',
+                'https://ur.xyz/investors/ur-letter-to-tokenholders-september-2026.pdf',
                 'https://ur.xyz/audits/masa-l2-2025.pdf',
             ],
             i18n: {

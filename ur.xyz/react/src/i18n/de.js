@@ -247,7 +247,7 @@ operators: {
             title: 'Audits',
             intro: 'Peer-Audits des Protokolls und seiner Implementierungen.',
             tag: 'Peer-Audit',
-            items: ['MASA L2 2026', 'MASA L2 2025']
+            items: ['MASA L2 2025']
         },
         publications: {
             title: 'Paper',

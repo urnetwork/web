@@ -246,7 +246,7 @@ operators: {
             title: 'Аудиты',
             intro: 'Экспертные аудиты протокола и его реализаций.',
             tag: 'Экспертный аудит',
-            items: ['MASA L2 2026', 'MASA L2 2025']
+            items: ['MASA L2 2025']
         },
         publications: {
             title: 'Статьи',

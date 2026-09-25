@@ -20,8 +20,9 @@
 - [Validators](https://ur.xyz/validators)
 - [Research](https://ur.xyz/research)
 - [Investor Centre](https://ur.xyz/investors): letters, materials, and public research
-- [Our Letter to Bittensor](https://ur.xyz/investors/our-letter-to-bittensor) ([PDF](https://ur.xyz/investors/our-letter-to-bittensor.pdf)): the August 2026 launch letter
+- [September Letter to Tokenholders](https://ur.xyz/investors/letter-to-tokenholders-september-2026) ([PDF](https://ur.xyz/investors/ur-letter-to-tokenholders-september-2026.pdf)): the September 2026 mainnet and product update
 - [UR team locks 550,000 alpha in perpetuity](https://ur.xyz/investors/conviction-lock) ([PDF](https://ur.xyz/investors/ur-conviction-lock-announcement.pdf)): the September 2026 conviction announcement
+- [Our Letter to Bittensor](https://ur.xyz/investors/our-letter-to-bittensor) ([PDF](https://ur.xyz/investors/our-letter-to-bittensor.pdf)): the August 2026 launch letter
 - [Introduction to UR (SN25)](https://ur.xyz/investors/deck) ([PDF](https://ur.xyz/investors/ur-investor-deck.pdf)): the investor deck
 - [About](https://ur.xyz/about): the core contributors building the protocol
 

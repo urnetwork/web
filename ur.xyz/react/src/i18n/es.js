@@ -247,7 +247,7 @@ operators: {
             title: 'Auditorías',
             intro: 'Auditorías de pares del protocolo y sus implementaciones.',
             tag: 'Auditoría de pares',
-            items: ['MASA L2 2026', 'MASA L2 2025']
+            items: ['MASA L2 2025']
         },
         publications: {
             title: 'Artículos',

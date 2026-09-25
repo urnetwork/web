@@ -49,9 +49,22 @@ const convictionAnnouncement = {
     pdfHref: '/investors/ur-conviction-lock-announcement.pdf',
 };
 
+const tokenholderLetter = {
+    kind: 'Announcement',
+    title: 'September Letter to Tokenholders',
+    summary:
+        'Brien and Jack outline UR\'s mainnet launch, the next phase of SN25, Project Meridien, and the mission to make privacy an expected property of the internet.',
+    date: '25 September 2026',
+    dateIso: '2026-09-25',
+    readTime: '6 min read',
+    cta: 'Read the update',
+    href: '/investors/letter-to-tokenholders-september-2026',
+    pdfHref: '/investors/ur-letter-to-tokenholders-september-2026.pdf',
+};
+
 export const investorCentre = {
-    updated: '9 September 2026',
-    updatedIso: '2026-09-09',
+    updated: '25 September 2026',
+    updatedIso: '2026-09-25',
     about: [
         'Our mission is to make privacy the default for every user by providing the encryption layer for the open internet. We are building a user-powered network and a privacy product suite designed to serve people, not surveil them.',
         'Anyone, anywhere should be able to access the internet freely and privately.',
@@ -61,12 +74,24 @@ export const investorCentre = {
     // a page that reads `featured` gets retitled and re-pointed the next time
     // the card changes, which is how the letter page briefly offered the deck
     // PDF as its own download.
-    featured: convictionAnnouncement,
+    featured: tokenholderLetter,
     deck,
     letter,
     convictionAnnouncement,
+    tokenholderLetter,
 
     updates: [
+        {
+            title: tokenholderLetter.title,
+            date: tokenholderLetter.date,
+            dateIso: tokenholderLetter.dateIso,
+            kind: tokenholderLetter.kind,
+            format: 'Written',
+            readTime: tokenholderLetter.readTime,
+            href: tokenholderLetter.href,
+            pdfHref: tokenholderLetter.pdfHref,
+            external: false,
+        },
         {
             title: convictionAnnouncement.title,
             date: convictionAnnouncement.date,
@@ -102,6 +127,8 @@ export const investorCentre = {
             title: 'UR Litepaper',
             detail: null,
             readTime: '12 min read',
+            date: '18 August 2026',
+            dateIso: '2026-08-18',
             href: '/docs/litepaper',
         },
     ],
@@ -142,7 +169,7 @@ Begin with UR's published sources:
 
 - Machine-readable protocol source: https://ur.xyz/llms-full.txt
 - Investor Centre: https://ur.xyz/investors
-- Latest investment letter: https://ur.xyz/investors/our-letter-to-bittensor
+- Latest investment letter: https://ur.xyz/investors/letter-to-tokenholders-september-2026
 
 Treat these as the project's own published claims, then verify material claims against primary or independently observable sources:
 

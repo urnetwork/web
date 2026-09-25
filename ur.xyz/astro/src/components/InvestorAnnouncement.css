@@ -91,6 +91,10 @@
     text-wrap: balance;
 }
 
+.announcement-summary > h1.announcement-summary-title--compact {
+    max-inline-size: 17ch;
+}
+
 .announcement-summary-meta {
     display: flex;
     align-items: center;
@@ -124,7 +128,11 @@
 .announcement-summary-meta > p { display: flex; gap: 18px; margin: 0; white-space: nowrap; }
 .announcement-summary-meta > p span + span::before { content: '·'; margin-right: 18px; }
 
-.announcement-stage { padding: 0 0 110px; }
+.announcement-stage {
+    display: grid;
+    gap: 32px;
+    padding: 0 0 110px;
+}
 
 .announcement-paper {
     position: relative;
@@ -204,13 +212,24 @@
 /* the section after the last quote is boilerplate, not news - give the reader
    a clear break rather than the 9px used between related blocks */
 .announcement-document-section:has(blockquote) + .announcement-document-section:not(:has(blockquote)) { margin-top: 24px; }
-.announcement-document-section ul {
+.announcement-document-section ul,
+.announcement-document-section ol {
     display: grid;
     gap: 1px;
     margin: 0 0 12px;
     padding-left: 2.1rem;
 }
 .announcement-document-section li { padding-left: 0.4rem; font-size: 0.835rem; line-height: 1.36; text-align: justify; hyphens: auto; }
+.announcement-paper--tokenholders .announcement-document-section { margin-top: 18px; }
+.announcement-paper--tokenholders .announcement-document-section h3 { margin-bottom: 9px; }
+.announcement-paper--tokenholders a { color: #6f087d; text-underline-offset: 0.12em; }
+.announcement-paper--tokenholders code {
+    overflow-wrap: anywhere;
+    color: #145426;
+    font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+    font-size: 0.88em;
+}
+.announcement-paper--tokenholders .announcement-signoff p { margin-bottom: 10px; text-align: left; }
 .announcement-document-section blockquote {
     margin: 0;
     padding: 0 0 0 22px;
@@ -243,6 +262,7 @@
     .announcement-letterhead::after { margin-top: 8px; }
     .announcement-document-title { margin-block: 24px 40px; font-size: 1.35rem; text-align: left; }
     .announcement-paper p { font-size: 0.94rem; line-height: 1.55; }
+    .announcement-paper--tokenholders .announcement-document-section li { font-size: 0.94rem; line-height: 1.5; }
 }
 
 @media (max-width: 480px) {
@@ -268,8 +288,9 @@
     .disclaimer, .nav, .announcement-toolbar, .announcement-summary, .footer { display: none !important; }
     html, body, .app, .announcement-page, .announcement-stage { background: #ffffff !important; }
     .announcement-page { min-height: 0; padding: 0; }
-    .announcement-stage { padding: 0; }
+    .announcement-stage { gap: 0; padding: 0; }
     .announcement-paper { width: 100%; min-height: 0; margin: 0; padding: 0; overflow: visible; background: #ffffff !important; box-shadow: none; }
+    .announcement-paper + .announcement-paper { break-before: page; }
     .announcement-paper p { font-size: 10pt; line-height: 1.42; }
     .announcement-document-section li { font-size: 10pt; }
     .announcement-document-section h3 { font-size: 10.5pt; }

@@ -9,3 +9,6 @@ manager/manager
 web/web
 /venv
 **/node_modules
+ur.xyz/astro/.astro/dev.json
+ur.xyz/astro/.astro/dev.log
+ur.xyz/astro/.astro/settings.json

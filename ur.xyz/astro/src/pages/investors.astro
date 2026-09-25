@@ -14,8 +14,8 @@ const { featured, deck, updates, materials, metrics } = investorCentre;
 const SHOW_METRICS = false;
 const archiveItems = [...updates, ...materials.map(item => ({
     ...item,
-    date: item.href === deck.href ? deck.date : 'Not dated',
-    dateIso: item.href === deck.href ? deck.dateIso : null,
+    date: item.date || (item.href === deck.href ? deck.date : 'Not dated'),
+    dateIso: item.dateIso || (item.href === deck.href ? deck.dateIso : null),
     kind: item.href === deck.href ? deck.kind : 'Link',
     format: item.pdfHref ? 'PDF' : 'Web',
 }))]
@@ -127,12 +127,11 @@ const centreJsonLd = [{
 
                     <div class="archive-list" data-archive-list>
                         <div class="archive-row archive-row--heading" aria-hidden="true">
-                            <span>Date</span><span>Type</span><span>Title</span><span>Format</span>
+                            <span>Date</span><span>Title</span><span>Format</span>
                         </div>
                         {archiveItems.map(item => (
                             <article class="archive-row" data-archive-item data-kind={item.kind.toLowerCase()}>
                                 <time datetime={item.dateIso || undefined}>{item.date}</time>
-                                <span class="archive-row__kind">{item.kind}</span>
                                 <div class="archive-row__title">
                                     <a href={item.href}>{item.title}</a>
                                     <small>{item.readTime || item.detail}</small>

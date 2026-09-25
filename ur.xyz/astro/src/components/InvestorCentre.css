@@ -1,6 +1,7 @@
 .investor-page {
     --investor-width: min(980px, calc(100vw - 64px));
     --investor-line: rgba(214, 230, 244, 0.13);
+    --investor-line-subtle: rgba(214, 230, 244, 0.075);
     --investor-line-strong: rgba(214, 230, 244, 0.22);
     --investor-soft: rgba(214, 230, 244, 0.72);
     --investor-muted: rgba(214, 230, 244, 0.54);
@@ -251,13 +252,14 @@
 }
 
 .featured-letter h3 {
-    max-width: 560px;
+    max-inline-size: 17ch;
     margin: 0;
     color: var(--brand-white);
     font-size: clamp(2rem, 4vw, 2.7rem);
     font-weight: 400;
     letter-spacing: -0.045em;
     line-height: 1.06;
+    text-wrap: balance;
 }
 
 .featured-letter__details {
@@ -432,10 +434,10 @@
 .archive-row {
     display: grid;
     min-height: 74px;
-    grid-template-columns: 130px 135px minmax(0, 1fr) 72px;
-    gap: 16px;
+    grid-template-columns: 180px minmax(0, 1fr) 72px;
+    gap: 38px;
     align-items: center;
-    border-bottom: 1px solid var(--investor-line);
+    border-bottom: 1px solid var(--investor-line-subtle);
 }
 
 .archive-row:not(.archive-row--heading) {
@@ -448,22 +450,21 @@
 
 .archive-row--heading {
     min-height: 38px;
-    color: var(--investor-muted);
+    border-bottom-color: var(--investor-line);
+    color: var(--investor-soft);
     font-size: 0.65rem;
-    letter-spacing: 0.05em;
+    font-weight: 600;
+    letter-spacing: 0.075em;
     text-transform: uppercase;
+}
+
+.archive-row--heading > :last-child {
+    justify-self: end;
 }
 
 .archive-row time {
     color: var(--investor-muted);
     font-size: 0.72rem;
-}
-
-.archive-row__kind {
-    color: var(--brand-ur);
-    font-size: 0.68rem;
-    letter-spacing: 0.055em;
-    text-transform: uppercase;
 }
 
 .archive-row__title {
@@ -903,7 +904,7 @@
     }
 
     .archive-row {
-        grid-template-columns: 112px 112px minmax(0, 1fr) 64px;
+        grid-template-columns: 112px minmax(0, 1fr) 64px;
         gap: 12px;
     }
 
@@ -1031,35 +1032,28 @@
     }
 
     .archive-row:not(.archive-row--heading) {
-        min-height: 94px;
+        min-height: 88px;
         grid-template-columns: 84px minmax(0, 1fr) auto;
-        grid-template-rows: auto auto;
-        gap: 4px 12px;
+        gap: 12px;
         padding-block: 16px;
     }
 
     .archive-row time {
         grid-column: 1;
-        grid-row: 1 / 3;
+        grid-row: 1;
         align-self: start;
         padding-top: 2px;
     }
 
-    .archive-row__kind {
-        grid-column: 2;
-        grid-row: 1;
-        align-self: end;
-    }
-
     .archive-row__title {
         grid-column: 2;
-        grid-row: 2;
-        align-self: start;
+        grid-row: 1;
+        align-self: center;
     }
 
     .archive-row__format {
         grid-column: 3;
-        grid-row: 1 / 3;
+        grid-row: 1;
         align-self: center;
     }
 

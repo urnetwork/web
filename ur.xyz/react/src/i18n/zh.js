@@ -245,7 +245,7 @@ operators: {
             title: '审计',
             intro: '对协议及其实现的同行审计。',
             tag: '同行审计',
-            items: ['MASA L2 2026', 'MASA L2 2025']
+            items: ['MASA L2 2025']
         },
         publications: {
             title: '论文',

@@ -246,7 +246,7 @@ operators: {
             title: 'التدقيقات',
             intro: 'تدقيقات نظراء للبروتوكول وتطبيقاته.',
             tag: 'تدقيق نظراء',
-            items: ['MASA L2 2026', 'MASA L2 2025']
+            items: ['MASA L2 2025']
         },
         publications: {
             title: 'الأوراق البحثية',
