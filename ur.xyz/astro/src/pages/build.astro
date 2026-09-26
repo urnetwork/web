@@ -1,0 +1,33 @@
+---
+// /build — "Build on UR": the Network Operator opportunities page.
+//
+// The page body is the React component the SPA renders for this route
+// (react/src/components/pages/Build.jsx), rendered on the server here and
+// hydrated on load: its ?model= / ?op= / ?brief= handling and the model's
+// interactions (opportunity tabs, the reveal scrub, the session trace, the
+// brief) run client-side. The shell around it is the section pages' exactly,
+// so the SPA and this render are pixel-identical.
+import Base from '../layouts/Base.astro';
+import DisclaimerStatic from '../components/DisclaimerStatic.astro';
+import NavIsland from '../islands/NavIsland.jsx';
+import FooterStatic from '../components/FooterStatic.astro';
+import BuildPage from '@react/components/pages/Build.jsx';
+import en from '@react/i18n/en.js';
+
+import '@react/components/Nav.css';
+
+const title = 'Build on UR | Network Operator opportunities';
+const description = 'Build products on UR as a Network Operator using shared residential capacity, measured service quality, and the SN25 incentive layer.';
+---
+<Base title={title} description={description} breadcrumbName="Build on UR" lang="en">
+    <div class="app">
+        <DisclaimerStatic t={en} />
+        <NavIsland activeRoute="build" lang="en" client:load />
+
+        <main class="section-page">
+            <BuildPage route={{ name: 'build', slug: null }} client:load />
+        </main>
+
+        <FooterStatic t={en} lang="en" />
+    </div>
+</Base>

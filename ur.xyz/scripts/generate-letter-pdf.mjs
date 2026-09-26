@@ -1,10 +1,12 @@
 // Print the investor letter to a real PDF.
 //
 // The letter page is the single source of truth: this prints that page through
-// Chromium's print pipeline, so `@media print` in InvestorLetter.css decides how
-// the file looks and the two can never drift. The result is committed under
-// astro/public/ and served as a static file, which keeps Chromium out of the
-// site build — `astro build` must not depend on a browser binary being present.
+// Chromium's print pipeline, so `@media print` in react/src/components/pages/
+// investors/InvestorLetter.css decides how the file looks and the two can never
+// drift. The result is committed under react/public/ (the source of truth for
+// static assets, mirrored into astro/public by `make sync-public` at build
+// time) and served as a static file, which keeps Chromium out of the site
+// build — `astro build` must not depend on a browser binary being present.
 //
 //   Usage:  node scripts/generate-letter-pdf.mjs           (build if output missing)
 //           node scripts/generate-letter-pdf.mjs --rebuild  (always rebuild first)
@@ -31,7 +33,7 @@ const UR_ENV = process.env.UR_ENV || 'main';
 const BUILD_DIR = path.join(ASTRO_DIR, 'build', UR_ENV);
 
 const ROUTE = '/investors/our-letter-to-bittensor.html';
-const OUT = path.join(ASTRO_DIR, 'public', 'investors', 'our-letter-to-bittensor.pdf');
+const OUT = path.join(ROOT, 'react', 'public', 'investors', 'our-letter-to-bittensor.pdf');
 
 const MIME = {
     '.html': 'text/html',
@@ -52,7 +54,11 @@ const MIME = {
 function buildSite() {
     console.log('building the astro site...');
     // `npm run build` also fires the postbuild parity test; call astro directly.
-    const astroBin = path.join(ASTRO_DIR, 'node_modules', 'astro', 'astro.js');
+    // The CLI's entry moved (astro.js → bin/astro.mjs in Astro 7): read it from
+    // the package rather than hard-coding it.
+    const astroPkg = path.join(ASTRO_DIR, 'node_modules', 'astro');
+    const { bin } = JSON.parse(fs.readFileSync(path.join(astroPkg, 'package.json'), 'utf8'));
+    const astroBin = path.join(astroPkg, typeof bin === 'string' ? bin : bin.astro);
     const res = spawnSync(process.execPath, [astroBin, 'build'], {
         cwd: ASTRO_DIR,
         stdio: 'inherit',

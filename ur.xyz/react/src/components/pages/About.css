@@ -1,0 +1,85 @@
+/* About.css — the /about page body (components/pages/About.jsx).
+ *
+ * Global stylesheet (the SPA bundles every component's CSS into one sheet
+ * that is loaded on every route), so nothing here may leak onto other
+ * pages: the section/id rules are scoped under the page's own .about-page
+ * wrapper, and the remaining class names are unique to this page
+ * (about-ur-copy, core-contributor*, contribute-cta).
+ *
+ * The page's former scoped Astro styles also set html scroll-behavior and
+ * the body background/overflow; App.css already provides those site-wide,
+ * and .section-page (App.css) provides the nav-height top padding.
+ */
+
+.about-page .section:first-of-type { border-top: 0; }
+.about-page #about-ur { padding-bottom: 72px; }
+.about-page #core-contributors { padding-top: 72px; padding-bottom: 72px; }
+.about-page #contribute { padding-top: 72px; }
+
+.about-ur-copy { max-width: 68ch; }
+.about-ur-copy p { margin: 0; color: var(--brand-white); font-size: 1.12rem; line-height: 1.62; }
+.about-ur-copy a { color: var(--brand-ur); text-decoration-thickness: 1px; text-underline-offset: 0.18em; }
+.about-ur-copy a:hover { color: var(--brand-white); }
+.about-ur-copy a:focus-visible { outline: 2px solid var(--brand-ur); outline-offset: 4px; }
+
+.core-contributor-list { border-bottom: 1px solid rgba(214, 230, 244, 0.14); }
+.core-contributor { display: grid; grid-template-columns: 96px minmax(190px, 0.72fr) minmax(300px, 1.35fr); gap: 28px; align-items: center; min-height: 148px; padding: 26px 0; border-top: 1px solid rgba(214, 230, 244, 0.14); transition: background 0.2s ease; }
+.core-contributor:hover { background: rgba(237, 143, 255, 0.025); }
+.core-contributor__portrait { width: 96px; aspect-ratio: 1; overflow: hidden; border: 1px solid rgba(214, 230, 244, 0.22); background: rgba(237, 143, 255, 0.08); transition: border-color 0.25s ease, background 0.25s ease; }
+.core-contributor__portrait img { display: block; width: 100%; height: 100%; object-fit: cover; filter: grayscale(0.78) saturate(0.5) brightness(0.74); transition: filter 0.28s ease; }
+.core-contributor:hover .core-contributor__portrait,
+.core-contributor:focus-within .core-contributor__portrait { border-color: rgba(237, 143, 255, 0.65); background: rgba(237, 143, 255, 0.14); }
+.core-contributor:hover .core-contributor__portrait img,
+.core-contributor:focus-within .core-contributor__portrait img { filter: grayscale(0) saturate(1.05) brightness(1); }
+.core-contributor__identity h3 { margin: 0 0 9px; color: var(--brand-white); font-size: clamp(1.75rem, 2.4vw, 2.15rem); font-weight: 400; line-height: 1; letter-spacing: -0.025em; }
+.core-contributor__identity p { margin: 0; color: var(--brand-ui); font-family: 'PPNeueBit', monospace; font-size: 0.8rem; letter-spacing: 0.08em; text-transform: uppercase; }
+.core-contributor__identity a { display: inline-flex; align-items: center; gap: 8px; min-width: 44px; min-height: 44px; margin-top: 4px; color: var(--brand-ur); font-size: 0.82rem; line-height: 1.4; text-decoration: none; }
+.core-contributor__identity a:hover { text-decoration: underline; text-underline-offset: 0.2em; }
+.core-contributor__identity a:focus-visible { outline: 2px solid var(--brand-ur); outline-offset: 2px; }
+.core-contributor__bio { max-width: 54ch; margin: 0; color: var(--brand-ui); font-size: 1.05rem; line-height: 1.6; opacity: 0.9; }
+
+.contribute-cta { display: grid; grid-template-columns: minmax(0, 1.25fr) auto; gap: 56px; align-items: center; }
+.contribute-cta p { max-width: 61ch; margin: 0; color: var(--brand-ui); font-size: 1.08rem; line-height: 1.6; }
+.contribute-cta a { display: inline-flex; flex-direction: column; justify-content: center; align-items: center; gap: 2px; min-width: 230px; min-height: 72px; padding: 10px 24px; border: 1px solid var(--brand-ur); background: var(--brand-ur); color: var(--brand-bg); font-family: 'PPNeueMontreal', 'Montreal', sans-serif; font-size: 14px; font-weight: 600; line-height: 1.05; letter-spacing: 0.07em; text-align: center; text-decoration: none; transition: background 0.2s ease, border-color 0.2s ease; }
+.contribute-cta a span { display: block; }
+.contribute-cta a i { font-style: normal; }
+.contribute-cta a:hover { border-color: var(--brand-white); background: var(--brand-white); }
+.contribute-cta a:focus-visible { outline: 2px solid var(--brand-ur); outline-offset: 4px; }
+
+/* Scroll-reveal: About.jsx adds html.has-reveal-motion (outside reduced
+   motion) and marks each row .is-visible as it enters the viewport. */
+.has-reveal-motion .core-contributor[data-reveal] { opacity: 0; transform: translateY(16px); transition: opacity 0.42s ease, transform 0.42s cubic-bezier(0.2, 0.7, 0.2, 1), background 0.2s ease; }
+.has-reveal-motion .core-contributor[data-reveal].is-visible { opacity: 1; transform: translateY(0); }
+
+@media (max-width: 820px) {
+    .about-page #about-ur { padding-bottom: 52px; }
+    .about-page #core-contributors { padding-top: 52px; padding-bottom: 52px; }
+    .about-page #contribute { padding-top: 52px; }
+    .core-contributor { grid-template-columns: 84px minmax(0, 1fr); gap: 18px 20px; align-items: start; padding: 26px 0 30px; }
+    .core-contributor__portrait { grid-column: 1; grid-row: 1; width: 84px; }
+    .core-contributor__identity { grid-column: 2; grid-row: 1; align-self: center; }
+    .core-contributor__bio { grid-column: 1 / -1; margin-top: 2px; }
+    .contribute-cta { grid-template-columns: 1fr; gap: 32px; }
+}
+
+@media (max-width: 520px) {
+    .about-ur-copy p { font-size: 1.03rem; line-height: 1.58; }
+    .core-contributor { grid-template-columns: 72px minmax(0, 1fr); gap: 16px; padding: 22px 0 26px; }
+    .core-contributor__portrait { width: 72px; }
+    .core-contributor__identity h3 { font-size: clamp(1.55rem, 8vw, 1.75rem); }
+    .core-contributor__bio { font-size: 1rem; line-height: 1.58; }
+    .contribute-cta { gap: 28px; }
+    .contribute-cta p { font-size: 1rem; line-height: 1.58; }
+    .contribute-cta a { width: 100%; min-width: 0; }
+}
+
+@media (hover: none) {
+    .core-contributor__portrait img { filter: grayscale(0.55) saturate(0.65) brightness(0.82); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .core-contributor,
+    .core-contributor__portrait,
+    .core-contributor__portrait img,
+    .contribute-cta a { transition: none; }
+}

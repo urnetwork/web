@@ -2,52 +2,46 @@
 import Base from '../../layouts/Base.astro';
 import DocsIsland from '../../islands/DocsIsland.jsx';
 import { docs } from '@react/lib/docs.js';
+import { DOC_PAGE_PATHS } from '@react/lib/docs-shared.js';
 import { docDescription } from '../../lib/meta.js';
-import { execFileSync } from 'node:child_process';
-import path from 'node:path';
+import { LASTMOD_TOKEN } from '../../lib/lastmod.js';
 
 export function getStaticPaths() {
-    // Defined INSIDE getStaticPaths: Astro executes this function hoisted out
-    // of the frontmatter, so outer consts are not in scope here. And the
-    // hoisted module runs from the BUILD dir, so import.meta.url is useless
-    // for finding the corpus — anchor on the build cwd (astro/) instead.
-    const DOCS_DIR = path.resolve(process.cwd(), '../docs');
-    // last committed change per source document — the honest dateModified
-    const lastCommitted = (rel) => {
-        try {
-            const out = execFileSync('git', ['-C', DOCS_DIR, 'log', '-1', '--pretty=format:%cs', '--', rel], {
-                encoding: 'utf8',
-                stdio: ['ignore', 'pipe', 'ignore'],
-            }).trim();
-            return out || null;
-        } catch {
-            return null;
-        }
-    };
-    return docs.filter(d => d.slug).map(d => ({
+    // A document published as its own page (the legal documents, at /terms,
+    // /privacy and /vdp) gets no second copy under /docs.
+    return docs.filter(d => d.slug && !DOC_PAGE_PATHS[d.slug]).map(d => ({
         params: { slug: d.slug },
         props: {
             title: d.title,
-            // whole-sentence, markdown-free (the raw slice leaked "> " and cut mid-word)
-            description: docDescription(d.content, d.title),
-            updated: lastCommitted(d.path),
+            meta: d.meta,
+            // whole-sentence and markdown-free (the raw slice leaked "> " and cut
+            // mid-word); a revision line is not what the document is about, so
+            // it never opens the description ("Last modified: May 8, 2025 …")
+            description: d.meta.description || docDescription(
+                d.content.replace(/^\s*\**\s*Last (?:modified|revised|updated)\b[^\n]*$/gim, ''),
+                d.title,
+            ),
         },
     }));
 }
 
 const { slug } = Astro.params;
-const { title, description, updated } = Astro.props;
+const { title, meta, description } = Astro.props;
+const url = `https://ur.xyz/docs/${slug}`;
 
 const jsonLd = [{
     '@type': 'TechArticle',
+    '@id': `${url}#article`,
     headline: title,
     description,
-    url: `https://ur.xyz/docs/${slug}`,
-    mainEntityOfPage: `https://ur.xyz/docs/${slug}`,
+    url,
+    mainEntityOfPage: url,
     publisher: { '@id': 'https://ur.xyz/#org' },
     author: { '@id': 'https://ur.xyz/#org' },
     inLanguage: 'en',
-    ...(updated ? { dateModified: updated } : {}),
+    // the day the page's content last changed, from the same record as the
+    // sitemap's <lastmod>: the build fills it in once the page is fingerprinted
+    dateModified: LASTMOD_TOKEN,
     encoding: {
         '@type': 'MediaObject',
         encodingFormat: 'text/markdown',
@@ -56,7 +50,8 @@ const jsonLd = [{
 }];
 ---
 <Base
-    title={`${title} — UR Docs`}
+    title={meta.title || `${title} — UR Docs`}
+    breadcrumbName={title}
     description={description}
     lang="en"
     jsonLd={jsonLd}

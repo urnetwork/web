@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import './Simulation.css';
-import { useLanguage } from './i18n';
+import { useLanguage, intlLocale } from './i18n';
 import { blockEndAt, blockNumberAt } from './lib/network';
 
 // Brand Constants mapped from the CSS variables
@@ -52,12 +52,16 @@ function BlockToast({ block, network }) {
             : blockNumberAt(now);
         const end = blockEndAt(now);
         const left = Math.max(0, end - now);
-        const endDate = new Date(end).toLocaleDateString(code, {
+        const endDate = new Date(end).toLocaleDateString(intlLocale(code), {
             month: 'short',
             day: 'numeric',
             timeZone: 'UTC'
         });
-        countdown = t.sim.endsAt
+        // An abbreviated month can end in its own period (de "27. Sept.",
+        // ru "27 сент."): it doubles as the sentence's full stop rather than
+        // printing "Sept.." before the countdown.
+        const template = endDate.endsWith('.') ? t.sim.endsAt.replace('{date}.', '{date}') : t.sim.endsAt;
+        countdown = template
             .replace('{date}', endDate)
             .replace('{d}', Math.floor(left / 86400000))
             .replace('{h}', Math.floor(left / 3600000) % 24)
@@ -100,12 +104,17 @@ function BlockToast({ block, network }) {
  * BlockToast, fed by the same feeds.
  */
 export default function URSimulation({ block, network }) {
+    const { t } = useLanguage();
     const canvasRef = useRef(null);
     const wrapperRef = useRef(null);
     // The animation loop reads the live totals through a ref so the canvas
     // effect never re-runs when a poll lands.
     const networkRef = useRef(network);
     networkRef.current = network;
+    // …and the two hub labels the same way, so a language switch relabels
+    // the running canvas.
+    const hubLabelsRef = useRef(null);
+    hubLabelsRef.current = { ops: t.sim.ops, protocol: t.sim.protocol };
 
     useEffect(() => {
         const canvas = canvasRef.current;
@@ -119,8 +128,8 @@ export default function URSimulation({ block, network }) {
         let globeCenterX, globeCenterY;
 
         const hubs = {
-            ops: { x: 0, y: 0, label: "OPS" },
-            protocol: { x: 0, y: 0, label: "PROTOCOL" }
+            ops: { x: 0, y: 0 },
+            protocol: { x: 0, y: 0 }
         };
 
         function init() {
@@ -339,10 +348,11 @@ export default function URSimulation({ block, network }) {
             });
 
             // Hub Labels
+            const hubLabels = hubLabelsRef.current;
             ctx.fillStyle = COLORS.ui; ctx.font = 'bold 10px "PPNeueMontreal", sans-serif'; ctx.textAlign = 'center';
-            ctx.fillText("OPS", hubs.ops.x, hubs.ops.y - 12);
+            ctx.fillText(hubLabels.ops, hubs.ops.x, hubs.ops.y - 12);
             ctx.fillStyle = COLORS.ur;
-            ctx.fillText("PROTOCOL", hubs.protocol.x, hubs.protocol.y - (currentRadius + 10));
+            ctx.fillText(hubLabels.protocol, hubs.protocol.x, hubs.protocol.y - (currentRadius + 10));
 
             animationFrameId = requestAnimationFrame(animate);
         }

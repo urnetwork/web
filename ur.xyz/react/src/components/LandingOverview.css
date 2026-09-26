@@ -7,7 +7,7 @@
 .roles h2 { margin: 0; max-width: 720px; color: var(--brand-white); font-size: clamp(2.25rem, 5vw, 5rem); font-weight: 500; line-height: 0.98; letter-spacing: -0.045em; }
 .roles-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border-top: 1px solid rgba(214, 230, 244, 0.16); border-bottom: 1px solid rgba(214, 230, 244, 0.16); }
 .role-card { display: flex; min-height: 420px; flex-direction: column; padding: 28px 30px 32px; }
-.role-card + .role-card { border-left: 1px solid rgba(214, 230, 244, 0.16); }
+.role-card + .role-card { border-inline-start: 1px solid rgba(214, 230, 244, 0.16); }
 .role-card h3 { margin: 78px 0 24px; color: var(--brand-white); font-size: clamp(1.8rem, 3vw, 2.6rem); font-weight: 500; letter-spacing: -0.035em; }
 .role-card > p:not(.role-number) { margin: 0; color: var(--brand-ui); font-size: 0.98rem; line-height: 1.65; }
 .role-card a,
@@ -21,7 +21,7 @@
     .roles-heading { grid-template-columns: 1fr; gap: 20px; }
     .roles-grid { grid-template-columns: 1fr; }
     .role-card { min-height: 0; padding: 28px 0 36px; }
-    .role-card + .role-card { border-top: 1px solid rgba(214, 230, 244, 0.16); border-left: 0; }
+    .role-card + .role-card { border-top: 1px solid rgba(214, 230, 244, 0.16); border-inline-start: 0; }
     .role-card h3 { margin-top: 42px; }
     .role-card a { margin-top: 40px; }
 }

@@ -1,4 +1,4 @@
-.PHONY: build build-main build-canary generate-legal generate-agent-assets letter-pdf deck-slides sync-public install-playwright-browser gates clean
+.PHONY: build build-main build-canary generate-legal generate-agent-assets page-dates letter-pdf deck-slides sync-public install-playwright-browser gates clean
 
 BUILD_DIR := build
 
@@ -11,23 +11,34 @@ build: build-main build-canary
 generate-legal:
 	node ../scripts/generate-legal.mjs
 
-# Regenerate the machine-readable agent assets (whitepaper.md, docs-md mirror,
-# openapi.yml, llms.txt) so crawlers and agents always get current documents.
+# Regenerate the machine-readable agent assets (litepaper.md, the docs-md
+# mirror and the docs images) so crawlers and agents always get current
+# documents. llms.txt and llms-full.txt are written by the astro build itself,
+# from the pages it built (../scripts/generate-agent-assets-llms.mjs).
 generate-agent-assets:
 	node ../scripts/generate-agent-assets.mjs
 
-# Reprint the investor letter to astro/public/investors/*.pdf from the built
-# page, so the download always matches the copy on the page. It is intentionally
+# Bring page-dates.json (the sitemap's <lastmod> record) up to date with an
+# existing build without rebuilding. The astro build does this itself; this is
+# for a build made with UR_PAGE_DATES=check. Commit the file with the content.
+page-dates:
+	node scripts/page-dates.mjs build/$(or $(UR_ENV_DIR),main)
+
+# Reprint the investor letter to react/public/investors/*.pdf from the built
+# page (sync-public mirrors it into astro/public at build time), so the download
+# always matches the copy on the page. It is intentionally
 # not part of build-* because the generated PDF is a committed asset. Run it
 # whenever the letter copy or its print styles change, and commit the result.
 letter-pdf:
 	node ../scripts/generate-letter-pdf.mjs --rebuild
 
-# Rasterise the investor deck PDF into astro/public/investors/deck/*.webp and
-# place the PDF itself as the download. Pass the export from Google Slides:
+# Rasterise the investor deck PDF into react/public/investors/deck/*.webp (at
+# 2560 and 1280 px) and
+# place the PDF itself as the download (sync-public mirrors both into
+# astro/public at build time). Pass the export from Google Slides:
 #   make deck-slides DECK=~/Downloads/deck.pdf
 # Like letter-pdf, this updates committed assets and is not part of build-*.
-# Update deck.slideCount in src/lib/investors.js to the count it prints.
+# Update deck.slideCount in ../react/src/data/investors.js to the count it prints.
 deck-slides:
 	node ../scripts/generate-deck-slides.mjs "$(DECK)"
 
@@ -56,6 +67,9 @@ gates: install-playwright-browser
 	node ../react/tests/network-privacy.mjs
 	node scripts/link-audit.mjs build/$(UR_ENV_DIR)
 	node scripts/seo-audit.mjs build/$(UR_ENV_DIR)
+	node scripts/page-dates.mjs build/$(UR_ENV_DIR) --check
+	node ../react/tests/i18n-staleness.mjs
+	node ../react/tests/localized-english-text.mjs build/$(UR_ENV_DIR)
 
 build-main: generate-legal generate-agent-assets sync-public
 	(cd ../react && npm ci)

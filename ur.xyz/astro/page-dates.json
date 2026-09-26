@@ -1,0 +1,197 @@
+{
+  "about": "The day each ur.xyz page last changed, for the sitemap <lastmod>: a fingerprint of what the page says and the day it last changed. The build maintains this file (scripts/page-dates.mjs); commit it with the content it dates.",
+  "pages": {
+    "/": {
+      "fingerprint": "3212360bf8a0509b",
+      "lastmod": "2026-09-25"
+    },
+    "/about": {
+      "fingerprint": "5a2aca1212fe371f",
+      "lastmod": "2026-09-25"
+    },
+    "/ar": {
+      "fingerprint": "84627eb68b409f90",
+      "lastmod": "2026-09-25"
+    },
+    "/ar/miners": {
+      "fingerprint": "bf88f5a54ef2292a",
+      "lastmod": "2026-09-25"
+    },
+    "/ar/operators": {
+      "fingerprint": "d15169a6d8b123e9",
+      "lastmod": "2026-09-25"
+    },
+    "/ar/research": {
+      "fingerprint": "0346a3ca785ce9e5",
+      "lastmod": "2026-09-25"
+    },
+    "/ar/validators": {
+      "fingerprint": "307cc71152692456",
+      "lastmod": "2026-09-25"
+    },
+    "/audits/masa-l2-2025.pdf": {
+      "fingerprint": "4f992398684c330c",
+      "lastmod": "2026-08-18"
+    },
+    "/build": {
+      "fingerprint": "63fbb0c9ba9ad02f",
+      "lastmod": "2026-09-25"
+    },
+    "/de": {
+      "fingerprint": "2265067f61a4bc13",
+      "lastmod": "2026-09-25"
+    },
+    "/de/miners": {
+      "fingerprint": "a663bd324d7b63a8",
+      "lastmod": "2026-09-25"
+    },
+    "/de/operators": {
+      "fingerprint": "afaecea56462daa4",
+      "lastmod": "2026-09-25"
+    },
+    "/de/research": {
+      "fingerprint": "916eb6997214d13f",
+      "lastmod": "2026-09-25"
+    },
+    "/de/validators": {
+      "fingerprint": "8f2624a69f8dea00",
+      "lastmod": "2026-09-25"
+    },
+    "/docs": {
+      "fingerprint": "804985b250769ac1",
+      "lastmod": "2026-09-25"
+    },
+    "/docs/litepaper": {
+      "fingerprint": "b5cc10e20d54d9c4",
+      "lastmod": "2026-09-25"
+    },
+    "/docs/miner": {
+      "fingerprint": "714fe6c2e94b9d65",
+      "lastmod": "2026-09-25"
+    },
+    "/docs/operator": {
+      "fingerprint": "4a5eb0ace4b883a4",
+      "lastmod": "2026-09-25"
+    },
+    "/docs/support/delete": {
+      "fingerprint": "9dc5b2d9e6febabc",
+      "lastmod": "2026-09-25"
+    },
+    "/docs/validator": {
+      "fingerprint": "54e88580fd36609c",
+      "lastmod": "2026-09-25"
+    },
+    "/es": {
+      "fingerprint": "b8783032fd01f193",
+      "lastmod": "2026-09-25"
+    },
+    "/es/miners": {
+      "fingerprint": "9a239b70858f5e16",
+      "lastmod": "2026-09-25"
+    },
+    "/es/operators": {
+      "fingerprint": "3ed00a40f55dd88b",
+      "lastmod": "2026-09-25"
+    },
+    "/es/research": {
+      "fingerprint": "48730e846b089a84",
+      "lastmod": "2026-09-25"
+    },
+    "/es/validators": {
+      "fingerprint": "b19a149314e5bbd7",
+      "lastmod": "2026-09-25"
+    },
+    "/investors": {
+      "fingerprint": "31d6c11a82b3fe58",
+      "lastmod": "2026-09-26"
+    },
+    "/investors/conviction-lock": {
+      "fingerprint": "71ba2cff05ef2129",
+      "lastmod": "2026-09-09"
+    },
+    "/investors/deck": {
+      "fingerprint": "bbb211adad089f1d",
+      "lastmod": "2026-09-25"
+    },
+    "/investors/letter-to-tokenholders-september-2026": {
+      "fingerprint": "4000d9b292dda2f4",
+      "lastmod": "2026-09-26"
+    },
+    "/investors/our-letter-to-bittensor": {
+      "fingerprint": "bea6c43d6881e1a1",
+      "lastmod": "2026-08-18"
+    },
+    "/miners": {
+      "fingerprint": "bd5a5648ae69e1d6",
+      "lastmod": "2026-09-25"
+    },
+    "/operators": {
+      "fingerprint": "4769f8f5096c50cf",
+      "lastmod": "2026-09-25"
+    },
+    "/price": {
+      "fingerprint": "83df0721f46586da",
+      "lastmod": "2026-09-25"
+    },
+    "/privacy": {
+      "fingerprint": "a14ca6884f5119cc",
+      "lastmod": "2026-09-25"
+    },
+    "/research": {
+      "fingerprint": "4855a744b7b1aafa",
+      "lastmod": "2026-09-25"
+    },
+    "/ru": {
+      "fingerprint": "8e927c0c6770db66",
+      "lastmod": "2026-09-25"
+    },
+    "/ru/miners": {
+      "fingerprint": "8760ba99463477a9",
+      "lastmod": "2026-09-25"
+    },
+    "/ru/operators": {
+      "fingerprint": "deada2e29894fb50",
+      "lastmod": "2026-09-25"
+    },
+    "/ru/research": {
+      "fingerprint": "fab6e192f20a928c",
+      "lastmod": "2026-09-25"
+    },
+    "/ru/validators": {
+      "fingerprint": "44b25f8d2f7fda85",
+      "lastmod": "2026-09-25"
+    },
+    "/terms": {
+      "fingerprint": "54eda4f227fcb9fa",
+      "lastmod": "2026-08-21"
+    },
+    "/validators": {
+      "fingerprint": "f8bdea96812e7a04",
+      "lastmod": "2026-09-25"
+    },
+    "/vdp": {
+      "fingerprint": "c5ed84b60e9ab960",
+      "lastmod": "2026-08-14"
+    },
+    "/zh": {
+      "fingerprint": "e7a5ed2f4d016a6e",
+      "lastmod": "2026-09-25"
+    },
+    "/zh/miners": {
+      "fingerprint": "2cb36dfe82c00cfb",
+      "lastmod": "2026-09-25"
+    },
+    "/zh/operators": {
+      "fingerprint": "1afba986c09392ac",
+      "lastmod": "2026-09-25"
+    },
+    "/zh/research": {
+      "fingerprint": "97c574ea0bf86247",
+      "lastmod": "2026-09-25"
+    },
+    "/zh/validators": {
+      "fingerprint": "beb18ab2dde5e282",
+      "lastmod": "2026-09-25"
+    }
+  }
+}

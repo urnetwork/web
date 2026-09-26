@@ -6,7 +6,7 @@ import RoleBlocks from '../../components/RoleBlocks.astro';
 import HeroIsland from '../../islands/HeroIsland.jsx';
 import LaunchVideoIsland from '../../islands/LaunchVideoIsland.jsx';
 import HomepageIntro from '@react/components/HomepageIntro.jsx';
-import NetworkDiagram from '@react/components/NetworkDiagram.jsx';
+import NetworkDiagram, { diagramCopy } from '@react/components/NetworkDiagram.jsx';
 import { NON_EN_LANGS, LANGS, getDict } from '../../lib/i18n.js';
 import { sentenceClamp } from '../../lib/meta.js';
 
@@ -17,22 +17,15 @@ export function getStaticPaths() {
 const { lang } = Astro.params;
 const t = await getDict(lang);
 const dir = LANGS[lang]?.dir || 'ltr';
-const description = sentenceClamp(t.homepage.intro);
-const videoJsonLd = [{
-    '@type': 'VideoObject',
-    '@id': 'https://ur.xyz/#launch-video',
-    name: `UR — ${t.nav.tagline}`,
-    description,
-    thumbnailUrl: 'https://ur.xyz/launch-video-poster.jpg',
-    contentUrl: 'https://ur.xyz/launch-video.mp4',
-    uploadDate: '2026-08-19T11:33:18-05:00',
-    duration: 'PT1M13S',
-    width: 1920,
-    height: 1080,
-    publisher: { '@id': 'https://ur.xyz/#org' },
-}];
+// What a search result shows: the dictionary's own title and description
+// when it has them (homepage.metaTitle / metaDescription), else the tagline
+// and the intro's opening sentences.
+const title = t.homepage.metaTitle || `UR | ${t.nav.tagline}`;
+const description = sentenceClamp(t.homepage.metaDescription || t.homepage.intro);
+// No VideoObject: the launch film opens in an overlay that mounts on demand,
+// so the page's HTML carries no <video> for the markup to describe.
 ---
-<Base title={`UR | ${t.nav.tagline}`} description={description} jsonLd={videoJsonLd} lang={lang} dir={dir}>
+<Base title={title} description={description} lang={lang} dir={dir}>
     <div class="app">
         <DisclaimerStatic t={t} />
         <HeroIsland lang={lang} client:load />
@@ -40,7 +33,7 @@ const videoJsonLd = [{
         <main class="landing-main">
             <HomepageIntro copy={t} />
             <section class="landing-overview" aria-label={t.homepage.diagramAria}>
-                <NetworkDiagram client:visible={{rootMargin: "200px"}} active="subnet" lang={lang} />
+                <NetworkDiagram client:visible={{rootMargin: "200px"}} active="subnet" lang={lang} copy={diagramCopy(t)} />
                 <RoleBlocks t={t} lang={lang} />
             </section>
         </main>

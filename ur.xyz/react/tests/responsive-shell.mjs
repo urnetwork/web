@@ -132,11 +132,19 @@ async function auditPage(browser, base, route, profile) {
     assert(await toggle.getAttribute('aria-expanded') === 'false', `${route} closed menu does not announce aria-expanded=false`);
 
     await toggle.click();
-    await page.waitForTimeout(50);
+    // The drawer transitions in from visibility:hidden, so wait for the open
+    // state itself rather than a fixed pause: on a loaded machine a pause
+    // raced the transition and the check failed on a different route each run.
+    const mobileNav = page.locator('nav[aria-label="Mobile navigation"]');
+    await mobileNav.first().waitFor({ state: 'visible', timeout: 2000 }).catch(() => {});
+    await page.waitForFunction(
+      (selector) => document.querySelector(selector)?.getAttribute('aria-expanded') === 'true',
+      'header button[aria-label*="menu" i], header summary[aria-label*="menu" i]',
+      { timeout: 2000 },
+    ).catch(() => {});
     assert(await toggle.getAttribute('aria-expanded') === 'true', `${route} open menu does not announce aria-expanded=true`);
     assert((await toggle.getAttribute('aria-label'))?.toLowerCase().includes('close'), `${route} open menu label does not announce Close`);
 
-    const mobileNav = page.locator('nav[aria-label="Mobile navigation"]');
     assert(await visible(mobileNav), `${route} mobile navigation did not open`);
     const order = (await mobileNav.locator('a').allTextContents()).map(linkName).filter(Boolean);
     assert(JSON.stringify(order) === JSON.stringify(MOBILE_ORDER), `${route} mobile nav order is ${order.join(', ')}`);

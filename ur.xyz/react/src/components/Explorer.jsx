@@ -1,8 +1,23 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import './Explorer.css';
-import { docs as ALL_DOCS, docGroups } from '../lib/docs';
+import { listedDocs, docGroups } from '../lib/docs';
+import { DOC_PAGE_PATHS } from '../lib/docs-shared';
 import { buildPath, navigate, useRoute } from '../router';
 import { useLanguage } from '../i18n';
+
+/**
+ * Where a document lives for a reader in `code`: /docs/<slug> (with the
+ * language prefix the SPA routes), or the document's own page for the ones
+ * published outside /docs (the legal documents, English-only at /terms, …).
+ */
+export function docHref(doc, code) {
+    return DOC_PAGE_PATHS[doc.slug] || buildPath({ name: 'docs', slug: doc.slug }, code);
+}
+
+/** A click the page should route itself: not a new-tab, new-window or download click. */
+export function isPlainClick(e) {
+    return !e.defaultPrevented && e.button === 0 && !e.metaKey && !e.ctrlKey && !e.shiftKey && !e.altKey;
+}
 
 /**
  * Explorer
@@ -17,12 +32,15 @@ import { useLanguage } from '../i18n';
  *                      OpenAPI normalizer in ApiExplorer).
  *   • `apiOperations`— flat operation list, for the search index.
  *   • `children`     — main pane content.
+ *   • `initialSlug`  — the document the page was rendered for. During SSR the
+ *                      router sees no URL, so the sidebar marks this one as
+ *                      the current page; in the browser the URL wins.
  *
  * The component owns the search index because both pages share it: a
  * docs result navigates to `/docs/<slug>` and an API result navigates
  * to `/api#<operationId>`.
  */
-export default function Explorer({ kind, apiGroups, apiOperations, children }) {
+export default function Explorer({ kind, apiGroups, apiOperations, children, initialSlug = null }) {
     const route = useRoute();
     const { code, t } = useLanguage();
     const [query, setQuery] = useState('');
@@ -30,8 +48,9 @@ export default function Explorer({ kind, apiGroups, apiOperations, children }) {
     // first thing you see; this toggles it open.
     const [navOpen, setNavOpen] = useState(false);
 
+    // what the sidebar lists (an unlisted document is not searchable either)
     const searchIndex = useMemo(
-        () => buildSearchIndex(ALL_DOCS, apiOperations || []),
+        () => buildSearchIndex(listedDocs, apiOperations || []),
         [apiOperations]
     );
 
@@ -46,9 +65,9 @@ export default function Explorer({ kind, apiGroups, apiOperations, children }) {
             .map(r => r.entry);
     }, [query, searchIndex]);
 
-    const onPickDoc = (slug) => {
+    const onPickDoc = (doc) => {
         setNavOpen(false);
-        navigate(buildPath({ name: 'docs', slug }, code));
+        navigate(docHref(doc, code));
     };
     const onPickApi = (anchor) => {
         setNavOpen(false);
@@ -60,13 +79,13 @@ export default function Explorer({ kind, apiGroups, apiOperations, children }) {
         });
     };
     const onPickResult = (entry) => {
-        if (entry.kind === 'doc') onPickDoc(entry.slug);
+        if (entry.kind === 'doc') onPickDoc(entry);
         else onPickApi(entry.anchor);
         setQuery('');
     };
 
     const isApiActive = kind === 'api';
-    const activeDocSlug = kind === 'docs' ? (route.slug || '') : null;
+    const activeDocSlug = kind === 'docs' ? (route.slug ?? initialSlug ?? '') : null;
 
     return (
         <div className={`explorer ${navOpen ? 'sidebar-open' : ''}`}>
@@ -165,17 +184,26 @@ export default function Explorer({ kind, apiGroups, apiOperations, children }) {
                             <div key={group.id} className="explorer-group">
                                 <div className="explorer-group-label">{group.label}</div>
                                 <ul className="explorer-group-list">
-                                    {group.docs.map(d => (
-                                        <li key={d.slug || '_root'}>
-                                            <button
-                                                type="button"
-                                                className={`explorer-doc-link ${kind === 'docs' && d.slug === activeDocSlug ? 'is-active' : ''}`}
-                                                onClick={() => onPickDoc(d.slug)}
-                                            >
-                                                {d.title}
-                                            </button>
-                                        </li>
-                                    ))}
+                                    {group.docs.map(d => {
+                                        const current = kind === 'docs' && d.slug === activeDocSlug;
+                                        // a real link (crawlable, opens in a new tab), routed in place on a plain click
+                                        return (
+                                            <li key={d.slug || '_root'}>
+                                                <a
+                                                    href={docHref(d, code)}
+                                                    className={`explorer-doc-link ${current ? 'is-active' : ''}`}
+                                                    aria-current={current ? 'page' : undefined}
+                                                    onClick={(e) => {
+                                                        if (!isPlainClick(e)) return;
+                                                        e.preventDefault();
+                                                        onPickDoc(d);
+                                                    }}
+                                                >
+                                                    {d.title}
+                                                </a>
+                                            </li>
+                                        );
+                                    })}
                                 </ul>
                             </div>
                         ))}

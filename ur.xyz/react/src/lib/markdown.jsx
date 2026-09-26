@@ -23,14 +23,41 @@ const FENCE_RE   = /^```\s*([a-zA-Z0-9_+-]*)\s*$/;
 const QUOTE_RE   = /^>\s?(.*)$/;
 const TABLE_SEP  = /^\s*\|?\s*:?-+:?\s*(?:\|\s*:?-+:?\s*)+\|?\s*$/;
 
-export function Markdown({ source, baseHref }) {
+/**
+ * `dropTitle` removes the document's first level-1 heading, for a page whose
+ * own <h1> already shows the document title (the docs pages print it in their
+ * header; the markdown's "# Title" made a second h1). `headingBase` renders the
+ * headings as an outline beneath that level: each heading one level below the
+ * heading it sits under, so a document that jumps from "#" to "###" does not
+ * skip a level. The visual size still follows the markdown (md-h3 stays md-h3).
+ */
+export function Markdown({ source, baseHref, dropTitle = false, headingBase = null }) {
     if (!source) return null;
-    const blocks = parseBlocks(source);
+    let blocks = parseBlocks(source);
+    if (dropTitle) {
+        const title = blocks.findIndex(b => b.type === 'heading' && b.level === 1);
+        if (title !== -1) blocks = blocks.filter((_, i) => i !== title);
+    }
+    const levels = headingBase == null ? null : outlineLevels(blocks, headingBase);
     return (
         <div className="md">
-            {blocks.map((b, i) => renderBlock(b, i, baseHref))}
+            {blocks.map((b, i) => renderBlock(b, i, baseHref, levels))}
         </div>
     );
+}
+
+/** Heading block → the level it renders at: no skips, nesting kept, never above `base`. */
+function outlineLevels(blocks, base) {
+    const levels = new Map();
+    const open = [{ written: 0, level: base }];
+    for (const b of blocks) {
+        if (b.type !== 'heading') continue;
+        while (open.length > 1 && open[open.length - 1].written >= b.level) open.pop();
+        const level = Math.min(6, open[open.length - 1].level + 1);
+        open.push({ written: b.level, level });
+        levels.set(b, level);
+    }
+    return levels;
 }
 
 function parseBlocks(src) {
@@ -174,10 +201,10 @@ function splitRow(line) {
         .map(c => c.trim());
 }
 
-function renderBlock(block, idx, baseHref) {
+function renderBlock(block, idx, baseHref, levels = null) {
     switch (block.type) {
         case 'heading': {
-            const Tag = `h${Math.min(6, Math.max(1, block.level))}`;
+            const Tag = `h${levels?.get(block) ?? Math.min(6, Math.max(1, block.level))}`;
             const id = slugify(block.text);
             return <Tag key={idx} id={id} className={`md-h md-h${block.level}`}>{renderInline(block.text, baseHref)}</Tag>;
         }

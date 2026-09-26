@@ -13,8 +13,8 @@
 // stale, and it goes stale quietly.
 //
 // Mirroring is ADDITIVE — nothing in astro/public is deleted — so the files
-// generated straight into astro/public (whitepaper.md, docs-md/, openapi.yml,
-// llms.txt, llms-full.txt from generate-agent-assets.mjs) are untouched.
+// generated straight into astro/public (litepaper.md, docs-md/ and the docs
+// images from generate-agent-assets.mjs) are untouched.
 //
 // Usage:
 //   node scripts/sync-public.mjs
@@ -22,7 +22,7 @@
 // Wired into the Makefile's build targets, which run `npx astro build` and so
 // never execute a package.json prebuild step.
 
-import { cpSync, existsSync, readdirSync, rmSync, statSync } from "node:fs";
+import { cpSync, existsSync, readdirSync, statSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -48,11 +48,11 @@ const REACT_PUBLIC = path.resolve(__dirname, "../../react/public");
 // a _redirects file on this host).
 const ASTRO_OWNED = new Set(["robots.txt", "_redirects"]);
 
-// Pricing is retired from the public site for now. Keep the source and sync
-// implementation available, but never let stale/generated feed files leak
-// back into a production build through the public-directory mirror.
-const RETIRED_PUBLIC = new Set(["price.yml", "price.rss"]);
-
+// price.yml and price.rss were held back here while pricing was retired from
+// the public site (2026-08-18). Pricing is public again since 2026-09-25: the
+// initial-period sheet (0 α) is published at /price, /price.yml and
+// /price.rss by scripts/sync-price.mjs, and the role guides link it, so the
+// two files mirror like every other asset.
 const SKIP = new Set([".DS_Store"]);
 
 if (!existsSync(REACT_PUBLIC)) {
@@ -65,11 +65,6 @@ const skipped = [];
 
 for (const name of readdirSync(REACT_PUBLIC)) {
   if (name.startsWith(".") || SKIP.has(name)) continue;
-  if (RETIRED_PUBLIC.has(name)) {
-    rmSync(path.join(ASTRO_PUBLIC, name), { force: true });
-    skipped.push(name);
-    continue;
-  }
   if (ASTRO_OWNED.has(name)) {
     skipped.push(name);
     continue;

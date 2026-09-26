@@ -20,6 +20,9 @@ import LegalSection from './components/LegalSection';
 
 import DocsExplorer from './components/DocsExplorer';
 import ApiExplorer from './components/ApiExplorer';
+import AboutPage from './components/pages/About';
+import InvestorsPage from './components/pages/Investors';
+import BuildPage from './components/pages/Build';
 import { useRoute } from './router';
 
 const Terms = () => <LegalSection doc="terms" />;
@@ -36,6 +39,11 @@ const SECTION_COMPONENTS = {
     terms:      Terms,
     privacy:    Privacy,
     vdp:        Vdp,
+    // the English-only pages (router PAGE_ROUTES); the Astro build renders
+    // the same components from its thin pages, so they stay one source
+    about:      AboutPage,
+    investors:  InvestorsPage,
+    build:      BuildPage,
 };
 
 /**
@@ -52,7 +60,7 @@ export default function App() {
     if (route.name === 'api')  return <ApiExplorer />;
 
     const SectionComponent = SECTION_COMPONENTS[route.name];
-    if (SectionComponent) return <SectionPage Component={SectionComponent} />;
+    if (SectionComponent) return <SectionPage Component={SectionComponent} route={route} />;
 
     return <HomePage />;
 }
@@ -99,7 +107,7 @@ function HomePage() {
  * Wraps a single section component in the shared site chrome:
  * Disclaimer, Nav, section content, Footer.
  */
-function SectionPage({ Component }) {
+function SectionPage({ Component, route }) {
     const disclaimerVisible = useDisclaimerVisible();
 
     return (
@@ -108,7 +116,7 @@ function SectionPage({ Component }) {
             <Nav disclaimerVisible={disclaimerVisible} />
 
             <main className="section-page">
-                <Component />
+                <Component route={route} />
             </main>
 
             <Footer />

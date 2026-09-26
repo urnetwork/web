@@ -1,14 +1,16 @@
 import React, { useEffect, useRef, useState } from 'react';
 import './StatsPanel.css';
-import { useLanguage } from '../i18n';
+import { useLanguage, intlLocale } from '../i18n';
 
-const fmt = (num) =>
-    Number(num || 0).toLocaleString(undefined, {
+// Figures are formatted in the page's language (intlLocale), never the
+// browser's: a German page groups 12.345,67 whatever the visitor's settings.
+const fmt = (num, locale) =>
+    Number(num || 0).toLocaleString(locale, {
         minimumFractionDigits: 2,
         maximumFractionDigits: 2
     });
 
-const fmtInt = (num) => Math.floor(Number(num || 0)).toLocaleString();
+const fmtInt = (num, locale) => Math.floor(Number(num || 0)).toLocaleString(locale);
 
 // Stat values glide between readings: a 2s ease-in-out count from the old
 // number to the new one.
@@ -128,7 +130,8 @@ function useCountUp(target, scale = 1) {
 export default function StatsPanel({ block, network, anchorId = 'whitepaper', disclaimerVisible = false }) {
     const ref = useRef(null);
     const reflowRef = useRef(false);
-    const { t } = useLanguage();
+    const { t, code } = useLanguage();
+    const locale = intlLocale(code);
 
     useEffect(() => {
         const el = ref.current;
@@ -302,9 +305,9 @@ export default function StatsPanel({ block, network, anchorId = 'whitepaper', di
 
             <div className="stat-grid">
                 <Stat label={t.stats.blockNumber}      value={network?.blockNumber ?? block?.number ?? null} format={(n) => `#${n}`} tone="ur"                    />
-                <Stat label={t.stats.dataPerBlock}     value={totals ? totals.dataGib : null}             format={fmt}            tone="data"  scale={GIB_BYTES} />
-                <Stat label={t.stats.usersPerBlock}    value={totals ? totals.users : null}               format={fmtInt}         tone="usd"                      />
-                <Stat label={t.stats.totalNetworks}    value={totals ? totals.totalNetworks : null}       format={fmtInt}         tone="white"                    />
+                <Stat label={t.stats.dataPerBlock}     value={totals ? totals.dataGib : null}             format={(n) => fmt(n, locale)}    tone="data"  scale={GIB_BYTES} />
+                <Stat label={t.stats.usersPerBlock}    value={totals ? totals.users : null}               format={(n) => fmtInt(n, locale)} tone="usd"                      />
+                <Stat label={t.stats.totalNetworks}    value={totals ? totals.totalNetworks : null}       format={(n) => fmtInt(n, locale)} tone="white"                    />
             </div>
         </aside>
     );

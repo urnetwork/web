@@ -224,7 +224,7 @@ export default function Nav({ disclaimerVisible, activeRoute, aboutHref }) {
                         <img src="/ur.svg" alt="UR" className="nav-logo" />
                     </a>
 
-                    <nav className="nav-links" aria-label="Primary navigation">
+                    <nav className="nav-links" aria-label={t.nav.primaryNav}>
                         <NetworkMenu code={code} route={route} t={t} />
                         <a href={buildPath({ name: 'research', slug: null }, code)} className={route.name === 'research' ? 'is-active' : ''} aria-current={route.name === 'research' ? 'page' : undefined}>{t.nav.research}</a>
                         {code === 'en' && <a href="/build" className={route.name === 'build' ? 'is-active' : ''} aria-current={route.name === 'build' ? 'page' : undefined}>Build</a>}
@@ -256,15 +256,15 @@ export default function Nav({ disclaimerVisible, activeRoute, aboutHref }) {
                 className={`nav-drawer ${menuOpen ? 'is-open' : ''}`}
                 role="dialog"
                 aria-modal="true"
-                aria-label="Site menu"
+                aria-label={t.nav.siteMenu}
             >
                 <div className="nav-drawer-bar">
                     <a className="nav-brand" href={homeHref} onClick={goHome}><img src="/ur.svg" alt="UR" className="nav-logo" /></a>
-                    <button type="button" className="nav-menu-toggle is-open" aria-label="Close menu" onClick={() => setMenuOpen(false)}>
+                    <button type="button" className="nav-menu-toggle is-open" aria-label={t.nav.closeMenu} onClick={() => setMenuOpen(false)}>
                         <span /><span /><span />
                     </button>
                 </div>
-                <nav className="nav-drawer-links" aria-label="Mobile navigation">
+                <nav className="nav-drawer-links" aria-label={t.nav.mobileNav}>
                     <NetworkMenu code={code} route={route} t={t} mobile />
                     <a href={buildPath({ name: 'research', slug: null }, code)} className={route.name === 'research' ? 'is-active' : ''} aria-current={route.name === 'research' ? 'page' : undefined}>{t.nav.research}</a>
                     {code === 'en' && <a href="/build" className={route.name === 'build' ? 'is-active' : ''} aria-current={route.name === 'build' ? 'page' : undefined}>Build</a>}

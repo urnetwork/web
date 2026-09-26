@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import './NetworkDiagram.css';
+import { useLanguage } from '../i18n';
 import { buildPath, navigate, splitPath } from '../router';
 
 /**
@@ -12,7 +13,8 @@ import { buildPath, navigate, splitPath } from '../router';
  *     to the current vertex, solid = a real subnet edge, dashed = structural-only
  *     (the Miners–Validators pair, which is not a real connection).
  *
- *   • Docked (left margin, on scroll): it slides into the left column, shrinks,
+ *   • Docked (reading-start margin, on scroll): it slides into the left column
+ *     (the right one on a right-to-left page), shrinks,
  *     and FLATTENS into the flat square nav — the vertices rotate into place
  *     (affine, in polar coords) rather than crossing over, the Miners–Validators
  *     diagonal opens up, and the pink glow settles back to the subtle wire.
@@ -22,12 +24,28 @@ import { buildPath, navigate, splitPath } from '../router';
  */
 
 const NODE_KEYS = ['operators', 'miners', 'validators', 'subnet'];
-const LABEL = { operators: 'Operators', miners: 'Miners', validators: 'Validators', subnet: 'Subnet' };
 const ROUTE = { operators: 'operators', miners: 'miners', validators: 'validators', subnet: 'home' };
 
-// Docs target for each role's "Become a …" CTA. Miners have a published
-// guide; the others land on the docs root until theirs exist.
-const CTA_DOCS_SLUG = { operators: null, miners: 'provider', validators: null };
+/**
+ * The diagram's words in one language, from its dictionary: the vertex labels
+ * (the nav's role names plus the subnet) and the accessible-name templates.
+ * The Astro pages pass this as the `copy` prop — an island has no language
+ * context — and the SPA reads it from the LanguageProvider.
+ */
+export function diagramCopy(t) {
+    const nav = t?.nav || {};
+    const diagram = t?.diagram || {};
+    return {
+        labels: { operators: nav.operators, miners: nav.miners, validators: nav.validators, subnet: diagram.subnet },
+        aria: diagram.aria || '',
+        goTo: diagram.goTo || '{label}',
+    };
+}
+
+const fill = (template, values) => template.replace(/\{(\w+)\}/g, (match, key) => values[key] ?? match);
+
+// Docs target for each role's "Become a …" CTA: the role's guide.
+const CTA_DOCS_SLUG = { operators: 'operator', miners: 'miner', validators: 'validator' };
 
 // Flat square corners + label anchors, in the 320×288 viewBox (the docked layout).
 const SQUARE = {
@@ -67,7 +85,10 @@ const lerp = (a, b, t) => a + (b - a) * t;
 const lerpAngle = (a0, a1, t) => { const d = Math.atan2(Math.sin(a1 - a0), Math.cos(a1 - a0)); return a0 + d * t; };
 const easeInOut = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
 
-export default function NetworkDiagram({ active = 'subnet', lang = 'en', ctaLabel = null }) {
+export default function NetworkDiagram({ active = 'subnet', lang = 'en', ctaLabel = null, copy = null }) {
+    const { t } = useLanguage();
+    const words = copy || diagramCopy(t);
+    const label = words.labels;
     const holderRef = useRef(null);
     const svgRef = useRef(null);
     const ctaRef = useRef(null);
@@ -107,8 +128,12 @@ export default function NetworkDiagram({ active = 'subnet', lang = 'en', ctaLabe
 
             const vw = window.innerWidth, vh = window.innerHeight;
             const rect = holder.getBoundingClientRect();
-            const leftCol = rect.left;              // left margin = width of the left column
-            const canDock = !(vw < 768 || leftCol < DOCKED_W + 2 * EDGE_GAP);
+            // It docks into the reading-start margin: the left column, or the
+            // right one when the page reads right to left.
+            const rtl = document.documentElement.dir === 'rtl';
+            const startCol = rtl ? document.documentElement.clientWidth - rect.right : rect.left; // that margin's width
+            const colX = rtl ? rect.right : 0;      // where that margin begins
+            const canDock = !(vw < 768 || startCol < DOCKED_W + 2 * EDGE_GAP);
 
             // Commit to docked/inline once raw scroll progress crosses THRESHOLD, then ease.
             const rawP = Math.max(0, Math.min(1, ((NAV_H + GAP + TRAVEL) - rect.top) / TRAVEL));
@@ -130,7 +155,7 @@ export default function NetworkDiagram({ active = 'subnet', lang = 'en', ctaLabe
             } else {
                 holder.classList.add('is-interactive');
                 const inlineX = rect.left + (rect.width - NAT_W) / 2; // centered in the content column
-                const dockX = (leftCol - DOCKED_W) / 2;              // centered in the left column
+                const dockX = colX + (startCol - DOCKED_W) / 2;      // centered in the start column
                 const dockY = NAV_H + DOCK_VFRAC * (vh - NAV_H) - DOCKED_H / 2; // 0.25 of the nav→bottom span
                 svg.style.width = NAT_W + 'px';
                 svg.style.transform =
@@ -139,11 +164,11 @@ export default function NetworkDiagram({ active = 'subnet', lang = 'en', ctaLabe
                 // docked in the margin, so the content column holds the same
                 // vertical spacing and never lurches upward as it slides out.
                 holder.style.height = NAT_H + 'px';
-                // The role CTA parks in the left margin where the square will
+                // The role CTA parks in the start margin where the square will
                 // dock, then yields downward beneath it as it arrives.
                 if (cta) {
                     cta.classList.add('is-floating');
-                    const ctaX = (leftCol - cta.offsetWidth) / 2;
+                    const ctaX = colX + (startCol - cta.offsetWidth) / 2;
                     const ctaY = lerp(dockY, dockY + DOCKED_H + 18, p);
                     cta.style.transform = `translate3d(${ctaX.toFixed(1)}px, ${ctaY.toFixed(1)}px, 0)`;
                 }
@@ -236,7 +261,7 @@ export default function NetworkDiagram({ active = 'subnet', lang = 'en', ctaLabe
                 ref={svgRef}
                 viewBox="0 0 320 288"
                 role="img"
-                aria-label={`The UR network — Subnet, Operators, Miners and Validators — with ${active} highlighted`}
+                aria-label={fill(words.aria, { ...label, active: label[active] })}
             >
                 <g className="nd-edges">
                     {EDGES.map(({ e, mv }) => {
@@ -260,11 +285,11 @@ export default function NetworkDiagram({ active = 'subnet', lang = 'en', ctaLabe
                                 href={hrefFor(key)}
                                 onClick={e => go(e, key)}
                                 className={`nd-node ${key === active ? 'is-active' : ''}`}
-                                aria-label={`Go to ${LABEL[key]}`}
+                                aria-label={fill(words.goTo, { label: label[key] })}
                             >
                                 <circle className="nd-hit" ref={el => (hitRefs.current[key] = el)} cx={sq.x} cy={sq.y} r={24} />
                                 <circle ref={el => (circleRefs.current[key] = el)} cx={sq.x} cy={sq.y} r={key === active ? 9 : 6} />
-                                <text className="nd-label" ref={el => (labelRefs.current[key] = el)} x={sq.lx} y={sq.ly} textAnchor="middle">{LABEL[key]}</text>
+                                <text className="nd-label" ref={el => (labelRefs.current[key] = el)} x={sq.lx} y={sq.ly} textAnchor="middle">{label[key]}</text>
                             </a>
                         );
                     })}

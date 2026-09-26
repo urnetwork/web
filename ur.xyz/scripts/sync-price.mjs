@@ -11,10 +11,12 @@
  *                    astro/public/price.yml + price.rss
  *                    react/public/price.yml + price.rss
  *
- * The sn checkout is located via $SN_DIR (default: ../../../sn — the
- * urnetwork monorepo layout). When the sn repo is not present (e.g. a CI
- * build of the site alone), the checked-in copy is kept and only the derived
- * artifacts are regenerated, so the build stays reproducible.
+ * The sn checkout is located via $SN_DIR (default: ../../sn — the urnetwork
+ * monoroot, where ur.xyz lives at web/ur.xyz since the 2026-09 reorganization;
+ * the old ../../../sn dated from web/web2/ur.xyz and silently kept the
+ * checked-in copy). When the sn repo is not present (e.g. a CI build of the
+ * site alone), the checked-in copy is kept and only the derived artifacts are
+ * regenerated, so the build stays reproducible.
  *
  * A history entry is appended only when the sheet's content changes, dated
  * at the moment the change is first synced — that is the "published" time
@@ -27,7 +29,7 @@ import { fileURLToPath } from 'node:url';
 import { parseYaml } from '../react/src/lib/yaml.js';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const SN_DIR = process.env.SN_DIR || path.resolve(ROOT, '../../../sn');
+const SN_DIR = process.env.SN_DIR || path.resolve(ROOT, '../../sn');
 
 const SITE_ORIGIN = 'https://ur.xyz';
 const PRICE_PAGE = `${SITE_ORIGIN}/price`;

@@ -7,13 +7,16 @@ import { parseYaml } from './yaml';
  * and publishes the demand deposit price per block (7 days), tiered by the
  * operator's staked α:
  *
- *   sn: 1
+ *   sn: 25
  *   tiered_per_block_demand_deposits:
- *     0:    { alpha_per_gib: 1,   alpha_per_user: 1 }
- *     1000: { alpha_per_gib: 0.1, alpha_per_user: 0.1 }
+ *     0:    { alpha_per_gib: 0, alpha_per_user: 0 }
+ *     1000: { alpha_per_gib: 0, alpha_per_user: 0 }
  *
  * An operator pays the best tier whose staked-α threshold it meets; the
- * 0 tier applies to everyone, with or without staked α.
+ * 0 tier applies to everyone, with or without staked α. In the initial
+ * period every rate is 0: no demand deposits are collected while the network
+ * is hardened, and the tiers keep the shape of the schedule for when they
+ * are (PriceSection shows the initial-period note while every rate is 0).
  *
  * α → USD resolves against CoinGecko's public onchain (GeckoTerminal) feed:
  * on the "bittensor" network, every subnet's α/TAO pool has the

@@ -9,8 +9,29 @@
 //
 // Usage: node scripts/seo-audit.mjs [distDir]   (default: dist)
 
+import { execFileSync } from "node:child_process";
 import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
+import { UNLISTED_DOC_SLUGS } from "../../react/src/lib/docs-shared.js";
+
+// The day a file's content last changed: its last commit when the working copy
+// matches it, otherwise (modified, untracked, or no git at all) its mtime,
+// because an uncommitted edit is newer than any commit.
+function contentDay(root, rel) {
+  const git = (args) =>
+    execFileSync("git", ["-C", root, ...args], { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] }).trim();
+  try {
+    if (!git(["status", "--porcelain", "--", rel])) {
+      const committed = git(["log", "-1", "--format=%cs", "--", rel]);
+      if (committed) return committed;
+    }
+  } catch {
+    /* not a git checkout: fall through to the file itself */
+  }
+  const m = statSync(path.join(root, rel)).mtime;
+  return `${m.getFullYear()}-${String(m.getMonth() + 1).padStart(2, "0")}-${String(m.getDate()).padStart(2, "0")}`;
+}
 
 const DIST = path.resolve(process.argv[2] || "dist");
 if (!existsSync(DIST)) {
@@ -217,7 +238,7 @@ const canonicalSelf = [...pages.values()].filter(
 for (const key of ["title", "description"]) {
   const seen = new Map();
   for (const p of canonicalSelf) {
-    const k = `${p.lang} ${p[key]}`;
+    const k = `${p.lang}\u0000${p[key]}`;
     if (seen.has(k)) err(`${p.urlPath}: duplicate ${key} (lang=${p.lang}) with ${seen.get(k)}`);
     else seen.set(k, p.urlPath);
   }
@@ -282,6 +303,21 @@ else {
   }
 }
 
+// ── heading outline: one h1, no skipped levels (indexable pages) ──
+// The docs pages printed the document title as an h1 over the markdown's own
+// "# Title", the legal pages hid a second h1 with CSS, and card grids jumped
+// from the page h1 to h3s. Headings are read in document order, hidden
+// alternatives (the Build page's unselected opportunities) included, since a
+// crawler reads those too.
+for (const p of pages.values()) {
+  if (p.noindex || p.redirectStub) continue;
+  const levels = [...p.html.slice(p.html.indexOf("<body")).matchAll(/<h([1-6])[\s>]/g)].map((m) => Number(m[1]));
+  const h1s = levels.filter((l) => l === 1).length;
+  if (h1s !== 1) err(`${p.urlPath}: ${h1s} <h1> elements (want exactly one)`);
+  const skips = [...new Set(levels.slice(1).map((l, i) => (l > levels[i] + 1 ? `h${levels[i]}→h${l}` : null)).filter(Boolean))];
+  if (skips.length) err(`${p.urlPath}: heading levels skip (${skips.join(", ")})`);
+}
+
 // ── media + og resolution across all pages ──
 for (const p of pages.values()) {
   for (const m of p.html.matchAll(/<(?:img|audio|video|source)[^>]*\ssrc="(\/[^"]+)"/g)) {
@@ -297,8 +333,15 @@ for (const p of pages.values()) {
 }
 
 // ── internal links + orphans (canonical-self pages need an inbound link) ──
+// A redirect stub's only link is to its own target (every /<lang>/docs/<slug>
+// stub links /docs/<slug>), so counting stubs made every document look linked
+// while the sidebar that should link them rendered buttons. Only real pages
+// count as an inbound link. An unlisted document (docs-shared.js) is linked
+// from outside the site, by the app-store listings, and is exempt.
+const unlistedDocPage = (p) => p.startsWith("/docs/") && UNLISTED_DOC_SLUGS.has(p.slice("/docs/".length));
 const inbound = new Map();
 for (const p of pages.values()) {
+  if (p.redirectStub) continue;
   for (const m of p.html.matchAll(/<a[^>]*\shref="(\/[^"]*)"/g)) {
     const target = m[1].split("#")[0].split("?")[0].replace(/\/$/, "") || "/";
     if (!inbound.has(target)) inbound.set(target, new Set());
@@ -308,7 +351,7 @@ for (const p of pages.values()) {
 }
 for (const p of canonicalSelf) {
   const selfPath = p.urlPath === "/" ? "/" : p.urlPath;
-  if (selfPath === "/") continue;
+  if (selfPath === "/" || unlistedDocPage(selfPath)) continue;
   if (!(inbound.get(selfPath)?.size > 0)) err(`${selfPath}: orphan — zero inbound internal links`);
 }
 
@@ -344,10 +387,16 @@ if (existsSync(secPath)) {
 // llms-full embeds the whole docs corpus, whose prose/code may legitimately
 // say TODO or show elided example URLs — the strict checks apply to the
 // generated files, the link check tolerates markdown punctuation.
+// The agent files are generated from the build (llms.txt lists every page);
+// they stay small, so an agent can take them in one fetch.
+const AGENT_FILE_BUDGET = { "llms.txt": 16 * 1024, "llms-full.txt": 128 * 1024 };
 for (const rel of ["llms.txt", "llms-full.txt", "litepaper.md"]) {
   const fp = path.join(DIST, rel);
   if (!existsSync(fp)) continue;
   const text = readFileSync(fp, "utf8");
+  if (AGENT_FILE_BUDGET[rel] && Buffer.byteLength(text) > AGENT_FILE_BUDGET[rel]) {
+    err(`${rel}: ${(Buffer.byteLength(text) / 1024).toFixed(1)} KB, over its ${AGENT_FILE_BUDGET[rel] / 1024} KB budget`);
+  }
   if (/\{link\}|\{name\}/.test(text)) err(`${rel}: template placeholder leaked`);
   if (rel !== "llms-full.txt" && /TODO|FIXME/.test(text)) err(`${rel}: TODO/FIXME leaked`);
   for (const m of text.matchAll(/https:\/\/ur\.xyz(\/[^\s)>\]"`]*)/g)) {
@@ -357,24 +406,32 @@ for (const rel of ["llms.txt", "llms-full.txt", "litepaper.md"]) {
   }
 }
 
-// The letter PDF is reprinted manually (make letter-pdf). If the page source
-// moved after the committed PDF last changed, the download no longer matches
-// the page — fail until it is re-printed.
-import { execFileSync } from "node:child_process";
-try {
-  const ROOT = path.resolve(DIST, "../../..");
-  const gitDate = (rel) =>
-    execFileSync("git", ["-C", ROOT, "log", "-1", "--pretty=format:%cs", "--", rel], {
-      encoding: "utf8",
-      stdio: ["ignore", "pipe", "ignore"],
-    }).trim();
-  const pageDate = gitDate("astro/src/pages/investors/our-letter-to-bittensor.astro");
-  const pdfDate = gitDate("astro/public/investors/our-letter-to-bittensor.pdf");
-  if (pageDate && pdfDate && pageDate > pdfDate) {
-    err(`letter PDF is stale: page changed ${pageDate}, PDF last printed ${pdfDate} — run \`make letter-pdf\``);
+// The letter PDF is reprinted manually (make letter-pdf). If the letter's copy
+// changed after the PDF last did, the download no longer matches the page —
+// fail until it is re-printed. The copy lives in the React component and the
+// investor data module (the Astro page is only the shell), and the generator
+// writes the PDF under react/public. Every path must exist: when the letter
+// moved into React this check compared a shell page and a mirrored copy of the
+// PDF, found no difference, and passed silently — a moved file now fails here.
+{
+  // ur.xyz/, from this script (the build dir may live anywhere)
+  const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
+  const LETTER_SOURCES = [
+    "react/src/components/pages/investors/InvestorLetter.jsx",
+    "react/src/data/investors.js",
+  ];
+  const LETTER_PDF = "react/public/investors/our-letter-to-bittensor.pdf";
+  const missing = [...LETTER_SOURCES, LETTER_PDF].filter((rel) => !existsSync(path.join(ROOT, rel)));
+  if (missing.length) {
+    err(`letter PDF check: ${missing.join(", ")} not found under ${ROOT} — update the paths in seo-audit.mjs`);
+  } else {
+    const [newestRel, newestDate] = LETTER_SOURCES.map((rel) => [rel, contentDay(ROOT, rel)])
+      .sort((a, b) => (a[1] < b[1] ? 1 : a[1] > b[1] ? -1 : 0))[0];
+    const pdfDate = contentDay(ROOT, LETTER_PDF);
+    if (newestDate > pdfDate) {
+      err(`letter PDF is stale: ${newestRel} changed ${newestDate}, the PDF was last printed ${pdfDate} — run \`make letter-pdf\``);
+    }
   }
-} catch {
-  /* not a git checkout */
 }
 
 auditRobots();

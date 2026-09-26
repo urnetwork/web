@@ -1,6 +1,6 @@
 import React from 'react';
 import NetworkDiagram from './NetworkDiagram';
-import { useLanguage } from '../i18n';
+import { LANGS, useLanguage } from '../i18n';
 import { buildPath } from '../router';
 import './LandingOverview.css';
 
@@ -8,6 +8,8 @@ const ROLE_ROUTES = ['operators', 'miners', 'validators'];
 
 export default function LandingOverview() {
     const { code, t } = useLanguage();
+    // the "go" arrow points along the reading direction (as RoleBlocks.astro)
+    const arrow = LANGS[code]?.dir === 'rtl' ? '←' : '→';
 
     return (
         <section className="landing-overview" aria-label={t.homepage.diagramAria}>
@@ -26,14 +28,14 @@ export default function LandingOverview() {
                                 <h3>{role.name}</h3>
                                 <p>{role.body}</p>
                                 <a href={buildPath({ name: route, slug: null }, code)}>
-                                    {role.explore} <span aria-hidden="true">→</span>
+                                    {role.explore} <span aria-hidden="true">{arrow}</span>
                                 </a>
                             </article>
                         );
                     })}
                 </div>
                 <a className="roles-cta" href={buildPath({ name: 'docs', slug: 'litepaper' }, code)}>
-                    {t.homepage.whitepaperCta} <span aria-hidden="true">→</span>
+                    {t.homepage.whitepaperCta} <span aria-hidden="true">{arrow}</span>
                 </a>
             </section>
         </section>

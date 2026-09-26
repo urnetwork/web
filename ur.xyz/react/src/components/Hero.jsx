@@ -1,5 +1,6 @@
 import React from 'react';
 import URSimulation from '../URSimulation';
+import { useLanguage } from '../i18n';
 import './Hero.css';
 
 /**
@@ -10,8 +11,9 @@ import './Hero.css';
  * and animate independently as the user scrolls.
  */
 export default function Hero({ block, network }) {
+    const { t } = useLanguage();
     return (
-        <section className="hero" aria-label="Network simulation">
+        <section className="hero" aria-label={t.sim.heroAria}>
             <URSimulation block={block} network={network} />
         </section>
     );

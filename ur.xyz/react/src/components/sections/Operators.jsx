@@ -3,6 +3,7 @@ import Section from '../Section';
 import NetworkDiagram from '../NetworkDiagram';
 import OperatorsDirectory from '../OperatorsDirectory';
 import { useLanguage } from '../../i18n';
+import { EXTERNAL, isExternal } from '../../lib/links';
 
 export default function Operators() {
     const { t, code } = useLanguage();
@@ -15,10 +16,11 @@ export default function Operators() {
                 {s.roles.map(r => (
                     <div className="card" key={r.tag}>
                         <div className="card-eyebrow">{r.tag}</div>
-                        <h3 className="card-title">{r.title}</h3>
+                        <h2 className="card-title">{r.title}</h2>
                         <p className="card-body">{r.body}</p>
                         {r.href && (
-                            <a href={r.href} className="card-link" target="_blank" rel="noopener noreferrer">
+                            // only an external link opens a new tab; a guide on this site opens in place
+                            <a href={r.href} className="card-link" {...(isExternal(r.href) ? EXTERNAL : {})}>
                                 {r.linkLabel}
                             </a>
                         )}

@@ -17,10 +17,8 @@
     max-width: 760px;
 }
 
-/* the Section header already carries the document title */
-.legal-doc h1 {
-    display: none;
-}
+/* No .legal-doc h1: the Section header is the page's h1, and
+   scripts/generate-legal.mjs drops the document's own title heading. */
 
 .legal-doc h2 {
     font-size: 19px;

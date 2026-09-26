@@ -1,0 +1,66 @@
+---
+// /price: the published price sheet. The SPA has had this route all along
+// (App.jsx SectionPage → PriceSection); the static page went missing in the
+// 2026-08-18 launch refresh, and the role guides (/docs/miner, /docs/validator,
+// /docs/operator) link it for the initial-period rate.
+import Base from '../layouts/Base.astro';
+import DisclaimerStatic from '../components/DisclaimerStatic.astro';
+import NavIsland from '../islands/NavIsland.jsx';
+import PriceIsland from '../islands/PriceIsland.jsx';
+import FooterStatic from '../components/FooterStatic.astro';
+import en from '@react/i18n/en.js';
+import { parsePriceSheet } from '@react/lib/price.js';
+import { sentenceClamp } from '../lib/meta.js';
+// the canonical tracked copy of the sheet (scripts/sync-price.mjs publishes
+// it to /price.yml as well); the island refreshes from /price.yml in the browser
+import priceSheetText from '../../../price/price.yml?raw';
+
+import '@react/components/Nav.css';
+
+const t = en;
+const sheet = parsePriceSheet(priceSheetText);
+const title = 'Usage cost | The published price of the UR network';
+const description = sentenceClamp(t.price.intro);
+
+const jsonLd = [{
+    '@type': 'Dataset',
+    name: 'UR network usage cost: the published rate sheet',
+    description,
+    url: 'https://ur.xyz/price',
+    license: 'https://ur.xyz/terms',
+    creator: { '@id': 'https://ur.xyz/#org' },
+    distribution: [
+        { '@type': 'DataDownload', contentUrl: 'https://ur.xyz/price.yml', encodingFormat: 'application/yaml' },
+        { '@type': 'DataDownload', contentUrl: 'https://ur.xyz/price.rss', encodingFormat: 'application/rss+xml' },
+    ],
+}];
+---
+<Base
+    title={title}
+    description={description}
+    breadcrumbName={t.price.eyebrow}
+    lang="en"
+    jsonLd={jsonLd}
+    alternate={{ href: '/price.yml', type: 'application/yaml' }}
+>
+    <!-- RSS autodiscovery: browsers and feed readers pick /price.rss up
+         straight from this page. -->
+    <link
+        slot="head"
+        rel="alternate"
+        type="application/rss+xml"
+        title="UR usage cost"
+        href="/price.rss"
+    />
+
+    <div class="app">
+        <DisclaimerStatic t={t} />
+        <NavIsland activeRoute="price" lang="en" client:load />
+
+        <main class="section-page">
+            <PriceIsland lang="en" initialSheet={sheet} client:load />
+        </main>
+
+        <FooterStatic t={t} lang="en" />
+    </div>
+</Base>

@@ -11,8 +11,10 @@
     padding: 70px 0 86px;
     border-bottom: 1px solid rgba(214, 230, 244, 0.12);
 }
-.footer-column { display: flex; flex-direction: column; align-items: flex-start; gap: 14px; padding-left: clamp(0px, 4vw, 62px); }
-.footer-column + .footer-column { border-left: 1px solid rgba(214, 230, 244, 0.12); }
+/* Logical sides throughout: in Arabic the columns run right to left, and the
+   divider and gutter belong on each column's reading-start edge. */
+.footer-column { display: flex; flex-direction: column; align-items: flex-start; gap: 14px; padding-inline-start: clamp(0px, 4vw, 62px); }
+.footer-column + .footer-column { border-inline-start: 1px solid rgba(214, 230, 244, 0.12); }
 .footer-column h2 {
     margin: 0 0 20px;
     color: var(--brand-ur);
@@ -35,7 +37,7 @@
 }
 .footer-column a:hover { color: var(--brand-white); }
 .footer-pending { opacity: 0.42; }
-.footer-pending small { margin-left: 6px; font-size: 0.58rem; letter-spacing: 0.08em; text-transform: uppercase; }
+.footer-pending small { margin-inline-start: 6px; font-size: 0.58rem; letter-spacing: 0.08em; text-transform: uppercase; }
 
 .footer-socials {
     display: flex;
@@ -72,7 +74,7 @@
     font-size: 0.82rem;
     letter-spacing: 0.04em;
 }
-.footer-product-link span { margin-left: 5px; color: var(--brand-ur); }
+.footer-product-link span { margin-inline-start: 5px; color: var(--brand-ur); }
 
 .footer-utility {
     display: grid;
@@ -117,7 +119,7 @@
 @media (max-width: 800px) {
     .footer-directory { grid-template-columns: 1fr; }
     .footer-column { padding: 32px 0; }
-    .footer-column + .footer-column { border-top: 1px solid rgba(214, 230, 244, 0.12); border-left: 0; }
+    .footer-column + .footer-column { border-top: 1px solid rgba(214, 230, 244, 0.12); border-inline-start: 0; }
     .footer-utility { grid-template-columns: 1fr; justify-items: start; }
     .footer-legal,
     .footer-langs { justify-content: flex-start; }
@@ -127,7 +129,7 @@
     .footer { padding-bottom: 28px; }
     .footer-directory { grid-template-columns: 1fr; gap: 0; padding: 26px 0 48px; }
     .footer-column { padding: 26px 0; }
-    .footer-column + .footer-column { border-top: 1px solid rgba(214, 230, 244, 0.12); border-left: 0; }
+    .footer-column + .footer-column { border-top: 1px solid rgba(214, 230, 244, 0.12); border-inline-start: 0; }
     .footer-column h2 { margin-bottom: 14px; }
     .footer-socials { justify-content: flex-start; flex-wrap: wrap; }
     .footer-utility { align-items: flex-start; }

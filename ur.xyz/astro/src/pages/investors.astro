@@ -1,27 +1,19 @@
 ---
+// The Investor Centre. The body is the React component the SPA renders
+// (react/src/components/pages/Investors.jsx); this page owns the head and the
+// shell, matching [section].astro. The archive's search and type filter run
+// in the component's handlers, so it hydrates.
 import Base from '../layouts/Base.astro';
 import DisclaimerStatic from '../components/DisclaimerStatic.astro';
 import FooterStatic from '../components/FooterStatic.astro';
 import NavIsland from '../islands/NavIsland.jsx';
+import InvestorsPage from '@react/components/pages/Investors.jsx';
 import en from '@react/i18n/en.js';
-import { investorCentre, externalResources } from '../lib/investors.js';
+import { investorCentre } from '@react/data/investors.js';
 
 import '@react/components/Nav.css';
-import '../components/InvestorCentre.css';
 
-const t = en;
-const { featured, deck, updates, materials, metrics } = investorCentre;
-const SHOW_METRICS = false;
-const archiveItems = [...updates, ...materials.map(item => ({
-    ...item,
-    date: item.date || (item.href === deck.href ? deck.date : 'Not dated'),
-    dateIso: item.dateIso || (item.href === deck.href ? deck.dateIso : null),
-    kind: item.href === deck.href ? deck.kind : 'Link',
-    format: item.pdfHref ? 'PDF' : 'Web',
-}))]
-    .filter((item, index, items) => items.findIndex(candidate => candidate.href === item.href) === index)
-    .sort((a, b) => (b.dateIso || '').localeCompare(a.dateIso || ''));
-const archiveKinds = [...new Set(archiveItems.map(item => item.kind))];
+const { featured, updates, materials } = investorCentre;
 const centreDocs = [featured, ...updates, ...materials].filter(
     (d, i, arr) => d && arr.findIndex((x) => x.href === d.href) === i,
 );
@@ -51,231 +43,13 @@ const centreJsonLd = [{
     jsonLd={centreJsonLd}
 >
     <div class="app">
-        <DisclaimerStatic />
+        <DisclaimerStatic t={en} />
         <NavIsland activeRoute="investors" lang="en" client:load />
 
-        <main id="main" class="investor-page">
-            <header class="investor-hero investor-shell">
-                <div class="investor-hero__title">
-                    <span class="investor-eyebrow">Investors</span>
-                    <h1>Investor Centre</h1>
-                    <div class="investor-hero__rule" aria-hidden="true"></div>
-                </div>
-                <p class="investor-updated">
-                    <span aria-hidden="true"></span>
-                    Updated <time datetime={investorCentre.updatedIso}>{investorCentre.updated}</time>
-                </p>
-            </header>
-
-            <section class="investor-about investor-shell" aria-labelledby="about-ur">
-                <h2 id="about-ur">About UR</h2>
-                <div class="investor-about__copy">
-                    {investorCentre.about.map(paragraph => <p>{paragraph}</p>)}
-                </div>
-            </section>
-
-            <div class="investor-views investor-shell" data-investor-views>
-
-                <section class="investor-library">
-                    <div class="investor-section-heading">
-                        <h2>Latest from UR</h2>
-                        <span>Curated overview</span>
-                    </div>
-
-                    <a class="featured-letter" href={featured.href}>
-                        <p class="resource-meta">
-                            <time datetime={featured.dateIso}>{featured.date}</time>
-                            <span aria-hidden="true">·</span>
-                            {featured.kind}
-                            <span aria-hidden="true">·</span>
-                            {featured.readTime}
-                        </p>
-                        <div class="featured-letter__content">
-                            <h3>{featured.title}</h3>
-                            <div class="featured-letter__details">
-                                <p>{featured.summary}</p>
-                                <span class="text-action">{featured.cta} <i aria-hidden="true">→</i></span>
-                            </div>
-                        </div>
-                    </a>
-
-                </section>
-
-                <section class="investor-archive" id="announcements" aria-labelledby="all-investor-materials">
-                    <div class="investor-archive__heading">
-                        <div>
-                            <h2 id="all-investor-materials">All investor materials</h2>
-                            <p>Browse announcements, letters, decks and reference materials.</p>
-                        </div>
-                        <span>Updated {investorCentre.updated}</span>
-                    </div>
-
-                    <div class="archive-controls" aria-label="Filter investor materials">
-                        <label class="archive-search">
-                            <span class="sr-only">Search investor materials</span>
-                            <input type="search" placeholder="Search titles" data-archive-search />
-                        </label>
-                        <label>
-                            <span class="sr-only">Filter by type</span>
-                            <select data-archive-kind>
-                                <option value="all">All types</option>
-                                {archiveKinds.map(kind => <option value={kind.toLowerCase()}>{kind}</option>)}
-                            </select>
-                        </label>
-                        <p class="archive-count" aria-live="polite"><strong data-archive-count>{archiveItems.length}</strong> items</p>
-                    </div>
-
-                    <div class="archive-list" data-archive-list>
-                        <div class="archive-row archive-row--heading" aria-hidden="true">
-                            <span>Date</span><span>Title</span><span>Format</span>
-                        </div>
-                        {archiveItems.map(item => (
-                            <article class="archive-row" data-archive-item data-kind={item.kind.toLowerCase()}>
-                                <time datetime={item.dateIso || undefined}>{item.date}</time>
-                                <div class="archive-row__title">
-                                    <a href={item.href}>{item.title}</a>
-                                    <small>{item.readTime || item.detail}</small>
-                                </div>
-                                <div class="archive-row__format">
-                                    {item.pdfHref ? <a href={item.pdfHref} download>PDF <span aria-hidden="true">↓</span></a> : <a href={item.href}>Read <span aria-hidden="true">→</span></a>}
-                                </div>
-                            </article>
-                        ))}
-                    </div>
-                    <p class="archive-empty" data-archive-empty hidden>No investor materials match those filters.</p>
-                </section>
-            </div>
-
-            {SHOW_METRICS && <section class="investor-metrics investor-shell" aria-labelledby="metrics-title">
-                <h2 id="metrics-title">Metrics</h2>
-                <div class="metric-grid">
-                    {metrics.map(metric => (
-                        <article class="metric">
-                            <p class="metric__label">{metric.label}</p>
-                            <p class="metric__value">
-                                <strong>
-                                    <span data-count={metric.value} data-decimals={metric.decimals}>{metric.value}</span>
-                                    {metric.suffix && <span class="metric__suffix"> {metric.suffix}</span>}
-                                </strong>
-                                {metric.usd && <small>({metric.usd})</small>}
-                            </p>
-                            <p class="metric__context">{metric.context}</p>
-                            <p class="metric__change">{metric.change}</p>
-                        </article>
-                    ))}
-                </div>
-            </section>}
-
-            <section class="investor-explore investor-shell" aria-label="Network and research resources">
-                <div class="explore-panel">
-                    <h2>Explore the network</h2>
-                    <p>Follow network performance on the UR Dashboard and view subnet market data through TaoMarketCap and taostats.</p>
-                    <nav class="network-links" aria-label="Network data sources">
-                        <a href={externalResources.dashboard} target="_blank" rel="noopener noreferrer">
-                            UR Dashboard <span aria-hidden="true">↗</span>
-                        </a>
-                        <a class="network-brand network-brand--tmc" href={externalResources.taoMarketCap} target="_blank" rel="noopener noreferrer">
-                            <img src="/investors/taomarketcap.svg" alt="TaoMarketCap" />
-                            <span aria-hidden="true">↗</span>
-                        </a>
-                        <a class="network-brand network-brand--taostats" href={externalResources.taostats} target="_blank" rel="noopener noreferrer">
-                            <img src="/investors/taostats.svg" alt="taostats" />
-                            <span aria-hidden="true">↗</span>
-                        </a>
-                    </nav>
-                </div>
-
-                <div class="explore-panel explore-panel--research">
-                    <h2>Research UR</h2>
-                    <p>Ask ChatGPT or Claude about UR's products, research, subnet development, published updates and public materials.</p>
-                    <nav class="research-links" aria-label="Research UR with AI">
-                        <a href={externalResources.chatgpt} target="_blank" rel="noopener noreferrer">
-                            <img src="/investors/openai.svg" alt="" width="16" height="16" />
-                            ChatGPT
-                        </a>
-                        <a href={externalResources.claude} target="_blank" rel="noopener noreferrer">
-                            <img src="/investors/claude.svg" alt="" width="16" height="16" />
-                            Claude
-                        </a>
-                    </nav>
-                </div>
-            </section>
-
-            <aside class="investor-disclosure investor-shell" aria-label="Investment disclaimer">
-                This material is provided for informational purposes only and does not constitute an offer, solicitation or investment advice.
-            </aside>
+        <main class="section-page">
+            <InvestorsPage route={{ name: 'investors', slug: null }} client:load />
         </main>
 
-        <FooterStatic t={t} lang="en" />
+        <FooterStatic t={en} lang="en" />
     </div>
 </Base>
-
-<script>
-    const archiveSearch = document.querySelector('[data-archive-search]');
-    const archiveKind = document.querySelector('[data-archive-kind]');
-    const archiveItems = Array.from(document.querySelectorAll('[data-archive-item]'));
-    const archiveCount = document.querySelector('[data-archive-count]');
-    const archiveEmpty = document.querySelector('[data-archive-empty]');
-
-    const filterArchive = () => {
-        const query = archiveSearch?.value.trim().toLowerCase() || '';
-        const kind = archiveKind?.value || 'all';
-        let visibleCount = 0;
-
-        archiveItems.forEach(item => {
-            const matchesQuery = !query || item.textContent.toLowerCase().includes(query);
-            const matchesKind = kind === 'all' || item.dataset.kind === kind;
-            const visible = matchesQuery && matchesKind;
-            item.hidden = !visible;
-            if (visible) visibleCount += 1;
-        });
-
-        if (archiveCount) archiveCount.textContent = String(visibleCount);
-        if (archiveEmpty) archiveEmpty.hidden = visibleCount !== 0;
-    };
-
-    archiveSearch?.addEventListener('input', filterArchive);
-    archiveKind?.addEventListener('change', filterArchive);
-
-    const counters = Array.from(document.querySelectorAll('[data-count]'));
-    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-    const formatCounter = (value, decimals) => value.toLocaleString('en-US', {
-        minimumFractionDigits: decimals,
-        maximumFractionDigits: decimals,
-    });
-
-    const finishCounter = (element) => {
-        const value = Number(element.dataset.count);
-        const decimals = Number(element.dataset.decimals || 0);
-        element.textContent = formatCounter(value, decimals);
-    };
-
-    const animateCounter = (element) => {
-        const target = Number(element.dataset.count);
-        const decimals = Number(element.dataset.decimals || 0);
-        const duration = 900;
-        const started = performance.now();
-
-        const frame = (now) => {
-            const progress = Math.min((now - started) / duration, 1);
-            const eased = 1 - Math.pow(1 - progress, 3);
-            element.textContent = formatCounter(target * eased, decimals);
-            if (progress < 1) requestAnimationFrame(frame);
-        };
-
-        requestAnimationFrame(frame);
-    };
-
-    if (reduceMotion || !('IntersectionObserver' in window)) {
-        counters.forEach(finishCounter);
-    } else if (counters.length) {
-        const metricSection = document.querySelector('.investor-metrics');
-        const observer = new IntersectionObserver((entries) => {
-            if (!entries.some(entry => entry.isIntersecting)) return;
-            counters.forEach(animateCounter);
-            observer.disconnect();
-        }, { threshold: 0.3 });
-        if (metricSection) observer.observe(metricSection);
-    }
-</script>

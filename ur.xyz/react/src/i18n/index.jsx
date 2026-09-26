@@ -1,16 +1,21 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 
-import { parseRoute, buildPath } from '../router';
+import { parseRoute, buildPath, isTranslatedRoute } from '../router';
+import {
+    LANG_STORAGE_KEY,
+    localizedPathFor,
+    publicPathFor,
+} from '../../../astro/src/lib/route-localization.js';
 
 // Dictionaries load per language. The old shape imported all six statically,
 // which put ~147 KB of dictionary text in the JS of every page.
 // - On the server / at build every language loads eagerly: each page renders
 //   once per language.
-// - On the client only the document's language (plus English, the fallback)
-//   loads before hydration — top-level await, so hydration cannot start with
-//   missing strings.
-// - A client-side language switch (the SPA, or the astro switcher's pushState
-//   path) loads the missing dictionary before switching.
+// - On the client only the page's language (plus English, the fallback)
+//   loads before hydration — top-level await at the end of this module, so
+//   hydration cannot start with missing strings.
+// - A client-side language switch (the SPA) loads the missing dictionary
+//   before switching; the static pages switch with a full page load.
 const dictLoaders = import.meta.glob('./{en,ru,ar,zh,de,es}.js');
 const dicts = {};
 
@@ -24,18 +29,6 @@ async function loadDict(code) {
     if (!loader) return null;
     dicts[code] = (await loader()).default;
     return dicts[code];
-}
-
-if (import.meta.env.SSR) {
-    const eager = import.meta.glob('./{en,ru,ar,zh,de,es}.js', { eager: true });
-    for (const [file, mod] of Object.entries(eager)) {
-        dicts[langOfFile(file)] = mod.default;
-    }
-} else {
-    const docLang = (document.documentElement.lang || 'en').slice(0, 2).toLowerCase();
-    await Promise.all(
-        [...new Set(['en', docLang])].map((code) => loadDict(code))
-    );
 }
 
 /**
@@ -57,7 +50,10 @@ export const LANGS = {
 export const LANG_ORDER = ['en', 'ru', 'ar', 'zh', 'de', 'es'];
 
 export const DEFAULT_LANG = 'en';
-export const LANG_KEY = 'ur.xyz.lang';
+// The visitor's explicit choice from a language switch. The SPA reads it in
+// resolveInitialLang; the static pages in their <head> redirect
+// (storedLanguageRedirectScript in astro/src/lib/route-localization.js).
+export const LANG_KEY = LANG_STORAGE_KEY;
 
 /**
  * Build the canonical URL path for a given language. English lives at
@@ -65,6 +61,16 @@ export const LANG_KEY = 'ur.xyz.lang';
  */
 export function pathForLang(code) {
     return code === DEFAULT_LANG ? '/' : `/${code}`;
+}
+
+/**
+ * The locale to hand Intl for a page language — numbers and dates follow
+ * the page, never the browser. Arabic keeps Western digits: its copy writes
+ * figures that way (10–20%, 200, N≥2) and the block number and countdown sit
+ * in the same lines.
+ */
+export function intlLocale(code) {
+    return code === 'ar' ? 'ar-u-nu-latn' : (LANGS[code] ? code : DEFAULT_LANG);
 }
 
 /**
@@ -79,38 +85,49 @@ export function parseLangFromPath(pathname) {
     return LANGS[code] ? code : null;
 }
 
-/**
- * Decide which language the visitor should see on initial load.
- *
- *   1. URL — if /xx is a supported code, that wins (lets people share
- *      a direct link to a specific language).
- *   2. localStorage — if the visitor has previously made an explicit
- *      choice via the switcher, honour it.
- *   3. Browser language — `navigator.language` slice; only used if it
- *      maps to a language we ship.
- *   4. Default — English.
- *
- * The returned `fromUrl` flag tells the caller whether the URL already
- * agrees with the chosen language; if not, the caller is responsible
- * for syncing the URL via history.replaceState.
- */
-export function resolveInitialLang() {
-    if (typeof window === 'undefined') {
-        return { code: DEFAULT_LANG, fromUrl: true };
+function storedLang() {
+    try {
+        const stored = window.localStorage.getItem(LANG_KEY);
+        return LANGS[stored] ? stored : null;
+    } catch (e) {
+        return null; // private mode / blocked storage
     }
+}
 
-    const urlLang = parseLangFromPath();
-    if (urlLang) return { code: urlLang, fromUrl: true };
+/**
+ * Decide the SPA's language and URL on initial load.
+ *
+ *   1. A route without translations (docs, legal, about, …) is English at
+ *      its bare path: /de/about becomes /about, as the static host
+ *      redirects it.
+ *   2. URL — if /xx is a supported code, that wins (lets people share
+ *      a direct link to a specific language).
+ *   3. localStorage — if the visitor has previously made an explicit
+ *      choice via the switcher, honour it.
+ *   4. Browser language — `navigator.language` slice; only used if it
+ *      maps to a language we ship.
+ *   5. Default — English.
+ *
+ * Returns `{ code, path }`: when `path` differs from the current pathname
+ * the caller replaces the URL (history.replaceState), keeping the page.
+ */
+export function resolveInitialLang(pathname) {
+    if (typeof window === 'undefined') {
+        return { code: DEFAULT_LANG, path: pathname || '/' };
+    }
+    const path = pathname || window.location.pathname;
+    const route = parseRoute(path);
+    const urlLang = parseLangFromPath(path);
 
-    let stored = null;
-    try { stored = window.localStorage.getItem(LANG_KEY); } catch (e) { /* private mode */ }
-    if (stored && LANGS[stored]) return { code: stored, fromUrl: false };
+    if (!isTranslatedRoute(route)) {
+        return { code: DEFAULT_LANG, path: urlLang ? buildPath(route, DEFAULT_LANG) : path };
+    }
+    if (urlLang) return { code: urlLang, path };
 
     const nav = (window.navigator && (window.navigator.language || window.navigator.userLanguage)) || '';
     const browser = nav.slice(0, 2).toLowerCase();
-    if (LANGS[browser]) return { code: browser, fromUrl: false };
-
-    return { code: DEFAULT_LANG, fromUrl: false };
+    const code = storedLang() || (LANGS[browser] ? browser : DEFAULT_LANG);
+    return { code, path: code === DEFAULT_LANG ? path : buildPath(route, code) };
 }
 
 /**
@@ -128,7 +145,8 @@ export function applyHtmlAttributes(code) {
 const LanguageContext = createContext({
     code: DEFAULT_LANG,
     // every surface renders inside LanguageProvider; this default only guards
-    // accidental out-of-provider use
+    // accidental out-of-provider use (the static page's standalone islands
+    // take their strings as props instead)
     t: {},
     setLang: () => {}
 });
@@ -160,26 +178,38 @@ export function LanguageProvider({ children, initialLang }) {
     }, []);
 
     const setLang = (newCode) => {
-        if (!LANGS[newCode] || newCode === code) {
-            // No-op for unsupported codes; for same-language taps, still
-            // record the explicit choice so the visitor's next visit
-            // honours it even if their browser language has shifted.
-            if (LANGS[newCode]) {
-                try { window.localStorage.setItem(LANG_KEY, newCode); } catch (e) {}
+        if (!LANGS[newCode]) return;
+        // Every switch is an explicit choice, recorded even when it keeps the
+        // current language so the next visit honours it.
+        try { window.localStorage.setItem(LANG_KEY, newCode); } catch (e) { /* private mode */ }
+        // Already reading it: nothing moves (an English-only page stays put).
+        if (newCode === code) return;
+
+        // The same page in the new language when it is translated, otherwise
+        // that language's home: a visitor reading /miners in German stays on
+        // the miners page, one on the English-only /docs lands on /de.
+        const current = window.location.pathname;
+        const target = localizedPathFor(current, newCode);
+        const samePage = isTranslatedRoute(parseRoute(current));
+
+        if (window.__ASTRO_STATIC__) {
+            // A static page is prerendered in one language, and its islands
+            // each hold their own copy of the language: only loading the
+            // target's HTML shows the whole page in the new language.
+            if (target !== publicPathFor(current)) {
+                window.location.assign(target + (samePage ? window.location.search + window.location.hash : ''));
             }
             return;
         }
-        try { window.localStorage.setItem(LANG_KEY, newCode); } catch (e) {}
-        // Preserve the current route (home / docs / api) when switching
-        // languages so a visitor reading /docs/protocol-research in
-        // English doesn't get bounced to the localised home page. The
-        // dictionary loads before the switch so no frame renders with
-        // missing strings.
+
+        // The SPA renders every surface from this provider: switch the
+        // dictionary, then the URL, then re-render the whole page.
         loadDict(newCode).then(() => {
-            const route = parseRoute(window.location.pathname);
-            const path = buildPath(route, newCode);
-            if (window.location.pathname !== path) {
-                window.history.pushState(null, '', path);
+            if (window.location.pathname !== target) {
+                window.history.pushState(null, '', target + (samePage ? window.location.hash : ''));
+                // the router re-reads the URL (an English-only page lands on home)
+                window.dispatchEvent(new PopStateEvent('popstate'));
+                if (!samePage) window.scrollTo(0, 0);
             }
             setCode(newCode);
         });
@@ -202,4 +232,21 @@ export function LanguageProvider({ children, initialLang }) {
 
 export function useLanguage() {
     return useContext(LanguageContext);
+}
+
+// Load the dictionaries this page needs before anything renders (see top).
+if (import.meta.env.SSR) {
+    const eager = import.meta.glob('./{en,ru,ar,zh,de,es}.js', { eager: true });
+    for (const [file, mod] of Object.entries(eager)) {
+        dicts[langOfFile(file)] = mod.default;
+    }
+} else {
+    // A static page states its language in <html lang>. The SPA's index.html
+    // always says "en": its language comes from the URL, a stored choice or
+    // the browser (resolveInitialLang, which main.jsx applies next).
+    const docLang = (document.documentElement.lang || DEFAULT_LANG).slice(0, 2).toLowerCase();
+    const pageLang = window.__ASTRO_STATIC__ ? docLang : resolveInitialLang().code;
+    await Promise.all(
+        [...new Set([DEFAULT_LANG, docLang, pageLang])].map((code) => loadDict(code))
+    );
 }

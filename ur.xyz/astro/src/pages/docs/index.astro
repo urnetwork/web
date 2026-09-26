@@ -1,13 +1,14 @@
 ---
 import Base from '../../layouts/Base.astro';
 import DocsIsland from '../../islands/DocsIsland.jsx';
-import { docs } from '@react/lib/docs.js';
+import { docsIndex as listed } from '@react/lib/docs.js';
 
-const listed = docs.filter(d => d.slug);
+// the documents the landing page lists, in its order: the three role guides
+// and the litepaper (an unlisted document, docs-shared.js, is not among them)
 const jsonLd = [{
     '@type': 'CollectionPage',
     '@id': 'https://ur.xyz/docs#docs',
-    name: 'UR protocol documentation',
+    name: 'UR documentation',
     url: 'https://ur.xyz/docs',
     inLanguage: 'en',
     isPartOf: { '@id': 'https://ur.xyz/#website' },
@@ -18,14 +19,16 @@ const jsonLd = [{
             '@type': 'ListItem',
             position: i + 1,
             name: d.title,
-            url: `https://ur.xyz/docs/${d.slug}`,
+            url: `https://ur.xyz${d.href}`,
+            ...(d.meta.description ? { description: d.meta.description } : {}),
         })),
     },
 }];
 ---
 <Base
-    title="Docs — UR"
-    description="UR protocol documentation: the litepaper, protocol research, provider guides, trust and safety, and the legal corpus — every page with a markdown twin."
+    title="UR Docs | How to become a miner, validator or network operator"
+    description="How to become a miner, a validator or a network operator on Bittensor SN25, one guide per role, and the UR litepaper that explains the mechanism, each with a markdown twin."
+    breadcrumbName="Docs"
     lang="en"
     jsonLd={jsonLd}
 >

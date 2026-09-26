@@ -1,10 +1,10 @@
 import React, { useEffect } from 'react';
-import Explorer from './Explorer';
+import Explorer, { docHref, isPlainClick } from './Explorer';
 import Disclaimer, { useDisclaimerVisible } from './Disclaimer';
 import Nav from './Nav';
 import Footer from './Footer';
 import { Markdown } from '../lib/markdown.jsx';
-import { docs as ALL_DOCS, docGroups, findDoc } from '../lib/docs';
+import { docsIndex, findDoc } from '../lib/docs';
 import { buildPath, navigate, useRoute } from '../router';
 import { useLanguage } from '../i18n';
 
@@ -41,7 +41,7 @@ export default function DocsExplorer({ activeRoute, initialSlug = null } = {}) {
         <div className="app">
             <Disclaimer visible={disclaimerVisible} />
             <Nav disclaimerVisible={disclaimerVisible} activeRoute={activeRoute} />
-            <Explorer kind="docs">
+            <Explorer kind="docs" initialSlug={initialSlug}>
                 {!doc ? <DocsLanding code={code} /> : <DocBody doc={doc} />}
             </Explorer>
             <Footer />
@@ -49,30 +49,42 @@ export default function DocsExplorer({ activeRoute, initialSlug = null } = {}) {
     );
 }
 
+/**
+ * The /docs landing: the corpus, one entry per document with its front-matter
+ * description, in the sidebar's order (the three role guides, then the
+ * litepaper). An unlisted document (docs-shared.js) is not here.
+ */
 function DocsLanding({ code }) {
+    const follow = (href) => (e) => {
+        if (!isPlainClick(e)) return;
+        e.preventDefault();
+        navigate(href);
+    };
     return (
         <>
             <header className="explorer-page-header">
                 <span className="explorer-page-eyebrow">Documentation</span>
                 <h1 className="explorer-page-title">URnetwork docs</h1>
                 <p className="explorer-page-meta">
-                    {ALL_DOCS.length} documents across {docGroups.length} sections.
-                    Pick one from the sidebar or use search.
+                    How to take part in the UR privacy network on Bittensor SN25, one guide
+                    per role, and the litepaper that explains the mechanism they take part in.
+                    Every document is also served as markdown.
                 </p>
             </header>
 
             <div className="md">
-                <p className="md-p">
-                    <a className="md-a" href={buildPath({ name: 'docs', slug: 'litepaper' }, code)}>
-                        Read the UR litepaper →
-                    </a>
-                </p>
-                <p className="md-p">
-                    Welcome to the URnetwork docs. Everything that explains how
-                    to hack on, run, or extend the network lives here, organised
-                    by topic on the left. Use the search box to jump straight to
-                    a document by name.
-                </p>
+                {docsIndex.map(d => {
+                    const href = docHref(d, code);
+                    const id = `docs-index-${d.slug.replace(/[^a-z0-9]+/gi, '-')}`;
+                    return (
+                        <section key={d.slug} className="docs-index-entry" aria-labelledby={id}>
+                            <h2 id={id} className="md-h md-h2">
+                                <a className="md-link" href={href} onClick={follow(href)}>{d.title}</a>
+                            </h2>
+                            {d.meta.description && <p className="md-p">{d.meta.description}</p>}
+                        </section>
+                    );
+                })}
             </div>
         </>
     );
@@ -90,17 +102,13 @@ function DocBody({ doc }) {
     return (
         <article>
             <header className="explorer-page-header">
-                <span className="explorer-page-eyebrow">{doc.group === '_root' ? 'Docs' : prettyGroup(doc.group)}</span>
+                <span className="explorer-page-eyebrow">Docs</span>
                 <h1 className="explorer-page-title">{doc.title}</h1>
                 <p className="explorer-page-meta">{doc.path}</p>
             </header>
-            <Markdown source={doc.content} baseHref={`/docs/${doc.path}`} />
+            {/* the header's h1 is the document's title: drop the markdown's own
+                "# Title" and nest the remaining headings beneath it */}
+            <Markdown source={doc.content} baseHref={`/docs/${doc.path}`} dropTitle headingBase={1} />
         </article>
     );
-}
-
-function prettyGroup(g) {
-    return g
-        .replace(/[-_]/g, ' ')
-        .replace(/\b\w/g, c => c.toUpperCase());
 }

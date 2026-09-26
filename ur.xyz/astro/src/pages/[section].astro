@@ -5,14 +5,17 @@ import NavIsland from '../islands/NavIsland.jsx';
 import Section from '../components/Section.astro';
 import CardGrid from '../components/CardGrid.astro';
 import FooterStatic from '../components/FooterStatic.astro';
-import NetworkDiagram from '@react/components/NetworkDiagram.jsx';
+import NetworkDiagram, { diagramCopy } from '@react/components/NetworkDiagram.jsx';
 import MinerSim from '@react/components/MinerSim.jsx';
+import MinerGlobeIntro from '@react/components/MinerGlobeIntro.jsx';
 import ValidatorSim from '@react/components/ValidatorSim.jsx';
 import OperatorsDirectoryIsland from '../islands/OperatorsDirectoryIsland.jsx';
-import { ResearchCompetition, ResearchDocsLink, ResearchCardGrid, ResearchFoot } from '@react/components/ResearchExtras.jsx';
+import { ResearchCompetition, ResearchAreas, ResearchNotes, ResearchFoot, competitionPhase } from '@react/components/ResearchExtras.jsx';
+import { RESEARCH_DEEP_LINK_SCRIPT, researchCollectionJsonLd } from '@react/components/research-areas.js';
 import en from '@react/i18n/en.js';
 import { sentenceClamp } from '../lib/meta.js';
 import { SECTION_ROUTES } from '../lib/i18n.js';
+import { publicPathFor } from '../lib/route-localization.js';
 
 import '@react/components/Nav.css';
 
@@ -27,29 +30,45 @@ const t = en;
 const sectionData = t[section];
 const items = sectionData.roles || sectionData.items || sectionData.papers || [];
 const showDiagram = ROLE_SECTIONS.includes(section);
+const description = sentenceClamp(sectionData.metaDescription || sectionData.intro);
+// the research page is a collection of its algorithm areas, each a deep link
+const jsonLd = section === 'research'
+    ? researchCollectionJsonLd(t, { canonical: new URL(publicPathFor(Astro.url.pathname), 'https://ur.xyz').href, lang: 'en', description })
+    : [];
 ---
 <Base
-    title={`${sectionData.title} — UR`}
-    description={sentenceClamp(sectionData.intro)}
+    title={sectionData.metaTitle || `${sectionData.title} — UR`}
+    description={description}
+    breadcrumbName={sectionData.eyebrow}
     lang="en"
+    jsonLd={jsonLd}
 >
+    {/* the stored-language redirect (a visitor who chose another language
+        reads this page in it) is in Base's head */}
     <div class="app">
         <DisclaimerStatic t={t} />
         <NavIsland activeRoute={section} lang="en" client:load />
 
         <main class="section-page">
             <Section id={section} eyebrow={sectionData.eyebrow} title={sectionData.title} headingLevel="h1">
-                {section === 'research' && <ResearchCompetition t={t} />}
+                {/* hydrated for its status pill, which reads the visitor's clock; the
+                    server render (and the first client render) use the build's */}
+                {section === 'research' && <ResearchCompetition client:load copy={t.research.competition} initialPhase={competitionPhase(Date.now())} />}
+                {section === 'miners' && <MinerGlobeIntro client:load alt={sectionData.globeAlt} labels={sectionData.globeLabels} />}
                 <p>{sectionData.intro}</p>
-                {section === 'research' && <ResearchDocsLink t={t} href="/docs/protocol/protocol-research" />}
-                {showDiagram && <NetworkDiagram client:visible={{rootMargin: "200px"}} active={section} lang="en" ctaLabel={sectionData.cta} />}
+                {section === 'miners' && <p>{sectionData.both}</p>}
+                {section === 'miners' && <p>{sectionData.goal}</p>}
+                {showDiagram && <NetworkDiagram client:visible={{rootMargin: "200px"}} active={section} lang="en" ctaLabel={sectionData.cta} copy={diagramCopy(t)} />}
                 {section === 'research'
-                    ? <ResearchCardGrid t={t} />
+                    ? <ResearchAreas t={t} />
                     : <CardGrid items={items} />}
+                {section === 'research' && <ResearchNotes t={t} />}
                 {section === 'operators' && <OperatorsDirectoryIsland lang="en" client:visible />}
-                {section === 'miners' && <MinerSim client:visible />}
-                {section === 'validators' && <ValidatorSim client:visible />}
+                {section === 'miners' && <MinerSim client:visible caption={sectionData.simCaption} />}
+                {section === 'validators' && <ValidatorSim client:visible caption={sectionData.simCaption} />}
                 {section === 'research' && <ResearchFoot t={t} />}
+                {/* the areas are static HTML; this opens the one a /research#<id> visit names */}
+                {section === 'research' && <script is:inline set:html={RESEARCH_DEEP_LINK_SCRIPT} />}
             </Section>
         </main>
 

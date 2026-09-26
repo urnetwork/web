@@ -1,7 +1,7 @@
 ---
 import '@react/App.css';
 import { LANG_CODES } from '../lib/i18n.js';
-import { basePathFor, hasLocalizedVersion, publicPathFor } from '../lib/route-localization.js';
+import { basePathFor, hasLocalizedVersion, publicPathFor, storedLanguageRedirectScript } from '../lib/route-localization.js';
 
 interface Props {
     title: string;
@@ -20,11 +20,14 @@ interface Props {
     ogImage?: string | null;
     ogImageWidth?: number;
     ogImageHeight?: number;
+    // the page's name in the breadcrumb trail (default: the title without the
+    // site suffix)
+    breadcrumbName?: string | null;
 }
 
 const {
     title,
-    description = 'UR: Own your privacy. Own your network.',
+    description = 'UR: Own your privacy. Own the network.',
     lang = 'en',
     dir = 'ltr',
     jsonLd = [],
@@ -35,6 +38,7 @@ const {
     ogImage: ogImageProp = null,
     ogImageWidth = 1200,
     ogImageHeight = 630,
+    breadcrumbName = null,
 } = Astro.props;
 
 const SITE_ORIGIN = 'https://ur.xyz';
@@ -59,39 +63,56 @@ const localized = hasLocalizedVersion(basePath);
 const altHref = (l) =>
     new URL(l === 'en' ? basePath : `/${l}${basePath === '/' ? '' : basePath}`, SITE_ORIGIN).href;
 
-// Site-wide schema.org graph. The protocol is the subject; BringYour hosts the
-// site (see /terms) — the WebSite node carries that relationship, pages add
-// their own nodes (TechArticle, Dataset, …) via the jsonLd prop.
+// Site-wide schema.org graph. UR is the subject: one Organization node that
+// the WebSite, the breadcrumbs and every article's author and publisher point
+// at by @id, named as the site names itself everywhere else (og:site_name,
+// the breadcrumb root, the title suffix). ur.io is a different company and is
+// not one of its profiles. Pages add their own nodes (TechArticle, Article,
+// CollectionPage, …) via the jsonLd prop.
+const ORG_ID = `${SITE_ORIGIN}/#org`;
+const X_HANDLE = 'urnetwork';
+
+// Breadcrumbs follow the URL: the home page of the page's language, the
+// section a page sits in (Docs, the Investor Centre), then the page itself,
+// named without the site suffix (" — UR", " | UR", " — UR Docs").
+const homeUrl = lang && lang !== 'en' ? new URL(`/${lang}`, SITE_ORIGIN).href : `${SITE_ORIGIN}/`;
+const PARENTS = [
+    { prefix: '/docs/', name: 'Docs', path: '/docs' },
+    { prefix: '/investors/', name: 'Investor Centre', path: '/investors' },
+];
+const parent = PARENTS.find((p) => basePath.startsWith(p.prefix));
+const pageName = breadcrumbName || title.replace(/\s+[—–|-]\s+UR(?:\s+Docs)?\s*$/u, '');
+const trail = basePath === '/' || noindex
+    ? []
+    : [
+        { name: 'UR', item: homeUrl },
+        ...(parent ? [{ name: parent.name, item: new URL(parent.path, SITE_ORIGIN).href }] : []),
+        { name: pageName, item: canonical },
+    ];
+
 const graph = [
     {
         '@type': 'Organization',
-        '@id': `${SITE_ORIGIN}/#org`,
-        name: 'UR protocol',
+        '@id': ORG_ID,
+        name: 'UR',
+        alternateName: 'UR protocol',
         url: `${SITE_ORIGIN}/`,
-        logo: `${SITE_ORIGIN}/favicon-128.png`,
-        sameAs: ['https://github.com/urfoundation', 'https://github.com/urnetwork', 'https://ur.io/'],
+        logo: `${SITE_ORIGIN}/icon-512.png`,
+        sameAs: ['https://github.com/urfoundation', 'https://github.com/urnetwork', `https://x.com/${X_HANDLE}`],
     },
     {
         '@type': 'WebSite',
         '@id': `${SITE_ORIGIN}/#website`,
-        name: 'UR protocol',
+        name: 'UR',
+        alternateName: 'UR protocol',
         url: `${SITE_ORIGIN}/`,
-        publisher: { '@id': `${SITE_ORIGIN}/#org` },
+        publisher: { '@id': ORG_ID },
         inLanguage: LANG_CODES,
     },
-    // a flat site: every non-root page is one step below home
-    ...(basePath !== '/'
+    ...(trail.length
         ? [{
             '@type': 'BreadcrumbList',
-            itemListElement: [
-                { '@type': 'ListItem', position: 1, name: 'UR', item: `${SITE_ORIGIN}/` },
-                // Two title conventions are in use — reference pages end
-            // " — UR", the investor/about pages end " | UR" — and the
-            // breadcrumb name is the page, not the page plus the site, so
-            // strip either separator. Homepage titles ("UR | tagline") put the
-            // pipe at the front and are untouched by this anchored pattern.
-            { '@type': 'ListItem', position: 2, name: title.replace(/\s+[—–|-]\s+UR\s*$/u, ''), item: canonical },
-            ],
+            itemListElement: trail.map((crumb, i) => ({ '@type': 'ListItem', position: i + 1, ...crumb })),
         }]
         : []),
     ...jsonLd,
@@ -137,6 +158,7 @@ const jsonLdText = JSON.stringify({ '@context': 'https://schema.org', '@graph': 
 
     <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:site" content={`@${X_HANDLE}`} />
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content={ogImage} />
@@ -150,8 +172,10 @@ const jsonLdText = JSON.stringify({ '@context': 'https://schema.org', '@graph': 
     <link rel="apple-touch-icon" sizes="180x180" href="/favicon-180.png" />
     <link rel="manifest" href="/site.webmanifest" />
 
-    <link rel="preload" href="/PPNeueMontreal-Regular.woff2" as="font" type="font/woff2" crossorigin />
-    <link rel="preload" href="/PPNeueBit-Bold.woff2" as="font" type="font/woff2" crossorigin />
+    {/* The Arabic and Chinese pages set in system fonts: preloading the Latin
+        faces there fetches two files the page never paints with. */}
+    {!['ar', 'zh'].includes(lang) && <link rel="preload" href="/PPNeueMontreal-Regular.woff2" as="font" type="font/woff2" crossorigin />}
+    {!['ar', 'zh'].includes(lang) && <link rel="preload" href="/PPNeueBit-Bold.woff2" as="font" type="font/woff2" crossorigin />}
 
     <style is:global>
         @font-face {
@@ -173,6 +197,12 @@ const jsonLdText = JSON.stringify({ '@context': 'https://schema.org', '@graph': 
     <title>{title}</title>
 
     <script type="application/ld+json" set:html={jsonLdText} />
+
+    {/* A visitor who chose another language reads the page in it: the script
+        redirects a translated English page to its /<lang>/ twin and does
+        nothing on a page without translations (it was inlined by the home and
+        section pages, which are exactly the translated ones). */}
+    <script is:inline set:html={storedLanguageRedirectScript()} />
 
     <!-- Page-specific head extras. -->
     <slot name="head" />

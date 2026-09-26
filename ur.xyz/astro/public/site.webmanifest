@@ -9,6 +9,7 @@
   "icons": [
     { "src": "/favicon-128.png", "type": "image/png", "sizes": "128x128" },
     { "src": "/favicon-180.png", "type": "image/png", "sizes": "180x180" },
-    { "src": "/apple-touch-icon.png", "type": "image/png", "sizes": "192x192" }
+    { "src": "/apple-touch-icon.png", "type": "image/png", "sizes": "192x192" },
+    { "src": "/icon-512.png", "type": "image/png", "sizes": "512x512" }
   ]
 }

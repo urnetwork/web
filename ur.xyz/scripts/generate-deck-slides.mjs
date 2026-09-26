@@ -15,9 +15,12 @@
 //
 //   node ../scripts/generate-deck-slides.mjs <deck.pdf>
 //
-// Writes astro/public/investors/deck/NN.webp and copies the PDF to
-// astro/public/investors/ur-investor-deck.pdf. Prints the slide count, which
-// must match `deck.slideCount` in astro/src/lib/investors.js.
+// Writes react/public/investors/deck/NN.webp (2560 px wide) and NN-1280.webp
+// (1280 px, the srcset candidate a 1x screen or a phone picks) and copies the PDF to
+// react/public/investors/ur-investor-deck.pdf: react/public is the source of
+// truth for static assets, and `make sync-public` mirrors them into
+// astro/public at build time. Prints the slide count, which must match
+// `deck.slideCount` in react/src/data/investors.js.
 
 import fs from 'node:fs';
 import http from 'node:http';
@@ -29,15 +32,19 @@ import { fileURLToPath } from 'node:url';
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(HERE, '..');
 const REACT = path.join(ROOT, 'react');
-const PUBLIC = path.join(ROOT, 'astro', 'public', 'investors');
+const PUBLIC = path.join(REACT, 'public', 'investors');
 const SLIDES = path.join(PUBLIC, 'deck');
 const PDF_OUT = path.join(PUBLIC, 'ur-investor-deck.pdf');
 
 // 2560 covers a 2x display at the viewer's 1180px stage and still looks clean
 // stretched to a 1440p fullscreen. Above that the files grow faster than the
-// visible detail does.
-const WIDTH = 2560;
+// visible detail does. 1280 is the size a 1x screen or a phone needs (the
+// viewer's srcset offers both); rendering it from the PDF rather than scaling
+// the 2560 keeps its text sharp.
+const WIDTHS = [2560, 1280];
 const QUALITY = 0.9;
+// the file for a slide at a width: 07.webp, 07-1280.webp
+const slideFile = (n, width) => `${String(n).padStart(2, '0')}${width === WIDTHS[0] ? '' : `-${width}`}.webp`;
 
 const require = createRequire(path.join(REACT, 'package.json'));
 
@@ -70,12 +77,12 @@ const HOST_PAGE = `<!doctype html><meta charset="utf-8">
 <script type="module">
 import * as pdfjs from './pdfjs/pdf.mjs';
 pdfjs.GlobalWorkerOptions.workerSrc = './pdfjs/pdf.worker.mjs';
-window.renderAll = async ({ b64, width, quality }) => {
+window.renderAll = async ({ b64, widths, quality }) => {
     const doc = await pdfjs.getDocument({
         data: Uint8Array.from(atob(b64), c => c.charCodeAt(0)),
     }).promise;
     const out = [];
-    for (let n = 1; n <= doc.numPages; n++) {
+    for (let n = 1; n <= doc.numPages; n++) for (const width of widths) {
         const page = await doc.getPage(n);
         const base = page.getViewport({ scale: 1 });
         const viewport = page.getViewport({ scale: width / base.width });
@@ -90,6 +97,7 @@ window.renderAll = async ({ b64, width, quality }) => {
         await page.render({ canvasContext: ctx, viewport }).promise;
         out.push({
             n,
+            width,
             w: canvas.width,
             h: canvas.height,
             ratio: (base.width / base.height).toFixed(3),
@@ -134,7 +142,7 @@ try {
     await page.waitForFunction('window.__ready === true', null, { timeout: 30_000 });
     slides = await page.evaluate(args => window.renderAll(args), {
         b64: fs.readFileSync(src).toString('base64'),
-        width: WIDTH,
+        widths: WIDTHS,
         quality: QUALITY,
     });
 } finally {
@@ -149,14 +157,15 @@ fs.mkdirSync(SLIDES, { recursive: true });
 
 let bytes = 0;
 for (const slide of slides) {
-    const file = path.join(SLIDES, `${String(slide.n).padStart(2, '0')}.webp`);
+    const file = path.join(SLIDES, slideFile(slide.n, slide.width));
     fs.writeFileSync(file, Buffer.from(slide.data, 'base64'));
     const size = fs.statSync(file).size;
     bytes += size;
     console.log(
-        `${String(slide.n).padStart(2, '0')}  ${slide.w}x${slide.h}  ${(size / 1024).toFixed(0)} KB`,
+        `${path.basename(file).padEnd(13)} ${slide.w}x${slide.h}  ${(size / 1024).toFixed(0)} KB`,
     );
 }
+const pageCount = new Set(slides.map(s => s.n)).size;
 
 fs.copyFileSync(src, PDF_OUT);
 
@@ -168,6 +177,7 @@ if (ratios.length > 1) {
     console.warn(`\nWarning: pages are ${ratios[0]}:1, not 16:9 (1.778). Slides will letterbox.`);
 }
 
-console.log(`\n${slides.length} slides, ${(bytes / 1024 / 1024).toFixed(2)} MB total`);
+console.log(`\n${pageCount} slides at ${WIDTHS.join(' and ')} px, ${(bytes / 1024 / 1024).toFixed(2)} MB total`);
 console.log(`PDF  ${(fs.statSync(PDF_OUT).size / 1024 / 1024).toFixed(2)} MB -> ${path.relative(ROOT, PDF_OUT)}`);
-console.log(`\nSet deck.slideCount = ${slides.length} in astro/src/lib/investors.js`);
+console.log(`\nSet deck.slideCount = ${pageCount} in react/src/data/investors.js, and give each slide`);
+console.log('its title, alt text and summary in deck.slides there (the page outline and the alt text).');

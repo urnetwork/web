@@ -1,13 +1,13 @@
 ---
-import LegalPage from '../../components/LegalPage.astro';
-import { NON_EN_LANGS, LANGS, getDict } from '../../lib/i18n.js';
+// The legal documents are English-only (a translated contract would be a
+// different contract), so /<lang>/terms is not a page of its own: it 301s to
+// /terms. nginx answers it at the HTTP layer; this stub is the static fallback,
+// like the /<lang>/docs ones.
+import { NON_EN_LANGS } from '../../lib/i18n.js';
 
 export function getStaticPaths() {
     return NON_EN_LANGS.map(lang => ({ params: { lang } }));
 }
 
-const { lang } = Astro.params;
-const t = await getDict(lang);
-const dir = LANGS[lang]?.dir || 'ltr';
+return Astro.redirect('/terms', 301);
 ---
-<LegalPage t={t} lang={lang} dir={dir} doc="terms" />

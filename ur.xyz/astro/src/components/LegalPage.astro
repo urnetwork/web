@@ -1,6 +1,14 @@
 ---
 /**
  * Shared shell for the legal document pages (terms | privacy | vdp).
+ *
+ * The documents are English only by design (a translated contract would be a
+ * different contract), so they are built at their bare paths alone: no
+ * /<lang>/terms pages, no hreflang cluster (lib/route-localization.js), and
+ * the /<lang>/ URLs redirect to the English page. The whole page, chrome
+ * included, renders from the one dictionary it is given, which the pages pass
+ * as English. "Last revised:" would need a dictionary key if a translated
+ * legal page is ever built again.
  */
 import Base from '../layouts/Base.astro';
 import DisclaimerStatic from './DisclaimerStatic.astro';
@@ -11,23 +19,23 @@ import FooterStatic from './FooterStatic.astro';
 import '@react/components/Nav.css';
 import '@react/components/Legal.css';
 import { LEGAL_DOCS } from '@react/data/legal';
+import en from '@react/i18n/en.js';
 
 interface Props {
-    t: any;
-    lang: string;
-    dir?: string;
+    t?: any;
+    lang?: string;
     doc: 'terms' | 'privacy' | 'vdp';
 }
 
-const { t, lang, dir = 'ltr', doc } = Astro.props;
+const { t = en, lang = 'en', doc } = Astro.props;
 // full document from the generated data module (docs/legal/*.md is
 // canonical); the i18n entry supplies the meta description
 const d = LEGAL_DOCS[doc];
 const meta = t.legal[doc];
 ---
-<Base title={`${meta.title || d.title} — UR`} description={meta.body} lang={lang} dir={dir}>
+<Base title={`${meta.title || d.title} — UR`} description={meta.body} lang={lang} dir="ltr">
     <div class="app">
-        <DisclaimerStatic />
+        <DisclaimerStatic t={t} />
         <NavIsland lang={lang} client:load />
 
         <main class="section-page">

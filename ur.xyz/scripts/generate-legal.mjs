@@ -26,7 +26,9 @@ const entries = DOC_KEYS.map((key) => {
   const md = readFileSync(path.join(DOCS, `${key}.md`), "utf8");
   const title = legalTitle(md);
   const updated = legalUpdated(md);
-  const html = legalMdToHtml(md);
+  // The page prints the title as its <h1> (the Section header); the document's
+  // own "# Title" made a second one, hidden with CSS but still in the outline.
+  const html = legalMdToHtml(md).replace(/^\s*<h1>[\s\S]*?<\/h1>\n?/, "");
   if (html.length < 500) {
     console.error(`generate-legal: ${key}.md produced suspiciously little HTML — refusing`);
     process.exit(1);

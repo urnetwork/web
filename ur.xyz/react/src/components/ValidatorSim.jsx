@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import './Sim.css';
+import { useLanguage } from '../i18n';
 
 /**
  * ValidatorSim — validators probing miners for liveness.
@@ -37,7 +38,11 @@ const COL_UR = '237,143,255';   // --brand-ur (pink core)
 
 const rand = (a, b) => a + Math.random() * (b - a);
 
-export default function ValidatorSim({ caption = 'Validators probe the available IP surface area and rank miners by reliability.' }) {
+// `caption` is validators.simCaption in the page's language: the Astro pages
+// pass it (an island has no language context), the SPA reads its provider.
+export default function ValidatorSim({ caption }) {
+    const { t } = useLanguage();
+    const text = caption ?? t.validators?.simCaption;
     const wrapRef = useRef(null);
     const canvasRef = useRef(null);
 
@@ -178,7 +183,7 @@ export default function ValidatorSim({ caption = 'Validators probe the available
             <div className="sim-wrap" ref={wrapRef}>
                 <canvas className="sim-canvas" ref={canvasRef} aria-hidden="true" />
             </div>
-            <figcaption className="sim-caption">{caption}</figcaption>
+            <figcaption className="sim-caption">{text}</figcaption>
         </figure>
     );
 }

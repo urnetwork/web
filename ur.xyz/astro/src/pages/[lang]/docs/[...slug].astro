@@ -1,11 +1,13 @@
 ---
 import { NON_EN_LANGS } from '../../../lib/i18n.js';
 import { docs } from '@react/lib/docs.js';
+import { DOC_PAGE_PATHS } from '@react/lib/docs-shared.js';
 
 export function getStaticPaths() {
     const paths = [];
     for (const lang of NON_EN_LANGS) {
-        for (const doc of docs.filter(doc => doc.slug)) {
+        // documents with their own page (/terms, …) have no /docs copy to point at
+        for (const doc of docs.filter(doc => doc.slug && !DOC_PAGE_PATHS[doc.slug])) {
             paths.push({ params: { lang, slug: doc.slug } });
         }
     }

@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
 
+import { LOCALIZED_BASE_PATHS } from '../../astro/src/lib/route-localization.js';
+
 /**
  * Tiny client-side router for ur.xyz.
  *
@@ -9,6 +11,12 @@ import { useEffect, useState } from 'react';
  * OpenAPI explorer also have their own routes. The optional `/<lang>`
  * prefix used by the i18n layer is stripped before route detection so
  * a Chinese visitor at `/zh/providers` still resolves correctly.
+ *
+ * Only the home page and the sections are translated (the same list the
+ * static build publishes hreflang for, LOCALIZED_BASE_PATHS). Every other
+ * route is English-only: buildPath never gives it a language prefix, and a
+ * prefixed URL still resolves to it (/de/about is /about, as /de/docs is
+ * /docs), which is where the static host redirects those URLs.
  *
  * State is just `window.location.pathname`. We push it with
  * pushState/popstate so back/forward work, and re-emit a popstate
@@ -34,11 +42,29 @@ export function splitPath(pathname) {
 /** Section names that map 1:1 to top-level paths (e.g. /providers). */
 export const SECTION_ROUTES = ['operators', 'miners', 'validators', 'research'];
 
-/** Legal documents — top-level paths, linked from the footer only. */
+/**
+ * Legal documents — top-level paths, linked from the footer only. English
+ * only by design: a translated contract would be a different contract.
+ */
 export const LEGAL_ROUTES = ['terms', 'privacy', 'vdp'];
+
+/**
+ * The English-only pages (components/pages): each routes 1:1 to its path,
+ * and the Investor Centre's documents live under /investors/<slug>. They
+ * have no translations, so they exist at the bare path only.
+ */
+export const PAGE_ROUTES = ['about', 'investors', 'build'];
 
 const SECTION_SET = new Set(SECTION_ROUTES);
 const LEGAL_SET = new Set(LEGAL_ROUTES);
+const PAGE_SET = new Set(PAGE_ROUTES);
+// route names with translated pages: '/' is home, '/miners' is miners, …
+const TRANSLATED_SET = new Set(LOCALIZED_BASE_PATHS.map(path => (path === '/' ? 'home' : path.slice(1))));
+
+/** Whether a route has translated pages (a `/<lang>/…` URL of its own). */
+export function isTranslatedRoute(route) {
+    return TRANSLATED_SET.has(route?.name || 'home');
+}
 
 export function parseRoute(pathname) {
     const { rest } = splitPath(pathname);
@@ -47,6 +73,13 @@ export function parseRoute(pathname) {
     // Strip leading slash and trailing slash for matching.
     const bare = rest.replace(/^\//, '').replace(/\/$/, '');
     if (SECTION_SET.has(bare)) return { name: bare, slug: null };
+
+    // English-only pages resolve under a language prefix too, like the docs:
+    // /de/about is the English /about.
+    if (PAGE_SET.has(bare)) return { name: bare, slug: null };
+    if (bare.startsWith('investors/')) {
+        return { name: 'investors', slug: bare.slice('investors/'.length) };
+    }
 
     if (bare === 'docs') return { name: 'docs', slug: null };
     if (bare.startsWith('docs/')) {
@@ -60,18 +93,23 @@ export function parseRoute(pathname) {
 
 /**
  * Build a URL for a given route under a given language. English lives
- * at the bare path, every other language carries its `/<lang>` prefix.
+ * at the bare path; a translated route (home, the sections) carries the
+ * `/<lang>` prefix of any other language. An English-only route is always
+ * its bare path: a prefixed link to it would only bounce through a redirect.
  */
 export function buildPath(route, lang) {
-    const prefix = lang && lang !== 'en' ? `/${lang}` : '';
+    const prefix = lang && lang !== 'en' && isTranslatedRoute(route) ? `/${lang}` : '';
     if (!route || route.name === 'home') return prefix || '/';
     if (SECTION_SET.has(route.name)) return `${prefix}/${route.name}`;
     if (route.name === 'docs') {
-        return route.slug ? `${prefix}/docs/${route.slug}` : `${prefix}/docs`;
+        return route.slug ? `/docs/${route.slug}` : '/docs';
     }
-    if (route.name === 'api') return `${prefix}/api`;
-    if (route.name === 'price') return `${prefix}/price`;
-    if (LEGAL_SET.has(route.name)) return `${prefix}/${route.name}`;
+    if (route.name === 'api') return '/api';
+    if (route.name === 'price') return '/price';
+    if (LEGAL_SET.has(route.name)) return `/${route.name}`;
+    if (PAGE_SET.has(route.name)) {
+        return route.slug ? `/${route.name}/${route.slug}` : `/${route.name}`;
+    }
     return prefix || '/';
 }
 

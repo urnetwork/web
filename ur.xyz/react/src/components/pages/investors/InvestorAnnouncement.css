@@ -1,0 +1,312 @@
+.announcement-page {
+    --announcement-shell: min(940px, calc(100vw - 64px));
+    --announcement-paper: min(760px, calc(100vw - 64px));
+    --announcement-ink: #151515;
+    --announcement-muted: #595959;
+    /* The page shell's <main class="section-page"> already pads one nav
+       height; this adds the second and takes it off the viewport-height
+       minimum, so the page sits and ends where it did as its own <main>. */
+    min-height: calc(100vh - var(--nav-height));
+    padding-top: var(--nav-height);
+    background:
+        radial-gradient(circle at 50% 18%, rgba(237, 143, 255, 0.045), transparent 34rem),
+        var(--brand-bg);
+}
+
+.announcement-shell { width: var(--announcement-shell); margin-inline: auto; }
+
+.announcement-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    padding-block: 42px 26px;
+}
+
+.announcement-back,
+.announcement-download { min-height: 44px; }
+
+.announcement-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    color: rgba(214, 230, 244, 0.7);
+    font-size: 0.875rem;
+    text-decoration: none;
+}
+
+.announcement-back span { color: var(--brand-ur); transition: transform 180ms ease; }
+.announcement-back:hover span { transform: translateX(-3px); }
+
+.announcement-actions { display: flex; align-items: center; gap: 12px; }
+
+.announcement-download {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    padding: 0 18px;
+    border: 1px solid rgba(214, 230, 244, 0.24);
+    border-radius: 999px;
+    color: var(--brand-white);
+    font-size: 0.78rem;
+    text-decoration: none;
+    transition: border-color 180ms ease, background 180ms ease;
+}
+
+.announcement-download:hover {
+    border-color: rgba(214, 230, 244, 0.5);
+    background: rgba(214, 230, 244, 0.06);
+}
+
+.announcement-back:focus-visible,
+.announcement-download:focus-visible { outline: 2px solid var(--brand-ur); outline-offset: 4px; }
+
+.announcement-summary { padding: 14px 0 42px; }
+
+.announcement-kicker {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    margin: 0 0 17px;
+    color: var(--brand-ur);
+    font-family: 'PPNeueBit', monospace;
+    font-size: 0.8125rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+.announcement-kicker span {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: currentColor;
+    box-shadow: 0 0 0 4px rgba(237, 143, 255, 0.08);
+}
+
+.announcement-summary > h1 {
+    max-width: 980px;
+    margin: 0;
+    color: var(--brand-white);
+    font-size: clamp(2.6rem, 5.1vw, 4.9rem);
+    font-weight: 400;
+    letter-spacing: -0.055em;
+    line-height: 0.98;
+    text-wrap: balance;
+}
+
+.announcement-summary > h1.announcement-summary-title--compact {
+    max-inline-size: 17ch;
+}
+
+.announcement-summary-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 32px;
+    margin-top: 34px;
+    padding: 18px 0;
+    border-top: 1px solid rgba(214, 230, 244, 0.14);
+    border-bottom: 1px solid rgba(214, 230, 244, 0.14);
+}
+
+.announcement-issuer { display: flex; min-width: 0; align-items: center; gap: 12px; color: var(--brand-white); }
+
+.announcement-issuer__mark {
+    display: grid;
+    width: 40px;
+    height: 40px;
+    flex: 0 0 auto;
+    place-items: center;
+    border: 1px solid rgba(214, 230, 244, 0.18);
+    border-radius: 50%;
+}
+
+.announcement-issuer__mark img { display: block; width: 22px; height: 22px; filter: invert(1); opacity: 0.9; }
+.announcement-issuer > span:last-child { display: grid; gap: 3px; }
+.announcement-issuer strong { font-size: 0.9rem; font-weight: 400; }
+
+.announcement-issuer small,
+.announcement-summary-meta > p { color: rgba(214, 230, 244, 0.58); font-size: 0.74rem; }
+
+.announcement-summary-meta > p { display: flex; gap: 18px; margin: 0; white-space: nowrap; }
+.announcement-summary-meta > p span + span::before { content: '·'; margin-right: 18px; }
+
+.announcement-stage {
+    display: grid;
+    gap: 32px;
+    padding: 0 0 110px;
+}
+
+.announcement-paper {
+    position: relative;
+    box-sizing: border-box;
+    display: flex;
+    width: var(--announcement-paper);
+    min-height: 1075px;
+    flex-direction: column;
+    margin-inline: auto;
+    padding: clamp(34px, 5vw, 64px) clamp(24px, 8vw, 61px) clamp(32px, 4vw, 41px);
+    overflow: hidden;
+    background: #ffffff;
+    box-shadow: 0 2px 0 rgba(255, 255, 255, 0.08), 0 32px 80px rgba(0, 0, 0, 0.36);
+    color: var(--announcement-ink);
+    /* Times New Roman is absent on Android and most Linux. Name every
+       metric-compatible clone (identical advance widths, so line breaks and
+       the A4 fit survive) before falling through to the generic serif. */
+    font-family: 'Times New Roman', 'Liberation Serif', 'Tinos', 'Nimbus Roman', 'Nimbus Roman No9 L', 'Thorndale AMT', Times, serif;
+}
+
+.announcement-letterhead {
+    display: grid;
+    grid-template-columns: minmax(140px, 190px) minmax(180px, 1fr);
+    align-items: end;
+    gap: 6px 28px;
+}
+
+.announcement-wordmark {
+    display: block;
+    width: min(100%, 168px);
+    height: 42px;
+    object-fit: contain;
+    object-position: left center;
+    filter: invert(1);
+}
+
+.announcement-address { margin: 0; color: #232323; font-size: 0.7rem; font-style: normal; line-height: 1.22; text-align: right; }
+.announcement-address strong { display: block; font-size: 0.74rem; }
+
+.announcement-letterhead::after {
+    content: '';
+    grid-column: 1 / -1;
+    height: 1px;
+    margin-top: 2px;
+    background: #222222;
+}
+
+.announcement-paper p.announcement-date { margin: 24px 0 22px; font-size: 0.835rem; font-weight: 700; text-align: left; hyphens: none; }
+
+.announcement-document-title {
+    max-width: 100%;
+    margin: 0 auto 12px;
+    font-size: clamp(0.94rem, 1.15vw, 1.02rem);
+    line-height: 1.3;
+    text-align: center;
+    text-wrap: balance;
+}
+
+.announcement-paper p { margin: 0 0 8px; font-size: 0.835rem; line-height: 1.38; text-align: justify; hyphens: auto; }
+.announcement-document-section { margin-top: 9px; }
+.announcement-document-section:first-of-type { margin-top: 0; }
+.announcement-document-section h3 {
+    margin: 0 0 8px;
+    font-size: 0.92rem;
+    line-height: 1.32;
+}
+
+/* An attribution is a lead-in to the next sentence, not a section heading:
+   body size, italic, tight beneath; the distinction BET draws. */
+.announcement-document-section:has(blockquote) h3 {
+    margin: 0 0 5px;
+    font-size: 0.835rem;
+    font-style: italic;
+    line-height: 1.3;
+}
+.announcement-document-section:has(blockquote) { margin-top: 12px; }
+/* the section after the last quote is boilerplate, not news - give the reader
+   a clear break rather than the 9px used between related blocks */
+.announcement-document-section:has(blockquote) + .announcement-document-section:not(:has(blockquote)) { margin-top: 24px; }
+.announcement-document-section ul,
+.announcement-document-section ol {
+    display: grid;
+    gap: 1px;
+    margin: 0 0 12px;
+    padding-left: 2.1rem;
+}
+.announcement-document-section li { padding-left: 0.4rem; font-size: 0.835rem; line-height: 1.36; text-align: justify; hyphens: auto; }
+.announcement-paper--tokenholders .announcement-document-section { margin-top: 18px; }
+.announcement-paper--tokenholders .announcement-document-section h3 { margin-bottom: 9px; }
+.announcement-paper--tokenholders a { color: #6f087d; text-underline-offset: 0.12em; }
+.announcement-paper--tokenholders code {
+    overflow-wrap: anywhere;
+    color: #145426;
+    font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+    font-size: 0.88em;
+}
+.announcement-paper--tokenholders .announcement-signoff p { margin-bottom: 10px; text-align: left; }
+.announcement-document-section blockquote {
+    margin: 0;
+    padding: 0 0 0 22px;
+    color: #2c2c2c;
+}
+.announcement-document-section blockquote p { margin-bottom: 0; font-style: italic; }
+.announcement-paper--continued > .announcement-document-section:first-child { margin-top: 0; }
+#about-sn25 ~ p { font-size: 0.75rem !important; line-height: 1.34; }
+.announcement-signoff { margin-top: 48px !important; }
+.announcement-legal {
+    margin-top: auto !important;
+    padding-top: 10px;
+    color: var(--announcement-muted);
+    font-size: 0.75rem !important;
+}
+
+@media (max-width: 760px) {
+    .announcement-page { --announcement-shell: calc(100vw - 32px); --announcement-paper: calc(100vw - 24px); }
+    .announcement-toolbar { align-items: flex-start; padding-block: 28px 18px; }
+    .announcement-actions { flex-direction: column; align-items: flex-end; }
+    .announcement-summary { padding: 12px 0 32px; }
+    .announcement-summary > h1 { font-size: clamp(2.35rem, 9vw, 3.9rem); }
+    .announcement-summary-meta { align-items: flex-end; }
+    .announcement-summary-meta > p { flex-direction: column; align-items: flex-end; gap: 5px; }
+    .announcement-summary-meta > p span + span::before { content: none; }
+    .announcement-paper { min-height: 0; padding: 48px 30px 72px; }
+    .announcement-letterhead { grid-template-columns: 1fr; gap: 16px; }
+    .announcement-wordmark { width: 210px; height: 58px; }
+    .announcement-address { font-size: 0.68rem; text-align: left; }
+    .announcement-letterhead::after { margin-top: 8px; }
+    .announcement-document-title { margin-block: 24px 40px; font-size: 1.35rem; text-align: left; }
+    .announcement-paper p { font-size: 0.94rem; line-height: 1.55; }
+    .announcement-paper--tokenholders .announcement-document-section li { font-size: 0.94rem; line-height: 1.5; }
+}
+
+@media (max-width: 480px) {
+    .announcement-page { --announcement-shell: calc(100vw - 24px); --announcement-paper: calc(100vw - 16px); }
+    .announcement-toolbar { align-items: center; gap: 16px; }
+    .announcement-actions { flex-direction: row; justify-content: flex-end; }
+    .announcement-download { padding-inline: 14px; }
+    .announcement-paper { padding: 42px 22px 58px; }
+    .announcement-summary > h1 { font-size: 2.3rem; }
+    .announcement-summary-meta { align-items: flex-start; flex-direction: column; gap: 14px; }
+    .announcement-summary-meta > p { align-items: flex-start; }
+    .announcement-wordmark { width: 178px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .announcement-back span,
+    .announcement-download { transition: none; }
+}
+
+/* Scoped to a document that contains the announcement: this stylesheet is
+   loaded on every investor page (and site-wide in the SPA), so nothing here
+   may change how another page prints. The page box is a named page for the
+   same reason; the unnamed @page in InvestorLetter.css is the document
+   default, which engines without named pages (Safari) fall back to. */
+@media print {
+    @page investor-announcement { size: A4; margin: 0.62in 0.72in 0.7in; }
+    .announcement-page { page: investor-announcement; }
+    :root:has(.announcement-page) { --brand-bg: #ffffff; }
+    body:has(.announcement-page) :is(.disclaimer, .nav, .footer),
+    .announcement-toolbar, .announcement-summary { display: none !important; }
+    html:has(.announcement-page), body:has(.announcement-page), .app:has(.announcement-page),
+    .announcement-page, .announcement-stage { background: #ffffff !important; }
+    .section-page:has(.announcement-page) { padding-top: 0; }
+    .announcement-page { min-height: 0; padding: 0; }
+    .announcement-stage { gap: 0; padding: 0; }
+    .announcement-paper { width: 100%; min-height: 0; margin: 0; padding: 0; overflow: visible; background: #ffffff !important; box-shadow: none; }
+    .announcement-paper + .announcement-paper { break-before: page; }
+    .announcement-paper p { font-size: 10pt; line-height: 1.42; }
+    .announcement-document-section li { font-size: 10pt; }
+    .announcement-document-section h3 { font-size: 10.5pt; }
+    .announcement-paper > p,
+    .announcement-document-section { break-inside: avoid; }
+    .announcement-document-title { font-size: 12pt; }
+}

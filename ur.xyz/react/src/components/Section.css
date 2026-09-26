@@ -10,8 +10,11 @@
     border-top: 1px solid rgba(214, 230, 244, 0.06);
 }
 
+/* One column for everything in a section: the paragraphs run the full
+   width of it, so it is sized as a reading measure (about 80 characters of
+   body text) rather than as a wide content well with narrower text inside. */
 .section-inner {
-    max-width: 980px;
+    max-width: 800px;
     margin: 0 auto;
 }
 
@@ -65,7 +68,6 @@
 
 .section-body p {
     margin: 0 0 1.4em;
-    max-width: 68ch;
 }
 
 .section-body p:last-child {
@@ -159,7 +161,7 @@
 }
 
 .article-table th {
-    text-align: left;
+    text-align: start;
     font-weight: 600;
     font-size: 0.7rem;
     letter-spacing: 0.1em;

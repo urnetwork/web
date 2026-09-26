@@ -4,6 +4,8 @@
  * Each item: { tag, title, body, href?, linkLabel?, soon?, button? }
  *   soon   — small "coming soon" chip in place of a link
  *   button — pill button; disabled look until button.href exists
+ * Card titles are h2s: the grid sits directly under the section page's h1
+ * (.card-title sets the look, so the level does not change it).
  */
 interface Props {
     items: Array<{
@@ -17,23 +19,29 @@ interface Props {
     }>;
 }
 
+import { EXTERNAL, isExternal } from '@react/lib/links.js';
+
 const { items } = Astro.props;
+
+// only an external link opens a new tab; a guide on this site (/docs/miner)
+// opens in place, as in the React sections (react/src/lib/links.js)
+const linkAttrs = (href) => (isExternal(href) ? EXTERNAL : {});
 ---
 <div class="card-grid">
     {items.map(r => (
         <div class="card">
             <div class="card-eyebrow">{r.tag}</div>
-            <h3 class="card-title">{r.title}</h3>
+            <h2 class="card-title">{r.title}</h2>
             <p class="card-body">{r.body}</p>
             {r.href && (
-                <a href={r.href} class="card-link" target="_blank" rel="noopener noreferrer">
+                <a href={r.href} class="card-link" {...linkAttrs(r.href)}>
                     {r.linkLabel}
                 </a>
             )}
             {r.soon && <span class="card-soon">{r.soon}</span>}
             {r.button && (
                 r.button.href
-                    ? <a href={r.button.href} class="card-button" target="_blank" rel="noopener noreferrer">{r.button.label}</a>
+                    ? <a href={r.button.href} class="card-button" {...linkAttrs(r.button.href)}>{r.button.label}</a>
                     : <span class="card-button is-disabled">{r.button.label}</span>
             )}
         </div>

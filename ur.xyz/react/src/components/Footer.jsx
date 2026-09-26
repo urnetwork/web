@@ -1,7 +1,7 @@
 import React from 'react';
 import './Footer.css';
 import { useLanguage, LANG_ORDER, pathForLang } from '../i18n';
-import { buildPath } from '../router';
+import { buildPath, isTranslatedRoute, useRoute } from '../router';
 import { LAUNCH_VIDEO_HASH } from './LaunchVideo';
 
 const GENERAL_DISCORD = 'https://discord.gg/urnetwork';
@@ -28,8 +28,12 @@ function SocialIcon({ name }) {
 
 export default function Footer() {
     const { code, setLang, langs, t } = useLanguage();
+    const route = useRoute();
     const year = new Date().getFullYear();
     const path = (name, slug = null) => buildPath({ name, slug }, code);
+    // each language link opens this page in that language when it is
+    // translated, else that language's home
+    const langHref = (language) => (isTranslatedRoute(route) ? buildPath(route, language) : pathForLang(language));
 
     return (
         <footer className="footer">
@@ -59,12 +63,12 @@ export default function Footer() {
                 </nav>
             </div>
 
-            <nav className="footer-socials" aria-label="Community and social links">
-                <a href={X_URL} target="_blank" rel="noopener noreferrer" aria-label="URnetwork on X" title="X"><SocialIcon name="x" /></a>
-                <a href={TELEGRAM_URL} target="_blank" rel="noopener noreferrer" aria-label="UR subnet on Telegram" title="Telegram"><SocialIcon name="telegram" /></a>
-                <a href={GENERAL_DISCORD} target="_blank" rel="noopener noreferrer" aria-label="URnetwork Discord" title="Discord"><SocialIcon name="discord" /></a>
-                <a href={GITHUB_URL} target="_blank" rel="noopener noreferrer" aria-label="UR subnet on GitHub" title="GitHub"><SocialIcon name="github" /></a>
-                <a className="footer-product-link" href={PRODUCT_URL} target="_blank" rel="noopener noreferrer" aria-label="URnetwork products at ur.io">ur.io <span aria-hidden="true">↗</span></a>
+            <nav className="footer-socials" aria-label={t.footer.socialAria}>
+                <a href={X_URL} target="_blank" rel="noopener noreferrer" aria-label={t.footer.socialX} title="X"><SocialIcon name="x" /></a>
+                <a href={TELEGRAM_URL} target="_blank" rel="noopener noreferrer" aria-label={t.footer.socialTelegram} title="Telegram"><SocialIcon name="telegram" /></a>
+                <a href={GENERAL_DISCORD} target="_blank" rel="noopener noreferrer" aria-label={t.footer.socialDiscord} title="Discord"><SocialIcon name="discord" /></a>
+                <a href={GITHUB_URL} target="_blank" rel="noopener noreferrer" aria-label={t.footer.socialGithub} title="GitHub"><SocialIcon name="github" /></a>
+                <a className="footer-product-link" href={PRODUCT_URL} target="_blank" rel="noopener noreferrer" aria-label={t.footer.productsAria}>ur.io <span aria-hidden="true">↗</span></a>
             </nav>
 
             <div className="footer-utility">
@@ -78,7 +82,7 @@ export default function Footer() {
                     {LANG_ORDER.map(language => (
                         <a
                             key={language}
-                            href={pathForLang(language)}
+                            href={langHref(language)}
                             lang={language}
                             className={`footer-lang ${language === code ? 'is-active' : ''}`}
                             onClick={(event) => { event.preventDefault(); setLang(language); }}

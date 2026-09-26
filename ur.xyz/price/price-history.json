@@ -2,5 +2,9 @@
   {
     "date": "2026-07-08T21:12:54.564Z",
     "yaml": "sn: 1\n# the alpha must be deposited as demand deposits per block (7 days)\ntiered_per_block_demand_deposits:\n  0:\n    alpha_per_gib: 1\n    alpha_per_user: 1\n  1000:\n    alpha_per_gib: 0.1\n    alpha_per_user: 0.1\n"
+  },
+  {
+    "date": "2026-09-26T00:18:42.381Z",
+    "yaml": "sn: 25\n# the alpha must be deposited as demand deposits per block (7 days)\n#\n# Initial period: no operator demand deposits are collected, so every rate is\n# 0 alpha per GiB and 0 alpha per user. The tiers are kept for the shape of the\n# schedule (an operator pays the best tier whose staked-alpha threshold it meets;\n# the 0 tier applies to everyone) and will be filled in when deposits start.\ntiered_per_block_demand_deposits:\n  0:\n    alpha_per_gib: 0\n    alpha_per_user: 0\n  1000:\n    alpha_per_gib: 0\n    alpha_per_user: 0\n"
   }
 ]

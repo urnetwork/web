@@ -30,7 +30,7 @@ const ASTRO_OUT = path.join(ASTRO_DIR, "build", UR_ENV);
 const OUT = path.join(__dirname, "__parity__");
 
 // Routes shared by the React implementation and the Astro static build.
-const ROUTES = ["/", "/operators", "/miners", "/validators", "/research", "/docs", "/terms", "/privacy", "/vdp"];
+const ROUTES = ["/", "/operators", "/miners", "/validators", "/research", "/docs", "/terms", "/privacy", "/vdp", "/about", "/investors", "/investors/deck", "/investors/conviction-lock", "/investors/our-letter-to-bittensor", "/investors/letter-to-tokenholders-september-2026", "/build", "/ar/miners"];
 
 const PIXEL_TOLERANCE = 40; // desktop
 // Phones render at 3x DPR; composited/animated text vs a static node antialiases the SAME

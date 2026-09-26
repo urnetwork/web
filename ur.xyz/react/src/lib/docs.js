@@ -1,81 +1,42 @@
 import rawDocs from 'virtual:ur-docs';
 import { extractTitle, markdownToText } from './markdown.jsx';
+import {
+    DOC_ORDER,
+    DOC_PAGE_PATHS,
+    HIDDEN_DOC_SLUGS,
+    UNLISTED_DOC_SLUGS,
+    docPath,
+    slugFor,
+    splitFrontMatter,
+} from './docs-shared.js';
 
 /**
- * Build the docs registry from the virtual module emitted at build time
- * by `urXyzContent` in vite.config.js. Each entry exposes:
+ * The docs registry, built from the virtual module emitted at build time by
+ * `urXyzContent` in vite.config.js. Each entry exposes:
  *
- *   slug:    URL-safe identifier (e.g. "protocol/protocol-research")
+ *   slug:    URL-safe identifier (e.g. "miner", "support/delete")
  *   path:    original on-disk relative path inside docs/
+ *   href:    the URL the document is published at (/docs/<slug>, or its own
+ *            page for the documents in DOC_PAGE_PATHS)
  *   title:   first H1 in the markdown, or a humanised file name fallback
- *   group:   top-level folder name, used to bucket entries in the sidebar
- *   content: raw markdown
+ *   meta:    the document's front matter (title / description overrides)
+ *   content: the markdown, front matter removed
  *   text:    plain-text version used by the search index
  *
- * The list is sorted alphabetically by slug; groups are then derived in
- * a deterministic order matching how the docs/ directory is laid out.
+ * The corpus is four documents, the three role guides and the litepaper, in
+ * DOC_ORDER (docs-shared.js). The legal documents, published as their own
+ * pages, follow them in the sidebar. An unlisted document (UNLISTED_DOC_SLUGS)
+ * is in `docs`, so its page and markdown twin build and findDoc resolves it,
+ * but in none of the lists.
  */
 
 const RAW_DOCS = Array.isArray(rawDocs) ? rawDocs : [];
-import { HIDDEN_DOC_SLUGS, slugFor } from './docs-shared.js';
 
 const DOC_TITLE_OVERRIDES = {
     'legal/terms': 'Terms of Service',
     'legal/privacy': 'Privacy Policy',
     'legal/vdp': 'VDP'
 };
-
-/**
- * Folders we deliberately want at the top of the sidebar. Anything not
- * named here is appended in alphabetical order so new docs always show
- * up without us having to maintain a manifest.
- */
-const GROUP_PRIORITY = [
-    'protocol',
-    'economic-model',
-    'sdk',
-    'cli',
-    'provider',
-    'router',
-    'routeros',
-    'rpi',
-    'edgeos',
-    'mcp',
-    'changelog',
-    'audits',
-    'trust-and-safety',
-    'support',
-    'legal',
-    'archive',
-    'ama',
-    'presentations',
-    'res'
-];
-
-const GROUP_LABELS = {
-    'protocol':         'Protocol',
-    'economic-model':   'Economic model',
-    'sdk':              'SDK',
-    'cli':              'CLI',
-    'provider':         'Provider',
-    'router':           'Router',
-    'routeros':         'RouterOS',
-    'rpi':              'Raspberry Pi',
-    'edgeos':           'EdgeOS',
-    'mcp':              'MCP',
-    'changelog':        'Changelog',
-    'audits':           'Audits',
-    'trust-and-safety': 'Trust & safety',
-    'support':          'Support',
-    'legal':            'Legal',
-    'archive':          'Archive',
-    'ama':              'AMA',
-    'presentations':    'Presentations',
-    'res':              'Resources',
-    '_root':            'Overview'
-};
-
-
 
 function titleFromPath(filePath) {
     const base = filePath.replace(/\.md$/i, '').split('/').pop();
@@ -92,70 +53,51 @@ function humanise(s) {
         .replace(/\b\w/g, c => c.toUpperCase());
 }
 
-function groupFor(filePath) {
-    const parts = filePath.split('/');
-    return parts.length > 1 ? parts[0] : '_root';
+const BY_SLUG = new Map();
+for (const { path, content: source } of RAW_DOCS) {
+    const slug = slugFor(path);
+    // The root README is the repository's index, not a page. The first file
+    // per slug wins which, in the virtual module's walk order, is the README
+    // before any numbered companion file in the same folder.
+    if (!slug || BY_SLUG.has(slug) || HIDDEN_DOC_SLUGS.has(slug)) continue;
+    const { meta, body } = splitFrontMatter(source);
+    BY_SLUG.set(slug, {
+        slug,
+        path,
+        href: docPath(slug),
+        title: DOC_TITLE_OVERRIDES[slug] || extractTitle(body, titleFromPath(path)),
+        meta,
+        content: body,
+        text: markdownToText(body)
+    });
 }
 
-const DOCS = RAW_DOCS
-    .map(({ path, content }) => {
-        const slug = slugFor(path) || (path.endsWith('README.md') ? '' : path);
-        return {
-            slug,
-            path,
-            title: DOC_TITLE_OVERRIDES[slug] || extractTitle(content, titleFromPath(path)),
-            group: groupFor(path),
-            content,
-            text: markdownToText(content)
-        };
-    })
-    .filter(d => d.slug !== undefined && d.slug !== null)
-    .filter(d => !HIDDEN_DOC_SLUGS.has(d.slug));
-
-// De-duplicate by slug. The first entry wins which, given the sort order
-// in the virtual module (walk-order), gives us the README before any
-// numbered companion file in the same folder.
-const seen = new Set();
-const UNIQUE_DOCS = [];
-for (const d of DOCS) {
-    if (seen.has(d.slug)) continue;
-    seen.add(d.slug);
-    UNIQUE_DOCS.push(d);
-}
-UNIQUE_DOCS.sort((a, b) => a.slug.localeCompare(b.slug));
-
-export const docs = UNIQUE_DOCS;
+/** Every published document, the unlisted ones included, by slug. */
+export const docs = [...BY_SLUG.values()].sort((a, b) => a.slug.localeCompare(b.slug));
 
 /**
- * Group docs into the sidebar buckets. Priority groups go first in the
- * order declared above; everything else is sorted alphabetically. Each
- * group's entries are sorted alphabetically by title.
+ * The documents the site lists, in list order: DOC_ORDER, then any other
+ * document under /docs alphabetically, then the documents published as their
+ * own pages (the legal documents).
  */
-export const docGroups = (() => {
-    const byGroup = new Map();
-    for (const d of UNIQUE_DOCS) {
-        if (!byGroup.has(d.group)) byGroup.set(d.group, []);
-        byGroup.get(d.group).push(d);
-    }
-    for (const arr of byGroup.values()) {
-        arr.sort((a, b) => a.title.localeCompare(b.title));
-    }
-
-    const order = [];
-    for (const k of GROUP_PRIORITY) if (byGroup.has(k)) order.push(k);
-    const remaining = [...byGroup.keys()]
-        .filter(k => !GROUP_PRIORITY.includes(k))
-        .sort();
-    for (const k of remaining) order.push(k);
-
-    return order.map(k => ({
-        id: k,
-        label: GROUP_LABELS[k] || humanise(k),
-        docs: byGroup.get(k)
-    }));
+export const listedDocs = (() => {
+    const listed = docs.filter(d => !UNLISTED_DOC_SLUGS.has(d.slug));
+    const ordered = DOC_ORDER.map(slug => BY_SLUG.get(slug)).filter(Boolean);
+    const rest = listed.filter(d => !DOC_ORDER.includes(d.slug) && !DOC_PAGE_PATHS[d.slug]);
+    const ownPage = listed.filter(d => DOC_PAGE_PATHS[d.slug]);
+    return [...ordered, ...rest, ...ownPage].filter(d => !UNLISTED_DOC_SLUGS.has(d.slug));
 })();
+
+/** The listed documents under /docs: what the landing and the docs index structured data list. */
+export const docsIndex = listedDocs.filter(d => !DOC_PAGE_PATHS[d.slug]);
+
+/** The sidebar: the corpus as one flat list, then the legal documents. */
+export const docGroups = [
+    { id: 'docs', label: 'Docs', docs: docsIndex },
+    { id: 'legal', label: 'Legal', docs: listedDocs.filter(d => DOC_PAGE_PATHS[d.slug]) },
+].filter(group => group.docs.length);
 
 export function findDoc(slug) {
     if (slug == null) return null;
-    return UNIQUE_DOCS.find(d => d.slug === slug) || null;
+    return BY_SLUG.get(slug) || null;
 }

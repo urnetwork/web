@@ -1,8 +1,12 @@
 ---
+import { LANGS } from '../lib/i18n.js';
+
 interface Props { t: any; lang: string; }
 const { t, lang } = Astro.props;
 const prefix = lang && lang !== 'en' ? `/${lang}` : '';
 const roleRoutes = ['operators', 'miners', 'validators'];
+// the "go" arrow points along the reading direction
+const arrow = LANGS[lang]?.dir === 'rtl' ? '←' : '→';
 ---
 <section class="roles" aria-labelledby="roles-title">
     <div class="roles-heading">
@@ -18,14 +22,15 @@ const roleRoutes = ['operators', 'miners', 'validators'];
                     <p class="role-number">{String(index + 1).padStart(2, '0')}</p>
                     <h3>{role.name}</h3>
                     <p>{role.body}</p>
-                    <a href={`${prefix}/${route}`}>{role.explore} <span aria-hidden="true">→</span></a>
+                    <a href={`${prefix}/${route}`}>{role.explore} <span aria-hidden="true">{arrow}</span></a>
                 </article>
             );
         })}
     </div>
 
-    <a class="roles-cta" href={`${prefix}/docs/litepaper`}>
-        {t.homepage.whitepaperCta} <span aria-hidden="true">→</span>
+    {/* the litepaper is English-only, like all the docs: link it directly */}
+    <a class="roles-cta" href="/docs/litepaper">
+        {t.homepage.whitepaperCta} <span aria-hidden="true">{arrow}</span>
     </a>
 </section>
 
@@ -37,7 +42,7 @@ const roleRoutes = ['operators', 'miners', 'validators'];
     .roles h2 { margin: 0; max-width: 720px; color: var(--brand-white); font-size: clamp(2.25rem, 5vw, 5rem); font-weight: 500; line-height: 0.98; letter-spacing: -0.045em; }
     .roles-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border-top: 1px solid rgba(214, 230, 244, 0.16); border-bottom: 1px solid rgba(214, 230, 244, 0.16); }
     .role-card { display: flex; min-height: 420px; flex-direction: column; padding: 28px 30px 32px; }
-    .role-card + .role-card { border-left: 1px solid rgba(214, 230, 244, 0.16); }
+    .role-card + .role-card { border-inline-start: 1px solid rgba(214, 230, 244, 0.16); }
     .role-card h3 { margin: 78px 0 24px; color: var(--brand-white); font-size: clamp(1.8rem, 3vw, 2.6rem); font-weight: 500; letter-spacing: -0.035em; }
     .role-card > p:not(.role-number) { margin: 0; color: var(--brand-ui); font-size: 0.98rem; line-height: 1.65; }
     .role-card a,
@@ -51,7 +56,7 @@ const roleRoutes = ['operators', 'miners', 'validators'];
         .roles-heading { grid-template-columns: 1fr; gap: 20px; }
         .roles-grid { grid-template-columns: 1fr; }
         .role-card { min-height: 0; padding: 28px 0 36px; }
-        .role-card + .role-card { border-top: 1px solid rgba(214, 230, 244, 0.16); border-left: 0; }
+        .role-card + .role-card { border-top: 1px solid rgba(214, 230, 244, 0.16); border-inline-start: 0; }
         .role-card h3 { margin-top: 42px; }
         .role-card a { margin-top: 40px; }
     }

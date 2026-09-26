@@ -1,15 +1,17 @@
 import React from 'react';
 import './OperatorsDirectory.css';
-import { useLanguage } from '../i18n';
+import { useLanguage, intlLocale } from '../i18n';
 import { useOperatorFeeds } from '../lib/network';
 
-const fmt = (n) =>
-    Number(n || 0).toLocaleString(undefined, {
+// Figures are formatted in the page's language (intlLocale), never the
+// browser's.
+const formatAmount = (n, locale) =>
+    Number(n || 0).toLocaleString(locale, {
         minimumFractionDigits: 2,
         maximumFractionDigits: 2
     });
 
-const fmtInt = (n) => Math.floor(Number(n || 0)).toLocaleString();
+const formatCount = (n, locale) => Math.floor(Number(n || 0)).toLocaleString(locale);
 
 const DASH = '—';
 
@@ -112,7 +114,10 @@ function StoreLinks({ operator, label }) {
  * stable reference (hidden until the feed publishes one).
  */
 export default function OperatorsDirectory() {
-    const { t } = useLanguage();
+    const { t, code } = useLanguage();
+    const locale = intlLocale(code);
+    const fmt = (n) => formatAmount(n, locale);
+    const fmtInt = (n) => formatCount(n, locale);
     const s = t.operators;
     const rows = useOperatorFeeds();
 

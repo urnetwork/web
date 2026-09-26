@@ -3,8 +3,11 @@
 **/build.*
 **/__pycache__
 !.github/workflows/build.yml
-# The Build on UR page is a standalone static page; **/build.* would swallow it.
-!ur.xyz/astro/public/build.html
+# The Build on UR page (a React component and its thin Astro page); **/build.*
+# would swallow these on a case-insensitive checkout.
+!ur.xyz/astro/src/pages/build.astro
+!ur.xyz/react/src/components/pages/Build.jsx
+!ur.xyz/react/src/components/pages/Build.css
 manager/manager
 web/web
 /venv

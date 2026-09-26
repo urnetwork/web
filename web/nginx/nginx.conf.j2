@@ -299,7 +299,7 @@ http {
             # always check for updates in the background
             add_header 'Cache-Control' 'max-age=0, stale-while-revalidate=86400';
             add_header 'Last-Modified' '{{ http_last_modified }}';
-            add_header 'ETag' '"{{ http_etag }}"';
+            add_header 'ETag' 'W/"{{ http_etag }}"';
             add_header 'X-Robots-Tag' $ur_preview_robots always;
         }
 
@@ -308,6 +308,81 @@ http {
         # variants onto the canonical form with real 301s.
         location = /index.html {
             return 301 /;
+        }
+
+        # Retired paths, in every language: the UR node is sold at shop.ur.io
+        # and the protocol has its own site, ur.xyz.
+        location ~ ^/(?:(?:ru|ar|zh|de|es)/)?urnode(?:\.html|/)?$ {
+            return 301 https://shop.ur.io/;
+        }
+
+        location ~ ^/(?:(?:ru|ar|zh|de|es)/)?protocol(?:\.html|/)?$ {
+            return 301 https://ur.xyz/;
+        }
+
+        # /404 is the not-found page's own URL: answer it with a 404 (which
+        # error_page renders with that page) rather than a 200 copy of it.
+        location = /404 {
+            return 404;
+        }
+
+        # The code examples are English-only; their localized paths 301 to them.
+        location ~ ^/(?:ru|ar|zh|de|es)(?<examples_path>/docs/examples(?:/.*)?)$ {
+            return 301 $examples_path;
+        }
+
+        # Markdown and text twins of HTML pages, for agents: canonical to the
+        # page they mirror, so the page is what search engines index. Ahead of
+        # the generic machine-readable rule below, which they would otherwise
+        # match first.
+        location = /docs-md/index.md {
+            add_header 'Link' '<https://ur.io/docs>; rel="canonical"';
+            add_header 'Cache-Control' 'public, max-age=3600, stale-while-revalidate=86400';
+            add_header 'X-Robots-Tag' $ur_preview_robots always;
+        }
+
+        location ~ ^/docs-md/(?<md_lang>es|de|zh|ru|ar)/(?<md_slug>[a-z0-9-]+)\.md$ {
+            add_header 'Link' '<https://ur.io/$md_lang/docs/$md_slug>; rel="canonical"';
+            add_header 'Cache-Control' 'public, max-age=3600, stale-while-revalidate=86400';
+            add_header 'X-Robots-Tag' $ur_preview_robots always;
+        }
+
+        location ~ ^/docs-md/(?<md_slug>[a-z0-9-]+)\.md$ {
+            add_header 'Link' '<https://ur.io/docs/$md_slug>; rel="canonical"';
+            add_header 'Cache-Control' 'public, max-age=3600, stale-while-revalidate=86400';
+            add_header 'X-Robots-Tag' $ur_preview_robots always;
+        }
+
+        location ~ ^/blog-md/(?<md_lang>es|de|zh|ru|ar)/(?<md_slug>[a-z0-9-]+)\.md$ {
+            add_header 'Link' '<https://ur.io/$md_lang/blog/$md_slug>; rel="canonical"';
+            add_header 'Cache-Control' 'public, max-age=3600, stale-while-revalidate=86400';
+            add_header 'X-Robots-Tag' $ur_preview_robots always;
+        }
+
+        location ~ ^/blog-md/(?<md_slug>[a-z0-9-]+)\.md$ {
+            add_header 'Link' '<https://ur.io/blog/$md_slug>; rel="canonical"';
+            add_header 'Cache-Control' 'public, max-age=3600, stale-while-revalidate=86400';
+            add_header 'X-Robots-Tag' $ur_preview_robots always;
+        }
+
+        location ~ ^/(?<md_page>products|about|agents|changelog)\.md$ {
+            add_header 'Link' '<https://ur.io/$md_page>; rel="canonical"';
+            add_header 'Cache-Control' 'public, max-age=3600, stale-while-revalidate=86400';
+            add_header 'X-Robots-Tag' $ur_preview_robots always;
+        }
+
+        location ~ ^/llms(?:-full)?\.txt$ {
+            add_header 'Link' '<https://ur.io/>; rel="canonical"';
+            add_header 'Cache-Control' 'public, max-age=3600, stale-while-revalidate=86400';
+            add_header 'X-Robots-Tag' $ur_preview_robots always;
+        }
+
+        # mime.types has no entry for the web app manifest, which went out as
+        # application/octet-stream.
+        location = /site.webmanifest {
+            types { application/manifest+json webmanifest; }
+            add_header 'Cache-Control' 'public, max-age=3600, stale-while-revalidate=86400';
+            add_header 'X-Robots-Tag' $ur_preview_robots always;
         }
 
         # Keep /ip a browser page by default, while giving command-line and API
@@ -323,7 +398,7 @@ http {
 
             add_header 'Cache-Control' 'max-age=0, stale-while-revalidate=86400';
             add_header 'Last-Modified' '{{ http_last_modified }}';
-            add_header 'ETag' '"{{ http_etag }}"';
+            add_header 'ETag' 'W/"{{ http_etag }}"';
             add_header 'Vary' 'Accept' always;
             add_header 'X-Robots-Tag' $ur_preview_robots always;
         }
@@ -391,7 +466,7 @@ http {
             # always check for updates in the background
             add_header 'Cache-Control' 'max-age=0, stale-while-revalidate=86400';
             add_header 'Last-Modified' '{{ http_last_modified }}';
-            add_header 'ETag' '"{{ http_etag }}"';
+            add_header 'ETag' 'W/"{{ http_etag }}"';
             add_header 'X-Robots-Tag' $ur_preview_robots always;
         }
     }
@@ -428,20 +503,143 @@ http {
             return 301 /;
         }
 
+        # /404 is the not-found page's own URL: answer it with a 404 (which
+        # error_page renders with that page) rather than a 200 copy of it.
+        location = /404 {
+            return 404;
+        }
+
         # Retired aliases: the build ships noindex meta-refresh stubs as a
         # fallback, but a real 301 passes signals properly and skips a hop.
         location = /docs/whitepaper {
             return 301 /docs/litepaper;
         }
 
+        # The docs corpus is four documents, /docs/miner, /docs/validator,
+        # /docs/operator and /docs/litepaper (2026-09-25). Each retired document,
+        # with its .html and trailing-slash variants and its localized paths,
+        # 301s to the document that replaced it or to the index; the markdown
+        # twins under /docs-md follow their pages.
+        location ~ ^/(?:(?:ru|ar|zh|de|es)/)?docs/provider(?:\.html|/.*)?$ {
+            return 301 /docs/miner;
+        }
+
+        location ~ ^/(?:(?:ru|ar|zh|de|es)/)?docs/protocol/protocol-research(?:\.html|/)?$ {
+            return 301 /research;
+        }
+
+        # the trust-and-safety document is the miner guide's "Safety rules"
+        location ~ ^/(?:(?:ru|ar|zh|de|es)/)?docs/trust-and-safety/trust-and-safety(?:\.html|/)?$ {
+            return 301 "/docs/miner#safety-rules";
+        }
+
+        location ~ ^/(?:(?:ru|ar|zh|de|es)/)?docs/archive/whitepaper(?:\.html|/)?$ {
+            return 301 /docs/litepaper;
+        }
+
+        # the platform guides (CLI, EdgeOS, RouterOS, Raspberry Pi) folded into the miner guide
+        location ~ ^/(?:(?:ru|ar|zh|de|es)/)?docs/(?:cli|edgeos|routeros|rpi)(?:\.html|/.*)?$ {
+            return 301 /docs/miner;
+        }
+
+        location ~ ^/(?:(?:ru|ar|zh|de|es)/)?docs/(?:economic-model|changelog|mcp|router|protocol|trust-and-safety|archive)(?:\.html|/.*)?$ {
+            return 301 /docs;
+        }
+
+        location = /docs-md/provider.md {
+            return 301 /docs-md/miner.md;
+        }
+
+        location = /docs-md/protocol/protocol-research.md {
+            return 301 /research;
+        }
+
+        location = /docs-md/archive/whitepaper.md {
+            return 301 /docs-md/litepaper.md;
+        }
+
+        location ~ ^/docs-md/(?:cli|edgeos|routeros|rpi|economic-model|changelog|mcp|router|protocol|trust-and-safety|archive|provider)(?:/.*)?\.md$ {
+            return 301 /docs;
+        }
+
         location = /investors/august-investment-letter {
             return 301 /investors/our-letter-to-bittensor;
+        }
+
+        # The legal documents are English-only pages at /terms, /privacy and
+        # /vdp: their localized paths and the docs corpus copies (/docs/legal/*,
+        # /<lang>/docs/legal/*) are the same document, so they 301 there in one
+        # hop. Ahead of the localized-docs rule below, which would add a hop.
+        location ~ ^/(?:(?:ru|ar|zh|de|es)(?:/docs/legal)?|docs/legal)/(?<legal_doc>terms|privacy|vdp)(?:\.html|/)?$ {
+            return 301 /$legal_doc;
         }
 
         # Docs are English-only; the localized docs URLs are redirect stubs.
         # Serve the redirect at the HTTP layer instead of via meta refresh.
         location ~ ^/(?:ru|ar|zh|de|es)/docs(?<docpath>/.*)?$ {
             return 301 /docs$docpath;
+        }
+
+        # The about, build, investor and price pages are English-only too:
+        # their localized paths 301 to the page.
+        location ~ ^/(?:ru|ar|zh|de|es)/(?<en_page>about|build|investors|price)(?<en_rest>/.*)?$ {
+            return 301 /$en_page$en_rest$is_args$args;
+        }
+
+        # The investor documents' PDFs are printouts of HTML pages. They stay
+        # downloads, and point search engines at the page they print.
+        location = /investors/ur-investor-deck.pdf {
+            add_header 'Link' '<https://ur.xyz/investors/deck>; rel="canonical"';
+            add_header 'Cache-Control' 'public, max-age=2592000, stale-while-revalidate=86400';
+            add_header 'X-Robots-Tag' $ur_preview_robots always;
+        }
+
+        location = /investors/our-letter-to-bittensor.pdf {
+            add_header 'Link' '<https://ur.xyz/investors/our-letter-to-bittensor>; rel="canonical"';
+            add_header 'Cache-Control' 'public, max-age=2592000, stale-while-revalidate=86400';
+            add_header 'X-Robots-Tag' $ur_preview_robots always;
+        }
+
+        location = /investors/ur-conviction-lock-announcement.pdf {
+            add_header 'Link' '<https://ur.xyz/investors/conviction-lock>; rel="canonical"';
+            add_header 'Cache-Control' 'public, max-age=2592000, stale-while-revalidate=86400';
+            add_header 'X-Robots-Tag' $ur_preview_robots always;
+        }
+
+        location = /investors/ur-letter-to-tokenholders-september-2026.pdf {
+            add_header 'Link' '<https://ur.xyz/investors/letter-to-tokenholders-september-2026>; rel="canonical"';
+            add_header 'Cache-Control' 'public, max-age=2592000, stale-while-revalidate=86400';
+            add_header 'X-Robots-Tag' $ur_preview_robots always;
+        }
+
+        # Markdown and text twins of HTML pages, for agents: canonical to the
+        # page they mirror, so the page is what search engines index. Ahead of
+        # the generic machine-readable rule below, which they would otherwise
+        # match first.
+        location ~ ^/docs-md/(?<doc_slug>[A-Za-z0-9/_.-]+)\.md$ {
+            add_header 'Link' '<https://ur.xyz/docs/$doc_slug>; rel="canonical"';
+            add_header 'Cache-Control' 'public, max-age=3600, stale-while-revalidate=86400';
+            add_header 'X-Robots-Tag' $ur_preview_robots always;
+        }
+
+        location = /litepaper.md {
+            add_header 'Link' '<https://ur.xyz/docs/litepaper>; rel="canonical"';
+            add_header 'Cache-Control' 'public, max-age=3600, stale-while-revalidate=86400';
+            add_header 'X-Robots-Tag' $ur_preview_robots always;
+        }
+
+        location ~ ^/llms(?:-full)?\.txt$ {
+            add_header 'Link' '<https://ur.xyz/>; rel="canonical"';
+            add_header 'Cache-Control' 'public, max-age=3600, stale-while-revalidate=86400';
+            add_header 'X-Robots-Tag' $ur_preview_robots always;
+        }
+
+        # mime.types has no entry for the web app manifest, which went out as
+        # application/octet-stream.
+        location = /site.webmanifest {
+            types { application/manifest+json webmanifest; }
+            add_header 'Cache-Control' 'public, max-age=3600, stale-while-revalidate=86400';
+            add_header 'X-Robots-Tag' $ur_preview_robots always;
         }
 
         location ^~ /_astro/ {

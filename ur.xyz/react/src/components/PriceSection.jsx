@@ -1,19 +1,22 @@
 import React from 'react';
 import Section from './Section';
 import './PriceSection.css';
-import { useLanguage } from '../i18n';
+import { useLanguage, intlLocale } from '../i18n';
 import { useAlphaPrice } from '../lib/usePrice';
 import { PRICE_FEED_URL, PRICE_SHEET_URL } from '../lib/price';
 
+// Figures are formatted in the page's language (intlLocale), never the
+// browser's.
+
 // Tier α rates are published exact — render them without rounding.
-const fmtAlphaExact = (n) =>
-    Number(n).toLocaleString(undefined, { maximumFractionDigits: 8 });
+const formatAlphaExact = (n, locale) =>
+    Number(n).toLocaleString(locale, { maximumFractionDigits: 8 });
 
 // USD equivalents: 2 decimals at cents scale, 4 below a cent.
-const fmtUsd = (n) => {
+const formatUsd = (n, locale) => {
     if (!isFinite(n)) return '—';
     const digits = n >= 0.01 || n === 0 ? 2 : 4;
-    return '$' + n.toLocaleString(undefined, {
+    return '$' + n.toLocaleString(locale, {
         minimumFractionDigits: 2,
         maximumFractionDigits: digits
     });
@@ -26,20 +29,37 @@ const fmtUsd = (n) => {
  * staked-α tier, with the α rates published exactly as the sheet states
  * them and live USD equivalents resolved from the subnet's public pool
  * feed. Links out to the RSS change feed and the raw yaml.
+ *
+ * It is the whole /price page (the SPA's SectionPage, astro/src/pages/price.astro),
+ * so its title is the page's h1. The static page passes the sheet it was
+ * built from as `initialSheet`, so the table and the initial-period note are
+ * in the HTML; the live sheet replaces it once fetched.
  */
-export default function PriceSection() {
-    const { t } = useLanguage();
+export default function PriceSection({ initialSheet = null }) {
+    const { t, code } = useLanguage();
+    const locale = intlLocale(code);
+    const fmtAlphaExact = (n) => formatAlphaExact(n, locale);
+    const fmtUsd = (n) => formatUsd(n, locale);
     const p = t.price;
-    const { sheet, alphaUsd, alphaUsdSource } = useAlphaPrice();
+    const { sheet: liveSheet, alphaUsd, alphaUsdSource } = useAlphaPrice();
+    const sheet = liveSheet || initialSheet;
 
     const tiers = sheet ? sheet.tiers : [];
     const usdNote = alphaUsdSource === 'operators'
         ? p.usdNoteOperators
         : p.usdNote.replace('{sn}', String(sheet ? sheet.sn : ''));
+    // The initial period: the sheet publishes 0 α in every tier (no demand
+    // deposits are collected while the network is hardened). The table still
+    // shows the zeros; the note says why. The USD columns multiply a rate by
+    // the α price, so a 0 rate is an honest $0.00 and nothing divides.
+    const initialPeriod = tiers.length > 0 && tiers.every(t => t.alphaPerGib === 0 && t.alphaPerUser === 0);
 
     return (
-        <Section id="price" eyebrow={p.eyebrow} title={p.title}>
+        <Section id="price" eyebrow={p.eyebrow} title={p.title} headingLevel="h1">
             <p>{p.intro}</p>
+            {initialPeriod && p.initialPeriod && (
+                <p className="price-initial-period">{p.initialPeriod}</p>
+            )}
 
             <div className="article-table-wrap">
                 <table className="article-table price-table">

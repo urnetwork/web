@@ -6,7 +6,7 @@
 
 UR is a decentralized privacy network. It distributes user traffic across a global network of independent miners using multi-hop routing and layered encryption, so that no single miner sees both who a user is and what they are doing. The transport is designed to resemble ordinary HTTPS, with N-layer TLS encryption, SNI spoofing, and traffic indistinguishability, so the network stays reachable almost everywhere.
 
-The UR Subnet coordinates this network through on-chain incentives on Bittensor. Network operators run the servers; independent miners carry the ingress and egress traffic; and independent validators continuously walk operator-assigned chains of miners to prove real-time transit and measure which miners are the weakest links. That measurement is the core signal the network pays for.
+The UR Subnet, Bittensor SN25 (netuid 25), coordinates this network through on-chain incentives. Network operators run the servers; independent miners carry the ingress and egress traffic; and independent validators continuously walk operator-assigned chains of miners to prove real-time transit and measure which miners are the weakest links. That measurement is the core signal the network pays for.
 
 Bittensor's Yuma Consensus turns the validators' measurements into token emission, and a smart contract on the Subtensor EVM settles the payouts. The protocol is open source, and running a miner or a validator is permissionless.
 
@@ -32,7 +32,7 @@ New UR is emitted by Bittensor's coinbase each cycle and split three ways:
 | Miners | 41% | Miners through operator pools and top-level miner slots |
 | Validators | 41% | Independent validators, receiving native dividends for accurate scoring |
 
-Operators fund the network by depositing UR sized to their real usage, at a published reference rate. A deposit is a revenue-backed signal of real demand: the contract moves every deposit into the subnet reserve. An operator's cumulative deposits lower the rate it must post, so committed operators can onboard with less up-front capital.
+Operators fund the network by depositing UR sized to their real usage, at a published reference rate. A deposit is a revenue-backed signal of real demand: the contract moves every deposit into the subnet reserve. An operator's cumulative deposits lower the rate it must post, so committed operators can onboard with less up-front capital. During the initial period the published rate is 0, no deposits are required, and every operator pool is given equal demand, so measured quality alone steers the pool channel.
 
 Miners are paid from emission, not from deposits. Because deposits accumulate in the reserve rather than being recycled into payouts, real usage adds demand for the token, while emission follows a fixed schedule with halvings.
 
