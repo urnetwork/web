@@ -219,7 +219,7 @@ operators: {
 
     miners: {
         eyebrow: 'Miners',
-        title:   'The miners who carry the traffic.',
+        title:   'The miners who convert IP subnets into the dual internet.',
         intro:   'Miners compete to make the most IPv4 /29 and IPv6 /48 subnets available on the network, each kept routable at any moment for ingress or egress traffic. In other words, miners convert the public internet into an anonymous private network for everyone to use. Every miner carries both ingress and egress traffic, runs a safe-by-default security model, routes only encrypted traffic, and is paid from subnet emission for the routable capacity it contributes. The fleets with the broadest distinct, routable coverage are promoted to top-level miners and earn more, all in user space, on hardware you already own.',
         both:    'A miner is both an extender and a provider: every miner takes the ingress and the egress role at once. It configures itself automatically for the system it runs on.',
         goal:    'The goal is a dual shadow network: for every public IPv4 and IPv6 subnet, a private, anonymous counterpart is also available. UR is building that private anonymous network.',

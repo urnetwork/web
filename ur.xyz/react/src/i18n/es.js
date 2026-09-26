@@ -201,7 +201,7 @@ operators: {
 
     miners: {
         eyebrow: 'Mineros',
-        title:   'Los mineros que transportan el tráfico.',
+        title:   'Los mineros que convierten las subredes IP en la internet dual.',
         intro:   'Los mineros compiten por poner a disposición de la red la mayor cantidad de subredes IPv4 /29 e IPv6 /48, cada una enrutable en todo momento para el tráfico de entrada o de salida. En otras palabras, los mineros convierten la internet pública en una red privada y anónima que cualquiera puede usar. Cada minero transporta tanto el tráfico de entrada como el de salida, ejecuta un modelo de seguridad seguro por defecto, solo enruta tráfico cifrado y recibe pago de la emisión de la subred por la capacidad enrutable que aporta. Las flotas con la mayor cobertura de subredes distintas y enrutables son promovidas a mineros de nivel superior y ganan más: todo en espacio de usuario, en hardware que ya posees.',
         both:    'Un minero es a la vez extensor y proveedor: cada minero asume al mismo tiempo el rol de entrada y el de salida. Se configura automáticamente para el sistema en el que se ejecuta.',
         goal:    'El objetivo es una red sombra dual: por cada subred pública IPv4 e IPv6 existe también una contraparte privada y anónima. UR está construyendo esa red privada anónima.',
