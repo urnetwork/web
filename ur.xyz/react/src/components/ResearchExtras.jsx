@@ -18,11 +18,12 @@ import { openResearchArea, researchAreaId } from './research-areas.js';
  */
 
 // The current competition runs on Apex (Bittensor SN1): six weekly rounds
-// from the start date. The card's art, its title and its button link to the
-// competition page.
+// from the start date. Until the competition page is finalized `url` is null
+// and the card's art, title and button are not links; until a start date is
+// fixed `startsAt` is null and the card says it is launching soon.
 export const APEX_COMPETITION = Object.freeze({
-    url: 'https://apex.macrocosmos.ai/competitions/14',
-    startsAt: '2026-09-28',
+    url: null,
+    startsAt: null,
     rounds: 6,
     roundDays: 7,
 });
@@ -36,6 +37,8 @@ const AUDIT_REPORT_URLS = { 'masa-l2-2025': MASA_2025_AUDIT_URL };
 const DAY_MS = 86_400_000;
 /** 'upcoming' | 'live' | 'ended' at time `now` (ms): live from the start date (UTC) for rounds × roundDays days. */
 export function competitionPhase(now, { startsAt, rounds, roundDays } = APEX_COMPETITION) {
+    // no fixed start date yet: the competition is upcoming whatever the clock says
+    if (!startsAt) return 'upcoming';
     const start = Date.parse(`${startsAt}T00:00:00Z`);
     const end = start + rounds * roundDays * DAY_MS;
     if (now < start) return 'upcoming';
@@ -91,10 +94,13 @@ export function ResearchCompetition({ t, copy, initialPhase }) {
     const [phase, setPhase] = useState(() => initialPhase || competitionPhase(Date.now()));
     useEffect(() => { setPhase(competitionPhase(Date.now())); }, []);
     const status = { live: c.statusLive, upcoming: c.statusUpcoming, ended: c.statusEnded }[phase];
-    const statusText = status ? status.replace('{date}', APEX_COMPETITION.startsAt) : (c.statusLive || 'Live');
+    const statusText = status ? status.replace('{date}', APEX_COMPETITION.startsAt || '') : (c.statusLive || 'Live');
+    // the art, the title and the button link to the competition page once it exists
+    const Hero = APEX_COMPETITION_URL ? 'a' : 'div';
+    const heroProps = APEX_COMPETITION_URL ? { href: APEX_COMPETITION_URL, ...external } : {};
     return (
         <div className="research-competition">
-            <a className="research-competition-hero" href={APEX_COMPETITION_URL} {...external}>
+            <Hero className="research-competition-hero" {...heroProps}>
                 <picture>
                     <source
                         type="image/webp"
@@ -110,7 +116,7 @@ export function ResearchCompetition({ t, copy, initialPhase }) {
                         fetchpriority="high"
                     />
                 </picture>
-            </a>
+            </Hero>
             <div className="research-competition-row">
                 <div className="research-competition-copy">
                     <div className="research-competition-head">
@@ -124,12 +130,16 @@ export function ResearchCompetition({ t, copy, initialPhase }) {
                     </div>
                     {c.title && (
                         <h2 className="research-competition-title">
-                            <a href={APEX_COMPETITION_URL} {...external}>{c.title}</a>
+                            {APEX_COMPETITION_URL
+                                ? <a href={APEX_COMPETITION_URL} {...external}>{c.title}</a>
+                                : c.title}
                         </h2>
                     )}
                     <p className="research-competition-body">{competitionBody(c.body, c.codeLabel)}</p>
                 </div>
-                <a className="research-competition-cta" href={APEX_COMPETITION_URL} {...external}>{c.cta}</a>
+                {APEX_COMPETITION_URL
+                    ? <a className="research-competition-cta" href={APEX_COMPETITION_URL} {...external}>{c.cta}</a>
+                    : <span className="research-competition-cta research-competition-cta--pending" aria-disabled="true">{c.cta}</span>}
             </div>
         </div>
     );

@@ -327,10 +327,10 @@ operators: {
         competition: {
             title: 'Sim-Latenz-Algo-Wettbewerb',
             eyebrow: 'Unterstützt von Apex (SN1)',
-            body: 'Optimiere das UR-Protokoll. Einreichungen werden gegen einen Branch {code} bewertet, und der Gewinner wird zur nächsten Baseline und erhält SN1α. Sechs Runden zu je einer Woche, Start am 2026-09-28. Los geht’s!',
+            body: 'Optimiere das UR-Protokoll. Einreichungen werden gegen einen Branch {code} bewertet, und der Gewinner wird zur nächsten Baseline und erhält SN1α. Sechs Runden zu je einer Woche, Start in Kürze. Los geht’s!',
             codeLabel: 'des Codes',
             cta: 'Am Wettbewerb teilnehmen',
-            statusUpcoming: 'Beginnt am {date}',
+            statusUpcoming: 'Startet bald',
             statusLive: 'Läuft',
             statusEnded: 'Beendet',
             imageAlt: 'Zwei Knoten, verbunden über Routen durch eine Barriere: der Apex-Sim-Latenz-Wettbewerb'

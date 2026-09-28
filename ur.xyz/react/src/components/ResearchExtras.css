@@ -187,9 +187,15 @@
     transition: box-shadow 0.2s ease, transform 0.15s ease;
 }
 
-.research-competition:hover .research-competition-cta {
+.research-competition:hover a.research-competition-cta {
     box-shadow: 0 0 30px rgba(240, 195, 80, 0.55);
     transform: translateY(-1px);
+}
+
+/* until the competition page exists the button is a label, not a link */
+.research-competition-cta--pending {
+    cursor: default;
+    opacity: 0.85;
 }
 
 .section-body .research-competition-title + .research-competition-body {
