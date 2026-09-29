@@ -146,7 +146,7 @@ const tokenholderLetter = {
     kind: 'Announcement',
     title: 'September Letter to Tokenholders',
     summary:
-        'Brien and Jack outline UR\'s mainnet launch, the next phase of SN25, Project Meridien, and the mission to make privacy an expected property of the internet.',
+        'Brien and Jack outline UR\'s mainnet launch, the next phase of SN25, Project Meridian, and the mission to make privacy an expected property of the internet.',
     date: '25 September 2026',
     dateIso: '2026-09-25',
     readTime: '6 min read',

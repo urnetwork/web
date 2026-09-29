@@ -89,16 +89,16 @@ export default function TokenholderLetter() {
                         <p>Which brings me back to Bittensor: expanding the network’s geographic reach and attracting dependable bandwidth providers are essential to serving users under pressure. As we extend UR into private identity and agent communications, we will carry forward the same standard: infrastructure earns trust by remaining useful and true to privacy value when people need it the most.</p>
                     </section>
 
-                    <section className="announcement-document-section" aria-labelledby="project-meridien">
-                        <h3 id="project-meridien">Project Meridien</h3>
+                    <section className="announcement-document-section" aria-labelledby="project-meridian">
+                        <h3 id="project-meridian">Project Meridian</h3>
 
-                        <p>Following the mainnet launch, our core product development focus will shift to our second Network Operator, <em>Project Meridien</em>, extending UR’s infrastructure to serve AI agents and the businesses deploying them. Our thesis is that, as agents take on more work, they will need secure and reliable ways to communicate, exchange code and connect to services. We intend to build products that meet those needs while bringing additional demand to the SN25.</p>
+                        <p>Following the mainnet launch, our core product development focus will shift to our second Network Operator, Project Meridian, extending UR’s infrastructure to serve AI agents and the businesses deploying them. Our thesis is that, as agents take on more work, they will need secure and reliable ways to communicate, exchange code and connect to services. We intend to build products that meet those needs while bringing additional demand to the SN25.</p>
                     </section>
                 </article>
 
                 <article className="announcement-paper announcement-paper--tokenholders announcement-paper--continued" aria-label="September Letter to Tokenholders, page 2">
-                    <section className="announcement-document-section" aria-label="Project Meridien continued">
-                        <p>Our first product under Meridien will be <strong>agent email hosted on the user’s private network</strong>; the proposed design would route messages sent to an address such as <code>agent@mynetwork.ur.network</code> directly to a mail server on that network. Users could operate their agents’ mailboxes on infrastructure they control, creating alternatives to centralized hosted email providers such as Gmail or Proton. We think that over time, agent identity persistence will be driven by email architecture, whereby they can communicate with other agents, humans and services via an email framework. If a business deploys agents for recurring operational work, such as procurement, scheduling or customer enquiries, the objective is to workflows easier, core features would need to be:</p>
+                    <section className="announcement-document-section" aria-label="Project Meridian continued">
+                        <p>Our first product under Meridian will be <strong>agent email hosted on the user’s private network</strong>; the proposed design would route messages sent to an address such as <code>agent@mynetwork.ur.network</code> directly to a mail server on that network. Users could operate their agents’ mailboxes on infrastructure they control, creating alternatives to centralized hosted email providers such as Gmail or Proton. We think that over time, agent identity persistence will be driven by email architecture, whereby they can communicate with other agents, humans and services via an email framework. If a business deploys agents for recurring operational work, such as procurement, scheduling or customer enquiries, the objective is to workflows easier, core features would need to be:</p>
 
                         <ol>
                             <li>Let AI agents handle routine business correspondence</li>
@@ -106,7 +106,7 @@ export default function TokenholderLetter() {
                             <li>Keeping sensitive stored messages and mailbox within infrastructure under your control</li>
                         </ol>
 
-                        <p>Our broader vision for <em>Meridian</em> is to help developers deploy AI agents faster and spend less time managing infrastructure. Beyond agent identity i.e. email, we plan to add encrypted code storage and private networking so agents can communicate, access code and connect to internal tools through one integrated service. A lightweight companion process, designed to run without administrator privileges, would make Meridian easier to add to existing deployments. For developers, the intended benefits are fewer integrations to build, less networking to configure and lower ongoing maintenance costs, while retaining control over their data and agent access. In this manner, we think that by accelerating the proliferation of agent capability, we can embed our world class proxy network for their agents too.</p>
+                        <p>Our broader vision for Meridian is to help developers deploy AI agents faster and spend less time managing infrastructure. Beyond agent identity i.e. email, we plan to add encrypted code storage and private networking so agents can communicate, access code and connect to internal tools through one integrated service. A lightweight companion process, designed to run without administrator privileges, would make Meridian easier to add to existing deployments. For developers, the intended benefits are fewer integrations to build, less networking to configure and lower ongoing maintenance costs, while retaining control over their data and agent access. In this manner, we think that by accelerating the proliferation of agent capability, we can embed our world class proxy network for their agents too.</p>
                     </section>
 
                     <section className="announcement-document-section" aria-labelledby="mycelium-private-internet">
