@@ -1,6 +1,9 @@
 .PHONY: build build-main build-canary generate-legal generate-agent-assets page-dates letter-pdf deck-slides sync-public install-playwright-browser gates clean
 
 BUILD_DIR := build
+# Only build/all/run.sh's final service build disables checks, after its early
+# checked build. Standalone builds remain checked by default.
+WEB_BUILD_CHECKS ?= 1
 
 build: build-main build-canary
 
@@ -76,7 +79,9 @@ build-main: generate-legal generate-agent-assets sync-public
 	npm ci
 	UR_ENV=main npx astro build
 	node scripts/modulepreload.mjs build/main
+ifneq ($(WEB_BUILD_CHECKS),0)
 	$(MAKE) gates UR_ENV_DIR=main
+endif
 	node scripts/precompress.mjs build/main
 
 build-canary: generate-legal generate-agent-assets sync-public
@@ -84,7 +89,9 @@ build-canary: generate-legal generate-agent-assets sync-public
 	npm ci
 	UR_ENV=canary npx astro build
 	node scripts/modulepreload.mjs build/canary
+ifneq ($(WEB_BUILD_CHECKS),0)
 	$(MAKE) gates UR_ENV_DIR=canary
+endif
 	node scripts/precompress.mjs build/canary
 
 clean:

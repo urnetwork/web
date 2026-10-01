@@ -4,8 +4,9 @@ MMM_HOME := ${WARP_HOME}/mmm
 BRINGYOUR_SITE_DIR := ${MMM_HOME}/bringyour.com
 UR_NETWORK_SITE_DIR := ${MMM_HOME}/ur.network
 UR_IO_SITE_DIR := ${MMM_HOME}/ur.io
+WEB_BUILD_CHECKS ?= 1
 
-.PHONY: all init clean build build_external_sites check_external_sites build-preview warp_build warp_build_image
+.PHONY: all init clean build check build_external_sites check_external_sites build-preview warp_build warp_build_image
 
 all: init clean build
 
@@ -60,17 +61,25 @@ build: build_external_sites
 	env GOOS=darwin GOARCH=amd64 go build -ldflags "-X main.Version=${WARP_VERSION}" -o build/darwin/amd64/
 	$(MAKE) build-preview
 
+# Release preflight always runs the full checks, even when the caller has a
+# checks-disabled environment. No service binaries or images are published.
+check:
+	(. "${NVM_DIR}/nvm.sh" && nvm install ${NODE_VERSION})
+	$(MAKE) -C "${UR_IO_SITE_DIR}/astro" generate-locales
+	$(MAKE) build-preview WEB_BUILD_CHECKS=1
+
 build-preview:
+	rm -rf build/preview.ur.xyz build/preview.ur.io
 	mkdir -p build
 	(. ${NVM_DIR}/nvm.sh && \
 		nvm use ${NODE_VERSION} && \
 		cd ${BRINGYOUR_HOME}/web/ur.xyz/astro && \
-		make clean build-main && \
+		$(MAKE) clean build-main WEB_BUILD_CHECKS=$(WEB_BUILD_CHECKS) && \
 		cp -r build/main ${BRINGYOUR_HOME}/web/web/build/preview.ur.xyz)
 	(. ${NVM_DIR}/nvm.sh && \
 		nvm use ${NODE_VERSION} && \
 		cd ${UR_IO_SITE_DIR}/astro && \
-		make clean build-main && \
+		$(MAKE) clean build-main WEB_BUILD_CHECKS=$(WEB_BUILD_CHECKS) && \
 		cp -r build/main ${BRINGYOUR_HOME}/web/web/build/preview.ur.io)
 	
 
