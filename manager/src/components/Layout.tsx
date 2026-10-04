@@ -15,6 +15,7 @@ import { useAutoLogin } from "../hooks/useAutoLogin";
 import BalanceCodesSection from "./BalanceCodesSection";
 import ApiKeysSection from "./ApiKeysSection";
 import LoginExtension from "../pages/LoginExtension";
+import ConfirmModal from "./ConfirmModal";
 
 const EXTENSION_RETURN_KEY = 'extension_return_to';
 
@@ -57,7 +58,8 @@ const Layout: React.FC = () => {
 		}
 	}, [isAuthenticated]); // eslint-disable-line react-hooks/exhaustive-deps
 
-	useAutoLogin();
+	// a sign-in link (?auth_code=…) for another network waits for an answer
+	const { pendingSwitch, confirmSwitch, cancelSwitch } = useAutoLogin();
 
 	// Get current tab from URL
 	const getCurrentTab = (): TabType => {
@@ -311,6 +313,19 @@ const Layout: React.FC = () => {
 					</p>
 				</div>
 			</footer>
+			<ConfirmModal
+				isOpen={pendingSwitch !== null}
+				onClose={cancelSwitch}
+				onConfirm={confirmSwitch}
+				title="Switch accounts?"
+			>
+				<p className="text-gray-300 break-words">
+					This link signs in to{" "}
+					<span className="font-medium text-gray-100">{pendingSwitch?.linkNetwork}</span>.
+					You are signed in to{" "}
+					<span className="font-medium text-gray-100">{pendingSwitch?.currentNetwork}</span>.
+				</p>
+			</ConfirmModal>
 		</div>
 	);
 };
