@@ -1,55 +1,113 @@
-import { useEffect, useRef } from "react";
-import { useSearchParams, useNavigate, useLocation } from "react-router-dom";
+import { useEffect, useRef, useState } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
+import toast from "react-hot-toast";
 import { useAuth } from "./useAuth";
+import {
+	authCodeAccountDecision,
+	parseJwtClaims,
+	takeAuthCode,
+} from "../services/authCodeUrl";
 
+export interface PendingAccountSwitch {
+	currentNetwork: string;
+	linkNetwork: string;
+}
+
+const AUTH_CODE_LINK_INVALID =
+	"This sign-in link could not be used. It may have expired or already been used.";
+
+// ?auth_code=<code> (ur.io's Operator Client UI; see services/authCodeUrl).
+// The code leaves the url first, whether or not it is needed. Then it signs in
+// a signed-out manager, changes nothing for the network already signed in, and
+// waits for an answer (pendingSwitch) when another network is signed in.
 export function useAutoLogin() {
-	const [searchParams] = useSearchParams();
 	const navigate = useNavigate();
 	const location = useLocation();
-	const authCode = searchParams.get("auth_code");
-	const autoAuthAttemptedRef = useRef(false);
-	const { login, isAuthenticated, isLoading, setIsAutoLoginAttempted } =
-		useAuth();
+	const {
+		token,
+		exchangeAuthCode,
+		commitToken,
+		isLoading,
+		setIsAutoLoginAttempted,
+	} = useAuth();
+	const handledRef = useRef(false);
+	const linkedJwtRef = useRef<string | null>(null);
+	const [pendingSwitch, setPendingSwitch] =
+		useState<PendingAccountSwitch | null>(null);
 
 	useEffect(() => {
-		const loginHandler = async () => {
-			if (!authCode) {
-				return;
-			}
-
-			setIsAutoLoginAttempted(true);
-			console.info("Attempting auto login");
-			const response = await login(authCode);
-
-			if (response?.by_jwt && !response.error) {
-				console.info("Auto login successful");
-				navigate(location.pathname, { replace: true });
-			} else {
-				console.error(
-					"Auto login failed: ",
-					response?.error?.message || "Invalid response received",
-				);
-
-				setIsAutoLoginAttempted(false);
-			}
-		};
-
-		if (!autoAuthAttemptedRef.current && !isAuthenticated && authCode) {
-			autoAuthAttemptedRef.current = true;
-			loginHandler();
+		const { authCode, search } = takeAuthCode(location.search);
+		if (search === null) {
+			return;
 		}
 
-		if (isAuthenticated && authCode) {
-			navigate(location.pathname, { replace: true });
+		navigate(
+			{ pathname: location.pathname, search, hash: location.hash },
+			{ replace: true },
+		);
+
+		if (!authCode || handledRef.current) {
+			return;
 		}
+		handledRef.current = true;
+
+		const current = parseJwtClaims(token);
+		setIsAutoLoginAttempted(true);
+		console.info("Attempting auto login");
+
+		exchangeAuthCode(authCode).then((response) => {
+			const jwt = response.error ? null : (response.by_jwt ?? null);
+			const linked = parseJwtClaims(jwt);
+
+			switch (authCodeAccountDecision(current, linked)) {
+				case "sign-in":
+					if (jwt) {
+						console.info("Auto login successful");
+						commitToken(jwt, "Login successful");
+					}
+					return;
+				case "same-account":
+					setIsAutoLoginAttempted(false);
+					return;
+				case "ask-to-switch":
+					linkedJwtRef.current = jwt;
+					setPendingSwitch({
+						currentNetwork: current?.network_name ?? "",
+						linkNetwork: linked?.network_name ?? "",
+					});
+					setIsAutoLoginAttempted(false);
+					return;
+				default:
+					console.error(
+						"Auto login failed: ",
+						response.error?.message || "Invalid response received",
+					);
+					toast.error(AUTH_CODE_LINK_INVALID);
+					setIsAutoLoginAttempted(false);
+			}
+		});
 	}, [
-		authCode,
-		navigate,
 		location,
-		isAuthenticated,
-		login,
+		navigate,
+		token,
+		exchangeAuthCode,
+		commitToken,
 		setIsAutoLoginAttempted,
 	]);
 
-	return { inProgress: isLoading };
+	const confirmSwitch = () => {
+		const jwt = linkedJwtRef.current;
+		linkedJwtRef.current = null;
+		setPendingSwitch(null);
+		if (jwt) {
+			commitToken(jwt, "Switched accounts");
+		}
+	};
+
+	const cancelSwitch = () => {
+		linkedJwtRef.current = null;
+		setPendingSwitch(null);
+	};
+
+	return { inProgress: isLoading, pendingSwitch, confirmSwitch, cancelSwitch };
 }

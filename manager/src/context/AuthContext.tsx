@@ -17,6 +17,10 @@ interface AuthContextType {
 	setIsAutoLoginAttempted: (value: boolean) => void;
 	setToken: (token: string) => void;
 	login: (code: string) => Promise<AuthResponse | null>;
+	/** POST /auth/code-login without signing in: the caller decides */
+	exchangeAuthCode: (code: string) => Promise<AuthResponse>;
+	/** sign in with a jwt, as a successful login does */
+	commitToken: (token: string, message: string) => void;
 	loginWithPassword: (
 		username: string,
 		password: string,
@@ -33,6 +37,8 @@ export const AuthContext = createContext<AuthContextType>({
 	setToken: () => {},
 	logout: () => {},
 	login: async () => null,
+	exchangeAuthCode: async () => ({}),
+	commitToken: () => {},
 	loginWithPassword: async () => null,
 	loginWithWallet: async () => null,
 	isLoading: false,
@@ -53,10 +59,28 @@ export const AuthContextProvider: FC<PropsWithChildren> = ({ children }) => {
 	const [isTransitioning, setIsTransitioning] = useState(false);
 	const [isLoggingOut, setIsLoggingOut] = useState(false);
 
-	const login = async (code: string): Promise<AuthResponse | null> => {
+	const exchangeAuthCode = async (code: string): Promise<AuthResponse> => {
 		setIsLoading(true);
-		const response = await apiLogin(code);
-		setIsLoading(false);
+		try {
+			return await apiLogin(code);
+		} finally {
+			setIsLoading(false);
+		}
+	};
+
+	const commitToken = (jwt: string, message: string) => {
+		setIsTransitioning(true);
+		toast.success(message);
+
+		setTimeout(() => {
+			setToken(jwt);
+			localStorage.setItem("byToken", jwt);
+			setIsTransitioning(false);
+		}, 900);
+	};
+
+	const login = async (code: string): Promise<AuthResponse | null> => {
+		const response = await exchangeAuthCode(code);
 
 		if (response.error || !response.by_jwt) {
 			toast.error(
@@ -65,14 +89,7 @@ export const AuthContextProvider: FC<PropsWithChildren> = ({ children }) => {
 			return null;
 		}
 
-		setIsTransitioning(true);
-		toast.success("Login successful");
-
-		setTimeout(() => {
-			setToken(response.by_jwt);
-			localStorage.setItem("byToken", response.by_jwt);
-			setIsTransitioning(false);
-		}, 900);
+		commitToken(response.by_jwt, "Login successful");
 
 		return response;
 	};
@@ -155,6 +172,8 @@ export const AuthContextProvider: FC<PropsWithChildren> = ({ children }) => {
 				token,
 				setToken,
 				login,
+				exchangeAuthCode,
+				commitToken,
 				loginWithPassword,
 				loginWithWallet,
 				isLoading,
