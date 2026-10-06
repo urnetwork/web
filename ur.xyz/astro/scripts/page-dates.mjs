@@ -203,7 +203,7 @@ function docFiles() {
     return DOC_FILES;
 }
 
-const INVESTOR_DOCS = { deck: 'deck', 'our-letter-to-bittensor': 'letter', 'conviction-lock': 'convictionAnnouncement' };
+const INVESTOR_DOCS = { deck: 'deck', 'our-letter-to-bittensor': 'letter', 'conviction-lock': 'convictionAnnouncement', 'letter-to-tokenholders-september-2026': 'tokenholderLetter', 'funding-network-capacity': 'capacityLetter' };
 
 /**
  * The sources a page is built from, for dating a URL the record has not seen.

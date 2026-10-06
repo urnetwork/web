@@ -4,6 +4,7 @@ import DeckViewer from './investors/DeckViewer';
 import InvestorAnnouncement from './investors/InvestorAnnouncement';
 import InvestorLetter from './investors/InvestorLetter';
 import TokenholderLetter from './investors/TokenholderLetter';
+import NetworkCapacityLetter from './investors/NetworkCapacityLetter';
 
 /**
  * The Investor Centre and its documents, one component per slug.
@@ -19,6 +20,7 @@ const DOCUMENTS = new Map([
     ['conviction-lock', InvestorAnnouncement],
     ['our-letter-to-bittensor', InvestorLetter],
     ['letter-to-tokenholders-september-2026', TokenholderLetter],
+    ['funding-network-capacity', NetworkCapacityLetter],
     // The letter's former address: the Astro page redirects there, the SPA
     // simply renders the letter.
     ['august-investment-letter', InvestorLetter],

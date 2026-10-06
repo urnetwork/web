@@ -37,7 +37,7 @@ const SITE = 'https://ur.xyz';
 // not name follows, alphabetically, so a new page is never left out.
 const PAGE_ORDER = [
     '/', '/operators', '/miners', '/validators', '/research', '/build', '/reserve',
-    '/investors', '/investors/letter-to-tokenholders-september-2026', '/investors/our-letter-to-bittensor', '/investors/conviction-lock', '/investors/deck',
+    '/investors', '/investors/funding-network-capacity', '/investors/letter-to-tokenholders-september-2026', '/investors/our-letter-to-bittensor', '/investors/conviction-lock', '/investors/deck',
     '/about',
 ];
 const LEGAL = ['/terms', '/privacy', '/vdp'];
@@ -139,7 +139,7 @@ export function buildLlms(distDir) {
     const en = [...pages.entries()].filter(([, p]) => p.lang === 'en');
     const rank = (u) => (PAGE_ORDER.includes(u) ? PAGE_ORDER.indexOf(u) : PAGE_ORDER.length);
     const pdfFor = Object.fromEntries(
-        ['deck', 'letter', 'convictionAnnouncement']
+        ['deck', 'letter', 'convictionAnnouncement', 'tokenholderLetter', 'capacityLetter']
             .map((key) => investorCentre[key])
             .filter((d) => d?.href && d?.pdfHref)
             .map((d) => [d.href, d.pdfHref]),
@@ -203,10 +203,13 @@ ${optionalLines.join('\n')}
         .map((slug) => docs.find((d) => d.slug === slug)?.body.trim())
         .filter(Boolean);
 
-    const { letter, convictionAnnouncement: announcement, tokenholderLetter, deck } = investorCentre;
+    const { letter, convictionAnnouncement: announcement, tokenholderLetter, capacityLetter, deck } = investorCentre;
     const investor = [];
-    // newest first: the September letter to tokenholders, then the letter to
-    // Bittensor, the conviction announcement and the deck's outline
+    const capacityPage = pages.get(capacityLetter.href);
+    if (capacityPage) {
+        const publication = capacityLetter.dateIso ? `Published ${capacityLetter.date}` : 'Draft; publication date to confirm';
+        investor.push(`# ${capacityLetter.headline}\n\n${publication} at ${SITE}${capacityLetter.href} (PDF: ${SITE}${capacityLetter.pdfHref})\n\n${proseOf(capacityPage.html, 'announcement-stage')}`);
+    }
     const tokenholderPage = pages.get(tokenholderLetter.href);
     if (tokenholderPage) {
         // the letter runs over two .announcement-paper sheets; the stage holds both

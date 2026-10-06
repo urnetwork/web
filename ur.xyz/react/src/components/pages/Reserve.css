@@ -157,6 +157,7 @@
     margin-top: 44px;
     padding-top: 28px;
 }
+.reserve-proof { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 .reserve-stat {
     display: flex;
     flex-direction: column;

@@ -17,13 +17,12 @@ import ReservePage from '@react/components/pages/Reserve.jsx';
 import en from '@react/i18n/en.js';
 import { reserve } from '@react/data/reserve.js';
 import { FINNEY_RPC } from '@react/lib/subtensor.js';
-import { longDate } from '@react/components/pages/reserve/format.js';
 
 import '@react/components/Nav.css';
 
 const title = `${reserve.name} | UR`;
 // the reserve is the miner emissions momentum leaves: miner emissions × (1 − momentum)
-const description = `From ${longDate(reserve.launch)} the ${reserve.name} receives the SN25 miner emissions momentum leaves and pays providers for verified network capacity. Read live from Bittensor.`;
+const description = `The ${reserve.name} receives the SN25 miner emissions momentum leaves and pays providers for verified network capacity. Read live from Bittensor.`;
 ---
 <Base title={title} description={description} breadcrumbName={reserve.name} lang="en">
     {/* the first chain read happens on hydration; warm the connection */}

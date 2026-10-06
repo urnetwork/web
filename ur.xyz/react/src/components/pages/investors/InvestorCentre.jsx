@@ -25,7 +25,7 @@ const archiveItems = [...updates, ...materials.map(item => ({
     format: item.pdfHref ? 'PDF' : 'Web',
 }))]
     .filter((item, index, items) => items.findIndex(candidate => candidate.href === item.href) === index)
-    .sort((a, b) => (b.dateIso || '').localeCompare(a.dateIso || ''));
+    .sort((a, b) => Number(Boolean(b.draft)) - Number(Boolean(a.draft)) || (b.dateIso || '').localeCompare(a.dateIso || ''));
 const archiveKinds = [...new Set(archiveItems.map(item => item.kind))];
 
 // What the search box matches: the row's visible text, as the page's script

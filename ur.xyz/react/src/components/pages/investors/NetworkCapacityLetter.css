@@ -1,0 +1,24 @@
+.capacity-letter-diagram {
+    margin: 20px 0 0;
+    break-inside: avoid;
+}
+
+.capacity-letter-diagram img {
+    display: block;
+    width: 100%;
+    height: auto;
+}
+
+.capacity-letter-diagram figcaption { margin-top: 8px; font-size: 0.8rem; text-align: right; }
+
+@media (max-width: 760px) {
+    .announcement-paper--capacity p,
+    .announcement-paper--capacity .announcement-document-section li { font-size: 1rem; }
+}
+
+@media print {
+    .capacity-letter-diagram figcaption { display: none; }
+    .announcement-paper--capacity .announcement-document-section { break-inside: auto; }
+    .announcement-paper--capacity .announcement-document-section h3 { break-after: avoid; }
+    .announcement-paper--capacity li { break-inside: avoid; }
+}

@@ -66,6 +66,7 @@ install-playwright-browser:
 # the SPA _redirects catch-all and a missing letter PDF (SEO3.md §H2).
 gates: install-playwright-browser
 	node --test scripts/route-localization.test.mjs
+	node --test scripts/pdf-freshness.test.mjs
 	node --test ../react/tests/subtensor.test.mjs
 	node --test ../react/tests/reserve-momentum.test.mjs
 	node --test ../react/tests/code-marks.test.mjs

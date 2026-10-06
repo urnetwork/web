@@ -9,29 +9,11 @@
 //
 // Usage: node scripts/seo-audit.mjs [distDir]   (default: dist)
 
-import { execFileSync } from "node:child_process";
-import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { UNLISTED_DOC_SLUGS } from "../../react/src/lib/docs-shared.js";
-
-// The day a file's content last changed: its last commit when the working copy
-// matches it, otherwise (modified, untracked, or no git at all) its mtime,
-// because an uncommitted edit is newer than any commit.
-function contentDay(root, rel) {
-  const git = (args) =>
-    execFileSync("git", ["-C", root, ...args], { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] }).trim();
-  try {
-    if (!git(["status", "--porcelain", "--", rel])) {
-      const committed = git(["log", "-1", "--format=%cs", "--", rel]);
-      if (committed) return committed;
-    }
-  } catch {
-    /* not a git checkout: fall through to the file itself */
-  }
-  const m = statSync(path.join(root, rel)).mtime;
-  return `${m.getFullYear()}-${String(m.getMonth() + 1).padStart(2, "0")}-${String(m.getDate()).padStart(2, "0")}`;
-}
+import { contentDay, investorLetterMetadata } from "./pdf-freshness.mjs";
 
 const DIST = path.resolve(process.argv[2] || "dist");
 if (!existsSync(DIST)) {
@@ -409,7 +391,8 @@ for (const rel of ["llms.txt", "llms-full.txt", "litepaper.md"]) {
 // The letter PDF is reprinted manually (make letter-pdf). If the letter's copy
 // changed after the PDF last did, the download no longer matches the page —
 // fail until it is re-printed. The copy lives in the React component and the
-// investor data module (the Astro page is only the shell), and the generator
+// letter's metadata within the investor data module (the Astro page is only
+// the shell), and the generator
 // writes the PDF under react/public. Every path must exist: when the letter
 // moved into React this check compared a shell page and a mirrored copy of the
 // PDF, found no difference, and passed silently — a moved file now fails here.
@@ -425,7 +408,8 @@ for (const rel of ["llms.txt", "llms-full.txt", "litepaper.md"]) {
   if (missing.length) {
     err(`letter PDF check: ${missing.join(", ")} not found under ${ROOT} — update the paths in seo-audit.mjs`);
   } else {
-    const [newestRel, newestDate] = LETTER_SOURCES.map((rel) => [rel, contentDay(ROOT, rel)])
+    const [newestRel, newestDate] = LETTER_SOURCES.map((rel) => [rel, contentDay(ROOT, rel,
+      rel === "react/src/data/investors.js" ? investorLetterMetadata : undefined)])
       .sort((a, b) => (a[1] < b[1] ? 1 : a[1] > b[1] ? -1 : 0))[0];
     const pdfDate = contentDay(ROOT, LETTER_PDF);
     if (newestDate > pdfDate) {

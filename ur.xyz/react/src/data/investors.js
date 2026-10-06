@@ -146,7 +146,7 @@ const tokenholderLetter = {
     kind: 'Announcement',
     title: 'September Letter to Tokenholders',
     summary:
-        'Brien and Jack outline UR\'s mainnet launch, the next phase of SN25, Project Meridian, and the mission to make privacy an expected property of the internet.',
+        'Brien and Jack outline preparations for UR\'s mainnet launch, the next phase of SN25, Project Meridian, and the mission to make privacy an expected property of the internet.',
     date: '25 September 2026',
     dateIso: '2026-09-25',
     readTime: '6 min read',
@@ -155,9 +155,24 @@ const tokenholderLetter = {
     pdfHref: '/investors/ur-letter-to-tokenholders-september-2026.pdf',
 };
 
+// Local draft: sign-off awaits confirmation.
+const capacityLetter = {
+    kind: 'Letter',
+    title: "UR's Operator Ecosystem",
+    headline: 'Funding network capacity for UR’s operator ecosystem',
+    summary:
+        'Introducing the Network Capacity Reserve, which retains excess emissions to fund the capacity UR’s operators need.',
+    date: '6 October 2026',
+    dateIso: '2026-10-06',
+    readTime: '5 min read',
+    cta: 'Read the letter',
+    href: '/investors/funding-network-capacity',
+    pdfHref: '/investors/ur-network-capacity-letter.pdf',
+};
+
 export const investorCentre = {
-    updated: '25 September 2026',
-    updatedIso: '2026-09-25',
+    updated: '6 October 2026',
+    updatedIso: '2026-10-06',
     about: [
         'Our mission is to make privacy the default for every user by providing the encryption layer for the open internet. We are building a user-powered network and a privacy product suite designed to serve people, not surveil them.',
         'Anyone, anywhere should be able to access the internet freely and privately.',
@@ -167,13 +182,26 @@ export const investorCentre = {
     // a page that reads `featured` gets retitled and re-pointed the next time
     // the card changes, which is how the letter page briefly offered the deck
     // PDF as its own download.
-    featured: tokenholderLetter,
+    featured: capacityLetter,
     deck,
     letter,
     convictionAnnouncement,
     tokenholderLetter,
+    capacityLetter,
 
     updates: [
+        {
+            title: capacityLetter.title,
+            draft: !capacityLetter.dateIso,
+            date: capacityLetter.date,
+            dateIso: capacityLetter.dateIso,
+            kind: capacityLetter.kind,
+            format: 'Written',
+            readTime: capacityLetter.readTime,
+            href: capacityLetter.href,
+            pdfHref: capacityLetter.pdfHref,
+            external: false,
+        },
         {
             title: tokenholderLetter.title,
             date: tokenholderLetter.date,

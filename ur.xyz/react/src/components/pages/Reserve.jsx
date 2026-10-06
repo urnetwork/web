@@ -134,15 +134,11 @@ export default function ReservePage() {
                 ? { label: 'Net change per day', value: `−${whole(-observed.perDay)} α`, sub: `observed, last ${observed.days} days` }
                 : { label: 'Inflow per day', value: `${whole(observed?.perDay ?? perDay)} α`, sub: observed ? `observed, last ${observed.days} days` : 'miner emissions × (1 − momentum)' },
             { label: 'In the reserve', value: `${compact(snapshot.alpha)} α`, sub: `${snapshot.account.freeTao ? `+ ${snapshot.account.freeTao.toFixed(2)} TAO free · ` : ''}${priceTao ? `≈ ${compact(snapshot.alpha * priceTao)} TAO spot` : ''}` },
-            { label: 'Days live', value: today ? String(Math.max(1, daysBetween(reserve.launch, today) + 1)) : '—', sub: `since ${shortDate(reserve.launch)}` },
             custodyStat,
         ]
         : [
             { label: 'Inflow per day', value: `${whole(perDay)} α`, sub: `${whole(minerPerDay)} α × (1 − ${pct(momentum)} momentum)` },
             { label: `Reserve by ${shortDate(reserve.projectThrough)}`, value: snapshot && end ? pct(end.alpha / snapshot.pool.alphaOut) : end ? `${compact(end.alpha)} α` : '—', sub: snapshot ? `of the ${compact(snapshot.pool.alphaOut)} α outstanding today` : 'projected, no programs paid' },
-            daysToLaunch != null && daysToLaunch <= 0
-                ? { label: 'Launched', value: shortDate(reserve.launch), sub: 'awaiting the first receipt' }
-                : { label: 'Launches', value: shortDate(reserve.launch), sub: daysToLaunch != null ? `in ${daysToLaunch} day${daysToLaunch === 1 ? '' : 's'}` : '' },
             custodyStat,
         ];
 
@@ -171,7 +167,7 @@ export default function ReservePage() {
                 <h1>{reserve.name}</h1>
                 <div className="reserve-rule" aria-hidden="true" />
                 <p className="reserve-lede">
-                    From {shortDate(reserve.launch)}, SN25's miner emissions are split two ways: momentum, paid to providers now, and the reserve, which receives the rest. The reserve pays providers for verified network capacity: more coverage, more reliable routes, and capacity for new Network Operators.
+                    SN25's miner emissions are split two ways: momentum, paid to providers now, and the reserve, which receives the rest. The reserve pays providers for verified network capacity: more coverage, more reliable routes, and capacity for new Network Operators.
                 </p>
                 <div className="reserve-facts">
                     <div className="reserve-formula">
@@ -443,7 +439,7 @@ export default function ReservePage() {
                         {reserve.custody.signers.map((s) => (
                             <div key={s.label}>
                                 <dt>{s.label}</dt>
-                                <dd className={s.placeholder ? 'is-placeholder' : ''}>{s.placeholder ? `${s.name} · to be confirmed` : s.name}</dd>
+                                <dd className="is-placeholder">Redacted</dd>
                             </div>
                         ))}
                     </dl>

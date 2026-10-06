@@ -1,0 +1,40 @@
+---
+import Base from '../../layouts/Base.astro';
+import DisclaimerStatic from '../../components/DisclaimerStatic.astro';
+import FooterStatic from '../../components/FooterStatic.astro';
+import NavIsland from '../../islands/NavIsland.jsx';
+import InvestorsPage from '@react/components/pages/Investors.jsx';
+import en from '@react/i18n/en.js';
+import { investorCentre } from '@react/data/investors.js';
+import '@react/components/Nav.css';
+
+const letter = investorCentre.capacityLetter;
+const canonicalUrl = `https://ur.xyz${letter.href}`;
+const letterJsonLd = [{
+    '@type': 'Article',
+    '@id': `${canonicalUrl}#article`,
+    headline: letter.headline,
+    description: letter.summary,
+    ...(letter.dateIso ? { datePublished: letter.dateIso } : {}),
+    author: { '@id': 'https://ur.xyz/#org' },
+    publisher: { '@id': 'https://ur.xyz/#org' },
+    mainEntityOfPage: canonicalUrl,
+    url: canonicalUrl,
+    image: 'https://ur.xyz/og.png',
+    encoding: {
+        '@type': 'MediaObject',
+        encodingFormat: 'application/pdf',
+        contentUrl: `https://ur.xyz${letter.pdfHref}`,
+    },
+}];
+---
+<Base title={`${letter.headline} | UR`} description={letter.summary} lang="en" ogType="article" article={{ ...(letter.dateIso ? { publishedTime: letter.dateIso } : {}) }} jsonLd={letterJsonLd}>
+    <div class="app">
+        <DisclaimerStatic t={en} />
+        <NavIsland activeRoute="investors" lang="en" client:load />
+        <main class="section-page">
+            <InvestorsPage route={{ name: 'investors', slug: 'funding-network-capacity' }} />
+        </main>
+        <FooterStatic t={en} lang="en" />
+    </div>
+</Base>

@@ -2,7 +2,7 @@
  * The Network Capacity Reserve (/reserve): the on-chain account the page
  * reads, the launch policy it explains, and the editorial content around the
  * live figures. Like data/investors.js, this is the file to edit when the
- * reserve's facts change (a published multisig, named signers, an approved
+ * reserve's facts change (a published multisig, an approved
  * program); the page itself only renders what is here and what the chain says.
  *
  * The reserve is not a fixed share of the miner emissions. Momentum is the
@@ -45,10 +45,11 @@ export const reserve = {
         threshold: '2 of 3',
         thresholdNote: 'Multisig for spending, to be published',
         multisig: null, // the published spending multisig address, when there is one
+        // Signer identities are redacted in the public custody section.
         signers: [
-            { label: 'Signer 1', name: 'TBC', placeholder: true },
-            { label: 'Signer 2', name: 'TBC', placeholder: true },
-            { label: 'Signer 3', name: 'TBC', placeholder: true },
+            { label: 'Signer 1' },
+            { label: 'Signer 2' },
+            { label: 'Signer 3' },
         ],
     },
 
