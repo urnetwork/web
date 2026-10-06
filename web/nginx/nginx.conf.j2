@@ -700,6 +700,20 @@ http {
             add_header 'X-Robots-Tag' $ur_preview_robots always;
         }
 
+        # The network operator list: the tracked copy of sn/operators.yml that
+        # ur.xyz/scripts/sync-operators.mjs publishes. Miners and validators
+        # refresh it hourly by default and keep their last good copy; the short
+        # lifetime keeps a cached copy at most five minutes behind a change.
+        # Only the file itself is served: anything else here is a 404, never a
+        # redirect or a directory index.
+        location = /operators.yml {
+            types { application/yaml yml; }
+            autoindex off;
+            try_files $uri =404;
+            add_header 'Cache-Control' 'public, max-age=300';
+            add_header 'X-Robots-Tag' $ur_preview_robots always;
+        }
+
         location ^~ /_astro/ {
             add_header 'Cache-Control' 'public, max-age=31536000, immutable';
             add_header 'X-Robots-Tag' $ur_preview_robots always;
