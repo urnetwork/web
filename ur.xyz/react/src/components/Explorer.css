@@ -343,49 +343,16 @@
 }
 
 /* --- Code ---
- * Everything a reader types is set in one fixed-width face, JetBrains Mono,
- * at 15px on a 24px line on every screen. At 15px each character is exactly
- * 9px wide: indentation and aligned columns show, and on a standard-resolution
- * monitor every character lands on a whole pixel. Only two things are
- * coloured, and by what the reader does with them, not by grammar: a value to
- * replace and a comment (lib/code-marks.js). The reasoning and the measurements
- * are in the design repo: DESIGNSTYLE.md ("Code") and code-style.html.
- *
- * The face is JetBrains Mono Regular 2.304 (SIL Open Font License 1.1, served
- * at /JetBrainsMono-OFL.txt), cut down to the characters code can use: Latin,
- * punctuation, arrows, box drawing, and no ligatures. Its hinting is kept: macOS
- * ignores it, Windows draws small text with it. To rebuild it from the upstream
- * TTF with fonttools (tests/code-marks.test.mjs checks that every character of
- * code in docs/ is still in it):
- *
- *   pyftsubset JetBrainsMono-Regular.ttf --flavor=woff2 --layout-features=zero \
- *     --name-IDs='*' --name-languages='*' --name-legacy --notdef-outline \
- *     --unicodes=U+0020-007E,U+00A0-00FF,U+2010-2015,U+2018-201A,U+201C-201E,U+2022,U+2026,U+2032,U+2033,U+2190-2194,U+21AA,U+2248,U+2260,U+2264,U+2265,U+2500-257F,U+2580-259F,U+2713,U+2717,U+03B1,U+03C4
+ * Everything a reader types is set in one fixed-width face, JetBrains Mono
+ * (--code-font, declared in App.css), at 15px on a 24px line on every screen.
+ * At 15px each character is exactly 9px wide: indentation and aligned columns
+ * show, and on a standard-resolution monitor every character lands on a whole
+ * pixel. Only two things are coloured, and by what the reader does with them,
+ * not by grammar: a value to replace and a comment (lib/code-marks.js). The
+ * reasoning and the measurements are in the design repo: DESIGNSTYLE.md
+ * ("Code") and code-style.html.
  */
-@font-face {
-    font-family: 'JetBrains Mono';
-    src: url('/JetBrainsMono-Regular.woff2') format('woff2');
-    font-weight: 400;
-    font-style: normal;
-    font-display: swap;
-}
-
-/* What draws until the face arrives: the system's own fixed-width font, scaled
-   to JetBrains Mono's character width so that no line of prose re-wraps. */
-@font-face {
-    font-family: 'UR Mono Fallback';
-    src: local('Menlo'), local('DejaVu Sans Mono');
-    size-adjust: 99.67%;
-}
-
-@font-face {
-    font-family: 'UR Mono Fallback Win';
-    src: local('Consolas');
-    size-adjust: 109.13%;
-}
-
 .md {
-    --code-font: 'JetBrains Mono', 'UR Mono Fallback', 'UR Mono Fallback Win', ui-monospace, 'SFMono-Regular', 'Roboto Mono', 'Liberation Mono', monospace;
     --code-size: 15px;
     --code-line: 24px;
     /* the face's own line height: the rules of a directory tree join */

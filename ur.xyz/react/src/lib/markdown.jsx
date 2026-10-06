@@ -1,6 +1,7 @@
 import React, { Fragment, useEffect, useRef, useState } from 'react';
 
 import { codeLabel, isDiagram, lineShape, wrapInline, wrapLine } from './code-marks.js';
+import { copyText } from './clipboard.js';
 
 /**
  * Tiny markdown renderer for the docs corpus shipped at /docs.
@@ -295,16 +296,8 @@ function CodeBlock({ lang, source }) {
     useEffect(() => () => clearTimeout(reset.current), []);
 
     const copy = async () => {
-        let done = false;
-        try {
-            await navigator.clipboard.writeText(source);
-            done = true;
-        } catch {
-            // no clipboard access here: select the text and try the browser's own command
-            done = selectAndCopy(pre.current && pre.current.firstElementChild);
-        }
         // say "Copied" only when it was; otherwise the text is left selected to copy by hand
-        if (!done) return;
+        if (!(await copyText(source, pre.current && pre.current.firstElementChild))) return;
         setCopied(true);
         clearTimeout(reset.current);
         reset.current = setTimeout(() => setCopied(false), 2000);
@@ -377,21 +370,6 @@ function codeItems(items) {
         if (item.mark) return <span key={i} className={`md-code-${item.mark}`}>{item.text}</span>;
         return <Fragment key={i}>{item.text}</Fragment>;
     });
-}
-
-/** Select an element's text and copy it with the browser's own command. True when it was copied. */
-function selectAndCopy(el) {
-    if (!el || typeof window === 'undefined' || !window.getSelection) return false;
-    const range = document.createRange();
-    range.selectNodeContents(el);
-    const selection = window.getSelection();
-    selection.removeAllRanges();
-    selection.addRange(range);
-    try {
-        return document.execCommand('copy');
-    } catch {
-        return false;
-    }
 }
 
 /**
