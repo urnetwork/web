@@ -1,18 +1,9 @@
 /**
  * The pre-launch projection and its splice onto live history: the reserve's
  * balance if it receives what momentum leaves of the miner allocation every
- * day, at a steady momentum, and pays no program.
+ * day (momentum.js), at a steady momentum, and pays no program.
  */
 import { dayRange, isoDay } from './format';
-
-/**
- * α per day the reserve receives: the miner emissions momentum does not use,
- * minerPerDay × (1 − momentum). `burned` is any share the chain burns instead
- * (the owner-directed share before launch); it reaches neither.
- */
-export function inflowPerDay(minerPerDay, momentum, burned = 0) {
-    return minerPerDay * Math.max(0, 1 - momentum - burned);
-}
 
 /** Daily balances from `launch` to `through`, starting from `opening`. */
 export function projectBalance({ launch, through, perDay, opening = 0 }) {
