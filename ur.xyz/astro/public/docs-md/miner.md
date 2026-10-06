@@ -1,379 +1,348 @@
 
-# How to become a miner
+# How to run a miner
 
-A miner carries the traffic of the UR privacy network. The network is coordinated by **Bittensor SN25 (netuid 25)**: independent validators measure which miners actually route, and Bittensor's Yuma Consensus turns that measurement into the subnet's miner emission, paid in the subnet's α token. A miner joins a network operator, runs the `provider` binary (or one of the operator's apps), and is paid in one of two ways:
+A UR miner supplies an internet exit for a network operator. Validators measure whether it routes traffic, and Bittensor SN25 (netuid 25) distributes rewards in the subnet's native α token, branded $UR.
 
-- **Pool tier** (where everyone starts): your operator holds one on-chain slot for all of its miners. You need no slot, no stake and no registration. Each settlement epoch you claim your share of the pool directly from the settlement vault with a Merkle proof.
-- **Top-level miners** (the head): the roughly 200 fleets with the broadest distinct, routable exit coverage register their own hotkey on SN25, bind their miners to it, and are paid natively to that hotkey each tempo, with no operator in the payout path.
+Most miners join an operator's **pool**. You register a provider identity with that operator, without buying your own Bittensor UID or paying a subnet registration burn. The immutable settlement vault owns the operator's shared pool hotkey and pays your entitlement directly to your Bittensor coldkey. Larger fleets can register their own **head-tier** hotkey and earn native miner emission; [that path](#larger-fleets-and-the-head-tier) has additional requirements.
 
-This guide is written against the release-1.0 code in the `sn` repository. Where a step is not automated by the code, it says so. For the mechanism itself read the [litepaper](/docs/litepaper); for the other roles see [How to become a validator](/docs/validator) and [How to become a network operator](/docs/operator).
+This guide follows the current [`sn/miner` implementation](https://github.com/urfoundation/sn/tree/main/miner) and [`cli/miner` entry point](https://github.com/urfoundation/sn/tree/main/cli/miner). The executable is named `provider` in these examples. For the other roles, see [Run a validator](/docs/validator) and [Run a network operator](/docs/operator).
 
-## Who this is for
+## Before you start
 
-- Anyone with a computer, router or server that has its own public IPv4 or IPv6 address and can leave a small user-space process running.
-- Operators of larger fleets (many exits in many networks) who want to compete for a top-level miner slot.
+- Use a Linux or macOS host with a stable internet connection. Current provider identity storage supports these platforms; a build for another platform does not imply support for its durable registration path.
+- Create an account with the [network operator](/operators) you want to serve. Obtain its API URL, connect URL and current subnet deployment information, including the settlement vault and EVM RPC endpoints.
+- Use one stable public exit address per provider identity. If you run several exits, give each its own provider slot; see [Several exits on one host](#several-exits-on-one-host).
+- Have a Bittensor sr25519 coldkey with a prefix-42 SS58 address for receiving rewards. You can sign wallet consent on a separate device and keep the coldkey seed off the provider host.
+- To submit pool claims yourself, have a separate secp256k1 EVM relayer key funded with TAO for gas on the selected Subtensor EVM network. The relayer pays transaction fees; the reward destination remains the coldkey in the payout proof.
 
-You do not need to be a Bittensor validator, and you do not need to buy a UID to start.
+Obtain deployment details from the operator's published configuration. The mainnet plan uses EVM chain ID 964 and SN25; testnet uses different addresses, chain identity and timing. A successful build or login does not establish that an operator's subnet rewards are activated.
 
-## What you need
+## 1. Build the current provider
 
-- **Hardware.** The `provider` binary runs in user space with no special permissions on Linux (arm64, arm, amd64, 386, mips, mipsle, mips64, mips64le), macOS (arm64, amd64) and Windows (arm64, amd64). Memory is bounded by a soft limit you can set with `--max-memory`; with no limit the target is derived from the host's memory.
-- **One public exit address per miner.** Validators attribute a measured hop to exactly one miner by its exit IP. A miner whose `client_id` is currently seen behind more than one exit IP is not eligible to be measured until it is back to one (the one-provider, one-egress-IP rule of the `/verify` protocol). If you have several exits, run one provider per exit (see [Several exits on one host](#several-exits-on-one-host)).
-- **An account with a network operator.** Miners work with operators; the operator you join runs the API and connect servers your provider talks to. The operators listed on [/operators](/operators) publish their app and their public stats feed. The reference operator is ur.io (`https://api.bringyour.com`, `wss://connect.bringyour.com`), which the binary uses by default.
-- **A Bittensor coldkey** (an ss58 address, prefix 42) to receive pool payouts. Set it as your claim wallet (below). It never needs to hold TAO or α to receive claims.
-- **For claims and the head tier only:** an EVM key (hex-encoded 32-byte secp256k1) funded with TAO on the Subtensor EVM to pay gas for claim and binding transactions, and, for a fleet, a hotkey seed plus a coldkey seed whose account holds TAO for the registration burn (`provider fleet register` registers the hotkey on SN25 with them).
+Use the Go version required by `sn/go.mod` (currently Go 1.26.5) and compatible revisions of the sibling repositories referenced by its `replace` directives. The source workspace must have this shape:
 
-Your Bittensor keys never touch the provider process: the provider only stores the ss58 address of your coldkey.
+```text
+urnetwork/
+├── sn/                 # github.com/urfoundation/sn
+├── connect/            # includes connect/sctp
+├── sdk/
+├── server/
+├── warp/
+├── proxy/
+├── userwireguard/
+├── glog/
+├── goidenticons/
+└── gvisor/             # matching generated Go source selected by the release
+```
 
-## Step 1: install the provider binary
+The local replacements are part of the build: use the matched source checkouts or source bundle for the release you are deploying. A checkout of `sn` alone is insufficient. Obtain the matching generated `gvisor` source with that bundle; an arbitrary upstream revision is not a reproducible substitute.
 
-The miner is shipped under its historical name, `provider`, as the release asset `urnetwork-provider-<version>.tar.gz` on [github.com/urnetwork/build/releases](https://github.com/urnetwork/build/releases). The tarball contains one binary per platform at `<os>/<arch>/provider` (`provider.exe` on Windows).
+From the `sn` directory:
 
 ```bash
-VERSION=2026.9.24-1054966040   # pick the latest tag on the releases page (without the leading v)
-curl -fSsL -o urnetwork-provider.tar.gz \
-  "https://github.com/urnetwork/build/releases/download/v${VERSION}/urnetwork-provider-${VERSION}.tar.gz"
-tar -xzf urnetwork-provider.tar.gz
-mkdir -p ~/.local/bin
-install -m 755 linux/amd64/provider ~/.local/bin/provider   # choose your os/arch
+mkdir -p "$HOME/.local/bin"
+go build -o "$HOME/.local/bin/provider" ./cli/miner
+export PATH="$HOME/.local/bin:$PATH"
 provider --help
 ```
 
-On macOS the binaries are not signed; clear the quarantine flag once:
+You can also install an operator-supplied binary built from the same current source. Check its `--help` for `--allow-client-registration`, `wallet challenge`, `--provider-jwt` and `claim`; an older binary may have different registration and wallet behavior.
 
-```bash
-xattr -d com.apple.quarantine ~/.local/bin/provider
-```
+## 2. Select an operator and authenticate
 
-The same release also ships `urnetwork-snclaim-<version>.tar.gz` (the offline transaction submitter used below) and `urnetwork-validator-<version>.tar.gz`.
-
-**Installer scripts.** The `Provider_Install_Linux.sh` and `Provider_Install_Win32.ps1` scripts in the `urnetwork/connect` repository install the binary as `urnetwork` (Linux: `~/.local/share/urnetwork-provider/bin/urnetwork`, with a user systemd unit `urnetwork.service` that runs `urnetwork provide` and an `urnetwork-update.timer`; Windows: `%LOCALAPPDATA%\urnetwork\provider\urnetwork.exe` with an optional startup shortcut). Note that both scripts resolve the release from the `urnetwork/connect` GitHub releases, not from `urnetwork/build` where current builds are published, so prefer the manual download above until the scripts are updated.
-
-**Building from source.** The miner lives in the `sn` repository (`cli/miner`, module `github.com/urfoundation/sn`). Its `go.mod` resolves the sibling urnetwork repositories through `replace` directives, so a lone checkout does not build; check out the siblings named in `go.mod` beside `sn`, then:
-
-```bash
-cd sn/cli/miner
-go build -o provider .
-```
-
-## Step 2: join a network operator
-
-Create an account with the operator you want to mine for. On ur.io, log in at [ur.io/?auth](https://ur.io/?auth) and use **Copy an Auth Code** to get a time-limited auth code. Then authenticate the provider:
-
-```bash
-provider auth
-# Enter auth code: <paste>
-# Jwt written to ~/.urnetwork/jwt
-```
-
-Or log in with a username and password:
-
-```bash
-provider auth --user_auth=<user_auth>
-# Enter password:
-```
-
-`provider auth` asks before overwriting an existing `~/.urnetwork/jwt` unless you pass `-f`. Everything the provider keeps lives in `~/.urnetwork` (override the directory with the `URNETWORK_STATE_DIR` environment variable):
-
-| File | What it is |
-| --- | --- |
-| `jwt` | the network credential written by `provider auth` |
-| `.provider.jwt` | the renewable client credential minted on the first `provide` |
-| `.provider.key` | the 32-byte Ed25519 seed of your client identity (0600). It signs your head-tier binding; anyone holding it can impersonate your miner |
-| `.provider.cert` | the TLS certificate and key the provider serves with |
-| `.provider.extender.key` | the seed of your ingress (extender) identity |
-| `network.json` | the operator chosen with `provider choose_network` |
-| `proxy` | SOCKS5 exits added with `provider proxy add` |
-
-You can copy `~/.urnetwork` to another machine to move a miner, but never run two providers from the same copy at once.
-
-### Mining for a different operator
-
-The binary defaults to the ur.io operator. To mine for another operator, save its API and connect URLs; they must be `https://` and `wss://` (plaintext is accepted only for an explicit loopback host):
+The default endpoints are `https://api.bringyour.com` and `wss://connect.bringyour.com`. To select another operator, do this before the first registration:
 
 ```bash
 provider choose_network https://api.example.net wss://connect.example.net
 provider choose_network --show
-provider choose_network --reset
 ```
 
-A saved network replaces the defaults for every command. The `jwt` you already have was issued by the previous operator, so run `provider auth` against the new one before `provider provide`. A one-off `--api_url=<api_url>` / `--connect_url=<connect_url>` flag on a command overrides the saved network for that command only.
+Use the operator's actual URLs in place of the examples. A saved selection applies to later commands. API URLs require HTTPS and connect URLs require WSS, except for explicit loopback development hosts. `choose_network --reset` restores the defaults. Individual commands also accept `--api_url`; `provide` accepts `--connect_url`.
 
-## Step 3: provide
+Get an authentication code from the operator's app or account page, then run:
+
+```bash
+provider auth
+# Paste the authentication code at the prompt.
+```
+
+Alternatively, use your account login and enter the password at the prompt:
+
+```bash
+provider auth --user_auth='you@example.com'
+```
+
+Authentication writes the network bootstrap token to `~/.urnetwork/jwt`. If a token already exists, the command asks before replacing it; `-f` explicitly permits replacement. This account token lets the provider register or refresh its own client identity. Wallet consent and provider claims use the resulting **provider token**, not the bootstrap token.
+
+Run these commands and the eventual service as the same operating-system user. No environment variables are required for the default setup. Keep each operator in its own provider state and account context: changing URLs does not reassign an existing provider identity to a different operator.
+
+## 3. Register once and start providing
+
+For a genuinely new installation:
+
+```bash
+provider provide --allow-client-registration
+```
+
+The first start retains the provider's Ed25519 key, registers its direct provider slot, saves its client credential and begins serving. Leave it running while you set the wallet in another terminal. Record the printed `client_id`; this is the provider identity used for measurement and payout attribution.
+
+For subsequent starts:
 
 ```bash
 provider provide
 ```
 
-The provider prints its identity and stays in the foreground until killed:
+The provider reuses its retained identity and registration operation. Do not clear its files or add the creation flag to work around a missing key or identity mismatch. An installation upgrading from a legacy `.provider.key` may require the explicit, one-time `--adopt-legacy-provider-key` assertion after you identify the original key; see the [registration and recovery instructions](https://github.com/urfoundation/sn/blob/main/miner/PROVIDER-REGISTRATION.md).
 
-```text
-client_id: <16-byte id>
-instance_id: <id>
-extender_public_key: <hex>
-extender: listening, v4 activated at <ip>, v6 not activated
-Provider <version> started
-```
-
-Useful flags:
+Useful runtime options are:
 
 ```bash
-provider provide --port=8080                 # serve GET / status JSON on *:8080
-provider provide --wallet=<coldkey_ss58>     # also set the claim wallet at startup (see step 4)
-provider provide --max-memory=1gib           # soft memory limit: b, kib, mib, gib
-provider provide -v                          # verbose; -vv for more
+provider provide --max-memory=1gib
+provider provide -v
+provider provide --port=8080
 ```
 
-`provider auth-provide` does `auth` and `provide` in one invocation (same options as both), which is convenient for containers.
+`--max-memory` is a soft memory target, accepting bytes or `b`, `kib`, `mib` and `gib` suffixes. Without it, the target comes from host memory. `-vv` increases logging further. `--port=8080` exposes status JSON on all interfaces at port 8080; restrict that port to your monitoring network. The default port `0` disables the status server.
 
-**Ingress as well as egress.** On desktop and server builds the provider also takes the ingress role: it starts an extender on TCP 443, UDP 443 and UDP 53 (each bound independently; a port that fails to bind just disables that carrier), activates its public address with the operator, and prints one `extender:` status line whenever that status changes. Its identity is the `.provider.extender.key` seed beside your client key. Mobile builds carry no extender.
+The process stays in the foreground until stopped with Ctrl-C or a termination signal. `auth-provide` combines authentication and providing; a new installation still needs `--allow-client-registration`.
 
-**Running in the background.** On Linux, a user systemd unit is the simplest way (the installer script generates the same unit for its `urnetwork` binary, with `Restart=no`):
+### Retain the provider state
+
+The default state directory is `~/.urnetwork`. Back up the complete directory privately after stopping its writers, and restore it as one identity. Do not run simultaneous copies of the same state.
+
+| File or directory | Purpose |
+| --- | --- |
+| `jwt` | Operator account bootstrap credential. |
+| `.provider.key` and `.provider.key.identity` | Original Ed25519 seed and identity marker. |
+| `.provider.key.registration.lock` | Local registration ownership lock. |
+| `.provider.jwt` | Direct provider's renewable client credential. |
+| `.provider.jwt.registration*` | Retained registration request, first-send and recovery state. Preserve every side file. |
+| `.provider.jwt.wallet-consent/` | Signed wallet-consent history, including pending originals. |
+| `.provider.cert`, `.provider.extender.key` | Provider certificate and ingress identity, when present. |
+| `network.json` | Selected operator endpoints. |
+| `proxy` | Optional SOCKS5 exit configuration. |
+
+Losing or editing identity files can prevent recovery even if account login still works.
+
+## 4. Set the wallet that earns pool rewards
+
+Set a wallet after the provider registers, using its retained `.provider.jwt`. Consent binds the exact provider, deployment, predecessor and earning interval to your coldkey. Merely storing a wallet address in an account profile does not establish this signed provider mapping.
+
+### Sign on another device
+
+Request the statement to sign:
+
+```bash
+provider wallet challenge '<coldkey_ss58>'
+```
+
+Sign the exact printed statement with that coldkey and use the `wallet set` command printed by the challenge. Its shape is:
+
+```bash
+provider wallet set '<coldkey_ss58>' \
+  --message='<exact printed statement>' \
+  --signature='0x<64-byte sr25519 signature>'
+```
+
+Use the exact UTF-8 message, with LF line endings and no extra trailing newline, in the sr25519 `substrate` signing context. A Polkadot extension `signRaw` of type `bytes`, which wraps the statement in `<Bytes>...</Bytes>`, is also accepted. A literal `\n` in `--message` stands for a line break. Submit within the challenge's five-minute maximum lifetime. The printed command preserves the selected API URL and provider token path.
+
+### Sign with a local seed file
+
+On a host where you deliberately keep the coldkey seed, the CLI can obtain and sign the statement itself:
+
+```bash
+provider wallet set '<coldkey_ss58>' \
+  --coldkey_seed_file=/absolute/private/coldkey.seed
+```
+
+The file must already exist, be owned by the user, have private permissions such as `0600`, and have no symlinked path components. It contains the raw 32-byte sr25519 mini secret or 64 hexadecimal characters, optionally prefixed with `0x`; it is not a mnemonic phrase. The command refuses a seed that derives a different address. The seed is used locally and never sent to the operator.
+
+You can do the same signed setup at startup with `provide --wallet='<coldkey_ss58>' --coldkey_seed_file=/absolute/private/coldkey.seed`. A wallet failure is logged while traffic serving continues, so check the result before assuming rewards are configured.
+
+### When the wallet mapping takes effect
+
+Default consent starts at the next earning epoch and covers 65,536 epochs. To select a shorter exact interval, pass both `--wallet-from-epoch=<epoch>` and `--wallet-through-epoch=<epoch>` to the challenge/set flow. The operator's prospective boundary remains authoritative. Set the wallet before the epoch in which you intend to earn, and renew consent before its interval ends.
+
+Before submitting, the CLI retains the signed original under `<provider-jwt-path>.wallet-consent/history.json`. Keep it with the credential. A retry reconciles and replays the same pending original, including after the seed is removed from the host. A new mapping does not redirect earlier earned obligations.
+
+For a proxy provider, add `--provider-jwt=/absolute/path/to/.provider-<hash>.jwt` to select that slot for both wallet commands and claims. Every provider that should earn needs its own valid consent; several providers may choose the same coldkey.
+
+## 5. Keep the provider running
+
+After initial registration and wallet setup, a Linux user service can restart the retained provider automatically. Create `~/.config/systemd/user/urnetwork-provider.service`:
 
 ```ini
-# ~/.config/systemd/user/urnetwork.service
 [Unit]
-Description=URnetwork Provider
+Description=URnetwork provider
 
 [Service]
 ExecStart=%h/.local/bin/provider provide
 Restart=always
+RestartSec=10
+UMask=0077
 
 [Install]
 WantedBy=default.target
 ```
 
+Stop the foreground instance, then enable the service:
+
 ```bash
 systemctl --user daemon-reload
-systemctl --user enable --now urnetwork
-loginctl enable-linger        # keep user services running after logout
+systemctl --user enable --now urnetwork-provider.service
+journalctl --user -u urnetwork-provider.service -f
 ```
 
-On Windows, `powershell -NoProfile -WindowStyle Hidden -Command "Start-Process provider.exe -ArgumentList 'provide' -WindowStyle Hidden"` runs it hidden; the installer script can add it to the Startup folder.
+Enable lingering for that user if it must run after logout (`loginctl enable-linger`). Keep the creation flag out of the normal service command so missing state requires an explicit recovery decision.
 
-**Apps.** The operator's consumer apps can provide too: in the URnetwork apps, turn on **Provide while disconnected** in settings to run an always-on provider on a phone, desktop or TV you already own. See [ur.io/app](https://ur.io/app). The rest of this guide is about the binary.
+## How rewards accrue
 
-## Step 4: set your claim wallet
+Pool rewards depend on completed traffic and measured reliability. The operator records completed work against the original provider identity and uses the epoch's signed wallet mapping. **Equal completed paid and free traffic receives equal usage credit.** Account balances, escrow reservations, subscription payments and uncompleted contracts are not proof of work performed.
 
-Pool payouts are claimable by an ss58 coldkey (Bittensor prefix 42) that you register with your operator. The provider records it for your network with `POST /sn/wallet`; the latest wallet set wins and applies from the next committed epoch's payout list.
-
-```bash
-provider wallet set <coldkey_ss58>
-# subnet wallet set to 5… (pubkey 0x…)
-```
-
-or pass `--wallet=<coldkey_ss58>` to `provider provide` (a failure is logged and does not stop providing; retry with `provider wallet set`).
-
-By default an operator requires the coldkey to sign a single-use challenge before it accepts a wallet, which the URnetwork apps do (set the wallet in the app under your account). The unsigned CLI path above only works for an operator that keeps the `wallet_allow_unsigned` policy on; the ur.io operator does not, so on ur.io set the wallet from the app or web account. A miner without a wallet at epoch close is left out of that epoch's payout list (`missing_payout_wallet`).
-
-## Several exits on one host
-
-The provider can front several SOCKS5 exits, running one independent miner identity per exit:
-
-```bash
-provider proxy auth add <key> <proxy_user> <proxy_password>
-provider proxy add <key>@<host>:<port>
-provider proxy add <host>:<port>:<user>:<pass>
-provider proxy add --proxy_file=<proxy_file>     # one entry per line; # comments allowed
-provider proxy remove <key>@<host>:<port>
-provider proxy remove --all
-provider proxy auth remove <key>
-```
-
-Entries take the forms `host:port`, `host:port:user:pass`, `host:port::` or `key@host:port` (the key names a saved auth). On the next `provide` the provider prints `Using N proxy servers:` and runs each with its own client identity (`.provider-<hash>.jwt`). Each exit must still map to exactly one miner.
-
-## How you are measured and paid
-
-### The clocks
-
-- A **tempo** is 360 chain blocks (about 72 minutes). Each tempo every validator scores both miner tiers and commits its weight vector under commit-reveal; Yuma Consensus takes the stake-weighted median, clips outliers and pays the 41% miner share of SN25's emission accordingly.
-- A **settlement epoch** is 50,400 chain blocks (about 7 days). Pool emission accrues to the vault over the epoch; at the boundary the operator's pool is captured, the operator has a root-commit window to commit its payout list (the mainnet reference is 1,200 blocks, +4 h), the epoch finalizes at +48 h (14,400 blocks), and claims open. The signed mainnet policy fixes these windows; the values above are the deploy-script reference in `sn/mainnet/MAINNET.md`.
-
-### The pool tier
-
-Validators weight your operator's pool by `implied_usage × Q`: implied usage is the operator's audited demand, the bytes and distinct users in its signed payout artifact priced at the baseline (conviction-zero) tier of the published rate schedule, so a conviction discount lowers what the operator deposits but not its weight; and `Q` is the exposure-weighted quality of the operator's pool miners as measured by that validator's own trails (the head-bound miners are excluded from `Q`). While the published price is zero (see [Initial period](#initial-period)) every pool's implied usage is exactly 1, and `Q` alone sets the pool split. The policy clamps `Q` into a band (`quality_transform: clamp_ppm`, minimum and maximum in parts per million) so a noisy measurement cannot swing a pool to zero.
-
-Inside the pool the operator's server computes one leaf per coldkey each epoch:
+The pool payout weight is proportional to:
 
 ```text
-weight   = usage_bytes × confirmations / max(assignments, reliability_a_min)
-shareBps = weight / Σ weight, allocated to exactly 10,000 basis points (largest remainder, ties by coldkey)
+completed usage bytes × reliability
+reliability = confirmations / max(assignments, reliability_a_min)
 ```
 
-`usage_bytes` is the traffic you carried under contracts in the epoch; `assignments` and `confirmations` are the validator trail hops the operator's `/verify` server assigned to you and saw you confirm. A miner is in the list only if it carried usage, was assigned at least `reliability_a_min` hops, confirmed at least one, has a wallet, and is not bound into a head fleet. All of a coldkey's miners at one operator collapse into one leaf, and the list is published as a content-addressed payout artifact anyone can reproduce.
+The implementation represents reliability in parts per million. To enter the payout list, a provider needs positive completed usage, at least the required number of assigned verification hops, at least one confirmation, a valid earning wallet and no active head-fleet exclusion. Eligible contributions sharing one coldkey are aggregated into one leaf, and the shares are allocated across the pool in basis points.
 
-### Claiming a pool payout
+Validators independently measure routing quality and weight the operator pools and eligible head fleets. The current mainnet launch plan assigns **10% of the native miner allocation to providers**, split between the pool and head channels by policy, with the other 90% received by `ur-reserve` for network improvements. This is a launch policy, not a fixed payment per byte; use the operator's activated policy and published payout artifacts to inspect actual earnings. The reserve is separate from the settlement vault's provider claim collateral.
 
-Claims are permissionless pull claims against the immutable settlement vault: any funded EVM key may relay the transaction, and the α always goes to the coldkey in the leaf. The simplest path is the provider's own claim command, which fetches your proof from the operator (`GET /sn/pool/claim`), recomputes the leaf, checks the proof against the operator's root and, with `--rpc`, against the root the vault holds on chain:
+A settlement epoch is defined by the deployed contracts and signed policy. The mainnet reference uses 50,400 blocks, about seven days at a 12-second block time. After the epoch closes, its payout root must be committed and finalized before claims open. Read the returned `claim_open_block` and the operator's deployment windows rather than assuming recent work is immediately claimable.
+
+## 6. Claim pool rewards
+
+The provider fetches your proof from the operator, recomputes the Merkle leaf and checks the proof. Supply the deployment's EVM RPC endpoint to also compare the root with the settlement vault:
 
 ```bash
-provider claim --rpc=<rpc_url>
+provider claim --epoch='<settlement_epoch>' --rpc='https://<evm-json-rpc>'
 ```
 
-```text
-epoch: 41 (last finalized; current epoch is 42. Use --epoch to override)
-no_id: 0x…
-coldkey: 0x…
-share_bps: 125 (1.25%)
-payout_root (server): 0x…
-payout_root (proof): verifies against the server root (9-element proof)
-payout_root (chain): 0x… (via <rpc_url>, chain id 964)
-contract: 0x… (chain id 964)
-claim_open_block: 1234567
-claim calldata:
-0x…
-submit with: snclaim submit --calldata=0x… --contract=0x… --rpc=<rpc_url> --key_file=<evm_key_file>
-status: VERIFIED (proof, server, and on-chain roots agree)
-```
+With no key, this command verifies and prints the `epoch`, `no_id`, `coldkey`, `share_bps`, payout roots, vault `contract`, `claim_open_block` and claim calldata. Review the destination coldkey, contract and chain ID against the operator's published deployment. `--rpc` is repeatable for ordered endpoint failover. A proof or root mismatch causes a nonzero exit and must be resolved before submission.
 
-`--epoch=<epoch>` selects an epoch; the default is the last finalized one (the current epoch minus one). `--rpc=<rpc_url>` may be repeated; endpoints are tried in order. The command exits non-zero with `status: MISMATCH — do not submit` if the proof, the server root and the on-chain root disagree, and with `status: UNVERIFIED — no --rpc endpoint answered` if no endpoint answers.
+Omitting `--epoch` selects `current_epoch - 1`. Although the CLI labels this the last finalized epoch, it can still be inside the root-commit or challenge window; the contract must actually be finalized and open. Specify older unclaimed epochs explicitly.
 
-To sign and send in the same step, give the provider the relayer key (needs `--rpc`):
+Place the funded EVM relayer's hex-encoded 32-byte secp256k1 key in a private file. First check the claim without broadcasting:
 
 ```bash
-provider claim --rpc=<rpc_url> --key_file=<key_file>            # sign and submit
-provider claim --rpc=<rpc_url> --key_file=<key_file> --dry-run  # stop at the eth_call preflight
+provider claim --epoch='<settlement_epoch>' \
+  --rpc='https://<evm-json-rpc>' \
+  --key_file=/absolute/private/relayer.key --dry-run
 ```
 
-The receipt is decoded for you. `Claimed` records the accepted entitlement, `ClaimPaid` the actual α transfer, and `ClaimPaymentDeferred` a credit that stayed in the vault because its TAO equivalent is below the runtime's `DefaultMinTransfer` floor. Deferred credit is not lost: it accumulates on your coldkey and pays out in a later claim once it clears the floor.
-
-To keep an air-gapped key, run `provider claim` without `--key_file`, copy the printed calldata, and submit it with `snclaim` (from `urnetwork-snclaim-<version>.tar.gz`), giving the settlement vault address that `provider claim` printed as `contract`:
+Then submit it:
 
 ```bash
-snclaim submit --calldata=<hex> --contract=<addr> --rpc=<url>... --key_file=<path> [--chain_id=<id>] [--gas_limit=<n>] [--dry-run]
-snclaim status --epoch=<e> --no_id=<n> [--coldkey=<key>] --contract=<addr> --rpc=<url>...
+provider claim --epoch='<settlement_epoch>' \
+  --rpc='https://<evm-json-rpc>' \
+  --key_file=/absolute/private/relayer.key
 ```
 
-`snclaim submit` refuses any calldata whose selector is not the settlement vault's `claim(uint256,uint256,bytes32,uint256,bytes32[])` (`0xce479a1b`), and `submit`/`status` are its only commands; head-tier registration and bindings use `provider fleet` (below).
+`--key_file` requires `--rpc`. Any funded relayer can submit the proof; it cannot change the leaf's coldkey or receive its α. The reward is transferred as native α stake to the beneficiary coldkey. The coldkey seed is not needed to relay the claim.
 
-**Claiming automatically.** The claim daemon polls the operator's epoch clock, discovers every claimable epoch, and submits and reconciles claims with a durable queue (`claim-queue.json`, one entry per epoch with statuses such as `pending`, `submitting`, `uncertain`, `retry`, `finalized` and `no-claim`, retried with a backoff from one minute doubling to one hour):
+Read the receipt events separately:
+
+| Event | Meaning |
+| --- | --- |
+| `Claimed` | The vault accepted the entitlement and credited the coldkey. This alone does not prove a transfer. |
+| `ClaimPaid` | Accumulated credit was transferred to the coldkey. |
+| `ClaimPaymentDeferred` | Credit remains in the vault, for example because it is below the runtime transfer minimum, the price is unavailable or the runtime transfer failed. |
+
+Deferred credit survives entitlement expiry. A later claim can pay the accumulated credit once payment is possible. The vault also exposes the permissionless `withdrawClaimCredit(bytes32 coldkey)` method to retry existing credit; the current `provider` and `snclaim` CLIs do not provide a withdrawal subcommand. Re-submitting an already accepted leaf is not a withdrawal and will fail as already claimed.
+
+### Separate proof fetching from transaction submission
+
+For a separate relayer host, build the claim submitter from the same source:
 
 ```bash
-provider claim-daemon --config=<path>
+# From sn/:
+go build -o "$HOME/.local/bin/snclaim" ./cli/snclaim
 ```
 
-The config is strict YAML (unknown keys are rejected):
+Fetch and verify with `provider claim` on the provider host, then submit its exact calldata and vault address on the relayer host:
+
+```bash
+snclaim submit --calldata='0x<verified claim calldata>' \
+  --contract='0x<settlement vault>' --rpc='https://<evm-json-rpc>' \
+  --chain_id=964 --key_file=/absolute/private/relayer.key --dry-run
+```
+
+Use the deployment's actual chain ID; remove `--dry-run` to broadcast. This separates the keys between hosts, but the submitter still needs an RPC connection. To inspect whether the leaf is already accepted:
+
+```bash
+snclaim status --epoch='<settlement_epoch>' --no_id='<operator id>' \
+  --coldkey='<coldkey_ss58>' --contract='0x<settlement vault>' \
+  --rpc='https://<evm-json-rpc>'
+```
+
+### Optional automatic claims
+
+The claim daemon retains pending and signed claims in a durable queue and reconciles finalized EVM outcomes across restarts. Its configuration is strict YAML:
 
 ```yaml
 schema_version: 1
 release: "1.0"
-api_url: https://api.bringyour.com     # your operator's API
-rpc:                                   # Subtensor EVM JSON-RPC endpoints, tried in order
-  - https://<evm-json-rpc>
-key_file: relayer.key                  # hex-encoded 32-byte secp256k1 EVM key; holds TAO for gas
-jwt_file: network.jwt                  # optional: defaults to ~/.urnetwork/jwt; must be a private (0600) regular file
-state_dir: /var/lib/urnetwork/claims   # created 0700; relative paths are anchored to this file
-poll_seconds: 30                       # 5 to 3600
-lookback_epochs: 2                     # up to 256 epochs discovered on first start
+api_url: https://api.example.net
+rpc:
+  - https://evm-rpc.example.net
+key_file: /home/miner/.urnetwork/private/relayer.key
+jwt_file: /home/miner/.urnetwork/.provider.jwt
+state_dir: /var/lib/urnetwork/claims/provider-1
+poll_seconds: 30
+lookback_epochs: 2
 ```
 
-Run exactly one daemon per relayer key: the daemon owns that key's nonce through preparation, broadcast and finality, and two processes sharing a key would race.
+Replace these paths and endpoints. Relative file paths are resolved against the configuration file. `jwt_file` selects the provider credential and must be a private regular file; omitting it selects the default `.provider.jwt`. `poll_seconds` accepts 5–3,600; the default initial lookback is two epochs, with a maximum of 256.
 
-**Claim expiry.** An entitlement stays claimable for the policy's `claim_ttl_epochs` plus `claim_grace_epochs` (the mainnet reference is 8 epochs plus 1 grace epoch). What is still unclaimed after that becomes carry for the same operator's pool; credit you already claimed is never expired.
-
-### The top-level (head) tier
-
-The head is the roughly 200 fleets with the broadest routable exit coverage. A fleet is a hotkey registered on SN25 with one or more miners bound to it. Validators score a fleet by counting the distinct routable **prefixes** its miners' verified trail hops egressed from (the scoring unit is a keyed hash of the exit prefix, IPv4 /29 and IPv6 /48 by policy, never the raw IP), splitting each prefix equally among every fleet seen on it, and smoothing the score across tempos with the policy's `head_score_ema`. The top `maximum_head_fleets` (at most 200) positive scores get head weight; the policy's `theta` share of the miner emission (the launch value is 3/10) is normalized across them. A fleet earns natively on its own hotkey, needs no claim, and its miners are removed from their operators' payout lists for as long as the binding is live. A fleet that slips out of the top set, or whose hotkey is deregistered, falls back to earning inside the pool.
-
-Publishing a binding maps your `client_id`s to a public hotkey, and therefore to your exit addresses. It is opt-in self-deanonymization for fleets that want a public slot; pool miners stay pseudonymous.
-
-**1. Register a hotkey on SN25.** The fleet registers its own hotkey as a neuron on the manifest's netuid with a burned registration (`register_limit` with a maximum-burn ceiling), signed by the fleet coldkey. Keep the hotkey's 32-byte sr25519 seed in a file (raw bytes or hex) for `--hotkey_seed_file`, and the coldkey's seed (same grammar; a `btcli` wallet's coldkey seed works, and `btcli` remains the tool for creating the wallet and moving TAO onto it) in another file that never touches the mining hosts. The command reads the live burn economics from the finalized chain, refuses a burn above the ceiling, and is a dry run until `--apply`:
+Before starting, prepare the claim-queue storage and obtain the exact durable-volume declaration and reviewed digest for the host. These are required by current storage admission; creating an empty directory or omitting the flags is insufficient. The declaration uses the daemon-volume schema and covers the actual `state_dir` and retained queue. See [claim queue ownership](https://github.com/urfoundation/sn/blob/main/miner/CLAIM-QUEUE-OWNERSHIP.md) and the repository's [offline storage preparation](https://github.com/urfoundation/sn/blob/main/mainnet/OWNER-CUSTODY-PREPARATION.md) instructions for the storage workflow.
 
 ```bash
-provider fleet register --manifest=<path> --hotkey_seed_file=<path> --coldkey_seed_file=<path> --substrate=<ws_url>...
-# fleet register: netuid 25 hotkey 0x… via <ws_url>
-# runtime: node-subtensor/…/1/1 at finalized block … (0x…)
-# registration economics (netuid 25): burn 1.000000000 TAO (1000000000 rao), min … rao, max … rao, half-life … blocks, increase x…/2^64
-# hotkey: 0x…
-# coldkey: 5… (free balance 3.250000000 TAO)
-# burn limit: 1000000000 rao (register_limit refuses a higher live burn)
-# extrinsic: 0x… (signer 5…, nonce 0, 168 bytes)
-# fee: estimated 0.002131733 TAO (2131733 rao), limit 10000000 rao
-# dry run: nothing was broadcast; re-run with --apply to submit
-provider fleet register --manifest=<path> --hotkey_seed_file=<path> --coldkey_seed_file=<path> --substrate=<ws_url>... --apply
-# …
-# registered: uid 137 on netuid 25 (hotkey 0x…, coldkey 5…)
+provider claim-daemon --config=/absolute/path/claim.yml \
+  --durable-volumes=/absolute/path/reviewed-daemon-volumes.json \
+  --durable-volumes-sha256='sha256:<reviewed digest>'
 ```
 
-`--burn_limit_rao=<n>` sets the ceiling the runtime enforces (default: the burn observed at the read), `--fee_limit_rao` (default 10,000,000 rao) bounds the quoted fee, and every broadcast is journaled with its extrinsic hash under `~/.urnetwork/fleet-native/`. The hotkey seed must derive the manifest's `hotkey`; a hotkey already registered under that coldkey is reported and nothing is sent. Each registration pays the current burn, and a slot that earns the least emission is the one pruned when the subnet is full, so only register a fleet whose breadth can hold a slot.
+Run one owner for each queue and relayer key. Do not submit one-shot claims or run another daemon with that key concurrently. Preserve the complete queue directory, including custody side files, after an interrupted submission. A queue marked `uncertain` needs reconciliation of its original signed transaction. A finalized claim entry establishes acceptance; use payment events to distinguish paid rewards from deferred credit.
 
-**2. Write the fleet manifest.** The manifest is JSON in the exact canonical form (schema `urnetwork-fleet-manifest-v1`, members ordered by `client_id`, lowercase `0x` hex, no trailing whitespace):
+Claim before the deployed entitlement expires. The mainnet reference window is eight epochs plus one grace epoch; unclaimed entitlements can then become carry for the same operator's pool. This expiry does not erase credit already accepted by `claim`.
 
-```json
-{"schema":"urnetwork-fleet-manifest-v1","chain_id":964,"netuid":25,"coordinator":"0x<coordinator address>","fleet_id":"0x<32-byte fleet id>","hotkey":"0x<32-byte hotkey public key>","generation":1,"members":[{"client_id":"0x<16-byte client id>","client_key":"0x<32-byte client public key>"}]}
-```
+## Several exits on one host
 
-`client_id` is what `provider provide` prints; `client_key` is that client's Ed25519 public key as the operator publishes it at `GET /key/<client_id>`. `fleet_id` is a 32-byte identifier you choose and keep across generations; `generation` starts at 1 and must strictly increase for every replacement. A client may belong to at most one fleet in any epoch. Check and canonicalize the file:
+The provider supports SOCKS5 exits, with a separate client slot for each effective proxy address:
 
 ```bash
-provider fleet manifest --manifest=<path>
-# prints the canonical JSON, commitment_sha256: 0x…, members: N
+provider proxy add '<host>:<port>:<user>:<pass>'
+provider proxy add --proxy_file=/absolute/private/proxies.txt
+provider provide --allow-client-registration
 ```
 
-**3. Publish the commitment.** The hotkey writes the manifest's SHA-256 to the Subtensor commitments pallet (free) under `(netuid, hotkey)`; the finalized chain index mirrors it into the coordinator:
+Use the creation flag only when adding genuinely new slots. Ordinary restarts use `provider provide`. Each slot retains a `.provider-<hash>.jwt` and its registration side files. Select that token with `--provider-jwt` when setting its wallet and fetching claims. The shared `.provider.key` and all slot histories belong in the same backup. Provider identity and unique routable exit coverage matter; adding accounts behind the same exit does not manufacture additional coverage.
 
-```bash
-provider fleet publish --manifest=<path> --substrate=<ws_url>... --hotkey_seed_file=<path>
-# fleet commitment finalized
-#   endpoint: … netuid: 25 hotkey: 0x… commitment: 0x… extrinsic: … finalized_block: … finalized_hash: …
-```
+## Larger fleets and the head tier
 
-`--substrate` is repeatable (ordered failover) and the endpoint's runtime is authenticated against the release pin before anything is signed.
+A head fleet binds many provider client IDs to one Bittensor hotkey. Validators score distinct routable exit prefixes, sharing a prefix's weight when fleets overlap. The hotkey earns native miner emission and uses the chain's normal coldkey/hotkey stake management; there is no pool Merkle claim for that head reward. Providers with active head bindings are excluded from the pool payout list for the corresponding epoch.
 
-**4. Bind each member.** Each miner's client key and the fleet hotkey both sign the binding; a relayer EVM key (which receives no ownership) submits it to the coordinator:
+The current workflow is:
 
-```bash
-provider fleet bind --manifest=<path> --client_id=<hex> --client_seed_file=<path> --hotkey_seed_file=<path> \
-  --valid_from_epoch=<e> --valid_to_epoch=<e> --rpc=<rpc_url>... --relayer_key_file=<path> [--dry-run]
-# fleet member binding finalized: client=0x… fleet=0x… hotkey=0x… uid=… generation=… epochs=[from,to]
-```
+1. Create a canonical `urnetwork-fleet-manifest-v1` JSON manifest containing the deployment's chain ID, netuid and coordinator, a stable fleet ID, fleet hotkey, generation, and providers' client IDs and public keys. Inspect it with `provider fleet manifest --manifest=/absolute/path/fleet.json`.
+2. Preview `provider fleet register` with the manifest, hotkey and owning coldkey seed files, and native `--substrate` endpoints. Registration is a dry run unless `--apply` is present. Use `--burn_limit_rao` and `--fee_limit_rao` to bound registration costs.
+3. Use `provider fleet publish` to publish the manifest commitment, then `provider fleet bind` for each member. Each binding needs both the original provider client seed and fleet hotkey signature, a finite earning-epoch interval and an EVM relayer.
+4. Inspect with `provider fleet status`; use `provider fleet revoke` to revoke a member prospectively.
 
-`--client_seed_file` is that miner's `~/.urnetwork/.provider.key`. Bindings take effect no earlier than the next settlement epoch, run for at most the policy's `maximum_validity_epochs`, and are accepted only if the hotkey holds a live UID and the mirrored commitment matches the manifest exactly. Versions cannot overlap.
+Production fleet commands require an independently reviewed `--mainnet-runtime-authority` document and its `--mainnet-runtime-authority-sha256`. Fleet writes also require the prepared owner-local durable-volume declaration selected with `--durable-volumes` and `--durable-volumes-sha256`. The repository does not ship a universal mainnet authority pin. Obtain these deployment-specific inputs before signing; a testnet pin or a fresh RPC observation is insufficient. See the [complete fleet authority and recovery contract](https://github.com/urfoundation/sn/blob/main/miner/FLEET-MAINNET-RUNTIME.md) and `provider --help` for exact arguments.
 
-**5. Check and revoke.**
+Keep the fleet coldkey on the registration/signing host. The always-on provider only needs its original provider identity and credentials. A larger fleet does not automatically retain a UID: native registration, validator scores and the chain's pruning rules still determine eligibility and emission.
 
-```bash
-provider fleet status --manifest=<path> --client_id=<hex> --substrate=<ws_url>... --rpc=<rpc_url>...
-provider fleet revoke --manifest=<path> --client_id=<hex> --client_seed_file=<path> --effective_epoch=<e> \
-  --rpc=<rpc_url>... --relayer_key_file=<path> [--dry-run]
-```
+## Troubleshooting
 
-`status` fails if the native commitment, the coordinator record, the hotkey or the fleet id disagree with the manifest. A revocation is signed by the client alone and takes effect at a future epoch; anyone can clean up an expired, deregistered or UID-reused binding.
+- **`startup_recovery_required`:** recover the original key, identity marker, registration history and credentials together. New account login does not replace a lost provider identity.
+- **No payout leaf:** check positive completed usage, enough verification assignments, a confirmation and signed wallet consent for the earning epoch. An active head binding moves its earning path out of the pool.
+- **Wallet change appears late:** consent is prospective. Review the exact earning interval; it cannot rewrite an earlier payout destination.
+- **Claim proof is not ready:** confirm the operator published this provider's contribution and finalized the epoch's root. A network bootstrap JWT cannot substitute for `.provider.jwt`.
+- **Proof or root mismatch:** retain the output and compare the deployment, epoch and artifact with the operator. Waiting or changing wallets is not a fix for contradictory proof bytes.
+- **Claim accepted but balance unchanged:** inspect `ClaimPaid` versus `ClaimPaymentDeferred`, and check native α stake for the beneficiary coldkey. The EVM relayer's balance is not the reward balance.
+- **Lost connection during a claim:** reconcile the existing transaction or retained daemon queue before using the relayer again. Keep signed transaction history intact.
 
-### Testnet
-
-The public testnet campaign runs the same software on netuid 521 (chain id 945) with accelerated epochs. Point `provider choose_network` at a testnet operator and use the testnet coordinator, chain id and netuid in your manifest; nothing else changes.
-
-## What can go wrong
-
-- **No wallet, or a wallet set after epoch close.** The leaf set is frozen when the operator closes the epoch; a wallet set later applies from the next committed epoch.
-- **Too little exposure.** Below `reliability_a_min` assigned trail hops in the epoch you get no leaf (`reliability_exposure_floor`). Stay up; validators sample eligible miners at random.
-- **More than one exit IP.** A `client_id` seen behind two exit addresses is excluded from trails until it is back to one. A prefix shared by two fleets is split, so co-located exits do not add head score.
-- **Proof or root mismatch.** `provider claim` refuses to emit a submit line when the proof, the server root and the on-chain root disagree. Retry after the epoch finalizes (`claim_open_block`), and if it persists the operator's artifact is at fault, not your claim.
-- **Below the transfer floor.** Small entitlements are accepted as `ClaimPaymentDeferred` credit and paid once they aggregate above the runtime's minimum transfer.
-- **Missed or expired claims.** After the claim TTL and grace the unclaimed remainder becomes the operator's carry. Run the claim daemon.
-- **The operator missed its root.** The pool's captured emission is not lost: it carries to the same operator's next epoch (`missed_root_action: carry_same_operator`), and validators zero the pool's weight only while the operator's deposit audit fails.
-- **A stale head binding.** If the fleet hotkey loses its UID, or the recorded UID no longer matches the live one, validators skip the binding (never guess), the fleet earns nothing on the head, and its miners are back in the pool from the next epoch; publish a new generation after re-registering.
-- **A rejected credential.** If the operator rejects your client JWT the provider prints `provider authentication was rejected; run provider auth if the bootstrap credential is no longer valid` and exits; run `provider auth` again.
-
-## Safety rules
-
-Miners are exits to the public internet, so the reference operator (ur.io) ships every miner with a safe-by-default policy embedded in the client and provider software. The client and the provider must agree on the rules; a mismatch raises a contract dispute, so neither side can change them alone. Other operators may publish their own rules.
-
-**Protocol limits.**
-
-- Only public unicast addresses route. Traffic to private or multicast addresses is dropped.
-- Unencrypted protocols are blocked: DNS (53), HTTP (80), IMAP (143), SMTP (25) and POP (110). Their encrypted forms are open: HTTPS and DoH (443), DoT (853), IMAP TLS (993), SMTP TLS (587 and 465), POP TLS (995) and SFTP (990).
-- Of the restricted port range only the protocols mainstream users need are open; user ports are open except the ones that generate a disproportionate number of abuse reports for miners: BitTorrent (6881 to 6889) and IRC (6667) are blocked.
-
-**Rate limits.** Each source may open a limited number of new TCP connections and UDP streams per second and a limited number of parallel connections, high enough not to affect normal use; per miner, parallel connections are additionally bounded by the host's `ulimit`.
-
-**Contract limits.** Every transfer is preceded by a contract with an escrowed balance and a permission set, and both sides close it with an acknowledged byte count. The operator assigns each contract a priority weighted toward premium users and premium traffic (spend per GiB), so miners may rate-limit by priority and bots cannot buy priority without spending money.
-
-**Abuse audit that preserves privacy.** The operator keeps an encrypted audit log for 24 months. Miners opt in to send encrypted records and throw away their key; only the destination or its ISP can reconstruct the record key, which is what they send in an abuse report (when, source and destination IP and port, the SHA-256 of the TLS client random for TLS connections, an official reporter contact and the notice), to [notice@bringyour.com](mailto:notice@bringyour.com). The operator can decode a single record only with a mostly complete key from a legitimate report; everyone involved in an incident, including the reporter, can be removed from the network.
-
-**Opting out.** A miner may opt out of sending encrypted audit records, in which case the operator cannot act on abuse reports the miner receives. Letting miners switch off individual frontline rules, and letting users pick miners by the rules they run, is on the roadmap.
-
-## Initial period
-
-At launch the published [price sheet](/price) is **0 α per GiB and 0 α per user**, and the signed mainnet policy carries that zero price explicitly (`zero_rate_action: equal_demand`). While the price is zero, operators make no demand deposits: none are required and none are audited. Every registered operator pool is given the same implied usage (exactly 1), so the pool channel is split by the validators' measured quality `Q` alone, and a voluntary deposit or conviction lock neither helps nor hurts a pool. The head channel, the `theta` split, the quality clamp and the cede rule are unchanged, so as a miner nothing about your payout list, your claims or the head tier changes. Operator admission is owner-gated at launch. This is a deliberate launch mode while bugs are flushed out of the network; watch the price sheet's RSS feed for the change that starts collecting deposits.
+`--legacy-network-wallet` and `claim --legacy-coldkey` are compatibility paths for retained historical records. They do not establish a new provider earning-wallet consent or infer old ownership from the current account wallet. Use them only with the operator's original legacy records.
