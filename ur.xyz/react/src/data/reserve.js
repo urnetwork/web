@@ -5,11 +5,18 @@
  * reserve's facts change (a published multisig, named signers, an approved
  * program); the page itself only renders what is here and what the chain says.
  *
+ * The reserve is not a fixed share of the miner emissions. Momentum is the
+ * share used now to power the network, as rewards to providers; the reserve
+ * receives the rest:
+ *
+ *     reserve = miner emissions × (1 − momentum)
+ *
  * Sources: the launch policy and the receive-only destination are documented
  * in the sn repo (mainnet/TREASURY-EMISSIONS.md, validator/TREASURY-PRODUCTION.md)
- * and the miner guide (/docs/miner): 10% of the native miner allocation for
- * providers, 90% received by `ur-reserve`, which only receives funds and
- * never sends. The 2-of-3 multisig is the optional sending custody for later.
+ * and the miner guide (/docs/miner): at launch, 10% of the native miner
+ * allocation for providers and the rest received by `ur-reserve`, which only
+ * receives funds and never sends. The 2-of-3 multisig is the optional sending
+ * custody for later.
  */
 
 export const reserve = {
@@ -22,8 +29,10 @@ export const reserve = {
     // how far the pre-launch projection runs
     launch: '2026-10-12',
     projectThrough: '2026-12-31',
-    // the reserve's share of the native miner allocation, basis points
-    retentionBps: 9000,
+    // momentum at launch, in basis points of the native miner allocation: the
+    // share paid to providers. The reserve receives the rest, (1 − momentum).
+    // Once the reserve is live the page reads momentum from the chain instead.
+    launchMomentumBps: 1000,
 
     explorerUrl: 'https://taostats.io/account/5CcHGEqKK3RXeEA2sVycHQAQGrqsyhWaYu9FjGtDVN6nwMwR',
     policyUrl: 'https://github.com/urfoundation/sn/blob/main/mainnet/TREASURY-EMISSIONS.md',
