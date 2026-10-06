@@ -30,7 +30,7 @@ const ASTRO_OUT = path.join(ASTRO_DIR, "build", UR_ENV);
 const OUT = path.join(__dirname, "__parity__");
 
 // Routes shared by the React implementation and the Astro static build.
-const ROUTES = ["/", "/operators", "/miners", "/validators", "/research", "/docs", "/terms", "/privacy", "/vdp", "/about", "/investors", "/investors/deck", "/investors/conviction-lock", "/investors/our-letter-to-bittensor", "/investors/letter-to-tokenholders-september-2026", "/build", "/ar/miners"];
+const ROUTES = ["/", "/operators", "/miners", "/validators", "/research", "/docs", "/terms", "/privacy", "/vdp", "/about", "/investors", "/investors/deck", "/investors/conviction-lock", "/investors/our-letter-to-bittensor", "/investors/letter-to-tokenholders-september-2026", "/build", "/reserve", "/ar/miners"];
 
 const PIXEL_TOLERANCE = 40; // desktop
 // Phones render at 3x DPR; composited/animated text vs a static node antialiases the SAME
@@ -88,8 +88,10 @@ function startServer(cmd, args, cwd, port) {
 
 async function stub(page) {
   // ur.xyz bakes its content at build time; stub any stray first-party calls so both
-  // renders are deterministic.
-  await page.route(/bringyour\.com|ur\.network/, (r) => r.fulfill({ json: {} }).catch(() => r.abort()));
+  // renders are deterministic. The reserve page reads Bittensor mainnet (its public
+  // RPC, *.opentensor.ai); an empty answer puts both renders in the same "waiting
+  // for the chain" state.
+  await page.route(/bringyour\.com|ur\.network|opentensor\.ai/, (r) => r.fulfill({ json: {} }).catch(() => r.abort()));
 }
 
 // Injected AFTER navigation (a style added before goto lands on about:blank and is lost).

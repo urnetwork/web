@@ -23,6 +23,7 @@ import ApiExplorer from './components/ApiExplorer';
 import AboutPage from './components/pages/About';
 import InvestorsPage from './components/pages/Investors';
 import BuildPage from './components/pages/Build';
+import ReservePage from './components/pages/Reserve';
 import { useRoute } from './router';
 
 const Terms = () => <LegalSection doc="terms" />;
@@ -44,6 +45,7 @@ const SECTION_COMPONENTS = {
     about:      AboutPage,
     investors:  InvestorsPage,
     build:      BuildPage,
+    reserve:    ReservePage,
 };
 
 /**

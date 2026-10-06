@@ -1,0 +1,41 @@
+---
+// /reserve — the Network Capacity Reserve.
+//
+// The page body is the React component the SPA renders for this route
+// (react/src/components/pages/Reserve.jsx), rendered on the server here and
+// hydrated on load: the reserve's balance, the SN25 pool and emission and
+// the routing of the miner allocation are read in the browser from Bittensor
+// mainnet (react/src/lib/subtensor.js), so the static HTML carries the
+// editorial content and the projection's frame, and the chain fills in the
+// figures. The shell around it is the section pages' exactly, so the SPA and
+// this render are pixel-identical. English-only, like /about.
+import Base from '../layouts/Base.astro';
+import DisclaimerStatic from '../components/DisclaimerStatic.astro';
+import NavIsland from '../islands/NavIsland.jsx';
+import FooterStatic from '../components/FooterStatic.astro';
+import ReservePage from '@react/components/pages/Reserve.jsx';
+import en from '@react/i18n/en.js';
+import { reserve } from '@react/data/reserve.js';
+import { FINNEY_RPC } from '@react/lib/subtensor.js';
+import { longDate } from '@react/components/pages/reserve/format.js';
+
+import '@react/components/Nav.css';
+
+const title = `${reserve.name} | UR`;
+const description = `The ${reserve.name} receives ${reserve.retentionBps / 100}% of SN25 miner emissions from ${longDate(reserve.launch)} and pays providers for verified network capacity. Read live from Bittensor mainnet.`;
+---
+<Base title={title} description={description} breadcrumbName={reserve.name} lang="en">
+    {/* the first chain read happens on hydration; warm the connection */}
+    <link slot="head" rel="preconnect" href={FINNEY_RPC[0]} crossorigin />
+
+    <div class="app">
+        <DisclaimerStatic t={en} />
+        <NavIsland activeRoute="reserve" lang="en" client:load />
+
+        <main class="section-page">
+            <ReservePage route={{ name: 'reserve', slug: null }} client:load />
+        </main>
+
+        <FooterStatic t={en} lang="en" />
+    </div>
+</Base>

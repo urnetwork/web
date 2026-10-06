@@ -3,7 +3,7 @@
 // unserved /<lang>/... variants in its head or sitemap.
 //
 // Everything else is English-only and exists at its bare path alone: the docs,
-// /about, /build, /investors and the legal documents (a translated contract
+// /about, /build, /investors, /reserve and the legal documents (a translated contract
 // would be a different contract, so /terms, /privacy and /vdp are not built
 // per language). Their /<lang>/... URLs redirect to the English page (nginx),
 // and the SPA router maps them the same way.

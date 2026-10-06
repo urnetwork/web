@@ -36,7 +36,7 @@ const SITE = 'https://ur.xyz';
 // The pages in the order an agent should meet them; anything the list does
 // not name follows, alphabetically, so a new page is never left out.
 const PAGE_ORDER = [
-    '/', '/operators', '/miners', '/validators', '/research', '/build',
+    '/', '/operators', '/miners', '/validators', '/research', '/build', '/reserve',
     '/investors', '/investors/letter-to-tokenholders-september-2026', '/investors/our-letter-to-bittensor', '/investors/conviction-lock', '/investors/deck',
     '/about',
 ];

@@ -51,9 +51,10 @@ export const LEGAL_ROUTES = ['terms', 'privacy', 'vdp'];
 /**
  * The English-only pages (components/pages): each routes 1:1 to its path,
  * and the Investor Centre's documents live under /investors/<slug>. They
- * have no translations, so they exist at the bare path only.
+ * have no translations, so they exist at the bare path only. /reserve is the
+ * Network Capacity Reserve dashboard, linked from the footer.
  */
-export const PAGE_ROUTES = ['about', 'investors', 'build'];
+export const PAGE_ROUTES = ['about', 'investors', 'build', 'reserve'];
 
 const SECTION_SET = new Set(SECTION_ROUTES);
 const LEGAL_SET = new Set(LEGAL_ROUTES);

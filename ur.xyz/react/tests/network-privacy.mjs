@@ -8,6 +8,10 @@
 // Allowed:
 //   - first-party: *.ur.xyz, *.ur.io, *.bringyour.com (whitelisted network
 //     operators, e.g. grafana.bringyour.com), *.ur.network, *.urnetwork.com
+//   - on /reserve only: *.opentensor.ai, the public Bittensor RPC endpoints. The
+//     page's purpose is to read the reserve's balance from mainnet in the visitor's
+//     browser, and it says so on the page; nothing else on the site may contact
+//     them, and the page contacts nothing else (it shows no fiat price).
 // SSO / WalletConnect / payment SDKs are intentionally NOT allowlisted — they may load
 // only inside their own flows, which this test does not trigger.
 import { chromium } from "playwright-core";
@@ -20,13 +24,16 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const REACT_DIR = path.resolve(__dirname, "..");
 const VITE_BIN = path.join(REACT_DIR, "node_modules/vite/bin/vite.js");
 
-const ROUTES = ["/", "/operators", "/miners", "/validators", "/research", "/docs", "/terms", "/privacy", "/vdp"];
+const ROUTES = ["/", "/operators", "/miners", "/validators", "/research", "/docs", "/terms", "/privacy", "/vdp", "/reserve"];
 
 const ALLOWED = ["ur.xyz", "ur.io", "bringyour.com", "ur.network", "urnetwork.com"];
+// hosts a single route may contact, for the reason stated on that page
+const ALLOWED_ON_ROUTE = { "/reserve": ["opentensor.ai"] };
 
-function isAllowed(host) {
+function isAllowed(host, route) {
   if (host.startsWith("localhost") || host.startsWith("127.")) return true;
-  return ALLOWED.some((d) => host === d || host.endsWith("." + d));
+  const allowed = [...ALLOWED, ...(ALLOWED_ON_ROUTE[route] || [])];
+  return allowed.some((d) => host === d || host.endsWith("." + d));
 }
 
 function freePort() {
@@ -72,7 +79,7 @@ async function main() {
       try { host = new URL(r.url()).host; } catch { return; }
       if (host.startsWith("localhost") || host.startsWith("127.")) return;
       allHosts.add(host);
-      if (!isAllowed(host)) {
+      if (!isAllowed(host, route)) {
         if (!offenders.has(host)) offenders.set(host, new Set());
         offenders.get(host).add(route);
       }
@@ -89,7 +96,7 @@ async function main() {
   try { srv.kill(); } catch {}
 
   console.log("hosts contacted:");
-  [...allHosts].filter(isAllowed).sort().forEach((h) => console.log(`  ✓ ${h}`));
+  [...allHosts].filter((h) => ROUTES.some((route) => isAllowed(h, route))).sort().forEach((h) => console.log(`  ✓ ${h}`));
 
   if (offenders.size > 0) {
     console.log("\n❌ non-allowlisted hosts contacted on normal browsing:");
