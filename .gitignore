@@ -2,7 +2,6 @@
 **/build
 **/build.*
 **/__pycache__
-!.github/workflows/build.yml
 # The Build on UR page (a React component and its thin Astro page); **/build.*
 # would swallow these on a case-insensitive checkout.
 !ur.xyz/astro/src/pages/build.astro
