@@ -20,7 +20,7 @@ Teams that want to run a network space: a deployment of the open-source server s
 
 ## Step 1: build the single operator binary
 
-Use the current [`urnetwork/server`](https://github.com/urnetwork/server) source and the Go version and **exact sibling revisions** in its [source lock](https://github.com/urnetwork/server/blob/main/local/source-graph/lock.yml). The current lock uses Go 1.26.7. Its sibling checkouts are `connect`, `glog`, `sdk`, `proxy`, `goidenticons`, `userwireguard`, `operator-proxy`, `warp`, `sn` and `gvisor`; `sn` comes from `urfoundation/sn`, and the others from `urnetwork`. Keep these beside `server`: `go.mod` uses relative replacements. Follow the repository's [canonical build instructions](https://github.com/urnetwork/server#canonical-build-sources) when preparing that source tree.
+Use the current [`urnetwork/server`](https://github.com/urnetwork/server) source and the Go version and **exact sibling revisions** in its [source lock](https://github.com/urnetwork/server/blob/main/local/source-graph/lock.yml). The current lock uses Go 1.26.7. Its sibling checkouts are `connect`, `glog`, `sdk`, `proxy`, `goidenticons`, `userwireguard`, `warp`, `sn` and `gvisor`; `sn` comes from `urfoundation/sn`, and the others from `urnetwork`. Keep these beside `server`: `go.mod` uses relative replacements. Follow the repository's [canonical build instructions](https://github.com/urnetwork/server#canonical-build-sources) when preparing that source tree.
 
 From the `server` checkout:
 
