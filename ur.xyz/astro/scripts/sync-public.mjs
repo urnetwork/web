@@ -2,7 +2,7 @@
 // Sync static assets from react/public into astro/public before `astro build`.
 //
 // Astro only copies files from its own public/ directory, so any asset that
-// lives in ../react/public — favicons, fonts, ur.png/ur.svg, the orgs/ art —
+// lives in ../react/public — favicons, fonts, ur.png/ur.svg —
 // simply does not exist on the astro side unless it is mirrored. The failure
 // is silent: the build succeeds and the page ships a broken <img>.
 //

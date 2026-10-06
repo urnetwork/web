@@ -5,10 +5,10 @@ import { LOCALIZED_BASE_PATHS } from '../../astro/src/lib/route-localization.js'
 /**
  * Tiny client-side router for ur.xyz.
  *
- * Each content section (research, providers, extenders, community) lives
+ * Each content section (operators, miners, validators, research) lives
  * at its own top-level path. The whitepaper section remains on the home
- * page below the simulation hero. The docs explorer and
- * OpenAPI explorer also have their own routes. The optional `/<lang>`
+ * page below the simulation hero. The docs explorer also has its own
+ * routes. The optional `/<lang>`
  * prefix used by the i18n layer is stripped before route detection so
  * a Chinese visitor at `/zh/providers` still resolves correctly.
  *
@@ -86,7 +86,6 @@ export function parseRoute(pathname) {
     if (bare.startsWith('docs/')) {
         return { name: 'docs', slug: bare.slice('docs/'.length) };
     }
-    if (bare === 'api') return { name: 'api', slug: null };
     if (bare === 'price') return { name: 'price', slug: null };
     if (LEGAL_SET.has(bare)) return { name: bare, slug: null };
     return { name: 'home', slug: null };
@@ -105,7 +104,6 @@ export function buildPath(route, lang) {
     if (route.name === 'docs') {
         return route.slug ? `/docs/${route.slug}` : '/docs';
     }
-    if (route.name === 'api') return '/api';
     if (route.name === 'price') return '/price';
     if (LEGAL_SET.has(route.name)) return `/${route.name}`;
     if (PAGE_SET.has(route.name)) {

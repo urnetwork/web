@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import './Explorer.css';
 import { listedDocs, docGroups } from '../lib/docs';
 import { DOC_PAGE_PATHS } from '../lib/docs-shared';
@@ -22,25 +22,16 @@ export function isPlainClick(e) {
 /**
  * Explorer
  *
- * Two-pane chrome shared by `/docs` and `/api`. The left rail is the
- * sidebar (search input + grouped link list); the right pane is whatever
- * page-specific body the caller passes as `children`.
+ * The two-pane chrome of /docs. The left rail is the sidebar (search input
+ * and the grouped document list); the right pane is whatever page body the
+ * caller passes as `children`.
  *
- *   • `kind`         — 'docs' or 'api', selects the active sidebar entry
- *                      and which group list to render.
- *   • `apiGroups`    — sidebar groups for the API view (computed by the
- *                      OpenAPI normalizer in ApiExplorer).
- *   • `apiOperations`— flat operation list, for the search index.
  *   • `children`     — main pane content.
  *   • `initialSlug`  — the document the page was rendered for. During SSR the
  *                      router sees no URL, so the sidebar marks this one as
  *                      the current page; in the browser the URL wins.
- *
- * The component owns the search index because both pages share it: a
- * docs result navigates to `/docs/<slug>` and an API result navigates
- * to `/api#<operationId>`.
  */
-export default function Explorer({ kind, apiGroups, apiOperations, children, initialSlug = null }) {
+export default function Explorer({ children, initialSlug = null }) {
     const route = useRoute();
     const { code, t } = useLanguage();
     const [query, setQuery] = useState('');
@@ -49,10 +40,7 @@ export default function Explorer({ kind, apiGroups, apiOperations, children, ini
     const [navOpen, setNavOpen] = useState(false);
 
     // what the sidebar lists (an unlisted document is not searchable either)
-    const searchIndex = useMemo(
-        () => buildSearchIndex(listedDocs, apiOperations || []),
-        [apiOperations]
-    );
+    const searchIndex = useMemo(() => buildSearchIndex(listedDocs), []);
 
     const results = useMemo(() => {
         const q = query.trim().toLowerCase();
@@ -69,28 +57,17 @@ export default function Explorer({ kind, apiGroups, apiOperations, children, ini
         setNavOpen(false);
         navigate(docHref(doc, code));
     };
-    const onPickApi = (anchor) => {
-        setNavOpen(false);
-        navigate(buildPath({ name: 'api' }, code));
-        // Defer to next paint so the new page mounts before we scroll.
-        requestAnimationFrame(() => {
-            const el = document.getElementById(anchor);
-            if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        });
-    };
     const onPickResult = (entry) => {
-        if (entry.kind === 'doc') onPickDoc(entry);
-        else onPickApi(entry.anchor);
+        onPickDoc(entry);
         setQuery('');
     };
 
-    const isApiActive = kind === 'api';
-    const activeDocSlug = kind === 'docs' ? (route.slug ?? initialSlug ?? '') : null;
+    const activeDocSlug = route.slug ?? initialSlug ?? '';
 
     return (
         <div className={`explorer ${navOpen ? 'sidebar-open' : ''}`}>
             {/* Mobile-only handle: the sidebar is collapsed until tapped so the
-                doc/API content is visible on load instead of a wall of nav. */}
+                document is visible on load instead of a wall of nav. */}
             <button
                 type="button"
                 className="explorer-sidebar-toggle"
@@ -99,7 +76,7 @@ export default function Explorer({ kind, apiGroups, apiOperations, children, ini
                 onClick={() => setNavOpen(o => !o)}
             >
                 <span className="explorer-sidebar-toggle-label">
-                    {kind === 'api' ? t.nav.apiReference : t.nav.browseDocs} &middot; {t.nav.search}
+                    {t.nav.browseDocs} &middot; {t.nav.search}
                 </span>
                 <span className="explorer-sidebar-toggle-icon" aria-hidden="true">
                     {navOpen ? '✕' : '☰'}
@@ -111,10 +88,10 @@ export default function Explorer({ kind, apiGroups, apiOperations, children, ini
                     <input
                         type="search"
                         className="explorer-search-input"
-                        placeholder={kind === 'api' ? 'Search API' : 'Search docs'}
+                        placeholder="Search docs"
                         value={query}
                         onChange={(e) => setQuery(e.target.value)}
-                        aria-label={kind === 'api' ? 'Search API' : 'Search docs'}
+                        aria-label="Search docs"
                     />
                 </div>
 
@@ -125,14 +102,12 @@ export default function Explorer({ kind, apiGroups, apiOperations, children, ini
                         )}
                         {results.map((r, i) => (
                             <button
-                                key={`${r.kind}:${r.kind === 'doc' ? r.slug : r.anchor}:${i}`}
+                                key={`${r.slug}:${i}`}
                                 type="button"
                                 className="explorer-result"
                                 onClick={() => onPickResult(r)}
                             >
-                                <span className={`explorer-result-kind kind-${r.kind}`}>
-                                    {r.kind === 'doc' ? 'DOC' : r.method}
-                                </span>
+                                <span className="explorer-result-kind kind-doc">DOC</span>
                                 <span className="explorer-result-body">
                                     <span className="explorer-result-title">{r.title}</span>
                                     {r.subtitle && (
@@ -146,46 +121,12 @@ export default function Explorer({ kind, apiGroups, apiOperations, children, ini
 
                 {!results && (
                     <nav className="explorer-nav" aria-label="Documentation sections">
-                        {kind === 'api' && (
-                            <button
-                                type="button"
-                                className={`explorer-link explorer-link-api ${isApiActive ? 'is-active' : ''}`}
-                                onClick={() => navigate(buildPath({ name: 'api' }, code))}
-                            >
-                                <span className="explorer-link-eyebrow">API</span>
-                                <span className="explorer-link-title">REST reference</span>
-                            </button>
-                        )}
-
-                        {kind === 'api' && Array.isArray(apiGroups) && apiGroups.map(group => (
-                            <div key={group.id} className="explorer-group">
-                                <div className="explorer-group-label">{group.label}</div>
-                                <ul className="explorer-group-list">
-                                    {group.operations.map(op => (
-                                        <li key={op.id}>
-                                            <a
-                                                href={`#${op.id}`}
-                                                className="explorer-group-link"
-                                                onClick={(e) => {
-                                                    e.preventDefault();
-                                                    onPickApi(op.id);
-                                                }}
-                                            >
-                                                <span className={`explorer-method method-${op.method.toLowerCase()}`}>{op.method}</span>
-                                                <span className="explorer-op-path">{op.path}</span>
-                                            </a>
-                                        </li>
-                                    ))}
-                                </ul>
-                            </div>
-                        ))}
-
                         {docGroups.map(group => (
                             <div key={group.id} className="explorer-group">
                                 <div className="explorer-group-label">{group.label}</div>
                                 <ul className="explorer-group-list">
                                     {group.docs.map(d => {
-                                        const current = kind === 'docs' && d.slug === activeDocSlug;
+                                        const current = d.slug === activeDocSlug;
                                         // a real link (crawlable, opens in a new tab), routed in place on a plain click
                                         return (
                                             <li key={d.slug || '_root'}>
@@ -219,41 +160,23 @@ export default function Explorer({ kind, apiGroups, apiOperations, children, ini
 }
 
 /**
- * Build a flat search index. Each entry is either a doc (slug, title,
- * preview text) or an API operation (method, path, summary, description).
- * The renderer hands these straight to the result list so we don't need
- * to re-resolve identifiers later.
+ * Build a flat search index, one entry per document (slug, title, path and
+ * the text a reader sees). The result list renders these entries directly.
  */
-function buildSearchIndex(docs, ops) {
-    const out = [];
-    for (const d of docs) {
-        out.push({
-            kind: 'doc',
-            slug: d.slug,
-            title: d.title,
-            subtitle: d.path,
-            haystack: `${d.title} ${d.path} ${d.text}`.toLowerCase()
-        });
-    }
-    for (const op of ops) {
-        const desc = (op.description || '').replace(/\s+/g, ' ').trim();
-        out.push({
-            kind: 'api',
-            anchor: op.id,
-            method: op.method,
-            title: op.path,
-            subtitle: op.operationId || (desc.length > 80 ? desc.slice(0, 78) + '…' : desc),
-            haystack: `${op.method} ${op.path} ${op.operationId || ''} ${desc}`.toLowerCase()
-        });
-    }
-    return out;
+function buildSearchIndex(docs) {
+    return docs.map(d => ({
+        slug: d.slug,
+        path: d.path,
+        title: d.title,
+        subtitle: d.path,
+        haystack: `${d.title} ${d.path} ${d.text}`.toLowerCase(),
+    }));
 }
 
 /**
  * Score an entry against the search query. Each whitespace-separated
  * token must appear at least once for the entry to match; extra weight
- * is awarded for matches in the title and for token-prefix matches in
- * the path / operation id, which is what most people search for.
+ * is awarded for matches in the title and the path.
  */
 function scoreEntry(entry, q) {
     const tokens = q.split(/\s+/).filter(Boolean);

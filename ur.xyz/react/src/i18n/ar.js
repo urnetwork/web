@@ -7,7 +7,6 @@ export default {
         miners:     'المُعدِّنون',
         validators: 'المُصادِقون',
         research:   'الأبحاث',
-        community:  'المجتمع',
         price:      'تكلفة الاستخدام',
         docs:       'الوثائق',
         roadmap:    'خارطة الطريق',
@@ -20,7 +19,6 @@ export default {
         mobileNav:    'التنقّل على الجوّال',
         siteMenu:     'قائمة الموقع',
         browseDocs:   'تصفّح الوثائق',
-        apiReference: 'مرجع API',
         search:       'بحث',
         ctaAria:    'تكلفة الاستخدام — سعر الشبكة الحالي',
         denomAria:  'عملة عرض السعر'
@@ -36,7 +34,6 @@ export default {
         privacy:    'الخصوصية',
         vdp:        'VDP',
         protocol:   'البروتوكول',
-        community:  'المجتمع',
         legal:      'قانوني',
         learn:      'تعرّف',
         resources:  'الموارد',
@@ -363,18 +360,5 @@ operators: {
                 { title: 'Whole Internet Encryption for the whole world' }
             ]
         }
-    },
-
-    community: {
-        eyebrow: 'المجتمع',
-        title:   'الأشخاص وراء الشبكة.',
-        intro:   'البروتوكول مفتوح. والمجتمع الذي يبنيه ويشغّله في نمو. إليك أين تجدهم.',
-        items: [
-            { tag: '01', title: 'Discord',              body: 'نقاش عام حول المشروع — تطوير البروتوكول ودعم المُعدِّنين والمجتمع.', href: 'https://discord.gg/urnetwork', linkLabel: 'انضم إلى Discord' },
-            { tag: '02', title: 'ديسكورد Bittensor SN', body: 'نقاش خاص بجوانب Bittensor — الشبكة الفرعية والإصدار والمُصادِقون والرهن (staking).', soon: 'قريبًا' },
-            { tag: '03', title: 'حزمة العلامة التجارية', body: 'URnetwork وشعار الموصّل علامتان تجاريتان مسجّلتان في الولايات المتحدة. يُمنح مستخدمو البروتوكول الإذن باستخدام حزمة العلامة التجارية بصيغة «powered by UR» أو «with URnetwork» أو رسائل مكوّنات مشابهة.', button: { label: 'تنزيل حزمة العلامة التجارية' } }
-        ],
-        supportersTitle: 'الداعمون',
-        partnersTitle:   'الشركاء'
     }
 };

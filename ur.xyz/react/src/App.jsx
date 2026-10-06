@@ -19,7 +19,6 @@ import PriceSection from './components/PriceSection';
 import LegalSection from './components/LegalSection';
 
 import DocsExplorer from './components/DocsExplorer';
-import ApiExplorer from './components/ApiExplorer';
 import AboutPage from './components/pages/About';
 import InvestorsPage from './components/pages/Investors';
 import BuildPage from './components/pages/Build';
@@ -59,7 +58,6 @@ export default function App() {
     const route = useRoute();
 
     if (route.name === 'docs') return <DocsExplorer />;
-    if (route.name === 'api')  return <ApiExplorer />;
 
     const SectionComponent = SECTION_COMPONENTS[route.name];
     if (SectionComponent) return <SectionPage Component={SectionComponent} route={route} />;

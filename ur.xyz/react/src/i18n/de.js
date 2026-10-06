@@ -7,7 +7,6 @@ export default {
         miners:     'Miner',
         validators: 'Validatoren',
         research:   'Forschung',
-        community:  'Gemeinschaft',
         price:      'Nutzungskosten',
         docs:       'Dokumentation',
         roadmap:    'Roadmap',
@@ -20,7 +19,6 @@ export default {
         mobileNav:    'Mobile Navigation',
         siteMenu:     'Website-Menü',
         browseDocs:   'Dokumentation',
-        apiReference: 'API-Referenz',
         search:       'Suche',
         ctaAria:    'Nutzungskosten — der aktuelle Netzwerkpreis',
         denomAria:  'Preiswährung'
@@ -36,7 +34,6 @@ export default {
         privacy:    'Datenschutz',
         vdp:        'VDP',
         protocol:   'Protokoll',
-        community:  'Community',
         legal:      'Rechtliches',
         learn:      'Entdecken',
         resources:  'Ressourcen',
@@ -364,18 +361,5 @@ operators: {
                 { title: 'Whole Internet Encryption for the whole world' }
             ]
         }
-    },
-
-    community: {
-        eyebrow: 'Gemeinschaft',
-        title:   'Die Menschen hinter dem Netzwerk.',
-        intro:   'Das Protokoll ist offen. Die Gemeinschaft, die es aufbaut und betreibt, wächst. Hier findest du sie.',
-        items: [
-            { tag: '01', title: 'Discord',              body: 'Allgemeine Diskussion über das Projekt — Protokollentwicklung, Miner-Support und Community.', href: 'https://discord.gg/urnetwork', linkLabel: 'Discord beitreten' },
-            { tag: '02', title: 'Bittensor-SN-Discord', body: 'Bittensor-spezifische Diskussion — Subnet, Emission, Validatoren und Staking.', soon: 'Demnächst' },
-            { tag: '03', title: 'Brand Kit',           body: 'URnetwork und das Connector-Logo sind eingetragene US-Marken. Nutzern des Protokolls wird gestattet, das Brand Kit als „powered by UR" oder „with URnetwork" oder ähnliche Komponentenhinweise zu verwenden.', button: { label: 'Brand Kit herunterladen' } }
-        ],
-        supportersTitle: 'Unterstützer',
-        partnersTitle:   'Partner'
     }
 };

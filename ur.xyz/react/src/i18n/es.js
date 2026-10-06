@@ -7,7 +7,6 @@ export default {
         miners:     'Mineros',
         validators: 'Validadores',
         research:   'Investigación',
-        community:  'Comunidad',
         price:      'Costo de uso',
         docs:       'Documentación',
         roadmap:    'Hoja de ruta',
@@ -20,7 +19,6 @@ export default {
         mobileNav:    'Navegación móvil',
         siteMenu:     'Menú del sitio',
         browseDocs:   'Explorar documentación',
-        apiReference: 'Referencia de API',
         search:       'Buscar',
         ctaAria:    'Costo de uso — el precio actual de la red',
         denomAria:  'Moneda del precio'
@@ -36,7 +34,6 @@ export default {
         privacy:    'Privacidad',
         vdp:        'VDP',
         protocol:   'Protocolo',
-        community:  'Comunidad',
         legal:      'Legal',
         learn:      'Conocer',
         resources:  'Recursos',
@@ -364,18 +361,5 @@ operators: {
                 { title: 'Whole Internet Encryption for the whole world' }
             ]
         }
-    },
-
-    community: {
-        eyebrow: 'Comunidad',
-        title:   'Las personas detrás de la red.',
-        intro:   'El protocolo es abierto. La comunidad que lo construye y opera está creciendo. Aquí es donde encontrarla.',
-        items: [
-            { tag: '01', title: 'Discord',              body: 'Discusión general sobre el proyecto: desarrollo del protocolo, soporte a mineros y comunidad.', href: 'https://discord.gg/urnetwork', linkLabel: 'Unirse a Discord' },
-            { tag: '02', title: 'Discord de Bittensor SN', body: 'Discusión específica de Bittensor: la subred, la emisión, los validadores y el staking.', soon: 'Próximamente' },
-            { tag: '03', title: 'Kit de marca',        body: 'URnetwork y el logotipo del conector son marcas registradas en EE. UU. Se permite a los usuarios del protocolo usar el kit de marca como "powered by UR", "with URnetwork" o mensajes de componente similares.', button: { label: 'Descargar kit de marca' } }
-        ],
-        supportersTitle: 'Patrocinadores',
-        partnersTitle:   'Socios'
     }
 };
