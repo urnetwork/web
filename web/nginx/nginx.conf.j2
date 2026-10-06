@@ -268,6 +268,64 @@ http {
         return 301 https://ur.xyz$request_uri;
     }
 
+    # docs.ur.io was the GitBook docs site; the docs are now ur.io/docs. Each
+    # GitBook page with a successor 301s to it in one hop, with its .md and
+    # trailing-slash variants, and every other path, the root included, 301s
+    # to the docs index, so no old link 404s. The query string carries over,
+    # ahead of any fragment: ur.io/docs reads ?q=, the parameter of GitBook's
+    # search links. The smoke test checks each target is a page of the build.
+    server {
+        listen 80;
+        server_name docs.ur.io;
+
+        location ~ ^/provider(?:\.md|/)?$ {
+            return 301 "https://ur.io/docs/faq$is_args$args#sharing-your-connection";
+        }
+
+        location ~ ^/support/delete(?:\.md|/)?$ {
+            return 301 "https://ur.io/docs/faq$is_args$args#how-do-i-delete-my-account";
+        }
+
+        location ~ ^/protocol/protocol-research(?:\.md|/)?$ {
+            return 301 https://ur.io/docs/overview$is_args$args;
+        }
+
+        location ~ ^/trust-and-safety/trust-and-safety(?:\.md|/)?$ {
+            return 301 "https://ur.io/docs/overview$is_args$args#safe-to-share-the-ipsecurity-layer";
+        }
+
+        # the legal documents are pages of their own on ur.io, outside /docs
+        location ~ ^/legal/(?<docs_legal_doc>terms|privacy|vdp)(?:\.md|/)?$ {
+            return 301 https://ur.io/$docs_legal_doc$is_args$args;
+        }
+
+        # the agent skill documents became the agents page
+        location ~ ^/mcp/skill2?(?:\.md|/)?$ {
+            return 301 https://ur.io/agents$is_args$args;
+        }
+
+        # GitBook's API reference had a page per section and per operation
+        # (/api/api-reference/auth/code-login); ur.io/docs has one page per
+        # section, named by the first segment of its routes. Any other API
+        # path goes to the reference index.
+        location ~ ^/api/api-reference/(?<docs_api_group>auth|network|stats|subscription|wallet|device|account|preferences|feedback|connect|transfer|solana|referral-code)(?:\.md|/.*)?$ {
+            return 301 https://ur.io/docs/api/$docs_api_group$is_args$args;
+        }
+
+        location ~ ^/api(?:\.md|/.*)?$ {
+            return 301 https://ur.io/docs/api$is_args$args;
+        }
+
+        # the machine-readable entry points have the same files on ur.io
+        location ~ ^/(?<docs_site_file>robots\.txt|llms\.txt|llms-full\.txt)$ {
+            return 301 https://ur.io/$docs_site_file$is_args$args;
+        }
+
+        location / {
+            return 301 https://ur.io/docs$is_args$args;
+        }
+    }
+
     server {
         listen 80;
         server_name ur.io preview.ur.io;
