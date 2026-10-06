@@ -21,12 +21,14 @@ export function getStaticPaths() {
                 d.content.replace(/^\s*\**\s*Last (?:modified|revised|updated)\b[^\n]*$/gim, ''),
                 d.title,
             ),
+            // a document with code in it paints with the code face (Explorer.css)
+            hasCode: d.content.includes('`'),
         },
     }));
 }
 
 const { slug } = Astro.params;
-const { title, meta, description } = Astro.props;
+const { title, meta, description, hasCode } = Astro.props;
 const url = `https://ur.xyz/docs/${slug}`;
 
 const jsonLd = [{
@@ -57,5 +59,8 @@ const jsonLd = [{
     jsonLd={jsonLd}
     alternate={{ href: `/docs-md/${slug}.md`, type: 'text/markdown' }}
 >
+    {/* fetched with the page, not after its stylesheet: the guides are mostly code.
+        A document without code never paints with it, so it is not preloaded there. */}
+    {hasCode && <link slot="head" rel="preload" href="/JetBrainsMono-Regular.woff2" as="font" type="font/woff2" crossorigin />}
     <DocsIsland activeRoute="docs" lang="en" initialSlug={slug} client:load />
 </Base>

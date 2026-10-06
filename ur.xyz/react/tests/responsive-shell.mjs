@@ -14,7 +14,10 @@ const ASTRO_DIR = path.resolve(__dirname, '../../astro');
 const UR_ENV = process.env.UR_ENV || 'main';
 const ROOT = path.join(ASTRO_DIR, 'build', UR_ENV);
 
-const ROUTES = ['/build', '/about', '/investors', '/reserve', '/', '/operators', '/miners', '/validators', '/research', '/docs'];
+// /docs/operator: the guide with the longest code lines and two tables of
+// code; /docs/miner: a directory tree. Their code wraps and their tables stack,
+// so neither a code block nor a table scrolls sideways at any width.
+const ROUTES = ['/build', '/about', '/investors', '/reserve', '/', '/operators', '/miners', '/validators', '/research', '/docs', '/docs/operator', '/docs/miner'];
 const PROFILES = [
   { name: 'desktop', width: 1280, height: 900 },
   { name: 'desktop-edge', width: 1080, height: 800 },
@@ -116,6 +119,13 @@ async function auditPage(browser, base, route, profile) {
   assert(shell.brokenImages.length === 0, `${route} has broken images: ${shell.brokenImages.join(', ')}`);
   assert(errors.length === 0, `${route} logged errors: ${errors.join(' | ')}`);
   assert(await page.locator('footer a[href="/about"]').count() > 0, `${route} footer has no About link`);
+
+  if (route.startsWith('/docs/')) {
+    const sideways = await page.evaluate(() => [...document.querySelectorAll('.md-pre, .md-table-wrap')]
+      .filter((el) => el.scrollWidth > el.clientWidth + 1)
+      .map((el) => `${el.className}: ${el.textContent.trim().slice(0, 40)}`));
+    assert(sideways.length === 0, `${route} has code or tables that scroll sideways at ${profile.width}px: ${sideways.join(' | ')}`);
+  }
 
   const primary = page.locator('nav[aria-label="Primary navigation"]');
   const menuToggle = page.locator('header button[aria-label*="menu" i], header summary[aria-label*="menu" i]');
