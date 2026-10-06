@@ -6,7 +6,8 @@ import { copyText } from '../../lib/clipboard';
 import XYChart from './reserve/XYChart';
 import SplitBar from './reserve/SplitBar';
 import { axisCompact, compact, whole, alpha as fmtAlpha, pct, shortDate, longDate, isoDay, timeUtc, daysBetween } from './reserve/format';
-import { inflowPerDay, projectBalance, spliceLive, flowsOf, observedInflow } from './reserve/projection';
+import { projectBalance, spliceLive, flowsOf, observedInflow } from './reserve/projection';
+import { inflowPerDay, momentumOf } from './reserve/momentum';
 import './Reserve.css';
 
 /**
@@ -77,15 +78,14 @@ export default function ReservePage() {
     const emission = snapshot ? snapshot.emission : { ...FALLBACK_EMISSION, ownerPerDay: FALLBACK_EMISSION.alphaPerDay * FALLBACK_EMISSION.ownerCut, validatorPerDay: minerPerDayOf(FALLBACK_EMISSION), minerPerDay: minerPerDayOf(FALLBACK_EMISSION) };
     const minerPerDay = emission.minerPerDay;
     // Momentum is the share of the miner emissions paid to providers now; the
-    // reserve receives the rest, minerPerDay × (1 − momentum). Until the
-    // reserve is live that is momentum's launch value. Once it is, the chain's
-    // own split: what goes to neither the reserve's hotkeys nor the burn.
+    // reserve receives the rest, minerPerDay × (1 − momentum). The launch value
+    // until the chain shows momentum of its own (reserve/momentum.js): what
+    // goes to neither the reserve's hotkeys nor the burn, once providers are
+    // paid on chain or the reserve has received anything.
     const routing = snapshot?.routing;
     const otherShare = routing ? Math.max(0, 1 - routing.reserve - routing.burned) : 0;
     const launchMomentum = reserve.launchMomentumBps / 10_000;
-    const measured = live && !!routing;
-    const momentum = measured ? otherShare : launchMomentum;
-    const burnedShare = measured ? routing.burned : 0;
+    const { momentum, fromChain, burned: burnedShare } = momentumOf({ routing, live, launchMomentum });
     const perDay = inflowPerDay(minerPerDay, momentum, burnedShare);
     const momentumPerDay = minerPerDay * momentum;
     // TAO per α at the pool's reserves: the one valuation the page shows
@@ -182,13 +182,13 @@ export default function ReservePage() {
                             <span className="reserve-nw">(1 − <span className="is-momentum">momentum</span>)</span>
                         </p>
                         <p className="reserve-formula-calc">
-                            <span className="reserve-nw">{measured ? `At block ${whole(snapshot.block)}:` : 'At launch:'}</span>{' '}
+                            <span className="reserve-nw">{live && routing ? `At block ${whole(snapshot.block)}:` : fromChain ? 'At the current momentum:' : 'At launch:'}</span>{' '}
                             <span className="reserve-nw">{whole(perDay)} α a day</span>{' '}
                             <span className="reserve-nw">= {whole(minerPerDay)} α a day</span>{' '}
                             <span className="reserve-nw">× (1 − {pct(momentum)}{burnedShare >= 0.0005 ? ` − ${pct(burnedShare)} burned` : ''})</span>
                         </p>
                         <p className="reserve-formula-def">
-                            <dfn>Momentum</dfn> is the share of the miner emissions used now to power the network, as rewards to providers: {measured ? `${pct(momentum)} at this block, from ${pct(launchMomentum)} at launch` : `${pct(launchMomentum)} at launch`}. The reserve is not a fixed share. It receives whatever momentum does not use, so it receives less as momentum grows.
+                            <dfn>Momentum</dfn> is the share of the miner emissions used now to power the network, as rewards to providers: {fromChain ? `${pct(momentum)} at block ${whole(snapshot.block)}, from ${pct(launchMomentum)} at launch` : `${pct(launchMomentum)} at launch`}. The reserve is not a fixed share. It receives whatever momentum does not use, so it receives less as momentum grows.
                         </p>
                     </div>
                     <div className="reserve-wallet">
@@ -230,7 +230,7 @@ export default function ReservePage() {
                     <p className="reserve-sub">
                         {chart.livePts.length
                             ? 'Live balance sampled daily from finalized chain state, then projected at miner emissions × (1 − momentum), with momentum as the chain shows it now.'
-                            : `Miner emissions × (1 − momentum), with momentum at its launch value of ${pct(launchMomentum)} and no programs paid. Switches to the live balance once the reserve receives emission.`}
+                            : `Miner emissions × (1 − momentum), with momentum at ${fromChain ? `${pct(momentum)}, its value on chain now,` : `its launch value of ${pct(launchMomentum)}`} and no programs paid. Switches to the live balance once the reserve receives emission.`}
                     </p>
 
                     <div className="reserve-panel">
@@ -328,7 +328,9 @@ export default function ReservePage() {
                                 ]}
                                 note={live
                                     ? `The reserve receives what momentum leaves: 1 − momentum. Momentum was ${pct(otherShare)} of the miner allocation at this block, from ${pct(launchMomentum)} at launch.`
-                                    : `From ${shortDate(reserve.launch)}, momentum goes to providers, ${pct(launchMomentum)} at launch (${whole(momentumPerDay)} α a day), and the reserve receives the rest, 1 − momentum (${whole(perDay)} α a day). Until then the chain burns the owner-directed share.`}
+                                    : fromChain
+                                        ? `Momentum is on chain now: ${pct(momentum)} of the miner allocation (${whole(momentumPerDay)} α a day) goes to providers. The reserve receives the rest, 1 − momentum (${whole(perDay)} α a day), once its hotkeys are paid.`
+                                        : `From ${shortDate(reserve.launch)}, momentum goes to providers, ${pct(launchMomentum)} at launch (${whole(momentumPerDay)} α a day), and the reserve receives the rest, 1 − momentum (${whole(perDay)} α a day). Until then the chain burns the owner-directed share.`}
                             />
                         ) : (
                             <SplitBar
@@ -459,7 +461,7 @@ export default function ReservePage() {
                     <p className="reserve-fine">
                         <span><b>Mechanism.</b> SN25 emits {whole(emission.alphaPerDay)} α a day: {pct(emission.ownerCut, 0)} to the subnet owner and the rest split evenly between validators and miners, so the miner allocation is {whole(minerPerDay)} α a day. From {shortDate(reserve.launch)}, momentum, the share used now to power the network, goes to providers as rewards: {pct(launchMomentum)} at launch. The reserve's recipient hotkeys receive the rest, miner emissions × (1 − momentum), so the reserve's share is not fixed. It falls as momentum grows.</span>
                         {snapshot && !live && (
-                            <span><b>{overdue ? 'Before the first receipt.' : 'Before launch.'}</b> At finalized block {whole(snapshot.block)} ({timeUtc(snapshot.time)}) {pct(snapshot.routing.burned, 0)} of the miner allocation was directed to the subnet owner hotkey and burned by the chain, and the reserve account held nothing. The projection holds momentum at its launch value and assumes no program payments.</span>
+                            <span><b>{overdue ? 'Before the first receipt.' : 'Before launch.'}</b> At finalized block {whole(snapshot.block)} ({timeUtc(snapshot.time)}) {pct(snapshot.routing.burned, 0)} of the miner allocation was directed to the subnet owner hotkey and burned by the chain, and the reserve account held nothing. The projection holds momentum at {fromChain ? `its value on chain now, ${pct(momentum)},` : 'its launch value'} and assumes no program payments.</span>
                         )}
                         {snapshot && live && (
                             <span><b>Balance.</b> The reserve is α staked on SN25 under its recipient hotkeys, owned by coldkey {shortKey(reserve.address)}, read from finalized chain state (block {whole(snapshot.block)}, {timeUtc(snapshot.time)}); any free TAO is shown separately. Receipts and payments are the rises and falls between daily samples.</span>
