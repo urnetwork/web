@@ -816,8 +816,10 @@
   .build-page[data-version="12"] .cta-actions-v12{align-items:stretch;flex-direction:column}
 }
 
-/* 12 consistency pass — use the live editorial page rhythm outside the 3D theatre. */
-.build-page[data-version="12"] .build-hero.shell,.build-page[data-version="12"] .proof-v12 .shell,.build-page[data-version="12"] .flows.shell,.build-page[data-version="12"] .cta .shell{width:min(980px,calc(100% - 64px))}
+/* 12 consistency pass — use the live editorial page rhythm outside the 3D theatre:
+   the site's content column (--content-width, App.css). The theatre's stage is the
+   one exhibit wider than it. */
+.build-page[data-version="12"] .build-hero.shell,.build-page[data-version="12"] .proof-v12 .shell,.build-page[data-version="12"] .flows.shell,.build-page[data-version="12"] .cta .shell{width:min(var(--content-width),calc(100% - (var(--content-gutter) * 2)))}
 .build-page[data-version="12"] .build-hero{padding:78px 0 70px}
 .build-page[data-version="12"] .hero-title{display:block;margin:0 0 54px;padding:0;border:0}
 .build-page[data-version="12"] .hero-title .eyebrow{display:block;margin:0 0 18px;color:var(--pink);font:11px PPNeueBit,monospace;font-weight:600;letter-spacing:.2em;text-transform:uppercase}
@@ -826,12 +828,12 @@
 .build-page[data-version="12"] .hero-intro{display:block;max-width:760px;padding:0}
 .build-page[data-version="12"] .hero-intro h2{max-width:20ch;font-size:clamp(30px,3.2vw,42px);line-height:1.04;letter-spacing:-.035em}
 .build-page[data-version="12"] .hero-intro p{max-width:67ch;margin-top:20px;font-size:17px;line-height:1.65}
-.build-page[data-version="12"] .proof-strip{display:grid;grid-template-columns:repeat(3,1fr);gap:0;min-height:0;margin-top:44px;padding:28px 0 0;border:0;border-top:1px solid var(--rule)}
+.build-page[data-version="12"] .proof-strip{display:grid;grid-template-columns:repeat(3,1fr);align-items:start;gap:0;min-height:0;margin-top:44px;padding:28px 0 0;border:0;border-top:1px solid var(--rule)}
 .build-page[data-version="12"] .proof-strip span{display:flex;flex-direction:column;align-items:flex-start;gap:9px;min-height:0;padding:0 24px 0 28px!important;border:0!important;border-left:1px solid var(--rule)!important;color:#a3aeb5;text-transform:uppercase}
 .build-page[data-version="12"] .proof-strip span:first-child{padding-left:0!important;border-left:0!important}
 .build-page[data-version="12"] .proof-strip b{color:#e9eff2;font-size:clamp(32px,3vw,42px);font-weight:400;line-height:.92;letter-spacing:-.045em}
 .build-page[data-version="12"] .hero-quiet{display:none!important}
-.build-page[data-version="12"] .section-head{grid-template-columns:160px minmax(0,1fr);gap:44px;max-width:980px;margin-right:auto;margin-left:auto}
+.build-page[data-version="12"] .section-head{grid-template-columns:160px minmax(0,1fr);gap:44px;max-width:var(--content-width);margin-right:auto;margin-left:auto}
 .build-page[data-version="12"] .section-head h2{font-size:clamp(40px,4.5vw,58px);line-height:1.02;letter-spacing:-.045em}
 .build-page[data-version="12"] .section-head p{font-size:17px;line-height:1.65}
 .build-page[data-version="12"] .model-stage:not([data-focus]) .architecture-readout{display:none!important}
@@ -1044,7 +1046,7 @@
 /* Editorial model showcase. The object remains technical; its framing should
    read like an exhibition caption rather than an application dashboard. */
 .build-page[data-version="12"] .theatre{padding:72px 0 88px;background:radial-gradient(900px 620px at 52% 43%,rgba(126,55,139,.15),transparent 66%),linear-gradient(180deg,#0d0e11,#101010 94%)}
-.build-page[data-version="12"] .section-head{max-width:980px;margin-bottom:46px}
+.build-page[data-version="12"] .section-head{max-width:var(--content-width);margin-bottom:46px}
 .build-page[data-version="12"] .section-head>.eyebrow{margin-bottom:20px}
 .build-page[data-version="12"] .section-head h2{max-width:16ch;font-size:clamp(46px,5.1vw,66px);white-space:normal}
 .build-page[data-version="12"] .section-head p{max-width:64ch;margin-top:19px;color:#a2adb4;font-size:18px;line-height:1.58}
@@ -1103,12 +1105,12 @@
   .build-page[data-version="12"] .readout-brief{margin-top:7px;font-size:14px}
 }
 
-/* One content edge across the full page. */
+/* One content edge across the full page: the site's content column. */
 .build-page[data-version="12"] .build-hero.shell,
 .build-page[data-version="12"] .proof-v12 .shell,
 .build-page[data-version="12"] .flows.shell,
-.build-page[data-version="12"] .cta .shell{width:min(980px,calc(100% - 64px))}
-.build-page[data-version="12"] .theatre>.shell{width:min(var(--max),calc(100% - 64px))}
+.build-page[data-version="12"] .cta .shell{width:min(var(--content-width),calc(100% - (var(--content-gutter) * 2)))}
+.build-page[data-version="12"] .theatre>.shell{width:min(var(--max),calc(100% - (var(--content-gutter) * 2)))}
 /* With the brief closed the readout is the last thing on the stage; the old
    88px stage tail plus the section pad left a long empty run. */
 .build-page[data-version="12"] .theatre{padding-bottom:44px}
@@ -1162,9 +1164,11 @@
   .build-page[data-version="12"] .terminal3-asset{
     transform:translate(-50%,-50%) scale(.86);
   }
+  /* top-aligned, as on desktop: the third label runs to two lines in the
+     content column, and centring left its figure above the other two */
   .build-page[data-version="12"] .proof-strip span{
     height:70px;
-    justify-content:center;
+    justify-content:flex-start;
   }
 }
 

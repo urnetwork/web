@@ -1,6 +1,9 @@
 .announcement-page {
-    --announcement-shell: min(940px, calc(100vw - 64px));
-    --announcement-paper: min(760px, calc(100vw - 64px));
+    /* the toolbar and headline sit on the site's content column (App.css);
+       the paper below is the document itself, an A4 sheet: it keeps its size
+       where there is room and the content gutter where there is not */
+    --announcement-shell: min(var(--content-width), calc(100% - (var(--content-gutter) * 2)));
+    --announcement-paper: min(760px, calc(100vw - (var(--content-gutter) * 2)));
     --announcement-ink: #151515;
     --announcement-muted: #595959;
     /* The page shell's <main class="section-page"> already pads one nav
@@ -250,7 +253,6 @@
 }
 
 @media (max-width: 760px) {
-    .announcement-page { --announcement-shell: calc(100vw - 32px); --announcement-paper: calc(100vw - 24px); }
     .announcement-toolbar { align-items: flex-start; padding-block: 28px 18px; }
     .announcement-actions { flex-direction: column; align-items: flex-end; }
     .announcement-summary { padding: 12px 0 32px; }
@@ -269,7 +271,6 @@
 }
 
 @media (max-width: 480px) {
-    .announcement-page { --announcement-shell: calc(100vw - 24px); --announcement-paper: calc(100vw - 16px); }
     .announcement-toolbar { align-items: center; gap: 16px; }
     .announcement-actions { flex-direction: row; justify-content: flex-end; }
     .announcement-download { padding-inline: 14px; }

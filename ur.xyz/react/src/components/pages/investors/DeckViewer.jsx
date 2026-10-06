@@ -42,7 +42,7 @@ const slides = Array.from({ length: total }, (_, i) => {
     };
 });
 // the stage's width (--deck-shell in DeckViewer.css), for picking a file
-const STAGE_SIZES = '(max-width: 720px) calc(100vw - 40px), (max-width: 1244px) calc(100vw - 64px), 1180px';
+const STAGE_SIZES = '(max-width: 767px) calc(100vw - 40px), (max-width: 1244px) calc(100vw - 64px), 1180px';
 
 function slideFromHash() {
     const n = Number(window.location.hash.slice(1));

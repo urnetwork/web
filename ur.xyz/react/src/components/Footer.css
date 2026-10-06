@@ -116,6 +116,12 @@
 .footer-lang.is-active { color: var(--brand-white); opacity: 1; }
 .footer-lang.is-active { border-bottom: 1px solid var(--brand-ur); }
 
+/* While the content column is fluid (viewports up to --content-width plus
+   two 32px gutters) the footer sits on the content's edges. */
+@media (max-width: 864px) {
+    .footer { padding-inline: var(--content-gutter); }
+}
+
 @media (max-width: 800px) {
     .footer-directory { grid-template-columns: 1fr; }
     .footer-column { padding: 32px 0; }

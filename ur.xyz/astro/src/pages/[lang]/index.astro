@@ -45,8 +45,8 @@ const description = sentenceClamp(t.homepage.metaDescription || t.homepage.intro
 
 <style>
     .landing-main { position: relative; background: var(--brand-bg); }
-    .landing-overview { width: min(1180px, calc(100% - 64px)); margin: 0 auto; padding: 120px 0 0; }
+    .landing-overview { width: min(1180px, calc(100% - (var(--content-gutter) * 2))); margin: 0 auto; padding: 120px 0 0; }
     @media (max-width: 767px) {
-        .landing-overview { width: calc(100% - 40px); padding-top: 88px; }
+        .landing-overview { padding-top: 88px; }
     }
 </style>

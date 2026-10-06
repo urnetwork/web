@@ -1,6 +1,6 @@
 .homepage-intro {
     width: 100%;
-    padding: 420px 32px 128px;
+    padding: 420px var(--content-gutter) 128px;
     background: var(--brand-bg);
 }
 .homepage-intro-inner {
@@ -39,7 +39,7 @@
 
 @media (max-width: 767px) {
     .homepage-intro {
-        padding: 176px 20px 88px;
+        padding: 176px var(--content-gutter) 88px;
     }
 
     .homepage-intro h1 {

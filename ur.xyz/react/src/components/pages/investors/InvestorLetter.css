@@ -1,6 +1,8 @@
 .investor-letter-page {
-    --letter-shell: min(860px, calc(100vw - 64px));
-    --letter-body: min(680px, calc(100vw - 64px));
+    /* the heading band sits on the site's content column (App.css); the
+       letter's own text measure and its wider exhibits are set below */
+    --letter-shell: min(var(--content-width), calc(100% - (var(--content-gutter) * 2)));
+    --letter-body: min(680px, calc(100vw - (var(--content-gutter) * 2)));
     --letter-line: rgba(214, 230, 244, 0.14);
     --letter-line-strong: rgba(214, 230, 244, 0.23);
     --letter-soft: rgba(214, 230, 244, 0.74);
@@ -192,7 +194,7 @@
 }
 
 .letter-exhibit {
-    width: min(1000px, calc(100vw - 36px));
+    width: min(1000px, calc(100vw - (var(--content-gutter) * 2)));
     margin: 74px 0;
     margin-left: 50%;
     transform: translateX(-50%);
@@ -793,11 +795,6 @@
 }
 
 @media screen and (max-width: 720px) {
-    .investor-letter-page {
-        --letter-shell: calc(100vw - (var(--page-gutter) * 2));
-        --letter-body: calc(100vw - (var(--page-gutter) * 2));
-    }
-
     .letter-back-row {
         padding-top: 28px;
     }
@@ -850,7 +847,6 @@
     }
 
     .letter-exhibit {
-        width: calc(100vw - (var(--page-gutter) * 2));
         margin-block: 56px;
     }
 

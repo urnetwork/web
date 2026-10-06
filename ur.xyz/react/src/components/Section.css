@@ -3,7 +3,7 @@
 .section {
     position: relative;
     width: 100%;
-    padding: 120px 32px 140px;
+    padding: 120px var(--content-gutter) 140px;
     background: var(--brand-bg);
     color: var(--brand-ui);
     font-family: 'PPNeueMontreal', sans-serif;
@@ -11,10 +11,11 @@
 }
 
 /* One column for everything in a section: the paragraphs run the full
-   width of it, so it is sized as a reading measure (about 80 characters of
-   body text) rather than as a wide content well with narrower text inside. */
+   width of it, so it is sized as a reading measure rather than as a wide
+   content well with narrower text inside. The width is the site's content
+   column (--content-width, App.css), which the other pages' shells share. */
 .section-inner {
-    max-width: 800px;
+    max-width: var(--content-width);
     margin: 0 auto;
 }
 
@@ -261,7 +262,7 @@
 /* --- Responsive --- */
 @media (max-width: 768px) {
     .section {
-        padding: 80px 20px 100px;
+        padding: 80px var(--content-gutter) 100px;
     }
 
     .section-whitepaper {

@@ -61,7 +61,7 @@
     justify-content: space-between;
     gap: 12px;
     min-height: 44px;
-    padding: 14px var(--page-gutter);
+    padding: 14px var(--content-gutter);
     background: rgba(16, 16, 16, 0.92);
     backdrop-filter: blur(14px);
     -webkit-backdrop-filter: blur(14px);
@@ -1029,7 +1029,7 @@
         height: auto;
         max-height: 0;
         overflow: hidden;
-        padding: 0 var(--page-gutter);
+        padding: 0 var(--content-gutter);
         border-right: none;
         border-bottom: none;
         transition: max-height 0.3s ease, padding 0.3s ease;
@@ -1037,12 +1037,12 @@
     .explorer.sidebar-open .explorer-sidebar {
         max-height: 78vh;
         overflow-y: auto;
-        padding: 20px var(--page-gutter) 28px;
+        padding: 20px var(--content-gutter) 28px;
         border-bottom: 1px solid var(--sidebar-border);
     }
 
     .explorer-main {
-        padding: 36px var(--page-gutter) 80px;
+        padding: 36px var(--content-gutter) 80px;
     }
     .api-field {
         grid-template-columns: 1fr;

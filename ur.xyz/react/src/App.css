@@ -16,6 +16,32 @@
 
     --nav-height: 64px;
     --page-gutter: 20px;
+
+    /* The content column: the one width every page's main column shares
+       (the section pages, /about, /price, /build, /investors, /reserve, the
+       legal pages, and the header band of the investor documents). It is the
+       reading column the section pages set: body text already runs about 110
+       characters a line at 800px, so paragraphs fill the column and the
+       column is no wider. Exhibits may exceed it (the home page's landing
+       band, the build model's stage, the deck, a letter's figures); running
+       text and page furniture do not. Change it here and every page follows.
+       --content-gutter is the space kept on either side of it when the
+       viewport is narrower: 32px, and the page gutter on small screens (the
+       media query below). A shell is
+       min(var(--content-width), calc(100% - (var(--content-gutter) * 2))).
+       On tablets and phones nothing breaks the column: the nav, the footer
+       and the wide layouts (home, docs, deck, exhibits) keep to the same
+       gutter, so every page has the same two edges. */
+    --content-width: 800px;
+    --content-gutter: 32px;
+}
+
+/* Phones: below 768px, the boundary the home page's layout and its docking
+   script use (a 768px tablet keeps the 32px gutter). */
+@media (max-width: 767px) {
+    :root {
+        --content-gutter: var(--page-gutter);
+    }
 }
 
 /* --- Base reset --- */
