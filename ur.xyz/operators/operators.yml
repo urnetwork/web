@@ -1,0 +1,15 @@
+# Network operators of the UR subnet (Bittensor SN25, netuid 25).
+#
+# Published at https://ur.xyz/operators.yml. Miners run with --all-operators
+# and validators run with --operators-refresh read this list periodically and
+# keep the last good copy if ur.xyz is unreachable.
+#
+# Each entry names where an operator serves its API and Connect endpoints. The
+# list grants no weight or payout authority: a validator weights only the
+# operators pinned by its signed release config, and every operator
+# authenticates its own accounts and mining keys.
+schema: urnetwork-operators-v1
+operators:
+  - domain: bringyour.com
+    api_url: https://api.bringyour.com
+    connect_url: wss://connect.bringyour.com

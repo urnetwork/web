@@ -119,6 +119,37 @@ expect_ip_html() {
         fail "ur.io/ip HTML ($label) did not vary on Accept"
 }
 
+# Miners and validators read the network operator list from ur.xyz. It must
+# come from its own location: YAML, a five-minute lifetime rather than the
+# hour that the generic machine-readable rule gives, and the list's schema line.
+expect_operator_list() {
+    local headers="$test_dir/operators.headers"
+    local body="$test_dir/operators.body"
+    local status
+    local content_type
+    local cache_control
+
+    status=$(curl --silent --show-error \
+        --output "$body" \
+        --dump-header "$headers" \
+        --write-out '%{http_code}' \
+        --header 'Host: ur.xyz' \
+        'http://127.0.0.1/operators.yml')
+
+    [[ "$status" == 200 ]] || fail "ur.xyz/operators.yml returned $status, expected 200"
+
+    content_type=$(awk 'BEGIN { IGNORECASE=1 } /^Content-Type:/ { sub(/^[^:]+:[[:space:]]*/, ""); sub(/[[:space:]]*;.*/, ""); gsub(/\r/, ""); print; exit }' "$headers")
+    [[ "$content_type" == application/yaml ]] || \
+        fail "ur.xyz/operators.yml content type was ${content_type:-<missing>}"
+
+    cache_control=$(awk 'BEGIN { IGNORECASE=1 } /^Cache-Control:/ { sub(/^[^:]+:[[:space:]]*/, ""); gsub(/\r/, ""); print; exit }' "$headers")
+    [[ "$cache_control" == 'public, max-age=300' ]] || \
+        fail "ur.xyz/operators.yml cache control was ${cache_control:-<missing>}"
+
+    grep -Eq '^schema: urnetwork-operators-v1([[:space:]]|$)' "$body" || \
+        fail 'ur.xyz/operators.yml does not carry schema: urnetwork-operators-v1'
+}
+
 nginx -t
 nginx >"$analytics_log" 2>"$nginx_error_log"
 
@@ -145,6 +176,7 @@ expect_response ur.io /products 200
 expect_response ur.io /ip 200
 expect_response ur.xyz /investors 200
 expect_response ur.xyz /reserve 200
+expect_operator_list
 expect_response www.ur.io / 301 https://ur.io/
 expect_response www.ur.xyz / 301 https://ur.xyz/
 
