@@ -1,12 +1,12 @@
 ---
-description: How to become a network operator on Bittensor SN25 (netuid 25): run the servers and /verify, get admitted to the coordinator, set deposits and payout roots, publish stats.
+description: Run a URnetwork operator in one binary, configure PostgreSQL, Redis and Warp resources for main, and operate the SN25 reward pipeline.
 ---
 
 # How to become a network operator
 
 A network operator runs the servers of the UR privacy network: the API and connect services that users and miners attach to, the `/verify` endpoint that validators walk, and the epoch pipeline that settles its miners' rewards on **Bittensor SN25 (netuid 25)**. An operator brings its own users and products (the ur.io apps are one operator's), deposits α as a revenue-backed signal of real demand, and each settlement epoch commits the Merkle payout list that splits its pool among its miners. It directs where the pool goes but never holds anyone else's α: the immutable settlement vault owns the pool and every miner claims from it directly.
 
-This guide is written against the release-1.0 code in the `sn` and `server` repositories. For the mechanism read the [litepaper](/docs/litepaper); for the other roles see [How to become a miner](/docs/miner) and [How to become a validator](/docs/validator).
+The [`server/cli/all/main.go`](https://github.com/urnetwork/server/blob/main/cli/all/main.go) entry point runs the API, Connect and the production taskworker together. You deploy one operator executable; PostgreSQL, Redis, artifact storage and public TLS ingress remain backing services. For the mechanism read the [litepaper](/docs/litepaper); for the other roles see [How to become a miner](/docs/miner) and [How to become a validator](/docs/validator).
 
 ## Who this is for
 
@@ -14,16 +14,307 @@ Teams that want to run a network space: a deployment of the open-source server s
 
 ## What you need
 
-- **The server stack.** The services in [github.com/urnetwork/server](https://github.com/urnetwork/server): the API (`api.<your domain>`), the connect service (`connect.<your domain>`), an extender (`extender.<your domain>`), taskworkers, PostgreSQL, Redis, and the content-addressed `server/blob` object store (MinIO) that holds payout and evidence artifacts. The reference operator deploys it continuously with the `warp` tools and tags each deployed version on GitHub. Anyone can host a network space by deploying and maintaining these services.
+- **A Linux host and your domain.** The single binary serves the API (`api.<your domain>`), Connect (`connect.<your domain>`) and the full production taskworker. PostgreSQL stores accounts, usage, settlement and the durable task queue; Redis supplies shared coordination and caches; local durable artifact storage holds payout and evidence artifacts. Configure the integrations your operator offers, including extender gossip when using extenders. The optional Alt and Proxy frontends are separate server roles.
 - **Admission on the coordinator.** Operators are registered by the subnet owner with `registerOperator(noId, coldkey, poolHotkey, depositHotkey, depositSigner, rootSigner, effectiveEpoch, maximumBurnRao)`, an owner-only call that also has the settlement vault register your pool UID under the vault's own coldkey (the registration burn is paid from the call's value up to `maximumBurnRao`, with the unburned remainder refunded). Later role changes are scheduled future-effective with `scheduleOperator`. You supply the identities; the owner registers them and gives you your `no_id`.
 - **Keys and hotkeys.** An operator coldkey (ss58, prefix 42); a **pool hotkey** the vault registers as your pool UID; a **deposit hotkey**, unique to you, on which deposits are staged; and three EVM signers held by the server (hex-encoded secp256k1): the **deposit signer** (`deposit_key`, calls `deposit`), the **root signer** (`root_key`, closes epochs, commits payout roots and finalizes), and the **artifact signer** (`artifact_key`, signs payout artifacts; validators pin it as your `artifact_signer`). The signers need TAO on the Subtensor EVM for gas; the deposit hotkey needs α to deposit (none during the initial period).
 - **`/verify` server keys.** One or more Ed25519 keys in the `verify.yml` vault resource; the first signs new trails and all are published at `GET /verify/keys` so historical proofs verify across rotations.
-- **An egress prober.** Something that measures what each miner's exit actually carries: either the taskworker's durable probe shards (`config/<env>/provider_egress_probe.yml`) or the standalone `egress-prober` from [operator-proxy](https://github.com/urnetwork/operator-proxy).
+- **Egress probes.** The binary's taskworker runs durable probe shards configured by `config/main/provider_egress_probe.yml`, measuring what each miner's exit actually carries.
 - **A public stats feed** (`stats.json`) so the ur.xyz operators directory can list you.
 
-## Step 1: deploy the servers
+## Step 1: build the single operator binary
 
-Deploy the server repository's services for your domain. The `/verify` route needs no separate service: it is part of the API, and its statistics, proofs and keys are public routes on the same host:
+Use the current [`urnetwork/server`](https://github.com/urnetwork/server) source and the Go version and **exact sibling revisions** in its [build workflow](https://github.com/urnetwork/server/blob/main/.github/workflows/test.yml). The current workflow uses Go 1.26.7. Its sibling checkouts are `connect`, `glog`, `sdk`, `proxy`, `goidenticons`, `userwireguard`, `operator-proxy`, `warp`, `sn` and `gvisor`; `sn` comes from `urfoundation/sn`, and the others from `urnetwork`. Keep these beside `server`: `go.mod` uses relative replacements. Follow the repository's [canonical build instructions](https://github.com/urnetwork/server#canonical-build-sources) when preparing that source tree.
+
+From the `server` checkout:
+
+```bash
+GOWORK=off GOTOOLCHAIN=local CGO_ENABLED=0 \
+  go build -mod=readonly -p 2 -o build/ur-operator ./cli/all
+
+./build/ur-operator --help
+```
+
+Copy `build/ur-operator` to `/usr/local/bin/ur-operator` on the server. Keep the binary's source revision with your release record. Build each upgrade from the dependency revisions selected by that server revision.
+
+## Step 2: create the Warp layout for main
+
+The executable uses the same resolver as the individual server services. `WARP_ENV=main` selects the **deployment environment**; `URNETWORK_ST_PROFILE=mainnet` separately selects the **chain profile**. This example runs the process as a dedicated `urnetwork` Unix user, with public HTTPS terminated by a reverse proxy on the same host.
+
+```bash
+sudo useradd --system --home-dir /srv/warp --no-create-home \
+  --shell /usr/sbin/nologin urnetwork
+sudo install -d -o root -g urnetwork -m 0750 /srv/warp
+sudo install -d -o root -g urnetwork -m 0750 \
+  /srv/warp/config/main/mmdb /srv/warp/vault/main /srv/warp/site
+sudo install -d -o root -g urnetwork -m 0750 /etc/urnetwork
+```
+
+Use this layout. Names such as `pg.yml` are literal resource names; `<...>` values in the examples below must be replaced.
+
+```text
+/usr/local/bin/ur-operator
+/etc/urnetwork/operator.env
+/etc/urnetwork/durable-volumes.json   # external declaration for artifact storage
+/srv/urnetwork-data/                 # separately mounted persistent filesystem
+  operator-blob/                     # preprovisioned artifact root
+  operator-identity/                 # external volume marker and root lease
+/srv/warp/
+  config/
+    main/
+      db.yml
+      redis.yml
+      tls.yml
+      provider_egress_probe.yml
+      sn.yml                         # reviewed earnings/activation declaration
+      operator-gas-authority.yml      # independently provisioned public approval
+      mmdb/
+        geolite2.mmdb                 # real GeoLite2-City database
+        places.yml                   # place export from the same database
+    all/                             # optional resources shared by environments
+  vault/
+    main/
+      pg.yml
+      redis.yml
+      jwt.yml
+      jwt-signing.pem
+      password.yml
+      client.yml
+      verify.yml
+      provider_egress.yml
+      minio.yml
+      st.yml
+      auth.yml                       # OAuth configuration when offering OAuth
+      oauth/                         # OAuth's separate signing keys
+      extender.yml                   # when offering extender/gossip services
+      tls/                           # when enabling Connect's native TLS transports
+        connect.example.net/
+          connect.example.net.crt
+          connect.example.net.key
+    all/                             # optional shared vault resources
+  site/
+    settings.yml                     # host-specific routes/settings
+```
+
+Set vault files to `root:urnetwork` mode `0640` and vault directories to `0750`; use `umask 077` when generating secrets. Keep the operator's config and binaries readable but not writable by the service user. PostgreSQL, Redis and object storage need persistent data and backups independent of this resource tree.
+
+Without overrides the roots are `$WARP_HOME/{config,vault,site}`, and `WARP_HOME` defaults to `/srv/warp`. You may instead set `WARP_CONFIG_HOME`, `WARP_VAULT_HOME` and `WARP_SITE_HOME` to other roots. For each resource, the resolver tries direct files at the root, then `main/`, then `all/`; after those it searches version directories in descending semantic-version order. A root-level file therefore overrides the environment copy. A Warp container may mount the already-selected environment directly at a root. Use one layout consistently and avoid stale files at a higher-precedence location.
+
+Write `/etc/urnetwork/operator.env` as plain `NAME=value` assignments, without `export`, so both the shell and systemd can read it:
+
+```dotenv
+WARP_HOME=/srv/warp
+WARP_ENV=main
+URNETWORK_ST_PROFILE=mainnet
+WARP_SERVICE=all
+WARP_BLOCK=operator-1
+WARP_HOST=operator-1.example.net
+WARP_DOMAIN=example.net
+WARP_VERSION=2026.10.6
+WARP_CONFIG_VERSION=2026.10.6
+WARP_HOST_IPV4=127.0.0.1
+WARP_PORTS=8080:8080,8081:8081,8082:8082,5080:5080
+BY_LOG_LOGTOSTDERR=true
+```
+
+Replace the domain, host, binary version and configuration version with yours. `WARP_PORTS` is `service-port:host-port`, and includes **5080**, the first internal Connect exchange port. The three HTTP ports must be distinct. Keeping a host IP and an explicit port map also selects which optional native Connect listeners are enabled. Add contiguous internal mappings `5081:5081`, `5082:5082`, and so on when allocating more exchange ports.
+
+For this single-host loopback deployment, `/srv/warp/site/settings.yml` routes the advertised host back to its internal listener:
+
+```yaml
+routes:
+  operator-1.example.net: 127.0.0.1
+```
+
+`config/main/settings.yml`, if present, supplies shared `all:` and host-specific settings, followed by `site/settings.yml` overrides. Keep secrets in the vault, not a `settings.yml` `env_vars` block: startup logs the merged settings. This example uses literal PostgreSQL/Redis/RPC authorities in vault files, so `BRINGYOUR_POSTGRES_HOSTNAME`, `BRINGYOUR_REDIS_HOSTNAME` and `BRINGYOUR_SUBTENSOR_HOSTNAME` are not needed. They are needed only if your resources explicitly interpolate them with `{{ env:NAME }}`.
+
+## Step 3: set up PostgreSQL, Redis and artifact storage
+
+Install and start PostgreSQL and Redis as separate services; the server repository's local setup uses PostgreSQL 18 and Redis 8. On a host with PostgreSQL installed, create the operator's own database and owner role:
+
+```bash
+sudo -u postgres createuser --pwprompt urnetwork
+sudo -u postgres createdb --owner=urnetwork --encoding=UTF8 \
+  --locale=en_US.UTF-8 --template=template0 urnetwork
+```
+
+Install the `en_US.UTF-8` locale first if the database host does not have it. Bind PostgreSQL to loopback, and permit password authentication for role `urnetwork` to database `urnetwork` from `127.0.0.1/32` in `pg_hba.conf` using `scram-sha-256`. The migration role must own the database/schema and be able to create and alter its tables and indexes. Use a generated hexadecimal password so it is safe in the connection URL constructed by this server.
+
+Create `/srv/warp/vault/main/pg.yml`:
+
+```yaml
+authority: 127.0.0.1:5432
+db: urnetwork
+user: urnetwork
+password: "<the PostgreSQL role password>"
+```
+
+Create `/srv/warp/config/main/db.yml`:
+
+```yaml
+min_connections: 0
+max_connections: 32
+```
+
+The maintenance pool falls back to these resources. If adding PgBouncer, keep `pg.yml` pointed at the pooler and put the direct PostgreSQL connection in `vault/main/pg_maintenance.yml`; `config/main/db_maintenance.yml` can size that pool separately. Migrations and maintenance need the direct connection. Budget PostgreSQL's connection limit for both pools and any other clients. The current PostgreSQL client uses `sslmode=disable`, so keep this connection on loopback or a protected private transport.
+
+Configure Redis with persistence and a password. For a package-based Redis service, the relevant `redis.conf` settings are:
+
+```conf
+bind 127.0.0.1
+protected-mode yes
+appendonly yes
+maxmemory-policy noeviction
+requirepass <a separate generated Redis password>
+```
+
+Restart Redis after installing the settings. Create `/srv/warp/vault/main/redis.yml`:
+
+```yaml
+authority: 127.0.0.1:6379
+password: "<the Redis password>"
+cluster: false
+db: 0
+```
+
+Create `/srv/warp/config/main/redis.yml`:
+
+```yaml
+min_connections: 0
+max_connections: 32
+```
+
+These are separate files: the vault supplies the connection credentials and the config supplies pool sizes. A Redis cluster uses `cluster: true`; this guide uses a standalone instance dedicated to the operator. Neither backing service should be reachable from the public internet.
+
+### Prepare local artifact storage
+
+The payout and evidence code uses the server's `BlobStore` interface. It supports local files; no cloud object-store account is required. The configuration resource is still named `minio.yml`, including for the local backend.
+
+Mount a persistent **separate filesystem** at `/srv/urnetwork-data`, using ext4, XFS or Btrfs, and arrange for it to mount before the service starts. A directory on the system root filesystem, tmpfs or a container overlay does not satisfy daemon storage admission. Size the filesystem for your artifact history and backups.
+
+For a **new, empty operator**, provision the artifact root and its independently retained identity declaration. The following example refuses to reuse existing roots, marker files or a declaration. Run it once as the host administrator after checking that this is the intended mounted volume:
+
+```bash
+sudo python3 - <<'PY'
+import hashlib, json, os, pathlib, pwd, subprocess
+
+mount = pathlib.Path('/srv/urnetwork-data')
+root = mount / 'operator-blob'
+identity = mount / 'operator-identity'
+declaration = pathlib.Path('/etc/urnetwork/durable-volumes.json')
+account = pwd.getpwnam('urnetwork')
+if not os.path.ismount(mount) or mount.stat().st_dev == pathlib.Path('/').stat().st_dev:
+    raise SystemExit('a separately mounted persistent filesystem is required')
+uuid, fs_type = subprocess.check_output(
+    ['findmnt', '--noheadings', '--raw', '--output', 'UUID,FSTYPE', '--mountpoint', str(mount)],
+    text=True).strip().split()
+if fs_type not in ('ext4', 'xfs', 'btrfs'):
+    raise SystemExit('unsupported durable filesystem')
+if any(p.exists() for p in (root, identity, declaration)):
+    raise SystemExit('existing storage requires its original declaration and recovery procedure')
+os.umask(0o077)
+root.mkdir(mode=0o700)
+os.chown(root, account.pw_uid, account.pw_gid)
+identity.mkdir(mode=0o750)
+os.chown(identity, 0, account.pw_gid)
+os.chmod(identity, 0o750)
+def digest(data):
+    return 'sha256:' + hashlib.sha256(data).hexdigest()
+def protected_write(path, data):
+    with path.open('xb') as f:
+        f.write(data)
+        f.flush()
+        os.fsync(f.fileno())
+    os.chown(path, 0, account.pw_gid)
+    os.chmod(path, 0o640)
+marker, lease, generation = os.urandom(32), os.urandom(32), os.urandom(32)
+protected_write(identity / 'marker', marker)
+protected_write(identity / 'blob-lease', lease)
+os.setxattr(root, 'user.urnetwork.durable-root-generation', generation, os.XATTR_CREATE)
+config = {'schema': 'urnetwork-durable-volumes-v2', 'volumes': [{
+    'mount_path': str(mount), 'filesystem_uuid': uuid, 'filesystem_type': fs_type,
+    'marker_path': str(identity / 'marker'), 'marker_sha256': digest(marker),
+    'min_available_bytes': 1073741824, 'min_available_inodes': 10000,
+    'state_roots': [{'path': str(root), 'lease_path': str(identity / 'blob-lease'),
+        'lease_sha256': digest(lease), 'root_inode': root.stat().st_ino,
+        'generation_sha256': digest(generation)}]}]}
+encoded = (json.dumps(config, indent=2) + '\n').encode()
+protected_write(declaration, encoded)
+for directory in (root, identity, mount, declaration.parent):
+    fd = os.open(directory, os.O_RDONLY | os.O_DIRECTORY)
+    try:
+        os.fsync(fd)
+    finally:
+        os.close(fd)
+print('declaration:', declaration)
+print('sha256:', digest(encoded))
+PY
+```
+
+Record the emitted declaration path and `sha256:` digest, and configure `/srv/warp/vault/main/minio.yml`:
+
+```yaml
+authority: local
+path: /srv/urnetwork-data/operator-blob
+prefix: blob
+max_bytes: 107374182400
+durable_volumes:
+  path: /etc/urnetwork/durable-volumes.json
+  sha256: "sha256:<exact declaration digest>"
+```
+
+The example allocates at most 100 GiB to blobs and refuses writes below 1 GiB or 10,000 free inodes; choose limits for your host. The declaration binds the filesystem UUID, marker, lease, root inode and 32-byte generation attribute. The service validates those existing objects and never creates a replacement root. Keep their ownership and ancestor directories protected from group/world writes. Preserve the original declaration and bytes on restart; a restore to another inode or filesystem requires an explicit storage migration, not rerunning this fresh setup over retained artifacts. This recipe provisions the operator's file store only; miner claim queues and validator journals have their own owner-state preparation.
+
+An absent `minio.yml` does not provide a filesystem fallback in `main`. Existing deployments can alternatively use the self-hosted MinIO backend supported by [`server/blob.go`](https://github.com/urnetwork/server/blob/main/blob.go), with `authority`, `tls`, `access_key`, `secret_key`, `bucket` and `prefix`. Keep artifact storage and the database together in your recovery plan: miners and validators must still be able to fetch the artifacts referenced by on-chain roots.
+
+## Step 4: configure authentication and ingress
+
+Generate a dedicated P-256 JWT signing key into `vault/main/jwt-signing.pem`, for example with `openssl genpkey -algorithm EC -pkeyopt ec_paramgen_curve:P-256 -out jwt-signing.pem`, then install it with the vault permissions above. Do this in a private directory under `umask 077`. Point `vault/main/jwt.yml` at it:
+
+```yaml
+tls_key_paths:
+  - jwt-signing.pem
+```
+
+The resource name is historical: this can be a dedicated signing key and does not have to be your public HTTPS certificate key. Keep previous JWT keys available during a rotation. Configure two separate random peppers:
+
+```yaml
+# vault/main/password.yml
+password:
+  pepper: "<random password pepper>"
+```
+
+```yaml
+# vault/main/client.yml
+client_ip_hash_pepper: "<different random IP hash pepper>"
+```
+
+Install a current, licensed GeoLite2-City database at `config/main/mmdb/geolite2.mmdb` and its matching `places.yml`. The server's `cli/geolite2export` build tool generates the place list from that exact MMDB (`-mmdb <path> -out <path>`); generate it on the build/configuration host and ship both files. The tiny `local/testdata` database is a test fixture, not a production geography database. API and Connect warmup require a valid City database, and location seeding requires its place list.
+
+Create `config/main/tls.yml`, which Connect loads even when the deployment uses only WebSockets:
+
+```yaml
+allowed_hosts:
+  - connect.example.net
+```
+
+For the loopback port map above, configure your HTTPS reverse proxy as follows:
+
+| Public endpoint | Internal listener | Ingress requirement |
+| --- | --- | --- |
+| `https://api.example.net` | `http://127.0.0.1:8080` | forward the API routes and real client address |
+| `wss://connect.example.net` | `http://127.0.0.1:8081` | preserve WebSocket upgrades and long-lived connections |
+| worker status | `http://127.0.0.1:8082/status` | keep private for monitoring |
+| Connect exchange | TCP `127.0.0.1:5080` | internal only |
+
+Terminate TLS with certificates for your public names. The ingress must **overwrite `X-UR-Forwarded-For` with one real client `IP:port` pair**, using brackets around an IPv6 address. The [server's address resolver](https://github.com/urnetwork/server/blob/main/session/client_session.go) deliberately ignores standard `X-Forwarded-For`; `/verify` depends on observing the actual miner exit address. Only your trusted ingress should reach the internal listeners. Route `/verify`, `/sn/*`, and WebSocket traffic without authentication or buffering rules that interfere with their own protocols.
+
+This port map provides the WebSocket transport. Native HTTP/3 and DNS transports additionally need Connect port mappings for service UDP/443 and UDP/4053, the [Warp ingress forwarding convention](https://github.com/urnetwork/warp), and certificates under `vault/main/tls/<hostname>/<hostname>.crt` and `.key`. Public DNS uses UDP/53, which ingress forwards to private UDP/4053; UDP/8053 is a compatibility listener enabled only when explicitly mapped. These listeners expect the production ingress's Proxy Protocol framing; opening a UDP port alone is insufficient. Keep each certificate and key pair in the same resource/version directory.
+
+The full API and worker also support product features such as OAuth, email, subscriptions and extenders. Provision their resources when offering those features; the binary does not generate integration credentials. OAuth uses `auth.yml` with its own issuer and **separate** OAuth signing keys, generated and rotated with Warp's OAuth tooling. See [server IDP configuration](https://github.com/urnetwork/server/blob/main/IDP.md). Do not use the JWT key as an OAuth signer.
+
+### Configure the verification endpoint
+
+The `/verify` route needs no separate service: it is part of the API, and its statistics, proofs and keys are public routes on the same host:
 
 | Route | Purpose |
 | --- | --- |
@@ -46,13 +337,13 @@ keys:
     seed: <base64 standard encoding of a 32-byte Ed25519 seed>
 ```
 
-`server_key_id` is one byte (0 to 255) carried in every ASSIGN and FINAL message; to rotate, add a new first entry and keep the old ones. The API refuses to start without at least one key.
+`server_key_id` is one byte (0 to 255) carried in every ASSIGN and FINAL message; to rotate, add a new first entry and keep the old ones. Verification requires at least one key; check `GET /verify/keys` after startup.
 
 The `/verify` server enforces the invariant validators depend on: each eligible miner maps to exactly one exit IP and each exit IP to exactly one miner; a miner seen behind two exits is dropped from the eligible index until it is back to one. Seeds whose source address does not resolve to a miner, or that exceed the soft limits, are poisoned (walked to full depth but never published) so the endpoint cannot be used as an oracle for which addresses are miners; only the hard per-source limits in the policy (`hard_seed_per_minute_per_source`, `hard_extend_per_minute_per_source`, `hard_active_trails_per_source`) refuse requests outright.
 
-## Step 2: configure the epoch pipeline
+## Step 5: configure the epoch pipeline
 
-The subtensor pipeline is configured by the `st.yml` vault resource. It is optional: without it the API and taskworker run with the subnet subsystem disabled. Mainnet values use the unprefixed keys; the testnet profile uses the same keys with a `testnet-` prefix, selected by `profile`. Fields, from `server/controller/st_controller.go`:
+The subtensor pipeline is configured by `vault/main/st.yml`. Without a valid, enabled resource the API and taskworker can run with the subnet subsystem disabled, so an HTTP health check alone does not establish that miners can earn or claim. Select mainnet with `URNETWORK_ST_PROFILE=mainnet` in the environment and `profile: mainnet` in the file. Testnet has a separate `testnet-...` namespace; it is not selected by `WARP_ENV` or by changing `profile` alone. Fields, from [`server/controller/st_controller.go`](https://github.com/urnetwork/server/blob/main/controller/st_controller.go):
 
 ```yaml
 profile: mainnet
@@ -64,6 +355,7 @@ chain_id: 964
 genesis_hash: "0x<native genesis hash>"
 deployment_id: ur-mainnet
 policy_hash: "0x<sha256 of the signed policy>"
+launch_readiness_sha256: "<reviewed readiness receipt digest from sn.yml>"
 coordinator_address: "0x<coordinator>"
 settlement_vault_address: "0x<settlement vault>"
 reserve_sink_address: "0x<reserve sink>"
@@ -86,27 +378,104 @@ block_seconds: 12
 deploy_block: <coordinator deployment block>
 ```
 
-`attempt_upload` and `reserved_attempt_upload` bound the validator attempt-artifact uploads your API accepts; `ops_key` and `contract_address` exist only for the retired monolithic contract. Keys are optional for a read-only deployment; each publish flow errors per call when its key is absent.
+An enabled operator requires **three distinct** deposit, root and artifact keys. They must match the admitted operator identity. Missing or malformed `st.yml` is logged as a disabled subsystem; check that state explicitly after startup. `attempt_upload` and `reserved_attempt_upload` bound validator evidence uploads; `ops_key` and `contract_address` are legacy fields and should not be used for a new deployment.
+
+Mainnet activation also requires the reviewed `config/main/sn.yml` earnings declaration, including the selected chain/genesis, coordinator, settlement vault, policy and readiness receipt. Its exact file digest is used by the migration command below, and its readiness digest must match `st.yml`'s `launch_readiness_sha256`. Obtain these deployment-specific values through operator admission and preserve the reviewed bytes. The server keeps post-cutoff usage separate from legacy obligations and refuses mainnet settlement when activation is blocked or the identities differ.
+
+Before any mainnet EVM publishing can succeed, install the independently signed `operator_gas_policy` in `st.yml` and its matching `config/main/operator-gas-authority.yml`. The approval binds the operator, deposit/root accounts, policy revision, validity window, transaction-history pins and gas/attempt limits. The [gas policy implementation](https://github.com/urnetwork/server/blob/main/st_operator_gas_policy.go) defines its schema. Funding a signer does not replace this approval, and the approver's private key does not belong on this host.
 
 The deposit tiers must be the signed policy's schedule: validators recompute your required deposit from the same formula and zero your pool when the observed deposit differs (see below).
 
-## Step 3: run the prober
+## Step 6: migrate, initialize and run
 
-Miners are placed and health-checked through tunnels pinned to each miner, never from the operator host's own network. In the reference deployment this runs as durable taskworker shards configured in `config/<env>/provider_egress_probe.yml` (`shard_count`, batch sizes and timeouts for the `full` and `blackhole` passes, the control-plane URLs and the bandwidth CDN); the prober identity is minted by the `ProberBootstrap` task and the ingest secret lives in `vault/<env>/provider_egress.yml`. Run `taskworker init-tasks` after changing the shard count. The standalone equivalent is:
+Install the probe resources in Step 7 before starting the worker. Use the same binary and environment for all three commands below. `db migrate` applies the server's complete PostgreSQL migration catalog; it does not create the PostgreSQL role or database. For `main`, supply the independently reviewed **64-character lowercase SHA-256** of the exact `sn.yml` bytes, without a `sha256:` prefix. The command checks the schedule before DDL and prepares the payout boundary after migration. Use the digest from your release review, rather than treating a hash of an unreviewed edit as approval.
+
+Open a shell as the service user, then load the environment:
 
 ```bash
-./egress-prober \
-  -api-url https://api.example.net \
-  -platform-url wss://connect.example.net \
-  -operator-secret "$UR_OPERATOR_SECRET" \
-  -public-api-url https://api.example.net \
-  -cache-ttl 24h \
-  -interval 1h
+sudo -u urnetwork bash
+set -a
+. /etc/urnetwork/operator.env
+set +a
+
+SN_SCHEDULE_SHA256='replace-with-the-reviewed-64-character-sha256'
+ur-operator db migrate --sn-schedule-sha256="$SN_SCHEDULE_SHA256"
+ur-operator init-tasks
+ur-operator run --require-subnet
 ```
 
-`-operator-secret` must equal `ingest_secret` in `provider_egress.yml`; the prober fetches its own credential from `/network/prober-credential` unless `-by-jwt` (or `UR_PROBER_BY_JWT`) is given. It refuses to start unless it is confined (it must be unable to reach any probe destination directly, for example a systemd unit with `IPAddressDeny=any` and `IPAddressAllow=` your API and connect addresses), because a probe that fell back to the host's own egress would certify a dead miner as healthy.
+Complete each command successfully before running the next. `init-tasks` initializes recurring production tasks; normal startup also ensures their idempotent schedules exist. Ordinary `run` never applies database migrations. `--require-subnet` makes an absent, invalid or disabled `st.yml` a startup error, instead of silently starting a network without its subnet pipeline. The running worker executes maintenance, probes, verification and SN epoch tasks, plus configured retail/product work.
 
-## Step 4: publish your stats feed and get listed
+Default listeners are API 8080, Connect 8081 and worker status 8082, with eight workers and batch size four. The corresponding options are `--api-port`, `--connect-port`, `--taskworker-port`, `--worker-count` and `--worker-batch-size`. When changing ports, update `WARP_PORTS` and the reverse proxy together.
+
+For operators using extenders, configure `vault/main/extender.yml` with the deployment's root/issuer keys and gossip identity, add `8083:8083` to `WARP_PORTS`, route `wss://gossip.example.net` to its listener, and add `--gossip-port=8083`. A nonempty `gossip_identity_key_hex` requires that listener: advertising gossip without running it leaves queued extender publications unconsumed. See the [extender deployment specification](https://github.com/urnetwork/connect/blob/main/EXTENDER.md). Alt and Proxy deployments continue to use their own frontends; they are not required to run the API/Connect operator described here.
+
+Once the foreground startup is healthy, stop it with Ctrl-C and leave the service-user shell. Install `/etc/systemd/system/ur-operator.service`:
+
+```ini
+[Unit]
+Description=URnetwork operator
+After=network-online.target postgresql.service redis-server.service
+Wants=network-online.target
+RequiresMountsFor=/srv/urnetwork-data
+
+[Service]
+Type=simple
+User=urnetwork
+Group=urnetwork
+WorkingDirectory=/srv/warp
+EnvironmentFile=/etc/urnetwork/operator.env
+ExecStart=/usr/local/bin/ur-operator run --require-subnet
+Restart=on-failure
+RestartSec=5
+TimeoutStopSec=180
+UMask=0077
+NoNewPrivileges=true
+
+[Install]
+WantedBy=multi-user.target
+```
+
+Adjust backing-service unit names for your distribution, and add the gossip argument if configured. Start the service:
+
+```bash
+sudo systemctl daemon-reload
+sudo systemctl enable --now ur-operator
+sudo journalctl -u ur-operator -f
+```
+
+Check **each** service's readiness JSON. HTTP 200 by itself is insufficient; each `status` must be `ok`:
+
+```bash
+for port in 8080 8081 8082; do
+  curl --fail --silent --show-error "http://127.0.0.1:$port/status" \
+    | jq -e '.status == "ok"' || break
+done
+curl --fail --silent --show-error https://api.example.net/verify/keys
+curl --fail --silent --show-error https://api.example.net/sn/epoch
+```
+
+Confirm the public epoch response identifies your expected chain, contract, settlement vault and `no_id`, and that the worker is advancing its chain mirror. Readiness checks PostgreSQL's migration head and Redis before the services activate; it is not proof of completed operator admission, funded/approved publishing, or an available claim. If a check reports `error not ready`, resolve that cause and restart: readiness is latched at startup. For upgrades, back up the database and artifacts, deploy the reviewed resources, apply migrations explicitly, then restart the binary and check all listeners again.
+
+## Step 7: run the prober
+
+Miners are placed and health-checked through tunnels pinned to each miner, never from the operator host's own network. The single binary's production worker runs durable probe shards; configure `config/main/provider_egress_probe.yml` with your own endpoints:
+
+```yaml
+enabled: true
+shard_count: 4
+api_url: https://api.example.net
+platform_url: wss://connect.example.net
+public_api_url: https://api.example.net
+url_probe:
+  limit: 8
+  concurrency: 8
+  probe_timeout_seconds: 60
+```
+
+Create `vault/main/provider_egress.yml` with `ingest_secret: "<a separate random ingest secret>"`. Each live probe shard creates its own credential and credit at execution admission; the recurring `ProberBootstrap` task cleans up finished shard accounts after crashes. Re-run `ur-operator init-tasks` after changing the shard configuration. Current production probes use `url_probe`; the older `full` and `blackhole` task fields remain for compatibility. Monitor probe results and queue retries before admitting miners: an API that is reachable does not prove that miner egress is usable.
+
+## Step 8: publish your stats feed and get listed
 
 The ur.xyz operators directory is the registry baked into the site at `web/ur.xyz/react/src/lib/network.js` (`NETWORK_OPERATORS`): an operator lists itself by adding an entry there by pull request with its name, site, app name, dashboard and GitHub URLs, its store listings, and its `statsUrl`. The site reads live totals from every listed feed in the visitor's browser, so the feed must be public JSON with exactly one `Access-Control-Allow-Origin` (`*` or a reflection that includes `https://ur.xyz`):
 
