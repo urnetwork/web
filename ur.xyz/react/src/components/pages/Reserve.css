@@ -6,6 +6,8 @@
  * /investors): the site's content column (--content-width, App.css), the
  * eyebrow / h1 / rule / lede hero, a proof strip of figures, numbered
  * sections, hairline rules, and PPNeueBit for the small monospace labels.
+ * Addresses, which a reader copies, are in the code face (--code-font,
+ * App.css), as code is in the docs.
  *
  * Chart marks use the brand hues on the #101010 surface: pink (the reserve),
  * green (providers) and the pale-blue UI ink (the live balance). They were
@@ -50,7 +52,7 @@
    margin (a single class) wins over it. */
 :where(.reserve-page) :is(h1, h2, h3, p, dl, dd, ol, ul) { margin: 0; }
 .reserve-page a:focus-visible, .reserve-page summary:focus-visible, .reserve-page .xy-chart:focus-visible { outline: 2px solid var(--brand-ur); outline-offset: 3px; }
-.reserve-page code { font-family: var(--rv-mono); font-size: 0.86em; letter-spacing: 0.02em; }
+.reserve-page code { font-family: var(--code-font); font-size: 0.93em; letter-spacing: 0; font-variant-ligatures: none; font-variant-numeric: slashed-zero; }
 
 .reserve-shell { width: min(var(--content-width), calc(100% - (var(--content-gutter) * 2))); margin-inline: auto; }
 
@@ -84,6 +86,69 @@
 .reserve-status[data-state="live"] i { background: var(--brand-usd); box-shadow: 0 0 0 4px rgba(135, 251, 103, 0.08); }
 .reserve-status[data-state="error"] i { background: var(--brand-burn); }
 .reserve-status[data-state="loading"] i { opacity: 0.45; }
+
+/* the formula and the wallet: one panel under the lede, two rows */
+.reserve-facts { margin-top: 32px; border: 1px solid var(--rv-line); background: var(--rv-panel); }
+.reserve-formula { padding: 20px 24px 22px; }
+.reserve-wallet { padding: 18px 24px 20px; border-top: 1px solid var(--rv-line); }
+.reserve-fact-label {
+    display: block;
+    font-size: 11.52px;
+    line-height: 15.55px;
+    font-weight: 600;
+    letter-spacing: 2.53px;
+    text-transform: uppercase;
+    color: var(--rv-label);
+}
+.reserve-nw { white-space: nowrap; }
+/* the two terms in the colours their segments wear in the splits below; the words carry the meaning */
+.reserve-formula-eq { margin-top: 14px; font-size: clamp(18px, 5.6vw, 26px); line-height: 1.3; letter-spacing: -0.5px; color: var(--rv-head); }
+.reserve-formula-eq .is-reserve { color: var(--rv-reserve); }
+.reserve-formula-eq .is-momentum { color: var(--rv-providers); }
+.reserve-formula-calc { margin-top: 6px; font-size: 15px; line-height: 24px; color: var(--rv-lede); }
+.reserve-formula-def { margin-top: 14px; font-size: 13px; line-height: 20px; color: var(--rv-quiet); }
+.reserve-formula-def dfn { font-style: normal; color: var(--rv-providers); }
+.reserve-wallet-row { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 24px; margin-top: 10px; }
+/* each half of the address holds together, so it breaks only at its middle */
+.reserve-page .reserve-address { font-size: 15px; line-height: 24px; color: var(--brand-white); }
+.reserve-address > span { white-space: nowrap; }
+.reserve-wallet-actions { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 8px 20px; }
+.reserve-copy {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    height: 30px;
+    padding: 0 11px 0 10px;
+    border: 1px solid rgba(214, 230, 244, 0.18);
+    background: transparent;
+    color: var(--brand-ui);
+    font-family: inherit;
+    font-size: 12.5px;
+    line-height: 1;
+    letter-spacing: 0.01em;
+    cursor: pointer;
+}
+.reserve-copy svg { flex: none; }
+.reserve-copy:hover { border-color: rgba(214, 230, 244, 0.42); color: var(--brand-white); }
+.reserve-copy:focus-visible { outline: 2px solid var(--brand-ur); outline-offset: 2px; }
+.reserve-copy[data-state="copied"] { border-color: rgba(135, 251, 103, 0.45); color: var(--brand-usd); }
+/* "Copy" and "Copied" share one cell: the button keeps its size when the word changes */
+.reserve-copy-label { display: inline-grid; }
+.reserve-copy-label > span { grid-area: 1 / 1; }
+.reserve-copy-label > span[data-shown="false"] { visibility: hidden; }
+.reserve-wallet-link { display: inline-flex; align-items: center; gap: 4px; min-height: 32px; font-size: 12px; letter-spacing: 0.5px; color: var(--brand-ur); text-decoration: none; }
+.reserve-wallet-link:hover { color: var(--brand-white); }
+.reserve-visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    border: 0;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+}
 
 .reserve-proof, .reserve-kpis {
     display: grid;
@@ -284,6 +349,10 @@
 }
 @media (max-width: 640px) {
     .reserve-hero { padding: 64px 0 44px; }
+    .reserve-facts { margin-top: 26px; }
+    .reserve-formula { padding: 16px 14px 18px; }
+    .reserve-wallet { padding: 14px 14px 16px; }
+    .reserve-formula-calc { font-size: 14px; line-height: 22px; }
     .reserve-block { padding: 48px 0; }
     .reserve-panel { padding: 16px 14px 12px; }
     .reserve-panel-head b { font-size: 26px; }
@@ -294,6 +363,11 @@
     .xy-chart.is-wide { display: none; }
     .xy-chart.is-narrow { display: block; }
     .reserve-custody dd a { display: flex; margin-left: 0; }
+}
+/* a finger needs a larger target than a pointer */
+@media (pointer: coarse) {
+    .reserve-copy { height: 36px; padding: 0 13px 0 12px; }
+    .reserve-wallet-link { min-height: 36px; }
 }
 @media (prefers-reduced-motion: reduce) {
     .reserve-cta { transition: none; }
