@@ -178,6 +178,65 @@ for host in www.bringyour.com ur.network www.ur.network; do
     expect_response "$host" /status 301 https://ur.io/status
 done
 
+# docs.ur.io, the retired GitBook docs site, sends each page with a successor
+# there in one hop, from its .md and trailing-slash variants too. Every target
+# must be a page of this build, so renaming a document fails the image instead
+# of sending its old links to a 404.
+expect_docs_page_redirect() {
+    local path=$1
+    local target=$2
+    local target_page=${target%%#*}
+    local variant
+
+    for variant in "$path" "$path/" "$path.md"; do
+        expect_response docs.ur.io "$variant" 301 "$target"
+    done
+    expect_response ur.io "${target_page#https://ur.io}" 200
+}
+
+expect_docs_page_redirect /provider 'https://ur.io/docs/faq#sharing-your-connection'
+expect_docs_page_redirect /support/delete 'https://ur.io/docs/faq#how-do-i-delete-my-account'
+expect_docs_page_redirect /protocol/protocol-research https://ur.io/docs/overview
+expect_docs_page_redirect /trust-and-safety/trust-and-safety \
+    'https://ur.io/docs/overview#safe-to-share-the-ipsecurity-layer'
+for doc in terms privacy vdp; do
+    expect_docs_page_redirect "/legal/$doc" "https://ur.io/$doc"
+done
+for skill in skill skill2; do
+    expect_docs_page_redirect "/mcp/$skill" https://ur.io/agents
+done
+expect_docs_page_redirect /api https://ur.io/docs/api
+expect_docs_page_redirect /api/api-reference https://ur.io/docs/api
+for group in auth network stats subscription wallet device account preferences \
+    feedback connect transfer solana referral-code; do
+    expect_docs_page_redirect "/api/api-reference/$group" "https://ur.io/docs/api/$group"
+done
+expect_response docs.ur.io /api/api-reference/auth/code-login 301 https://ur.io/docs/api/auth
+expect_response docs.ur.io /api/api-reference/authx 301 https://ur.io/docs/api
+expect_response docs.ur.io /api/api-reference/retired-section/operation 301 https://ur.io/docs/api
+for file in robots.txt llms.txt llms-full.txt; do
+    expect_response docs.ur.io "/$file" 301 "https://ur.io/$file"
+    expect_response ur.io "/$file" 200
+done
+
+# The root, the pages without a successor, and every other path go to the docs
+# index.
+expect_response ur.io /docs 200
+for path in / /economic-model/economic-model /trust-and-safety/warrant-canary \
+    /changelog/2024-10-31-update-1/update-1 /cli /legal /no/such/page; do
+    expect_response docs.ur.io "$path" 301 https://ur.io/docs
+done
+
+# The query string carries over, ahead of a fragment: a GitBook search link
+# (?q=) opens the same search on ur.io/docs.
+expect_response docs.ur.io '/?q=wallet' 301 'https://ur.io/docs?q=wallet'
+expect_response docs.ur.io '/no/such/page?smoke=1' 301 'https://ur.io/docs?smoke=1'
+expect_response docs.ur.io '/provider?fallback=true' 301 \
+    'https://ur.io/docs/faq?fallback=true#sharing-your-connection'
+expect_response docs.ur.io '/legal/privacy?smoke=1' 301 'https://ur.io/privacy?smoke=1'
+expect_response docs.ur.io '/api/api-reference/auth/code-login?smoke=1' 301 \
+    'https://ur.io/docs/api/auth?smoke=1'
+
 # /ip remains HTML for browsers, but negotiates a tiny, non-cacheable JSON
 # response for API clients. Cloudflare is authoritative on the public host;
 # Warp's bracketed address is the direct/preview fallback.
