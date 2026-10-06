@@ -40,10 +40,11 @@ build_external_sites: check_external_sites
 	# generate the api docs into the latest build
 	npx -y @redocly/cli build-docs ${BRINGYOUR_HOME}/connect/api/bringyour.yml -o "${BRINGYOUR_SITE_DIR}/build/api.html"
 # 	npx -y @redocly/cli build-docs ${BRINGYOUR_HOME}/connect/api/gpt.yml -o "${BRINGYOUR_SITE_DIR}/build/gpt.html"
-	# include the legal documents verbatim as per privacytxt.dev
-	pandoc -f markdown -t plain ${BRINGYOUR_HOME}/docs/legal/privacy.md -o "${BRINGYOUR_SITE_DIR}/build/privacy.txt"
-	pandoc -f markdown -t plain ${BRINGYOUR_HOME}/docs/legal/terms.md -o "${BRINGYOUR_SITE_DIR}/build/terms.txt"
-	pandoc -f markdown -t plain ${BRINGYOUR_HOME}/docs/legal/vdp.md -o "${BRINGYOUR_SITE_DIR}/build/vdp.txt"
+	# Use the same canonical legal documents as ur.io; the GitBook docs repo is retired.
+	# Include the documents verbatim as per privacytxt.dev.
+	pandoc -f markdown -t plain "${UR_IO_SITE_DIR}/docs/legal/privacy.md" -o "${BRINGYOUR_SITE_DIR}/build/privacy.txt"
+	pandoc -f markdown -t plain "${UR_IO_SITE_DIR}/docs/legal/terms.md" -o "${BRINGYOUR_SITE_DIR}/build/terms.txt"
+	pandoc -f markdown -t plain "${UR_IO_SITE_DIR}/docs/legal/vdp.md" -o "${BRINGYOUR_SITE_DIR}/build/vdp.txt"
 	(. ${NVM_DIR}/nvm.sh && \
 		nvm use ${NODE_VERSION} && \
 		python ../webgen/webgen.py build "${UR_NETWORK_SITE_DIR}/gen.py")
