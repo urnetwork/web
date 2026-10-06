@@ -6,7 +6,9 @@
  */
 
 .deck-page {
-    --deck-shell: min(1180px, calc(100vw - 64px));
+    /* the slide stage is wider than the content column where there is room;
+       on tablets and phones it keeps to the content gutter (App.css) */
+    --deck-shell: min(1180px, calc(100vw - (var(--content-gutter) * 2)));
     /* The page shell's <main class="section-page"> already pads one nav
        height; this adds the second, so the page sits where it did when it
        was its own <main> padded by two. */
@@ -342,10 +344,6 @@
 }
 
 @media (max-width: 720px) {
-    .deck-page {
-        --deck-shell: calc(100vw - (var(--page-gutter) * 2));
-    }
-
     .deck-download {
         margin-inline-start: 0;
     }

@@ -8,7 +8,6 @@ export default {
         miners:     'Miners',
         validators: 'Validators',
         research:   'Research',
-        community:  'Community',
         price:      'Usage Cost',
         docs:       'Docs',
         roadmap:    'Roadmap',
@@ -21,7 +20,6 @@ export default {
         mobileNav:    'Mobile navigation',
         siteMenu:     'Site menu',
         browseDocs:   'Browse docs',
-        apiReference: 'API reference',
         search:       'Search',
         ctaAria:    'Usage cost — the current network price',
         denomAria:  'Price denomination'
@@ -37,7 +35,6 @@ export default {
         privacy:    'Privacy Policy',
         vdp:        'VDP',
         protocol:   'Protocol',
-        community:  'Community',
         legal:      'Legal',
         learn:      'Learn',
         resources:  'Resources',
@@ -388,18 +385,5 @@ operators: {
                 { title: 'Whole Internet Encryption for the whole world' }
             ]
         }
-    },
-
-    community: {
-        eyebrow: 'Community',
-        title:   'The people behind the network.',
-        intro:   'The protocol is open. The community that builds and operates it is growing. Here is where to find them.',
-        items: [
-            { tag: '01', title: 'Discord',              body: 'General discussion about the project: protocol development, miner support, and community.', href: 'https://discord.gg/urnetwork', linkLabel: 'Join Discord' },
-            { tag: '02', title: 'Bittensor SN Discord', body: 'Bittensor-specific discussion: the subnet, emission, validators, and staking.', soon: 'Coming soon' },
-            { tag: '03', title: 'Brand Kit',           body: 'URnetwork and the connector logo are registered US trademarks. Permission is granted for users of the protocol to use the brand kit as "powered by UR" or "with URnetwork" or similar component messaging.', button: { label: 'Download brand kit' } }
-        ],
-        supportersTitle: 'Supporters',
-        partnersTitle:   'Partners'
     }
 };

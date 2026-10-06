@@ -6,7 +6,6 @@ export default {
         miners:     '矿工',
         validators: '验证者',
         research:   '研究',
-        community:  '社区',
         price:      '使用成本',
         docs:       '文档',
         roadmap:    '路线图',
@@ -19,7 +18,6 @@ export default {
         mobileNav:    '移动端导航',
         siteMenu:     '网站菜单',
         browseDocs:   '浏览文档',
-        apiReference: 'API 参考',
         search:       '搜索',
         ctaAria:    '使用成本——当前网络价格',
         denomAria:  '价格计价单位'
@@ -35,7 +33,6 @@ export default {
         privacy:    '隐私政策',
         vdp:        'VDP',
         protocol:   '协议',
-        community:  '社区',
         legal:      '法律',
         learn:      '了解',
         resources:  '资源',
@@ -362,18 +359,5 @@ operators: {
                 { title: 'Whole Internet Encryption for the whole world' }
             ]
         }
-    },
-
-    community: {
-        eyebrow: '社区',
-        title:   '网络背后的人们。',
-        intro:   '协议是开放的。构建并运营它的社区正在壮大。以下是找到他们的地方。',
-        items: [
-            { tag: '01', title: 'Discord',              body: '关于项目的一般讨论——协议开发、矿工支持与社区。', href: 'https://discord.gg/urnetwork', linkLabel: '加入 Discord' },
-            { tag: '02', title: 'Bittensor SN Discord', body: '讨论 Bittensor 相关内容——子网、发行、验证者与质押。', soon: '即将上线' },
-            { tag: '03', title: '品牌工具包',  body: 'URnetwork 和连接器标志是美国注册商标。允许协议用户以 "powered by UR"、"with URnetwork" 或类似的组件宣传信息使用品牌工具包。', button: { label: '下载品牌工具包' } }
-        ],
-        supportersTitle: '支持者',
-        partnersTitle:   '合作伙伴'
     }
 };

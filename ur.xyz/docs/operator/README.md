@@ -348,7 +348,8 @@ The subtensor pipeline is configured by `vault/main/st.yml`. Without a valid, en
 ```yaml
 profile: mainnet
 enabled: true
-wallet_allow_unsigned: false              # keep the unsigned POST /sn/wallet path closed; apps sign the challenge
+# keep the unsigned POST /sn/wallet path closed; apps sign the challenge
+wallet_allow_unsigned: false
 public_rpc_url: https://<public evm json-rpc>   # published to clients via GET /sn/epoch
 rpc_urls: [https://<evm json-rpc>]        # or `authority`, resolved by server/st
 chain_id: 964
@@ -369,9 +370,11 @@ artifact_key: "<hex secp256k1 key>"       # payout artifact signer
 deposit_tiers:                            # the signed policy's tier schedule, verbatim
   - min_conviction_rao: 0
     rate_numerator_rao_per_gib: <rate>    # rao per GiB of usage
-    rate_numerator_rao_per_user: <rate>   # rao per distinct user (omit or 0 when the policy prices bytes only)
+    # rao per distinct user (omit or 0 when the policy prices bytes only)
+    rate_numerator_rao_per_user: <rate>
     rate_denominator: 1
-deposit_zero_rate_action: halt            # the policy's zero_rate_action; equal_demand only while every rate is 0
+# the policy's zero_rate_action; equal_demand only while every rate is 0
+deposit_zero_rate_action: halt
 deposit_epoch_cap_rao: <cap>              # custody blast-radius cap per epoch
 reliability_a_min: 8                      # the policy's reliability_a_min
 block_seconds: 12

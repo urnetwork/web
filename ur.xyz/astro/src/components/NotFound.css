@@ -10,7 +10,7 @@
     min-height: 62vh;
     flex-direction: column;
     justify-content: center;
-    width: min(720px, calc(100vw - (var(--page-gutter) * 2)));
+    width: min(var(--content-width), calc(100% - (var(--content-gutter) * 2)));
     margin-inline: auto;
     padding-block: calc(var(--nav-height) * 2) 96px;
 }

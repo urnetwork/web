@@ -66,11 +66,11 @@
       "lastmod": "2026-09-25"
     },
     "/docs/miner": {
-      "fingerprint": "99e36490ca3d2849",
+      "fingerprint": "5c8752a6f058550e",
       "lastmod": "2026-10-06"
     },
     "/docs/operator": {
-      "fingerprint": "937c94ab26c9fb78",
+      "fingerprint": "05cdabf16c2bc3f5",
       "lastmod": "2026-10-06"
     },
     "/docs/support/delete": {
@@ -78,7 +78,7 @@
       "lastmod": "2026-09-25"
     },
     "/docs/validator": {
-      "fingerprint": "118133e2d0671aa6",
+      "fingerprint": "2ab89adec19a7a5f",
       "lastmod": "2026-10-06"
     },
     "/es": {
@@ -140,6 +140,10 @@
     "/research": {
       "fingerprint": "ddafd228a9250800",
       "lastmod": "2026-09-27"
+    },
+    "/reserve": {
+      "fingerprint": "f02b460ae915935a",
+      "lastmod": "2026-10-06"
     },
     "/ru": {
       "fingerprint": "8e927c0c6770db66",

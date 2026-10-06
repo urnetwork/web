@@ -16,7 +16,6 @@
 .about-page #core-contributors { padding-top: 72px; padding-bottom: 72px; }
 .about-page #contribute { padding-top: 72px; }
 
-.about-ur-copy { max-width: 68ch; }
 .about-ur-copy p { margin: 0; color: var(--brand-white); font-size: 1.12rem; line-height: 1.62; }
 .about-ur-copy a { color: var(--brand-ur); text-decoration-thickness: 1px; text-underline-offset: 0.18em; }
 .about-ur-copy a:hover { color: var(--brand-white); }

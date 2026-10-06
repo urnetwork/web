@@ -14,7 +14,10 @@ const ASTRO_DIR = path.resolve(__dirname, '../../astro');
 const UR_ENV = process.env.UR_ENV || 'main';
 const ROOT = path.join(ASTRO_DIR, 'build', UR_ENV);
 
-const ROUTES = ['/build', '/about', '/investors', '/', '/operators', '/miners', '/validators', '/research', '/docs'];
+// /docs/operator: the guide with the longest code lines and two tables of
+// code; /docs/miner: a directory tree. Their code wraps and their tables stack,
+// so neither a code block nor a table scrolls sideways at any width.
+const ROUTES = ['/build', '/about', '/investors', '/reserve', '/', '/operators', '/miners', '/validators', '/research', '/docs', '/docs/operator', '/docs/miner'];
 const PROFILES = [
   { name: 'desktop', width: 1280, height: 900 },
   { name: 'desktop-edge', width: 1080, height: 800 },
@@ -93,7 +96,10 @@ async function visible(locator) {
 async function auditPage(browser, base, route, profile) {
   const page = await browser.newPage({ viewport: { width: profile.width, height: profile.height } });
   await page.emulateMedia({ reducedMotion: 'reduce' });
-  await page.route(/bringyour\.com|ur\.network/, (request) => request.fulfill({ json: {} }).catch(() => request.abort()));
+  // opentensor.ai: the reserve page reads Bittensor mainnet in the browser; an
+  // empty answer keeps this audit independent of the chain (the page then shows
+  // its "waiting for the chain" state, which is the layout under test).
+  await page.route(/bringyour\.com|ur\.network|opentensor\.ai/, (request) => request.fulfill({ json: {} }).catch(() => request.abort()));
   const errors = [];
   page.on('console', (message) => {
     if (message.type() === 'error') errors.push(message.text());
@@ -113,6 +119,13 @@ async function auditPage(browser, base, route, profile) {
   assert(shell.brokenImages.length === 0, `${route} has broken images: ${shell.brokenImages.join(', ')}`);
   assert(errors.length === 0, `${route} logged errors: ${errors.join(' | ')}`);
   assert(await page.locator('footer a[href="/about"]').count() > 0, `${route} footer has no About link`);
+
+  if (route.startsWith('/docs/')) {
+    const sideways = await page.evaluate(() => [...document.querySelectorAll('.md-pre, .md-table-wrap')]
+      .filter((el) => el.scrollWidth > el.clientWidth + 1)
+      .map((el) => `${el.className}: ${el.textContent.trim().slice(0, 40)}`));
+    assert(sideways.length === 0, `${route} has code or tables that scroll sideways at ${profile.width}px: ${sideways.join(' | ')}`);
+  }
 
   const primary = page.locator('nav[aria-label="Primary navigation"]');
   const menuToggle = page.locator('header button[aria-label*="menu" i], header summary[aria-label*="menu" i]');

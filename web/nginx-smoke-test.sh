@@ -144,6 +144,7 @@ done
 expect_response ur.io /products 200
 expect_response ur.io /ip 200
 expect_response ur.xyz /investors 200
+expect_response ur.xyz /reserve 200
 expect_response www.ur.io / 301 https://ur.io/
 expect_response www.ur.xyz / 301 https://ur.xyz/
 

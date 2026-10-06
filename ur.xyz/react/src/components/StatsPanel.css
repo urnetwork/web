@@ -283,7 +283,7 @@
         /* Inline-end padding reserves the refresh dial's gutter so it never
            sits over the last stat column. */
         padding-block: 10px;
-        padding-inline: var(--page-gutter) 52px;
+        padding-inline: var(--content-gutter) 52px;
         background: rgba(16, 16, 16, 0.92);
         border: none;
         border-bottom: 1px solid rgba(214, 230, 244, 0.18);

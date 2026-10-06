@@ -41,7 +41,7 @@ export default function DocsExplorer({ activeRoute, initialSlug = null } = {}) {
         <div className="app">
             <Disclaimer visible={disclaimerVisible} />
             <Nav disclaimerVisible={disclaimerVisible} activeRoute={activeRoute} />
-            <Explorer kind="docs" initialSlug={initialSlug}>
+            <Explorer initialSlug={initialSlug}>
                 {!doc ? <DocsLanding code={code} /> : <DocBody doc={doc} />}
             </Explorer>
             <Footer />

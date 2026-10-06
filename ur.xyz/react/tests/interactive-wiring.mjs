@@ -23,7 +23,7 @@ const UR_ENV = process.env.UR_ENV || "main";
 const ASTRO_OUT = path.join(ASTRO_DIR, "build", UR_ENV);
 const OUT = path.join(__dirname, "__wiring__");
 
-const ROUTES = ["/", "/price", "/api", "/operators", "/miners", "/validators", "/research", "/community", "/terms", "/privacy", "/vdp", "/about", "/investors", "/investors/deck", "/investors/conviction-lock", "/investors/our-letter-to-bittensor", "/investors/letter-to-tokenholders-september-2026", "/build"];
+const ROUTES = ["/", "/price", "/operators", "/miners", "/validators", "/research", "/terms", "/privacy", "/vdp", "/about", "/investors", "/investors/deck", "/investors/conviction-lock", "/investors/our-letter-to-bittensor", "/investors/letter-to-tokenholders-september-2026", "/build", "/reserve"];
 // Same screens as the pixel test: desktop + two phones. On phones the header collapses to a
 // hamburger, so the visible-button inventory differs from desktop — but react and astro share
 // the Header, so they still match each other per-profile, and tapping the hamburger exercises
@@ -41,7 +41,7 @@ const SEL = 'button:visible, [role="button"]:visible';
 function freePort() { return new Promise((r) => { const s = net.createServer(); s.listen(0, () => { const p = s.address().port; s.close(() => r(p)); }); }); }
 function waitFor(u, t = 60000) { const s = Date.now(); return new Promise((res, rej) => { const k = () => fetch(u).then(res).catch(() => Date.now() - s > t ? rej(new Error("timeout")) : setTimeout(k, 400)); k(); }); }
 async function stub(page) {
-  await page.route(/geckoterminal\.com|grafana\.ur\.io|bringyour\.com/, (r) => r.fulfill({ json: {} }).catch(() => r.abort()));
+  await page.route(/geckoterminal\.com|grafana\.ur\.io|bringyour\.com|opentensor\.ai/, (r) => r.fulfill({ json: {} }).catch(() => r.abort()));
   await page.addStyleTag({ content: `*,*::before,*::after{animation:none!important;transition:none!important}html,body,*{scroll-behavior:auto!important}` }).catch(() => {});
 }
 async function open(browser, base, route, profile) {

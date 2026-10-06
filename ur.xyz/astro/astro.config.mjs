@@ -28,7 +28,6 @@ function walk(dir, ext) {
 /**
  * Vite plugin that exposes the same virtual module the React app uses:
  *   virtual:ur-docs — the docs/ markdown corpus
- * (virtual:ur-openapi was retired with the /api explorer.)
  */
 function urXyzContent() {
     const DOCS_ID = 'virtual:ur-docs';

@@ -22,7 +22,8 @@
     height: 100%;
     max-width: 1440px;
     margin: 0 auto;
-    padding: 0 32px;
+    /* the content gutter (App.css): the logo and the menu sit on the content's edges */
+    padding: 0 var(--content-gutter);
     box-sizing: border-box;
     display: grid;
     grid-template-columns: minmax(190px, 1fr) auto minmax(190px, 1fr);
@@ -261,7 +262,7 @@
     inset: 0;
     display: none;
     flex-direction: column;
-    padding: 0 20px 24px;
+    padding: 0 var(--content-gutter) 24px;
     box-sizing: border-box;
     color: var(--brand-ui);
     background: var(--brand-bg);
@@ -357,6 +358,3 @@
     .nav-drawer { display: flex; }
 }
 
-@media (max-width: 480px) {
-    .nav-inner { padding: 0 var(--page-gutter); }
-}

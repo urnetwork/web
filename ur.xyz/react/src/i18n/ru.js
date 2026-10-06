@@ -7,7 +7,6 @@ export default {
         miners:     'Майнеры',
         validators: 'Валидаторы',
         research:   'Исследования',
-        community:  'Сообщество',
         price:      'Стоимость',
         docs:       'Документация',
         roadmap:    'Дорожная карта',
@@ -20,7 +19,6 @@ export default {
         mobileNav:    'Мобильная навигация',
         siteMenu:     'Меню сайта',
         browseDocs:   'Документация',
-        apiReference: 'Справочник API',
         search:       'Поиск',
         ctaAria:    'Стоимость — текущая цена сети',
         denomAria:  'Валюта отображения цены'
@@ -36,7 +34,6 @@ export default {
         privacy:    'Конфиденциальность',
         vdp:        'VDP',
         protocol:   'Протокол',
-        community:  'Сообщество',
         legal:      'Правовая информация',
         learn:      'Изучить',
         resources:  'Ресурсы',
@@ -363,18 +360,5 @@ operators: {
                 { title: 'Whole Internet Encryption for the whole world' }
             ]
         }
-    },
-
-    community: {
-        eyebrow: 'Сообщество',
-        title:   'Люди, стоящие за сетью.',
-        intro:   'Протокол открыт. Сообщество, которое его создаёт и поддерживает, растёт. Вот где их найти.',
-        items: [
-            { tag: '01', title: 'Discord',              body: 'Общее обсуждение проекта — разработка протокола, поддержка майнеров и сообщество.', href: 'https://discord.gg/urnetwork', linkLabel: 'Присоединиться к Discord' },
-            { tag: '02', title: 'Discord Bittensor SN', body: 'Обсуждение аспектов Bittensor — подсеть, эмиссия, валидаторы и стейкинг.', soon: 'Скоро' },
-            { tag: '03', title: 'Бренд-кит',         body: 'URnetwork и логотип-коннектор являются зарегистрированными товарными знаками США. Пользователям протокола разрешается использовать бренд-кит в формулировках «powered by UR», «with URnetwork» и аналогичных.', button: { label: 'Скачать бренд-кит' } }
-        ],
-        supportersTitle: 'Сторонники',
-        partnersTitle:   'Партнёры'
     }
 };

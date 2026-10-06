@@ -1,5 +1,5 @@
 .landing-main { position: relative; background: var(--brand-bg); }
-.landing-overview { width: min(1180px, calc(100% - 64px)); margin: 0 auto; padding: 120px 0 0; }
+.landing-overview { width: min(1180px, calc(100% - (var(--content-gutter) * 2))); margin: 0 auto; padding: 120px 0 0; }
 .roles { padding: 32px 0 180px; }
 .roles-heading { display: grid; grid-template-columns: minmax(160px, 0.65fr) minmax(0, 2fr); gap: 40px; padding-bottom: 56px; }
 .roles-eyebrow,
@@ -26,5 +26,5 @@
     .role-card a { margin-top: 40px; }
 }
 @media (max-width: 767px) {
-    .landing-overview { width: calc(100% - 40px); padding-top: 88px; }
+    .landing-overview { padding-top: 88px; }
 }

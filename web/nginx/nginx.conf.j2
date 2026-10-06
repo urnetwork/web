@@ -638,9 +638,9 @@ http {
             return 301 /docs$docpath;
         }
 
-        # The about, build, investor and price pages are English-only too:
-        # their localized paths 301 to the page.
-        location ~ ^/(?:ru|ar|zh|de|es)/(?<en_page>about|build|investors|price)(?<en_rest>/.*)?$ {
+        # The about, build, investor, price and reserve pages are English-only
+        # too: their localized paths 301 to the page.
+        location ~ ^/(?:ru|ar|zh|de|es)/(?<en_page>about|build|investors|price|reserve)(?<en_rest>/.*)?$ {
             return 301 /$en_page$en_rest$is_args$args;
         }
 

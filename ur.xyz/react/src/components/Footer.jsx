@@ -52,6 +52,7 @@ export default function Footer() {
                     <a href={path('operators')}>{t.nav.operators}</a>
                     <a href={path('miners')}>{t.nav.miners}</a>
                     <a href={path('validators')}>{t.nav.validators}</a>
+                    {code === 'en' && <a href="/reserve">Reserve</a>}
                 </nav>
 
                 <nav className="footer-column" aria-label={t.footer.resources}>

@@ -1,8 +1,7 @@
 /* Explorer.css
- * Two-pane chrome shared by /docs and /api: a sticky sidebar with the
- * doc / API tree and a search input, and a scrollable main pane that
- * holds either rendered markdown (DocsExplorer) or operation cards
- * (ApiExplorer). Visual language matches the rest of the site —
+ * The two-pane chrome of /docs: a sticky sidebar with the document list
+ * and a search input, and a scrollable main pane that holds the rendered
+ * markdown (DocsExplorer). Visual language matches the rest of the site —
  * off-white text on the brand black, pink accents for active state.
  */
 
@@ -61,7 +60,7 @@
     justify-content: space-between;
     gap: 12px;
     min-height: 44px;
-    padding: 14px var(--page-gutter);
+    padding: 14px var(--content-gutter);
     background: rgba(16, 16, 16, 0.92);
     backdrop-filter: blur(14px);
     -webkit-backdrop-filter: blur(14px);
@@ -165,7 +164,6 @@
 }
 
 .explorer-result-kind.kind-doc { color: var(--brand-ui); }
-.explorer-result-kind.kind-api { color: var(--brand-usd); }
 
 .explorer-result-body {
     display: flex;
@@ -194,45 +192,6 @@
     display: flex;
     flex-direction: column;
     gap: 18px;
-}
-
-.explorer-link {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 4px;
-    width: 100%;
-    background: transparent;
-    border: 1px solid var(--sidebar-border);
-    border-radius: 10px;
-    padding: 14px 14px;
-    cursor: pointer;
-    color: var(--brand-ui);
-    transition: border-color 0.2s ease, background 0.2s ease, color 0.2s ease;
-}
-
-.explorer-link:hover {
-    border-color: rgba(237, 143, 255, 0.5);
-    background: rgba(237, 143, 255, 0.04);
-}
-
-.explorer-link.is-active {
-    border-color: var(--brand-ur);
-    background: rgba(237, 143, 255, 0.06);
-    color: var(--brand-white);
-}
-
-.explorer-link-eyebrow {
-    font-family: 'PPNeueBit', monospace;
-    font-size: 0.7rem;
-    letter-spacing: 0.16em;
-    color: var(--brand-ur);
-}
-
-.explorer-link-title {
-    font-size: 0.92rem;
-    color: var(--brand-white);
-    letter-spacing: 0.01em;
 }
 
 /* --- Groups --- */
@@ -294,50 +253,6 @@
     opacity: 1;
 }
 
-.explorer-group-link {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    text-decoration: none;
-    color: var(--brand-ui);
-    padding: 5px 8px;
-    border-radius: 6px;
-    font-size: 0.78rem;
-    opacity: 0.78;
-    transition: background 0.15s ease, opacity 0.15s ease, color 0.15s ease;
-}
-
-.explorer-group-link:hover {
-    background: rgba(214, 230, 244, 0.05);
-    color: var(--brand-white);
-    opacity: 1;
-}
-
-.explorer-method {
-    flex: 0 0 auto;
-    font-family: 'PPNeueBit', monospace;
-    font-size: 0.6rem;
-    letter-spacing: 0.06em;
-    padding: 2px 5px;
-    border-radius: 3px;
-    line-height: 1;
-    background: rgba(214, 230, 244, 0.1);
-    color: var(--brand-ui);
-}
-
-.explorer-method.method-get    { color: var(--brand-usd); }
-.explorer-method.method-post   { color: var(--brand-ur); }
-.explorer-method.method-put    { color: var(--brand-ui); }
-.explorer-method.method-delete { color: var(--brand-burn); }
-.explorer-method.method-patch  { color: var(--brand-ui); }
-
-.explorer-op-path {
-    font-family: 'PPNeueBit', monospace;
-    font-size: 0.78rem;
-    color: inherit;
-    word-break: break-all;
-}
-
 /* --- Main pane --- */
 .explorer-main {
     min-width: 0;
@@ -345,7 +260,7 @@
     max-width: 1240px;
 }
 
-/* --- Page header (used by both DocsExplorer and ApiExplorer bodies) --- */
+/* --- Page header --- */
 .explorer-page-header {
     margin-bottom: 48px;
     padding-bottom: 28px;
@@ -427,32 +342,298 @@
     border-bottom-color: var(--brand-white);
 }
 
+/* --- Code ---
+ * Everything a reader types is set in one fixed-width face, JetBrains Mono,
+ * at 15px on a 24px line on every screen. At 15px each character is exactly
+ * 9px wide: indentation and aligned columns show, and on a standard-resolution
+ * monitor every character lands on a whole pixel. Only two things are
+ * coloured, and by what the reader does with them, not by grammar: a value to
+ * replace and a comment (lib/code-marks.js). The reasoning and the measurements
+ * are in the design repo: DESIGNSTYLE.md ("Code") and code-style.html.
+ *
+ * The face is JetBrains Mono Regular 2.304 (SIL Open Font License 1.1, served
+ * at /JetBrainsMono-OFL.txt), cut down to the characters code can use: Latin,
+ * punctuation, arrows, box drawing, and no ligatures. Its hinting is kept: macOS
+ * ignores it, Windows draws small text with it. To rebuild it from the upstream
+ * TTF with fonttools (tests/code-marks.test.mjs checks that every character of
+ * code in docs/ is still in it):
+ *
+ *   pyftsubset JetBrainsMono-Regular.ttf --flavor=woff2 --layout-features=zero \
+ *     --name-IDs='*' --name-languages='*' --name-legacy --notdef-outline \
+ *     --unicodes=U+0020-007E,U+00A0-00FF,U+2010-2015,U+2018-201A,U+201C-201E,U+2022,U+2026,U+2032,U+2033,U+2190-2194,U+21AA,U+2248,U+2260,U+2264,U+2265,U+2500-257F,U+2580-259F,U+2713,U+2717,U+03B1,U+03C4
+ */
+@font-face {
+    font-family: 'JetBrains Mono';
+    src: url('/JetBrainsMono-Regular.woff2') format('woff2');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+
+/* What draws until the face arrives: the system's own fixed-width font, scaled
+   to JetBrains Mono's character width so that no line of prose re-wraps. */
+@font-face {
+    font-family: 'UR Mono Fallback';
+    src: local('Menlo'), local('DejaVu Sans Mono');
+    size-adjust: 99.67%;
+}
+
+@font-face {
+    font-family: 'UR Mono Fallback Win';
+    src: local('Consolas');
+    size-adjust: 109.13%;
+}
+
+.md {
+    --code-font: 'JetBrains Mono', 'UR Mono Fallback', 'UR Mono Fallback Win', ui-monospace, 'SFMono-Regular', 'Roboto Mono', 'Liberation Mono', monospace;
+    --code-size: 15px;
+    --code-line: 24px;
+    /* the face's own line height: the rules of a directory tree join */
+    --code-line-diagram: 19px;
+    --code-pad-block: 18px;
+    --code-pad-inline: 24px;
+    --code-surface: #18191a;
+    --code-bar: #1c1d1f;
+    --code-rule: rgba(214, 230, 244, 0.13);
+    --code-text: var(--brand-white);       /* 16.6:1 on the surface */
+    --code-comment: #c3d1dd;               /* 11.3:1 */
+    --code-placeholder: var(--brand-ur);   /* 8.4:1, and underlined: not colour alone */
+    --code-label: #a3b1bd;
+    /* the rule beside the wrapped part of a line */
+    --code-wrap-rule: rgba(214, 230, 244, 0.3);
+    /* the width of the face's box-drawing stroke at --code-size */
+    --tree-stroke: 1.35px;
+}
+
+/* Inline code is a chip at the lowercase height of the prose around it (0.93em
+   of this face). A chip moves to the next line whole, so a name, a path or an
+   address is never split; only a chip longer than its line, or its table
+   cell, breaks, after a `/`, `=` or `:` where it can (code-marks.js). */
 .md-icode {
-    font-family: 'PPNeueBit', monospace;
-    font-size: 0.92em;
-    background: rgba(214, 230, 244, 0.08);
-    padding: 0.08em 0.35em;
-    border-radius: 4px;
+    display: inline-block;
+    max-width: 100%;
+    vertical-align: baseline;
+    font-family: var(--code-font, monospace);
+    font-size: 0.93em;
+    line-height: 1.4;
+    font-variant-ligatures: none;
+    font-variant-numeric: slashed-zero;
+    padding: 0.06em 0.38em;
+    border-radius: 5px;
+    background: rgba(214, 230, 244, 0.1);
+    color: var(--brand-white);
+    overflow-wrap: anywhere;
+}
+
+.md-codeblock {
+    margin: 1.75em 0;
+    border: 1px solid var(--code-rule);
+    border-radius: 10px;
+    background: var(--code-surface);
+    overflow: hidden;
+}
+
+/* The bar says what kind of text the block holds, and copies it. */
+.md-codeblock-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    min-height: 40px;
+    padding: 0 8px 0 var(--code-pad-inline);
+    background: var(--code-bar);
+    border-bottom: 1px solid rgba(214, 230, 244, 0.08);
+}
+
+.md-codeblock-lang {
+    font-size: 11px;
+    font-weight: 500;
+    line-height: 1;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--code-label);
+}
+
+.md-codeblock-copy {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    height: 28px;
+    padding: 0 10px 0 9px;
+    border: 1px solid rgba(214, 230, 244, 0.18);
+    border-radius: 6px;
+    background: transparent;
+    color: var(--brand-ui);
+    font-family: inherit;
+    font-size: 12.5px;
+    line-height: 1;
+    letter-spacing: 0.01em;
+    cursor: pointer;
+}
+
+.md-codeblock-copy svg {
+    flex: none;
+}
+
+.md-codeblock-copy:hover {
+    border-color: rgba(214, 230, 244, 0.42);
     color: var(--brand-white);
 }
 
+.md-codeblock-copy:focus-visible {
+    outline: 2px solid var(--brand-ur);
+    outline-offset: 2px;
+}
+
+.md-codeblock-copy[data-state="copied"] {
+    border-color: rgba(135, 251, 103, 0.45);
+    color: var(--brand-usd);
+}
+
+/* "Copy" and "Copied" share one cell: the button keeps its size when the word changes. */
+.md-codeblock-copy-label {
+    display: inline-grid;
+}
+
+.md-codeblock-copy-label > span {
+    grid-area: 1 / 1;
+}
+
+.md-codeblock-copy-label > span[data-shown="false"] {
+    visibility: hidden;
+}
+
+/* A finger needs a larger target than a pointer. */
+@media (pointer: coarse) {
+    .md-codeblock-bar {
+        min-height: 46px;
+    }
+
+    .md-codeblock-copy {
+        height: 34px;
+        padding: 0 12px;
+    }
+}
+
+.md-visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    border: 0;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+}
+
+/* A long line wraps (below), so nothing here is wider than the block. Should
+   something ever be, it scrolls here, never the page, and a shade at the edge
+   shows there is more: the two covers travel with the text, the shades stay. */
 .md-pre {
-    margin: 1.4em 0;
-    padding: 18px 22px;
-    background: rgba(255, 255, 255, 0.02);
-    border: 1px solid var(--sidebar-border);
-    border-radius: 8px;
+    --line: var(--code-line);
+    margin: 0;
+    padding: var(--code-pad-block) var(--code-pad-inline);
     overflow-x: auto;
-    font-size: 0.85rem;
-    line-height: 1.55;
+    overscroll-behavior-x: contain;
+    font-size: var(--code-size);
+    line-height: var(--line);
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(214, 230, 244, 0.3) transparent;
+    background:
+        linear-gradient(to right, var(--code-surface) 45%, rgba(24, 25, 26, 0)) left center / 44px 100% no-repeat local,
+        linear-gradient(to left, var(--code-surface) 45%, rgba(24, 25, 26, 0)) right center / 44px 100% no-repeat local,
+        linear-gradient(to right, rgba(0, 0, 0, 0.62), rgba(0, 0, 0, 0)) left center / 22px 100% no-repeat scroll,
+        linear-gradient(to left, rgba(0, 0, 0, 0.62), rgba(0, 0, 0, 0)) right center / 22px 100% no-repeat scroll,
+        var(--code-surface);
+}
+
+.md-pre:focus-visible {
+    outline: 2px solid var(--brand-ur);
+    outline-offset: -2px;
 }
 
 .md-pre .md-code {
-    font-family: 'PPNeueBit', monospace;
-    color: var(--brand-white);
-    background: transparent;
-    padding: 0;
-    white-space: pre;
+    display: block;
+    font-family: var(--code-font, monospace);
+    font-size: inherit;
+    line-height: inherit;
+    font-weight: 400;
+    color: var(--code-text);
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    tab-size: 4;
+    /* the characters shown are the characters to type; a zero is not an O */
+    font-variant-ligatures: none;
+    font-variant-numeric: slashed-zero;
+    font-synthesis: none;
+}
+
+.md-codeblock.is-diagram .md-pre {
+    --line: var(--code-line-diagram);
+}
+
+/* --- Wrapping ---
+ * Each line of code is a block. When it is longer than the block it wraps at
+ * the places code-marks.js leaves open, and its wrapped part hangs at
+ * --hang columns: two past the line's own indentation, beside a thin rule at
+ * --rule, so a wrapped part never reads as a line of its own. In a directory
+ * tree the wrapped part sits under the entry's name and the tree's vertical
+ * rules continue beside it (the backgrounds CodeLine draws). */
+.md-code-line {
+    display: block;
+    padding-left: calc(var(--hang) * 1ch);
+    text-indent: calc(var(--hang) * -1ch);
+}
+
+/* the rule runs from the first wrapped row to the last; a line that fits has none */
+.md-code-line:not(.is-tree) {
+    background: linear-gradient(var(--code-wrap-rule), var(--code-wrap-rule)) no-repeat;
+    background-position: calc(var(--rule) * 1ch + 0.5ch - 0.75px) calc(var(--line) + 4px);
+    background-size: 1.5px calc(100% - var(--line) - 8px);
+}
+
+/* held on one line: a word Chromium would split at a hyphen, `# word`, `- item`, `word \` */
+.md-code-keep {
+    white-space: nowrap;
+}
+
+/* longer than the narrowest line: it moves to the next row whole, and breaks
+   inside only when it is longer than a row, its own wrapped part hanging too */
+.md-code-word {
+    display: inline-block;
+    max-width: 100%;
+    padding-left: 2ch;
+    text-indent: -2ch;
+    white-space: pre-wrap;
+}
+
+.md-code-comment {
+    color: var(--code-comment);
+}
+
+.md-code-placeholder {
+    color: var(--code-placeholder);
+    text-decoration: underline dotted rgba(237, 143, 255, 0.7);
+    text-decoration-thickness: 1px;
+    text-underline-offset: 4px;
+}
+
+/* A reader who asks for more contrast gets comments at full strength and a firmer edge. */
+@media (prefers-contrast: more) {
+    .md {
+        --code-comment: var(--brand-white);
+        --code-rule: rgba(214, 230, 244, 0.5);
+    }
+}
+
+@media (max-width: 767px) {
+    .md {
+        --code-pad-block: 14px;
+        --code-pad-inline: 16px;
+    }
 }
 
 .md-strong {
@@ -530,486 +711,66 @@
 
 .md-table tr:last-child td { border-bottom: none; }
 
-/* --- API page intro --- */
-.api-intro {
-    margin: 0 0 48px;
-    color: var(--brand-ui);
-}
+/* On a phone a table's columns would squeeze its code into fragments, so each
+   row is drawn as a stack instead: every value under its column's name, at the
+   full width of the frame. The header row is kept for a screen reader only
+   (the roles in markdown.jsx keep the table a table). */
+@media (max-width: 600px) {
+    .md-table,
+    .md-table thead,
+    .md-table tbody,
+    .md-table tr,
+    .md-table th,
+    .md-table td {
+        display: block;
+    }
 
-/* --- API table of contents --- */
-.api-toc {
-    margin: 0 0 64px;
-    padding: 24px 28px 28px;
-    border: 1px solid var(--sidebar-border);
-    border-radius: 12px;
-    background: rgba(255, 255, 255, 0.02);
-}
+    .md-table thead {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip-path: inset(50%);
+        white-space: nowrap;
+    }
 
-.api-toc-header {
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: 12px;
-    margin-bottom: 18px;
-    padding-bottom: 14px;
-    border-bottom: 1px solid var(--sidebar-border);
-}
+    .md-table tr {
+        padding: 14px 16px;
+        border-bottom: 1px solid var(--sidebar-border);
+    }
 
-.api-toc-eyebrow {
-    font-size: 0.7rem;
-    text-transform: uppercase;
-    letter-spacing: 0.18em;
-    color: var(--brand-ur);
-    font-weight: 600;
-}
+    .md-table tbody tr:last-child {
+        border-bottom: none;
+    }
 
-.api-toc-meta {
-    font-size: 0.7rem;
-    text-transform: uppercase;
-    letter-spacing: 0.12em;
-    opacity: 0.55;
-}
+    .md-table td {
+        padding: 0;
+        border-bottom: none;
+    }
 
-.api-toc-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-    gap: 22px 32px;
-}
+    .md-table td + td {
+        margin-top: 10px;
+    }
 
-.api-toc-group {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    min-width: 0;
-}
-
-.api-toc-group-label {
-    display: block;
-    font-size: 0.7rem;
-    text-transform: uppercase;
-    letter-spacing: 0.16em;
-    color: var(--brand-white);
-    text-decoration: none;
-    padding-bottom: 6px;
-    border-bottom: 1px solid var(--sidebar-border);
-    margin-bottom: 4px;
-    transition: color 0.15s ease, border-color 0.15s ease;
-}
-
-.api-toc-group-label:hover {
-    color: var(--brand-ur);
-    border-bottom-color: var(--brand-ur);
-}
-
-.api-toc-list {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 1px;
-}
-
-.api-toc-link {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 4px 6px;
-    border-radius: 4px;
-    text-decoration: none;
-    color: var(--brand-ui);
-    opacity: 0.78;
-    transition: background 0.15s ease, color 0.15s ease, opacity 0.15s ease;
-}
-
-.api-toc-link:hover {
-    background: rgba(214, 230, 244, 0.05);
-    color: var(--brand-white);
-    opacity: 1;
-}
-
-.api-toc-method {
-    flex: 0 0 auto;
-    font-family: 'PPNeueBit', monospace;
-    font-size: 0.6rem;
-    letter-spacing: 0.06em;
-    padding: 2px 5px;
-    border-radius: 3px;
-    line-height: 1;
-    background: rgba(214, 230, 244, 0.1);
-    color: var(--brand-ui);
-    min-width: 38px;
-    text-align: center;
-}
-
-.api-toc-method.method-get    { color: var(--brand-usd); }
-.api-toc-method.method-post   { color: var(--brand-ur); }
-.api-toc-method.method-put    { color: var(--brand-ui); }
-.api-toc-method.method-delete { color: var(--brand-burn); }
-.api-toc-method.method-patch  { color: var(--brand-ui); }
-
-.api-toc-path {
-    font-family: 'PPNeueBit', monospace;
-    font-size: 0.78rem;
-    word-break: break-all;
-    line-height: 1.35;
-    color: inherit;
-}
-
-/* --- Group title --- */
-.api-group-title {
-    scroll-margin-top: calc(var(--nav-height) + 24px);
-}
-
-/* --- Operation card (ApiExplorer) --- */
-.api-op {
-    margin: 0 0 56px;
-    padding-bottom: 56px;
-    border-bottom: 1px solid var(--sidebar-border);
-    scroll-margin-top: calc(var(--nav-height) + 24px);
-}
-
-.api-op:last-child {
-    border-bottom: none;
-}
-
-/* Two-column layout: docs on the left, sticky JSON sample on the right.
-   The right column collapses underneath at narrower viewports. */
-.api-op-grid {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(280px, 380px);
-    gap: 36px;
-    align-items: start;
-}
-
-.api-op-main {
-    min-width: 0;
-}
-
-.api-op-samples {
-    position: sticky;
-    top: calc(var(--nav-height) + 24px);
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
-    min-width: 0;
-}
-
-/* --- JSON sample blocks --- */
-.api-sample {
-    border: 1px solid var(--sidebar-border);
-    border-radius: 8px;
-    background: rgba(0, 0, 0, 0.45);
-    overflow: hidden;
-}
-
-.api-sample-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 8px 14px;
-    background: rgba(255, 255, 255, 0.025);
-    border-bottom: 1px solid var(--sidebar-border);
-    font-size: 0.65rem;
-    text-transform: uppercase;
-    letter-spacing: 0.12em;
-}
-
-.api-sample-label {
-    color: var(--brand-white);
-    font-weight: 600;
-}
-
-.api-sample-mime {
-    font-family: 'PPNeueBit', monospace;
-    color: var(--brand-ui);
-    opacity: 0.6;
-    text-transform: none;
-    letter-spacing: 0.04em;
-}
-
-.api-sample-status {
-    font-family: 'PPNeueBit', monospace;
-    padding: 2px 6px;
-    border-radius: 3px;
-    background: rgba(214, 230, 244, 0.08);
-    color: var(--brand-ui);
-}
-
-.api-sample-status.status-ok       { color: var(--brand-usd); }
-.api-sample-status.status-info     { color: var(--brand-ui); }
-.api-sample-status.status-redirect { color: var(--brand-ur); }
-.api-sample-status.status-client   { color: var(--brand-burn); }
-.api-sample-status.status-server   { color: var(--brand-burn); }
-
-.api-sample-pre {
-    margin: 0;
-    padding: 14px 16px;
-    max-height: 360px;
-    overflow: auto;
-    font-family: 'PPNeueBit', monospace;
-    font-size: 0.78rem;
-    line-height: 1.55;
-    color: var(--brand-white);
-    white-space: pre;
-    scrollbar-width: thin;
-    scrollbar-color: rgba(214, 230, 244, 0.18) transparent;
-}
-
-.api-sample-pre::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
-}
-.api-sample-pre::-webkit-scrollbar-thumb {
-    background: rgba(214, 230, 244, 0.14);
-    border-radius: 4px;
-}
-
-.api-op-header {
-    display: flex;
-    align-items: baseline;
-    gap: 14px;
-    margin-bottom: 14px;
-    flex-wrap: wrap;
-}
-
-.api-op-method {
-    font-family: 'PPNeueBit', monospace;
-    font-size: 0.85rem;
-    letter-spacing: 0.08em;
-    padding: 5px 10px;
-    border-radius: 4px;
-    background: rgba(214, 230, 244, 0.1);
-    color: var(--brand-ui);
-    line-height: 1;
-}
-
-.api-op-method.method-get    { color: var(--brand-usd); }
-.api-op-method.method-post   { color: var(--brand-ur); }
-.api-op-method.method-put    { color: var(--brand-ui); }
-.api-op-method.method-delete { color: var(--brand-burn); }
-
-.api-op-path {
-    font-family: 'PPNeueBit', monospace;
-    font-size: 1.15rem;
-    color: var(--brand-white);
-    word-break: break-all;
-    line-height: 1.3;
-}
-
-.api-op-id {
-    font-size: 0.72rem;
-    text-transform: uppercase;
-    letter-spacing: 0.12em;
-    opacity: 0.55;
-}
-
-.api-op-auth {
-    display: inline-block;
-    font-size: 0.65rem;
-    text-transform: uppercase;
-    letter-spacing: 0.14em;
-    padding: 3px 7px;
-    border-radius: 3px;
-    background: rgba(255, 108, 88, 0.1);
-    color: var(--brand-burn);
-    margin-left: 8px;
-}
-
-.api-op-auth.is-public {
-    background: rgba(135, 251, 103, 0.08);
-    color: var(--brand-usd);
-}
-
-.api-op-section {
-    margin: 24px 0 0;
-}
-
-.api-op-section-label {
-    font-size: 0.65rem;
-    text-transform: uppercase;
-    letter-spacing: 0.18em;
-    color: var(--brand-ur);
-    margin-bottom: 10px;
-}
-
-/* --- Collapsible details for request body / responses --- */
-.api-op-details {
-    margin: 24px 0 0;
-    border: 1px solid var(--sidebar-border);
-    border-radius: 8px;
-    background: rgba(255, 255, 255, 0.015);
-    overflow: hidden;
-}
-
-.api-op-details[open] {
-    background: rgba(255, 255, 255, 0.025);
-}
-
-.api-op-details-summary {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 14px;
-    padding: 12px 16px;
-    cursor: pointer;
-    list-style: none;
-    user-select: none;
-    transition: background 0.15s ease;
-}
-
-.api-op-details-summary::-webkit-details-marker {
-    display: none;
-}
-
-.api-op-details-summary::before {
-    content: '▸';
-    flex: 0 0 auto;
-    font-size: 0.7rem;
-    color: var(--brand-ur);
-    transition: transform 0.2s ease;
-    transform: rotate(0deg);
-    line-height: 1;
-}
-
-.api-op-details[open] > .api-op-details-summary::before {
-    transform: rotate(90deg);
-}
-
-.api-op-details-summary:hover {
-    background: rgba(214, 230, 244, 0.04);
-}
-
-.api-op-details-summary .api-op-section-label {
-    margin-bottom: 0;
-    flex: 1 1 auto;
-}
-
-.api-op-details-hint {
-    font-size: 0.65rem;
-    text-transform: uppercase;
-    letter-spacing: 0.12em;
-    color: var(--brand-ui);
-    opacity: 0.55;
-}
-
-.api-op-details-body {
-    padding: 4px 18px 18px;
-    border-top: 1px solid var(--sidebar-border);
-}
-
-.api-op-response-block {
-    margin-bottom: 18px;
-}
-
-.api-op-response-block:last-child {
-    margin-bottom: 0;
-}
-
-.api-field-in {
-    margin-left: 8px;
-    opacity: 0.5;
-    font-size: 0.7rem;
-}
-
-/* --- Schema block --- */
-.api-schema {
-    margin: 0 0 0;
-    border-left: 1px solid var(--sidebar-border);
-    padding-left: 16px;
-}
-
-.api-schema-empty {
-    font-size: 0.82rem;
-    opacity: 0.5;
-    padding-left: 16px;
-}
-
-.api-field {
-    display: grid;
-    grid-template-columns: minmax(160px, 240px) 1fr;
-    gap: 18px;
-    padding: 8px 0;
-    border-bottom: 1px dashed var(--sidebar-border);
-}
-
-.api-field:last-child { border-bottom: none; }
-
-.api-field-name {
-    font-family: 'PPNeueBit', monospace;
-    color: var(--brand-white);
-    font-size: 0.88rem;
-    word-break: break-word;
-}
-
-.api-field-type {
-    display: inline-block;
-    font-family: 'PPNeueBit', monospace;
-    font-size: 0.7rem;
-    letter-spacing: 0.04em;
-    color: var(--brand-ur);
-    margin-top: 2px;
-}
-
-.api-field-desc {
-    font-size: 0.85rem;
-    color: var(--brand-ui);
-    opacity: 0.85;
-    line-height: 1.55;
-}
-
-.api-field-desc .md-p { margin-bottom: 0.4em; }
-
-.api-field-enum {
-    margin-top: 4px;
-    font-size: 0.72rem;
-    color: var(--brand-ui);
-    opacity: 0.7;
-}
-
-.api-field-nested {
-    margin-top: 8px;
-    grid-column: 1 / -1;
-}
-
-.api-ref-link {
-    color: var(--brand-ur);
-    background: transparent;
-    border: none;
-    padding: 0;
-    font: inherit;
-    cursor: pointer;
-    text-decoration: none;
-    border-bottom: 1px dashed rgba(237, 143, 255, 0.5);
-}
-
-.api-ref-link:hover {
-    color: var(--brand-white);
-    border-bottom-color: var(--brand-white);
+    /* the column's name above its value: the header's style, a size smaller */
+    .md-table td[data-label]::before {
+        content: attr(data-label);
+        content: attr(data-label) / "";
+        display: block;
+        margin-bottom: 4px;
+        font-size: 0.66rem;
+        font-weight: 500;
+        line-height: 1.3;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--brand-ui);
+        opacity: 0.62;
+    }
 }
 
 /* --- Responsive --- */
-@media (max-width: 1280px) {
-    .api-op-grid {
-        grid-template-columns: minmax(0, 1fr) minmax(260px, 320px);
-        gap: 24px;
-    }
-}
-
 @media (max-width: 1100px) {
     .explorer-main { padding: 48px 36px 96px; }
-
-    /* Stack the JSON sample below the docs once horizontal room runs out;
-       the sticky positioning is also released so it doesn't shadow the
-       schema details. */
-    .api-op-grid {
-        grid-template-columns: 1fr;
-        gap: 24px;
-    }
-    .api-op-samples {
-        position: static;
-        top: auto;
-    }
 }
 
 @media (max-width: 900px) {
@@ -1029,7 +790,7 @@
         height: auto;
         max-height: 0;
         overflow: hidden;
-        padding: 0 var(--page-gutter);
+        padding: 0 var(--content-gutter);
         border-right: none;
         border-bottom: none;
         transition: max-height 0.3s ease, padding 0.3s ease;
@@ -1037,21 +798,11 @@
     .explorer.sidebar-open .explorer-sidebar {
         max-height: 78vh;
         overflow-y: auto;
-        padding: 20px var(--page-gutter) 28px;
+        padding: 20px var(--content-gutter) 28px;
         border-bottom: 1px solid var(--sidebar-border);
     }
 
     .explorer-main {
-        padding: 36px var(--page-gutter) 80px;
-    }
-    .api-field {
-        grid-template-columns: 1fr;
-        gap: 4px;
-    }
-    .api-toc {
-        padding: 18px 18px 22px;
-    }
-    .api-toc-grid {
-        grid-template-columns: 1fr;
+        padding: 36px var(--content-gutter) 80px;
     }
 }

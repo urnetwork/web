@@ -1,4 +1,6 @@
-import React, { Fragment } from 'react';
+import React, { Fragment, useEffect, useRef, useState } from 'react';
+
+import { codeLabel, isDiagram, lineShape, wrapInline, wrapLine } from './code-marks.js';
 
 /**
  * Tiny markdown renderer for the docs corpus shipped at /docs.
@@ -219,9 +221,7 @@ function renderBlock(block, idx, baseHref, levels = null) {
                 </blockquote>
             );
         case 'code':
-            return (
-                <pre key={idx} className="md-pre"><code className={`md-code md-lang-${block.lang || 'text'}`}>{block.content}</code></pre>
-            );
+            return <CodeBlock key={idx} lang={block.lang} source={block.content} />;
         case 'ulist':
             return (
                 <ul key={idx} className="md-ul">
@@ -235,17 +235,21 @@ function renderBlock(block, idx, baseHref, levels = null) {
                 </ol>
             );
         case 'table': {
+            // On a phone each row is drawn as a stack, every value under its
+            // column's name (data-label, Explorer.css). The roles keep it a table
+            // for a screen reader once its parts are no longer laid out as one.
             const [head, ...body] = block.rows;
+            const labels = head.map(plainText);
             return (
                 <div key={idx} className="md-table-wrap">
-                    <table className="md-table">
-                        <thead>
-                            <tr>{head.map((c, j) => <th key={j}>{renderInline(c, baseHref)}</th>)}</tr>
+                    <table className="md-table" role="table">
+                        <thead role="rowgroup">
+                            <tr role="row">{head.map((c, j) => <th key={j} role="columnheader">{renderInline(c, baseHref)}</th>)}</tr>
                         </thead>
-                        <tbody>
+                        <tbody role="rowgroup">
                             {body.map((row, j) => (
-                                <tr key={j}>
-                                    {row.map((c, k) => <td key={k}>{renderInline(c, baseHref)}</td>)}
+                                <tr key={j} role="row">
+                                    {row.map((c, k) => <td key={k} role="cell" data-label={labels[k] || undefined}>{renderInline(c, baseHref)}</td>)}
                                 </tr>
                             ))}
                         </tbody>
@@ -255,6 +259,138 @@ function renderBlock(block, idx, baseHref, levels = null) {
         }
         default:
             return null;
+    }
+}
+
+/**
+ * A fenced block. The bar names the kind of text and copies it; the text
+ * carries the two marks code-marks.js finds, a value to replace and a comment,
+ * and nothing else is coloured. What is drawn is the source, character for
+ * character, so selecting it copies the same text the button does.
+ *
+ * A long line wraps, at the places code-marks.js chooses, and its wrapped part
+ * hangs beside a rule. Nothing is wider than the block, so it never scrolls;
+ * should something ever be, the block becomes a tab stop, so it can be
+ * scrolled from the keyboard (Safari does not make a scroller focusable).
+ */
+function CodeBlock({ lang, source }) {
+    const [copied, setCopied] = useState(false);
+    const [scrolls, setScrolls] = useState(false);
+    const pre = useRef(null);
+    const reset = useRef(0);
+
+    useEffect(() => {
+        const el = pre.current;
+        if (!el) return undefined;
+        const measure = () => setScrolls(el.scrollWidth > el.clientWidth + 1);
+        measure();
+        if (typeof ResizeObserver === 'undefined') return undefined;
+        // the block's width changes with the window, the text's with the font arriving
+        const watch = new ResizeObserver(measure);
+        watch.observe(el);
+        if (el.firstElementChild) watch.observe(el.firstElementChild);
+        return () => watch.disconnect();
+    }, [source]);
+
+    useEffect(() => () => clearTimeout(reset.current), []);
+
+    const copy = async () => {
+        let done = false;
+        try {
+            await navigator.clipboard.writeText(source);
+            done = true;
+        } catch {
+            // no clipboard access here: select the text and try the browser's own command
+            done = selectAndCopy(pre.current && pre.current.firstElementChild);
+        }
+        // say "Copied" only when it was; otherwise the text is left selected to copy by hand
+        if (!done) return;
+        setCopied(true);
+        clearTimeout(reset.current);
+        reset.current = setTimeout(() => setCopied(false), 2000);
+    };
+
+    const label = codeLabel(lang);
+    const lines = source.split('\n');
+    const diagram = isDiagram(source);
+
+    return (
+        <div className={`md-codeblock${diagram ? ' is-diagram' : ''}`}>
+            <div className="md-codeblock-bar">
+                <span className="md-codeblock-lang">{label}</span>
+                <button type="button" className="md-codeblock-copy" data-state={copied ? 'copied' : undefined} onClick={copy}>
+                    <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                        {copied
+                            ? <path d="M3.2 8.4l3 3 6.6-6.8" />
+                            : <><rect x="5.5" y="5.5" width="8" height="8" rx="1.6" /><path d="M10.5 5.5V4.1a1.6 1.6 0 0 0-1.6-1.6H4.1a1.6 1.6 0 0 0-1.6 1.6v4.8a1.6 1.6 0 0 0 1.6 1.6h1.4" /></>}
+                    </svg>
+                    {/* both words are laid in one cell, so the button is the same size in either state */}
+                    <span className="md-codeblock-copy-label">
+                        <span data-shown={!copied}>Copy</span>
+                        <span data-shown={copied}>Copied</span>
+                    </span>
+                    <span className="md-visually-hidden"> {label}</span>
+                </button>
+                <span className="md-visually-hidden" role="status">{copied ? 'Copied to the clipboard' : ''}</span>
+            </div>
+            <pre ref={pre} className="md-pre" tabIndex={scrolls ? 0 : undefined}>
+                <code className={`md-code md-lang-${lang || 'text'}`} translate="no">
+                    {lines.map((line, i) => (
+                        <CodeLine key={i} line={line} lang={lang} diagram={diagram} last={i === lines.length - 1} />
+                    ))}
+                </code>
+            </pre>
+        </div>
+    );
+}
+
+/**
+ * One line of a block. Its wrapped parts hang at `--hang` columns; a rule at
+ * `--rule` marks them, or, in a directory tree, the tree's own vertical rules
+ * continue beside them (one background per rule, drawn in the text colour).
+ */
+function CodeLine({ line, lang, diagram, last }) {
+    const shape = lineShape(line, diagram);
+    const style = { '--hang': String(shape.hang) };
+    if (shape.rule !== null) style['--rule'] = String(shape.rule);
+    if (shape.connectors.length) {
+        const each = (value) => shape.connectors.map(value).join(', ');
+        style.backgroundImage = each(() => 'linear-gradient(currentColor, currentColor)');
+        style.backgroundPosition = each((c) => `calc(${c}ch + 0.5ch - var(--tree-stroke) / 2) var(--line)`);
+        style.backgroundSize = each(() => 'var(--tree-stroke) calc(100% - var(--line))');
+        style.backgroundRepeat = 'no-repeat';
+    }
+    return (
+        <span className={`md-code-line${shape.rule === null ? ' is-tree' : ''}`} style={style}>
+            {wrapLine(line, lang, shape).map((run, i) => (run.kind
+                ? <span key={i} className={run.kind === 'word' ? 'md-code-word' : 'md-code-keep'}>{codeItems(run.items)}</span>
+                : <Fragment key={i}>{codeItems(run.items)}</Fragment>))}
+            {last ? null : '\n'}
+        </span>
+    );
+}
+
+function codeItems(items) {
+    return items.map((item, i) => {
+        if (item.wbr) return <wbr key={i} />;
+        if (item.keep) return <span key={i} className="md-code-keep">{codeItems(item.items)}</span>;
+        if (item.mark) return <span key={i} className={`md-code-${item.mark}`}>{item.text}</span>;
+        return <Fragment key={i}>{item.text}</Fragment>;
+    });
+}
+
+/** Select an element's text and copy it with the browser's own command. True when it was copied. */
+function selectAndCopy(el) {
+    if (!el || typeof window === 'undefined' || !window.getSelection) return false;
+    const range = document.createRange();
+    range.selectNodeContents(el);
+    const selection = window.getSelection();
+    selection.removeAllRanges();
+    selection.addRange(range);
+    try {
+        return document.execCommand('copy');
+    } catch {
+        return false;
     }
 }
 
@@ -279,7 +415,7 @@ function renderInline(input, baseHref) {
         if (text[i] === '`') {
             const end = text.indexOf('`', i + 1);
             if (end !== -1) {
-                push(<code className="md-icode">{text.slice(i + 1, end)}</code>);
+                push(<code className="md-icode" translate="no">{codeItems(wrapInline(text.slice(i + 1, end)))}</code>);
                 i = end + 1;
                 continue;
             }
@@ -347,6 +483,11 @@ function renderInline(input, baseHref) {
     }
 
     return out;
+}
+
+/** A table header cell as plain text, for the label a stacked row shows. */
+function plainText(s) {
+    return stripHtmlTags(s).replace(/[`*_]/g, '').replace(/\[([^\]]+)\]\([^)]*\)/g, '$1').trim();
 }
 
 function stripHtmlTags(s) {

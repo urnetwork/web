@@ -1,5 +1,6 @@
 .investor-page {
-    --investor-width: min(980px, calc(100vw - 64px));
+    /* the site's content column and its gutter (App.css) */
+    --investor-width: min(var(--content-width), calc(100% - (var(--content-gutter) * 2)));
     --investor-line: rgba(214, 230, 244, 0.13);
     --investor-line-subtle: rgba(214, 230, 244, 0.075);
     --investor-line-strong: rgba(214, 230, 244, 0.22);
@@ -884,10 +885,6 @@
 }
 
 @media (max-width: 1040px) {
-    .investor-page {
-        --investor-width: calc(100vw - 48px);
-    }
-
     /* Below full width there is no longer enough room to hand the summary a
        fixed 360px without squeezing the title into two lines, so share the
        row by ratio again and let the summary run to an extra line. */
@@ -940,10 +937,6 @@
 }
 
 @media (max-width: 560px) {
-    .investor-page {
-        --investor-width: calc(100vw - (var(--page-gutter) * 2));
-    }
-
     .investor-hero {
         display: block;
         min-height: 0;
