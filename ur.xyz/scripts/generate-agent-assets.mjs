@@ -8,6 +8,9 @@
  *                      drift apart
  *   docs-md/<slug>.md  the markdown of every docs page (each docs page links
  *                      its own via <link rel="alternate" type="text/markdown">)
+ *   <page>.md          the markdown of each document published as its own page
+ *                      (the legal documents: /terms.md, /privacy.md, /vdp.md),
+ *                      beside the page it mirrors, which links it the same way
  *   docs/<path>        the images the documents reference
  *
  * Front matter (a document's <title>/description overrides) is not part of
@@ -89,20 +92,27 @@ mkdirSync(outDir, { recursive: true });
 
 const seen = new Set();
 const docIndex = [];
+const pageTwins = [];
 
 for (const abs of walk(DOCS_DIR)) {
   const rel = path.relative(DOCS_DIR, abs).replace(/\\/g, "/");
   const slug = slugFor(rel);
   if (!slug || seen.has(slug) || HIDDEN_DOC_SLUGS.has(slug)) continue; // root README + first-wins dedupe, like the lib
   seen.add(slug);
-  // a document published as its own page (the legal documents) has no /docs page to be the twin of
-  if (DOC_PAGE_PATHS[slug]) continue;
+  const body = splitFrontMatter(readFileSync(abs, "utf8")).body;
+  // a document published as its own page (the legal documents) has no /docs
+  // page: its twin sits beside the page it mirrors, /terms.md for /terms
+  if (DOC_PAGE_PATHS[slug]) {
+    writeFileSync(path.join(PUBLIC, `${DOC_PAGE_PATHS[slug].slice(1)}.md`), body);
+    pageTwins.push(`${DOC_PAGE_PATHS[slug]}.md`);
+    continue;
+  }
   const target = path.join(outDir, `${slug}.md`);
   mkdirSync(path.dirname(target), { recursive: true });
-  writeFileSync(target, splitFrontMatter(readFileSync(abs, "utf8")).body);
+  writeFileSync(target, body);
   docIndex.push(slug);
 }
-console.log(`mirrored ${docIndex.length} docs into docs-md/`);
+console.log(`mirrored ${docIndex.length} docs into docs-md/ and wrote ${pageTwins.join(", ")}`);
 
 // The retired API explorer and its stale public specification remain in the
 // source history, but are not part of the published ur.xyz surface.

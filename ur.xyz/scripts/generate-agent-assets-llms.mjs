@@ -161,9 +161,11 @@ export function buildLlms(distDir) {
         .filter(([u]) => u.startsWith('/docs/') && !UNLISTED_DOC_SLUGS.has(docSlug(u)))
         .sort(([a], [b]) => docRank(a) - docRank(b) || a.localeCompare(b))
         .map(([u, p]) => `- [${shortTitle(p.title)}](${SITE}/docs-md/${docSlug(u)}.md): ${p.description}`);
+    // a legal page with its markdown twin (/terms.md beside /terms), when the build has it
+    const twinOf = (u) => (existsSync(path.join(distDir, `${u.slice(1)}.md`)) ? ` ([markdown](${SITE}${u}.md))` : '');
     const optionalLines = [
         ...SITEMAP_FILES.filter((f) => existsSync(path.join(distDir, f))).map((f) => `- [${FILE_LABELS[f] || f}](${SITE}${f})`),
-        ...LEGAL.filter((u) => pages.has(u)).map((u) => `- [${shortTitle(pages.get(u).title)}](${SITE}${u})`),
+        ...LEGAL.filter((u) => pages.has(u)).map((u) => `- [${shortTitle(pages.get(u).title)}](${SITE}${u})${twinOf(u)}: ${pages.get(u).description}`),
     ];
 
     const llms = `# UR

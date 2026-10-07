@@ -33,7 +33,8 @@ export function slugFor(filePath) {
 // under /docs. The legal documents render at /terms, /privacy and /vdp (the
 // generated react/src/data/legal.js); /docs/legal/* was a second, indexable
 // copy of each. They stay in the docs sidebar and search, linking to their page,
-// but get no /docs page, no /<lang>/docs stub and no docs-md twin.
+// but get no /docs page and no /<lang>/docs stub; their markdown twin sits
+// beside the page (/terms.md), not under /docs-md.
 export const DOC_PAGE_PATHS = Object.freeze({
     'legal/terms': '/terms',
     'legal/privacy': '/privacy',

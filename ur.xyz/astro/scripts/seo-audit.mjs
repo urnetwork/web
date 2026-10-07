@@ -12,7 +12,7 @@
 import { existsSync, readFileSync, readdirSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { UNLISTED_DOC_SLUGS } from "../../react/src/lib/docs-shared.js";
+import { DOC_PAGE_PATHS, UNLISTED_DOC_SLUGS } from "../../react/src/lib/docs-shared.js";
 import { contentDay, investorLetterMetadata } from "./pdf-freshness.mjs";
 
 const DIST = path.resolve(process.argv[2] || "dist");
@@ -359,10 +359,40 @@ for (const rel of mustExist) {
 // security.txt must not be expired (the deployed one had been, for months)
 const secPath = path.join(DIST, ".well-known/security.txt");
 if (existsSync(secPath)) {
-  const m = readFileSync(secPath, "utf8").match(/^Expires:\s*(.+)$/m);
+  const secText = readFileSync(secPath, "utf8");
+  const m = secText.match(/^Expires:\s*(.+)$/m);
   if (!m) err("security.txt: no Expires line");
   else if (new Date(m[1]).getTime() < Date.now() + 30 * 86400_000)
     err(`security.txt: Expires ${m[1].trim()} is past or within 30 days`);
+  // The preferred (first) contact is the reporting address itself, as a
+  // mailto: an agent or a scanner can use without running the policy page,
+  // whose address the CDN's email obfuscation rewrites into a script. It is
+  // the address the policy page names.
+  const contacts = [...secText.matchAll(/^Contact:\s*(\S+)/gm)].map((c) => c[1]);
+  const vdp = pages.get("/vdp");
+  if (!contacts.length || !contacts[0].startsWith("mailto:")) {
+    err(`security.txt: the first Contact is ${contacts[0] || "missing"}, not the mailto: reporting address`);
+  } else if (vdp && !vdp.html.includes(contacts[0].slice("mailto:".length))) {
+    err(`security.txt: ${contacts[0]} is not the address /vdp names`);
+  }
+}
+
+// ── markdown twins ──
+// A document page (each /docs page, and the legal pages docs-shared.js
+// publishes outside /docs) names its markdown twin with <link rel="alternate"
+// type="text/markdown">, and the twin it names is served: the legal pages
+// had no twin, so an agent got their text only by scraping the page.
+const LEGAL_PAGES = Object.values(DOC_PAGE_PATHS);
+for (const p of pages.values()) {
+  if (p.redirectStub) continue;
+  const head = p.html.slice(0, p.html.indexOf("</head>") + 7);
+  const twin = attr((head.match(/<link rel="alternate" type="text\/markdown"[^>]*>/) || [])[0] || "", "href");
+  if (twin) {
+    const twinPath = toPath(twin);
+    if (twinPath === null || !resolves(twinPath)) err(`${p.urlPath}: markdown twin ${twin} is not served`);
+  } else if (p.urlPath.startsWith("/docs/") || LEGAL_PAGES.includes(p.urlPath)) {
+    err(`${p.urlPath}: document page names no markdown twin`);
+  }
 }
 
 // llms.txt + top-level twins: internal links resolve, no template placeholders.

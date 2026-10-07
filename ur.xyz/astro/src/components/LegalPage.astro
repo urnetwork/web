@@ -32,8 +32,10 @@ const { t = en, lang = 'en', doc } = Astro.props;
 // canonical); the i18n entry supplies the meta description
 const d = LEGAL_DOCS[doc];
 const meta = t.legal[doc];
+// the document as markdown, for agents (scripts/generate-agent-assets.mjs)
+const twin = { href: `/${doc}.md`, type: 'text/markdown' };
 ---
-<Base title={`${meta.title || d.title} — UR`} description={meta.body} lang={lang} dir="ltr">
+<Base title={`${meta.title || d.title} — UR`} description={meta.body} lang={lang} dir="ltr" alternate={twin}>
     <div class="app">
         <DisclaimerStatic t={t} />
         <NavIsland lang={lang} client:load />
