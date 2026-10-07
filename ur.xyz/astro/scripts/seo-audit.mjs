@@ -426,6 +426,60 @@ for (const p of pages.values()) {
   }
 }
 
+// ── what a page hydrates, and how much script it references ──
+// Every docs page hydrated the whole docs explorer on load, with the entire
+// docs corpus bundled in (about 380 KB of script per page), and every page
+// hydrated the nav on load. The docs pages are static HTML now: the nav and
+// the docs search box hydrate when the browser is idle, and the search fetches
+// its index on first use. A docs page hydrates nothing on load and references
+// at most DOCS_JS_BUDGET of script (the whole static import graph of its
+// islands and scripts), and no page hydrates the nav on load.
+{
+  const DOCS_JS_BUDGET = 200 * 1024;
+  const jsImports = new Map();
+  const importsOf = (rel) => {
+    if (jsImports.has(rel)) return jsImports.get(rel);
+    const file = path.join(DIST, rel);
+    const out = [];
+    if (existsSync(file)) {
+      const src = readFileSync(file, "utf8");
+      for (const m of src.matchAll(/(?:\bimport|\bfrom)\s*["'](\.{1,2}\/[^"']+\.js)["']/g)) out.push(path.posix.join(path.posix.dirname(rel), m[1]));
+    }
+    jsImports.set(rel, out);
+    return out;
+  };
+  const scriptBytes = (html) => {
+    const seen = new Set();
+    const queue = [...html.matchAll(/(?:src|href|component-url|renderer-url)="(\/_astro\/[^"]+\.js)"/g)].map((m) => m[1].slice(1));
+    let bytes = 0;
+    while (queue.length) {
+      const rel = queue.shift();
+      if (seen.has(rel)) continue;
+      seen.add(rel);
+      const file = path.join(DIST, rel);
+      if (!existsSync(file)) continue;
+      bytes += readFileSync(file).length;
+      queue.push(...importsOf(rel));
+    }
+    return bytes;
+  };
+  const islands = (html) => [...html.matchAll(/<astro-island\b[^>]*>/g)].map((m) => ({
+    name: (decodeHtmlEntities(attr(m[0], "opts") || "").match(/"name":"([^"]+)"/) || [])[1] || "?",
+    client: attr(m[0], "client"),
+  }));
+  for (const p of pages.values()) {
+    if (p.redirectStub) continue;
+    for (const island of islands(p.html)) {
+      if (island.name === "NavIsland" && island.client === "load") err(`${p.urlPath}: the nav hydrates on load (client:idle keeps it off the critical path)`);
+    }
+    if (p.urlPath !== "/docs" && !p.urlPath.startsWith("/docs/")) continue;
+    const onLoad = islands(p.html).filter((i) => i.client === "load").map((i) => i.name);
+    if (onLoad.length) err(`${p.urlPath}: a docs page hydrates ${onLoad.join(", ")} on load`);
+    const bytes = scriptBytes(p.html);
+    if (bytes > DOCS_JS_BUDGET) err(`${p.urlPath}: references ${(bytes / 1024).toFixed(1)} KB of script, over the docs pages' ${DOCS_JS_BUDGET / 1024} KB budget`);
+  }
+}
+
 // ── document images nothing shows ──
 // The asset generator published every image in docs/, including a 3.3 MB
 // picture (/docs/res/ur.png and its WebP) no page used. An image under /docs/

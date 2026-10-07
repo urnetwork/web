@@ -81,6 +81,7 @@ gates: install-playwright-browser
 	node --test ../react/tests/subtensor.test.mjs
 	node --test ../react/tests/reserve-momentum.test.mjs
 	node --test ../react/tests/code-marks.test.mjs
+	node --test ../react/tests/docs-search.test.mjs
 	node --test ../scripts/agent-assets.test.mjs
 	node ../react/tests/visual-parity.mjs
 	node ../react/tests/network-privacy.mjs

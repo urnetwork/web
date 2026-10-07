@@ -1,7 +1,14 @@
 ---
 import Base from '../../layouts/Base.astro';
-import DocsIsland from '../../islands/DocsIsland.jsx';
+import DisclaimerStatic from '../../components/DisclaimerStatic.astro';
+import DocsShell from '../../components/DocsShell.astro';
+import FooterStatic from '../../components/FooterStatic.astro';
+import NavIsland from '../../islands/NavIsland.jsx';
+import en from '@react/i18n/en.js';
 import { docsIndex as listed } from '@react/lib/docs.js';
+import { docPath } from '@react/lib/docs-shared.js';
+
+import '@react/components/Nav.css';
 
 // the documents the landing page lists, in its order: the three role guides
 // and the litepaper (an unlisted document, docs-shared.js, is not among them)
@@ -32,5 +39,34 @@ const jsonLd = [{
     lang="en"
     jsonLd={jsonLd}
 >
-    <DocsIsland activeRoute="docs" lang="en" client:load />
+    {/* Static HTML, the landing the SPA's DocsExplorer renders (DocsLanding):
+        the corpus, one entry per document with its front-matter description.
+        The nav hydrates when the browser is idle; in the docs chrome only the
+        search box does (DocsShell.astro). */}
+    <div class="app">
+        <DisclaimerStatic t={en} />
+        <NavIsland activeRoute="docs" lang="en" client:idle={{ timeout: 1000 }} />
+        <DocsShell>
+            <header class="explorer-page-header">
+                <span class="explorer-page-eyebrow">Documentation</span>
+                <h1 class="explorer-page-title">UR docs</h1>
+                <p class="explorer-page-meta">How to take part in the UR privacy network on Bittensor SN25, one guide per role, and the litepaper that explains the mechanism they take part in. Every document is also served as markdown.</p>
+            </header>
+
+            <div class="md">
+                {listed.map((d) => {
+                    const id = `docs-index-${d.slug.replace(/[^a-z0-9]+/gi, '-')}`;
+                    return (
+                        <section class="docs-index-entry" aria-labelledby={id}>
+                            <h2 id={id} class="md-h md-h2">
+                                <a class="md-link" href={docPath(d.slug)}>{d.title}</a>
+                            </h2>
+                            {d.meta.description && <p class="md-p">{d.meta.description}</p>}
+                        </section>
+                    );
+                })}
+            </div>
+        </DocsShell>
+        <FooterStatic t={en} lang="en" />
+    </div>
 </Base>

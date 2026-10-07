@@ -194,6 +194,11 @@
     gap: 18px;
 }
 
+/* the static docs pages' search results take the list's place (DocsSearchIsland) */
+.explorer-nav[hidden] {
+    display: none;
+}
+
 /* --- Groups --- */
 .explorer-group {
     display: flex;

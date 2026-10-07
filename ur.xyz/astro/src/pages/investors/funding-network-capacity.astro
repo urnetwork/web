@@ -31,7 +31,7 @@ const letterJsonLd = [{
 <Base title={`${letter.headline} | UR`} description={letter.summary} lang="en" ogType="article" article={{ ...(letter.dateIso ? { publishedTime: letter.dateIso } : {}) }} jsonLd={letterJsonLd}>
     <div class="app">
         <DisclaimerStatic t={en} />
-        <NavIsland activeRoute="investors" lang="en" client:load />
+        <NavIsland activeRoute="investors" lang="en" client:idle={{ timeout: 1000 }} />
         <main class="section-page">
             <InvestorsPage route={{ name: 'investors', slug: 'funding-network-capacity' }} />
         </main>

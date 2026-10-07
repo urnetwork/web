@@ -44,7 +44,7 @@ const centreJsonLd = [{
 >
     <div class="app">
         <DisclaimerStatic t={en} />
-        <NavIsland activeRoute="investors" lang="en" client:load />
+        <NavIsland activeRoute="investors" lang="en" client:idle={{ timeout: 1000 }} />
 
         <main class="section-page">
             <InvestorsPage route={{ name: 'investors', slug: null }} client:load />

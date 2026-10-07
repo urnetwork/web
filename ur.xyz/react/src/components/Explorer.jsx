@@ -2,6 +2,7 @@ import React, { useMemo, useState } from 'react';
 import './Explorer.css';
 import { listedDocs, docGroups } from '../lib/docs';
 import { DOC_PAGE_PATHS } from '../lib/docs-shared';
+import { buildSearchIndex, searchDocs } from '../lib/docs-search';
 import { buildPath, navigate, useRoute } from '../router';
 import { useLanguage } from '../i18n';
 
@@ -24,7 +25,9 @@ export function isPlainClick(e) {
  *
  * The two-pane chrome of /docs. The left rail is the sidebar (search input
  * and the grouped document list); the right pane is whatever page body the
- * caller passes as `children`.
+ * caller passes as `children`. The static build renders the same markup
+ * without React (astro/src/components/DocsShell.astro) and searches the same
+ * index (lib/docs-search.js), published as /docs-search.json.
  *
  *   • `children`     — main pane content.
  *   • `initialSlug`  — the document the page was rendered for. During SSR the
@@ -40,18 +43,9 @@ export default function Explorer({ children, initialSlug = null }) {
     const [navOpen, setNavOpen] = useState(false);
 
     // what the sidebar lists (an unlisted document is not searchable either)
-    const searchIndex = useMemo(() => buildSearchIndex(listedDocs), []);
+    const searchIndex = useMemo(() => buildSearchIndex(listedDocs, d => docHref(d, code)), [code]);
 
-    const results = useMemo(() => {
-        const q = query.trim().toLowerCase();
-        if (!q) return null;
-        return searchIndex
-            .map(entry => ({ entry, score: scoreEntry(entry, q) }))
-            .filter(r => r.score > 0)
-            .sort((a, b) => b.score - a.score)
-            .slice(0, 24)
-            .map(r => r.entry);
-    }, [query, searchIndex]);
+    const results = useMemo(() => searchDocs(searchIndex, query), [query, searchIndex]);
 
     const onPickDoc = (doc) => {
         setNavOpen(false);
@@ -157,36 +151,4 @@ export default function Explorer({ children, initialSlug = null }) {
             </main>
         </div>
     );
-}
-
-/**
- * Build a flat search index, one entry per document (slug, title, path and
- * the text a reader sees). The result list renders these entries directly.
- */
-function buildSearchIndex(docs) {
-    return docs.map(d => ({
-        slug: d.slug,
-        path: d.path,
-        title: d.title,
-        subtitle: d.path,
-        haystack: `${d.title} ${d.path} ${d.text}`.toLowerCase(),
-    }));
-}
-
-/**
- * Score an entry against the search query. Each whitespace-separated
- * token must appear at least once for the entry to match; extra weight
- * is awarded for matches in the title and the path.
- */
-function scoreEntry(entry, q) {
-    const tokens = q.split(/\s+/).filter(Boolean);
-    if (!tokens.length) return 0;
-    let score = 0;
-    for (const tok of tokens) {
-        if (!entry.haystack.includes(tok)) return 0;
-        if (entry.title.toLowerCase().includes(tok)) score += 4;
-        if (entry.subtitle && entry.subtitle.toLowerCase().includes(tok)) score += 2;
-        score += 1;
-    }
-    return score;
 }

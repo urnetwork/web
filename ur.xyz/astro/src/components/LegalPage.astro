@@ -38,7 +38,7 @@ const twin = { href: `/${doc}.md`, type: 'text/markdown' };
 <Base title={`${meta.title || d.title} — UR`} description={meta.body} lang={lang} dir="ltr" alternate={twin}>
     <div class="app">
         <DisclaimerStatic t={t} />
-        <NavIsland lang={lang} client:load />
+        <NavIsland lang={lang} client:idle={{ timeout: 1000 }} />
 
         <main class="section-page">
             <Section id={doc} eyebrow={t.legal.eyebrow} title={d.title} headingLevel="h1">

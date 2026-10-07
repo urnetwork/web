@@ -22,7 +22,7 @@ const description = 'Build products on UR as a Network Operator using shared res
 <Base title={title} description={description} breadcrumbName="Build on UR" lang="en">
     <div class="app">
         <DisclaimerStatic t={en} />
-        <NavIsland activeRoute="build" lang="en" client:load />
+        <NavIsland activeRoute="build" lang="en" client:idle={{ timeout: 1000 }} />
 
         <main class="section-page">
             <BuildPage route={{ name: 'build', slug: null }} client:load />

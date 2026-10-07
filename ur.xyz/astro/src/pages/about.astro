@@ -15,7 +15,7 @@ const description = 'UR is an open-source protocol for private internet applicat
 <Base title={title} description={description} breadcrumbName="About" lang="en">
     <div class="app">
         <DisclaimerStatic t={en} />
-        <NavIsland activeRoute="about" lang="en" client:load />
+        <NavIsland activeRoute="about" lang="en" client:idle={{ timeout: 1000 }} />
 
         <main class="section-page">
             {/* the same component the SPA renders at /about (App.jsx SectionPage);
