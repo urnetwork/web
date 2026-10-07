@@ -1,4 +1,4 @@
-.PHONY: build build-main build-canary generate-legal generate-agent-assets page-dates letter-pdf deck-slides sync-public install-playwright-browser gates clean
+.PHONY: build build-main build-canary generate-legal generate-agent-assets page-dates letter-pdf deck-slides indexnow sync-public install-playwright-browser gates clean
 
 BUILD_DIR := build
 # Only build/all/run.sh's final service build disables checks, after its early
@@ -45,6 +45,15 @@ letter-pdf:
 deck-slides:
 	node ../scripts/generate-deck-slides.mjs "$(DECK)"
 
+# Tell the IndexNow engines (Bing, Yandex, Seznam, Naver, …) which pages
+# changed: the live sitemap's pages whose lastmod is on or after SINCE. Run it
+# AFTER a web deploy has put them live, with the deploy's day; never from a
+# build (pinging for pages not yet served sends the engines to the old ones),
+# so it is not part of build-* or gates:
+#   make indexnow SINCE=2026-10-07              (DRY_RUN=1 lists, submits nothing)
+indexnow:
+	node scripts/indexnow-ping.mjs --since "$(SINCE)" $(if $(DRY_RUN),--dry-run,)
+
 # Mirror every static asset from react/public into astro/public. Astro only
 # serves its own public/, so an image added on the react side is missing from
 # the astro build until it is copied — a silent failure that ships a broken
@@ -67,6 +76,7 @@ install-playwright-browser:
 gates: install-playwright-browser
 	node --test scripts/route-localization.test.mjs
 	node --test scripts/pdf-freshness.test.mjs
+	node --test scripts/indexnow-ping.test.mjs
 	node --test ../react/tests/subtensor.test.mjs
 	node --test ../react/tests/reserve-momentum.test.mjs
 	node --test ../react/tests/code-marks.test.mjs
