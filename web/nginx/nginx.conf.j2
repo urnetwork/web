@@ -628,6 +628,28 @@ http {
             return 301 /blog/rss.xml;
         }
 
+        # The paths where crawlers and agents guess the feed, the sitemap and
+        # the agents file lead to the real ones.
+        location = /feed {
+            return 301 /blog/rss.xml;
+        }
+
+        location = /feed/ {
+            return 301 /blog/rss.xml;
+        }
+
+        location = /rss.xml {
+            return 301 /blog/rss.xml;
+        }
+
+        location = /sitemap.xml {
+            return 301 /sitemap-index.xml;
+        }
+
+        location = /AGENTS.md {
+            return 301 /agents.md;
+        }
+
         # Universal Links / password AutoFill discovery. Apple fetches this
         # extensionless path and wants JSON.
         location = /.well-known/apple-app-site-association {

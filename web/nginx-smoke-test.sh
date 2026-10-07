@@ -363,6 +363,14 @@ for host in bringyour.com main-web.bringyour.com; do
 done
 expect_response ur.io /blog 200
 
+# The paths where crawlers and agents guess ur.io's feed, sitemap and agents
+# file lead to the real ones.
+for path in /feed /feed/ /rss.xml; do
+    expect_successor ur.io "$path" /blog/rss.xml
+done
+expect_successor ur.io /sitemap.xml /sitemap-index.xml
+expect_successor ur.io /AGENTS.md /agents.md
+
 # /ip remains HTML for browsers, but negotiates a tiny, non-cacheable JSON
 # response for API clients. Cloudflare is authoritative on the public host;
 # Warp's bracketed address is the direct/preview fallback.
