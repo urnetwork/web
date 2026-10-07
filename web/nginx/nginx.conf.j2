@@ -484,10 +484,12 @@ http {
         location = / {
             try_files /index.html =404;
 
-            # always check for updates in the background
+            # Always check for updates in the background. The validators are
+            # nginx's own Last-Modified and ETag (the file's mtime and size):
+            # its 304 check compares conditional requests with those, so a
+            # hand-set Last-Modified or ETag never matched and every
+            # revalidation got the whole page.
             add_header 'Cache-Control' 'max-age=0, stale-while-revalidate=86400';
-            add_header 'Last-Modified' '{{ http_last_modified }}';
-            add_header 'ETag' 'W/"{{ http_etag }}"';
             add_header 'X-Robots-Tag' $ur_preview_robots always;
         }
 
@@ -604,9 +606,8 @@ http {
 
             try_files /ip.html =404;
 
+            # nginx's own validators, as for the other pages (location = /)
             add_header 'Cache-Control' 'max-age=0, stale-while-revalidate=86400';
-            add_header 'Last-Modified' '{{ http_last_modified }}';
-            add_header 'ETag' 'W/"{{ http_etag }}"';
             add_header 'Vary' 'Accept' always;
             add_header 'X-Robots-Tag' $ur_preview_robots always;
         }
@@ -695,10 +696,9 @@ http {
         location / {
             try_files $uri $uri.html $uri/ $uri/index.html =404;
 
-            # always check for updates in the background
+            # always check for updates in the background, with nginx's own
+            # validators (see location = /)
             add_header 'Cache-Control' 'max-age=0, stale-while-revalidate=86400';
-            add_header 'Last-Modified' '{{ http_last_modified }}';
-            add_header 'ETag' 'W/"{{ http_etag }}"';
             add_header 'X-Robots-Tag' $ur_preview_robots always;
         }
     }

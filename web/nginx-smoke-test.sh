@@ -483,6 +483,11 @@ for host in ur.xyz preview.ur.xyz; do
         expect_revalidation "$host" "$path"
     done
 done
+for host in ur.io preview.ur.io; do
+    for path in / /products /ip /docs/faq; do
+        expect_revalidation "$host" "$path"
+    done
+done
 
 # llms.txt and llms-full.txt are not copies of the home page, so they carry no
 # canonical Link to it, and they cache like the other machine-readable files.
@@ -561,21 +566,27 @@ page_view_count() {
     grep -c "\"site\":\"$1\",\"path\":\"$2\"" "$analytics_log" || true
 }
 
+# Fetches host+path, then revalidates it with the Last-Modified it sent, and
+# waits until the two requests have added the expected page views.
 expect_counted_revalidation() {
     local host=$1
     local path=$2
     local expected=$3
-    local key=${host//./_}
+    local headers="$test_dir/counted.headers"
     local before
     local status
 
     before=$(page_view_count "$host" "$path")
-    expect_response "$host" "$path" 200
+    curl --silent --show-error \
+        --output /dev/null \
+        --dump-header "$headers" \
+        --header "Host: $host" \
+        "http://127.0.0.1${path}"
     status=$(curl --silent --show-error \
         --output /dev/null \
         --write-out '%{http_code}' \
         --header "Host: $host" \
-        --header "If-Modified-Since: $(header_value "$test_dir/${key}.headers" Last-Modified)" \
+        --header "If-Modified-Since: $(header_value "$headers" Last-Modified)" \
         "http://127.0.0.1${path}")
     [[ "$status" == 304 ]] || fail "$host$path revalidated with $status, expected 304"
 
@@ -587,7 +598,15 @@ expect_counted_revalidation() {
         fail "$host$path logged $(( $(page_view_count "$host" "$path") - before )) page views, expected $expected"
 }
 
-expect_counted_revalidation ur.xyz /reserve 2
 expect_counted_revalidation ur.xyz /llms.txt 0
+expect_counted_revalidation ur.io /llms.txt 0
+expect_counted_revalidation ur.xyz /reserve 2
+expect_counted_revalidation ur.io /agents 2
+# The page views above were logged after the llms.txt revalidations, which
+# must still have logged none.
+for host in ur.xyz ur.io; do
+    [[ "$(page_view_count "$host" /llms.txt)" == 0 ]] || \
+        fail "$host/llms.txt was logged as a page view"
+done
 
 printf 'nginx smoke test: canonical routes and privacy-safe analytics passed\n'
