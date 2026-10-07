@@ -499,6 +499,38 @@ for host in ur.io ur.xyz; do
     done
 done
 
+# The public machine-readable files can be read from any origin. The load
+# balancer answers the origin it allowlists (https://ur.io) itself, so for
+# that one the response leaves the header off rather than send a second
+# value. Pages are not machine-readable files.
+expect_public_cors() {
+    local host=$1
+    local path=$2
+
+    expect_response "$host" "$path" 200
+    expect_header "$host" "$path" Access-Control-Allow-Origin '*'
+    expect_header "$host" "$path" Access-Control-Allow-Origin '*' --header 'Origin: https://agent.example'
+    expect_header "$host" "$path" Access-Control-Allow-Origin '' --header 'Origin: https://ur.io'
+}
+
+blog_md=$(find /www/preview.ur.io/blog-md -maxdepth 1 -name '*.md' -print -quit)
+blog_md_localized=$(find /www/preview.ur.io/blog-md/es -maxdepth 1 -name '*.md' -print -quit)
+[[ -n "$blog_md" && -n "$blog_md_localized" ]] || fail 'the ur.io build has no blog-md twins'
+for path in /llms.txt /llms-full.txt /agents.md /products.md /openapi.yml /sitemap-index.xml \
+    /blog/rss.xml /docs-md/index.md /docs-md/faq.md /docs-md/es/faq.md \
+    "${blog_md#/www/preview.ur.io}" "${blog_md_localized#/www/preview.ur.io}"; do
+    expect_public_cors ur.io "$path"
+done
+for path in /llms.txt /llms-full.txt /docs-md/miner.md /litepaper.md /operators.yml \
+    /price.yml /price.rss /sitemap-index.xml; do
+    expect_public_cors ur.xyz "$path"
+done
+expect_header ur.io /products Access-Control-Allow-Origin ''
+expect_header ur.xyz /investors Access-Control-Allow-Origin ''
+
+# The price feed caches like the other machine-readable files, not like a page.
+expect_header ur.xyz /price.rss Cache-Control 'public, max-age=3600, stale-while-revalidate=86400'
+
 # /ip remains HTML for browsers, but negotiates a tiny, non-cacheable JSON
 # response for API clients. Cloudflare is authoritative on the public host;
 # Warp's bracketed address is the direct/preview fallback.

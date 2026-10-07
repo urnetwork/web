@@ -226,6 +226,19 @@ http {
         preview.ur.xyz   "noindex, nofollow";
     }
 
+    # The public machine-readable files (llms.txt, markdown twins, specs,
+    # feeds, sitemaps) can be read from any origin. The warp load balancer
+    # already sends Access-Control-Allow-Origin for the origins in the web
+    # service's cors_origins (vault services.yml: https://ur.io, plus two
+    # retired Framer previews), and nginx add_header appends rather than
+    # replaces, so a second value would fail the browser's check for exactly
+    # those origins: leave them to the load balancer. Should that list become
+    # "*", drop these headers instead.
+    map $http_origin $public_cors_origin {
+        default          "*";
+        "https://ur.io"  "";
+    }
+
     # ur.io's earlier Framer site had a page per country,
     # /how-to-get-a-vpn/vpn-access-in-<name>, in every language, and search
     # engines still list them. The name is the country's English name,
@@ -555,36 +568,42 @@ http {
             add_header 'Link' '<https://ur.io/docs>; rel="canonical"';
             add_header 'Cache-Control' 'public, max-age=3600, stale-while-revalidate=86400';
             add_header 'X-Robots-Tag' $ur_preview_robots always;
+            add_header 'Access-Control-Allow-Origin' $public_cors_origin always;
         }
 
         location ~ ^/docs-md/(?<md_lang>es|de|zh|ru|ar)/(?<md_slug>[a-z0-9-]+)\.md$ {
             add_header 'Link' '<https://ur.io/$md_lang/docs/$md_slug>; rel="canonical"';
             add_header 'Cache-Control' 'public, max-age=3600, stale-while-revalidate=86400';
             add_header 'X-Robots-Tag' $ur_preview_robots always;
+            add_header 'Access-Control-Allow-Origin' $public_cors_origin always;
         }
 
         location ~ ^/docs-md/(?<md_slug>[a-z0-9-]+)\.md$ {
             add_header 'Link' '<https://ur.io/docs/$md_slug>; rel="canonical"';
             add_header 'Cache-Control' 'public, max-age=3600, stale-while-revalidate=86400';
             add_header 'X-Robots-Tag' $ur_preview_robots always;
+            add_header 'Access-Control-Allow-Origin' $public_cors_origin always;
         }
 
         location ~ ^/blog-md/(?<md_lang>es|de|zh|ru|ar)/(?<md_slug>[a-z0-9-]+)\.md$ {
             add_header 'Link' '<https://ur.io/$md_lang/blog/$md_slug>; rel="canonical"';
             add_header 'Cache-Control' 'public, max-age=3600, stale-while-revalidate=86400';
             add_header 'X-Robots-Tag' $ur_preview_robots always;
+            add_header 'Access-Control-Allow-Origin' $public_cors_origin always;
         }
 
         location ~ ^/blog-md/(?<md_slug>[a-z0-9-]+)\.md$ {
             add_header 'Link' '<https://ur.io/blog/$md_slug>; rel="canonical"';
             add_header 'Cache-Control' 'public, max-age=3600, stale-while-revalidate=86400';
             add_header 'X-Robots-Tag' $ur_preview_robots always;
+            add_header 'Access-Control-Allow-Origin' $public_cors_origin always;
         }
 
         location ~ ^/(?<md_page>products|about|agents|changelog|install)\.md$ {
             add_header 'Link' '<https://ur.io/$md_page>; rel="canonical"';
             add_header 'Cache-Control' 'public, max-age=3600, stale-while-revalidate=86400';
             add_header 'X-Robots-Tag' $ur_preview_robots always;
+            add_header 'Access-Control-Allow-Origin' $public_cors_origin always;
         }
 
         # mime.types has no entry for the web app manifest, which went out as
@@ -691,6 +710,7 @@ http {
         location ~* \.(?:xml|txt|md|ya?ml|json)$ {
             add_header 'Cache-Control' 'public, max-age=3600, stale-while-revalidate=86400';
             add_header 'X-Robots-Tag' $ur_preview_robots always;
+            add_header 'Access-Control-Allow-Origin' $public_cors_origin always;
         }
 
         location / {
@@ -892,12 +912,14 @@ http {
             add_header 'Link' '<https://ur.xyz/docs/$doc_slug>; rel="canonical"';
             add_header 'Cache-Control' 'public, max-age=3600, stale-while-revalidate=86400';
             add_header 'X-Robots-Tag' $ur_preview_robots always;
+            add_header 'Access-Control-Allow-Origin' $public_cors_origin always;
         }
 
         location = /litepaper.md {
             add_header 'Link' '<https://ur.xyz/docs/litepaper>; rel="canonical"';
             add_header 'Cache-Control' 'public, max-age=3600, stale-while-revalidate=86400';
             add_header 'X-Robots-Tag' $ur_preview_robots always;
+            add_header 'Access-Control-Allow-Origin' $public_cors_origin always;
         }
 
         # mime.types has no entry for the web app manifest, which went out as
@@ -920,6 +942,7 @@ http {
             try_files $uri =404;
             add_header 'Cache-Control' 'public, max-age=300';
             add_header 'X-Robots-Tag' $ur_preview_robots always;
+            add_header 'Access-Control-Allow-Origin' $public_cors_origin always;
         }
 
         location ^~ /_astro/ {
@@ -940,9 +963,13 @@ http {
             add_header 'X-Robots-Tag' $ur_preview_robots always;
         }
 
-        location ~* \.(?:xml|txt|md|ya?ml|json)$ {
+        # Machine-readable surfaces (sitemaps, feeds, the price list and
+        # feed, llms.txt, markdown twins): fresh within the hour without
+        # hammering.
+        location ~* \.(?:xml|txt|md|ya?ml|json|rss)$ {
             add_header 'Cache-Control' 'public, max-age=3600, stale-while-revalidate=86400';
             add_header 'X-Robots-Tag' $ur_preview_robots always;
+            add_header 'Access-Control-Allow-Origin' $public_cors_origin always;
         }
 
         location / {
