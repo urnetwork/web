@@ -922,6 +922,14 @@ http {
             add_header 'Access-Control-Allow-Origin' $public_cors_origin always;
         }
 
+        # the legal documents' twins (scripts/generate-agent-assets.mjs)
+        location ~ ^/(?<legal_doc>terms|privacy|vdp)\.md$ {
+            add_header 'Link' '<https://ur.xyz/$legal_doc>; rel="canonical"';
+            add_header 'Cache-Control' 'public, max-age=3600, stale-while-revalidate=86400';
+            add_header 'X-Robots-Tag' $ur_preview_robots always;
+            add_header 'Access-Control-Allow-Origin' $public_cors_origin always;
+        }
+
         # mime.types has no entry for the web app manifest, which went out as
         # application/octet-stream.
         location = /site.webmanifest {

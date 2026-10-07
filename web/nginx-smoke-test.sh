@@ -531,6 +531,18 @@ expect_header ur.xyz /investors Access-Control-Allow-Origin ''
 # The price feed caches like the other machine-readable files, not like a page.
 expect_header ur.xyz /price.rss Cache-Control 'public, max-age=3600, stale-while-revalidate=86400'
 
+# ur.xyz publishes markdown twins of its legal documents from
+# scripts/generate-agent-assets.mjs; each points search engines at its page.
+# Until the build has them, say so instead of failing the image.
+for doc in terms privacy vdp; do
+    if [[ ! -f "/www/preview.ur.xyz/$doc.md" ]]; then
+        printf 'nginx smoke test: skipped ur.xyz/%s.md, not in this build\n' "$doc"
+        continue
+    fi
+    expect_public_cors ur.xyz "/$doc.md"
+    expect_header ur.xyz "/$doc.md" Link "<https://ur.xyz/$doc>; rel=\"canonical\""
+done
+
 # /ip remains HTML for browsers, but negotiates a tiny, non-cacheable JSON
 # response for API clients. Cloudflare is authoritative on the public host;
 # Warp's bracketed address is the direct/preview fallback.
