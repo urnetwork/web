@@ -218,18 +218,18 @@ const ClientsSection: React.FC = () => {
 		<div className="space-y-8">
 			<div className="flex flex-col md:flex-row md:items-center justify-between gap-4 animate-staggerFadeUp" style={{ animationDelay: '0.05s' }}>
 				<div>
-					<h2 className="text-3xl font-bold text-white flex items-center gap-3">
-						<div className="p-2 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl">
-							<Users className="text-white" size={28} />
+					<h2 className="text-3xl font-bold text-ur-white flex items-center gap-3">
+						<div className="p-2 bg-ur-blue rounded-ur">
+							<Users className="text-ur-white" size={28} />
 						</div>
 						Client Management
 					</h2>
-					<p className="text-gray-400 mt-2">
+					<p className="text-ur-gray mt-2">
 						View and manage connected network clients
 					</p>
 					<div className="flex items-center gap-2 mt-2">
-						<Network size={16} className="text-blue-400" />
-						<span className="text-sm text-gray-500">
+						<Network size={16} className="text-ur-blue-light" />
+						<span className="text-sm text-ur-gray-dark">
 							{totalClients} of {allClients.length} clients
 							{searchQuery && ` (filtered by "${searchQuery}")`}(
 							{statusCounts.online} online, {statusCounts.offline}{" "}
@@ -241,7 +241,7 @@ const ClientsSection: React.FC = () => {
 				<button
 					onClick={loadClients}
 					disabled={isLoading}
-					className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg transition-all duration-200 border border-blue-500 hover:shadow-lg"
+					className="flex items-center gap-2 bg-ur-blue hover:bg-ur-blue-hover text-ur-white px-6 py-3 rounded-lg transition-all duration-200 border border-ur-blue "
 				>
 					<RefreshCw
 						size={16}
@@ -252,29 +252,29 @@ const ClientsSection: React.FC = () => {
 			</div>
 
 			{/* Search Bar */}
-			<div className="bg-gray-800 rounded-xl shadow-2xl p-6 border border-gray-700 animate-staggerFadeUp" style={{ animationDelay: '0.1s' }}>
+			<div className="bg-ur-panel rounded-ur shadow-ur-flat p-6 border border-ur-border animate-staggerFadeUp" style={{ animationDelay: '0.1s' }}>
 				<div className="relative">
 					<div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-						<Search className="h-5 w-5 text-gray-400" />
+						<Search className="h-5 w-5 text-ur-gray" />
 					</div>
 					<input
 						type="text"
 						value={searchQuery}
 						onChange={(e) => setSearchQuery(e.target.value)}
 						placeholder="Search by device name, client ID, or device spec..."
-						className="block w-full pl-10 pr-3 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+						className="block w-full pl-10 pr-3 py-3 bg-ur-raised border border-ur-border rounded-lg text-ur-white placeholder-ur-gray-dark focus:outline-none focus:ring-2 focus:ring-ur-blue focus:border-ur-blue transition-all duration-200"
 					/>
 					{searchQuery && (
 						<button
 							onClick={() => setSearchQuery("")}
-							className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-200 transition-colors"
+							className="absolute inset-y-0 right-0 pr-3 flex items-center text-ur-gray hover:text-ur-white transition-colors"
 						>
 							<span className="text-sm">Clear</span>
 						</button>
 					)}
 				</div>
 				{searchQuery && (
-					<div className="mt-3 text-sm text-gray-400">
+					<div className="mt-3 text-sm text-ur-gray">
 						Found {totalClients} client
 						{totalClients !== 1 ? "s" : ""} matching "{searchQuery}"
 					</div>
@@ -282,12 +282,12 @@ const ClientsSection: React.FC = () => {
 			</div>
 
 			{/* Filters and Sorting */}
-			<div className="bg-gray-800 rounded-xl shadow-2xl p-6 border border-gray-700 animate-staggerFadeUp" style={{ animationDelay: '0.15s' }}>
+			<div className="bg-ur-panel rounded-ur shadow-ur-flat p-6 border border-ur-border animate-staggerFadeUp" style={{ animationDelay: '0.15s' }}>
 				<div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
 					<div className="flex flex-col sm:flex-row sm:items-center gap-4">
 						<div className="flex items-center gap-2">
-							<Filter size={16} className="text-gray-400" />
-							<span className="text-sm font-medium text-gray-300">
+							<Filter size={16} className="text-ur-gray" />
+							<span className="text-sm font-medium text-ur-gray">
 								Filter:
 							</span>
 						</div>
@@ -296,7 +296,7 @@ const ClientsSection: React.FC = () => {
 							onChange={(e) =>
 								setFilterStatus(e.target.value as FilterStatus)
 							}
-							className="px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+							className="px-3 py-2 bg-ur-raised border border-ur-border rounded-lg text-ur-white text-sm focus:ring-2 focus:ring-ur-blue focus:border-ur-blue"
 						>
 							<option value="all">
 								All Clients ({allClients.length})
@@ -311,7 +311,7 @@ const ClientsSection: React.FC = () => {
 					</div>
 
 					<div className="flex flex-col sm:flex-row sm:items-center gap-4">
-						<span className="text-sm font-medium text-gray-300">
+						<span className="text-sm font-medium text-ur-gray">
 							Sort by:
 						</span>
 						<select
@@ -319,7 +319,7 @@ const ClientsSection: React.FC = () => {
 							onChange={(e) =>
 								setSortBy(e.target.value as SortMode)
 							}
-							className="px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+							className="px-3 py-2 bg-ur-raised border border-ur-border rounded-lg text-ur-white text-sm focus:ring-2 focus:ring-ur-blue focus:border-ur-blue"
 						>
 							<option value="status">
 								Status (Online First)
@@ -333,16 +333,16 @@ const ClientsSection: React.FC = () => {
 				</div>
 			</div>
 			{error && (
-				<div className="bg-red-900/50 border border-red-700 p-4 rounded-xl flex items-start gap-3">
+				<div className="bg-ur-coral/15 border border-ur-coral p-4 rounded-ur flex items-start gap-3">
 					<AlertCircle
 						size={20}
-						className="text-red-400 mt-0.5 flex-shrink-0"
+						className="text-ur-coral mt-0.5 flex-shrink-0"
 					/>
 					<div>
-						<h3 className="font-medium text-red-300">
+						<h3 className="font-medium text-ur-coral">
 							Error loading clients
 						</h3>
-						<p className="text-red-200">{error}</p>
+						<p className="text-ur-coral">{error}</p>
 					</div>
 				</div>
 			)}
@@ -350,8 +350,8 @@ const ClientsSection: React.FC = () => {
 			{isLoading ? (
 				<div className="flex justify-center py-12">
 					<div className="relative">
-						<div className="animate-spin rounded-full h-16 w-16 border-4 border-gray-700 border-t-blue-500"></div>
-						<div className="absolute inset-0 rounded-full bg-gradient-to-r from-blue-500/20 to-purple-500/20 animate-pulse"></div>
+						<div className="animate-spin rounded-full h-16 w-16 border-4 border-ur-border border-t-ur-blue"></div>
+						<div className="absolute inset-0 rounded-full bg-gradient-to-r from-ur-blue/20 to-ur-pink/20 animate-pulse"></div>
 					</div>
 				</div>
 			) : (
@@ -363,9 +363,9 @@ const ClientsSection: React.FC = () => {
 
 					{/* Pagination */}
 					{totalPages > 1 && (
-						<div className="bg-gray-800 rounded-xl shadow-2xl p-6 border border-gray-700">
+						<div className="bg-ur-panel rounded-ur shadow-ur-flat p-6 border border-ur-border">
 							<div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-								<div className="text-sm text-gray-400">
+								<div className="text-sm text-ur-gray">
 									Showing{" "}
 									{(currentPage - 1) * CLIENTS_PER_PAGE + 1}{" "}
 									to{" "}
@@ -384,8 +384,8 @@ const ClientsSection: React.FC = () => {
 										disabled={currentPage === 1}
 										className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-all duration-200 flex-shrink-0 ${
 											currentPage === 1
-												? "bg-gray-700 text-gray-500 cursor-not-allowed"
-												: "bg-blue-600 text-white hover:bg-blue-700 border border-blue-500"
+												? "bg-ur-raised text-ur-gray-dark cursor-not-allowed"
+												: "bg-ur-blue text-ur-white hover:bg-ur-blue-hover border border-ur-blue"
 										}`}
 									>
 										<ChevronLeft size={16} />
@@ -423,8 +423,8 @@ const ClientsSection: React.FC = () => {
 														className={`px-3 py-2 rounded-lg text-sm transition-all duration-200 flex-shrink-0 ${
 															currentPage ===
 															pageNum
-																? "bg-blue-600 text-white border border-blue-500"
-																: "bg-gray-700 text-gray-300 hover:bg-gray-600 border border-gray-600"
+																? "bg-ur-blue text-ur-white border border-ur-blue"
+																: "bg-ur-raised text-ur-gray hover:bg-ur-hover border border-ur-border"
 														}`}
 													>
 														{pageNum}
@@ -441,8 +441,8 @@ const ClientsSection: React.FC = () => {
 										disabled={currentPage === totalPages}
 										className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-all duration-200 flex-shrink-0 ${
 											currentPage === totalPages
-												? "bg-gray-700 text-gray-500 cursor-not-allowed"
-												: "bg-blue-600 text-white hover:bg-blue-700 border border-blue-500"
+												? "bg-ur-raised text-ur-gray-dark cursor-not-allowed"
+												: "bg-ur-blue text-ur-white hover:bg-ur-blue-hover border border-ur-blue"
 										}`}
 									>
 										Next
@@ -453,24 +453,24 @@ const ClientsSection: React.FC = () => {
 						</div>
 					)}
 
-					<div className="bg-gray-800 rounded-xl shadow-2xl overflow-hidden border-2 border-red-600/30 hover:border-red-600/50 transition-all duration-200 animate-staggerFadeUp" style={{ animationDelay: '0.25s' }}>
-						<div className="bg-gradient-to-r from-red-600 to-pink-600 px-6 py-4 border-b border-red-500">
+					<div className="bg-ur-panel rounded-ur shadow-ur-flat overflow-hidden border-2 border-ur-coral/30 hover:border-ur-coral/50 transition-all duration-200 animate-staggerFadeUp" style={{ animationDelay: '0.25s' }}>
+						<div className="bg-gradient-to-r from-ur-coral to-pink-600 px-6 py-4 border-b border-ur-coral">
 							<div className="flex items-center gap-3">
 								<div className="p-2 bg-white/10 rounded-lg">
-									<Trash2 size={20} className="text-white" />
+									<Trash2 size={20} className="text-ur-white" />
 								</div>
 								<div>
-									<h3 className="font-semibold text-white text-lg">
+									<h3 className="font-semibold text-ur-white text-lg">
 										Bulk Delete Offline Clients
 									</h3>
-									<p className="text-red-50 text-sm mt-1">
+									<p className="text-ur-gray text-sm mt-1">
 										Remove multiple offline clients based on
 										their last authentication time
 									</p>
 								</div>
 							</div>
 						</div>
-						<div className="p-6 bg-gray-800/50">
+						<div className="p-6 bg-ur-panel/50">
 							<BulkDeleteForm
 								clients={allClients}
 								onClientsRemoved={handleClientsRemoved}
@@ -478,23 +478,23 @@ const ClientsSection: React.FC = () => {
 						</div>
 					</div>
 
-					<div className="bg-gray-800 rounded-xl shadow-2xl overflow-hidden border-2 border-blue-600/30 hover:border-blue-600/50 transition-all duration-200 animate-staggerFadeUp" style={{ animationDelay: '0.3s' }}>
-						<div className="bg-gradient-to-r from-blue-600 to-cyan-600 px-6 py-4 border-b border-blue-500">
+					<div className="bg-ur-panel rounded-ur shadow-ur-flat overflow-hidden border-2 border-ur-blue/30 hover:border-ur-blue/50 transition-all duration-200 animate-staggerFadeUp" style={{ animationDelay: '0.3s' }}>
+						<div className="bg-ur-raised px-6 py-4 border-b border-ur-border">
 							<div className="flex items-center gap-3">
 								<div className="p-2 bg-white/10 rounded-lg">
-									<Trash2 size={20} className="text-white" />
+									<Trash2 size={20} className="text-ur-white" />
 								</div>
 								<div>
-									<h3 className="font-semibold text-white text-lg">
+									<h3 className="font-semibold text-ur-white text-lg">
 										Remove Client Manually
 									</h3>
-									<p className="text-blue-50 text-sm mt-1">
+									<p className="text-ur-gray text-sm mt-1">
 										Enter a client ID to remove it from the network
 									</p>
 								</div>
 							</div>
 						</div>
-						<div className="p-6 bg-gray-800/50">
+						<div className="p-6 bg-ur-panel/50">
 							<RemoveClientForm
 								onClientRemoved={handleClientRemoved}
 							/>

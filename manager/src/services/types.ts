@@ -356,6 +356,10 @@ export type AccountPayment = {
   token_amount: number;
   /** Number of bytes this payout covers */
   payout_byte_count: number;
+  /** Gross payout the network has booked for this payment, before wallet fees */
+  payout_nano_cents?: number;
+  /** ISO 8601 timestamp of when the payment was created */
+  create_time?: string;
   /** Whether payment has been completed */
   completed: boolean;
   /** Whether payment was canceled */
@@ -392,6 +396,81 @@ export interface NetworkUser {
   auth_type: string;
   /** Name of the network user belongs to */
   network_name: string;
+  /** All auth methods bound to this account: "email" | "phone" | "apple" | "google" | "solana" | "seedphrase" */
+  auth_types?: string[];
+  /** Metadata for bound seedphrase auths (the phrase itself is never returned) */
+  seedphrase_auths?: { create_time: string }[];
+}
+
+/**
+ * Response from seed-phrase login (POST /auth/login with seedphrase field)
+ */
+export interface SeedphraseLoginResponse {
+  /** Present on successful login */
+  network?: { by_jwt: string };
+  error?: { message: string };
+}
+
+/**
+ * Response from instant network creation (POST /auth/network-create, no auth fields)
+ */
+export interface InstantNetworkCreateResponse {
+  /** The generated BIP39 seed phrase — shown once, never retrievable again */
+  seedphrase?: string;
+  network?: {
+    by_jwt?: string;
+    network_id?: string;
+    /** Server-assigned random network name */
+    network_name?: string;
+    is_pro?: boolean;
+  };
+  error?: { message: string };
+}
+
+/**
+ * Response from generate/regenerate seedphrase endpoints
+ */
+export interface SeedphraseResponse {
+  seedphrase?: string;
+  error?: { message: string };
+}
+
+/**
+ * Request to add an auth method to the current account (POST /auth/add-auth).
+ * Exactly one mode: password (user_auth+password), SSO (auth_jwt+auth_jwt_type),
+ * or wallet (wallet_auth).
+ */
+export interface AddAuthMethodRequest {
+  user_auth?: string;
+  password?: string;
+  auth_jwt?: string;
+  auth_jwt_type?: string;
+  wallet_auth?: WalletAuthPayload;
+}
+
+/** Response from add-auth / remove-auth — empty object on success */
+export interface AuthMethodMutationResponse {
+  error?: { message: string };
+}
+
+/**
+ * Response from change-name / claim-name endpoints
+ */
+export interface NetworkNameChangeResponse {
+  network_name?: string;
+  error?: { message: string };
+}
+
+/**
+ * Response from bulk client removal (POST /network/remove-clients).
+ * Empty object = applied synchronously (<=10k ids). scheduled = queued as a
+ * background task (>10k ids). already_in_progress = a bulk run for this
+ * network is active; retry later.
+ */
+export interface RemoveClientsResponse {
+  scheduled?: boolean;
+  already_in_progress?: boolean;
+  error?: { message: string };
 }
 
 /**
@@ -424,7 +503,32 @@ export interface WalletAuthPayload {
   wallet_message: string;
   wallet_signature: string;
   blockchain: "solana";
+  challenge: string;
+  timestamp: number;
 }
+
+/**
+ * Server-issued wallet authentication challenge
+ */
+export interface WalletAuthChallengeRequest {
+  wallet_address?: string;
+  blockchain?: "solana";
+}
+
+export type WalletAuthChallengeResponse =
+  | {
+      success: true;
+      challenge: string;
+      timestamp: number;
+      expires_in: number;
+      message_template: string;
+    }
+  | {
+      success: false;
+      error: {
+        message: string;
+      };
+    };
 
 /**
  * Response from wallet-based login

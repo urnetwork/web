@@ -57,23 +57,23 @@ const ClientCard: React.FC<ClientCardProps> = ({ client, onClientRemoved, isInGr
 
   return (
     <>
-      <div className={`bg-gray-800 rounded-xl shadow-2xl overflow-hidden hover:shadow-3xl transition-all duration-300 border border-gray-700 hover:border-gray-600 ${isInGroup ? '' : 'transform hover:scale-105'}`}>
-        <div className="bg-gradient-to-r from-gray-700 to-gray-800 px-4 py-3 border-b border-gray-600 overflow-hidden">
+      <div className={`bg-ur-panel rounded-ur shadow-ur-flat overflow-hidden hover:shadow-3xl transition-all duration-300 border border-ur-border hover:border-ur-border ${isInGroup ? '' : 'transform hover:scale-105'}`}>
+        <div className="bg-ur-raised px-4 py-3 border-b border-ur-border overflow-hidden">
           <div className="flex items-center justify-between gap-3">
-            <h3 className="font-medium text-gray-100 truncate flex-1 min-w-0 overflow-hidden" title={client.device_name || client.client_id}>
+            <h3 className="font-medium text-ur-white truncate flex-1 min-w-0 overflow-hidden" title={client.device_name || client.client_id}>
               {client.device_name || 'Unnamed Device'}
             </h3>
             <div className="flex items-center space-x-2 flex-shrink-0">
               {isConnected ? (
-                <Wifi size={16} className="text-green-400" />
+                <Wifi size={16} className="text-ur-green" />
               ) : (
-                <WifiOff size={16} className="text-red-400" />
+                <WifiOff size={16} className="text-ur-coral" />
               )}
               <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                isConnected 
-                  ? 'bg-green-900 text-green-300 border border-green-700' 
-                  : 'bg-red-900 text-red-300 border border-red-700'
-              }`}>
+ isConnected 
+ ? 'bg-ur-green/10 text-ur-green border border-ur-green' 
+ : 'bg-ur-coral/10 text-ur-coral border border-ur-coral'
+ }`}>
                 {isConnected ? 'Connected' : 'Offline'}
               </span>
             </div>
@@ -83,63 +83,63 @@ const ClientCard: React.FC<ClientCardProps> = ({ client, onClientRemoved, isInGr
         <div className="p-4">
           <div className="space-y-3">
             <div className="flex items-start gap-3">
-              <Cpu size={16} className="text-blue-400 mt-0.5 flex-shrink-0" />
+              <Cpu size={16} className="text-ur-blue-light mt-0.5 flex-shrink-0" />
               <div className="min-w-0 flex-1">
-                <p className="text-sm text-gray-400">Device ID</p>
-                <p className="text-sm font-medium text-gray-200 font-mono break-all">{client.device_id}</p>
+                <p className="text-sm text-ur-gray">Device ID</p>
+                <p className="text-sm font-medium text-ur-white font-mono break-all">{client.device_id}</p>
               </div>
             </div>
             
             <div className="flex items-start gap-3">
-              <Calendar size={16} className="text-purple-400 mt-0.5 flex-shrink-0" />
+              <Calendar size={16} className="text-ur-pink mt-0.5 flex-shrink-0" />
               <div className="min-w-0 flex-1">
-                <p className="text-sm text-gray-400">Created</p>
-                <p className="text-sm text-gray-200">{formatDate(client.create_time)}</p>
+                <p className="text-sm text-ur-gray">Created</p>
+                <p className="text-sm text-ur-white">{formatDate(client.create_time)}</p>
               </div>
             </div>
             
             <div className="flex items-start gap-3">
-              <Clock size={16} className="text-yellow-400 mt-0.5 flex-shrink-0" />
+              <Clock size={16} className="text-ur-yellow-light mt-0.5 flex-shrink-0" />
               <div className="min-w-0 flex-1">
-                <p className="text-sm text-gray-400">Last Authentication</p>
-                <p className="text-sm text-gray-200">{formatDate(client.auth_time)}</p>
+                <p className="text-sm text-ur-gray">Last Authentication</p>
+                <p className="text-sm text-ur-white">{formatDate(client.auth_time)}</p>
               </div>
             </div>
           </div>
           
           {showDetails && (
-            <div className="mt-4 pt-4 border-t border-gray-700">
-              <h4 className="text-sm font-medium text-gray-300 mb-3">Additional Details</h4>
+            <div className="mt-4 pt-4 border-t border-ur-border">
+              <h4 className="text-sm font-medium text-ur-gray mb-3">Additional Details</h4>
               
-              <div className="space-y-2 text-xs bg-gray-900 p-3 rounded-lg border border-gray-700">
+              <div className="space-y-2 text-xs bg-ur-black p-3 rounded-lg border border-ur-border">
                 {client.source_client_id && (
-                  <p><span className="text-gray-400">Source Client ID:</span> <span className="text-gray-200 font-mono break-all">{client.source_client_id}</span></p>
+                  <p><span className="text-ur-gray">Source Client ID:</span> <span className="text-ur-white font-mono break-all">{client.source_client_id}</span></p>
                 )}
-                <p><span className="text-gray-400">Client ID:</span> <span className="text-gray-200 font-mono break-all">{client.client_id}</span></p>
-                <p><span className="text-gray-400">Network ID:</span> <span className="text-gray-200 font-mono break-all">{client.network_id}</span></p>
-                <p><span className="text-gray-400">Description:</span> <span className="text-gray-200">{client.description || 'N/A'}</span></p>
-                <p><span className="text-gray-400">Device Spec:</span> <span className="text-gray-200 break-words">{client.device_spec || 'N/A'}</span></p>
+                <p><span className="text-ur-gray">Client ID:</span> <span className="text-ur-white font-mono break-all">{client.client_id}</span></p>
+                <p><span className="text-ur-gray">Network ID:</span> <span className="text-ur-white font-mono break-all">{client.network_id}</span></p>
+                <p><span className="text-ur-gray">Description:</span> <span className="text-ur-white">{client.description || 'N/A'}</span></p>
+                <p><span className="text-ur-gray">Device Spec:</span> <span className="text-ur-white break-words">{client.device_spec || 'N/A'}</span></p>
               </div>
               
               {client.resident && (
                 <div className="mt-3">
-                  <h5 className="text-xs font-medium text-gray-300 mb-2">Resident Information</h5>
-                  <div className="space-y-1 text-xs bg-gray-900 p-3 rounded-lg border border-gray-700">
-                    <p><span className="text-gray-400">Host:</span> <span className="text-gray-200">{client.resident.resident_host}</span></p>
-                    <p><span className="text-gray-400">Service:</span> <span className="text-gray-200">{client.resident.resident_service}</span></p>
-                    <p><span className="text-gray-400">ID:</span> <span className="text-gray-200 font-mono break-all">{client.resident.resident_id}</span></p>
+                  <h5 className="text-xs font-medium text-ur-gray mb-2">Resident Information</h5>
+                  <div className="space-y-1 text-xs bg-ur-black p-3 rounded-lg border border-ur-border">
+                    <p><span className="text-ur-gray">Host:</span> <span className="text-ur-white">{client.resident.resident_host}</span></p>
+                    <p><span className="text-ur-gray">Service:</span> <span className="text-ur-white">{client.resident.resident_service}</span></p>
+                    <p><span className="text-ur-gray">ID:</span> <span className="text-ur-white font-mono break-all">{client.resident.resident_id}</span></p>
                   </div>
                 </div>
               )}
               
               {client.connections && client.connections.length > 0 && (
                 <div className="mt-3">
-                  <h5 className="text-xs font-medium text-gray-300 mb-2">Connections ({client.connections.length})</h5>
+                  <h5 className="text-xs font-medium text-ur-gray mb-2">Connections ({client.connections.length})</h5>
                   <div className="space-y-2 text-xs max-h-24 overflow-y-auto">
                     {client.connections.map((conn, index) => (
-                      <div key={index} className="p-2 bg-gray-900 rounded border border-gray-700">
-                        <p><span className="text-gray-400">ID:</span> <span className="text-gray-200 font-mono break-all">{conn.connection_id.substring(0, 8)}...</span></p>
-                        <p><span className="text-gray-400">Host:</span> <span className="text-gray-200">{conn.connection_host}</span></p>
+                      <div key={index} className="p-2 bg-ur-black rounded border border-ur-border">
+                        <p><span className="text-ur-gray">ID:</span> <span className="text-ur-white font-mono break-all">{conn.connection_id.substring(0, 8)}...</span></p>
+                        <p><span className="text-ur-gray">Host:</span> <span className="text-ur-white">{conn.connection_host}</span></p>
                       </div>
                     ))}
                   </div>
@@ -151,7 +151,7 @@ const ClientCard: React.FC<ClientCardProps> = ({ client, onClientRemoved, isInGr
           <div className="mt-4 flex justify-between">
             <button
               onClick={toggleDetails}
-              className="text-xs flex items-center gap-1 text-blue-400 hover:text-blue-300 transition-colors"
+              className="text-xs flex items-center gap-1 text-ur-blue-light hover:text-ur-blue-light transition-colors"
             >
               <Info size={14} />
               {showDetails ? 'Hide Details' : 'Show Details'}
@@ -160,7 +160,7 @@ const ClientCard: React.FC<ClientCardProps> = ({ client, onClientRemoved, isInGr
             <button
               onClick={handleRemoveClick}
               disabled={isRemoving}
-              className="text-xs flex items-center gap-1 text-red-400 hover:text-red-300 transition-colors"
+              className="text-xs flex items-center gap-1 text-ur-coral hover:text-ur-coral transition-colors"
             >
               <Trash2 size={14} />
               Remove Client
@@ -175,10 +175,10 @@ const ClientCard: React.FC<ClientCardProps> = ({ client, onClientRemoved, isInGr
         onConfirm={handleRemoveConfirm}
         title="Remove Client"
         isLoading={isRemoving}
-        icon={<AlertTriangle className="h-6 w-6 text-red-400" />}
+        icon={<AlertTriangle className="h-6 w-6 text-ur-coral" />}
       >
-        <p className="text-gray-300">Are you sure you want to remove client <span className="font-medium text-white">{client.device_name || client.client_id}</span>?</p>
-        <p className="text-sm text-gray-400 mt-2">This action cannot be undone.</p>
+        <p className="text-ur-gray">Are you sure you want to remove client <span className="font-medium text-ur-white">{client.device_name || client.client_id}</span>?</p>
+        <p className="text-sm text-ur-gray mt-2">This action cannot be undone.</p>
       </ConfirmModal>
     </>
   );

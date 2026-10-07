@@ -5,6 +5,7 @@ import { fetchProviderLocations, findProviderLocations } from '../services/api';
 import type { Location } from '../services/types';
 import toast from 'react-hot-toast';
 import debounce from 'lodash/debounce';
+import { getColorHex } from '../theme/locationColors';
 
 interface LocationSelectorModalProps {
   isOpen: boolean;
@@ -163,29 +164,29 @@ const LocationSelectorModal: React.FC<LocationSelectorModalProps> = ({
 
   return createPortal(
     <div
-      className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/70 backdrop-blur-sm p-4 overflow-visible"
+      className="fixed inset-0 z-[9999] flex items-center justify-center bg-ur-black/70 backdrop-blur-sm p-4 overflow-visible"
       onClick={handleBackdropClick}
       onKeyDown={handleKeyDown}
       role="dialog"
       aria-modal="true"
       aria-labelledby="location-selector-title"
     >
-      <div className="bg-gray-800 rounded-xl shadow-2xl w-full max-w-5xl max-h-[85vh] flex flex-col border border-gray-700 animate-fadeIn">
-        <div className="bg-gradient-to-r from-teal-600 to-cyan-600 px-6 py-4 border-b border-gray-600 flex items-center justify-between rounded-t-xl">
+      <div className="bg-ur-panel rounded-ur shadow-ur-flat w-full max-w-5xl max-h-[85vh] flex flex-col border border-ur-border animate-fadeIn">
+        <div className="bg-ur-raised px-6 py-4 border-b border-ur-border flex items-center justify-between rounded-t-ur">
           <div className="flex items-center gap-3">
-            <MapPin size={24} className="text-white" />
+            <MapPin size={24} className="text-ur-white" />
             <div>
-              <h2 id="location-selector-title" className="text-xl font-bold text-white">
+              <h2 id="location-selector-title" className="text-xl font-bold text-ur-white">
                 Select Provider Location
               </h2>
-              <p className="text-teal-100 text-sm mt-1">
+              <p className="text-ur-gray text-sm mt-1">
                 Browse and search locations by provider availability
               </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="text-white hover:bg-teal-700 p-2 rounded-lg transition-colors"
+            className="text-ur-white hover:bg-ur-hover p-2 rounded-lg transition-colors"
             aria-label="Close modal"
           >
             <X size={24} />
@@ -195,37 +196,37 @@ const LocationSelectorModal: React.FC<LocationSelectorModalProps> = ({
         <div className="p-6 space-y-4 flex-1 overflow-hidden flex flex-col">
           <div className="relative">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <Search className="h-5 w-5 text-gray-400" />
+              <Search className="h-5 w-5 text-ur-gray" />
             </div>
             <input
               type="text"
               value={searchQuery}
               onChange={handleSearchChange}
               placeholder="Search locations (minimum 2 characters)..."
-              className="block w-full pl-10 pr-3 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-all duration-200"
+              className="block w-full pl-10 pr-3 py-3 bg-ur-raised border border-ur-border rounded-lg text-ur-white placeholder-ur-gray-dark focus:outline-none focus:ring-2 focus:ring-ur-blue focus:border-ur-blue transition-all duration-200"
               autoFocus
             />
           </div>
 
           {isSearchActive && (
-            <p className="text-sm text-teal-400">
+            <p className="text-sm text-ur-gray">
               Search results prioritized by exact matches, then partial matches
             </p>
           )}
 
           <div className="flex items-center gap-2">
-            <Globe size={16} className="text-teal-400" />
-            <span className="text-sm text-gray-400">
+            <Globe size={16} className="text-ur-green" />
+            <span className="text-sm text-ur-gray">
               {locations.length} locations {isSearchActive ? 'found' : 'available'}
               {isSearchActive ? '' : ' (sorted by provider count)'}
             </span>
           </div>
 
           {error && (
-            <div className="bg-red-900/50 border border-red-700 p-3 rounded-lg flex items-start gap-2">
+            <div className="bg-ur-coral/15 border border-ur-coral p-3 rounded-lg flex items-start gap-2">
               <div>
-                <h3 className="font-medium text-red-300 text-sm">Error loading locations</h3>
-                <p className="text-red-200 text-sm">{error}</p>
+                <h3 className="font-medium text-ur-coral text-sm">Error loading locations</h3>
+                <p className="text-ur-coral text-sm">{error}</p>
               </div>
             </div>
           )}
@@ -233,8 +234,8 @@ const LocationSelectorModal: React.FC<LocationSelectorModalProps> = ({
           {isLoading ? (
             <div className="flex-1 flex justify-center items-center py-12">
               <div className="flex flex-col items-center gap-3">
-                <Loader2 size={48} className="text-teal-500 animate-spin" />
-                <p className="text-gray-400">Loading locations...</p>
+                <Loader2 size={48} className="text-ur-green animate-spin" />
+                <p className="text-ur-gray">Loading locations...</p>
               </div>
             </div>
           ) : (
@@ -245,58 +246,63 @@ const LocationSelectorModal: React.FC<LocationSelectorModalProps> = ({
                     <button
                       key={location.location_id}
                       onClick={() => handleSelectLocation(location)}
-                      className={`bg-gray-750 rounded-lg p-4 border transition-all duration-200 text-left hover:scale-105 hover:shadow-lg ${
-                        (currentLocationId && currentLocationId === location.location_id) ||
-                        (!currentLocationId && currentCountryCode?.toLowerCase() === location.country_code?.toLowerCase() && location.location_type === 'country')
-                          ? 'border-teal-500 bg-teal-900/30'
-                          : 'border-gray-600 hover:border-teal-500'
-                      }`}
+                      className={`bg-ur-raised rounded-lg p-4 border transition-all duration-200 text-left hover:scale-105 ${
+ (currentLocationId && currentLocationId === location.location_id) ||
+ (!currentLocationId && currentCountryCode?.toLowerCase() === location.country_code?.toLowerCase() && location.location_type === 'country')
+ ? 'border-ur-green bg-ur-green/10'
+ : 'border-ur-border hover:border-ur-green'
+ }`}
                     >
                       <div className="flex items-center justify-between mb-3">
                         <div className="flex items-center gap-2 min-w-0 flex-1">
-                          <h3 className="font-medium text-gray-100 truncate" title={location.name}>
+                          <span
+                            className="w-3.5 h-3.5 rounded-full flex-shrink-0"
+                            style={{ backgroundColor: getColorHex(location.country_code || location.name) }}
+                            aria-hidden
+                          />
+                          <h3 className="font-medium text-ur-white truncate" title={location.name}>
                             {location.name}
                           </h3>
                           <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded flex-shrink-0 ${
-                            location.location_type === 'city'
-                              ? 'bg-blue-900/50 text-blue-300 border border-blue-700/50'
-                              : location.location_type === 'region'
-                                ? 'bg-yellow-900/50 text-yellow-300 border border-yellow-700/50'
-                                : 'bg-gray-700 text-gray-400 border border-gray-600'
-                          }`}>
+ location.location_type === 'city'
+ ? 'bg-ur-blue/15 text-ur-blue-light border border-ur-blue/40'
+ : location.location_type === 'region'
+ ? 'bg-ur-yellow-light/10 text-ur-yellow-light border border-ur-yellow-light/30'
+ : 'bg-ur-raised text-ur-gray border border-ur-border'
+ }`}>
                             {location.location_type}
                           </span>
                         </div>
-                        <span className="bg-teal-900 text-teal-300 text-xs font-medium px-2 py-1 rounded border border-teal-700 ml-2 flex-shrink-0">
+                        <span className="bg-ur-green/10 text-ur-green text-xs font-medium px-2 py-1 rounded border border-ur-green/40 ml-2 flex-shrink-0">
                           {location.provider_count}
                         </span>
                       </div>
 
                       <div className="space-y-2">
                         <div className="flex items-center gap-2">
-                          <Users size={14} className="text-teal-400 flex-shrink-0" />
+                          <Users size={14} className="text-ur-green flex-shrink-0" />
                           <div>
-                            <p className="text-xs text-gray-400">Provider Count</p>
-                            <p className="text-xs font-medium text-teal-300">{location.provider_count || 0}</p>
+                            <p className="text-xs text-ur-gray">Provider Count</p>
+                            <p className="text-xs font-medium text-ur-green">{location.provider_count || 0}</p>
                           </div>
                         </div>
 
                         {location.country_code && (
                           <div className="flex items-center gap-2">
-                            <Globe size={14} className="text-orange-400 flex-shrink-0" />
+                            <Globe size={14} className="text-ur-coral flex-shrink-0" />
                             <div>
-                              <p className="text-xs text-gray-400">Country Code</p>
-                              <p className="text-xs text-gray-200 font-mono">{location.country_code.toUpperCase()}</p>
+                              <p className="text-xs text-ur-gray">Country Code</p>
+                              <p className="text-xs text-ur-white font-mono">{location.country_code.toUpperCase()}</p>
                             </div>
                           </div>
                         )}
 
                         {location.region && (
                           <div className="flex items-center gap-2">
-                            <Globe size={14} className="text-yellow-400 flex-shrink-0" />
+                            <Globe size={14} className="text-ur-yellow-light flex-shrink-0" />
                             <div>
-                              <p className="text-xs text-gray-400">Region</p>
-                              <p className="text-xs text-gray-200">{location.region}</p>
+                              <p className="text-xs text-ur-gray">Region</p>
+                              <p className="text-xs text-ur-white">{location.region}</p>
                             </div>
                           </div>
                         )}
@@ -307,11 +313,11 @@ const LocationSelectorModal: React.FC<LocationSelectorModalProps> = ({
               ) : (
                 <div className="flex-1 flex justify-center items-center py-12">
                   <div className="max-w-md text-center">
-                    <div className="w-16 h-16 bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <MapPin className="text-gray-500" size={24} />
+                    <div className="w-16 h-16 bg-ur-raised rounded-full flex items-center justify-center mx-auto mb-4">
+                      <MapPin className="text-ur-gray-dark" size={24} />
                     </div>
-                    <h3 className="text-lg font-medium text-gray-200 mb-2">No Locations Found</h3>
-                    <p className="text-gray-400">
+                    <h3 className="text-lg font-medium text-ur-white mb-2">No Locations Found</h3>
+                    <p className="text-ur-gray">
                       {searchQuery ? 'Try adjusting your search terms or clear the search to see all locations.' : 'No provider locations available at the moment.'}
                     </p>
                   </div>

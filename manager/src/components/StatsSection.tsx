@@ -64,20 +64,20 @@ const StatsSection: React.FC = () => {
 
   const totals = calculateTotals();
 
-  const StatCard = ({ title, value, icon: Icon, gradient }: { 
-    title: string; 
-    value: string | number; 
-    icon: React.ElementType; 
-    gradient: string;
+  const StatCard = ({ title, value, icon: Icon, accent }: {
+    title: string;
+    value: string | number;
+    icon: React.ElementType;
+    accent: string;
   }) => (
-    <div className="bg-gray-800 rounded-xl shadow-2xl p-6 border border-gray-700 hover:border-gray-600 transition-all duration-300 transform hover:scale-105">
+    <div className="bg-ur-panel rounded-ur shadow-ur-flat p-6 border border-ur-border hover:border-ur-active transition-all duration-300 transform hover:scale-105">
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-sm text-gray-400">{title}</p>
-          <p className="text-2xl font-semibold mt-1 text-white">{value}</p>
+          <p className="text-sm text-ur-gray">{title}</p>
+          <p className="text-2xl font-semibold mt-1 text-ur-white">{value}</p>
         </div>
-        <div className={`${gradient} p-3 rounded-xl shadow-lg`}>
-          <Icon className="h-6 w-6 text-white" />
+        <div className={`${accent} p-3 rounded-ur shadow-ur-flat`}>
+          <Icon className="h-6 w-6 text-ur-black" />
         </div>
       </div>
     </div>
@@ -86,13 +86,13 @@ const StatsSection: React.FC = () => {
   return (
     <div className="space-y-8">
       {showWarningBanner && (
-        <div className="bg-yellow-900/50 border-l-4 border-yellow-500 p-4 rounded-lg shadow-lg animate-staggerFadeUp" style={{ animationDelay: '0.05s' }}>
+        <div className="bg-ur-yellow-light/10 border-l-4 border-ur-yellow-light p-4 rounded-lg shadow-ur-flat animate-staggerFadeUp" style={{ animationDelay: '0.05s' }}>
           <div className="flex items-start justify-between">
             <div className="flex items-start gap-3">
-              <AlertCircle size={20} className="text-yellow-400 mt-0.5 flex-shrink-0" />
+              <AlertCircle size={20} className="text-ur-yellow-light mt-0.5 flex-shrink-0" />
               <div>
-                <h3 className="font-medium text-yellow-300 mb-1">Development Notice</h3>
-                <p className="text-yellow-200 text-sm">
+                <h3 className="font-medium text-ur-yellow-light mb-1">Development Notice</h3>
+                <p className="text-ur-yellow-light text-sm">
                   This Statistics page is currently under development. The backend API is not yet complete, 
                   so the data shown here is temporary placeholder information and may not reflect actual network statistics.
                 </p>
@@ -100,7 +100,7 @@ const StatsSection: React.FC = () => {
             </div>
             <button
               onClick={() => setShowWarningBanner(false)}
-              className="text-yellow-400 hover:text-yellow-300 focus:outline-none focus:text-yellow-300 transition-colors p-1 rounded-lg hover:bg-yellow-800/20 ml-4 flex-shrink-0"
+              className="text-ur-yellow-light hover:text-ur-white focus:outline-none transition-colors p-1 rounded-lg hover:bg-ur-yellow-light/10 ml-4 flex-shrink-0"
               aria-label="Dismiss warning"
             >
               <X size={18} />
@@ -111,17 +111,17 @@ const StatsSection: React.FC = () => {
 
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 animate-staggerFadeUp" style={{ animationDelay: '0.1s' }}>
         <div>
-          <h2 className="text-3xl font-bold text-white flex items-center gap-3">
-            <div className="p-2 bg-gradient-to-r from-green-600 to-emerald-600 rounded-xl">
-              <BarChart3 className="text-white" size={28} />
+          <h2 className="text-3xl font-bold text-ur-white flex items-center gap-3">
+            <div className="p-2 bg-ur-green rounded-ur">
+              <BarChart3 className="text-ur-black" size={28} />
             </div>
             Provider Statistics
           </h2>
-          <p className="text-gray-400 mt-2">
+          <p className="text-ur-gray mt-2">
             Real-time network performance metrics and analytics
           </p>
           {lastUpdated && (
-            <p className="text-sm text-gray-500 mt-1 flex items-center gap-2">
+            <p className="text-sm text-ur-gray-dark mt-1 flex items-center gap-2">
               <Activity size={14} />
               Last updated: {new Date(lastUpdated).toLocaleString()}
             </p>
@@ -131,7 +131,7 @@ const StatsSection: React.FC = () => {
         <button
           onClick={loadStats}
           disabled={isLoading}
-          className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg transition-all duration-200 border border-green-500 hover:shadow-lg"
+          className="flex items-center gap-2 bg-ur-green hover:bg-ur-green/90 text-ur-black px-6 py-3 rounded-ur transition-colors duration-100 disabled:opacity-60"
         >
           <RefreshCw size={16} className={isLoading ? 'animate-spin' : ''} />
           Refresh Stats
@@ -139,11 +139,11 @@ const StatsSection: React.FC = () => {
       </div>
 
       {error && (
-        <div className="bg-red-900/50 border border-red-700 p-4 rounded-xl flex items-start gap-3">
-          <AlertCircle size={20} className="text-red-400 mt-0.5 flex-shrink-0" />
+        <div className="bg-ur-coral/15 border border-ur-coral p-4 rounded-ur flex items-start gap-3">
+          <AlertCircle size={20} className="text-ur-coral mt-0.5 flex-shrink-0" />
           <div>
-            <h3 className="font-medium text-red-300">Error loading statistics</h3>
-            <p className="text-red-200">{error}</p>
+            <h3 className="font-medium text-ur-coral">Error loading statistics</h3>
+            <p className="text-ur-coral">{error}</p>
           </div>
         </div>
       )}
@@ -151,8 +151,8 @@ const StatsSection: React.FC = () => {
       {isLoading ? (
         <div className="flex justify-center py-12">
           <div className="relative">
-            <div className="animate-spin rounded-full h-16 w-16 border-4 border-gray-700 border-t-green-500"></div>
-            <div className="absolute inset-0 rounded-full bg-gradient-to-r from-green-500/20 to-blue-500/20 animate-pulse"></div>
+            <div className="animate-spin rounded-full h-16 w-16 border-4 border-ur-border border-t-ur-green"></div>
+            <div className="absolute inset-0 rounded-full bg-gradient-to-r from-ur-green/20 to-ur-blue/20 animate-pulse"></div>
           </div>
         </div>
       ) : (
@@ -162,100 +162,100 @@ const StatsSection: React.FC = () => {
               title="Active Providers"
               value={totals.activeProviders}
               icon={Activity}
-              gradient="bg-gradient-to-r from-green-600 to-emerald-600"
+              accent="bg-ur-green"
             />
             <StatCard
               title="Average Uptime"
               value={`${(totals.uptime / (stats.length || 1)).toFixed(1)}%`}
               icon={Clock}
-              gradient="bg-gradient-to-r from-blue-600 to-indigo-600"
+              accent="bg-ur-blue-light"
             />
             <StatCard
               title="Total Data Transfer"
               value={`${(totals.transfer / 1024).toFixed(2)} GB`}
               icon={Database}
-              gradient="bg-gradient-to-r from-purple-600 to-pink-600"
+              accent="bg-ur-pink"
             />
             <StatCard
               title="Total Search Interest"
               value={totals.interest}
               icon={Search}
-              gradient="bg-gradient-to-r from-yellow-600 to-orange-600"
+              accent="bg-ur-yellow-light"
             />
             <StatCard
               title="Total Payout"
               value={`$${totals.payout.toFixed(2)}`}
               icon={DollarSign}
-              gradient="bg-gradient-to-r from-emerald-600 to-teal-600"
+              accent="bg-ur-green"
             />
             <StatCard
               title="Total Contracts"
               value={totals.contracts}
               icon={Users}
-              gradient="bg-gradient-to-r from-indigo-600 to-purple-600"
+              accent="bg-ur-blue-light"
             />
           </div>
 
-          <div className="bg-gray-800 rounded-xl shadow-2xl overflow-hidden border border-gray-700 animate-staggerFadeUp" style={{ animationDelay: '0.2s' }}>
-            <div className="bg-gradient-to-r from-gray-700 to-gray-800 px-6 py-4 border-b border-gray-600">
+          <div className="bg-ur-panel rounded-ur shadow-ur-flat overflow-hidden border border-ur-border animate-staggerFadeUp" style={{ animationDelay: '0.2s' }}>
+            <div className="bg-ur-raised px-6 py-4 border-b border-ur-border">
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="font-medium text-gray-100">Provider Details</h3>
-                  <p className="text-sm text-gray-400 mt-1">Detailed performance metrics for each provider</p>
+                  <h3 className="font-medium text-ur-white">Provider Details</h3>
+                  <p className="text-sm text-ur-gray mt-1">Detailed performance metrics for each provider</p>
                 </div>
                 <div className="flex items-center gap-2">
-                  <TrendingUp size={16} className="text-green-400" />
-                  <span className="text-sm text-gray-300">{stats.length} providers</span>
+                  <TrendingUp size={16} className="text-ur-green" />
+                  <span className="text-sm text-ur-gray">{stats.length} providers</span>
                 </div>
               </div>
             </div>
             <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-700">
-                <thead className="bg-gray-900">
+              <table className="min-w-full divide-y divide-ur-border">
+                <thead className="bg-ur-black">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Status</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Client ID</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Uptime</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Transfer</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Payout</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Interest</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Contracts</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-ur-gray uppercase tracking-wider">Status</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-ur-gray uppercase tracking-wider">Client ID</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-ur-gray uppercase tracking-wider">Uptime</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-ur-gray uppercase tracking-wider">Transfer</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-ur-gray uppercase tracking-wider">Payout</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-ur-gray uppercase tracking-wider">Interest</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-ur-gray uppercase tracking-wider">Contracts</th>
                   </tr>
                 </thead>
-                <tbody className="bg-gray-800 divide-y divide-gray-700">
+                <tbody className="bg-ur-panel divide-y divide-ur-border">
                   {stats.map((provider, index) => (
-                    <tr key={provider.client_id} className={`hover:bg-gray-700/50 transition-colors ${index % 2 === 0 ? 'bg-gray-800' : 'bg-gray-850'}`}>
+                    <tr key={provider.client_id} className={`hover:bg-ur-raised/50 transition-colors ${index % 2 === 0 ? 'bg-ur-panel' : 'bg-ur-tint'}`}>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                          provider.connected
-                            ? 'bg-green-900 text-green-300 border border-green-700'
-                            : 'bg-red-900 text-red-300 border border-red-700'
-                        }`}>
+ provider.connected
+ ? 'bg-ur-green/10 text-ur-green border border-ur-green'
+ : 'bg-ur-coral/10 text-ur-coral border border-ur-coral'
+ }`}>
                           {provider.connected ? 'Active' : 'Inactive'}
                         </span>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300 font-mono">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-ur-gray font-mono">
                         {provider.client_id}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-200">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-ur-white">
                         <div className="flex items-center gap-2">
                           <div className={`w-2 h-2 rounded-full ${
-                            provider.uptime_last_24h >= 90 ? 'bg-green-400' :
-                            provider.uptime_last_24h >= 70 ? 'bg-yellow-400' : 'bg-red-400'
-                          }`}></div>
+ provider.uptime_last_24h >= 90 ? 'bg-ur-green' :
+ provider.uptime_last_24h >= 70 ? 'bg-ur-yellow-light' : 'bg-ur-coral'
+ }`}></div>
                           {provider.uptime_last_24h.toFixed(1)}%
                         </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-200 font-medium">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-ur-white font-medium">
                         {(provider.transfer_data_last_24h / 1024).toFixed(2)} GB
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-green-400 font-medium">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-ur-green font-medium">
                         ${provider.payout_last_24h.toFixed(2)}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-blue-400">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-ur-blue-light">
                         {provider.search_interest_last_24h}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-purple-400">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-ur-pink">
                         {provider.contracts_last_24h}
                       </td>
                     </tr>
@@ -265,11 +265,11 @@ const StatsSection: React.FC = () => {
               
               {stats.length === 0 && !isLoading && (
                 <div className="text-center py-12">
-                  <div className="w-16 h-16 bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <BarChart3 className="text-gray-500" size={24} />
+                  <div className="w-16 h-16 bg-ur-raised rounded-full flex items-center justify-center mx-auto mb-4">
+                    <BarChart3 className="text-ur-gray-dark" size={24} />
                   </div>
-                  <h3 className="text-lg font-medium text-gray-200 mb-2">No Statistics Available</h3>
-                  <p className="text-gray-400 italic">No provider statistics found. Try refreshing the data.</p>
+                  <h3 className="text-lg font-medium text-ur-white mb-2">No Statistics Available</h3>
+                  <p className="text-ur-gray italic">No provider statistics found. Try refreshing the data.</p>
                 </div>
               )}
             </div>

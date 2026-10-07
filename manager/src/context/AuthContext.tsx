@@ -3,9 +3,10 @@ import {
 	login as apiLogin,
 	loginWithPassword as apiLoginWithPassword,
 	loginWithWallet as apiLoginWithWallet,
+	loginWithSeedphrase as apiLoginWithSeedphrase,
 } from "../services/api";
 import toast from "react-hot-toast";
-import { AuthResponse, PasswordLoginResponse, WalletAuthPayload, WalletLoginResponse } from "../services/types";
+import { AuthResponse, PasswordLoginResponse, SeedphraseLoginResponse, WalletAuthPayload, WalletLoginResponse } from "../services/types";
 
 interface AuthContextType {
 	token: string | null;
@@ -28,6 +29,9 @@ interface AuthContextType {
 	loginWithWallet: (
 		payload: WalletAuthPayload,
 	) => Promise<WalletLoginResponse | null>;
+	loginWithSeedphrase: (
+		seedphrase: string,
+	) => Promise<SeedphraseLoginResponse | null>;
 	logout: () => void;
 }
 
@@ -41,6 +45,7 @@ export const AuthContext = createContext<AuthContextType>({
 	commitToken: () => {},
 	loginWithPassword: async () => null,
 	loginWithWallet: async () => null,
+	loginWithSeedphrase: async () => null,
 	isLoading: false,
 	isAutoLoginAttempted: false,
 	isAuthenticated: false,
@@ -151,6 +156,32 @@ export const AuthContextProvider: FC<PropsWithChildren> = ({ children }) => {
 		return response;
 	};
 
+	const loginWithSeedphrase = async (
+		seedphrase: string,
+	): Promise<SeedphraseLoginResponse | null> => {
+		setIsLoading(true);
+		const response = await apiLoginWithSeedphrase(seedphrase);
+		setIsLoading(false);
+
+		if (response.error || !response.network?.by_jwt) {
+			toast.error(
+				`Login failed: ${response.error?.message || "Invalid response received"}`,
+			);
+			return null;
+		}
+
+		setIsTransitioning(true);
+		toast.success("Login successful");
+
+		setTimeout(() => {
+			setToken(response.network!.by_jwt);
+			localStorage.setItem("byToken", response.network!.by_jwt);
+			setIsTransitioning(false);
+		}, 900);
+
+		return response;
+	};
+
 	const logout = () => {
 		if (isLoggingOut || isTransitioning) {
 			return;
@@ -176,6 +207,7 @@ export const AuthContextProvider: FC<PropsWithChildren> = ({ children }) => {
 				commitToken,
 				loginWithPassword,
 				loginWithWallet,
+				loginWithSeedphrase,
 				isLoading,
 				isAuthenticated: !!token,
 				isTransitioning,

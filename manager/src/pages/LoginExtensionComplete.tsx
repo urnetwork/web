@@ -31,22 +31,22 @@ const LoginExtensionComplete: React.FC = () => {
 
   return (
     <div className="max-w-lg mx-auto">
-      <div className="bg-gray-800 rounded-xl border border-gray-700 shadow-2xl p-8 text-center">
+      <div className="bg-ur-panel rounded-ur border border-ur-border shadow-ur-flat p-8 text-center">
         <div className="flex justify-center mb-4">
-          <div className="p-3 bg-green-600/20 rounded-full">
-            <CheckCircle size={32} className="text-green-400" />
+          <div className="p-3 bg-ur-green/20 rounded-full">
+            <CheckCircle size={32} className="text-ur-green" />
           </div>
         </div>
 
-        <h2 className="text-xl font-bold text-white mb-2">
+        <h2 className="text-xl font-bold text-ur-white mb-2">
           Authentication Approved
         </h2>
 
-        <p className="text-gray-300 text-sm leading-relaxed mb-6">
+        <p className="text-ur-gray text-sm leading-relaxed mb-6">
           You may return to the extension.
         </p>
 
-        <div className="flex items-center justify-center space-x-2 text-gray-400 text-sm">
+        <div className="flex items-center justify-center space-x-2 text-ur-gray text-sm">
           <Loader2 size={14} className="animate-spin" />
           <span>Redirecting in {countdown}s...</span>
         </div>

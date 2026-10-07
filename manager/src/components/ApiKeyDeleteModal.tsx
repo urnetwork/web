@@ -50,24 +50,24 @@ const ApiKeyDeleteModal: React.FC<ApiKeyDeleteModalProps> = ({
   if (!portalRoot) return null;
 
   return createPortal(
-    <div className="fixed inset-0 z-[9999] bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 animate-fadeIn overflow-visible">
+    <div className="fixed inset-0 z-[9999] bg-ur-black/70 backdrop-blur-sm flex items-center justify-center p-4 animate-fadeIn overflow-visible">
       <div
         ref={modalRef}
-        className="bg-gray-800 rounded-xl shadow-2xl max-w-md w-full mx-auto animate-scaleIn border border-gray-700"
+        className="bg-ur-panel rounded-ur shadow-ur-flat max-w-md w-full mx-auto animate-scaleIn border border-ur-border"
       >
-        <div className="flex items-start justify-between p-6 border-b border-gray-700">
+        <div className="flex items-start justify-between p-6 border-b border-ur-border">
           <div className="flex items-center space-x-3">
-            <div className="flex-shrink-0 p-2 bg-red-600 rounded-lg">
-              <Trash2 size={20} className="text-white" />
+            <div className="flex-shrink-0 p-2 bg-ur-coral rounded-lg">
+              <Trash2 size={20} className="text-ur-black" />
             </div>
-            <h3 className="text-lg font-medium text-gray-100">
+            <h3 className="text-lg font-medium text-ur-white">
               Delete API Key
             </h3>
           </div>
           {!isDeleting && (
             <button
               onClick={onClose}
-              className="text-gray-400 hover:text-gray-200 focus:outline-none focus:text-gray-200 transition-colors p-1 rounded-lg hover:bg-gray-700"
+              className="text-ur-gray hover:text-ur-white focus:outline-none focus:text-ur-white transition-colors p-1 rounded-lg hover:bg-ur-raised"
             >
               <X size={20} />
             </button>
@@ -75,39 +75,39 @@ const ApiKeyDeleteModal: React.FC<ApiKeyDeleteModalProps> = ({
         </div>
 
         <div className="p-6">
-          <div className="flex items-start gap-3 p-4 bg-red-900/30 border border-red-700/50 rounded-lg mb-5">
+          <div className="flex items-start gap-3 p-4 bg-ur-coral/10 border border-ur-coral/40 rounded-lg mb-5">
             <AlertTriangle
               size={20}
-              className="text-red-400 flex-shrink-0 mt-0.5"
+              className="text-ur-coral flex-shrink-0 mt-0.5"
             />
             <div>
-              <p className="text-red-300 font-medium text-sm mb-1">
+              <p className="text-ur-coral font-medium text-sm mb-1">
                 This action cannot be undone
               </p>
-              <p className="text-red-400/80 text-sm">
+              <p className="text-ur-coral/80 text-sm">
                 Any applications or services using this key will lose access
                 immediately.
               </p>
             </div>
           </div>
 
-          <p className="text-gray-300 text-sm mb-5">
+          <p className="text-ur-gray text-sm mb-5">
             Are you sure you want to delete the API key{" "}
-            <span className="font-semibold text-white">"{keyName}"</span>?
+            <span className="font-semibold text-ur-white">"{keyName}"</span>?
           </p>
 
           <div className="flex justify-end space-x-3">
             <button
               onClick={onClose}
               disabled={isDeleting}
-              className="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-gray-200 rounded-lg transition-colors border border-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-4 py-2 bg-ur-raised hover:bg-ur-hover text-ur-white rounded-lg transition-colors border border-ur-border disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Cancel
             </button>
             <button
               onClick={onConfirm}
               disabled={isDeleting}
-              className="flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-all duration-200 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex items-center gap-2 px-4 py-2 bg-ur-coral hover:bg-ur-coral-hover text-ur-black rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isDeleting ? (
                 <>

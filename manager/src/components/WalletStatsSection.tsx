@@ -22,6 +22,7 @@ import {
   ChartOptions,
 } from 'chart.js';
 import { Line } from 'react-chartjs-2';
+import { urChart } from '../theme/chartColors';
 
 ChartJS.register(
   CategoryScale,
@@ -33,6 +34,9 @@ ChartJS.register(
   Legend,
   Filler
 );
+
+ChartJS.defaults.font.family = urChart.fontFamily;
+ChartJS.defaults.color = urChart.legend;
 
 // Default settings
 const DEFAULT_SETTINGS: WalletStatsSettings = {
@@ -367,20 +371,20 @@ const WalletStatsSection: React.FC = () => {
     ].filter((tz, index, arr) => arr.indexOf(tz) === index);
   };
 
-  const StatCard = ({ title, value, icon: Icon, gradient }: { 
+  const StatCard = ({ title, value, icon: Icon, accent }: {
     title: string; 
     value: string; 
     icon: React.ElementType; 
-    gradient: string;
+    accent: string;
   }) => (
-    <div className="bg-gray-800 rounded-xl shadow-2xl p-6 border border-gray-700 hover:border-gray-600 transition-all duration-300">
+    <div className="bg-ur-panel rounded-ur shadow-ur-flat p-6 border border-ur-border hover:border-ur-border transition-all duration-300">
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-sm text-gray-400">{title}</p>
-          <p className="text-2xl font-semibold mt-1 text-white">{value}</p>
+          <p className="text-sm text-ur-gray">{title}</p>
+          <p className="text-2xl font-semibold mt-1 text-ur-white">{value}</p>
         </div>
-        <div className={`${gradient} p-3 rounded-xl shadow-lg`}>
-          <Icon className="h-6 w-6 text-white" />
+        <div className={`${accent} p-3 rounded-ur shadow-ur-flat`}>
+          <Icon className="h-6 w-6 text-ur-black" />
         </div>
       </div>
     </div>
@@ -413,7 +417,7 @@ const WalletStatsSection: React.FC = () => {
           fill: true,
           tension: 0.4,
           pointBackgroundColor: color,
-          pointBorderColor: '#1f2937',
+          pointBorderColor: '#101010',
           pointBorderWidth: 2,
           pointRadius: settings.showDataPoints ? 4 : 0,
           pointHoverRadius: settings.showDataPoints ? 6 : 4,
@@ -448,12 +452,12 @@ const WalletStatsSection: React.FC = () => {
       datasets.push({
         label: 'Reliability Weight',
         data: weights,
-        borderColor: '#3b82f6',
-        backgroundColor: '#3b82f620',
+        borderColor: '#d6e6f4',
+        backgroundColor: '#d6e6f420',
         fill: false,
         tension: 0.4,
-        pointBackgroundColor: '#3b82f6',
-        pointBorderColor: '#1f2937',
+        pointBackgroundColor: '#d6e6f4',
+        pointBorderColor: '#101010',
         pointBorderWidth: 2,
         pointRadius: settings.showDataPoints ? 4 : 0,
         pointHoverRadius: settings.showDataPoints ? 6 : 4,
@@ -465,12 +469,12 @@ const WalletStatsSection: React.FC = () => {
       datasets.push({
         label: 'Weighted Clients',
         data: clientCounts,
-        borderColor: '#10b981',
-        backgroundColor: '#10b98120',
+        borderColor: '#87fb67',
+        backgroundColor: '#87fb6720',
         fill: false,
         tension: 0.4,
-        pointBackgroundColor: '#10b981',
-        pointBorderColor: '#1f2937',
+        pointBackgroundColor: '#87fb67',
+        pointBorderColor: '#101010',
         pointBorderWidth: 2,
         pointRadius: settings.showDataPoints ? 4 : 0,
         pointHoverRadius: settings.showDataPoints ? 6 : 4,
@@ -482,12 +486,12 @@ const WalletStatsSection: React.FC = () => {
       datasets.push({
         label: 'Total Clients',
         data: totalClientCounts,
-        borderColor: '#f59e0b',
-        backgroundColor: '#f59e0b20',
+        borderColor: '#eff7bb',
+        backgroundColor: '#eff7bb20',
         fill: false,
         tension: 0.4,
-        pointBackgroundColor: '#f59e0b',
-        pointBorderColor: '#1f2937',
+        pointBackgroundColor: '#eff7bb',
+        pointBorderColor: '#101010',
         pointBorderWidth: 2,
         pointRadius: settings.showDataPoints ? 4 : 0,
         pointHoverRadius: settings.showDataPoints ? 6 : 4,
@@ -505,17 +509,17 @@ const WalletStatsSection: React.FC = () => {
       legend: {
         position: 'top' as const,
         labels: {
-          color: '#d1d5db',
+          color: '#b7b7b7',
           font: {
             size: 12,
           },
         },
       },
       tooltip: {
-        backgroundColor: '#374151',
-        titleColor: '#f3f4f6',
-        bodyColor: '#d1d5db',
-        borderColor: '#4b5563',
+        backgroundColor: '#212121',
+        titleColor: '#f8f8f8',
+        bodyColor: '#b7b7b7',
+        borderColor: '#282828',
         borderWidth: 1,
         callbacks: {
           label: function(context) {
@@ -528,10 +532,10 @@ const WalletStatsSection: React.FC = () => {
     scales: {
       x: {
         grid: {
-          color: '#374151',
+          color: '#282828',
         },
         ticks: {
-          color: '#9ca3af',
+          color: '#909090',
           font: {
             size: 11,
           },
@@ -543,15 +547,15 @@ const WalletStatsSection: React.FC = () => {
         display: showReliabilityWeight,
         position: 'left' as const,
         grid: {
-          color: '#374151',
+          color: '#282828',
         },
         title: {
           display: true,
           text: 'Reliability Weight',
-          color: '#3b82f6',
+          color: '#d6e6f4',
         },
         ticks: {
-          color: '#3b82f6',
+          color: '#d6e6f4',
           font: {
             size: 11,
           },
@@ -567,10 +571,10 @@ const WalletStatsSection: React.FC = () => {
         title: {
           display: true,
           text: 'Client Count',
-          color: '#9ca3af',
+          color: '#909090',
         },
         ticks: {
-          color: '#9ca3af',
+          color: '#909090',
           font: {
             size: 11,
           },
@@ -590,17 +594,17 @@ const WalletStatsSection: React.FC = () => {
       legend: {
         position: 'top' as const,
         labels: {
-          color: '#d1d5db',
+          color: '#b7b7b7',
           font: {
             size: 12,
           },
         },
       },
       tooltip: {
-        backgroundColor: '#374151',
-        titleColor: '#f3f4f6',
-        bodyColor: '#d1d5db',
-        borderColor: '#4b5563',
+        backgroundColor: '#212121',
+        titleColor: '#f8f8f8',
+        bodyColor: '#b7b7b7',
+        borderColor: '#282828',
         borderWidth: 1,
         callbacks: {
           label: function(context) {
@@ -613,10 +617,10 @@ const WalletStatsSection: React.FC = () => {
     scales: {
       x: {
         grid: {
-          color: '#374151',
+          color: '#282828',
         },
         ticks: {
-          color: '#9ca3af',
+          color: '#909090',
           font: {
             size: 11,
           },
@@ -625,10 +629,10 @@ const WalletStatsSection: React.FC = () => {
       },
       y: {
         grid: {
-          color: '#374151',
+          color: '#282828',
         },
         ticks: {
-          color: '#9ca3af',
+          color: '#909090',
           font: {
             size: 11,
           },
@@ -644,22 +648,22 @@ const WalletStatsSection: React.FC = () => {
     },
   };
 
-  const paidChartData = createChartData('paid_bytes_provided', '#10b981', 'Paid Data Transfer');
-  const unpaidChartData = createChartData('unpaid_bytes_provided', '#f59e0b', 'Unpaid Data Transfer');
+  const paidChartData = createChartData('paid_bytes_provided', '#87fb67', 'Paid Data Transfer');
+  const unpaidChartData = createChartData('unpaid_bytes_provided', '#eff7bb', 'Unpaid Data Transfer');
   const reliabilityChartData = createReliabilityChartData();
 
   return (
     <div className="space-y-8">
       {/* Tab Navigation */}
-      <div className="bg-gray-800 rounded-xl border border-gray-700 shadow-2xl animate-staggerFadeUp overflow-hidden" style={{ animationDelay: '0.05s' }}>
+      <div className="bg-ur-panel rounded-ur border border-ur-border shadow-ur-flat animate-staggerFadeUp overflow-hidden" style={{ animationDelay: '0.05s' }}>
         <div className="flex space-x-1 p-3">
           <button
             onClick={() => setActiveTab('data')}
             className={`flex-1 py-3 px-4 rounded-lg font-medium text-sm transition-all duration-200 ${
-              activeTab === 'data'
-                ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg transform scale-[1.02]'
-                : 'text-gray-400 hover:text-gray-200 hover:bg-gray-700'
-            }`}
+ activeTab === 'data'
+ ? 'bg-ur-blue text-ur-white shadow-ur-flat transform scale-[1.02]'
+ : 'text-ur-gray hover:text-ur-white hover:bg-ur-raised'
+ }`}
           >
             <BarChart3 size={16} className="inline mr-2" />
             Data Stats
@@ -667,10 +671,10 @@ const WalletStatsSection: React.FC = () => {
           <button
             onClick={() => setActiveTab('payouts')}
             className={`flex-1 py-3 px-4 rounded-lg font-medium text-sm transition-all duration-200 ${
-              activeTab === 'payouts'
-                ? 'bg-gradient-to-r from-green-600 to-emerald-600 text-white shadow-lg transform scale-[1.02]'
-                : 'text-gray-400 hover:text-gray-200 hover:bg-gray-700'
-            }`}
+ activeTab === 'payouts'
+ ? 'bg-ur-green text-ur-black shadow-ur-flat transform scale-[1.02]'
+ : 'text-ur-gray hover:text-ur-white hover:bg-ur-raised'
+ }`}
           >
             <CreditCard size={16} className="inline mr-2" />
             Payout Stats
@@ -683,32 +687,32 @@ const WalletStatsSection: React.FC = () => {
       <div className="space-y-8">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 animate-staggerFadeUp" style={{ animationDelay: '0.1s' }}>
           <div>
-            <h2 className="text-3xl font-bold text-white flex items-center gap-3">
-              <div className="p-2 bg-gradient-to-r from-green-600 to-emerald-600 rounded-xl">
-                <Wallet className="text-white" size={28} />
+            <h2 className="text-3xl font-bold text-ur-white flex items-center gap-3">
+              <div className="p-2 bg-ur-green rounded-ur">
+                <Wallet className="text-ur-black" size={28} />
               </div>
               Data Statistics
             </h2>
-            <p className="text-gray-400 mt-2">
+            <p className="text-ur-gray mt-2">
               Real-time tracking of data transfer earnings (stored locally)
             </p>
             {networkUser && (
               <div className="flex items-center gap-2 mt-3">
-                <User size={16} className="text-blue-400" />
-                <span className="text-sm text-gray-300">
-                  Network: <span className="text-blue-400 font-medium">{networkUser.network_name}</span> ({networkUser.user_auth})
+                <User size={16} className="text-ur-blue-light" />
+                <span className="text-sm text-ur-gray">
+                  Network: <span className="text-ur-blue-light font-medium">{networkUser.network_name}</span> ({networkUser.user_auth})
                 </span>
               </div>
             )}
             {lastUpdated && (
-              <p className="text-sm text-gray-500 mt-1 flex items-center gap-2">
+              <p className="text-sm text-ur-gray-dark mt-1 flex items-center gap-2">
                 <Activity size={14} />
                 Last updated: {formatDateTime(lastUpdated)}
               </p>
             )}
             <div className="flex items-center gap-2 mt-2">
-              <HardDrive size={14} className="text-gray-400" />
-              <span className="text-xs text-gray-500">
+              <HardDrive size={14} className="text-ur-gray" />
+              <span className="text-xs text-ur-gray-dark">
                 {storageInfo.totalRecords} records • {storageInfo.storageSize} used
               </span>
             </div>
@@ -717,7 +721,7 @@ const WalletStatsSection: React.FC = () => {
           <div className="flex flex-col sm:flex-row gap-3">
             <button
               onClick={() => setShowSettings(!showSettings)}
-              className="flex items-center justify-center gap-2 bg-gray-700 hover:bg-gray-600 text-gray-200 px-4 py-2 rounded-lg transition-all duration-200 border border-gray-600"
+              className="flex items-center justify-center gap-2 bg-ur-raised hover:bg-ur-hover text-ur-white px-4 py-2 rounded-lg transition-all duration-200 border border-ur-border"
             >
               <Settings size={16} />
               Settings
@@ -727,10 +731,10 @@ const WalletStatsSection: React.FC = () => {
               onClick={() => setShowClearModal(true)}
               disabled={statsHistory.length === 0}
               className={`flex items-center justify-center gap-2 px-4 py-2 rounded-lg transition-all duration-200 ${
-                statsHistory.length === 0
-                  ? 'bg-gray-700 text-gray-500 cursor-not-allowed border border-gray-600'
-                  : 'bg-red-600 text-white hover:bg-red-700 border border-red-500 hover:shadow-lg'
-              }`}
+ statsHistory.length === 0
+ ? 'bg-ur-raised text-ur-gray-dark cursor-not-allowed border border-ur-border'
+ : 'bg-ur-coral text-ur-black hover:bg-ur-coral-hover border border-ur-coral '
+ }`}
             >
               <Trash2 size={16} />
               Clear History
@@ -739,7 +743,7 @@ const WalletStatsSection: React.FC = () => {
             <button
               onClick={() => loadWalletStats(true)}
               disabled={isLoading}
-              className="flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-all duration-200 border border-green-500 hover:shadow-lg"
+              className="flex items-center justify-center gap-2 bg-ur-green hover:bg-ur-green/90 text-ur-black px-4 py-2 rounded-lg transition-all duration-200 border border-ur-green "
             >
               <RefreshCw size={16} className={isLoading ? 'animate-spin' : ''} />
               Refresh
@@ -748,33 +752,33 @@ const WalletStatsSection: React.FC = () => {
         </div>
 
         {showSettings && (
-          <div className="bg-gray-800 rounded-xl shadow-2xl p-6 border border-gray-700">
-            <h3 className="text-lg font-medium text-gray-100 mb-6 flex items-center gap-2">
+          <div className="bg-ur-panel rounded-ur shadow-ur-flat p-6 border border-ur-border">
+            <h3 className="text-lg font-medium text-ur-white mb-6 flex items-center gap-2">
               <Settings size={20} />
               Configuration Settings
             </h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              <div className="bg-gray-900 p-4 rounded-lg border border-gray-700">
+              <div className="bg-ur-black p-4 rounded-lg border border-ur-border">
                 <label className="flex items-center space-x-3 mb-4">
                   <input
                     type="checkbox"
                     checked={settings.isAutoRefreshEnabled}
                     onChange={(e) => updateSettings({ isAutoRefreshEnabled: e.target.checked })}
-                    className="rounded border-gray-600 bg-gray-700 text-green-600 focus:ring-green-500 focus:ring-offset-gray-800"
+                    className="rounded border-ur-border bg-ur-raised text-ur-green focus:ring-ur-green focus:ring-offset-ur-black"
                   />
-                  <span className="text-sm font-medium text-gray-200">Enable Auto Refresh</span>
+                  <span className="text-sm font-medium text-ur-white">Enable Auto Refresh</span>
                 </label>
               </div>
               
-              <div className="bg-gray-900 p-4 rounded-lg border border-gray-700">
-                <label className="block text-sm font-medium text-gray-200 mb-2">
+              <div className="bg-ur-black p-4 rounded-lg border border-ur-border">
+                <label className="block text-sm font-medium text-ur-white mb-2">
                   Refresh Interval (minutes)
                 </label>
                 <select
                   value={settings.refreshInterval}
                   onChange={(e) => updateSettings({ refreshInterval: Number(e.target.value) })}
                   disabled={!settings.isAutoRefreshEnabled}
-                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 disabled:bg-gray-800 text-gray-200"
+                  className="w-full px-3 py-2 bg-ur-raised border border-ur-border rounded-lg focus:ring-2 focus:ring-ur-green focus:border-ur-green disabled:bg-ur-panel text-ur-white"
                 >
                   <option value={0.01}>LIVE (Spams API :3)</option>
                   <option value={1}>1 minute</option>
@@ -786,14 +790,14 @@ const WalletStatsSection: React.FC = () => {
                 </select>
               </div>
               
-              <div className="bg-gray-900 p-4 rounded-lg border border-gray-700">
-                <label className="block text-sm font-medium text-gray-200 mb-2">
+              <div className="bg-ur-black p-4 rounded-lg border border-ur-border">
+                <label className="block text-sm font-medium text-ur-white mb-2">
                   Maximum Data Points
                 </label>
                 <select
                   value={settings.maxDataPoints}
                   onChange={(e) => updateSettings({ maxDataPoints: Number(e.target.value) })}
-                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 text-gray-200"
+                  className="w-full px-3 py-2 bg-ur-raised border border-ur-border rounded-lg focus:ring-2 focus:ring-ur-green focus:border-ur-green text-ur-white"
                 >
                   <option value={10}>10 points</option>
                   <option value={25}>25 points</option>
@@ -805,29 +809,29 @@ const WalletStatsSection: React.FC = () => {
                 </select>
               </div>
               
-              <div className="bg-gray-900 p-4 rounded-lg border border-gray-700">
+              <div className="bg-ur-black p-4 rounded-lg border border-ur-border">
                 <label className="flex items-center space-x-3 mb-4">
                   <input
                     type="checkbox"
                     checked={settings.showDataPoints}
                     onChange={(e) => updateSettings({ showDataPoints: e.target.checked })}
-                    className="rounded border-gray-600 bg-gray-700 text-green-600 focus:ring-green-500 focus:ring-offset-gray-800"
+                    className="rounded border-ur-border bg-ur-raised text-ur-green focus:ring-ur-green focus:ring-offset-ur-black"
                   />
-                  <span className="text-sm font-medium text-gray-200">Show Data Points</span>
+                  <span className="text-sm font-medium text-ur-white">Show Data Points</span>
                 </label>
-                <p className="text-xs text-gray-400">
+                <p className="text-xs text-ur-gray">
                   When disabled, charts show as smooth lines. Hover to see data values.
                 </p>
               </div>
               
-              <div className="bg-gray-900 p-4 rounded-lg border border-gray-700">
-                <label className="block text-sm font-medium text-gray-200 mb-2">
+              <div className="bg-ur-black p-4 rounded-lg border border-ur-border">
+                <label className="block text-sm font-medium text-ur-white mb-2">
                   Timezone
                 </label>
                 <select
                   value={settings.timezone}
                   onChange={(e) => updateSettings({ timezone: e.target.value })}
-                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 text-gray-200"
+                  className="w-full px-3 py-2 bg-ur-raised border border-ur-border rounded-lg focus:ring-2 focus:ring-ur-green focus:border-ur-green text-ur-white"
                 >
                   {getTimezoneOptions().map((tz) => (
                     <option key={tz} value={tz}>
@@ -838,9 +842,9 @@ const WalletStatsSection: React.FC = () => {
               </div>
             </div>
             
-            <div className="mt-6 p-4 bg-blue-900/30 rounded-lg border border-blue-700/50">
-              <h4 className="text-sm font-medium text-blue-300 mb-2">Storage Information</h4>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-blue-200">
+            <div className="mt-6 p-4 bg-ur-blue/15 rounded-lg border border-ur-blue/40">
+              <h4 className="text-sm font-medium text-ur-blue-light mb-2">Storage Information</h4>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-ur-blue-light">
                 <div>
                   <span className="font-medium">Total Records:</span> {storageInfo.totalRecords}
                 </div>
@@ -851,7 +855,7 @@ const WalletStatsSection: React.FC = () => {
                   <span className="font-medium">Showing:</span> {settings.maxDataPoints === 1000 ? statsHistory.length : Math.min(settings.maxDataPoints, statsHistory.length)} of {statsHistory.length}
                 </div>
               </div>
-              <p className="text-xs text-blue-300 mt-2">
+              <p className="text-xs text-ur-blue-light mt-2">
                 Data is stored locally in your browser. Maximum 1000 records are kept automatically. Chart displays up to {settings.maxDataPoints === 1000 ? statsHistory.length : settings.maxDataPoints} most recent points.
               </p>
             </div>
@@ -859,21 +863,21 @@ const WalletStatsSection: React.FC = () => {
         )}
 
         {error && (
-          <div className="bg-red-900/50 border border-red-700 p-4 rounded-xl flex items-start gap-3">
-            <AlertCircle size={20} className="text-red-400 mt-0.5 flex-shrink-0" />
+          <div className="bg-ur-coral/15 border border-ur-coral p-4 rounded-ur flex items-start gap-3">
+            <AlertCircle size={20} className="text-ur-coral mt-0.5 flex-shrink-0" />
             <div>
-              <h3 className="font-medium text-red-300">Error loading wallet stats</h3>
-              <p className="text-red-200">{error}</p>
+              <h3 className="font-medium text-ur-coral">Error loading wallet stats</h3>
+              <p className="text-ur-coral">{error}</p>
             </div>
           </div>
         )}
 
         {!networkUser && !isLoading && (
-          <div className="bg-yellow-900/50 border border-yellow-700 p-4 rounded-xl flex items-start gap-3">
-            <AlertCircle size={20} className="text-yellow-400 mt-0.5 flex-shrink-0" />
+          <div className="bg-ur-yellow-light/10 border border-ur-yellow-light/40 p-4 rounded-ur flex items-start gap-3">
+            <AlertCircle size={20} className="text-ur-yellow-light mt-0.5 flex-shrink-0" />
             <div>
-              <h3 className="font-medium text-yellow-300">User Information Required</h3>
-              <p className="text-yellow-200">Loading user information to enable wallet stats tracking...</p>
+              <h3 className="font-medium text-ur-yellow-light">User Information Required</h3>
+              <p className="text-ur-yellow-light">Loading user information to enable wallet stats tracking...</p>
             </div>
           </div>
         )}
@@ -881,8 +885,8 @@ const WalletStatsSection: React.FC = () => {
         {isLoading && statsHistory.length === 0 ? (
           <div className="flex justify-center py-12">
             <div className="relative">
-              <div className="animate-spin rounded-full h-16 w-16 border-4 border-gray-700 border-t-green-500"></div>
-              <div className="absolute inset-0 rounded-full bg-gradient-to-r from-green-500/20 to-blue-500/20 animate-pulse"></div>
+              <div className="animate-spin rounded-full h-16 w-16 border-4 border-ur-border border-t-ur-green"></div>
+              <div className="absolute inset-0 rounded-full bg-gradient-to-r from-ur-green/20 to-ur-blue/20 animate-pulse"></div>
             </div>
           </div>
         ) : (
@@ -892,34 +896,34 @@ const WalletStatsSection: React.FC = () => {
                 title="Current Paid Data"
                 value={formatMBValue(currentStats.paid_mb)}
                 icon={DollarSign}
-                gradient="bg-gradient-to-r from-green-600 to-emerald-600"
+                accent="bg-ur-green"
               />
               <StatCard
                 title="Current Unpaid Data"
                 value={formatMBValue(currentStats.unpaid_mb)}
                 icon={Clock}
-                gradient="bg-gradient-to-r from-yellow-600 to-orange-600"
+                accent="bg-ur-yellow-light"
               />
               <StatCard
                 title="Total Data"
                 value={formatMBValue(currentStats.paid_mb + currentStats.unpaid_mb)}
                 icon={Database}
-                gradient="bg-gradient-to-r from-blue-600 to-indigo-600"
+                accent="bg-ur-blue-light"
               />
               <StatCard
                 title="Data Points"
                 value={`${settings.maxDataPoints === 1000 ? statsHistory.length : Math.min(settings.maxDataPoints, statsHistory.length)}/${statsHistory.length}`}
                 icon={TrendingUp}
-                gradient="bg-gradient-to-r from-purple-600 to-pink-600"
+                accent="bg-ur-pink"
               />
             </div>
 
             {statsHistory.length > 0 && (
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 animate-chartSlideUp" style={{ animationDelay: '0.25s' }}>
                 {paidChartData && (
-                  <div className="bg-gray-800 rounded-xl shadow-2xl p-6 border border-gray-700">
-                    <h3 className="text-lg font-medium text-gray-100 mb-6 flex items-center gap-2">
-                      <DollarSign size={20} className="text-green-400" />
+                  <div className="bg-ur-panel rounded-ur shadow-ur-flat p-6 border border-ur-border">
+                    <h3 className="text-lg font-medium text-ur-white mb-6 flex items-center gap-2">
+                      <DollarSign size={20} className="text-ur-green" />
                       Paid Data Transfer History
                     </h3>
                     <div className="h-64 md:h-80">
@@ -929,9 +933,9 @@ const WalletStatsSection: React.FC = () => {
                 )}
                 
                 {unpaidChartData && (
-                  <div className="bg-gray-800 rounded-xl shadow-2xl p-6 border border-gray-700">
-                    <h3 className="text-lg font-medium text-gray-100 mb-6 flex items-center gap-2">
-                      <Clock size={20} className="text-yellow-400" />
+                  <div className="bg-ur-panel rounded-ur shadow-ur-flat p-6 border border-ur-border">
+                    <h3 className="text-lg font-medium text-ur-white mb-6 flex items-center gap-2">
+                      <Clock size={20} className="text-ur-yellow-light" />
                       Unpaid Data Transfer History
                     </h3>
                     <div className="h-64 md:h-80">
@@ -944,16 +948,16 @@ const WalletStatsSection: React.FC = () => {
 
             {reliabilityData && (
               <div className="animate-chartSlideUp" style={{ animationDelay: '0.35s' }}>
-                <div className="bg-gray-800 rounded-xl shadow-2xl p-6 border border-gray-700">
+                <div className="bg-ur-panel rounded-ur shadow-ur-flat p-6 border border-ur-border">
                   <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
                     <div className="flex items-center gap-4">
-                      <h3 className="text-lg font-medium text-gray-100 flex items-center gap-2">
-                        <Activity size={20} className="text-blue-400" />
+                      <h3 className="text-lg font-medium text-ur-white flex items-center gap-2">
+                        <Activity size={20} className="text-ur-blue-light" />
                         Network Reliability
                       </h3>
                       <div className="flex items-center gap-2 text-sm">
-                        <span className="text-gray-400">Mean:</span>
-                        <span className="text-blue-400 font-medium">
+                        <span className="text-ur-gray">Mean:</span>
+                        <span className="text-ur-blue-light font-medium">
                           {reliabilityData.mean_reliability_weight.toFixed(2)}
                         </span>
                       </div>
@@ -964,27 +968,27 @@ const WalletStatsSection: React.FC = () => {
                           type="checkbox"
                           checked={showReliabilityWeight}
                           onChange={(e) => setShowReliabilityWeight(e.target.checked)}
-                          className="rounded border-gray-600 bg-gray-700 text-blue-500 focus:ring-blue-500 focus:ring-offset-gray-800"
+                          className="rounded border-ur-border bg-ur-raised text-ur-blue-light focus:ring-ur-blue focus:ring-offset-ur-black"
                         />
-                        <span className="text-sm text-blue-400">Reliability Weight</span>
+                        <span className="text-sm text-ur-blue-light">Reliability Weight</span>
                       </label>
                       <label className="flex items-center gap-2 cursor-pointer">
                         <input
                           type="checkbox"
                           checked={showWeightedClients}
                           onChange={(e) => setShowWeightedClients(e.target.checked)}
-                          className="rounded border-gray-600 bg-gray-700 text-emerald-500 focus:ring-emerald-500 focus:ring-offset-gray-800"
+                          className="rounded border-ur-border bg-ur-raised text-ur-green focus:ring-ur-green focus:ring-offset-ur-black"
                         />
-                        <span className="text-sm text-emerald-400">Weighted Clients</span>
+                        <span className="text-sm text-ur-green">Weighted Clients</span>
                       </label>
                       <label className="flex items-center gap-2 cursor-pointer">
                         <input
                           type="checkbox"
                           checked={showTotalClients}
                           onChange={(e) => setShowTotalClients(e.target.checked)}
-                          className="rounded border-gray-600 bg-gray-700 text-amber-500 focus:ring-amber-500 focus:ring-offset-gray-800"
+                          className="rounded border-ur-border bg-ur-raised text-ur-yellow-light focus:ring-ur-blue focus:ring-offset-ur-black"
                         />
-                        <span className="text-sm text-amber-400">Total Clients</span>
+                        <span className="text-sm text-ur-yellow-light">Total Clients</span>
                       </label>
                     </div>
                   </div>
@@ -993,7 +997,7 @@ const WalletStatsSection: React.FC = () => {
                       <Line data={reliabilityChartData} options={reliabilityChartOptions as ComponentProps<typeof Line>["options"]} />
                     </div>
                   ) : (
-                    <div className="flex items-center justify-center h-64 text-gray-400">
+                    <div className="flex items-center justify-center h-64 text-ur-gray">
                       Select at least one data series to display
                     </div>
                   )}
@@ -1002,49 +1006,49 @@ const WalletStatsSection: React.FC = () => {
             )}
 
             {reliabilityError && !reliabilityData && (
-              <div className="bg-gray-800 rounded-xl shadow-2xl p-6 border border-gray-700">
-                <div className="flex items-center gap-3 text-red-400">
+              <div className="bg-ur-panel rounded-ur shadow-ur-flat p-6 border border-ur-border">
+                <div className="flex items-center gap-3 text-ur-coral">
                   <AlertCircle size={20} />
                   <span>Failed to load reliability data: {reliabilityError}</span>
                 </div>
               </div>
             )}
 
-            <div className="bg-gray-800 rounded-xl shadow-2xl overflow-hidden border border-gray-700">
-              <div className="px-6 py-4 bg-gradient-to-r from-gray-700 to-gray-800 border-b border-gray-600">
-                <h3 className="font-medium text-gray-100">History Timeline</h3>
+            <div className="bg-ur-panel rounded-ur shadow-ur-flat overflow-hidden border border-ur-border">
+              <div className="px-6 py-4 bg-ur-raised border-b border-ur-border">
+                <h3 className="font-medium text-ur-white">History Timeline</h3>
               </div>
               <div className="max-h-96 overflow-y-auto">
-                <table className="min-w-full divide-y divide-gray-700">
-                  <thead className="bg-gray-900 sticky top-0">
+                <table className="min-w-full divide-y divide-ur-border">
+                  <thead className="bg-ur-black sticky top-0">
                     <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                      <th className="px-6 py-3 text-left text-xs font-medium text-ur-gray uppercase tracking-wider">
                         Timestamp
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                      <th className="px-6 py-3 text-left text-xs font-medium text-ur-gray uppercase tracking-wider">
                         Paid Data
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                      <th className="px-6 py-3 text-left text-xs font-medium text-ur-gray uppercase tracking-wider">
                         Unpaid Data
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                      <th className="px-6 py-3 text-left text-xs font-medium text-ur-gray uppercase tracking-wider">
                         Total Data
                       </th>
                     </tr>
                   </thead>
-                  <tbody className="bg-gray-800 divide-y divide-gray-700">
+                  <tbody className="bg-ur-panel divide-y divide-ur-border">
                     {statsHistory.map((entry, index) => (
-                      <tr key={entry.id} className={index === 0 ? 'bg-green-900/20 border-l-4 border-green-500' : 'hover:bg-gray-700/50'}>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                      <tr key={entry.id} className={index === 0 ? 'bg-ur-green/10 border-l-4 border-ur-green' : 'hover:bg-ur-raised/50'}>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-ur-gray">
                           {formatDateTime(entry.created_at)}
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-green-400 font-medium">
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-ur-green font-medium">
                           {formatBytes(entry.paid_bytes_provided)}
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-yellow-400 font-medium">
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-ur-yellow-light font-medium">
                           {formatBytes(entry.unpaid_bytes_provided)}
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-white">
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-ur-white">
                           {formatBytes(entry.paid_bytes_provided + entry.unpaid_bytes_provided)}
                         </td>
                       </tr>
@@ -1054,10 +1058,10 @@ const WalletStatsSection: React.FC = () => {
                 
                 {statsHistory.length === 0 && (
                   <div className="text-center py-12">
-                    <div className="w-16 h-16 bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <Database className="text-gray-500" size={24} />
+                    <div className="w-16 h-16 bg-ur-raised rounded-full flex items-center justify-center mx-auto mb-4">
+                      <Database className="text-ur-gray-dark" size={24} />
                     </div>
-                    <p className="text-gray-400 italic">No data collected yet. Data will appear after the first API call.</p>
+                    <p className="text-ur-gray italic">No data collected yet. Data will appear after the first API call.</p>
                   </div>
                 )}
               </div>
@@ -1075,14 +1079,14 @@ const WalletStatsSection: React.FC = () => {
         onConfirm={handleClearHistory}
         title="Clear Wallet History"
         isLoading={isClearing}
-        icon={<AlertTriangle className="h-6 w-6 text-red-400" />}
+        icon={<AlertTriangle className="h-6 w-6 text-ur-coral" />}
       >
-        <p className="text-gray-300">Are you sure you want to clear all wallet statistics history?</p>
-        <p className="text-sm text-gray-400 mt-2">
+        <p className="text-ur-gray">Are you sure you want to clear all wallet statistics history?</p>
+        <p className="text-sm text-ur-gray mt-2">
           This will permanently delete all {statsHistory.length} data points from localStorage. This action cannot be undone.
         </p>
-        <div className="mt-4 p-3 bg-red-900/50 rounded-lg border border-red-700">
-          <p className="text-sm text-red-300 font-medium">
+        <div className="mt-4 p-3 bg-ur-coral/15 rounded-lg border border-ur-coral">
+          <p className="text-sm text-ur-coral font-medium">
             ⚠️ This will delete all historical data stored locally in your browser
           </p>
         </div>

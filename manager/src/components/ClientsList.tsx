@@ -89,15 +89,15 @@ const ClientsList: React.FC<ClientsListProps> = ({
 
 	if (clients.length === 0) {
 		return (
-			<div className="bg-gray-800 rounded-xl shadow-2xl p-8 text-center border border-gray-700">
+			<div className="bg-ur-panel rounded-ur shadow-ur-flat p-8 text-center border border-ur-border">
 				<div className="max-w-md mx-auto">
-					<div className="w-16 h-16 bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4">
+					<div className="w-16 h-16 bg-ur-raised rounded-full flex items-center justify-center mx-auto mb-4">
 						<span className="text-2xl">🔍</span>
 					</div>
-					<h3 className="text-lg font-medium text-gray-200 mb-2">
+					<h3 className="text-lg font-medium text-ur-white mb-2">
 						No Clients Found
 					</h3>
-					<p className="text-gray-400 italic">
+					<p className="text-ur-gray italic">
 						Try refreshing the list or check your network
 						connection.
 					</p>
@@ -124,11 +124,11 @@ const ClientsList: React.FC<ClientsListProps> = ({
 				return (
 					<div
 						key={group.sourceClient.client_id}
-						className="bg-gray-800 rounded-xl shadow-2xl border border-gray-700"
+						className="bg-ur-panel rounded-ur shadow-ur-flat border border-ur-border"
 					>
 						{/* Group Header */}
 						<div
-							className={`p-4 ${isExpanded ? "rounded-t-xl" : "rounded-xl"} bg-gradient-to-r from-gray-700 to-gray-800 border-b border-gray-600 cursor-pointer hover:from-gray-600 hover:to-gray-700`}
+							className={`p-4 ${isExpanded ? "rounded-t-xl" : "rounded-ur"} bg-ur-raised border-b border-ur-border cursor-pointer hover:bg-ur-hover`}
 							onClick={() =>
 								toggleGroup(group.sourceClient.client_id)
 							}
@@ -139,26 +139,26 @@ const ClientsList: React.FC<ClientsListProps> = ({
 										{isExpanded ? (
 											<ChevronDown
 												size={20}
-												className="text-gray-400"
+												className="text-ur-gray"
 											/>
 										) : (
 											<ChevronRight
 												size={20}
-												className="text-gray-400"
+												className="text-ur-gray"
 											/>
 										)}
 										<Smartphone
 											size={20}
-											className="text-blue-400"
+											className="text-ur-blue-light"
 										/>
 									</div>
 									<div className="min-w-0 flex-1 overflow-hidden">
-										<h3 className="font-medium text-gray-100">
+										<h3 className="font-medium text-ur-white">
 											{group.sourceClient.device_name ||
 												"Device Group"}
 										</h3>
 										<p
-											className="text-sm text-gray-400 truncate overflow-hidden"
+											className="text-sm text-ur-gray truncate overflow-hidden"
 											title={
 												group.sourceClient
 													.device_spec ||
@@ -172,19 +172,19 @@ const ClientsList: React.FC<ClientsListProps> = ({
 								</div>
 								<div className="flex items-center gap-3 flex-shrink-0 overflow-hidden">
 									<div className="text-right flex-shrink-0">
-										<div className="text-sm font-medium text-gray-200">
+										<div className="text-sm font-medium text-ur-white">
 											{totalClients} client
 											{totalClients !== 1 ? "s" : ""}
 										</div>
-										<div className="text-xs text-gray-400">
+										<div className="text-xs text-ur-gray">
 											{connectedCount} connected
 										</div>
 									</div>
 									<div
 										className={`px-3 py-1 rounded-full text-xs font-medium flex-shrink-0 ${
 											connectedCount > 0
-												? "bg-green-900 text-green-300 border border-green-700"
-												: "bg-red-900 text-red-300 border border-red-700"
+												? "bg-ur-green/10 text-ur-green border border-ur-green"
+												: "bg-ur-coral/10 text-ur-coral border border-ur-coral"
 										}`}
 									>
 										{connectedCount > 0
@@ -202,8 +202,8 @@ const ClientsList: React.FC<ClientsListProps> = ({
 									{/* Source Client */}
 									<div>
 										<div className="flex items-center gap-2 mb-3">
-											<div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-											<span className="text-sm font-medium text-blue-400">
+											<div className="w-2 h-2 bg-ur-blue rounded-full"></div>
+											<span className="text-sm font-medium text-ur-blue-light">
 												Source Device
 											</span>
 										</div>
@@ -219,13 +219,13 @@ const ClientsList: React.FC<ClientsListProps> = ({
 									{group.childClients.length > 0 && (
 										<div>
 											<div className="flex items-center gap-2 mb-3">
-												<div className="w-2 h-2 bg-purple-500 rounded-full"></div>
-												<span className="text-sm font-medium text-purple-400">
+												<div className="w-2 h-2 bg-ur-pink rounded-full"></div>
+												<span className="text-sm font-medium text-ur-pink">
 													Connected Instances (
 													{group.childClients.length})
 												</span>
 											</div>
-											<div className="grid grid-cols-1 lg:grid-cols-2 gap-4 pl-4 border-l-2 border-gray-700">
+											<div className="grid grid-cols-1 lg:grid-cols-2 gap-4 pl-4 border-l-2 border-ur-border">
 												{group.childClients.map(
 													(client) => (
 														<ClientCard

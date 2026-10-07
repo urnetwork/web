@@ -75,15 +75,27 @@ const Layout: React.FC = () => {
 
 	const activeTab = getCurrentTab();
 
-	const tabs = [
-		{ id: "clients", label: "Clients", color: "blue", index: 0 },
-		{ id: "stats", label: "Statistics", color: "green", index: 1 },
-		{ id: "leaderboard", label: "Leaderboard", color: "yellow", index: 2 },
-		{ id: "providers", label: "Providers", color: "purple", index: 3 },
-		{ id: "wallet-stats", label: "Wallet Stats", color: "indigo", index: 4 },
-		{ id: "account", label: "Account Settings", color: "gray", index: 5 },
-		{ id: "balance-codes", label: "Balance Codes", color: "emerald", index: 6 },
+	const tabs: { id: TabType; label: string; index: number }[] = [
+		{ id: "clients", label: "Clients", index: 0 },
+		{ id: "stats", label: "Statistics", index: 1 },
+		{ id: "leaderboard", label: "Leaderboard", index: 2 },
+		{ id: "providers", label: "Providers", index: 3 },
+		{ id: "wallet-stats", label: "Wallet Stats", index: 4 },
+		{ id: "account", label: "Account Settings", index: 5 },
+		{ id: "balance-codes", label: "Balance Codes", index: 6 },
 	];
+
+	// Static class map — Tailwind can't generate classes from template
+	// interpolation, so every active-tab style must be a complete literal.
+	const TAB_ACTIVE_STYLES: Record<TabType, string> = {
+		clients: "bg-ur-green text-ur-black shadow-ur-flat",
+		stats: "bg-ur-blue-light text-ur-black shadow-ur-flat",
+		leaderboard: "bg-ur-yellow-light text-ur-black shadow-ur-flat",
+		providers: "bg-ur-pink text-ur-black shadow-ur-flat",
+		"wallet-stats": "bg-ur-blue text-ur-white shadow-ur-flat",
+		account: "bg-ur-gray text-ur-black shadow-ur-flat",
+		"balance-codes": "bg-ur-navy text-ur-white shadow-ur-flat",
+	};
 
 	const activeTabData = tabs.find((tab) => tab.id === activeTab);
 
@@ -120,26 +132,26 @@ const Layout: React.FC = () => {
 	}, [location.pathname]); // eslint-disable-line react-hooks/exhaustive-deps
 
 	return (
-		<div className="min-h-screen flex flex-col bg-gray-900">
+		<div className="min-h-screen flex flex-col bg-ur-black">
 			{isAuthenticated && (
-				<header className={`bg-gradient-to-r from-gray-800 via-gray-900 to-black text-white shadow-2xl border-b border-gray-700 ${isLoggingOut ? 'animate-unlockSequence' : showDashboard ? 'animate-slideInFromTop' : ''}`} style={{ opacity: showDashboard ? 1 : 0 }}>
+				<header className={`bg-ur-black text-ur-white border-b border-ur-border ${isLoggingOut ? 'animate-unlockSequence' : showDashboard ? 'animate-slideInFromTop' : ''}`} style={{ opacity: showDashboard ? 1 : 0 }}>
 					<div className="px-4 py-4">
 						<div className="flex justify-between items-center gap-4">
 							<div className="flex items-center space-x-2 md:space-x-3 min-w-0 flex-1">
-								<div className="p-2 bg-blue-600 rounded-lg shadow-lg">
+								<div className="p-2 bg-ur-blue rounded-ur-sm">
 									<TerminalSquare
 										size={20}
-										className="text-white md:w-6 md:h-6"
+										className="text-ur-white md:w-6 md:h-6"
 									/>
 								</div>
 								<div className="min-w-0 flex-1">
-									<h1 className="text-lg md:text-xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent truncate">
+									<h1 className="text-lg md:text-xl font-display text-ur-white truncate">
 										URnetwork
 										<span className="hidden md:inline">
 											&nbsp;Client Manager
 										</span>
 									</h1>
-									<p className="text-xs text-gray-400 hidden md:block">
+									<p className="text-xs text-ur-gray-dark hidden md:block">
 										Beta Application
 									</p>
 								</div>
@@ -149,10 +161,10 @@ const Layout: React.FC = () => {
 								<button
 									onClick={logout}
 									disabled={isLoggingOut || isTransitioning}
-									className={`flex items-center space-x-1 md:space-x-2 text-white px-3 md:px-4 py-2 rounded-lg transition-all duration-200 border shadow-lg flex-shrink-0 ${
+									className={`flex items-center space-x-1 md:space-x-2 font-pixel text-base px-3 md:px-4 py-2 rounded-ur transition-colors duration-100 border flex-shrink-0 ${
 										isLoggingOut || isTransitioning
-											? "bg-gray-800 border-gray-700 cursor-not-allowed opacity-60"
-											: "bg-gray-700 hover:bg-gray-600 border-gray-600 hover:border-gray-500 hover:shadow-xl"
+											? "bg-transparent text-ur-gray-dark border-ur-border cursor-not-allowed opacity-60"
+											: "bg-transparent text-ur-gray-dark border-ur-gray-dark hover:bg-ur-tint hover:text-ur-gray"
 									}`}
 								>
 									<LogOut
@@ -176,7 +188,7 @@ const Layout: React.FC = () => {
 				)}
 				{isAuthenticated && !isExtensionRoute && (
 					<>
-						<div className={`bg-gray-800 rounded-xl border border-gray-700 shadow-2xl ${isLoggingOut ? 'animate-unlockSequence' : showDashboard ? 'animate-expandFromCenter' : ''}`} style={{ opacity: showDashboard ? 1 : 0, overflow: viewportType === ViewportType.Mobile ? 'visible' : 'hidden', position: 'relative', zIndex: 10 }}>
+						<div className={`bg-ur-panel rounded-ur border border-ur-border shadow-ur-flat ${isLoggingOut ? 'animate-unlockSequence' : showDashboard ? 'animate-expandFromCenter' : ''}`} style={{ opacity: showDashboard ? 1 : 0, overflow: viewportType === ViewportType.Mobile ? 'visible' : 'hidden', position: 'relative', zIndex: 10 }}>
 							{viewportType === ViewportType.Mobile ? (
 								<div className="p-2" style={{ overflow: 'visible' }}>
 									<div className="relative" style={{ zIndex: 1000 }}>
@@ -186,7 +198,7 @@ const Layout: React.FC = () => {
 													!showMobileMenu,
 												)
 											}
-											className={`w-full flex items-center justify-between py-3 px-4 rounded-lg font-medium text-sm transition-all duration-200 bg-gradient-to-r from-${activeTabData?.color}-600 to-${activeTabData?.color}-500 text-white shadow-lg`}
+											className={`w-full flex items-center justify-between py-3 px-4 rounded-ur-sm font-pixel text-base transition-colors duration-100 ${TAB_ACTIVE_STYLES[activeTab]}`}
 										>
 											<span>{activeTabData?.label}</span>
 											<ChevronDown
@@ -196,25 +208,23 @@ const Layout: React.FC = () => {
 										</button>
 
 										{showMobileMenu && (
-											<div className="absolute top-full left-0 right-0 mt-2 rounded-lg shadow-2xl animate-fadeIn" style={{ backgroundColor: 'rgb(31, 41, 55)', border: '2px solid rgb(75, 85, 99)', zIndex: 9999 }}>
+											<div className="absolute top-full left-0 right-0 mt-2 rounded-ur-sm shadow-ur-flat bg-ur-panel border-2 border-ur-border animate-fadeIn" style={{ zIndex: 9999 }}>
 												{tabs.map((tab) => (
 													<button
 														key={tab.id}
 														onClick={() =>
 															handleTabChange(
-																tab.id as TabType,
+																tab.id,
 															)
 														}
-														className={`w-full text-left py-4 px-4 text-sm font-semibold transition-all duration-200 first:rounded-t-lg last:rounded-b-lg border-b last:border-b-0 ${
+														className={`w-full text-left py-4 px-4 text-sm font-semibold transition-colors duration-100 first:rounded-t-lg last:rounded-b-lg border-b border-ur-border last:border-b-0 ${
 															activeTab === tab.id
-																? `bg-gradient-to-r from-${tab.color}-600 to-${tab.color}-500 text-white`
-																: "text-white hover:bg-gray-700 active:bg-gray-600"
+																? TAB_ACTIVE_STYLES[tab.id]
+																: "bg-ur-raised text-ur-white hover:bg-ur-hover active:bg-ur-active"
 														}`}
 														style={{
 															pointerEvents: 'auto',
 															touchAction: 'manipulation',
-															backgroundColor: activeTab === tab.id ? undefined : 'rgb(55, 65, 81)',
-															borderColor: 'rgb(75, 85, 99)'
 														}}
 													>
 														{tab.label}
@@ -231,13 +241,13 @@ const Layout: React.FC = () => {
 											key={tab.id}
 											onClick={() =>
 												handleTabChange(
-													tab.id as TabType,
+													tab.id,
 												)
 											}
-											className={`flex-1 py-3 px-4 rounded-lg font-medium text-sm transition-all duration-200 ${
+											className={`flex-1 py-3 px-4 rounded-ur-sm font-pixel text-base transition-all duration-200 ${
 												activeTab === tab.id
-													? `bg-gradient-to-r from-${tab.color}-600 to-${tab.color}-500 text-white shadow-lg transform scale-105`
-													: "text-gray-400 hover:text-gray-200 hover:bg-gray-700"
+													? `${TAB_ACTIVE_STYLES[tab.id]} transform scale-105`
+													: "text-ur-gray hover:text-ur-white hover:bg-ur-raised"
 											}`}
 										>
 											{tab.label}
@@ -300,15 +310,15 @@ const Layout: React.FC = () => {
 					</Routes>
 				)}
 			</main>
-			<footer className="bg-gray-800 border-t border-gray-700 text-gray-300 py-6">
+			<footer className="bg-ur-black border-t border-ur-border text-ur-gray py-6">
 				<div className="container mx-auto px-4 text-center">
 					<div className="flex items-center justify-center space-x-2 mb-2">
-						<div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+						<div className="w-2 h-2 bg-ur-green rounded-full animate-pulse"></div>
 						<p className="text-sm font-medium">
 							URnetwork Client Manager
 						</p>
 					</div>
-					<p className="text-xs text-gray-500">
+					<p className="text-xs text-ur-gray-dark">
 						Beta Application
 					</p>
 				</div>
@@ -319,11 +329,11 @@ const Layout: React.FC = () => {
 				onConfirm={confirmSwitch}
 				title="Switch accounts?"
 			>
-				<p className="text-gray-300 break-words">
+				<p className="text-ur-gray break-words">
 					This link signs in to{" "}
-					<span className="font-medium text-gray-100">{pendingSwitch?.linkNetwork}</span>.
+					<span className="font-medium text-ur-white">{pendingSwitch?.linkNetwork}</span>.
 					You are signed in to{" "}
-					<span className="font-medium text-gray-100">{pendingSwitch?.currentNetwork}</span>.
+					<span className="font-medium text-ur-white">{pendingSwitch?.currentNetwork}</span>.
 				</p>
 			</ConfirmModal>
 		</div>

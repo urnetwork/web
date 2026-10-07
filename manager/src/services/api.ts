@@ -38,6 +38,8 @@ import type {
   AuthClientRequest,
   AuthClientResponse,
   WalletAuthPayload,
+  WalletAuthChallengeRequest,
+  WalletAuthChallengeResponse,
   WalletLoginResponse,
   NetworkCreateRequest,
   NetworkCreateResponse,
@@ -48,9 +50,37 @@ import type {
   GetApiKeysResult,
   DeleteApiKeyResult,
   ApiKeyMetadata,
+  SeedphraseLoginResponse,
+  InstantNetworkCreateResponse,
+  SeedphraseResponse,
+  AddAuthMethodRequest,
+  AuthMethodMutationResponse,
+  NetworkNameChangeResponse,
+  RemoveClientsResponse,
 } from "./types";
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE ?? "https://api.bringyour.com";
+/** Build-time default API base (VITE_API_BASE env override, else production) */
+export const DEFAULT_API_BASE =
+  import.meta.env.VITE_API_BASE ?? "https://api.bringyour.com";
+
+/** localStorage key for the user's custom API server override */
+export const CUSTOM_API_BASE_KEY = "urApiBase";
+
+/**
+ * The API base used for every request. A custom server set from the sign-in
+ * page (stored in localStorage, like the iOS/Android network-server sheet)
+ * takes precedence over the build-time default. Read per-request so changes
+ * apply without a reload.
+ */
+export function getApiBase(): string {
+  try {
+    const custom = localStorage.getItem(CUSTOM_API_BASE_KEY);
+    if (custom) return custom;
+  } catch {
+    // localStorage unavailable (e.g. privacy mode) — fall through to default
+  }
+  return DEFAULT_API_BASE;
+}
 
 /**
  * Safely parse JSON response with fallback to text on error
@@ -90,7 +120,7 @@ async function safeJsonParse<T>(response: Response): Promise<T> {
  */
 export const login = async (authCode: string): Promise<AuthResponse> => {
   try {
-    const response = await fetch(`${API_BASE_URL}/auth/code-login`, {
+    const response = await fetch(`${getApiBase()}/auth/code-login`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -135,7 +165,7 @@ export const loginWithPassword = async (
   password: string
 ): Promise<PasswordLoginResponse> => {
   try {
-    const response = await fetch(`${API_BASE_URL}/auth/login-with-password`, {
+    const response = await fetch(`${getApiBase()}/auth/login-with-password`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -185,7 +215,7 @@ export const loginWithWallet = async (
   payload: WalletAuthPayload
 ): Promise<WalletLoginResponse> => {
   try {
-    const response = await fetch(`${API_BASE_URL}/auth/login`, {
+    const response = await fetch(`${getApiBase()}/auth/login`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -220,6 +250,70 @@ export const loginWithWallet = async (
 };
 
 /**
+ * Request a server-issued wallet authentication challenge.
+ * The user must sign the returned `message_template`.
+ */
+export const fetchWalletChallenge = async (
+  request: WalletAuthChallengeRequest
+): Promise<WalletAuthChallengeResponse> => {
+  try {
+    const response = await fetch(`${getApiBase()}/auth/wallet-challenge`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(request),
+    });
+
+    if (!response.ok) {
+      return {
+        success: false,
+        error: {
+          message: `HTTP error! status: ${response.status}`,
+        },
+      };
+    }
+
+    // the server answers { challenge, timestamp, expires_in, message_template }
+    // or { error }, without a success flag
+    const data = await safeJsonParse<{
+      challenge?: string;
+      timestamp?: number;
+      expires_in?: number;
+      message_template?: string;
+      error?: { message?: string };
+    }>(response);
+    if (
+      data.error ||
+      !data.challenge ||
+      !data.message_template ||
+      typeof data.timestamp !== "number"
+    ) {
+      return {
+        success: false,
+        error: {
+          message: data.error?.message || "Invalid wallet challenge response",
+        },
+      };
+    }
+    return {
+      success: true,
+      challenge: data.challenge,
+      timestamp: data.timestamp,
+      expires_in: data.expires_in ?? 0,
+      message_template: data.message_template,
+    };
+  } catch (error) {
+    console.error("Wallet challenge error:", error);
+    return {
+      success: false,
+      error: {
+        message:
+          error instanceof Error ? error.message : "Failed to fetch wallet challenge",
+      },
+    };
+  }
+};
+
+/**
  * Get network user information
  * @param token - JWT authentication token
  * @returns NetworkUserResponse with user info or error
@@ -228,7 +322,7 @@ export const fetchNetworkUser = async (
   token: string
 ): Promise<NetworkUserResponse> => {
   try {
-    const response = await fetch(`${API_BASE_URL}/network/user`, {
+    const response = await fetch(`${getApiBase()}/network/user`, {
       method: "GET",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -277,7 +371,7 @@ export const fetchClients = async (token: string): Promise<ClientsResponse> => {
       "Fetching clients with token:",
       token ? "Token present" : "No token"
     );
-    const response = await fetch(`${API_BASE_URL}/network/clients`, {
+    const response = await fetch(`${getApiBase()}/network/clients`, {
       method: "GET",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -335,7 +429,7 @@ export const removeClient = async (
   abortSignal?: AbortSignal
 ): Promise<RemoveClientResponse> => {
   try {
-    const response = await fetch(`${API_BASE_URL}/network/remove-client`, {
+    const response = await fetch(`${getApiBase()}/network/remove-client`, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -386,7 +480,7 @@ export const fetchProviderStats = async (
   token: string
 ): Promise<StatsResponse> => {
   try {
-    const response = await fetch(`${API_BASE_URL}/stats/providers`, {
+    const response = await fetch(`${getApiBase()}/stats/providers`, {
       method: "GET",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -444,7 +538,7 @@ export const fetchLeaderboard = async (
   token: string
 ): Promise<LeaderboardResponse> => {
   try {
-    const response = await fetch(`${API_BASE_URL}/stats/leaderboard`, {
+    const response = await fetch(`${getApiBase()}/stats/leaderboard`, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -493,7 +587,7 @@ export const fetchNetworkRanking = async (
   token: string
 ): Promise<NetworkRanking> => {
   try {
-    const response = await fetch(`${API_BASE_URL}/network/ranking`, {
+    const response = await fetch(`${getApiBase()}/network/ranking`, {
       method: "GET",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -541,7 +635,7 @@ export const fetchProviderLocations =
   async (): Promise<ProviderLocationsResponse> => {
     try {
       const response = await fetch(
-        `${API_BASE_URL}/network/provider-locations`,
+        `${getApiBase()}/network/provider-locations`,
         {
           method: "GET",
           headers: {
@@ -599,7 +693,7 @@ export const findProviderLocations = async (
 ): Promise<ProviderLocationsResponse> => {
   try {
     const response = await fetch(
-      `${API_BASE_URL}/network/find-provider-locations`,
+      `${getApiBase()}/network/find-provider-locations`,
       {
         method: "POST",
         headers: {
@@ -661,7 +755,7 @@ export const fetchWalletStats = async (
   token: string
 ): Promise<WalletStatsResponse> => {
   try {
-    const response = await fetch(`${API_BASE_URL}/transfer/stats`, {
+    const response = await fetch(`${getApiBase()}/transfer/stats`, {
       method: "GET",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -715,7 +809,7 @@ export const createAuthCode = async (
   uses: number
 ): Promise<CreateAuthCodeResponse> => {
   try {
-    const response = await fetch(`${API_BASE_URL}/auth/code-create`, {
+    const response = await fetch(`${getApiBase()}/auth/code-create`, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -766,7 +860,7 @@ export const fetchAccountPayments = async (
   token: string
 ): Promise<AccountPaymentsResponse> => {
   try {
-    const response = await fetch(`${API_BASE_URL}/account/payments`, {
+    const response = await fetch(`${getApiBase()}/account/payments`, {
       method: "GET",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -813,7 +907,7 @@ export const requestPasswordReset = async (
   userAuth: string
 ): Promise<PasswordResetResponse> => {
   try {
-    const response = await fetch(`${API_BASE_URL}/auth/password-reset`, {
+    const response = await fetch(`${getApiBase()}/auth/password-reset`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -862,7 +956,7 @@ export const fetchAccountPoints = async (
   token: string
 ): Promise<AccountPointsResponse> => {
   try {
-    const response = await fetch(`${API_BASE_URL}/account/points`, {
+    const response = await fetch(`${getApiBase()}/account/points`, {
       method: "GET",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -908,7 +1002,7 @@ export const fetchNetworkReliability = async (
   token: string
 ): Promise<NetworkReliabilityResponse> => {
   try {
-    const response = await fetch(`${API_BASE_URL}/network/reliability`, {
+    const response = await fetch(`${getApiBase()}/network/reliability`, {
       method: "GET",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -947,7 +1041,7 @@ export const fetchNetworkTransferBalanceCodes = async (
   token: string
 ): Promise<RedeemedTransferBalanceCodesResponse> => {
   try {
-    const response = await fetch(`${API_BASE_URL}/account/balance-codes`, {
+    const response = await fetch(`${getApiBase()}/account/balance-codes`, {
       method: "GET",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -995,7 +1089,7 @@ export const redeemTransferBalanceCode = async (
   token: string
 ): Promise<RedeemTransferBalanceCodeResponse> => {
   try {
-    const response = await fetch(`${API_BASE_URL}/subscription/redeem-balance-code`, {
+    const response = await fetch(`${getApiBase()}/subscription/redeem-balance-code`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -1046,7 +1140,7 @@ export const fetchSubscriptionBalance = async (
   token: string
 ): Promise<SubscriptionBalanceResponse|{error: {message: string}}> => {
   try {
-    const response = await fetch(`${API_BASE_URL}/subscription/balance`, {
+    const response = await fetch(`${getApiBase()}/subscription/balance`, {
       method: "GET",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -1087,7 +1181,7 @@ export const createAuthClient = async (
   request: AuthClientRequest
 ): Promise<AuthClientResponse> => {
   try {
-    const response = await fetch(`${API_BASE_URL}/network/auth-client`, {
+    const response = await fetch(`${getApiBase()}/network/auth-client`, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -1136,7 +1230,7 @@ export const deleteNetwork = async (
   token: string
 ): Promise<NetworkDeleteResponse> => {
   try {
-    const response = await fetch(`${API_BASE_URL}/auth/network-delete`, {
+    const response = await fetch(`${getApiBase()}/auth/network-delete`, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -1168,7 +1262,7 @@ export const createNetwork = async (
   request: NetworkCreateRequest
 ): Promise<NetworkCreateResponse> => {
   try {
-    const response = await fetch(`${API_BASE_URL}/auth/network-create`, {
+    const response = await fetch(`${getApiBase()}/auth/network-create`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -1202,7 +1296,7 @@ export const checkNetworkName = async (
   networkName: string
 ): Promise<NetworkCheckResponse> => {
   try {
-    const response = await fetch(`${API_BASE_URL}/auth/network-check`, {
+    const response = await fetch(`${getApiBase()}/auth/network-check`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -1225,7 +1319,7 @@ export const sendVerificationCode = async (
   userAuth: string
 ): Promise<VerifySendResponse> => {
   try {
-    const response = await fetch(`${API_BASE_URL}/auth/verify-send`, {
+    const response = await fetch(`${getApiBase()}/auth/verify-send`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -1260,7 +1354,7 @@ export const verifyCode = async (
   verifyCode: string
 ): Promise<VerifyResponse> => {
   try {
-    const response = await fetch(`${API_BASE_URL}/auth/verify`, {
+    const response = await fetch(`${getApiBase()}/auth/verify`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -1293,7 +1387,7 @@ export const createApiKey = async (
   name: string
 ): Promise<CreateApiKeyResult> => {
   try {
-    const response = await fetch(`${API_BASE_URL}/account/api-key`, {
+    const response = await fetch(`${getApiBase()}/account/api-key`, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -1325,7 +1419,7 @@ export const fetchApiKeys = async (
   token: string
 ): Promise<GetApiKeysResult> => {
   try {
-    const response = await fetch(`${API_BASE_URL}/account/api-keys`, {
+    const response = await fetch(`${getApiBase()}/account/api-keys`, {
       method: "GET",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -1364,7 +1458,7 @@ export const deleteApiKey = async (
   apiKeyId: string
 ): Promise<DeleteApiKeyResult> => {
   try {
-    const response = await fetch(`${API_BASE_URL}/account/api-key/remove`, {
+    const response = await fetch(`${getApiBase()}/account/api-key/remove`, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -1387,6 +1481,414 @@ export const deleteApiKey = async (
       error: {
         message:
           error instanceof Error ? error.message : "Failed to delete API key",
+      },
+    };
+  }
+};
+
+/**
+ * Seed-phrase login (server PR #406)
+ * @param seedphrase - BIP39 mnemonic, whitespace-normalized
+ * @returns SeedphraseLoginResponse with network JWT or error
+ */
+export const loginWithSeedphrase = async (
+  seedphrase: string
+): Promise<SeedphraseLoginResponse> => {
+  try {
+    const response = await fetch(`${getApiBase()}/auth/login`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        seedphrase: seedphrase,
+      }),
+    });
+
+    if (!response.ok) {
+      console.error(
+        "Seedphrase login failed:",
+        response.status,
+        response.statusText
+      );
+      return {
+        error: {
+          message: `HTTP error! status: ${response.status}`,
+        },
+      };
+    }
+
+    return await safeJsonParse<SeedphraseLoginResponse>(response);
+  } catch (error) {
+    console.error("Seedphrase login error:", error);
+    return {
+      error: {
+        message:
+          error instanceof Error
+            ? error.message
+            : "Seed phrase authentication failed",
+      },
+    };
+  }
+};
+
+/**
+ * Instant network creation with a generated seed phrase (server PR #406).
+ * No auth fields sent — the server generates the account, a random network
+ * name, and a 24-word seed phrase that is returned exactly once.
+ * Rate limited to 5 signups per IP per day.
+ */
+export const createNetworkInstant =
+  async (): Promise<InstantNetworkCreateResponse> => {
+    try {
+      const response = await fetch(`${getApiBase()}/auth/network-create`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          terms: true,
+        }),
+      });
+
+      if (!response.ok) {
+        console.error(
+          "Instant network create failed:",
+          response.status,
+          response.statusText
+        );
+        return {
+          error: {
+            message:
+              response.status === 429
+                ? "Too many signups from this address today. Please try again tomorrow."
+                : `HTTP error! status: ${response.status}`,
+          },
+        };
+      }
+
+      return await safeJsonParse<InstantNetworkCreateResponse>(response);
+    } catch (error) {
+      console.error("Instant network create error:", error);
+      return {
+        error: {
+          message:
+            error instanceof Error
+              ? error.message
+              : "Failed to create network",
+        },
+      };
+    }
+  };
+
+/**
+ * Generate a seed phrase for an account that has none (server PR #406)
+ * @param token - JWT authentication token
+ */
+export const generateSeedphrase = async (
+  token: string
+): Promise<SeedphraseResponse> => {
+  try {
+    const response = await fetch(`${getApiBase()}/auth/generate-seedphrase`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({}),
+    });
+
+    if (!response.ok) {
+      console.error(
+        "Generate seedphrase failed:",
+        response.status,
+        response.statusText
+      );
+      return {
+        error: { message: `HTTP error! status: ${response.status}` },
+      };
+    }
+
+    return await safeJsonParse<SeedphraseResponse>(response);
+  } catch (error) {
+    console.error("Generate seedphrase error:", error);
+    return {
+      error: {
+        message:
+          error instanceof Error
+            ? error.message
+            : "Failed to generate seed phrase",
+      },
+    };
+  }
+};
+
+/**
+ * Regenerate (replace) the account's existing seed phrase (server PR #406).
+ * The previous phrase stops working immediately.
+ * @param token - JWT authentication token
+ */
+export const regenerateSeedphrase = async (
+  token: string
+): Promise<SeedphraseResponse> => {
+  try {
+    const response = await fetch(`${getApiBase()}/auth/regenerate-seedphrase`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({}),
+    });
+
+    if (!response.ok) {
+      console.error(
+        "Regenerate seedphrase failed:",
+        response.status,
+        response.statusText
+      );
+      return {
+        error: { message: `HTTP error! status: ${response.status}` },
+      };
+    }
+
+    return await safeJsonParse<SeedphraseResponse>(response);
+  } catch (error) {
+    console.error("Regenerate seedphrase error:", error);
+    return {
+      error: {
+        message:
+          error instanceof Error
+            ? error.message
+            : "Failed to regenerate seed phrase",
+      },
+    };
+  }
+};
+
+/**
+ * Bind an additional auth method to the current account (server PR #406).
+ * Exactly one mode per call: password, SSO jwt, or wallet.
+ * @param token - JWT authentication token
+ */
+export const addAuthMethod = async (
+  token: string,
+  request: AddAuthMethodRequest
+): Promise<AuthMethodMutationResponse> => {
+  try {
+    const response = await fetch(`${getApiBase()}/auth/add-auth`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(request),
+    });
+
+    if (!response.ok) {
+      console.error(
+        "Add auth method failed:",
+        response.status,
+        response.statusText
+      );
+      return {
+        error: { message: `HTTP error! status: ${response.status}` },
+      };
+    }
+
+    return await safeJsonParse<AuthMethodMutationResponse>(response);
+  } catch (error) {
+    console.error("Add auth method error:", error);
+    return {
+      error: {
+        message:
+          error instanceof Error ? error.message : "Failed to add auth method",
+      },
+    };
+  }
+};
+
+/**
+ * Remove an auth method from the current account (server PR #406).
+ * The server refuses to remove the last remaining method.
+ * @param token - JWT authentication token
+ * @param authType - "email" | "phone" | "apple" | "google" | "solana" | "seedphrase"
+ */
+export const removeAuthMethod = async (
+  token: string,
+  authType: string
+): Promise<AuthMethodMutationResponse> => {
+  try {
+    const response = await fetch(`${getApiBase()}/auth/remove-auth`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        auth_type: authType,
+      }),
+    });
+
+    if (!response.ok) {
+      console.error(
+        "Remove auth method failed:",
+        response.status,
+        response.statusText
+      );
+      return {
+        error: { message: `HTTP error! status: ${response.status}` },
+      };
+    }
+
+    return await safeJsonParse<AuthMethodMutationResponse>(response);
+  } catch (error) {
+    console.error("Remove auth method error:", error);
+    return {
+      error: {
+        message:
+          error instanceof Error
+            ? error.message
+            : "Failed to remove auth method",
+      },
+    };
+  }
+};
+
+/**
+ * Change the network name (server PR #406). Requires a verified email or SSO
+ * login on the account; the old name enters a 24h reclaim cooldown.
+ * @param token - JWT authentication token
+ */
+export const changeNetworkName = async (
+  token: string,
+  networkName: string
+): Promise<NetworkNameChangeResponse> => {
+  try {
+    const response = await fetch(`${getApiBase()}/account/change-name`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        network_name: networkName,
+      }),
+    });
+
+    if (!response.ok) {
+      console.error(
+        "Change network name failed:",
+        response.status,
+        response.statusText
+      );
+      return {
+        error: { message: `HTTP error! status: ${response.status}` },
+      };
+    }
+
+    return await safeJsonParse<NetworkNameChangeResponse>(response);
+  } catch (error) {
+    console.error("Change network name error:", error);
+    return {
+      error: {
+        message:
+          error instanceof Error
+            ? error.message
+            : "Failed to change network name",
+      },
+    };
+  }
+};
+
+/**
+ * Claim a custom network name for the first time (server PR #406).
+ * Same requirements as change-name but without the 24h cooldown.
+ * @param token - JWT authentication token
+ */
+export const claimNetworkName = async (
+  token: string,
+  networkName: string
+): Promise<NetworkNameChangeResponse> => {
+  try {
+    const response = await fetch(`${getApiBase()}/account/claim-name`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        network_name: networkName,
+      }),
+    });
+
+    if (!response.ok) {
+      console.error(
+        "Claim network name failed:",
+        response.status,
+        response.statusText
+      );
+      return {
+        error: { message: `HTTP error! status: ${response.status}` },
+      };
+    }
+
+    return await safeJsonParse<NetworkNameChangeResponse>(response);
+  } catch (error) {
+    console.error("Claim network name error:", error);
+    return {
+      error: {
+        message:
+          error instanceof Error
+            ? error.message
+            : "Failed to claim network name",
+      },
+    };
+  }
+};
+
+/**
+ * Bulk-remove network clients in one call (server PR #406).
+ * <=10k ids apply synchronously (empty response); more are scheduled as a
+ * background task ({scheduled: true}). {already_in_progress: true} means a
+ * bulk run for this network is still active — retry later. Max 1M ids.
+ * @param token - JWT authentication token
+ * @param clientIds - client ids to deactivate
+ */
+export const removeClients = async (
+  token: string,
+  clientIds: string[]
+): Promise<RemoveClientsResponse> => {
+  try {
+    const response = await fetch(`${getApiBase()}/network/remove-clients`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        client_ids: clientIds,
+      }),
+    });
+
+    if (!response.ok) {
+      console.error(
+        "Remove clients failed:",
+        response.status,
+        response.statusText
+      );
+      return {
+        error: { message: `HTTP error! status: ${response.status}` },
+      };
+    }
+
+    return await safeJsonParse<RemoveClientsResponse>(response);
+  } catch (error) {
+    console.error("Remove clients error:", error);
+    return {
+      error: {
+        message:
+          error instanceof Error ? error.message : "Failed to remove clients",
       },
     };
   }
@@ -1423,6 +1925,8 @@ export type {
   AuthClientRequest,
   AuthClientResponse,
   WalletAuthPayload,
+  WalletAuthChallengeRequest,
+  WalletAuthChallengeResponse,
   WalletLoginResponse,
   NetworkCreateRequest,
   NetworkCreateResponse,
@@ -1433,4 +1937,11 @@ export type {
   GetApiKeysResult,
   DeleteApiKeyResult,
   ApiKeyMetadata,
+  SeedphraseLoginResponse,
+  InstantNetworkCreateResponse,
+  SeedphraseResponse,
+  AddAuthMethodRequest,
+  AuthMethodMutationResponse,
+  NetworkNameChangeResponse,
+  RemoveClientsResponse,
 };
