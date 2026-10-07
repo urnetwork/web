@@ -15,6 +15,19 @@ export const HIDDEN_DOC_SLUGS = new Set([]);
 // listed after them, so a new document is never silently missing.
 export const DOC_ORDER = Object.freeze(['miner', 'validator', 'operator', 'litepaper']);
 
+// The day each document was first published at its URL, for its TechArticle
+// datePublished; a document's front matter may set `published` instead. From
+// the git history: the role guides replaced the provider guide on 2026-09-26,
+// whitepaper.md became the litepaper on 2026-08-18, and the account-deletion
+// walkthrough has been served since 2026-04-16.
+export const DOC_PUBLISHED = Object.freeze({
+    miner: '2026-09-26',
+    validator: '2026-09-26',
+    operator: '2026-09-26',
+    litepaper: '2026-08-18',
+    'support/delete': '2026-04-16',
+});
+
 // Published (the page, its /<lang>/docs stub and its markdown twin) but listed
 // nowhere on the site: not in the sidebar, the landing, the docs index
 // structured data, search or the llms files. The account-deletion walkthrough

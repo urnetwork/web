@@ -6,7 +6,7 @@ import { imageMetadata } from 'astro/assets/utils';
 import Base from '../../layouts/Base.astro';
 import DocsIsland from '../../islands/DocsIsland.jsx';
 import { docs } from '@react/lib/docs.js';
-import { DOC_PAGE_PATHS, UNLISTED_DOC_SLUGS, docImages } from '@react/lib/docs-shared.js';
+import { DOC_PAGE_PATHS, DOC_PUBLISHED, UNLISTED_DOC_SLUGS, docImages } from '@react/lib/docs-shared.js';
 import { docDescription } from '../../lib/meta.js';
 import { LASTMOD_TOKEN } from '../../lib/lastmod.js';
 
@@ -62,6 +62,11 @@ const jsonLd = [{
     publisher: { '@id': 'https://ur.xyz/#org' },
     author: { '@id': 'https://ur.xyz/#org' },
     inLanguage: 'en',
+    // the page's card, the social image Base.astro gives it
+    image: { '@type': 'ImageObject', url: 'https://ur.xyz/og.png', width: 1200, height: 630 },
+    // the day it was first published at this URL (docs-shared.js DOC_PUBLISHED,
+    // or its front matter's `published`)
+    ...((meta.published || DOC_PUBLISHED[slug]) ? { datePublished: meta.published || DOC_PUBLISHED[slug] } : {}),
     // the day the page's content last changed, from the same record as the
     // sitemap's <lastmod>: the build fills it in once the page is fingerprinted
     dateModified: LASTMOD_TOKEN,

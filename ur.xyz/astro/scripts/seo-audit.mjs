@@ -359,6 +359,43 @@ for (const p of pages.values()) {
   }
 }
 
+// ── structured data for documents ──
+// A docs page's TechArticle says when it was first published, beside when it
+// last changed, and names the image that represents it (it had neither); each
+// investor document page declares the dated work it publishes (the deck
+// declared none).
+{
+  const WORK_TYPES = new Set(["CreativeWork", "Article", "NewsArticle", "TechArticle", "Report", "DigitalDocument", "PresentationDigitalDocument"]);
+  const DAY = /^\d{4}-\d{2}-\d{2}$/;
+  for (const p of canonicalSelf) {
+    let graph = [];
+    try {
+      graph = JSON.parse((p.html.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/) || [])[1])["@graph"] || [];
+    } catch {
+      /* reported above */
+    }
+    if (p.urlPath.startsWith("/docs/")) {
+      const article = graph.find((n) => n["@type"] === "TechArticle");
+      if (!article) {
+        err(`${p.urlPath}: no TechArticle`);
+        continue;
+      }
+      for (const field of ["datePublished", "dateModified"]) {
+        if (!DAY.test(article[field] || "")) err(`${p.urlPath}: TechArticle ${field} is missing or not a day (${article[field]})`);
+      }
+      if (DAY.test(article.datePublished || "") && article.datePublished > article.dateModified) {
+        err(`${p.urlPath}: TechArticle was published ${article.datePublished}, after it last changed ${article.dateModified}`);
+      }
+      const image = typeof article.image === "string" ? article.image : article.image?.url;
+      const imagePath = image ? toPath(image) : null;
+      if (!imagePath || !resolves(imagePath)) err(`${p.urlPath}: TechArticle image ${image || "missing"} is not served`);
+    }
+    if (/^\/investors\/[^/]+$/.test(p.urlPath) && !graph.some((n) => WORK_TYPES.has(n["@type"]) && DAY.test(n.datePublished || ""))) {
+      err(`${p.urlPath}: investor document declares no dated CreativeWork`);
+    }
+  }
+}
+
 // ── document images nothing shows ──
 // The asset generator published every image in docs/, including a 3.3 MB
 // picture (/docs/res/ur.png and its WebP) no page used. An image under /docs/

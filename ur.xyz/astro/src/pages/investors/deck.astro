@@ -16,11 +16,40 @@ import { investorCentre } from '@react/data/investors.js';
 import '@react/components/Nav.css';
 
 const { deck } = investorCentre;
+const deckUrl = `https://ur.xyz${deck.href}`;
+// The deck is a published work: dated, by the site's publisher, viewable as
+// slides here and downloadable as the PDF. PresentationDigitalDocument is the
+// schema.org CreativeWork for a slide deck.
+const deckJsonLd = [{
+    '@type': 'PresentationDigitalDocument',
+    '@id': `${deckUrl}#deck`,
+    name: deck.title,
+    headline: deck.title,
+    description: deck.summary,
+    datePublished: deck.dateIso,
+    inLanguage: 'en',
+    url: deckUrl,
+    mainEntityOfPage: deckUrl,
+    author: { '@id': 'https://ur.xyz/#org' },
+    publisher: { '@id': 'https://ur.xyz/#org' },
+    image: {
+        '@type': 'ImageObject',
+        url: `https://ur.xyz${deck.slideBase}/01.${deck.slideExt}`,
+        width: deck.slideWidth,
+        height: deck.slideHeight,
+    },
+    encoding: {
+        '@type': 'MediaObject',
+        encodingFormat: 'application/pdf',
+        contentUrl: `https://ur.xyz${deck.pdfHref}`,
+    },
+}];
 ---
 <Base
     title={`${deck.title} | UR`}
     description={deck.summary}
     lang="en"
+    jsonLd={deckJsonLd}
 >
     <div class="app">
         <DisclaimerStatic t={en} />
