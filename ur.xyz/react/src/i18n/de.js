@@ -206,7 +206,7 @@ operators: {
         globeLabels: { provider: 'Provider', extender: 'Extender', miner: 'Miner' },
         simCaption: 'Miner konkurrieren um die meisten einzigartigen IPs, die zuverlässig im Netzwerk verfügbar sind. Top-Miner werden in einen eigenen UID-Slot befördert.',
         cta: 'Miner werden',
-        metaTitle: 'Miner: Verschlüsselten Verkehr tragen, SN25-Emissionen verdienen — UR',
+        metaTitle: 'Miner: Verkehr verschlüsselt tragen, Emission verdienen — UR',
         metaDescription: 'UR-Miner halten IPv4-/29- und IPv6-/48-Subnetze auf Bittensor SN25 routbar für verschlüsselten Ingress und Egress und verdienen Emission für ihre Abdeckung.',
         roles: [
             { tag: '01', title: 'Egress',              body: 'Als Egress ist ein Miner eine Exit-IP des gemeinsamen Netzwerks. Er lehnt Verkehr ab, der gängigen Regulierungsrichtlinien wie CFAA und DMCA widerspricht, blockiert bekannte bösartige IPs und leitet nur verschlüsselten Verkehr weiter — was sowohl Miner als auch Nutzer schützt.' },
@@ -223,7 +223,7 @@ operators: {
         intro:   'Validatoren sind unabhängig. Jeder setzt sein eigenes UR ein und führt das Routing-Verifizierungsprotokoll aus — dabei durchläuft er fortlaufend vom Betreiber zugewiesene Ketten von Minern, um Echtzeit-Transit nachzuweisen und zu messen, welche Miner die schwächsten Glieder sind. Diese Messung ist das zentrale Signal, für das das Netzwerk zahlt, und Validatoren verdienen native Dividenden dafür, sie genau zu erzeugen.',
         simCaption: 'Validatoren testen die verfügbare IP-Fläche und stufen Miner nach Zuverlässigkeit ein.',
         cta: 'Validator werden',
-        metaTitle: 'Validatoren: Das UR-Netzwerk vermessen, SN25-Dividenden verdienen — UR',
+        metaTitle: 'Validatoren: Netzwerk vermessen, Dividenden verdienen — UR',
         metaDescription: 'UR-Validatoren setzen eigenes UR ein, durchlaufen zugewiesene Miner-Ketten, belegen Echtzeit-Transit und verdienen Bittensor-Dividenden für genaue Bewertung.',
         roles: [
             { tag: '01', title: 'Die Routen durchlaufen',        body: 'Validatoren durchlaufen vom Betreiber zugewiesene Ketten von Minern und sammeln eine signierte, selbstbeweisende Aufzeichnung jedes abgeschlossenen Hops — kryptografischer Beweis von Echtzeit-Transit, den jeder überprüfen kann.' },

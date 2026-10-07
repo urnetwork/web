@@ -216,6 +216,18 @@ const canonicalSelf = [...pages.values()].filter(
   (p) => !p.noindex && p.canonical && toPath(p.canonical) === (p.urlPath === "/" ? "/" : p.urlPath),
 );
 
+// ── title length ──
+// A result shows about 60 characters of a title before cutting it, and the
+// translated section titles ran to 71 (/ru/miners). Counted in graphemes, as a
+// reader sees them: an Arabic vowel mark adds no width.
+const TITLE_MAX = 60;
+const graphemes = new Intl.Segmenter(undefined, { granularity: "grapheme" });
+for (const p of canonicalSelf) {
+  const title = decodeHtmlEntities(p.title);
+  const length = [...graphemes.segment(title)].length;
+  if (length > TITLE_MAX) err(`${p.urlPath}: title ${length} characters (cap ${TITLE_MAX}): ${title}`);
+}
+
 // ── unique titles/descriptions per language among canonical-self pages ──
 for (const key of ["title", "description"]) {
   const seen = new Map();

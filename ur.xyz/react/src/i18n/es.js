@@ -181,7 +181,7 @@ operators: {
         title:   'Los operadores que ejecutan la red.',
         intro:   'Los operadores de red ejecutan los servidores de privacidad y el punto de verificación. Un operador deposita en la subred como una señal respaldada por ingresos de demanda real, ejecuta el protocolo de verificación de enrutamiento que co-firma cada ruta medida, y registra la lista de pagos que reparte sus recompensas entre los mineros asociados a él. Los operadores dirigen a dónde van las recompensas, pero nunca custodian los fondos de nadie más.',
         cta: 'Conviértete en operador de red',
-        metaTitle: 'Operadores de red: ejecuta servidores de privacidad de UR en SN25 — UR',
+        metaTitle: 'Operadores de red: servidores de privacidad UR en SN25 — UR',
         metaDescription: 'Los operadores ejecutan servidores de privacidad UR y el endpoint /verify, depositan alpha como señal de demanda real y dirigen los pagos a sus mineros.',
         roles: [
             { tag: '01', title: 'Ejecutar los servidores', body: 'Los operadores ejecutan los servidores de privacidad y el punto /verify que co-firma cada ruta medida: la capa de coordinación entre los usuarios y los mineros que transportan el tráfico.' },
@@ -206,7 +206,7 @@ operators: {
         globeLabels: { provider: 'proveedor', extender: 'extensor', miner: 'minero' },
         simCaption: 'Los mineros compiten por la mayor cantidad de IPs únicas disponibles de forma fiable en la red. Los mejores mineros ascienden a su propio slot de UID.',
         cta: 'Conviértete en minero',
-        metaTitle: 'Mineros: transporta tráfico cifrado y gana emisiones de SN25 — UR',
+        metaTitle: 'Mineros: lleva tráfico cifrado y gana emisiones de SN25 — UR',
         metaDescription: 'Los mineros de UR mantienen enrutables subredes IPv4 /29 e IPv6 /48 para tráfico cifrado en Bittensor SN25 y ganan emisiones por cobertura distinta y medida.',
         roles: [
             { tag: '01', title: 'Salida',               body: 'Como salida, un minero es una IP de salida de la red compartida. Rechaza el tráfico que entra en conflicto con directrices regulatorias comunes como CFAA y DMCA, bloquea IPs maliciosas conocidas y solo enruta tráfico cifrado, protegiendo tanto a los mineros como a los usuarios.' },
