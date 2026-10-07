@@ -5,12 +5,15 @@ A UR miner supplies an internet exit for a network operator. Validators measure 
 
 Most miners join an operator's **pool**. You register a provider identity with that operator, without buying your own Bittensor UID or paying a subnet registration burn. The immutable settlement vault owns the operator's shared pool hotkey and pays your entitlement directly to your Bittensor coldkey. Larger fleets can register their own **head-tier** hotkey and earn native miner emission; [that path](#larger-fleets-and-the-head-tier) has additional requirements.
 
+The steps below serve one operator, the default. One command can instead serve every operator in the published [operator list](/operators.yml); see [Mine every listed operator](#mine-every-listed-operator).
+
 This guide follows the current [`sn/miner` implementation](https://github.com/urfoundation/sn/tree/main/miner) and [`cli/miner` entry point](https://github.com/urfoundation/sn/tree/main/cli/miner). The executable is named `provider` in these examples. For the other roles, see [Run a validator](/docs/validator) and [Run a network operator](/docs/operator).
 
 ## Before you start
 
 - Use a Linux or macOS host with a stable internet connection. Current provider identity storage supports these platforms; a build for another platform does not imply support for its durable registration path.
 - Create an account with the [network operator](/operators) you want to serve. Obtain its API URL, connect URL and current subnet deployment information, including the settlement vault and EVM RPC endpoints.
+- To mine every listed operator instead, the list supplies each operator's URLs. In auto mode a Bittensor sr25519 hotkey seed file replaces the operator accounts: the hotkey signs in to each operator without a chain transaction.
 - Use one stable public exit address per provider identity. If you run several exits, give each its own provider slot; see [Several exits on one host](#several-exits-on-one-host).
 - Have a Bittensor sr25519 coldkey with a prefix-42 SS58 address for receiving rewards. You can sign wallet consent on a separate device and keep the coldkey seed off the provider host.
 - To submit pool claims yourself, have a separate secp256k1 EVM relayer key funded with TAO for gas on the selected Subtensor EVM network. The relayer pays transaction fees; the reward destination remains the coldkey in the payout proof.
@@ -76,6 +79,33 @@ Authentication writes the network bootstrap token to `~/.urnetwork/jwt`. If a to
 
 Run these commands and the eventual service as the same operating-system user. No environment variables are required for the default setup. Keep each operator in its own provider state and account context: changing URLs does not reassign an existing provider identity to a different operator.
 
+### Mine every listed operator
+
+`provider provide --all-operators` mines every operator in the operator list published at [ur.xyz/operators.yml](/operators.yml), with one provider process per operator. The one-line auto mode signs in to each operator with your Bittensor hotkey, as a TAO wallet:
+
+```bash
+provider provide --all-operators --auto-register --hotkey_seed_file=/absolute/private/hotkey.seed
+```
+
+No chain transaction is involved. The first sign-in creates the hotkey's network on that operator, and each new operator directory registers its first provider client: `--auto-register` implies `--allow-client-registration`, which never replaces a retained identity. The seed file holds the hotkey's 32-byte sr25519 seed, raw or as 64 hexadecimal characters, in a private file that the provider never creates.
+
+To authenticate operators yourself instead, list them, then authenticate each one with an auth code, your account login or the hotkey:
+
+```bash
+provider operators
+provider auth --operator='<domain>'
+provider auth --operator='<domain>' --user_auth='you@example.com'
+provider auth --operator='<domain>' --hotkey_seed_file=/absolute/private/hotkey.seed
+```
+
+`provider operators` prints the list's source and digest, then each operator's domain, credential state (`jwt present` or `awaiting auth`), API URL and connect URL. `provider auth --operator` prompts for the code or password you don't pass, and writes that operator's token to `~/.urnetwork/operators/<domain>/jwt`. An operator authenticated this way has no provider client yet, so the first run needs the creation flag; later runs don't:
+
+```bash
+provider provide --all-operators --allow-client-registration
+```
+
+An operator without a token gets no provider. The log shows `operator <domain> is awaiting auth: provider auth --operator=<domain>`, and the miner checks again every five minutes. [Running every listed operator](#running-every-listed-operator) describes the supervised providers.
+
 ## 3. Register once and start providing
 
 For a genuinely new installation:
@@ -106,6 +136,18 @@ provider provide --port=8080
 
 The process stays in the foreground until stopped with Ctrl-C or a termination signal. `auth-provide` combines authentication and providing; a new installation still needs `--allow-client-registration`.
 
+### Running every listed operator
+
+With `--all-operators`, one process supervises a provider for each listed operator:
+
+- Each operator has its own state directory, `~/.urnetwork/operators/<domain>/`, with its own token, provider key and client credential. These are new provider identities: the single-operator identity in `~/.urnetwork` is not used, and a network saved with `choose_network` does not apply.
+- The list is refetched every hour. `--operators-refresh=<duration>` changes the interval, as a Go duration of at least `1m`, such as `30m`, and `--operators-url=<url>` follows another list. The last good copy is kept as `~/.urnetwork/operators.yml`, so mining continues while ur.xyz is unreachable.
+- A newly listed operator gets a provider once it has a token, and an operator whose URLs change has its provider restarted. A delisted operator's provider gets SIGTERM, then SIGKILL after 60 seconds; its directory is kept.
+- A provider that exits restarts after 30 seconds, doubling up to 10 minutes. Ctrl-C or a termination signal stops every provider.
+- `--max-memory` is divided evenly between the providers, and a provider restarts when its share changes. `--port` serves the status of every operator; the providers themselves run without a status port.
+- The first provider process to take TCP 443 serves the extender for the host.
+- `--all-operators` refuses `--api_url`, `--connect_url`, `--provider-jwt`, `--wallet` and its consent flags, `--adopt-legacy-provider-key`, `--test-egress-source-ip`, and the capture and close-report flags, which stay single-operator.
+
 ### Retain the provider state
 
 The default state directory is `~/.urnetwork`. Back up the complete directory privately after stopping its writers, and restore it as one identity. Do not run simultaneous copies of the same state.
@@ -121,6 +163,9 @@ The default state directory is `~/.urnetwork`. Back up the complete directory pr
 | `.provider.cert`, `.provider.extender.key` | Provider certificate and ingress identity, when present. |
 | `network.json` | Selected operator endpoints. |
 | `proxy` | Optional SOCKS5 exit configuration. |
+| `operators.yml` | Last good copy of the operator list, with `--all-operators`. |
+| `operators/<domain>/` | One listed operator's own state, with the files above. |
+| `hotkey-wallet/` | Signed hotkey payout chain (`originals.json`) and any pending statement (`pending.json`). |
 
 Losing or editing identity files can prevent recovery even if account login still works.
 
@@ -167,6 +212,34 @@ Before submitting, the CLI retains the signed original under `<provider-jwt-path
 
 For a proxy provider, add `--provider-jwt=/absolute/path/to/.provider-<hash>.jwt` to select that slot for both wallet commands and claims. Every provider that should earn needs its own valid consent; several providers may choose the same coldkey.
 
+### Sign once for every listed operator
+
+With `--all-operators`, one coldkey signature sets the payout wallet on every operator. The coldkey and the hotkey both sign one global consent that maps the hotkey to the coldkey, kept as a chain under `~/.urnetwork/hotkey-wallet/`. Each authenticated operator then stores the chain, and the hotkey alone signs a delegation of your network there to the chain's head. The coldkey never signs per operator.
+
+Request the statement:
+
+```bash
+provider wallet hotkey challenge '<coldkey_ss58>' \
+  --hotkey_seed_file=/absolute/private/hotkey.seed
+```
+
+Sign the exact printed statement with the coldkey in the same sr25519 `substrate` context, then run the `wallet hotkey set` command the challenge prints. Its shape is:
+
+```bash
+provider wallet hotkey set '<coldkey_ss58>' \
+  --hotkey_seed_file=/absolute/private/hotkey.seed \
+  --message='<exact printed statement>' \
+  --signature='0x<64-byte sr25519 signature>'
+```
+
+The statement stays pending in `hotkey-wallet/pending.json` until it is set or replaced. On a host where you deliberately keep the coldkey seed, pass `--coldkey_seed_file=/absolute/private/coldkey.seed` to `set` in place of `--message` and `--signature`.
+
+`set` adds the hotkey's signature, appends the new generation to the chain, then stores the chain and the delegation at every authenticated operator and reports each one; a failing operator never stops the others. `provider provide --all-operators` with `--hotkey_seed_file` keeps every authenticated operator delegated, at start and every hour, including operators listed later, so the coldkey signs only once. `provider wallet hotkey status` shows the chain, any pending statement and each operator's delegation.
+
+Unless `--wallet-from-epoch` and `--wallet-through-epoch` choose them, generation 1 earns from epoch 0 and a later generation from the operators' current epoch plus 1. Each delegation starts at the operator's current epoch plus 2, past its prospective boundary, and every interval covers 65,536 epochs. A later generation changes the coldkey or the epochs.
+
+An operator pays a provider by precedence: the provider's own wallet consent (`provider wallet set`), then a network consent, then the hotkey delegation.
+
 ## 5. Keep the provider running
 
 After initial registration and wallet setup, a Linux user service can restart the retained provider automatically. Create `~/.config/systemd/user/urnetwork-provider.service`:
@@ -194,6 +267,8 @@ journalctl --user -u urnetwork-provider.service -f
 ```
 
 Enable lingering for that user if it must run after logout (`loginctl enable-linger`). Keep the creation flag out of the normal service command so missing state requires an explicit recovery decision.
+
+To serve every listed operator, run the same unit with `ExecStart=%h/.local/bin/provider provide --all-operators --auto-register --hotkey_seed_file=/absolute/private/hotkey.seed`. In auto mode the service keeps `--auto-register`, so each newly listed operator registers its first provider client; it never replaces a retained identity. If you authenticate operators yourself, leave out `--auto-register`, keep `--hotkey_seed_file` if you use the hotkey payout, and add `--allow-client-registration` only for the first start after authenticating a new operator.
 
 ## How rewards accrue
 
@@ -223,6 +298,14 @@ provider claim --epoch='<settlement_epoch>' --rpc='https://<evm-json-rpc>'
 With no key, this command verifies and prints the `epoch`, `no_id`, `coldkey`, `share_bps`, payout roots, vault `contract`, `claim_open_block` and claim calldata. Review the destination coldkey, contract and chain ID against the operator's published deployment. `--rpc` is repeatable for ordered endpoint failover. A proof or root mismatch causes a nonzero exit and must be resolved before submission.
 
 Omitting `--epoch` selects `current_epoch - 1`. Although the CLI labels this the last finalized epoch, it can still be inside the root-commit or challenge window; the contract must actually be finalized and open. Specify older unclaimed epochs explicitly.
+
+With `--all-operators`, each operator settles its own pool, so claim from each operator separately. Select that operator's provider credential, and its API URL as `provider operators` prints it:
+
+```bash
+provider claim --epoch='<settlement_epoch>' --rpc='https://<evm-json-rpc>' \
+  --provider-jwt="$HOME/.urnetwork/operators/<domain>/.provider.jwt" \
+  --api_url='<operator api_url>'
+```
 
 Place the funded EVM relayer's hex-encoded 32-byte secp256k1 key in a private file. First check the claim without broadcasting:
 
@@ -320,6 +403,8 @@ provider provide --allow-client-registration
 
 Use the creation flag only when adding genuinely new slots. Ordinary restarts use `provider provide`. Each slot retains a `.provider-<hash>.jwt` and its registration side files. Select that token with `--provider-jwt` when setting its wallet and fetching claims. The shared `.provider.key` and all slot histories belong in the same backup. Provider identity and unique routable exit coverage matter; adding accounts behind the same exit does not manufacture additional coverage.
 
+With `--all-operators`, the `proxy` file in `~/.urnetwork` is copied into each operator's directory when its provider starts.
+
 ## Larger fleets and the head tier
 
 A head fleet binds many provider client IDs to one Bittensor hotkey. Validators score distinct routable exit prefixes, sharing a prefix's weight when fleets overlap. The hotkey earns native miner emission and uses the chain's normal coldkey/hotkey stake management; there is no pool Merkle claim for that head reward. Providers with active head bindings are excluded from the pool payout list for the corresponding epoch.
@@ -338,6 +423,7 @@ Keep the fleet coldkey on the registration/signing host. The always-on provider 
 ## Troubleshooting
 
 - **`startup_recovery_required`:** recover the original key, identity marker, registration history and credentials together. New account login does not replace a lost provider identity.
+- **`operator <domain> is awaiting auth`:** with `--all-operators`, that operator has no token yet. Run `provider auth --operator=<domain>`, or start with `--auto-register --hotkey_seed_file=<path>`. The miner checks again every five minutes.
 - **No payout leaf:** check positive completed usage, enough verification assignments, a confirmation and signed wallet consent for the earning epoch. An active head binding moves its earning path out of the pool.
 - **Wallet change appears late:** consent is prospective. Review the exact earning interval; it cannot rewrite an earlier payout destination.
 - **Claim proof is not ready:** confirm the operator published this provider's contribution and finalized the epoch's root. A network bootstrap JWT cannot substitute for `.provider.jwt`.
