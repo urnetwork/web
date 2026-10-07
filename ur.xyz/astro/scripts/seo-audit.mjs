@@ -12,7 +12,7 @@
 import { existsSync, readFileSync, readdirSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { DOC_PAGE_PATHS, UNLISTED_DOC_SLUGS } from "../../react/src/lib/docs-shared.js";
+import { DOC_ORDER, DOC_PAGE_PATHS, UNLISTED_DOC_SLUGS } from "../../react/src/lib/docs-shared.js";
 import { contentDay, investorLetterMetadata } from "./pdf-freshness.mjs";
 
 const DIST = path.resolve(process.argv[2] || "dist");
@@ -418,6 +418,54 @@ for (const rel of ["llms.txt", "llms-full.txt", "litepaper.md"]) {
     if (m[1].includes("<") || m[1].includes("...")) continue; // documented templates / elided examples
     const p = m[1].replace(/[`*.,;:!?]+$/, "");
     if (!resolves(p)) err(`${rel}: links to unserved https://ur.xyz${p}`);
+  }
+}
+
+// The markdown an agent reads out of context (the docs and legal twins,
+// litepaper.md, llms-full.txt) links absolutely: a target relative to the page
+// it was written for (/docs/miner, a screenshot beside the walkthrough) means
+// nothing in a file fetched on its own or concatenated into llms-full.txt.
+{
+  const agentMarkdown = files.filter((f) => f.endsWith(".md") || /\/llms(?:-full)?\.txt$/.test(f));
+  for (const f of agentMarkdown) {
+    const prose = readFileSync(f, "utf8").replace(/^```[^\n]*\n[\s\S]*?^```[ \t]*$/gm, "");
+    const relative = [...new Set([...prose.matchAll(/\]\(([^)\s]+)/g)].map((m) => m[1]))]
+      .filter((t) => !/^(?:[a-z][a-z0-9+.-]*:|#)/i.test(t));
+    if (relative.length) err(`${relOf(f)}: links relative to a page (${relative.slice(0, 4).join(", ")})`);
+  }
+}
+
+// llms.txt lists every machine-readable file the site publishes for programs,
+// and the security contact's address itself: the operator list, the price
+// sheet and its feed, and security.txt were served but listed nowhere.
+{
+  const llmsPath = path.join(DIST, "llms.txt");
+  const llms = existsSync(llmsPath) ? readFileSync(llmsPath, "utf8") : "";
+  for (const f of ["/llms-full.txt", "/litepaper.md", "/operators.yml", "/price.yml", "/price.rss", "/.well-known/security.txt"]) {
+    if (existsSync(path.join(DIST, f)) && !llms.includes(`(${siteOrigin}${f})`)) err(`llms.txt: does not list ${f}`);
+  }
+  const mailto = existsSync(secPath) ? (readFileSync(secPath, "utf8").match(/^Contact:\s*(mailto:\S+)/m) || [])[1] : null;
+  if (mailto && !llms.includes(`(${mailto})`)) err(`llms.txt: does not give the security contact ${mailto}`);
+}
+
+// llms-full.txt opens each embedded docs document with a source marker and,
+// under its H1, where it lives and the day its page last changed: the page's
+// own dateModified, filled in by the page-dates step before the llms step runs.
+{
+  const fullPath = path.join(DIST, "llms-full.txt");
+  const full = existsSync(fullPath) ? readFileSync(fullPath, "utf8") : "";
+  for (const slug of DOC_ORDER) {
+    const page = pages.get(`/docs/${slug}`);
+    if (!page || !full) continue;
+    const modified = (page.html.match(/"dateModified":"([^"]+)"/) || [])[1];
+    const url = `${siteOrigin}/docs/${slug}`;
+    const want = `<!-- source: ${url} -->\n\n# `;
+    const at = full.indexOf(want);
+    const where = at === -1 ? "" : full.slice(at + want.length).split("\n").slice(2, 3)[0];
+    if (at === -1) err(`llms-full.txt: no source marker for ${url}`);
+    else if (where !== `Source: ${url} · Markdown: ${siteOrigin}/docs-md/${slug}.md · Updated: ${modified}`) {
+      err(`llms-full.txt: ${slug} says "${where}" under its H1, not its page, twin and dateModified ${modified}`);
+    }
   }
 }
 

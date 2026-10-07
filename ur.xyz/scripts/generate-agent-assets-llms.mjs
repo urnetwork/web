@@ -10,7 +10,13 @@
  *                  whatever the site actually serves.
  *   llms-full.txt  single fetch: llms.txt, the litepaper, the three role
  *                  guides, and the investor materials (the letter and the
- *                  announcement as published, and the deck's outline).
+ *                  announcement as published, and the deck's outline). Each
+ *                  document follows a `<!-- source: <url> -->` line naming
+ *                  its page; a document's own horizontal rules cannot be
+ *                  mistaken for that boundary, as the `---` it used to be
+ *                  could. A docs document's H1 is followed by where it lives
+ *                  (page, markdown twin, the day it last changed), and every
+ *                  link in it is absolute (agent-markdown.mjs).
  *
  * Both are written after the pages exist, by the `llms-txt` integration in
  * astro/astro.config.mjs (so every build path has them); standalone:
@@ -27,6 +33,7 @@ import { fileURLToPath } from 'node:url';
 import { DOC_ORDER, DOC_PAGE_PATHS, HIDDEN_DOC_SLUGS, UNLISTED_DOC_SLUGS, slugFor, splitFrontMatter } from '../react/src/lib/docs-shared.js';
 import { investorCentre } from '../react/src/data/investors.js';
 import { pageFacts, SITEMAP_FILES } from '../astro/scripts/page-dates.mjs';
+import { absoluteLinks } from './agent-markdown.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, '..');
@@ -42,6 +49,17 @@ const PAGE_ORDER = [
 ];
 const LEGAL = ['/terms', '/privacy', '/vdp'];
 const FILE_LABELS = { '/audits/masa-l2-2025.pdf': 'MASA L2 2025 audit (PDF): third-party peer audit' };
+// The machine-readable files the site publishes for programs, listed when the
+// build has them: the protocol repository's published operator list and the
+// price sheet with its change feed.
+const MACHINE_FILES = [
+    ['/operators.yml', 'Network operator list (YAML)', 'the network operators miners and validators serve; they refresh it hourly'],
+    ['/price.yml', 'Price sheet (YAML)', 'the published demand deposits, in alpha per GiB and per user for each 7-day block, by staked-alpha tier'],
+    ['/price.rss', 'Price sheet changes (RSS)', 'a feed of changes to the published price sheet'],
+];
+const SOURCE_REPO = 'https://github.com/urfoundation/sn';
+// the section boundary in llms-full.txt; no embedded document may contain it
+const SECTION_MARK = '<!-- source:';
 
 function walk(dir, out = []) {
     for (const e of readdirSync(dir, { withFileTypes: true })) {
@@ -75,6 +93,25 @@ function pageName(html, title) {
         /* no structured data: fall back to the title */
     }
     return shortTitle(title);
+}
+
+/** The day a built docs page says its content last changed: its TechArticle dateModified, the sitemap's lastmod. */
+function updatedOf(html) {
+    const json = (html.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/) || [])[1];
+    try {
+        const article = JSON.parse(json)['@graph'].find((n) => n['@type'] === 'TechArticle');
+        return /^\d{4}-\d{2}-\d{2}$/.test(article?.dateModified || '') ? article.dateModified : null;
+    } catch {
+        return null;
+    }
+}
+
+/** The preferred (first) contact in the build's security.txt when it is an email address, else null. */
+function securityMailto(distDir) {
+    const file = path.join(distDir, '.well-known', 'security.txt');
+    if (!existsSync(file)) return null;
+    const first = (readFileSync(file, 'utf8').match(/^Contact:\s*(\S+)/m) || [])[1];
+    return first?.startsWith('mailto:') ? first : null;
 }
 
 /** Every page the build publishes as its own canonical: path → { title, description, lang, html }. */
@@ -129,7 +166,7 @@ function docsIndex() {
         const slug = slugFor(rel);
         if (!slug || seen.has(slug) || HIDDEN_DOC_SLUGS.has(slug) || UNLISTED_DOC_SLUGS.has(slug) || DOC_PAGE_PATHS[slug]) continue;
         seen.add(slug);
-        out.push({ slug, body: splitFrontMatter(readFileSync(abs, 'utf8')).body });
+        out.push({ slug, rel, body: splitFrontMatter(readFileSync(abs, 'utf8')).body });
     }
     return out;
 }
@@ -168,6 +205,14 @@ export function buildLlms(distDir) {
         ...LEGAL.filter((u) => pages.has(u)).map((u) => `- [${shortTitle(pages.get(u).title)}](${SITE}${u})${twinOf(u)}: ${pages.get(u).description}`),
     ];
 
+    const machineLines = MACHINE_FILES
+        .filter(([f]) => existsSync(path.join(distDir, f)))
+        .map(([f, label, about]) => `- [${label}](${SITE}${f}): ${about}`);
+    const mailto = securityMailto(distDir);
+    const securityLine = existsSync(path.join(distDir, '.well-known', 'security.txt'))
+        ? `- [Security contact](${SITE}/.well-known/security.txt): ${mailto ? `report vulnerabilities to [${mailto.slice('mailto:'.length)}](${mailto}) under` : 'see'} the [disclosure policy](${SITE}/vdp)`
+        : null;
+
     const llms = `# UR
 
 > UR is an open-source, decentralized privacy network: user traffic distributed
@@ -179,7 +224,10 @@ export function buildLlms(distDir) {
 
 - [Litepaper](${SITE}/docs/litepaper)
 - [Litepaper (raw markdown)](${SITE}/litepaper.md)
+- [Whitepaper](${SOURCE_REPO}/blob/main/WHITEPAPER.md): the full subnet whitepaper, in the source repository
+- [Source code](${SOURCE_REPO}): the UR subnet repository, with the miner, the validator and the mainnet runbooks
 - [Everything in one file](${SITE}/llms-full.txt): this file, the litepaper, the three role guides and the investor materials
+${[...machineLines, securityLine].filter(Boolean).join('\n')}
 - For connecting an agent to the network itself (MCP server, x402): [ur.io agents guide](https://ur.io/agents.md)
 
 ## Pages
@@ -199,38 +247,50 @@ ${optionalLines.join('\n')}
     // llms-full: the map, the litepaper (the mechanism), the role guides in
     // their order, then the investor materials as published
     const docs = docsIndex();
-    const litepaper = docs.find((d) => d.slug === 'litepaper')?.body.trim() || '';
-    const keyDocs = DOC_ORDER
-        .filter((slug) => slug !== 'litepaper')
-        .map((slug) => docs.find((d) => d.slug === slug)?.body.trim())
-        .filter(Boolean);
+    const embedded = ['litepaper', ...DOC_ORDER.filter((slug) => slug !== 'litepaper')]
+        .map((slug) => docs.find((d) => d.slug === slug))
+        .filter(Boolean)
+        .map((doc) => {
+            // under the H1: the page, the markdown twin and the day the page last changed
+            const url = `${SITE}/docs/${doc.slug}`;
+            const page = pages.get(`/docs/${doc.slug}`);
+            const updated = page ? updatedOf(page.html) : null;
+            const where = [`Source: ${url}`, `Markdown: ${SITE}/docs-md/${doc.slug}.md`, ...(updated ? [`Updated: ${updated}`] : [])].join(' · ');
+            const body = absoluteLinks(doc.body.trim(), `/docs/${doc.rel}`);
+            const h1 = body.match(/^# [^\n]*/);
+            return { url, text: h1 ? `${h1[0]}\n\n${where}${body.slice(h1[0].length)}` : `${where}\n\n${body}` };
+        });
 
     const { letter, convictionAnnouncement: announcement, tokenholderLetter, capacityLetter, deck } = investorCentre;
     const investor = [];
     const capacityPage = pages.get(capacityLetter.href);
     if (capacityPage) {
         const publication = capacityLetter.dateIso ? `Published ${capacityLetter.date}` : 'Draft; publication date to confirm';
-        investor.push(`# ${capacityLetter.headline}\n\n${publication} at ${SITE}${capacityLetter.href} (PDF: ${SITE}${capacityLetter.pdfHref})\n\n${proseOf(capacityPage.html, 'announcement-stage')}`);
+        investor.push({ url: `${SITE}${capacityLetter.href}`, text: `# ${capacityLetter.headline}\n\n${publication} at ${SITE}${capacityLetter.href} (PDF: ${SITE}${capacityLetter.pdfHref})\n\n${proseOf(capacityPage.html, 'announcement-stage')}` });
     }
     const tokenholderPage = pages.get(tokenholderLetter.href);
     if (tokenholderPage) {
         // the letter runs over two .announcement-paper sheets; the stage holds both
-        investor.push(`# ${tokenholderLetter.title}\n\nPublished ${tokenholderLetter.date} at ${SITE}${tokenholderLetter.href} (PDF: ${SITE}${tokenholderLetter.pdfHref})\n\n${proseOf(tokenholderPage.html, 'announcement-stage')}`);
+        investor.push({ url: `${SITE}${tokenholderLetter.href}`, text: `# ${tokenholderLetter.title}\n\nPublished ${tokenholderLetter.date} at ${SITE}${tokenholderLetter.href} (PDF: ${SITE}${tokenholderLetter.pdfHref})\n\n${proseOf(tokenholderPage.html, 'announcement-stage')}` });
     }
     const letterPage = pages.get(letter.href);
     if (letterPage) {
-        investor.push(`# ${letter.title}\n\nPublished ${letter.date} at ${SITE}${letter.href} (PDF: ${SITE}${letter.pdfHref})\n\n${proseOf(letterPage.html, 'letter-body')}`);
+        investor.push({ url: `${SITE}${letter.href}`, text: `# ${letter.title}\n\nPublished ${letter.date} at ${SITE}${letter.href} (PDF: ${SITE}${letter.pdfHref})\n\n${proseOf(letterPage.html, 'letter-body')}` });
     }
     const announcementPage = pages.get(announcement.href);
     if (announcementPage) {
-        investor.push(`# ${announcement.headline}\n\nPublished ${announcement.date} at ${SITE}${announcement.href} (PDF: ${SITE}${announcement.pdfHref})\n\n${proseOf(announcementPage.html, 'announcement-paper')}`);
+        investor.push({ url: `${SITE}${announcement.href}`, text: `# ${announcement.headline}\n\nPublished ${announcement.date} at ${SITE}${announcement.href} (PDF: ${SITE}${announcement.pdfHref})\n\n${proseOf(announcementPage.html, 'announcement-paper')}` });
     }
     if (deck.slides?.length) {
         const slides = deck.slides.map((s, i) => `${i + 1}. **${s.title}: ${s.headline}.** ${s.summary}`).join('\n');
-        investor.push(`# ${deck.title} (the investor deck)\n\n${deck.date}, ${deck.slideCount} slides, at ${SITE}${deck.href} (PDF: ${SITE}${deck.pdfHref})\n\n${deck.summary}\n\n${slides}`);
+        investor.push({ url: `${SITE}${deck.href}`, text: `# ${deck.title} (the investor deck)\n\n${deck.date}, ${deck.slideCount} slides, at ${SITE}${deck.href} (PDF: ${SITE}${deck.pdfHref})\n\n${deck.summary}\n\n${slides}` });
     }
 
-    const full = [llms.trimEnd(), litepaper, ...keyDocs, ...investor].filter(Boolean).join('\n\n---\n\n') + '\n';
+    const sections = [...embedded, ...investor];
+    for (const s of sections) {
+        if (s.text.includes(SECTION_MARK)) throw new Error(`llms: ${s.url} contains "${SECTION_MARK}", the llms-full.txt section boundary`);
+    }
+    const full = [llms.trimEnd(), ...sections.map((s) => `${SECTION_MARK} ${s.url} -->\n\n${s.text}`)].join('\n\n') + '\n';
     return { llms, full };
 }
 

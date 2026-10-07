@@ -14,7 +14,9 @@
  *   docs/<path>        the images the documents reference
  *
  * Front matter (a document's <title>/description overrides) is not part of
- * the published markdown. llms.txt and llms-full.txt are generated from the
+ * the published markdown, and every link in it is absolute (agent-markdown.mjs):
+ * a twin is read away from the page whose paths its links were written
+ * against. llms.txt and llms-full.txt are generated from the
  * finished build instead (generate-agent-assets-llms.mjs, run by the astro
  * build), so they list the pages the site actually serves.
  *
@@ -26,6 +28,7 @@ import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync, copyFi
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { DOC_PAGE_PATHS, HIDDEN_DOC_SLUGS, slugFor, splitFrontMatter } from "../react/src/lib/docs-shared.js";
+import { absoluteLinks } from "./agent-markdown.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, "..");
@@ -36,7 +39,7 @@ const PUBLIC = path.join(ROOT, "astro", "public");
 // docs/litepaper.md is what /docs/litepaper renders, so it is the one source.
 // Anything appended here (the living-document notice, for one) is already in
 // that file and comes along for free.
-const litepaperMd = splitFrontMatter(readFileSync(path.join(DOCS_DIR, "litepaper.md"), "utf8")).body.trimEnd() + "\n";
+const litepaperMd = absoluteLinks(splitFrontMatter(readFileSync(path.join(DOCS_DIR, "litepaper.md"), "utf8")).body.trimEnd() + "\n", "/docs/litepaper.md");
 rmSync(path.join(PUBLIC, "whitepaper.md"), { force: true });
 writeFileSync(path.join(PUBLIC, "litepaper.md"), litepaperMd);
 console.log("wrote litepaper.md");
@@ -103,13 +106,13 @@ for (const abs of walk(DOCS_DIR)) {
   // a document published as its own page (the legal documents) has no /docs
   // page: its twin sits beside the page it mirrors, /terms.md for /terms
   if (DOC_PAGE_PATHS[slug]) {
-    writeFileSync(path.join(PUBLIC, `${DOC_PAGE_PATHS[slug].slice(1)}.md`), body);
+    writeFileSync(path.join(PUBLIC, `${DOC_PAGE_PATHS[slug].slice(1)}.md`), absoluteLinks(body, DOC_PAGE_PATHS[slug]));
     pageTwins.push(`${DOC_PAGE_PATHS[slug]}.md`);
     continue;
   }
   const target = path.join(outDir, `${slug}.md`);
   mkdirSync(path.dirname(target), { recursive: true });
-  writeFileSync(target, body);
+  writeFileSync(target, absoluteLinks(body, `/docs/${rel}`));
   docIndex.push(slug);
 }
 console.log(`mirrored ${docIndex.length} docs into docs-md/ and wrote ${pageTwins.join(", ")}`);
