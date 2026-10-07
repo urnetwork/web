@@ -28,6 +28,23 @@ http {
     include /etc/nginx/mime.types;
     default_type application/octet-stream;
 
+    # Every text file these sites serve is UTF-8, and the Content-Type says
+    # so. Without the parameter, clients such as Python requests decode
+    # text/plain and its kin as ISO-8859-1, and RFC 7763 requires it on
+    # text/markdown. text/html always gets it.
+    charset utf-8;
+    charset_types
+        text/plain
+        text/markdown
+        text/xml
+        text/css
+        application/javascript
+        application/json
+        application/yaml
+        application/rss+xml
+        application/xml
+        application/manifest+json;
+
     ##
     # Logging Settings
     ##
@@ -479,6 +496,8 @@ http {
         # extensionless path and wants JSON.
         location = /.well-known/apple-app-site-association {
             default_type application/json;
+            # Apple documents exactly application/json for this file.
+            charset off;
             add_header 'Cache-Control' 'max-age=3600';
         }
 

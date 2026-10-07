@@ -55,6 +55,48 @@ expect_response() {
     fi
 }
 
+# The first value of a response header in a dumped header file, the name
+# matched case-insensitively.
+header_value() {
+    local headers=$1
+    local name=$2
+
+    awk -v name="$name" '
+        BEGIN { name = tolower(name) }
+        index($0, ":") > 1 && tolower(substr($0, 1, index($0, ":") - 1)) == name {
+            value = substr($0, index($0, ":") + 1)
+            sub(/^[[:space:]]+/, "", value)
+            sub(/\r$/, "", value)
+            print value
+            exit
+        }' "$headers"
+}
+
+# The response to host+path carries the header with exactly this value. An
+# empty expected value means the response must not carry the header. Further
+# arguments go to curl.
+expect_header() {
+    local host=$1
+    local path=$2
+    local name=$3
+    local expected=$4
+    shift 4
+    local headers="$test_dir/header.headers"
+    local value
+
+    curl --silent --show-error \
+        --output /dev/null \
+        --dump-header "$headers" \
+        --header "Host: $host" \
+        "$@" \
+        "http://127.0.0.1${path}"
+
+    value=$(header_value "$headers" "$name")
+    if [[ "$value" != "$expected" ]]; then
+        fail "$host$path sent $name: ${value:-<none>}, expected ${expected:-<none>}"
+    fi
+}
+
 expect_ip_json() {
     local label=$1
     local expected_ip=$2
@@ -80,8 +122,8 @@ expect_ip_json() {
     [[ "$(<"$body")" == "$expected_body" ]] || \
         fail "ur.io/ip JSON ($label) returned $(<"$body"), expected $expected_body"
 
-    content_type=$(awk 'BEGIN { IGNORECASE=1 } /^Content-Type:/ { gsub(/\r/, "", $2); print $2; exit }' "$headers")
-    [[ "$content_type" == application/json ]] || \
+    content_type=$(header_value "$headers" Content-Type)
+    [[ "$content_type" == 'application/json; charset=utf-8' ]] || \
         fail "ur.io/ip JSON ($label) content type was ${content_type:-<missing>}"
 
     cache_control=$(awk 'BEGIN { IGNORECASE=1 } /^Cache-Control:/ { sub(/^[^:]+:[[:space:]]*/, ""); gsub(/\r/, ""); print; exit }' "$headers")
@@ -111,8 +153,8 @@ expect_ip_html() {
     [[ "$status" == 200 ]] || fail "ur.io/ip HTML ($label) returned $status, expected 200"
     [[ -s "$body" ]] || fail "ur.io/ip HTML ($label) returned an empty response"
 
-    content_type=$(awk 'BEGIN { IGNORECASE=1 } /^Content-Type:/ { gsub(/\r/, "", $2); print $2; exit }' "$headers")
-    [[ "$content_type" == text/html ]] || \
+    content_type=$(header_value "$headers" Content-Type)
+    [[ "$content_type" == 'text/html; charset=utf-8' ]] || \
         fail "ur.io/ip HTML ($label) content type was ${content_type:-<missing>}"
 
     grep -Eiq '^Vary:.*(^|[,[:space:]])Accept([,[:space:]]|$)' "$headers" || \
@@ -281,6 +323,21 @@ expect_ip_json cloudflare-v4 203.0.113.9 \
     --header 'X-UR-Forwarded-For: 198.51.100.20:41001'
 expect_ip_json warp-v6 2001:db8::7 \
     --header 'X-UR-Forwarded-For: [2001:db8::7]:41002'
+
+# Text goes out as UTF-8 whatever its type, so no client falls back to
+# ISO-8859-1. Apple's association file keeps the exact type Apple documents.
+for host in ur.io ur.xyz; do
+    expect_header "$host" / Content-Type 'text/html; charset=utf-8'
+    expect_header "$host" /llms.txt Content-Type 'text/plain; charset=utf-8'
+    expect_header "$host" /sitemap-index.xml Content-Type 'text/xml; charset=utf-8'
+    expect_header "$host" /site.webmanifest Content-Type 'application/manifest+json; charset=utf-8'
+done
+expect_header ur.io /agents.md Content-Type 'text/markdown; charset=utf-8'
+expect_header ur.io /openapi.yml Content-Type 'application/yaml; charset=utf-8'
+expect_header ur.xyz /docs-md/miner.md Content-Type 'text/markdown; charset=utf-8'
+expect_header ur.xyz /operators.yml Content-Type 'application/yaml; charset=utf-8'
+expect_header ur.xyz /price.rss Content-Type 'application/rss+xml; charset=utf-8'
+expect_header ur.io /.well-known/apple-app-site-association Content-Type application/json
 
 # A synthetic edge request proves the only emitted page-view fields are the
 # normalized path, country bucket, and classified source. Deliberately put
