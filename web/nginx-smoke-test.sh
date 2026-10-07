@@ -431,6 +431,59 @@ ur-letter-to-tokenholders-september-2026 letter-to-tokenholders-september-2026
 ur-network-capacity-letter funding-network-capacity
 EOF
 
+# A page revalidates: a client that sends back the Last-Modified or the ETag
+# it got, or both, gets a 304. nginx's 304 check compares its own validators
+# (the file's mtime and size), so the response must carry those; Cloudflare
+# may weaken the ETag, and the weak form must match too.
+expect_revalidation() {
+    local host=$1
+    local path=$2
+    local headers="$test_dir/revalidation.headers"
+    local last_modified
+    local etag
+    local condition
+    local status
+
+    curl --silent --show-error \
+        --output /dev/null \
+        --dump-header "$headers" \
+        --header "Host: $host" \
+        "http://127.0.0.1${path}"
+    last_modified=$(header_value "$headers" Last-Modified)
+    etag=$(header_value "$headers" ETag)
+    if [[ -z "$last_modified" || -z "$etag" ]]; then
+        fail "$host$path sent Last-Modified: ${last_modified:-<none>}, ETag: ${etag:-<none>}"
+    fi
+
+    for condition in \
+        "If-Modified-Since: $last_modified" \
+        "If-None-Match: $etag" \
+        "If-None-Match: W/${etag#W/}"; do
+        status=$(curl --silent --show-error \
+            --output /dev/null \
+            --write-out '%{http_code}' \
+            --header "Host: $host" \
+            --header "$condition" \
+            "http://127.0.0.1${path}")
+        [[ "$status" == 304 ]] || fail "$host$path answered $condition with $status, expected 304"
+    done
+
+    status=$(curl --silent --show-error \
+        --output /dev/null \
+        --write-out '%{http_code}' \
+        --header "Host: $host" \
+        --header "If-Modified-Since: $last_modified" \
+        --header "If-None-Match: $etag" \
+        "http://127.0.0.1${path}")
+    [[ "$status" == 304 ]] || fail "$host$path answered both validators with $status, expected 304"
+}
+
+for host in ur.xyz preview.ur.xyz; do
+    for path in / /investors /docs/miner; do
+        expect_revalidation "$host" "$path"
+    done
+done
+
 # llms.txt and llms-full.txt are not copies of the home page, so they carry no
 # canonical Link to it, and they cache like the other machine-readable files.
 for host in ur.io ur.xyz; do
@@ -501,5 +554,40 @@ done
 if grep -q '"site":"preview\.' "$analytics_log"; then
     fail 'preview traffic was emitted as a public page view'
 fi
+
+# A revalidated page view counts like a full one: a 304 for the page's file
+# emits the event, while a 304 for a machine-readable file does not.
+page_view_count() {
+    grep -c "\"site\":\"$1\",\"path\":\"$2\"" "$analytics_log" || true
+}
+
+expect_counted_revalidation() {
+    local host=$1
+    local path=$2
+    local expected=$3
+    local key=${host//./_}
+    local before
+    local status
+
+    before=$(page_view_count "$host" "$path")
+    expect_response "$host" "$path" 200
+    status=$(curl --silent --show-error \
+        --output /dev/null \
+        --write-out '%{http_code}' \
+        --header "Host: $host" \
+        --header "If-Modified-Since: $(header_value "$test_dir/${key}.headers" Last-Modified)" \
+        "http://127.0.0.1${path}")
+    [[ "$status" == 304 ]] || fail "$host$path revalidated with $status, expected 304"
+
+    for _ in $(seq 1 50); do
+        [[ "$(page_view_count "$host" "$path")" -ge $((before + expected)) ]] && break
+        sleep 0.1
+    done
+    [[ "$(page_view_count "$host" "$path")" == $((before + expected)) ]] || \
+        fail "$host$path logged $(( $(page_view_count "$host" "$path") - before )) page views, expected $expected"
+}
+
+expect_counted_revalidation ur.xyz /reserve 2
+expect_counted_revalidation ur.xyz /llms.txt 0
 
 printf 'nginx smoke test: canonical routes and privacy-safe analytics passed\n'

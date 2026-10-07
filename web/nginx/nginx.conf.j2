@@ -167,11 +167,14 @@ http {
         "~^(?<analytics_public_path>[^?]*)(?:[?].*)?$" $analytics_public_path;
     }
 
-    # Count only successful public HTML GETs. Static assets, previews,
-    # redirects, errors, and health checks are excluded.
-    map "$request_method:$status:$sent_http_content_type:$analytics_site" $analytics_page_view {
+    # Count only public HTML page views: successful GETs of HTML, and
+    # revalidated ones, a 304 for a page's .html file ($uri after try_files),
+    # which carries no Content-Type. Static assets, previews, redirects,
+    # errors, and health checks are excluded.
+    map "$request_method:$status:$sent_http_content_type:$analytics_site:$uri" $analytics_page_view {
         default 0;
-        "~^GET:2[0-9][0-9]:text/html(?:;[^:]*)?:(?:ur\.io|ur\.xyz)$" 1;
+        "~^GET:2[0-9][0-9]:text/html(?:;[^:]*)?:(?:ur\.io|ur\.xyz):" 1;
+        "~^GET:304::(?:ur\.io|ur\.xyz):.*\.html$" 1;
     }
 
     log_format privacy_safe_page_view escape=json
@@ -721,10 +724,12 @@ http {
         location = / {
             try_files /index.html =404;
 
-            # always check for updates in the background
+            # Always check for updates in the background. The validators are
+            # nginx's own Last-Modified and ETag (the file's mtime and size):
+            # its 304 check compares conditional requests with those, so a
+            # hand-set Last-Modified or ETag never matched and every
+            # revalidation got the whole page.
             add_header 'Cache-Control' 'max-age=0, stale-while-revalidate=86400';
-            add_header 'Last-Modified' '{{ http_last_modified }}';
-            add_header 'ETag' '"{{ http_etag }}"';
             add_header 'X-Robots-Tag' $ur_preview_robots always;
         }
 
@@ -943,10 +948,9 @@ http {
         location / {
             try_files $uri $uri.html $uri/ $uri/index.html =404;
 
-            # always check for updates in the background
+            # always check for updates in the background, with nginx's own
+            # validators (see location = /)
             add_header 'Cache-Control' 'max-age=0, stale-while-revalidate=86400';
-            add_header 'Last-Modified' '{{ http_last_modified }}';
-            add_header 'ETag' '"{{ http_etag }}"';
             add_header 'X-Robots-Tag' $ur_preview_robots always;
         }
     }
