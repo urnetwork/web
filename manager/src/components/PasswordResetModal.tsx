@@ -89,22 +89,22 @@ const PasswordResetModal: React.FC<PasswordResetModalProps> = ({
   if (!portalRoot) return null;
 
   return createPortal(
-    <div className="fixed inset-0 z-[9999] bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 animate-fadeIn overflow-visible">
+    <div className="fixed inset-0 z-[9999] bg-ur-black/70 backdrop-blur-sm flex items-center justify-center p-4 animate-fadeIn overflow-visible">
       <div
         ref={modalRef}
-        className="bg-gray-800 rounded-xl shadow-2xl max-w-md w-full mx-auto animate-scaleIn border border-gray-700"
+        className="bg-ur-panel rounded-ur shadow-ur-flat max-w-md w-full mx-auto animate-scaleIn border border-ur-border"
       >
-        <div className="flex items-start justify-between p-6 border-b border-gray-700">
+        <div className="flex items-start justify-between p-6 border-b border-ur-border">
           <div className="flex items-center space-x-3">
-            <div className="flex-shrink-0 p-2 bg-red-600 rounded-lg">
-              <Lock size={20} className="text-white" />
+            <div className="flex-shrink-0 p-2 bg-ur-coral rounded-lg">
+              <Lock size={20} className="text-ur-black" />
             </div>
-            <h3 className="text-lg font-medium text-gray-100">Password Reset</h3>
+            <h3 className="text-lg font-medium text-ur-white">Password Reset</h3>
           </div>
           {state !== "loading" && (
             <button
               onClick={onClose}
-              className="text-gray-400 hover:text-gray-200 focus:outline-none focus:text-gray-200 transition-colors p-1 rounded-lg hover:bg-gray-700"
+              className="text-ur-gray hover:text-ur-white focus:outline-none focus:text-ur-white transition-colors p-1 rounded-lg hover:bg-ur-raised"
             >
               <X size={20} />
             </button>
@@ -114,34 +114,34 @@ const PasswordResetModal: React.FC<PasswordResetModalProps> = ({
         <div className="p-6">
           {state === "success" ? (
             <div className="text-center py-4">
-              <div className="inline-flex items-center justify-center w-16 h-16 bg-green-600/20 rounded-full mb-4">
-                <CheckCircle size={32} className="text-green-400" />
+              <div className="inline-flex items-center justify-center w-16 h-16 bg-ur-green/20 rounded-full mb-4">
+                <CheckCircle size={32} className="text-ur-green" />
               </div>
-              <h4 className="text-lg font-medium text-green-300 mb-2">
+              <h4 className="text-lg font-medium text-ur-green mb-2">
                 Email Sent Successfully
               </h4>
-              <p className="text-gray-400 text-sm mb-4">
+              <p className="text-ur-gray text-sm mb-4">
                 A password reset link has been sent to:
               </p>
-              <div className="bg-gray-700/50 px-4 py-2 rounded-lg inline-flex items-center gap-2">
-                <Mail size={16} className="text-red-400" />
-                <span className="text-red-300 font-medium">{userEmail}</span>
+              <div className="bg-ur-raised/50 px-4 py-2 rounded-lg inline-flex items-center gap-2">
+                <Mail size={16} className="text-ur-coral" />
+                <span className="text-ur-coral font-medium">{userEmail}</span>
               </div>
-              <p className="text-gray-500 text-xs mt-4">
+              <p className="text-ur-gray-dark text-xs mt-4">
               </p>
             </div>
           ) : (
             <>
               <div className="mb-6">
-                <p className="text-gray-300 mb-4">
+                <p className="text-ur-gray mb-4">
                   A password reset link will be sent to the email address
                   associated with your account:
                 </p>
-                <div className="bg-gray-700/50 px-4 py-3 rounded-lg flex items-center gap-3">
-                  <Mail size={18} className="text-red-400" />
-                  <span className="text-red-300 font-medium">{userEmail}</span>
+                <div className="bg-ur-raised/50 px-4 py-3 rounded-lg flex items-center gap-3">
+                  <Mail size={18} className="text-ur-coral" />
+                  <span className="text-ur-coral font-medium">{userEmail}</span>
                 </div>
-                <p className="text-gray-500 text-sm mt-3">
+                <p className="text-ur-gray-dark text-sm mt-3">
                   Please check your email and follow the link to reset your
                   password.
                 </p>
@@ -150,7 +150,7 @@ const PasswordResetModal: React.FC<PasswordResetModalProps> = ({
               <div className="flex justify-end space-x-3">
                 <button
                   onClick={onClose}
-                  className="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-gray-200 rounded-lg transition-colors border border-gray-600"
+                  className="px-4 py-2 bg-ur-raised hover:bg-ur-hover text-ur-white rounded-lg transition-colors border border-ur-border"
                   disabled={state === "loading"}
                 >
                   Cancel
@@ -158,16 +158,16 @@ const PasswordResetModal: React.FC<PasswordResetModalProps> = ({
                 <button
                   onClick={handleSendResetEmail}
                   disabled={state === "loading"}
-                  className={`px-4 py-2 bg-red-600 text-white rounded-lg transition-all duration-200 ${
-                    state === "loading"
+                  className={`px-4 py-2 bg-ur-coral text-ur-black rounded-lg transition-all duration-200 ${
+ state === "loading"
                       ? "opacity-70 cursor-not-allowed"
-                      : "hover:bg-red-700 hover:shadow-lg"
+                      : "hover:bg-ur-coral-hover "
                   }`}
                 >
                   {state === "loading" ? (
                     <span className="flex items-center justify-center">
                       <svg
-                        className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+                        className="animate-spin -ml-1 mr-2 h-4 w-4 text-ur-white"
                         xmlns="http://www.w3.org/2000/svg"
                         fill="none"
                         viewBox="0 0 24 24"

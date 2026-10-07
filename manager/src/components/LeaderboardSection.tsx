@@ -72,17 +72,17 @@ const LeaderboardSection: React.FC = () => {
     <div className="space-y-8">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 animate-staggerFadeUp" style={{ animationDelay: '0.05s' }}>
         <div>
-          <h2 className="text-3xl font-bold text-white flex items-center gap-3">
-            <div className="p-2 bg-gradient-to-r from-yellow-600 to-orange-600 rounded-xl">
-              <Trophy className="text-white" size={28} />
+          <h2 className="text-3xl font-bold text-ur-white flex items-center gap-3">
+            <div className="p-2 bg-ur-yellow-light rounded-ur">
+              <Trophy className="text-ur-black" size={28} />
             </div>
             Network Leaderboard
           </h2>
-          <p className="text-gray-400 mt-2">
+          <p className="text-ur-gray mt-2">
             Global network performance rankings and statistics
           </p>
           {lastUpdated && (
-            <p className="text-sm text-gray-500 mt-1">
+            <p className="text-sm text-ur-gray-dark mt-1">
               Last updated: {new Date(lastUpdated).toLocaleString()}
             </p>
           )}
@@ -91,7 +91,7 @@ const LeaderboardSection: React.FC = () => {
         <button
           onClick={loadLeaderboard}
           disabled={isLoading}
-          className="flex items-center gap-2 bg-yellow-600 hover:bg-yellow-700 text-white px-6 py-3 rounded-lg transition-all duration-200 border border-yellow-500 hover:shadow-lg"
+          className="flex items-center gap-2 bg-ur-yellow-light hover:bg-ur-yellow-light/90 text-ur-black px-6 py-3 rounded-ur transition-colors duration-100 "
         >
           <RefreshCw size={16} className={isLoading ? "animate-spin" : ""} />
           Refresh Leaderboard
@@ -99,16 +99,16 @@ const LeaderboardSection: React.FC = () => {
       </div>
 
       {error && (
-        <div className="bg-red-900/50 border border-red-700 p-4 rounded-xl flex items-start gap-3">
+        <div className="bg-ur-coral/15 border border-ur-coral p-4 rounded-ur flex items-start gap-3">
           <AlertCircle
             size={20}
-            className="text-red-400 mt-0.5 flex-shrink-0"
+            className="text-ur-coral mt-0.5 flex-shrink-0"
           />
           <div>
-            <h3 className="font-medium text-red-300">
+            <h3 className="font-medium text-ur-coral">
               Error loading leaderboard
             </h3>
-            <p className="text-red-200">{error}</p>
+            <p className="text-ur-coral">{error}</p>
           </div>
         </div>
       )}
@@ -116,33 +116,33 @@ const LeaderboardSection: React.FC = () => {
       {isLoading ? (
         <div className="flex justify-center py-12">
           <div className="relative">
-            <div className="animate-spin rounded-full h-16 w-16 border-4 border-gray-700 border-t-yellow-500"></div>
-            <div className="absolute inset-0 rounded-full bg-gradient-to-r from-yellow-500/20 to-orange-500/20 animate-pulse"></div>
+            <div className="animate-spin rounded-full h-16 w-16 border-4 border-ur-border border-t-ur-yellow-light"></div>
+            <div className="absolute inset-0 rounded-full bg-gradient-to-r from-ur-yellow-light/20 to-ur-green/20 animate-pulse"></div>
           </div>
         </div>
       ) : (
         <div className="space-y-6">
           {ranking && (
-            <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl shadow-2xl p-6 text-white border border-blue-500 animate-staggerFadeUp" style={{ animationDelay: '0.1s' }}>
+            <div className="bg-ur-blue rounded-ur shadow-ur-flat p-6 text-ur-white border border-ur-blue animate-staggerFadeUp" style={{ animationDelay: '0.1s' }}>
               <div className="flex items-center gap-3 mb-4">
                 <Medal size={24} />
                 <h3 className="text-xl font-semibold">Your Network Ranking</h3>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div>
-                  <p className="text-blue-100">Total Data Transfer</p>
+                  <p className="text-ur-blue-light">Total Data Transfer</p>
                   <p className="text-2xl font-bold">
                     {formatMibCount(ranking.net_mib_count)}
                   </p>
                 </div>
                 <div>
-                  <p className="text-blue-100">Leaderboard Position</p>
+                  <p className="text-ur-blue-light">Leaderboard Position</p>
                   <p className="text-2xl font-bold">
                     #{ranking.leaderboard_rank}
                   </p>
                 </div>
                 <div>
-                  <p className="text-blue-100">Network Status</p>
+                  <p className="text-ur-blue-light">Network Status</p>
                   <p className="text-2xl font-bold">
                     {ranking.leaderboard_public ? "Public" : "Private"}
                   </p>
@@ -151,67 +151,67 @@ const LeaderboardSection: React.FC = () => {
             </div>
           )}
 
-          <div className="bg-gray-800 rounded-xl shadow-2xl overflow-hidden border border-gray-700 animate-staggerFadeUp" style={{ animationDelay: '0.15s' }}>
-            <div className="bg-gradient-to-r from-gray-700 to-gray-800 px-6 py-4 border-b border-gray-600">
-              <h3 className="font-medium text-gray-100">Global Rankings</h3>
-              <p className="text-sm text-gray-400 mt-1">
+          <div className="bg-ur-panel rounded-ur shadow-ur-flat overflow-hidden border border-ur-border animate-staggerFadeUp" style={{ animationDelay: '0.15s' }}>
+            <div className="bg-ur-raised px-6 py-4 border-b border-ur-border">
+              <h3 className="font-medium text-ur-white">Global Rankings</h3>
+              <p className="text-sm text-ur-gray mt-1">
                 Top performing networks worldwide
               </p>
             </div>
             <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-700">
-                <thead className="bg-gray-900">
+              <table className="min-w-full divide-y divide-ur-border">
+                <thead className="bg-ur-black">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-ur-gray uppercase tracking-wider">
                       Rank
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-ur-gray uppercase tracking-wider">
                       Network
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-ur-gray uppercase tracking-wider">
                       Data Transfer
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-ur-gray uppercase tracking-wider">
                       Status
                     </th>
                   </tr>
                 </thead>
-                <tbody className="bg-gray-800 divide-y divide-gray-700">
+                <tbody className="bg-ur-panel divide-y divide-ur-border">
                   {leaderboard.map((entry, index) => (
                     <tr
                       key={entry.network_id}
                       className={`transition-colors ${
-                        ranking?.leaderboard_rank === index + 1
-                          ? "bg-blue-900/30 border-l-4 border-blue-500"
-                          : "hover:bg-gray-700/50"
+ ranking?.leaderboard_rank === index + 1
+ ? "bg-ur-blue/15 border-l-4 border-ur-blue"
+                          : "hover:bg-ur-raised/50"
                       }`}
                     >
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-200">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-ur-white">
                         <div className="flex items-center gap-2">
                           {index === 0 && (
-                            <Trophy size={16} className="text-yellow-400" />
+                            <Trophy size={16} className="text-ur-yellow-light" />
                           )}
                           {index === 1 && (
-                            <Medal size={16} className="text-gray-400" />
+                            <Medal size={16} className="text-ur-gray" />
                           )}
                           {index === 2 && (
-                            <Medal size={16} className="text-orange-400" />
+                            <Medal size={16} className="text-ur-coral" />
                           )}
                           #{index + 1}
                         </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-ur-gray">
                         {entry.network_name || "Private Network"}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-200 font-medium">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-ur-white font-medium">
                         {formatMibCount(entry.net_mib_count)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm">
                         <span
                           className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                            entry.is_public
-                              ? "bg-green-900 text-green-300 border border-green-700"
-                              : "bg-gray-700 text-gray-300 border border-gray-600"
+ entry.is_public
+ ? "bg-ur-green/10 text-ur-green border border-ur-green"
+                              : "bg-ur-raised text-ur-gray border border-ur-border"
                           }`}
                         >
                           {entry.is_public ? "Public" : "Private"}
@@ -224,13 +224,13 @@ const LeaderboardSection: React.FC = () => {
 
               {leaderboard.length === 0 && !isLoading && (
                 <div className="text-center py-12">
-                  <div className="w-16 h-16 bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Trophy className="text-gray-500" size={24} />
+                  <div className="w-16 h-16 bg-ur-raised rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Trophy className="text-ur-gray-dark" size={24} />
                   </div>
-                  <h3 className="text-lg font-medium text-gray-200 mb-2">
+                  <h3 className="text-lg font-medium text-ur-white mb-2">
                     No Leaderboard Data
                   </h3>
-                  <p className="text-gray-400 italic">
+                  <p className="text-ur-gray italic">
                     No ranking data available. Try refreshing the leaderboard.
                   </p>
                 </div>

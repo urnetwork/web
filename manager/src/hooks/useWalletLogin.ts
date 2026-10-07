@@ -1,5 +1,6 @@
 import { useCallback } from "react";
-import type { WalletAuthPayload } from "../services/types";
+import { fetchWalletChallenge } from "../services/api";
+import type { WalletAuthPayload, WalletAuthChallengeResponse } from "../services/types";
 
 function encodeBase64(bytes: Uint8Array): string {
   let binary = "";
@@ -45,7 +46,21 @@ export function useWalletLogin(): UseWalletLoginResult {
       }
 
       const walletAddress = provider.publicKey.toString();
-      const walletMessage = `Sign in to URnetwork ${Math.floor(Date.now() / 1000)}`;
+      const blockchain = "solana" as const;
+
+      const challengeResponse: WalletAuthChallengeResponse =
+        await fetchWalletChallenge({
+          wallet_address: walletAddress,
+          blockchain,
+        });
+
+      if (!challengeResponse.success) {
+        throw new Error(
+          challengeResponse.error.message || "Failed to fetch wallet challenge"
+        );
+      }
+
+      const walletMessage = challengeResponse.message_template;
       const messageBytes = new TextEncoder().encode(walletMessage);
 
       const result = await provider.signMessage(messageBytes, "utf8");
@@ -55,7 +70,9 @@ export function useWalletLogin(): UseWalletLoginResult {
         wallet_address: walletAddress,
         wallet_message: walletMessage,
         wallet_signature: walletSignature,
-        blockchain: "solana",
+        blockchain,
+        challenge: challengeResponse.challenge,
+        timestamp: challengeResponse.timestamp,
       };
     },
     []

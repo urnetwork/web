@@ -5,6 +5,7 @@ import type { Device } from '../services/api';
 import toast from 'react-hot-toast';
 import debounce from 'lodash/debounce';
 import { Location } from '../services/types';
+import { getColorHex } from '../theme/locationColors';
 
 const ProvidersSection: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -130,13 +131,18 @@ const ProvidersSection: React.FC = () => {
 
   // Memoize card components
   const LocationCard = React.memo<{ location: Location }>(({ location }) => (
-    <div className="bg-gray-800 rounded-xl shadow-2xl overflow-hidden hover:shadow-3xl transition-all duration-300 border border-gray-700 hover:border-gray-600 transform hover:scale-105">
-      <div className="bg-gradient-to-r from-gray-700 to-gray-800 px-4 py-3 border-b border-gray-600">
+    <div className="bg-ur-panel rounded-ur shadow-ur-flat overflow-hidden hover:shadow-3xl transition-all duration-300 border border-ur-border hover:border-ur-border transform hover:scale-105">
+      <div className="bg-ur-raised px-4 py-3 border-b border-ur-border">
         <div className="flex items-center justify-between">
-          <h3 className="font-medium text-gray-100 truncate flex-1" title={location.name}>
+          <span
+            className="w-4 h-4 rounded-full flex-shrink-0 mr-2"
+            style={{ backgroundColor: getColorHex(location.country_code || location.name) }}
+            aria-hidden
+          />
+          <h3 className="font-medium text-ur-white truncate flex-1" title={location.name}>
             {location.name}
           </h3>
-          <span className="bg-purple-900 text-purple-300 text-xs font-medium px-2 py-1 rounded border border-purple-700">
+          <span className="bg-ur-pink/10 text-ur-pink text-xs font-medium px-2 py-1 rounded border border-ur-pink/40">
             {location.provider_count} Providers
           </span>
         </div>
@@ -144,29 +150,29 @@ const ProvidersSection: React.FC = () => {
       <div className="p-4">
         <div className="space-y-3">
           <div className="flex items-start gap-3">
-            <Users size={16} className="text-purple-400 mt-0.5 flex-shrink-0" />
+            <Users size={16} className="text-ur-pink mt-0.5 flex-shrink-0" />
             <div>
-              <p className="text-sm text-gray-400">Provider Count</p>
-              <p className="text-sm font-medium text-purple-300">{location.provider_count || 0}</p>
+              <p className="text-sm text-ur-gray">Provider Count</p>
+              <p className="text-sm font-medium text-ur-pink">{location.provider_count || 0}</p>
             </div>
           </div>
           
           {location.region && (
             <div className="flex items-start gap-3">
-              <Globe size={16} className="text-yellow-400 mt-0.5 flex-shrink-0" />
+              <Globe size={16} className="text-ur-yellow-light mt-0.5 flex-shrink-0" />
               <div>
-                <p className="text-sm text-gray-400">Region</p>
-                <p className="text-sm text-gray-200">{location.region}</p>
+                <p className="text-sm text-ur-gray">Region</p>
+                <p className="text-sm text-ur-white">{location.region}</p>
               </div>
             </div>
           )}
           
           {location.country_code && (
             <div className="flex items-start gap-3">
-              <Globe size={16} className="text-orange-400 mt-0.5 flex-shrink-0" />
+              <Globe size={16} className="text-ur-coral mt-0.5 flex-shrink-0" />
               <div>
-                <p className="text-sm text-gray-400">Country Code</p>
-                <p className="text-sm text-gray-200 font-mono">{location.country_code}</p>
+                <p className="text-sm text-ur-gray">Country Code</p>
+                <p className="text-sm text-ur-white font-mono">{location.country_code}</p>
               </div>
             </div>
           )}
@@ -179,21 +185,21 @@ const ProvidersSection: React.FC = () => {
     <div className="space-y-8">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 animate-staggerFadeUp" style={{ animationDelay: '0.05s' }}>
         <div>
-          <h2 className="text-3xl font-bold text-white flex items-center gap-3">
-            <div className="p-2 bg-gradient-to-r from-purple-600 to-indigo-600 rounded-xl">
-              <MapPin className="text-white" size={28} />
+          <h2 className="text-3xl font-bold text-ur-white flex items-center gap-3">
+            <div className="p-2 bg-ur-pink rounded-ur">
+              <MapPin className="text-ur-black" size={28} />
             </div>
             Provider Locations
           </h2>
-          <p className="text-gray-400 mt-2">Browse and search provider locations worldwide</p>
+          <p className="text-ur-gray mt-2">Browse and search provider locations worldwide</p>
           {isSearchActive && (
-            <p className="text-sm text-blue-400 mt-1">
+            <p className="text-sm text-ur-blue-light mt-1">
               Search results prioritized by exact matches, then partial matches
             </p>
           )}
           <div className="flex items-center gap-2 mt-2">
-            <Globe size={16} className="text-purple-400" />
-            <span className="text-sm text-gray-500">
+            <Globe size={16} className="text-ur-pink" />
+            <span className="text-sm text-ur-gray-dark">
               {locations.length} locations {isSearchActive ? 'found' : 'available'}
               {isSearchActive ? '' : ' (sorted by provider count)'}
             </span>
@@ -203,7 +209,7 @@ const ProvidersSection: React.FC = () => {
         <button
           onClick={() => loadLocations()}
           disabled={isLoading}
-          className="flex items-center gap-2 bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg transition-all duration-200 border border-purple-500 hover:shadow-lg"
+          className="flex items-center gap-2 bg-ur-pink hover:bg-ur-pink/90 text-ur-black px-6 py-3 rounded-lg transition-all duration-200 border border-ur-pink "
         >
           <RefreshCw size={16} className={isLoading ? 'animate-spin' : ''} />
           Refresh Locations
@@ -212,23 +218,23 @@ const ProvidersSection: React.FC = () => {
 
       <div className="relative animate-staggerFadeUp" style={{ animationDelay: '0.1s' }}>
         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-          <Search className="h-5 w-5 text-gray-400" />
+          <Search className="h-5 w-5 text-ur-gray" />
         </div>
         <input
           type="text"
           value={searchQuery}
           onChange={handleSearchChange}
           placeholder="Search locations (minimum 2 characters)..."
-          className="block w-full pl-10 pr-3 py-3 bg-gray-800 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all duration-200"
+          className="block w-full pl-10 pr-3 py-3 bg-ur-panel border border-ur-border rounded-lg text-ur-white placeholder-ur-gray-dark focus:outline-none focus:ring-2 focus:ring-ur-pink focus:border-ur-pink transition-all duration-200"
         />
       </div>
 
       {error && (
-        <div className="bg-red-900/50 border border-red-700 p-4 rounded-xl flex items-start gap-3">
-          <AlertCircle size={20} className="text-red-400 mt-0.5 flex-shrink-0" />
+        <div className="bg-ur-coral/15 border border-ur-coral p-4 rounded-ur flex items-start gap-3">
+          <AlertCircle size={20} className="text-ur-coral mt-0.5 flex-shrink-0" />
           <div>
-            <h3 className="font-medium text-red-300">Error loading locations</h3>
-            <p className="text-red-200">{error}</p>
+            <h3 className="font-medium text-ur-coral">Error loading locations</h3>
+            <p className="text-ur-coral">{error}</p>
           </div>
         </div>
       )}
@@ -236,17 +242,17 @@ const ProvidersSection: React.FC = () => {
       {isLoading ? (
         <div className="flex justify-center py-12">
           <div className="relative">
-            <div className="animate-spin rounded-full h-16 w-16 border-4 border-gray-700 border-t-purple-500"></div>
-            <div className="absolute inset-0 rounded-full bg-gradient-to-r from-purple-500/20 to-indigo-500/20 animate-pulse"></div>
+            <div className="animate-spin rounded-full h-16 w-16 border-4 border-ur-border border-t-ur-pink"></div>
+            <div className="absolute inset-0 rounded-full bg-gradient-to-r from-ur-pink/20 to-ur-blue/20 animate-pulse"></div>
           </div>
         </div>
       ) : (
         <div className="space-y-8">
           <div>
-            <h3 className="text-xl font-semibold text-white mb-6 flex items-center gap-2 animate-staggerFadeUp" style={{ animationDelay: '0.15s' }}>
-              <Globe className="text-blue-400" size={20} />
+            <h3 className="text-xl font-semibold text-ur-white mb-6 flex items-center gap-2 animate-staggerFadeUp" style={{ animationDelay: '0.15s' }}>
+              <Globe className="text-ur-blue-light" size={20} />
               Provider Locations
-             <span className="text-sm text-gray-400 font-normal">({locations.length})</span>
+             <span className="text-sm text-ur-gray font-normal">({locations.length})</span>
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-staggerFadeUp" style={{ animationDelay: '0.2s' }}>
               {locations.map((location) => (
@@ -257,21 +263,21 @@ const ProvidersSection: React.FC = () => {
           
           {devices.length > 0 && (
             <div>
-              <h3 className="text-xl font-semibold text-white mb-6 flex items-center gap-2">
-                <Users className="text-green-400" size={20} />
+              <h3 className="text-xl font-semibold text-ur-white mb-6 flex items-center gap-2">
+                <Users className="text-ur-green" size={20} />
                 Provider Devices
-                <span className="text-sm text-gray-400 font-normal">({devices.length})</span>
+                <span className="text-sm text-ur-gray font-normal">({devices.length})</span>
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 {devices.slice(0, 20).map((device) => (
-                  <div key={device.client_id} className="bg-gray-800 rounded-lg p-4 border border-gray-700 hover:border-gray-600 transition-colors">
+                  <div key={device.client_id} className="bg-ur-panel rounded-lg p-4 border border-ur-border hover:border-ur-border transition-colors">
                     <div className="flex items-center gap-3">
-                      <Users size={16} className="text-green-400 flex-shrink-0" />
+                      <Users size={16} className="text-ur-green flex-shrink-0" />
                       <div className="min-w-0 flex-1">
-                        <p className="text-sm font-medium text-gray-200 truncate" title={device.device_name}>
+                        <p className="text-sm font-medium text-ur-white truncate" title={device.device_name}>
                           {device.device_name || 'Unnamed Device'}
                         </p>
-                        <p className="text-xs text-gray-400 font-mono truncate" title={device.client_id}>
+                        <p className="text-xs text-ur-gray font-mono truncate" title={device.client_id}>
                           {device.client_id.substring(0, 12)}...
                         </p>
                       </div>
@@ -281,7 +287,7 @@ const ProvidersSection: React.FC = () => {
               </div>
               {devices.length > 20 && (
                 <div className="mt-4 text-center">
-                  <p className="text-sm text-gray-400">
+                  <p className="text-sm text-ur-gray">
                     Showing 20 of {devices.length} devices
                   </p>
                 </div>
@@ -290,13 +296,13 @@ const ProvidersSection: React.FC = () => {
           )}
 
           {locations.length === 0 && !isLoading && (
-            <div className="bg-gray-800 rounded-xl shadow-2xl p-8 text-center border border-gray-700">
+            <div className="bg-ur-panel rounded-ur shadow-ur-flat p-8 text-center border border-ur-border">
               <div className="max-w-md mx-auto">
-                <div className="w-16 h-16 bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <MapPin className="text-gray-500" size={24} />
+                <div className="w-16 h-16 bg-ur-raised rounded-full flex items-center justify-center mx-auto mb-4">
+                  <MapPin className="text-ur-gray-dark" size={24} />
                 </div>
-                <h3 className="text-lg font-medium text-gray-200 mb-2">No Locations Found</h3>
-                <p className="text-gray-400 italic">
+                <h3 className="text-lg font-medium text-ur-white mb-2">No Locations Found</h3>
+                <p className="text-ur-gray italic">
                   {searchQuery ? 'Try adjusting your search terms or clear the search to see all locations.' : 'No provider locations available at the moment.'}
                 </p>
               </div>

@@ -1,7 +1,7 @@
-import React, { useRef, useState } from "react";
-import { Trash2, AlertTriangle, Clock, Users, Zap } from "lucide-react";
+import React, { useState } from "react";
+import { Trash2, AlertTriangle, Clock, Users } from "lucide-react";
 import { useAuth } from '../hooks/useAuth';
-import { removeClient } from "../services/api";
+import { removeClients } from "../services/api";
 import type { Client } from "../services/api";
 import toast from "react-hot-toast";
 import ConfirmModal from "./ConfirmModal";
@@ -11,15 +11,8 @@ interface BulkDeleteFormProps {
   onClientsRemoved: (clientIds: string[]) => void;
 }
 
-const MIN_RATE = 1;
-const MAX_RATE = 50;
-
-const formatEstimatedTime = (seconds: number): string => {
-  if (seconds < 60) return `~${seconds}s`;
-  const mins = Math.floor(seconds / 60);
-  const secs = seconds % 60;
-  return secs > 0 ? `~${mins}m ${secs}s` : `~${mins}m`;
-};
+/** Server applies larger requests as a background task (server PR #406) */
+const SYNC_BATCH_LIMIT = 10000;
 
 const BulkDeleteForm: React.FC<BulkDeleteFormProps> = ({
   clients,
@@ -27,14 +20,8 @@ const BulkDeleteForm: React.FC<BulkDeleteFormProps> = ({
 }) => {
   const { token } = useAuth();
   const [selectedDays, setSelectedDays] = useState<number>(7);
-  const [deletionsPerSecond, setDeletionsPerSecond] = useState<number>(10);
   const [isDeleting, setIsDeleting] = useState(false);
   const [showModal, setShowModal] = useState(false);
-  const [deleteProgress, setDeleteProgress] = useState({
-    current: 0,
-    total: 0,
-  });
-  const abortControllerRef = useRef<AbortController | null>(null);
 
   const getClientsToDelete = (days: number) => {
     const cutoffDate = new Date();
@@ -49,96 +36,41 @@ const BulkDeleteForm: React.FC<BulkDeleteFormProps> = ({
   };
 
   const clientsToDelete = getClientsToDelete(selectedDays);
-  const estimatedSeconds = Math.ceil(clientsToDelete.length / deletionsPerSecond);
-
-  const handleRateChange = (raw: string) => {
-    const parsed = parseInt(raw, 10);
-    if (isNaN(parsed)) return;
-    setDeletionsPerSecond(Math.min(MAX_RATE, Math.max(MIN_RATE, parsed)));
-  };
 
   const handleBulkDelete = async () => {
     if (!token || clientsToDelete.length === 0) return;
 
     setIsDeleting(true);
-    setDeleteProgress({ current: 0, total: clientsToDelete.length });
-
-    const deletedClientIds: string[] = [];
-    const failedClients: string[] = [];
-    let aborted = false;
-
-    const abortController = new AbortController();
-    abortControllerRef.current = abortController;
+    const clientIds = clientsToDelete.map((client) => client.client_id);
 
     try {
-      const batchSize = deletionsPerSecond;
+      const result = await removeClients(token, clientIds);
 
-      for (let i = 0; i < clientsToDelete.length; i += batchSize) {
-        if (abortController.signal.aborted) {
-          aborted = true;
-          break;
-        }
-
-        const batch = clientsToDelete.slice(i, i + batchSize);
-
-        const results = await Promise.allSettled(
-          batch.map((client) =>
-            removeClient(token, client.client_id, abortController.signal)
-          )
+      if (result.error) {
+        toast.error(`Bulk delete failed: ${result.error.message}`);
+      } else if (result.already_in_progress) {
+        toast.error(
+          "A bulk delete is already running for this network. Wait for it to finish, then try again.",
+          { duration: 6000 }
         );
-
-        for (let j = 0; j < results.length; j++) {
-          const result = results[j];
-          const client = batch[j];
-
-          if (result.status === "fulfilled") {
-            if (result.value.error) {
-              if (result.value.error.isAborted) {
-                aborted = true;
-              } else {
-                failedClients.push(client.client_id);
-              }
-            } else {
-              deletedClientIds.push(client.client_id);
-            }
-          } else {
-            failedClients.push(client.client_id);
-          }
-        }
-
-        setDeleteProgress({
-          current: Math.min(i + batchSize, clientsToDelete.length),
-          total: clientsToDelete.length,
-        });
-
-        if (aborted) break;
-
-        if (i + batchSize < clientsToDelete.length) {
-          await new Promise((resolve) => setTimeout(resolve, 1000));
-        }
-      }
-
-      if (aborted) {
-        onClientsRemoved(deletedClientIds);
+      } else if (result.scheduled) {
+        onClientsRemoved(clientIds);
         toast.success(
-          `Operation canceled. Removed ${deletedClientIds.length} offline clients successfully, ${failedClients.length} failed`
+          `Removal of ${clientIds.length.toLocaleString()} clients scheduled — the server is processing them in the background`,
+          { duration: 6000 }
         );
-      } else if (deletedClientIds.length > 0) {
-        onClientsRemoved(deletedClientIds);
+      } else {
+        onClientsRemoved(clientIds);
         toast.success(
-          `Successfully removed ${deletedClientIds.length} offline clients`
+          `Successfully removed ${clientIds.length.toLocaleString()} offline clients`
         );
-      } else if (failedClients.length > 0) {
-        toast.error(`Failed to remove ${failedClients.length} clients`);
       }
     } catch (error) {
       toast.error("Bulk delete operation failed");
       console.error("Bulk delete error:", error);
     } finally {
-      abortControllerRef.current = null;
       setIsDeleting(false);
       setShowModal(false);
-      setDeleteProgress({ current: 0, total: 0 });
     }
   };
 
@@ -182,24 +114,22 @@ const BulkDeleteForm: React.FC<BulkDeleteFormProps> = ({
     },
   ];
 
-  const ratePercent = ((deletionsPerSecond - MIN_RATE) / (MAX_RATE - MIN_RATE)) * 100;
-
   return (
     <>
       <div className="max-w-2xl">
-        <div className="mb-6 p-4 bg-yellow-900/30 border border-yellow-700/50 rounded-lg">
+        <div className="mb-6 p-4 bg-ur-yellow-light/10 border border-ur-yellow-light/30 rounded-lg">
           <div className="flex items-center gap-2 mb-2">
-            <AlertTriangle size={16} className="text-yellow-400" />
-            <span className="text-sm font-medium text-yellow-300">
+            <AlertTriangle size={16} className="text-ur-yellow-light" />
+            <span className="text-sm font-medium text-ur-yellow-light">
               Bulk Delete Warning
             </span>
           </div>
-          <p className="text-xs text-yellow-200 mb-2">
+          <p className="text-xs text-ur-yellow-light mb-2">
             This will permanently remove multiple clients from your network.
             Connected clients will never be deleted.
           </p>
-          <div className="text-xs text-yellow-300">
-            <strong>Safety Features:</strong>
+          <div className="text-xs text-ur-gray">
+            <strong className="text-ur-white">Safety Features:</strong>
             <ul className="list-disc list-inside mt-1 space-y-1">
               <li>Online/connected clients are automatically protected</li>
               <li>
@@ -207,7 +137,9 @@ const BulkDeleteForm: React.FC<BulkDeleteFormProps> = ({
                 removed
               </li>
               <li>
-                Each deletion is processed individually with error handling
+                Deletions are processed server-side in a single batched
+                operation; very large batches (over{" "}
+                {SYNC_BATCH_LIMIT.toLocaleString()}) run as a background task
               </li>
             </ul>
           </div>
@@ -215,7 +147,7 @@ const BulkDeleteForm: React.FC<BulkDeleteFormProps> = ({
 
         <div className="space-y-6">
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-3">
+            <label className="block text-sm font-medium text-ur-gray mb-3">
               Select Offline Duration Threshold
             </label>
             <div className="space-y-3">
@@ -230,14 +162,14 @@ const BulkDeleteForm: React.FC<BulkDeleteFormProps> = ({
                     value={option.value}
                     checked={selectedDays === option.value}
                     onChange={(e) => setSelectedDays(Number(e.target.value))}
-                    className="mt-1 rounded border-gray-600 bg-gray-700 text-red-600 focus:ring-red-500 focus:ring-offset-gray-800"
+                    className="mt-1 rounded border-ur-border bg-ur-raised text-ur-coral focus:ring-ur-coral focus:ring-offset-ur-black"
                     disabled={isDeleting}
                   />
                   <div className="flex-1">
-                    <div className="text-sm font-medium text-gray-200">
+                    <div className="text-sm font-medium text-ur-white">
                       {option.label}
                     </div>
-                    <div className="text-xs text-gray-400">
+                    <div className="text-xs text-ur-gray">
                       {option.description}
                     </div>
                   </div>
@@ -246,78 +178,21 @@ const BulkDeleteForm: React.FC<BulkDeleteFormProps> = ({
             </div>
           </div>
 
-          <div className="bg-gray-900 p-4 rounded-lg border border-gray-700">
-            <h4 className="text-sm font-medium text-gray-200 mb-4 flex items-center gap-2">
-              <Zap size={16} className="text-amber-400" />
-              Deletion Speed
-            </h4>
-
-            <div className="flex items-center gap-4 mb-3">
-              <div className="flex-1 relative">
-                <div
-                  className="absolute top-1/2 -translate-y-1/2 left-0 h-1.5 rounded-full bg-amber-500 pointer-events-none"
-                  style={{ width: `${ratePercent}%` }}
-                />
-                <input
-                  type="range"
-                  min={MIN_RATE}
-                  max={MAX_RATE}
-                  step={1}
-                  value={deletionsPerSecond}
-                  onChange={(e) => handleRateChange(e.target.value)}
-                  disabled={isDeleting}
-                  className="w-full h-1.5 rounded-full appearance-none bg-gray-700 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-amber-400 [&::-webkit-slider-thumb]:cursor-pointer [&::-moz-range-thumb]:h-4 [&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-amber-400 [&::-moz-range-thumb]:border-0 [&::-moz-range-thumb]:cursor-pointer"
-                />
-              </div>
-              <div className="flex items-center gap-1.5 shrink-0">
-                <input
-                  type="number"
-                  min={MIN_RATE}
-                  max={MAX_RATE}
-                  value={deletionsPerSecond}
-                  onChange={(e) => handleRateChange(e.target.value)}
-                  disabled={isDeleting}
-                  className="w-16 px-2 py-1 text-sm text-center bg-gray-800 border border-gray-600 rounded text-white focus:outline-none focus:border-amber-500 disabled:opacity-50 disabled:cursor-not-allowed [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
-                />
-                <span className="text-xs text-gray-400 whitespace-nowrap">/s</span>
-              </div>
-            </div>
-
-            <div className="flex items-center justify-between text-xs">
-              <span className="text-gray-500">{MIN_RATE}/s</span>
-              <span className="text-amber-400 font-medium">
-                {deletionsPerSecond} deletions / second
-                {clientsToDelete.length > 0 && (
-                  <span className="text-gray-400 font-normal ml-2">
-                    &mdash; est. {formatEstimatedTime(estimatedSeconds)}
-                  </span>
-                )}
-              </span>
-              <span className="text-gray-500">{MAX_RATE}/s</span>
-            </div>
-
-            {deletionsPerSecond > 20 && (
-              <p className="mt-3 text-xs text-amber-300/70">
-                High rates send many simultaneous requests. The API may rate-limit at very high speeds.
-              </p>
-            )}
-          </div>
-
-          <div className="bg-gray-900 p-4 rounded-lg border border-gray-700">
-            <h4 className="text-sm font-medium text-gray-200 mb-3 flex items-center gap-2">
-              <Users size={16} className="text-blue-400" />
+          <div className="bg-ur-black p-4 rounded-lg border border-ur-border">
+            <h4 className="text-sm font-medium text-ur-white mb-3 flex items-center gap-2">
+              <Users size={16} className="text-ur-blue-light" />
               Deletion Preview
             </h4>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-              <div className="bg-gray-800 p-3 rounded border border-gray-600">
-                <div className="text-gray-400">Total Clients</div>
-                <div className="text-lg font-semibold text-white">
+              <div className="bg-ur-panel p-3 rounded border border-ur-border">
+                <div className="text-ur-gray">Total Clients</div>
+                <div className="text-lg font-semibold text-ur-white">
                   {clients.length}
                 </div>
               </div>
-              <div className="bg-green-900/30 p-3 rounded border border-green-700">
-                <div className="text-green-300">Protected (Online)</div>
-                <div className="text-lg font-semibold text-green-200">
+              <div className="bg-ur-green/10 p-3 rounded border border-ur-green">
+                <div className="text-ur-green">Protected (Online)</div>
+                <div className="text-lg font-semibold text-ur-green">
                   {
                     clients.filter(
                       (c) => c.connections && c.connections.length > 0
@@ -325,17 +200,17 @@ const BulkDeleteForm: React.FC<BulkDeleteFormProps> = ({
                   }
                 </div>
               </div>
-              <div className="bg-red-900/30 p-3 rounded border border-red-700">
-                <div className="text-red-300">Will Be Deleted</div>
-                <div className="text-lg font-semibold text-red-200">
+              <div className="bg-ur-coral/10 p-3 rounded border border-ur-coral">
+                <div className="text-ur-coral">Will Be Deleted</div>
+                <div className="text-lg font-semibold text-ur-coral">
                   {clientsToDelete.length}
                 </div>
               </div>
             </div>
 
             {clientsToDelete.length > 0 && (
-              <div className="mt-4 p-3 bg-gray-800 rounded border border-gray-600">
-                <div className="text-xs text-gray-400 mb-2">
+              <div className="mt-4 p-3 bg-ur-panel rounded border border-ur-border">
+                <div className="text-xs text-ur-gray mb-2">
                   Sample clients to be deleted:
                 </div>
                 <div className="space-y-1 max-h-32 overflow-y-auto">
@@ -344,17 +219,17 @@ const BulkDeleteForm: React.FC<BulkDeleteFormProps> = ({
                       key={client.client_id}
                       className="flex items-center justify-between text-xs"
                     >
-                      <span className="text-gray-300 font-mono truncate flex-1 mr-2">
+                      <span className="text-ur-gray font-mono truncate flex-1 mr-2">
                         {client.device_name || client.client_id}
                       </span>
-                      <span className="text-gray-500 flex items-center gap-1">
+                      <span className="text-ur-gray-dark flex items-center gap-1">
                         <Clock size={12} />
                         {formatTimeAgo(client.auth_time)}
                       </span>
                     </div>
                   ))}
                   {clientsToDelete.length > 5 && (
-                    <div className="text-xs text-gray-500 italic">
+                    <div className="text-xs text-ur-gray-dark italic">
                       ...and {clientsToDelete.length - 5} more clients
                     </div>
                   )}
@@ -366,16 +241,16 @@ const BulkDeleteForm: React.FC<BulkDeleteFormProps> = ({
           <button
             onClick={() => setShowModal(true)}
             disabled={isDeleting || clientsToDelete.length === 0}
-            className={`flex items-center gap-2 px-6 py-3 rounded-lg text-white font-medium transition-all duration-200 ${
-              isDeleting || clientsToDelete.length === 0
-                ? "bg-gray-600 cursor-not-allowed border border-gray-600"
-                : "bg-red-600 hover:bg-red-700 border border-red-500 hover:shadow-lg transform hover:scale-105"
+            className={`flex items-center gap-2 px-6 py-3 rounded-lg font-medium transition-all duration-200 ${
+ isDeleting || clientsToDelete.length === 0
+ ? "bg-ur-hover cursor-not-allowed border border-ur-border text-ur-gray"
+                : "bg-ur-coral hover:bg-ur-coral-hover border border-ur-coral text-ur-black transform hover:scale-105"
             }`}
           >
             {isDeleting ? (
               <>
                 <svg
-                  className="animate-spin h-4 w-4 text-white"
+                  className="animate-spin h-4 w-4"
                   xmlns="http://www.w3.org/2000/svg"
                   fill="none"
                   viewBox="0 0 24 24"
@@ -394,7 +269,7 @@ const BulkDeleteForm: React.FC<BulkDeleteFormProps> = ({
                     d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                   ></path>
                 </svg>
-                Deleting... ({deleteProgress.current}/{deleteProgress.total})
+                Deleting...
               </>
             ) : (
               <>
@@ -406,7 +281,7 @@ const BulkDeleteForm: React.FC<BulkDeleteFormProps> = ({
 
           {clientsToDelete.length === 0 && (
             <div className="text-center py-4">
-              <p className="text-sm text-gray-400 italic">
+              <p className="text-sm text-ur-gray italic">
                 No offline clients found matching the selected criteria.
               </p>
             </div>
@@ -417,75 +292,54 @@ const BulkDeleteForm: React.FC<BulkDeleteFormProps> = ({
       <ConfirmModal
         isOpen={showModal}
         onClose={() => {
-          if (isDeleting) {
-            abortControllerRef.current?.abort();
-          } else {
+          if (!isDeleting) {
             setShowModal(false);
           }
         }}
         onConfirm={handleBulkDelete}
         title="Confirm Bulk Delete"
         isLoading={isDeleting}
-        icon={<AlertTriangle className="h-6 w-6 text-red-400" />}
+        icon={<AlertTriangle className="h-6 w-6 text-ur-coral" />}
       >
         <div className="space-y-4">
-          <p className="text-gray-300">
+          <p className="text-ur-gray">
             Are you sure you want to delete{" "}
-            <span className="font-medium text-white">
+            <span className="font-medium text-ur-white">
               {clientsToDelete.length}
             </span>{" "}
             offline clients?
           </p>
 
-          <div className="bg-red-900/50 p-3 rounded-lg border border-red-700">
-            <p className="text-sm text-red-300 font-medium mb-2">
+          <div className="bg-ur-coral/15 p-3 rounded-lg border border-ur-coral">
+            <p className="text-sm text-ur-coral font-medium mb-2">
               This action will:
             </p>
-            <ul className="text-sm text-red-200 space-y-1">
+            <ul className="text-sm text-ur-coral space-y-1">
               <li>
                 Permanently remove {clientsToDelete.length} clients from your
                 network
-              </li>
-              <li>
-                Process {deletionsPerSecond} deletions per second in parallel &mdash; est. {formatEstimatedTime(estimatedSeconds)}
               </li>
               <li>Skip any connected clients automatically</li>
               <li>Cannot be undone once completed</li>
             </ul>
           </div>
 
-          <div className="bg-blue-900/50 p-3 rounded-lg border border-blue-700">
-            <p className="text-sm text-blue-300">
+          <div className="bg-ur-blue/15 p-3 rounded-lg border border-ur-blue/40">
+            <p className="text-sm text-ur-blue-light">
               <strong>Criteria:</strong> Clients offline for{" "}
               {selectedDays === 0
                 ? "any amount of time"
                 : `${selectedDays}+ days`}
             </p>
+            {clientsToDelete.length > SYNC_BATCH_LIMIT && (
+              <p className="text-sm text-ur-blue-light mt-2">
+                <strong>Note:</strong> This batch exceeds{" "}
+                {SYNC_BATCH_LIMIT.toLocaleString()} clients, so the server will
+                process it as a background task. Clients may take a few minutes
+                to disappear from the list.
+              </p>
+            )}
           </div>
-
-          {isDeleting && (
-            <div className="bg-gray-800 p-3 rounded-lg border border-gray-600">
-              <div className="flex items-center justify-between text-sm text-gray-300 mb-2">
-                <span>Progress</span>
-                <span className="flex items-center gap-2">
-                  <span className="text-xs text-amber-400">{deletionsPerSecond}/s</span>
-                  <span>{deleteProgress.current} / {deleteProgress.total}</span>
-                </span>
-              </div>
-              <div className="w-full bg-gray-700 rounded-full h-2">
-                <div
-                  className="bg-red-600 h-2 rounded-full transition-all duration-300"
-                  style={{
-                    width: `${
-                      deleteProgress.total > 0
-                        ? (deleteProgress.current / deleteProgress.total) * 100
-                        : 0
-                    }%`,
-                  }}
-                ></div>
-              </div>
-            </div>
-          )}
         </div>
       </ConfirmModal>
     </>

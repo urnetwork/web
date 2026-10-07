@@ -1,6 +1,75 @@
+/* URnetwork brand fonts — licensed company-wide (same files as urnetwork/android,
+   urnetwork/apple, urnetwork/elements). Licenses: ABC Dinamo (Gravity),
+   Pangram Pangram (Neue Bit, Neue Montreal). */
+@font-face {
+  font-family: 'AbcGravityExtended';
+  src: url('./assets/fonts/abcgravity_extended.otf') format('opentype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'AbcGravityExtraCondensed';
+  src: url('./assets/fonts/abcgravity_extra_condensed.otf') format('opentype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'PpNeueBitBold';
+  src: url('./assets/fonts/pp_neue_bit_bold.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'PpNeueMontrealRegular';
+  src: url('./assets/fonts/pp_neue_montreal_regular.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+  /* URnetwork buttons use PP Neue Bit Bold across all platforms */
+  button {
+    @apply font-pixel;
+  }
+}
+
+@layer components {
+  /* URnetwork skin classes — carry brand "skin" only; layout utilities stay inline */
+  .ur-card {
+    @apply bg-ur-panel border border-ur-border rounded-ur shadow-ur-flat;
+  }
+
+  .ur-btn {
+    @apply font-pixel text-lg rounded-ur px-6 py-3 inline-flex items-center justify-center transition-colors duration-100 disabled:cursor-not-allowed;
+  }
+
+  .ur-btn-primary {
+    @apply bg-ur-blue text-ur-white border border-ur-blue hover:bg-ur-blue-hover hover:border-ur-blue-hover disabled:bg-ur-blue-disabled disabled:border-ur-blue-disabled;
+  }
+
+  .ur-btn-secondary {
+    @apply bg-transparent text-ur-gray-dark border border-ur-gray-dark hover:bg-ur-tint hover:text-ur-gray;
+  }
+
+  .ur-btn-danger {
+    @apply bg-ur-coral text-ur-black border border-ur-coral hover:bg-ur-coral-hover hover:border-ur-coral-hover disabled:opacity-60;
+  }
+
+  .ur-input {
+    @apply bg-ur-raised border border-ur-border rounded-ur-sm text-ur-white placeholder-ur-gray-dark focus:outline-none focus:ring-2 focus:ring-ur-blue focus:border-ur-blue transition-colors duration-100;
+  }
+}
 
 @keyframes fadeIn {
   from { opacity: 0; }
@@ -68,8 +137,8 @@
 }
 
 @keyframes glow {
-  0%, 100% { box-shadow: 0 0 5px rgba(59, 130, 246, 0.5); }
-  50% { box-shadow: 0 0 20px rgba(59, 130, 246, 0.8), 0 0 30px rgba(59, 130, 246, 0.4); }
+  0%, 100% { box-shadow: 0 0 5px rgba(0, 57, 222, 0.5); }
+  50% { box-shadow: 0 0 20px rgba(0, 57, 222, 0.8), 0 0 30px rgba(0, 57, 222, 0.4); }
 }
 
 @keyframes ripple {
@@ -459,8 +528,7 @@
 }
 
 body {
-  @apply text-gray-100 bg-gray-900;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+  @apply text-ur-white bg-ur-black font-sans;
 }
 
 /* Custom scrollbar for dark mode */
@@ -470,36 +538,15 @@ body {
 }
 
 ::-webkit-scrollbar-track {
-  @apply bg-gray-800;
+  @apply bg-ur-panel;
 }
 
 ::-webkit-scrollbar-thumb {
-  @apply bg-gray-600 rounded-full;
+  @apply bg-ur-hover rounded-full;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  @apply bg-gray-500;
-}
-
-/* Dark mode gradient backgrounds */
-.gradient-dark-blue {
-  background: linear-gradient(135deg, #1e3a8a 0%, #3730a3 100%);
-}
-
-.gradient-dark-purple {
-  background: linear-gradient(135deg, #581c87 0%, #7c3aed 100%);
-}
-
-.gradient-dark-green {
-  background: linear-gradient(135deg, #065f46 0%, #059669 100%);
-}
-
-.gradient-dark-red {
-  background: linear-gradient(135deg, #991b1b 0%, #dc2626 100%);
-}
-
-.gradient-dark-yellow {
-  background: linear-gradient(135deg, #92400e 0%, #d97706 100%);
+  @apply bg-ur-active;
 }
 
 /* Mobile-specific improvements */

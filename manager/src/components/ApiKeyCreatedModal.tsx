@@ -66,39 +66,39 @@ const ApiKeyCreatedModal: React.FC<ApiKeyCreatedModalProps> = ({
   if (!portalRoot) return null;
 
   return createPortal(
-    <div className="fixed inset-0 z-[9999] bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 animate-fadeIn overflow-visible">
+    <div className="fixed inset-0 z-[9999] bg-ur-black/70 backdrop-blur-sm flex items-center justify-center p-4 animate-fadeIn overflow-visible">
       <div
         ref={modalRef}
-        className="bg-gray-800 rounded-xl shadow-2xl max-w-lg w-full mx-auto animate-scaleIn border border-gray-700"
+        className="bg-ur-panel rounded-ur shadow-ur-flat max-w-lg w-full mx-auto animate-scaleIn border border-ur-border"
       >
-        <div className="flex items-start justify-between p-6 border-b border-gray-700">
+        <div className="flex items-start justify-between p-6 border-b border-ur-border">
           <div className="flex items-center space-x-3">
-            <div className="flex-shrink-0 p-2 bg-green-600 rounded-lg">
-              <Key size={20} className="text-white" />
+            <div className="flex-shrink-0 p-2 bg-ur-green rounded-lg">
+              <Key size={20} className="text-ur-black" />
             </div>
-            <h3 className="text-lg font-medium text-gray-100">
+            <h3 className="text-lg font-medium text-ur-white">
               API Key Created
             </h3>
           </div>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-200 focus:outline-none focus:text-gray-200 transition-colors p-1 rounded-lg hover:bg-gray-700"
+            className="text-ur-gray hover:text-ur-white focus:outline-none focus:text-ur-white transition-colors p-1 rounded-lg hover:bg-ur-raised"
           >
             <X size={20} />
           </button>
         </div>
 
         <div className="p-6 space-y-5">
-          <div className="flex items-start gap-3 p-4 bg-amber-900/30 border border-amber-700/50 rounded-lg">
+          <div className="flex items-start gap-3 p-4 bg-ur-yellow-light/10 border border-ur-yellow-light/30 rounded-lg">
             <AlertTriangle
               size={20}
-              className="text-amber-400 flex-shrink-0 mt-0.5"
+              className="text-ur-yellow-light flex-shrink-0 mt-0.5"
             />
             <div>
-              <p className="text-amber-300 font-medium text-sm mb-1">
+              <p className="text-ur-yellow-light font-medium text-sm mb-1">
                 Save this key now
               </p>
-              <p className="text-amber-400/80 text-sm">
+              <p className="text-ur-yellow-light/80 text-sm">
                 This is the only time the full API key will be shown. Once you
                 close this dialog, you will not be able to retrieve it again.
                 Copy it and store it in a safe place.
@@ -108,26 +108,26 @@ const ApiKeyCreatedModal: React.FC<ApiKeyCreatedModalProps> = ({
 
           <div>
             <div className="flex items-center justify-between mb-2">
-              <label className="text-sm font-medium text-gray-300">
+              <label className="text-sm font-medium text-ur-gray">
                 Key Name
               </label>
             </div>
-            <div className="bg-gray-900 px-4 py-2.5 rounded-lg border border-gray-600 text-sm text-gray-200">
+            <div className="bg-ur-black px-4 py-2.5 rounded-lg border border-ur-border text-sm text-ur-white">
               {keyName}
             </div>
           </div>
 
           <div>
             <div className="flex items-center justify-between mb-2">
-              <label className="text-sm font-medium text-gray-300">
+              <label className="text-sm font-medium text-ur-gray">
                 API Key
               </label>
               <button
                 onClick={handleCopy}
                 className={`flex items-center gap-2 px-3 py-1 rounded-lg text-xs transition-all duration-200 ${
-                  copied
-                    ? "bg-green-600 text-white border border-green-500"
-                    : "bg-gray-700 text-gray-300 hover:bg-gray-600 border border-gray-600"
+ copied
+ ? "bg-ur-green text-ur-black border border-ur-green"
+                    : "bg-ur-raised text-ur-gray hover:bg-ur-hover border border-ur-border"
                 }`}
               >
                 {copied ? (
@@ -143,15 +143,15 @@ const ApiKeyCreatedModal: React.FC<ApiKeyCreatedModalProps> = ({
                 )}
               </button>
             </div>
-            <div className="bg-gray-900 p-4 rounded-lg border border-gray-600 font-mono text-sm break-all">
-              <code className="text-green-400 select-all">{apiKey}</code>
+            <div className="bg-ur-black p-4 rounded-lg border border-ur-border font-mono text-sm break-all">
+              <code className="text-ur-green select-all">{apiKey}</code>
             </div>
           </div>
 
           <div className="flex justify-end pt-2">
             <button
               onClick={onClose}
-              className="px-5 py-2.5 bg-gray-700 hover:bg-gray-600 text-gray-200 rounded-lg transition-colors border border-gray-600 font-medium text-sm"
+              className="px-5 py-2.5 bg-ur-raised hover:bg-ur-hover text-ur-white rounded-lg transition-colors border border-ur-border font-medium text-sm"
             >
               Done
             </button>

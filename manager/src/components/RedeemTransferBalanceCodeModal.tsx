@@ -117,22 +117,22 @@ const RedeemTransferBalanceCodeModal: React.FC<RedeemTransferBalanceCodeModalPro
   if (!portalRoot) return null;
 
   return createPortal(
-    <div className="fixed inset-0 z-[9999] bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 animate-fadeIn overflow-visible">
+    <div className="fixed inset-0 z-[9999] bg-ur-black/70 backdrop-blur-sm flex items-center justify-center p-4 animate-fadeIn overflow-visible">
       <div
         ref={modalRef}
-        className="bg-gray-800 rounded-xl shadow-2xl max-w-md w-full mx-auto animate-scaleIn border border-gray-700"
+        className="bg-ur-panel rounded-ur shadow-ur-flat max-w-md w-full mx-auto animate-scaleIn border border-ur-border"
       >
-        <div className="flex items-start justify-between p-6 border-b border-gray-700">
+        <div className="flex items-start justify-between p-6 border-b border-ur-border">
           <div className="flex items-center space-x-3">
-            <div className="flex-shrink-0 p-2 bg-emerald-600 rounded-lg">
-              <TicketCheck size={20} className="text-white" />
+            <div className="flex-shrink-0 p-2 bg-ur-green rounded-lg">
+              <TicketCheck size={20} className="text-ur-black" />
             </div>
-            <h3 className="text-lg font-medium text-gray-100">Redeem Transfer Balance Code</h3>
+            <h3 className="text-lg font-medium text-ur-white">Redeem Transfer Balance Code</h3>
           </div>
           {state !== "loading" && (
             <button
               onClick={onClose}
-              className="text-gray-400 hover:text-gray-200 focus:outline-none focus:text-gray-200 transition-colors p-1 rounded-lg hover:bg-gray-700"
+              className="text-ur-gray hover:text-ur-white focus:outline-none focus:text-ur-white transition-colors p-1 rounded-lg hover:bg-ur-raised"
               aria-label="Close modal"
             >
               <X size={20} />
@@ -143,10 +143,10 @@ const RedeemTransferBalanceCodeModal: React.FC<RedeemTransferBalanceCodeModalPro
         <div className="p-6">
           {state === "success" ? (
             <div className="text-center py-4">
-              <div className="inline-flex items-center justify-center w-16 h-16 bg-green-600/20 rounded-full mb-4">
-                <CheckCircle size={32} className="text-green-400" />
+              <div className="inline-flex items-center justify-center w-16 h-16 bg-ur-green/20 rounded-full mb-4">
+                <CheckCircle size={32} className="text-ur-green" />
               </div>
-              <h4 className="text-lg font-medium text-green-300 mb-2">
+              <h4 className="text-lg font-medium text-ur-green mb-2">
                 Transfer Balance Code Redeemed Successfully
               </h4>
             </div>
@@ -164,14 +164,14 @@ const RedeemTransferBalanceCodeModal: React.FC<RedeemTransferBalanceCodeModalPro
                             e.target.value.trim().length === 26,
                         )
                     }
-                    className={`w-full px-4 py-3 bg-gray-700 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 text-white placeholder-gray-400 ${
-                        balanceCodeFocused
-                            ? "shadow-lg shadow-blue-500/20"
+                    className={`w-full px-4 py-3 bg-ur-raised border rounded-lg focus:ring-2 focus:ring-ur-blue focus:border-ur-blue transition-all duration-300 text-ur-white placeholder-ur-gray-dark ${
+ balanceCodeFocused
+ ? "shadow-ur-flat"
                             : ""
                     } ${
                         isBalanceCodeValid
-                            ? "border-green-500"
-                            : "border-gray-600"
+                            ? "border-ur-green"
+                            : "border-ur-border"
                     }`}
                     placeholder="Enter your transfer balance code"
                     disabled={state === "loading"}
@@ -182,7 +182,7 @@ const RedeemTransferBalanceCodeModal: React.FC<RedeemTransferBalanceCodeModalPro
                     required
                 />
 
-                <p id="balance-code-help" className="text-gray-500 text-sm mt-3">
+                <p id="balance-code-help" className="text-ur-gray-dark text-sm mt-3">
                   Redeeming transfer balance will add data credit to your network.
                 </p>
               </div>
@@ -191,7 +191,7 @@ const RedeemTransferBalanceCodeModal: React.FC<RedeemTransferBalanceCodeModalPro
                 <button
                   type="button"
                   onClick={onClose}
-                  className="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-gray-200 rounded-lg transition-colors border border-gray-600"
+                  className="px-4 py-2 bg-ur-raised hover:bg-ur-hover text-ur-white rounded-lg transition-colors border border-ur-border"
                   disabled={state === "loading"}
                 >
                   Cancel
@@ -199,16 +199,16 @@ const RedeemTransferBalanceCodeModal: React.FC<RedeemTransferBalanceCodeModalPro
                 <button
                   type="submit"
                   disabled={state === "loading" || !isBalanceCodeValid}
-                  className={`px-4 py-2 bg-emerald-600 text-white rounded-lg transition-all duration-200 ${
-                    state === "loading" || !isBalanceCodeValid
+                  className={`px-4 py-2 bg-ur-green text-ur-black rounded-lg transition-all duration-200 ${
+ state === "loading" || !isBalanceCodeValid
                       ? "opacity-70 cursor-not-allowed"
-                      : "hover:bg-emerald-700 hover:shadow-lg"
+                      : "hover:bg-ur-green "
                   }`}
                 >
                   {state === "loading" ? (
                     <span className="flex items-center justify-center">
                       <svg
-                        className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+                        className="animate-spin -ml-1 mr-2 h-4 w-4 text-ur-white"
                         xmlns="http://www.w3.org/2000/svg"
                         fill="none"
                         viewBox="0 0 24 24"

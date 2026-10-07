@@ -95,22 +95,22 @@ const DeleteAccountModal: React.FC<DeleteAccountModalProps> = ({
   if (!portalRoot) return null;
 
   return createPortal(
-    <div className="fixed inset-0 z-[9999] bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 animate-fadeIn overflow-visible">
+    <div className="fixed inset-0 z-[9999] bg-ur-black/70 backdrop-blur-sm flex items-center justify-center p-4 animate-fadeIn overflow-visible">
       <div
         ref={modalRef}
-        className="bg-gray-800 rounded-xl shadow-2xl max-w-md w-full mx-auto animate-scaleIn border border-gray-700"
+        className="bg-ur-panel rounded-ur shadow-ur-flat max-w-md w-full mx-auto animate-scaleIn border border-ur-border"
       >
-        <div className="flex items-start justify-between p-6 border-b border-gray-700">
+        <div className="flex items-start justify-between p-6 border-b border-ur-border">
           <div className="flex items-center space-x-3">
-            <div className="flex-shrink-0 p-2 bg-red-600 rounded-lg">
-              <Trash2 size={20} className="text-white" />
+            <div className="flex-shrink-0 p-2 bg-ur-coral rounded-lg">
+              <Trash2 size={20} className="text-ur-black" />
             </div>
-            <h3 className="text-lg font-medium text-gray-100">Delete Account</h3>
+            <h3 className="text-lg font-medium text-ur-white">Delete Account</h3>
           </div>
           {step !== "loading" && (
             <button
               onClick={onClose}
-              className="text-gray-400 hover:text-gray-200 focus:outline-none focus:text-gray-200 transition-colors p-1 rounded-lg hover:bg-gray-700"
+              className="text-ur-gray hover:text-ur-white focus:outline-none focus:text-ur-white transition-colors p-1 rounded-lg hover:bg-ur-raised"
             >
               <X size={20} />
             </button>
@@ -120,11 +120,11 @@ const DeleteAccountModal: React.FC<DeleteAccountModalProps> = ({
         <div className="p-6">
           {step === "warning" && (
             <>
-              <div className="flex items-start gap-3 p-4 bg-red-900/30 border border-red-700/50 rounded-lg mb-5">
-                <AlertTriangle size={20} className="text-red-400 flex-shrink-0 mt-0.5" />
+              <div className="flex items-start gap-3 p-4 bg-ur-coral/10 border border-ur-coral/40 rounded-lg mb-5">
+                <AlertTriangle size={20} className="text-ur-coral flex-shrink-0 mt-0.5" />
                 <div>
-                  <p className="text-red-300 font-medium text-sm mb-1">This action is permanent and cannot be undone</p>
-                  <p className="text-red-400/80 text-sm">Deleting your account will immediately and permanently remove:</p>
+                  <p className="text-ur-coral font-medium text-sm mb-1">This action is permanent and cannot be undone</p>
+                  <p className="text-ur-coral/80 text-sm">Deleting your account will immediately and permanently remove:</p>
                 </div>
               </div>
 
@@ -135,8 +135,8 @@ const DeleteAccountModal: React.FC<DeleteAccountModalProps> = ({
                   "Your network subscription and access",
                   "All associated billing history and wallet balance",
                 ].map((item) => (
-                  <li key={item} className="flex items-start gap-2 text-sm text-gray-300">
-                    <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-red-500 flex-shrink-0" />
+                  <li key={item} className="flex items-start gap-2 text-sm text-ur-gray">
+                    <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-ur-coral flex-shrink-0" />
                     {item}
                   </li>
                 ))}
@@ -145,13 +145,13 @@ const DeleteAccountModal: React.FC<DeleteAccountModalProps> = ({
               <div className="flex justify-end space-x-3">
                 <button
                   onClick={onClose}
-                  className="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-gray-200 rounded-lg transition-colors border border-gray-600"
+                  className="px-4 py-2 bg-ur-raised hover:bg-ur-hover text-ur-white rounded-lg transition-colors border border-ur-border"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={() => setStep("confirm")}
-                  className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-all duration-200 hover:shadow-lg"
+                  className="px-4 py-2 bg-ur-coral hover:bg-ur-coral-hover text-ur-black rounded-lg transition-all duration-200 "
                 >
                   Continue
                 </button>
@@ -161,22 +161,22 @@ const DeleteAccountModal: React.FC<DeleteAccountModalProps> = ({
 
           {step === "confirm" && (
             <>
-              <p className="text-gray-300 mb-2">
-                To confirm, type <span className="font-mono font-bold text-red-400">DELETE</span> in the field below:
+              <p className="text-ur-gray mb-2">
+                To confirm, type <span className="font-mono font-bold text-ur-coral">DELETE</span> in the field below:
               </p>
               <input
                 type="text"
                 value={confirmInput}
                 onChange={(e) => setConfirmInput(e.target.value)}
                 placeholder="Type DELETE to confirm"
-                className="w-full bg-gray-700 border border-gray-600 focus:border-red-500 focus:ring-1 focus:ring-red-500 text-gray-100 placeholder-gray-500 rounded-lg px-4 py-2.5 mb-5 outline-none transition-colors font-mono"
+                className="w-full bg-ur-raised border border-ur-border focus:border-ur-coral focus:ring-1 focus:ring-ur-coral text-ur-white placeholder-ur-gray-dark rounded-lg px-4 py-2.5 mb-5 outline-none transition-colors font-mono"
                 autoFocus
               />
 
               <div className="flex justify-end space-x-3">
                 <button
                   onClick={() => { setStep("warning"); setConfirmInput(""); }}
-                  className="flex items-center gap-1.5 px-4 py-2 bg-gray-700 hover:bg-gray-600 text-gray-200 rounded-lg transition-colors border border-gray-600"
+                  className="flex items-center gap-1.5 px-4 py-2 bg-ur-raised hover:bg-ur-hover text-ur-white rounded-lg transition-colors border border-ur-border"
                 >
                   <ArrowLeft size={16} />
                   Go Back
@@ -185,9 +185,9 @@ const DeleteAccountModal: React.FC<DeleteAccountModalProps> = ({
                   onClick={handleDelete}
                   disabled={confirmInput !== "DELETE"}
                   className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 flex items-center gap-2 ${
-                    confirmInput === "DELETE"
-                      ? "bg-red-600 hover:bg-red-700 text-white hover:shadow-lg"
-                      : "bg-gray-600 text-gray-400 cursor-not-allowed"
+ confirmInput === "DELETE"
+                      ? "bg-ur-coral hover:bg-ur-coral-hover text-ur-black "
+                      : "bg-ur-hover text-ur-gray cursor-not-allowed"
                   }`}
                 >
                   <Trash2 size={16} />
@@ -199,9 +199,9 @@ const DeleteAccountModal: React.FC<DeleteAccountModalProps> = ({
 
           {step === "loading" && (
             <div className="text-center py-8">
-              <div className="inline-flex items-center justify-center w-16 h-16 bg-red-600/20 rounded-full mb-4">
+              <div className="inline-flex items-center justify-center w-16 h-16 bg-ur-coral/20 rounded-full mb-4">
                 <svg
-                  className="animate-spin h-8 w-8 text-red-400"
+                  className="animate-spin h-8 w-8 text-ur-coral"
                   xmlns="http://www.w3.org/2000/svg"
                   fill="none"
                   viewBox="0 0 24 24"
@@ -210,18 +210,18 @@ const DeleteAccountModal: React.FC<DeleteAccountModalProps> = ({
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                 </svg>
               </div>
-              <p className="text-gray-300 font-medium">Deleting your account...</p>
-              <p className="text-gray-500 text-sm mt-1">Please wait, do not close this window</p>
+              <p className="text-ur-gray font-medium">Deleting your account...</p>
+              <p className="text-ur-gray-dark text-sm mt-1">Please wait, do not close this window</p>
             </div>
           )}
 
           {step === "success" && (
             <div className="text-center py-6">
-              <div className="inline-flex items-center justify-center w-16 h-16 bg-green-600/20 rounded-full mb-4">
-                <CheckCircle size={32} className="text-green-400" />
+              <div className="inline-flex items-center justify-center w-16 h-16 bg-ur-green/20 rounded-full mb-4">
+                <CheckCircle size={32} className="text-ur-green" />
               </div>
-              <h4 className="text-lg font-medium text-green-300 mb-2">Account Deleted</h4>
-              <p className="text-gray-400 text-sm">
+              <h4 className="text-lg font-medium text-ur-green mb-2">Account Deleted</h4>
+              <p className="text-ur-gray text-sm">
                 Your account has been permanently deleted. You will be signed out shortly.
               </p>
             </div>
@@ -229,24 +229,24 @@ const DeleteAccountModal: React.FC<DeleteAccountModalProps> = ({
 
           {step === "error" && (
             <>
-              <div className="flex items-start gap-3 p-4 bg-red-900/30 border border-red-700/50 rounded-lg mb-5">
-                <AlertTriangle size={20} className="text-red-400 flex-shrink-0 mt-0.5" />
+              <div className="flex items-start gap-3 p-4 bg-ur-coral/10 border border-ur-coral/40 rounded-lg mb-5">
+                <AlertTriangle size={20} className="text-ur-coral flex-shrink-0 mt-0.5" />
                 <div>
-                  <p className="text-red-300 font-medium text-sm mb-1">Deletion failed</p>
-                  <p className="text-red-400/80 text-sm">{errorMessage || "An unexpected error occurred. Please try again."}</p>
+                  <p className="text-ur-coral font-medium text-sm mb-1">Deletion failed</p>
+                  <p className="text-ur-coral/80 text-sm">{errorMessage || "An unexpected error occurred. Please try again."}</p>
                 </div>
               </div>
 
               <div className="flex justify-end space-x-3">
                 <button
                   onClick={onClose}
-                  className="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-gray-200 rounded-lg transition-colors border border-gray-600"
+                  className="px-4 py-2 bg-ur-raised hover:bg-ur-hover text-ur-white rounded-lg transition-colors border border-ur-border"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={() => { setStep("confirm"); setConfirmInput(""); }}
-                  className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-all duration-200 hover:shadow-lg"
+                  className="px-4 py-2 bg-ur-coral hover:bg-ur-coral-hover text-ur-black rounded-lg transition-all duration-200 "
                 >
                   Try Again
                 </button>
