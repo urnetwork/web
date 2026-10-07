@@ -101,6 +101,8 @@ install -m 600 "$HOME/.urnetwork/jwt" /var/lib/ur-validator/no-1/network.jwt
 
 For another operator, use its actual API and login flow, then copy the newly issued token to that operator's directory. `validator auth -f --api_url=...` explicitly replaces the temporary `$HOME/.urnetwork/jwt`; `validator auth --user_auth=... --api_url=...` prompts for a password instead.
 
+`validator auth --operator=<domain>` finds the operator in the published [operator list](/operators.yml) instead of taking `--api_url`, and writes its token to `<state_dir>/operators/<domain>/jwt`; the default state directory is `~/.urnetwork/validator`. That is where [measurement of every listed operator](#measure-every-listed-operator-without-weights) reads it. With `--hotkey_seed_file=<path>`, `validator auth` signs in with the hotkey, as a TAO wallet, in place of an auth code or password. The production configuration reads only the `network_jwt_file` paths it names.
+
 Each operator configuration names `network_jwt_file`, `client_jwt_file` and `client_key_seed_file`. The client JWT is tied to the original client key and identity. A production configuration can explicitly authorize first registration with `allow_client_registration: true`; without that signed permission, provide the existing client credential. An unsupported registration API, missing login or identity mismatch can leave measurement waiting. Preserve the existing identity when recovering authentication.
 
 ## 5. Provision the production configuration and evidence
@@ -169,10 +171,15 @@ validator storage-inspect \
 validator run --config=/etc/ur-validator/release.yml \
   --durable-volumes=/etc/ur-validator/durable-volumes.json \
   --durable-volumes-sha256="$VALIDATOR_VOLUMES_SHA256" \
-  --progress-file=/var/lib/ur-validator-observation/progress.json
+  --progress-file=/var/lib/ur-validator-observation/progress.json \
+  --operators-refresh=1h
 ```
 
 The foreground command performs real validation and can submit weights once the approved conditions are met. Run exactly one process for each hotkey and state namespace. Use the same arguments under your deployment's service manager; retain the original journals and signed pending transactions on restart. Handle a custody or configuration refusal before restarting instead of deleting state or generating replacement keys.
+
+`--operators-refresh=1h` follows the published [operator list](/operators.yml), refetching it every hour, without changing what the validator signs or weights: only the operators pinned in the signed configuration are weighted, and the release runs exactly as it would without the flag. The list is cached as `operators.yml` in the configuration's `state_dir`. At startup and at each list change, the validator logs a drift report and writes it to `operators-report.json` beside that cache. The report shows each pinned operator, matched to the list by API URL, as listed or delisted with any connect URL mismatch, and each listed operator that the configuration does not pin. It is operational output; nothing reads it back.
+
+With `--operators-refresh`, `--operators-url=<url>` follows another list, and `--observe-unpinned-operators` also measures each listed operator that the configuration does not pin, for observation only, under `observed-operators/<domain>/` in the configuration's `state_dir`. Observation signs in and provisions with the configuration's `hotkey_seed_file`, and its results never reach weights, evidence or production state. Pinned operators keep their configured `network_jwt_file`; a missing one is reported and never created.
 
 Watch stderr and the bounded [progress record](https://github.com/urfoundation/sn/blob/main/mainnet/SERVICE-PROGRESS.md). Check several separate signals:
 
@@ -180,9 +187,24 @@ Watch stderr and the bounded [progress record](https://github.com/urfoundation/s
 - `intent` records expose the prepared, finalized and applied transaction boundaries. A submitted or pending transaction is not yet an applied weight vector.
 - `settlement` shows the durable epoch cursor and outstanding publication work.
 - Operator authentication and trail diagnostics show whether measurement can progress for each operator.
+- Operator list drift is not in the progress record. With `--operators-refresh`, it is in the log and in `operators-report.json`.
 - Native metagraph reads show whether the hotkey still holds its UID and permit and is receiving dividends.
 
 An epoch wait can be normal; a fresh heartbeat alone does not establish successful validation. The current `validator status --config` rejects schema 3, so use the progress record, service logs and native chain reads for this production path. Without `--config`, `validator run` is a legacy measurement-only mode and never writes release weights.
+
+### Measure every listed operator without weights
+
+`validator run --all-operators` measures every operator in the published operator list and never writes weights. Each operator has its own state under `<state_dir>/operators/<domain>/`: the token `jwt`, the measurement key `.validator.key` and the client JWT `.validator.jwt`. The single-operator `<state_dir>/.validator.key` and `~/.urnetwork/jwt` are not used.
+
+```bash
+validator run --all-operators --auto-register \
+  --hotkey_seed_file=/absolute/private/hotkey.seed
+```
+
+- `--auto-register` signs in with the hotkey, as a TAO wallet, where an operator has no token. It provisions a measurement identity only for a brand-new operator directory, and never recovers, adopts or replaces an existing identity. The seed file must already exist; it is never created.
+- Without `--auto-register`, an operator with no token logs `operator <domain> is awaiting auth: validator auth --operator=<domain>` and is checked again every five minutes. A directory with no measurement identity is refused and retried, and the log names the flags that provision it.
+- The list is cached as `<state_dir>/operators.yml` and refetched every hour, or every `--operators-refresh`, a Go duration of at least `1m`. `--operators-url=<url>` follows another list. The last good copy stays in use while the list can't be fetched.
+- A newly listed operator starts, a delisted one stops with its state kept, and an operator whose URLs change restarts. A failed operator restarts after 30 seconds, doubling to 10 minutes, and never stops the others.
 
 ## 7. Collect validator rewards
 

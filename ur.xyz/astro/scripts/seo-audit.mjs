@@ -370,8 +370,11 @@ if (existsSync(secPath)) {
 // say TODO or show elided example URLs — the strict checks apply to the
 // generated files, the link check tolerates markdown punctuation.
 // The agent files are generated from the build (llms.txt lists every page);
-// they stay small, so an agent can take them in one fetch.
-const AGENT_FILE_BUDGET = { "llms.txt": 16 * 1024, "llms-full.txt": 128 * 1024 };
+// they stay small, so an agent can take them in one fetch. As of 2026-10,
+// llms-full.txt is about 137 KB: the three role guides, the litepaper, the
+// page map and the investor materials as published. Its budget leaves room
+// for the guides to grow and fails a build that embeds something by mistake.
+const AGENT_FILE_BUDGET = { "llms.txt": 16 * 1024, "llms-full.txt": 160 * 1024 };
 for (const rel of ["llms.txt", "llms-full.txt", "litepaper.md"]) {
   const fp = path.join(DIST, rel);
   if (!existsSync(fp)) continue;
