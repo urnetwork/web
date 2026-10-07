@@ -582,12 +582,6 @@ http {
             add_header 'X-Robots-Tag' $ur_preview_robots always;
         }
 
-        location ~ ^/llms(?:-full)?\.txt$ {
-            add_header 'Link' '<https://ur.io/>; rel="canonical"';
-            add_header 'Cache-Control' 'public, max-age=3600, stale-while-revalidate=86400';
-            add_header 'X-Robots-Tag' $ur_preview_robots always;
-        }
-
         # mime.types has no entry for the web app manifest, which went out as
         # application/octet-stream.
         location = /site.webmanifest {
@@ -859,12 +853,6 @@ http {
 
         location = /litepaper.md {
             add_header 'Link' '<https://ur.xyz/docs/litepaper>; rel="canonical"';
-            add_header 'Cache-Control' 'public, max-age=3600, stale-while-revalidate=86400';
-            add_header 'X-Robots-Tag' $ur_preview_robots always;
-        }
-
-        location ~ ^/llms(?:-full)?\.txt$ {
-            add_header 'Link' '<https://ur.xyz/>; rel="canonical"';
             add_header 'Cache-Control' 'public, max-age=3600, stale-while-revalidate=86400';
             add_header 'X-Robots-Tag' $ur_preview_robots always;
         }

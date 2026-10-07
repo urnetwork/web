@@ -383,6 +383,16 @@ for page in products about agents changelog install; do
     expect_header ur.io "/$page.md" Link "<https://ur.io/$page>; rel=\"canonical\""
 done
 
+# llms.txt and llms-full.txt are not copies of the home page, so they carry no
+# canonical Link to it, and they cache like the other machine-readable files.
+for host in ur.io ur.xyz; do
+    for file in llms.txt llms-full.txt; do
+        expect_response "$host" "/$file" 200
+        expect_header "$host" "/$file" Link ''
+        expect_header "$host" "/$file" Cache-Control 'public, max-age=3600, stale-while-revalidate=86400'
+    done
+done
+
 # /ip remains HTML for browsers, but negotiates a tiny, non-cacheable JSON
 # response for API clients. Cloudflare is authoritative on the public host;
 # Warp's bracketed address is the direct/preview fallback.
