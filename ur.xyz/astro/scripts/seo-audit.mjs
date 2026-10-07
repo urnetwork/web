@@ -14,6 +14,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { DOC_ORDER, DOC_PAGE_PATHS, UNLISTED_DOC_SLUGS } from "../../react/src/lib/docs-shared.js";
 import { contentDay, investorLetterMetadata } from "./pdf-freshness.mjs";
+import { reserve } from "../../react/src/data/reserve.js";
 
 const DIST = path.resolve(process.argv[2] || "dist");
 if (!existsSync(DIST)) {
@@ -392,6 +393,35 @@ for (const p of pages.values()) {
     }
     if (/^\/investors\/[^/]+$/.test(p.urlPath) && !graph.some((n) => WORK_TYPES.has(n["@type"]) && DAY.test(n.datePublished || ""))) {
       err(`${p.urlPath}: investor document declares no dated CreativeWork`);
+    }
+  }
+}
+
+// ── what a reader without JavaScript (or an agent reading the HTML) gets ──
+// /build's six opportunity briefs were reachable only through ?op=&brief=1,
+// which the page reads once it runs: each brief now has its own address
+// (#brief-<slug>), which a stylesheet rule shows before hydration, and the
+// static page marks every brief it does not show hidden. /reserve's figures
+// are read from the chain in the browser: its HTML says so, with the reserve's
+// account and where to check it.
+{
+  const build = pages.get("/build");
+  if (build) {
+    const panels = [...build.html.matchAll(/<section class="brief-panel"[^>]*>/g)].map((m) => m[0]);
+    if (!panels.length) err("/build: no opportunity briefs in the page");
+    for (const tag of panels) {
+      const id = attr(tag, "id") || "";
+      if (!/^brief-[a-z0-9-]+$/.test(id)) err(`/build: brief ${id || "(no id)"} has no #brief-<slug> address`);
+      if (!/\shidden(?:=""|[\s>])/.test(tag)) err(`/build: brief ${id} is not marked hidden in the static page`);
+    }
+    const css = files.filter((f) => f.endsWith(".css")).map((f) => readFileSync(f, "utf8")).join("\n");
+    if (!/\.brief-panel:target\b/.test(css)) err("/build: no stylesheet rule shows a brief at its address (.brief-panel:target)");
+  }
+  const reservePage = pages.get("/reserve");
+  if (reservePage) {
+    const verify = (reservePage.html.match(/<p class="reserve-verify">([\s\S]*?)<\/p>/) || [])[1] || "";
+    if (!verify.includes(reserve.address) || !verify.includes(`href="${reserve.explorerUrl}"`)) {
+      err("/reserve: the static page does not say where to verify its figures (the account and its explorer link)");
     }
   }
 }

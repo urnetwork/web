@@ -158,6 +158,11 @@
     padding-top: 28px;
 }
 .reserve-proof { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+/* the static line under the figures: where they come from and how to check them */
+.reserve-verify { margin-top: 18px; font-size: 12px; line-height: 18px; color: var(--rv-dim); }
+.reserve-verify code { overflow-wrap: anywhere; color: var(--rv-quiet); }
+.reserve-verify a { color: var(--brand-ur); text-decoration: none; }
+.reserve-verify a:hover { color: var(--brand-white); }
 .reserve-stat {
     display: flex;
     flex-direction: column;

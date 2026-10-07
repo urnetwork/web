@@ -86,7 +86,8 @@ function BriefNav({ pos, onPrev, onNext, children }) {
  * the prev/next navigation. `v12` is the BUILD_V12 entry for the opportunity
  * when the page runs as version 12 (its copy replaces the editorial story and
  * rail metadata), otherwise null. Like the readouts, every opportunity's brief
- * is in the page and all but the selected one are `hidden`.
+ * is in the page, at its own address (`id`, brief-<slug>), and all but the
+ * selected one are `hidden` (version 12 hides a closed one too: it is not drawn).
  */
 export function BriefPanel({ id, hidden, panelRef, op, v12, opportunities, builder, open, briefMode, onBriefMode, onPrev, onNext, onClose }) {
     const count = opportunities.length;

@@ -84,6 +84,7 @@ gates: install-playwright-browser
 	node --test ../scripts/agent-assets.test.mjs
 	node ../react/tests/visual-parity.mjs
 	node ../react/tests/network-privacy.mjs
+	node ../react/tests/static-affordances.mjs
 	node scripts/link-audit.mjs build/$(UR_ENV_DIR)
 	node scripts/seo-audit.mjs build/$(UR_ENV_DIR)
 	node scripts/page-dates.mjs build/$(UR_ENV_DIR) --check

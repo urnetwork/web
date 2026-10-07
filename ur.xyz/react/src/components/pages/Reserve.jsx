@@ -217,6 +217,11 @@ export default function ReservePage() {
                 <div className="reserve-proof">
                     {stats.map((s) => <Stat key={s.label} {...s} />)}
                 </div>
+                {/* in the page's HTML, for a reader or an agent that does not run it:
+                    where the figures come from and where to check them */}
+                <p className="reserve-verify">
+                    Verify it yourself: these figures are read from Bittensor mainnet in your browser. The reserve is held by coldkey <code translate="no">{reserve.address}</code>; see it on <a href={reserve.explorerUrl} target="_blank" rel="noopener noreferrer">Taostats</a>.
+                </p>
             </header>
 
             <section className="reserve-block" id="balance" aria-labelledby="reserve-balance-h">
