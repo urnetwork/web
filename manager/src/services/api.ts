@@ -272,13 +272,34 @@ export const fetchWalletChallenge = async (
       };
     }
 
-    const data = await safeJsonParse<WalletAuthChallengeResponse>(response);
-    if ("success" in data) {
-      return data;
+    // the server answers { challenge, timestamp, expires_in, message_template }
+    // or { error }, without a success flag
+    const data = await safeJsonParse<{
+      challenge?: string;
+      timestamp?: number;
+      expires_in?: number;
+      message_template?: string;
+      error?: { message?: string };
+    }>(response);
+    if (
+      data.error ||
+      !data.challenge ||
+      !data.message_template ||
+      typeof data.timestamp !== "number"
+    ) {
+      return {
+        success: false,
+        error: {
+          message: data.error?.message || "Invalid wallet challenge response",
+        },
+      };
     }
     return {
       success: true,
-      ...data,
+      challenge: data.challenge,
+      timestamp: data.timestamp,
+      expires_in: data.expires_in ?? 0,
+      message_template: data.message_template,
     };
   } catch (error) {
     console.error("Wallet challenge error:", error);
