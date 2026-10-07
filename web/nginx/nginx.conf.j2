@@ -744,6 +744,36 @@ http {
             return 301 /docs/litepaper;
         }
 
+        # Retired sections of the earlier site, in every language and with
+        # their .html and trailing-slash forms, 301 to their successors in
+        # one hop. The provider and extender roles became the miner role,
+        # whose page has localized copies, so they keep the language; the
+        # other successors are English-only pages.
+        location ~ ^(?<role_lang>/(?:ru|ar|zh|de|es))?/(?:providers|extenders)(?:\.html|/)?$ {
+            return 301 $role_lang/miners;
+        }
+
+        location ~ ^/(?:(?:ru|ar|zh|de|es)/)?community(?:\.html|/)?$ {
+            return 301 /about;
+        }
+
+        location ~ ^/(?:(?:ru|ar|zh|de|es)/)?api(?:\.html|/)?$ {
+            return 301 /docs;
+        }
+
+        location ~ ^/(?:(?:ru|ar|zh|de|es)/)?roadmap(?:\.html|/)?$ {
+            return 301 /investors;
+        }
+
+        location ~ ^/(?:(?:ru|ar|zh|de|es)/)?whitepaper(?:\.html|/)?$ {
+            return 301 /docs/litepaper;
+        }
+
+        # where crawlers guess the sitemap
+        location = /sitemap.xml {
+            return 301 /sitemap-index.xml;
+        }
+
         # The docs corpus is four documents, /docs/miner, /docs/validator,
         # /docs/operator and /docs/litepaper (2026-09-25). Each retired document,
         # with its .html and trailing-slash variants and its localized paths,
