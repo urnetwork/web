@@ -1,5 +1,5 @@
 ---
-description: Build and run the current SN25 validator, provision its keys and production configuration, monitor validation, and withdraw native validator rewards.
+description: Install and run the current SN25 validator, provision its keys and production configuration, monitor validation, and withdraw native validator rewards.
 ---
 
 # How to run a validator
@@ -22,7 +22,27 @@ Prepare these inputs for the deployment you intend to join:
 
 The current production binary accepts a provisioned schema-3 deployment. Its `init --config`, `register`, `stake add`, `activate` and `status --config` commands still use the older preactivation loader, which rejects schema 3. They do not provide a self-service bootstrap for current mainnet. Use the native wallet steps below for registration and staking; provision mainnet evidence and approval inputs through the deployment's bootstrap process. Changing a schema number or copying a testnet configuration does not produce those inputs. This boundary is documented in [production runtime admission](https://github.com/urfoundation/sn/blob/main/mainnet/VALIDATOR-PRODUCTION-RUNTIME.md).
 
-## 1. Build the current validator
+## 1. Get the validator
+
+Download a release build of the validator, or build it from source.
+
+### Download a release
+
+The validator ships as `urnetwork-validator-<version>.tar.gz` on the [build releases page](https://github.com/urnetwork/build/releases). The tarball holds one binary per platform at `<os>/<arch>/validator`, for Linux and macOS. A mainnet validator runs the Linux binary, `linux/amd64` or `linux/arm64` (see [Before you start](#before-you-start)):
+
+```bash
+VERSION=2026.10.6-1065506180   # the latest tag on the releases page, without the leading v
+curl -fSsL -o urnetwork-validator.tar.gz \
+  "https://github.com/urnetwork/build/releases/download/v${VERSION}/urnetwork-validator-${VERSION}.tar.gz"
+tar -xzf urnetwork-validator.tar.gz
+install -d "$HOME/.local/bin"
+install -m 755 linux/amd64/validator "$HOME/.local/bin/validator"   # choose your os/arch
+"$HOME/.local/bin/validator" --help
+```
+
+Add `$HOME/.local/bin` to your `PATH` for the commands below. Record the release version with the binary so a later deployment can reproduce it.
+
+### Or build from source
 
 Build from the `sn` revision selected for your deployment. Use the Go version declared in [`sn/go.mod`](https://github.com/urfoundation/sn/blob/main/go.mod) and matching sibling checkouts for its local `replace` directives: `connect` (including `sctp`), `sdk`, `server`, `warp`, `proxy`, `userwireguard`, `glog`, `goidenticons` and `gvisor`.
 

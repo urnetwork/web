@@ -382,11 +382,12 @@ function codeItems(items) {
  * supported inline constructs in order of priority. Anything that does
  * not match falls through as a plain text node. We strip raw HTML tags
  * but keep their text content so the colored `<span>` decorations in
- * the changelog read as normal sentences.
+ * the changelog read as normal sentences. A code span is not stripped:
+ * its `<domain>` is a placeholder, not a tag.
  */
 function renderInline(input, ctx) {
     if (!input) return null;
-    const text = stripHtmlTags(input);
+    const text = stripOutsideCode(input, stripHtmlTags);
     const out = [];
     let i = 0;
     let key = 0;
@@ -471,7 +472,24 @@ function renderInline(input, ctx) {
 
 /** A table header cell as plain text, for the label a stacked row shows. */
 function plainText(s) {
-    return stripHtmlTags(s).replace(/[`*_]/g, '').replace(/\[([^\]]+)\]\([^)]*\)/g, '$1').trim();
+    return stripOutsideCode(s, (prose) => stripHtmlTags(prose).replace(/[*_]/g, '').replace(/\[([^\]]+)\]\([^)]*\)/g, '$1'))
+        .replace(/`/g, '')
+        .trim();
+}
+
+/**
+ * `strip(s)` with each code span set aside, then put back as written. A code
+ * span is literal: read as markup, a placeholder in it was dropped as a tag
+ * (`--operator=<domain>` showed as `--operator=`) and its underscores were
+ * read as emphasis (the search text lost those of `--hotkey_seed_file`). The
+ * spans wait under NUL-delimited indexes, so a construct around one (a link's
+ * text) is still read whole. Backticks pair from the left, as renderInline
+ * reads them.
+ */
+function stripOutsideCode(s, strip) {
+    const spans = [];
+    const prose = s.replace(/`[^`]*`/g, (span) => `\0${spans.push(span) - 1}\0`);
+    return strip(prose).replace(/\0(\d+)\0/g, (_, i) => spans[i]);
 }
 
 function stripHtmlTags(s) {
@@ -516,18 +534,19 @@ function slugify(s) {
 /**
  * Lightweight plain-text extraction used by the search index. Keeps it
  * in sync with what the renderer actually displays so search results
- * match the visible text.
+ * match the visible text: a code span keeps its text as written, so
+ * `--hotkey_seed_file=<path>` is found as it is typed.
  */
 export function markdownToText(src) {
     if (!src) return '';
-    return src
-        .replace(/```[\s\S]*?```/g, ' ')
-        .replace(/`([^`]+)`/g, '$1')
+    const prose = (s) => s
         .replace(/!\[[^\]]*\]\([^)]*\)/g, ' ')
         .replace(/\[([^\]]+)\]\([^)]*\)/g, '$1')
         .replace(/^#{1,6}\s+/gm, '')
         .replace(/[*_]{1,3}([^*_]+)[*_]{1,3}/g, '$1')
-        .replace(/<\/?[a-zA-Z][^>]*>/g, ' ')
+        .replace(/<\/?[a-zA-Z][^>]*>/g, ' ');
+    return stripOutsideCode(src.replace(/```[\s\S]*?```/g, ' '), prose)
+        .replace(/`([^`]+)`/g, '$1')
         .replace(/\s+/g, ' ')
         .trim();
 }

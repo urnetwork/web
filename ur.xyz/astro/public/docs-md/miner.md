@@ -20,7 +20,26 @@ This guide follows the current [`sn/miner` implementation](https://github.com/ur
 
 Obtain deployment details from the operator's published configuration. The mainnet plan uses EVM chain ID 964 and SN25; testnet uses different addresses, chain identity and timing. A successful build or login does not establish that an operator's subnet rewards are activated.
 
-## 1. Build the current provider
+## 1. Get the provider
+
+Download a release build of the provider, or build it from source.
+
+### Download a release
+
+The miner ships under its historical name `provider`, as `urnetwork-provider-<version>.tar.gz` on the [build releases page](https://github.com/urnetwork/build/releases). The tarball holds one binary per platform at `<os>/<arch>/provider`. Use the Linux or macOS binary for your host (see [Before you start](#before-you-start)), such as `linux/amd64` on x86-64 Linux or `darwin/arm64` on Apple silicon:
+
+```bash
+VERSION=2026.10.6-1065506180   # the latest tag on the releases page, without the leading v
+curl -fSsL -o urnetwork-provider.tar.gz \
+  "https://github.com/urnetwork/build/releases/download/v${VERSION}/urnetwork-provider-${VERSION}.tar.gz"
+tar -xzf urnetwork-provider.tar.gz
+mkdir -p "$HOME/.local/bin"
+install -m 755 linux/amd64/provider "$HOME/.local/bin/provider"   # choose your os/arch
+export PATH="$HOME/.local/bin:$PATH"
+provider --help
+```
+
+### Or build from source
 
 Use the Go version required by `sn/go.mod` (currently Go 1.26.5) and compatible revisions of the sibling repositories referenced by its `replace` directives. The source workspace must have this shape:
 
@@ -343,6 +362,8 @@ For a separate relayer host, build the claim submitter from the same source:
 # From sn/:
 go build -o "$HOME/.local/bin/snclaim" ./cli/snclaim
 ```
+
+Or download it from the same release: the [releases page](https://github.com/urnetwork/build/releases) also ships `urnetwork-snclaim-<version>.tar.gz`, which holds `<os>/<arch>/snclaim` for Linux and macOS. Install it the way [Download a release](#download-a-release) installs the provider.
 
 Fetch and verify with `provider claim` on the provider host, then submit its exact calldata and vault address on the relayer host:
 
