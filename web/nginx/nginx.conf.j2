@@ -28,6 +28,23 @@ http {
     include /etc/nginx/mime.types;
     default_type application/octet-stream;
 
+    # Every text file these sites serve is UTF-8, and the Content-Type says
+    # so. Without the parameter, clients such as Python requests decode
+    # text/plain and its kin as ISO-8859-1, and RFC 7763 requires it on
+    # text/markdown. text/html always gets it.
+    charset utf-8;
+    charset_types
+        text/plain
+        text/markdown
+        text/xml
+        text/css
+        application/javascript
+        application/json
+        application/yaml
+        application/rss+xml
+        application/xml
+        application/manifest+json;
+
     ##
     # Logging Settings
     ##
@@ -150,11 +167,14 @@ http {
         "~^(?<analytics_public_path>[^?]*)(?:[?].*)?$" $analytics_public_path;
     }
 
-    # Count only successful public HTML GETs. Static assets, previews,
-    # redirects, errors, and health checks are excluded.
-    map "$request_method:$status:$sent_http_content_type:$analytics_site" $analytics_page_view {
+    # Count only public HTML page views: successful GETs of HTML, and
+    # revalidated ones, a 304 for a page's .html file ($uri after try_files),
+    # which carries no Content-Type. Static assets, previews, redirects,
+    # errors, and health checks are excluded.
+    map "$request_method:$status:$sent_http_content_type:$analytics_site:$uri" $analytics_page_view {
         default 0;
-        "~^GET:2[0-9][0-9]:text/html(?:;[^:]*)?:(?:ur\.io|ur\.xyz)$" 1;
+        "~^GET:2[0-9][0-9]:text/html(?:;[^:]*)?:(?:ur\.io|ur\.xyz):" 1;
+        "~^GET:304::(?:ur\.io|ur\.xyz):.*\.html$" 1;
     }
 
     log_format privacy_safe_page_view escape=json
@@ -206,6 +226,123 @@ http {
         preview.ur.xyz   "noindex, nofollow";
     }
 
+    # The public machine-readable files (llms.txt, markdown twins, specs,
+    # feeds, sitemaps) can be read from any origin. The warp load balancer
+    # already sends Access-Control-Allow-Origin for the origins in the web
+    # service's cors_origins (vault services.yml: https://ur.io, plus two
+    # retired Framer previews), and nginx add_header appends rather than
+    # replaces, so a second value would fail the browser's check for exactly
+    # those origins: leave them to the load balancer. Should that list become
+    # "*", drop these headers instead.
+    map $http_origin $public_cors_origin {
+        default          "*";
+        "https://ur.io"  "";
+    }
+
+    # ur.io's earlier Framer site had a page per country,
+    # /how-to-get-a-vpn/vpn-access-in-<name>, in every language, and search
+    # engines still list them. The name is the country's English name,
+    # lowercased, with hyphens for spaces. A country with a location page goes
+    # to it (this map); the ur.io block sends every other path there to the
+    # location index. One line per country of mmm
+    # ur.io/react/src/data/countries.js.
+    map $framer_country $framer_country_path {
+        default                 "";
+        albania                 /al;
+        argentina               /ar;
+        australia               /au;
+        austria                 /at;
+        bahrain                 /bh;
+        bangladesh              /bd;
+        belarus                 /by;
+        belgium                 /be;
+        bolivia                 /bo;
+        bosnia-and-herzegovina  /ba;
+        botswana                /bw;
+        brazil                  /br;
+        bulgaria                /bg;
+        cambodia                /kh;
+        canada                  /ca;
+        chile                   /cl;
+        china                   /cn;
+        colombia                /co;
+        costa-rica              /cr;
+        croatia                 /hr;
+        cyprus                  /cy;
+        czechia                 /cz;
+        denmark                 /dk;
+        dominican-republic      /do;
+        ecuador                 /ec;
+        egypt                   /eg;
+        estonia                 /ee;
+        finland                 /fi;
+        france                  /fr;
+        georgia                 /ge;
+        germany                 /de;
+        greece                  /gr;
+        hong-kong               /hk;
+        hungary                 /hu;
+        iceland                 /is;
+        india                   /in;
+        indonesia               /id;
+        ireland                 /ie;
+        israel                  /il;
+        italy                   /it;
+        jamaica                 /jm;
+        japan                   /jp;
+        kazakhstan              /kz;
+        kenya                   /ke;
+        kyrgyzstan              /kg;
+        latvia                  /lv;
+        lebanon                 /lb;
+        liechtenstein           /li;
+        lithuania               /lt;
+        luxembourg              /lu;
+        malaysia                /my;
+        malta                   /mt;
+        mexico                  /mx;
+        moldova                 /md;
+        myanmar                 /mm;
+        nepal                   /np;
+        netherlands             /nl;
+        new-zealand             /nz;
+        nigeria                 /ng;
+        north-macedonia         /mk;
+        norway                  /no;
+        oman                    /om;
+        pakistan                /pk;
+        panama                  /pa;
+        peru                    /pe;
+        philippines             /ph;
+        poland                  /pl;
+        portugal                /pt;
+        puerto-rico             /pr;
+        réunion                 /re;
+        romania                 /ro;
+        russia                  /ru;
+        saudi-arabia            /sa;
+        serbia                  /rs;
+        singapore               /sg;
+        slovakia                /sk;
+        slovenia                /si;
+        south-africa            /za;
+        south-korea             /kr;
+        spain                   /es;
+        sri-lanka               /lk;
+        sweden                  /se;
+        switzerland             /ch;
+        taiwan                  /tw;
+        thailand                /th;
+        turkey                  /tr;
+        ukraine                 /ua;
+        united-arab-emirates    /ae;
+        united-kingdom          /gb;
+        united-states           /us;
+        uruguay                 /uy;
+        uzbekistan              /uz;
+        vietnam                 /vn;
+    }
+
     server {
         listen 80 default_server;
 
@@ -238,6 +375,12 @@ http {
         location ^~ /res/emails/ {
             try_files $uri =404;
             add_header 'Cache-Control' 'public, max-age=2592000, stale-while-revalidate=86400';
+        }
+
+        # The legacy blog (/blog/ and its one article, /blog/visual/) has no
+        # page-by-page successor: its links land on the ur.io blog.
+        location ^~ /blog/ {
+            return 301 https://ur.io/blog;
         }
 
         location / {
@@ -354,10 +497,12 @@ http {
         location = / {
             try_files /index.html =404;
 
-            # always check for updates in the background
+            # Always check for updates in the background. The validators are
+            # nginx's own Last-Modified and ETag (the file's mtime and size):
+            # its 304 check compares conditional requests with those, so a
+            # hand-set Last-Modified or ETag never matched and every
+            # revalidation got the whole page.
             add_header 'Cache-Control' 'max-age=0, stale-while-revalidate=86400';
-            add_header 'Last-Modified' '{{ http_last_modified }}';
-            add_header 'ETag' 'W/"{{ http_etag }}"';
             add_header 'X-Robots-Tag' $ur_preview_robots always;
         }
 
@@ -375,6 +520,32 @@ http {
         }
 
         location ~ ^/(?:(?:ru|ar|zh|de|es)/)?protocol(?:\.html|/)?$ {
+            return 301 https://ur.xyz/;
+        }
+
+        # The earlier Framer site's pages, in every language, which search
+        # engines still list, go to their successors in one hop: the country
+        # pages to the country's location page ($framer_country_path) or else
+        # the location index, the newsletter and podcast to the blog, the VPN
+        # pitch pages to the products, the Seeker page to the install page,
+        # and the earn page to the protocol's site.
+        location ~ ^(?<framer_lang>/(?:es|de|zh|ru|ar))?/how-to-get-a-vpn(?:/vpn-access-in-(?<framer_country>[^/]+?))?(?:/.*)?$ {
+            return 301 $framer_lang/location$framer_country_path;
+        }
+
+        location ~ ^(?<framer_lang>/(?:es|de|zh|ru|ar))?/(?:newsletter|podcast)(?:\.html|/.*)?$ {
+            return 301 $framer_lang/blog;
+        }
+
+        location ~ ^(?<framer_lang>/(?:es|de|zh|ru|ar))?/(?:better-vpn|privacy-and-security)(?:\.html|/)?$ {
+            return 301 $framer_lang/products;
+        }
+
+        location ~ ^(?<framer_lang>/(?:es|de|zh|ru|ar))?/seeker(?:\.html|/)?$ {
+            return 301 $framer_lang/install;
+        }
+
+        location ~ ^/(?:(?:es|de|zh|ru|ar)/)?earn(?:\.html|/)?$ {
             return 301 https://ur.xyz/;
         }
 
@@ -397,42 +568,42 @@ http {
             add_header 'Link' '<https://ur.io/docs>; rel="canonical"';
             add_header 'Cache-Control' 'public, max-age=3600, stale-while-revalidate=86400';
             add_header 'X-Robots-Tag' $ur_preview_robots always;
+            add_header 'Access-Control-Allow-Origin' $public_cors_origin always;
         }
 
         location ~ ^/docs-md/(?<md_lang>es|de|zh|ru|ar)/(?<md_slug>[a-z0-9-]+)\.md$ {
             add_header 'Link' '<https://ur.io/$md_lang/docs/$md_slug>; rel="canonical"';
             add_header 'Cache-Control' 'public, max-age=3600, stale-while-revalidate=86400';
             add_header 'X-Robots-Tag' $ur_preview_robots always;
+            add_header 'Access-Control-Allow-Origin' $public_cors_origin always;
         }
 
         location ~ ^/docs-md/(?<md_slug>[a-z0-9-]+)\.md$ {
             add_header 'Link' '<https://ur.io/docs/$md_slug>; rel="canonical"';
             add_header 'Cache-Control' 'public, max-age=3600, stale-while-revalidate=86400';
             add_header 'X-Robots-Tag' $ur_preview_robots always;
+            add_header 'Access-Control-Allow-Origin' $public_cors_origin always;
         }
 
         location ~ ^/blog-md/(?<md_lang>es|de|zh|ru|ar)/(?<md_slug>[a-z0-9-]+)\.md$ {
             add_header 'Link' '<https://ur.io/$md_lang/blog/$md_slug>; rel="canonical"';
             add_header 'Cache-Control' 'public, max-age=3600, stale-while-revalidate=86400';
             add_header 'X-Robots-Tag' $ur_preview_robots always;
+            add_header 'Access-Control-Allow-Origin' $public_cors_origin always;
         }
 
         location ~ ^/blog-md/(?<md_slug>[a-z0-9-]+)\.md$ {
             add_header 'Link' '<https://ur.io/blog/$md_slug>; rel="canonical"';
             add_header 'Cache-Control' 'public, max-age=3600, stale-while-revalidate=86400';
             add_header 'X-Robots-Tag' $ur_preview_robots always;
+            add_header 'Access-Control-Allow-Origin' $public_cors_origin always;
         }
 
-        location ~ ^/(?<md_page>products|about|agents|changelog)\.md$ {
+        location ~ ^/(?<md_page>products|about|agents|changelog|install)\.md$ {
             add_header 'Link' '<https://ur.io/$md_page>; rel="canonical"';
             add_header 'Cache-Control' 'public, max-age=3600, stale-while-revalidate=86400';
             add_header 'X-Robots-Tag' $ur_preview_robots always;
-        }
-
-        location ~ ^/llms(?:-full)?\.txt$ {
-            add_header 'Link' '<https://ur.io/>; rel="canonical"';
-            add_header 'Cache-Control' 'public, max-age=3600, stale-while-revalidate=86400';
-            add_header 'X-Robots-Tag' $ur_preview_robots always;
+            add_header 'Access-Control-Allow-Origin' $public_cors_origin always;
         }
 
         # mime.types has no entry for the web app manifest, which went out as
@@ -454,9 +625,8 @@ http {
 
             try_files /ip.html =404;
 
+            # nginx's own validators, as for the other pages (location = /)
             add_header 'Cache-Control' 'max-age=0, stale-while-revalidate=86400';
-            add_header 'Last-Modified' '{{ http_last_modified }}';
-            add_header 'ETag' 'W/"{{ http_etag }}"';
             add_header 'Vary' 'Accept' always;
             add_header 'X-Robots-Tag' $ur_preview_robots always;
         }
@@ -475,10 +645,34 @@ http {
             return 301 /blog/rss.xml;
         }
 
+        # The paths where crawlers and agents guess the feed, the sitemap and
+        # the agents file lead to the real ones.
+        location = /feed {
+            return 301 /blog/rss.xml;
+        }
+
+        location = /feed/ {
+            return 301 /blog/rss.xml;
+        }
+
+        location = /rss.xml {
+            return 301 /blog/rss.xml;
+        }
+
+        location = /sitemap.xml {
+            return 301 /sitemap-index.xml;
+        }
+
+        location = /AGENTS.md {
+            return 301 /agents.md;
+        }
+
         # Universal Links / password AutoFill discovery. Apple fetches this
         # extensionless path and wants JSON.
         location = /.well-known/apple-app-site-association {
             default_type application/json;
+            # Apple documents exactly application/json for this file.
+            charset off;
             add_header 'Cache-Control' 'max-age=3600';
         }
 
@@ -516,15 +710,15 @@ http {
         location ~* \.(?:xml|txt|md|ya?ml|json)$ {
             add_header 'Cache-Control' 'public, max-age=3600, stale-while-revalidate=86400';
             add_header 'X-Robots-Tag' $ur_preview_robots always;
+            add_header 'Access-Control-Allow-Origin' $public_cors_origin always;
         }
 
         location / {
             try_files $uri $uri.html $uri/ $uri/index.html =404;
 
-            # always check for updates in the background
+            # always check for updates in the background, with nginx's own
+            # validators (see location = /)
             add_header 'Cache-Control' 'max-age=0, stale-while-revalidate=86400';
-            add_header 'Last-Modified' '{{ http_last_modified }}';
-            add_header 'ETag' 'W/"{{ http_etag }}"';
             add_header 'X-Robots-Tag' $ur_preview_robots always;
         }
     }
@@ -550,10 +744,12 @@ http {
         location = / {
             try_files /index.html =404;
 
-            # always check for updates in the background
+            # Always check for updates in the background. The validators are
+            # nginx's own Last-Modified and ETag (the file's mtime and size):
+            # its 304 check compares conditional requests with those, so a
+            # hand-set Last-Modified or ETag never matched and every
+            # revalidation got the whole page.
             add_header 'Cache-Control' 'max-age=0, stale-while-revalidate=86400';
-            add_header 'Last-Modified' '{{ http_last_modified }}';
-            add_header 'ETag' '"{{ http_etag }}"';
             add_header 'X-Robots-Tag' $ur_preview_robots always;
         }
 
@@ -571,6 +767,36 @@ http {
         # fallback, but a real 301 passes signals properly and skips a hop.
         location = /docs/whitepaper {
             return 301 /docs/litepaper;
+        }
+
+        # Retired sections of the earlier site, in every language and with
+        # their .html and trailing-slash forms, 301 to their successors in
+        # one hop. The provider and extender roles became the miner role,
+        # whose page has localized copies, so they keep the language; the
+        # other successors are English-only pages.
+        location ~ ^(?<role_lang>/(?:ru|ar|zh|de|es))?/(?:providers|extenders)(?:\.html|/)?$ {
+            return 301 $role_lang/miners;
+        }
+
+        location ~ ^/(?:(?:ru|ar|zh|de|es)/)?community(?:\.html|/)?$ {
+            return 301 /about;
+        }
+
+        location ~ ^/(?:(?:ru|ar|zh|de|es)/)?api(?:\.html|/)?$ {
+            return 301 /docs;
+        }
+
+        location ~ ^/(?:(?:ru|ar|zh|de|es)/)?roadmap(?:\.html|/)?$ {
+            return 301 /investors;
+        }
+
+        location ~ ^/(?:(?:ru|ar|zh|de|es)/)?whitepaper(?:\.html|/)?$ {
+            return 301 /docs/litepaper;
+        }
+
+        # where crawlers guess the sitemap
+        location = /sitemap.xml {
+            return 301 /sitemap-index.xml;
         }
 
         # The docs corpus is four documents, /docs/miner, /docs/validator,
@@ -633,8 +859,10 @@ http {
         }
 
         # Docs are English-only; the localized docs URLs are redirect stubs.
-        # Serve the redirect at the HTTP layer instead of via meta refresh.
-        location ~ ^/(?:ru|ar|zh|de|es)/docs(?<docpath>/.*)?$ {
+        # Serve the redirect at the HTTP layer instead of via meta refresh, in
+        # one hop: the target leaves off a trailing slash or .html, which the
+        # canonical rules below would otherwise redirect again.
+        location ~ ^/(?:ru|ar|zh|de|es)/docs(?<docpath>/.*?[^/])?(?:\.html|/+)?$ {
             return 301 /docs$docpath;
         }
 
@@ -670,6 +898,12 @@ http {
             add_header 'X-Robots-Tag' $ur_preview_robots always;
         }
 
+        location = /investors/ur-network-capacity-letter.pdf {
+            add_header 'Link' '<https://ur.xyz/investors/funding-network-capacity>; rel="canonical"';
+            add_header 'Cache-Control' 'public, max-age=2592000, stale-while-revalidate=86400';
+            add_header 'X-Robots-Tag' $ur_preview_robots always;
+        }
+
         # Markdown and text twins of HTML pages, for agents: canonical to the
         # page they mirror, so the page is what search engines index. Ahead of
         # the generic machine-readable rule below, which they would otherwise
@@ -678,18 +912,22 @@ http {
             add_header 'Link' '<https://ur.xyz/docs/$doc_slug>; rel="canonical"';
             add_header 'Cache-Control' 'public, max-age=3600, stale-while-revalidate=86400';
             add_header 'X-Robots-Tag' $ur_preview_robots always;
+            add_header 'Access-Control-Allow-Origin' $public_cors_origin always;
         }
 
         location = /litepaper.md {
             add_header 'Link' '<https://ur.xyz/docs/litepaper>; rel="canonical"';
             add_header 'Cache-Control' 'public, max-age=3600, stale-while-revalidate=86400';
             add_header 'X-Robots-Tag' $ur_preview_robots always;
+            add_header 'Access-Control-Allow-Origin' $public_cors_origin always;
         }
 
-        location ~ ^/llms(?:-full)?\.txt$ {
-            add_header 'Link' '<https://ur.xyz/>; rel="canonical"';
+        # the legal documents' twins (scripts/generate-agent-assets.mjs)
+        location ~ ^/(?<legal_doc>terms|privacy|vdp)\.md$ {
+            add_header 'Link' '<https://ur.xyz/$legal_doc>; rel="canonical"';
             add_header 'Cache-Control' 'public, max-age=3600, stale-while-revalidate=86400';
             add_header 'X-Robots-Tag' $ur_preview_robots always;
+            add_header 'Access-Control-Allow-Origin' $public_cors_origin always;
         }
 
         # mime.types has no entry for the web app manifest, which went out as
@@ -712,6 +950,7 @@ http {
             try_files $uri =404;
             add_header 'Cache-Control' 'public, max-age=300';
             add_header 'X-Robots-Tag' $ur_preview_robots always;
+            add_header 'Access-Control-Allow-Origin' $public_cors_origin always;
         }
 
         location ^~ /_astro/ {
@@ -732,18 +971,21 @@ http {
             add_header 'X-Robots-Tag' $ur_preview_robots always;
         }
 
-        location ~* \.(?:xml|txt|md|ya?ml|json)$ {
+        # Machine-readable surfaces (sitemaps, feeds, the price list and
+        # feed, llms.txt, markdown twins): fresh within the hour without
+        # hammering.
+        location ~* \.(?:xml|txt|md|ya?ml|json|rss)$ {
             add_header 'Cache-Control' 'public, max-age=3600, stale-while-revalidate=86400';
             add_header 'X-Robots-Tag' $ur_preview_robots always;
+            add_header 'Access-Control-Allow-Origin' $public_cors_origin always;
         }
 
         location / {
             try_files $uri $uri.html $uri/ $uri/index.html =404;
 
-            # always check for updates in the background
+            # always check for updates in the background, with nginx's own
+            # validators (see location = /)
             add_header 'Cache-Control' 'max-age=0, stale-while-revalidate=86400';
-            add_header 'Last-Modified' '{{ http_last_modified }}';
-            add_header 'ETag' '"{{ http_etag }}"';
             add_header 'X-Robots-Tag' $ur_preview_robots always;
         }
     }

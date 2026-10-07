@@ -55,6 +55,48 @@ expect_response() {
     fi
 }
 
+# The first value of a response header in a dumped header file, the name
+# matched case-insensitively.
+header_value() {
+    local headers=$1
+    local name=$2
+
+    awk -v name="$name" '
+        BEGIN { name = tolower(name) }
+        index($0, ":") > 1 && tolower(substr($0, 1, index($0, ":") - 1)) == name {
+            value = substr($0, index($0, ":") + 1)
+            sub(/^[[:space:]]+/, "", value)
+            sub(/\r$/, "", value)
+            print value
+            exit
+        }' "$headers"
+}
+
+# The response to host+path carries the header with exactly this value. An
+# empty expected value means the response must not carry the header. Further
+# arguments go to curl.
+expect_header() {
+    local host=$1
+    local path=$2
+    local name=$3
+    local expected=$4
+    shift 4
+    local headers="$test_dir/header.headers"
+    local value
+
+    curl --silent --show-error \
+        --output /dev/null \
+        --dump-header "$headers" \
+        --header "Host: $host" \
+        "$@" \
+        "http://127.0.0.1${path}"
+
+    value=$(header_value "$headers" "$name")
+    if [[ "$value" != "$expected" ]]; then
+        fail "$host$path sent $name: ${value:-<none>}, expected ${expected:-<none>}"
+    fi
+}
+
 expect_ip_json() {
     local label=$1
     local expected_ip=$2
@@ -80,8 +122,8 @@ expect_ip_json() {
     [[ "$(<"$body")" == "$expected_body" ]] || \
         fail "ur.io/ip JSON ($label) returned $(<"$body"), expected $expected_body"
 
-    content_type=$(awk 'BEGIN { IGNORECASE=1 } /^Content-Type:/ { gsub(/\r/, "", $2); print $2; exit }' "$headers")
-    [[ "$content_type" == application/json ]] || \
+    content_type=$(header_value "$headers" Content-Type)
+    [[ "$content_type" == 'application/json; charset=utf-8' ]] || \
         fail "ur.io/ip JSON ($label) content type was ${content_type:-<missing>}"
 
     cache_control=$(awk 'BEGIN { IGNORECASE=1 } /^Cache-Control:/ { sub(/^[^:]+:[[:space:]]*/, ""); gsub(/\r/, ""); print; exit }' "$headers")
@@ -111,8 +153,8 @@ expect_ip_html() {
     [[ "$status" == 200 ]] || fail "ur.io/ip HTML ($label) returned $status, expected 200"
     [[ -s "$body" ]] || fail "ur.io/ip HTML ($label) returned an empty response"
 
-    content_type=$(awk 'BEGIN { IGNORECASE=1 } /^Content-Type:/ { gsub(/\r/, "", $2); print $2; exit }' "$headers")
-    [[ "$content_type" == text/html ]] || \
+    content_type=$(header_value "$headers" Content-Type)
+    [[ "$content_type" == 'text/html; charset=utf-8' ]] || \
         fail "ur.io/ip HTML ($label) content type was ${content_type:-<missing>}"
 
     grep -Eiq '^Vary:.*(^|[,[:space:]])Accept([,[:space:]]|$)' "$headers" || \
@@ -270,6 +312,237 @@ expect_response docs.ur.io '/legal/privacy?smoke=1' 301 'https://ur.io/privacy?s
 expect_response docs.ur.io '/api/api-reference/auth/code-login?smoke=1' 301 \
     'https://ur.io/docs/api/auth?smoke=1'
 
+# The earlier Framer site's pages, in every language, which search engines
+# still list, go to their successors in one hop, and every successor is a
+# page of this build.
+expect_successor() {
+    local host=$1
+    local path=$2
+    local target=$3
+
+    expect_response "$host" "$path" 301 "$target"
+    expect_response "$host" "$target" 200
+}
+
+# Each country of the Framer map has its location page, so dropping a country
+# from the site fails the image instead of sending its old page to a 404.
+framer_countries=0
+while read -r slug path; do
+    framer_countries=$((framer_countries + 1))
+    expect_successor ur.io "/how-to-get-a-vpn/vpn-access-in-$slug" "/location$path"
+done < <(awk '
+    /map \$framer_country \$framer_country_path/ { in_map = 1; next }
+    in_map && /^[[:space:]]*}/ { exit }
+    in_map && $1 != "default" { sub(/;$/, "", $2); print $1, $2 }' /etc/nginx/nginx.conf)
+[[ "$framer_countries" -gt 0 ]] || fail 'nginx.conf has no $framer_country map'
+
+for lang in '' /es /de /zh /ru /ar; do
+    expect_successor ur.io "$lang/how-to-get-a-vpn/vpn-access-in-canada" "$lang/location/ca"
+    expect_successor ur.io "$lang/how-to-get-a-vpn/vpn-access-in-united-states/" "$lang/location/us"
+    # a Framer country without a location page, and the index
+    expect_successor ur.io "$lang/how-to-get-a-vpn/vpn-access-in-northern-mariana-islands" "$lang/location"
+    expect_successor ur.io "$lang/how-to-get-a-vpn" "$lang/location"
+    for page in newsletter newsletter/issue-12 podcast podcast/episode-3; do
+        expect_successor ur.io "$lang/$page" "$lang/blog"
+    done
+    for page in better-vpn privacy-and-security/; do
+        expect_successor ur.io "$lang/$page" "$lang/products"
+    done
+    expect_successor ur.io "$lang/seeker" "$lang/install"
+    expect_response ur.io "$lang/earn" 301 https://ur.xyz/
+done
+# the form search engines list for a name outside ASCII
+expect_successor ur.io /how-to-get-a-vpn/vpn-access-in-r%C3%A9union /location/re
+
+# The legacy bringyour.com blog has no page-by-page successor: its links land
+# on the ur.io blog.
+for host in bringyour.com main-web.bringyour.com; do
+    for path in /blog /blog/ /blog/visual/ '/blog/visual/vis/latencymap/?smoke=1'; do
+        expect_response "$host" "$path" 301 https://ur.io/blog
+    done
+done
+expect_response ur.io /blog 200
+
+# The paths where crawlers and agents guess ur.io's feed, sitemap and agents
+# file lead to the real ones.
+for path in /feed /feed/ /rss.xml; do
+    expect_successor ur.io "$path" /blog/rss.xml
+done
+expect_successor ur.io /sitemap.xml /sitemap-index.xml
+expect_successor ur.io /AGENTS.md /agents.md
+
+# The markdown twins of ur.io's pages point search engines at the page they
+# mirror. The site publishes /install.md from mmm's generate-agents-md.mjs;
+# until the build has it, say so instead of failing the image.
+for page in products about agents changelog install; do
+    if [[ "$page" == install && ! -f /www/preview.ur.io/install.md ]]; then
+        printf 'nginx smoke test: skipped ur.io/install.md, not in this build\n'
+        continue
+    fi
+    expect_response ur.io "/$page.md" 200
+    expect_header ur.io "/$page.md" Link "<https://ur.io/$page>; rel=\"canonical\""
+done
+
+# ur.xyz's retired sections, in every language, go to their successors in one
+# hop, from their .html and trailing-slash forms too. The provider and
+# extender roles keep the language: the miner page has localized copies.
+for lang in '' /ru /ar /zh /de /es; do
+    for path in providers extenders; do
+        expect_successor ur.xyz "$lang/$path" "$lang/miners"
+    done
+    expect_successor ur.xyz "$lang/community" /about
+    expect_successor ur.xyz "$lang/api" /docs
+    expect_successor ur.xyz "$lang/roadmap" /investors
+    expect_successor ur.xyz "$lang/whitepaper" /docs/litepaper
+done
+for variant in / .html; do
+    expect_response ur.xyz "/de/providers$variant" 301 /de/miners
+    expect_response ur.xyz "/extenders$variant" 301 /miners
+    expect_response ur.xyz "/community$variant" 301 /about
+    expect_response ur.xyz "/es/api$variant" 301 /docs
+    expect_response ur.xyz "/roadmap$variant" 301 /investors
+    expect_response ur.xyz "/zh/whitepaper$variant" 301 /docs/litepaper
+done
+expect_successor ur.xyz /sitemap.xml /sitemap-index.xml
+
+# A localized docs URL goes to the English document in one hop, from its
+# trailing-slash and .html forms too.
+for lang in ru ar zh de es; do
+    for variant in '' / .html; do
+        expect_response ur.xyz "/$lang/docs$variant" 301 /docs
+        expect_response ur.xyz "/$lang/docs/miner$variant" 301 /docs/miner
+    done
+done
+expect_response ur.xyz /docs 200
+expect_response ur.xyz /docs/miner 200
+
+# Each investor PDF is a printout of an investor page: it stays a month-long
+# download and points search engines at the page it prints.
+while read -r pdf page; do
+    expect_response ur.xyz "/investors/$pdf.pdf" 200
+    expect_response ur.xyz "/investors/$page" 200
+    expect_header ur.xyz "/investors/$pdf.pdf" Link "<https://ur.xyz/investors/$page>; rel=\"canonical\""
+    expect_header ur.xyz "/investors/$pdf.pdf" Cache-Control 'public, max-age=2592000, stale-while-revalidate=86400'
+done <<'EOF'
+ur-investor-deck deck
+our-letter-to-bittensor our-letter-to-bittensor
+ur-conviction-lock-announcement conviction-lock
+ur-letter-to-tokenholders-september-2026 letter-to-tokenholders-september-2026
+ur-network-capacity-letter funding-network-capacity
+EOF
+
+# A page revalidates: a client that sends back the Last-Modified or the ETag
+# it got, or both, gets a 304. nginx's 304 check compares its own validators
+# (the file's mtime and size), so the response must carry those; Cloudflare
+# may weaken the ETag, and the weak form must match too.
+expect_revalidation() {
+    local host=$1
+    local path=$2
+    local headers="$test_dir/revalidation.headers"
+    local last_modified
+    local etag
+    local condition
+    local status
+
+    curl --silent --show-error \
+        --output /dev/null \
+        --dump-header "$headers" \
+        --header "Host: $host" \
+        "http://127.0.0.1${path}"
+    last_modified=$(header_value "$headers" Last-Modified)
+    etag=$(header_value "$headers" ETag)
+    if [[ -z "$last_modified" || -z "$etag" ]]; then
+        fail "$host$path sent Last-Modified: ${last_modified:-<none>}, ETag: ${etag:-<none>}"
+    fi
+
+    for condition in \
+        "If-Modified-Since: $last_modified" \
+        "If-None-Match: $etag" \
+        "If-None-Match: W/${etag#W/}"; do
+        status=$(curl --silent --show-error \
+            --output /dev/null \
+            --write-out '%{http_code}' \
+            --header "Host: $host" \
+            --header "$condition" \
+            "http://127.0.0.1${path}")
+        [[ "$status" == 304 ]] || fail "$host$path answered $condition with $status, expected 304"
+    done
+
+    status=$(curl --silent --show-error \
+        --output /dev/null \
+        --write-out '%{http_code}' \
+        --header "Host: $host" \
+        --header "If-Modified-Since: $last_modified" \
+        --header "If-None-Match: $etag" \
+        "http://127.0.0.1${path}")
+    [[ "$status" == 304 ]] || fail "$host$path answered both validators with $status, expected 304"
+}
+
+for host in ur.xyz preview.ur.xyz; do
+    for path in / /investors /docs/miner; do
+        expect_revalidation "$host" "$path"
+    done
+done
+for host in ur.io preview.ur.io; do
+    for path in / /products /ip /docs/faq; do
+        expect_revalidation "$host" "$path"
+    done
+done
+
+# llms.txt and llms-full.txt are not copies of the home page, so they carry no
+# canonical Link to it, and they cache like the other machine-readable files.
+for host in ur.io ur.xyz; do
+    for file in llms.txt llms-full.txt; do
+        expect_response "$host" "/$file" 200
+        expect_header "$host" "/$file" Link ''
+        expect_header "$host" "/$file" Cache-Control 'public, max-age=3600, stale-while-revalidate=86400'
+    done
+done
+
+# The public machine-readable files can be read from any origin. The load
+# balancer answers the origin it allowlists (https://ur.io) itself, so for
+# that one the response leaves the header off rather than send a second
+# value. Pages are not machine-readable files.
+expect_public_cors() {
+    local host=$1
+    local path=$2
+
+    expect_response "$host" "$path" 200
+    expect_header "$host" "$path" Access-Control-Allow-Origin '*'
+    expect_header "$host" "$path" Access-Control-Allow-Origin '*' --header 'Origin: https://agent.example'
+    expect_header "$host" "$path" Access-Control-Allow-Origin '' --header 'Origin: https://ur.io'
+}
+
+blog_md=$(find /www/preview.ur.io/blog-md -maxdepth 1 -name '*.md' -print -quit)
+blog_md_localized=$(find /www/preview.ur.io/blog-md/es -maxdepth 1 -name '*.md' -print -quit)
+[[ -n "$blog_md" && -n "$blog_md_localized" ]] || fail 'the ur.io build has no blog-md twins'
+for path in /llms.txt /llms-full.txt /agents.md /products.md /openapi.yml /sitemap-index.xml \
+    /blog/rss.xml /docs-md/index.md /docs-md/faq.md /docs-md/es/faq.md \
+    "${blog_md#/www/preview.ur.io}" "${blog_md_localized#/www/preview.ur.io}"; do
+    expect_public_cors ur.io "$path"
+done
+for path in /llms.txt /llms-full.txt /docs-md/miner.md /litepaper.md /operators.yml \
+    /price.yml /price.rss /sitemap-index.xml; do
+    expect_public_cors ur.xyz "$path"
+done
+expect_header ur.io /products Access-Control-Allow-Origin ''
+expect_header ur.xyz /investors Access-Control-Allow-Origin ''
+
+# The price feed caches like the other machine-readable files, not like a page.
+expect_header ur.xyz /price.rss Cache-Control 'public, max-age=3600, stale-while-revalidate=86400'
+
+# ur.xyz publishes markdown twins of its legal documents from
+# scripts/generate-agent-assets.mjs; each points search engines at its page.
+# Until the build has them, say so instead of failing the image.
+for doc in terms privacy vdp; do
+    if [[ ! -f "/www/preview.ur.xyz/$doc.md" ]]; then
+        printf 'nginx smoke test: skipped ur.xyz/%s.md, not in this build\n' "$doc"
+        continue
+    fi
+    expect_public_cors ur.xyz "/$doc.md"
+    expect_header ur.xyz "/$doc.md" Link "<https://ur.xyz/$doc>; rel=\"canonical\""
+done
+
 # /ip remains HTML for browsers, but negotiates a tiny, non-cacheable JSON
 # response for API clients. Cloudflare is authoritative on the public host;
 # Warp's bracketed address is the direct/preview fallback.
@@ -281,6 +554,21 @@ expect_ip_json cloudflare-v4 203.0.113.9 \
     --header 'X-UR-Forwarded-For: 198.51.100.20:41001'
 expect_ip_json warp-v6 2001:db8::7 \
     --header 'X-UR-Forwarded-For: [2001:db8::7]:41002'
+
+# Text goes out as UTF-8 whatever its type, so no client falls back to
+# ISO-8859-1. Apple's association file keeps the exact type Apple documents.
+for host in ur.io ur.xyz; do
+    expect_header "$host" / Content-Type 'text/html; charset=utf-8'
+    expect_header "$host" /llms.txt Content-Type 'text/plain; charset=utf-8'
+    expect_header "$host" /sitemap-index.xml Content-Type 'text/xml; charset=utf-8'
+    expect_header "$host" /site.webmanifest Content-Type 'application/manifest+json; charset=utf-8'
+done
+expect_header ur.io /agents.md Content-Type 'text/markdown; charset=utf-8'
+expect_header ur.io /openapi.yml Content-Type 'application/yaml; charset=utf-8'
+expect_header ur.xyz /docs-md/miner.md Content-Type 'text/markdown; charset=utf-8'
+expect_header ur.xyz /operators.yml Content-Type 'application/yaml; charset=utf-8'
+expect_header ur.xyz /price.rss Content-Type 'application/rss+xml; charset=utf-8'
+expect_header ur.io /.well-known/apple-app-site-association Content-Type application/json
 
 # A synthetic edge request proves the only emitted page-view fields are the
 # normalized path, country bucket, and classified source. Deliberately put
@@ -315,5 +603,54 @@ done
 if grep -q '"site":"preview\.' "$analytics_log"; then
     fail 'preview traffic was emitted as a public page view'
 fi
+
+# A revalidated page view counts like a full one: a 304 for the page's file
+# emits the event, while a 304 for a machine-readable file does not.
+page_view_count() {
+    grep -c "\"site\":\"$1\",\"path\":\"$2\"" "$analytics_log" || true
+}
+
+# Fetches host+path, then revalidates it with the Last-Modified it sent, and
+# waits until the two requests have added the expected page views.
+expect_counted_revalidation() {
+    local host=$1
+    local path=$2
+    local expected=$3
+    local headers="$test_dir/counted.headers"
+    local before
+    local status
+
+    before=$(page_view_count "$host" "$path")
+    curl --silent --show-error \
+        --output /dev/null \
+        --dump-header "$headers" \
+        --header "Host: $host" \
+        "http://127.0.0.1${path}"
+    status=$(curl --silent --show-error \
+        --output /dev/null \
+        --write-out '%{http_code}' \
+        --header "Host: $host" \
+        --header "If-Modified-Since: $(header_value "$headers" Last-Modified)" \
+        "http://127.0.0.1${path}")
+    [[ "$status" == 304 ]] || fail "$host$path revalidated with $status, expected 304"
+
+    for _ in $(seq 1 50); do
+        [[ "$(page_view_count "$host" "$path")" -ge $((before + expected)) ]] && break
+        sleep 0.1
+    done
+    [[ "$(page_view_count "$host" "$path")" == $((before + expected)) ]] || \
+        fail "$host$path logged $(( $(page_view_count "$host" "$path") - before )) page views, expected $expected"
+}
+
+expect_counted_revalidation ur.xyz /llms.txt 0
+expect_counted_revalidation ur.io /llms.txt 0
+expect_counted_revalidation ur.xyz /reserve 2
+expect_counted_revalidation ur.io /agents 2
+# The page views above were logged after the llms.txt revalidations, which
+# must still have logged none.
+for host in ur.xyz ur.io; do
+    [[ "$(page_view_count "$host" /llms.txt)" == 0 ]] || \
+        fail "$host/llms.txt was logged as a page view"
+done
 
 printf 'nginx smoke test: canonical routes and privacy-safe analytics passed\n'
