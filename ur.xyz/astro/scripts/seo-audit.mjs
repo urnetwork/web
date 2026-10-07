@@ -337,6 +337,36 @@ for (const p of canonicalSelf) {
   if (!(inbound.get(selfPath)?.size > 0)) err(`${selfPath}: orphan — zero inbound internal links`);
 }
 
+// ── the publisher entity ──
+// The Organization the site-wide graph declares is the publisher the footer
+// names (© <year> UR Foundation), and its sameAs lists only that publisher's
+// profiles. It was named "UR" and claimed the urnetwork GitHub and X
+// accounts, which are URnetwork's: the product at ur.io, a different company.
+{
+  const PRODUCT_PROFILES = /^https:\/\/(?:www\.)?(?:github\.com\/urnetwork|x\.com\/urnetwork|twitter\.com\/urnetwork|ur\.io)(?:[/?#]|$)/i;
+  const seen = new Set();
+  for (const p of pages.values()) {
+    if (p.redirectStub) continue;
+    const json = (p.html.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/) || [])[1];
+    let org = null;
+    try {
+      org = (JSON.parse(json)["@graph"] || []).find((n) => n["@type"] === "Organization") || null;
+    } catch {
+      /* reported above */
+    }
+    if (!org) continue;
+    const footerName = (p.html.match(/<div class="footer-utility">\s*<p>©\s*\d{4}\s+([^<]+?)\s*<\/p>/) || [])[1];
+    const problems = [
+      footerName && org.name !== footerName && `the Organization is named "${org.name}", the footer's publisher "${footerName}"`,
+      ...[].concat(org.sameAs || []).filter((u) => PRODUCT_PROFILES.test(u)).map((u) => `the Organization claims ${u}, a URnetwork (ur.io) profile`),
+    ].filter(Boolean);
+    for (const problem of problems) {
+      if (!seen.has(problem)) err(`${p.urlPath}: ${problem}`);
+      seen.add(problem);
+    }
+  }
+}
+
 // ── machine/agent assets ──
 const mustExist = [
   "robots.txt",

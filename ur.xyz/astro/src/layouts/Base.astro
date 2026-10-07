@@ -63,13 +63,16 @@ const localized = hasLocalizedVersion(basePath);
 const altHref = (l) =>
     new URL(l === 'en' ? basePath : `/${l}${basePath === '/' ? '' : basePath}`, SITE_ORIGIN).href;
 
-// Site-wide schema.org graph. UR is the subject: one Organization node that
-// the WebSite, the breadcrumbs and every article's author and publisher point
-// at by @id, named as the site names itself everywhere else (og:site_name,
-// the breadcrumb root, the title suffix). ur.io is a different company and is
-// not one of its profiles. Pages add their own nodes (TechArticle, Article,
-// CollectionPage, …) via the jsonLd prop.
+// Site-wide schema.org graph. The Organization is the site's publisher, UR
+// Foundation, as the footer and the legal pages name it, also known by the
+// protocol's names; the WebSite, the breadcrumbs and every article's author
+// and publisher point at it by @id. Its profiles are the ones UR Foundation
+// controls, the urfoundation GitHub organization and the subnet's Telegram:
+// the urnetwork GitHub and X accounts are URnetwork's, the product at ur.io (a
+// different company), as the footer labels the X link. Pages add their own
+// nodes (TechArticle, Article, CollectionPage, …) via the jsonLd prop.
 const ORG_ID = `${SITE_ORIGIN}/#org`;
+// the X account the footer links ("URnetwork on X"), credited on the cards
 const X_HANDLE = 'urnetwork';
 
 // Breadcrumbs follow the URL: the home page of the page's language, the
@@ -94,11 +97,11 @@ const graph = [
     {
         '@type': 'Organization',
         '@id': ORG_ID,
-        name: 'UR',
-        alternateName: 'UR protocol',
+        name: 'UR Foundation',
+        alternateName: ['UR', 'UR protocol', 'UR subnet (SN25)'],
         url: `${SITE_ORIGIN}/`,
         logo: `${SITE_ORIGIN}/icon-512.png`,
-        sameAs: ['https://github.com/urfoundation', 'https://github.com/urnetwork', `https://x.com/${X_HANDLE}`],
+        sameAs: ['https://github.com/urfoundation', 'https://t.me/ursn25'],
     },
     {
         '@type': 'WebSite',
