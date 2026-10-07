@@ -84,5 +84,5 @@ const jsonLd = [{
     {/* fetched with the page, not after its stylesheet: the guides are mostly code.
         A document without code never paints with it, so it is not preloaded there. */}
     {hasCode && <link slot="head" rel="preload" href="/JetBrainsMono-Regular.woff2" as="font" type="font/woff2" crossorigin />}
-    <DocsIsland activeRoute="docs" lang="en" initialSlug={slug} images={images} client:load />
+    <DocsIsland activeRoute="docs" lang="en" initialSlug={slug} images={images} updated={LASTMOD_TOKEN} client:load />
 </Base>

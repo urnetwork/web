@@ -96,6 +96,10 @@ export function pageFacts(html) {
     const body = mains.length ? mains.join(' ') : (html.match(/<body\b[^>]*>([\s\S]*)<\/body>/i) || [, ''])[1];
     const text = [title, description, textOf(body)]
         .join('\n')
+        // the day a page states it last changed (src/lib/lastmod.js) is
+        // fingerprinted as neither the token the build writes first nor the
+        // day that replaces it, so the build and the --check gate agree
+        .split(LASTMOD_TOKEN).join(' ')
         // machine-written dates and bundle names say nothing about the content
         .replace(/\b\d{4}-\d{2}-\d{2}(?:T\d{2}:\d{2}(?::\d{2}(?:\.\d+)?)?(?:Z|[+-]\d{2}:?\d{2})?)?\b/g, ' ')
         .replace(/\/_astro\/[\w.-]+/g, ' ')

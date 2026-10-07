@@ -14,10 +14,11 @@ import { useLanguage } from '../i18n';
  * Renders the /docs page. The shared `<Explorer>` chrome handles the
  * sidebar and search; this component owns the right pane: a landing
  * placeholder when no slug is selected, otherwise the markdown body of
- * the requested doc. `images` is the static build's size map for the page's
- * own document (lib/markdown.jsx).
+ * the requested doc. For the page's own document the static build passes
+ * `images`, its size map (lib/markdown.jsx), and `updated`, the day its
+ * content last changed (the sitemap's lastmod), shown under the title.
  */
-export default function DocsExplorer({ activeRoute, initialSlug = null, images = null } = {}) {
+export default function DocsExplorer({ activeRoute, initialSlug = null, images = null, updated = null } = {}) {
     const route = useRoute();
     const { code } = useLanguage();
 
@@ -43,7 +44,7 @@ export default function DocsExplorer({ activeRoute, initialSlug = null, images =
             <Disclaimer visible={disclaimerVisible} />
             <Nav disclaimerVisible={disclaimerVisible} activeRoute={activeRoute} />
             <Explorer initialSlug={initialSlug}>
-                {!doc ? <DocsLanding code={code} /> : <DocBody doc={doc} images={doc.slug === initialSlug ? images : null} />}
+                {!doc ? <DocsLanding code={code} /> : <DocBody doc={doc} {...(doc.slug === initialSlug ? { images, updated } : {})} />}
             </Explorer>
             <Footer />
         </div>
@@ -65,7 +66,7 @@ function DocsLanding({ code }) {
         <>
             <header className="explorer-page-header">
                 <span className="explorer-page-eyebrow">Documentation</span>
-                <h1 className="explorer-page-title">URnetwork docs</h1>
+                <h1 className="explorer-page-title">UR docs</h1>
                 <p className="explorer-page-meta">
                     How to take part in the UR privacy network on Bittensor SN25, one guide
                     per role, and the litepaper that explains the mechanism they take part in.
@@ -91,7 +92,7 @@ function DocsLanding({ code }) {
     );
 }
 
-function DocBody({ doc, images }) {
+function DocBody({ doc, images = null, updated = null }) {
     // Reset scroll on doc change so a long previous doc doesn't strand
     // the visitor in the middle of the new one.
     useEffect(() => {
@@ -105,7 +106,8 @@ function DocBody({ doc, images }) {
             <header className="explorer-page-header">
                 <span className="explorer-page-eyebrow">Docs</span>
                 <h1 className="explorer-page-title">{doc.title}</h1>
-                <p className="explorer-page-meta">{doc.path}</p>
+                {/* the day the content last changed, not where the file sits in the repository */}
+                {updated && <p className="explorer-page-meta">Updated <time dateTime={updated}>{updated}</time></p>}
             </header>
             {/* the header's h1 is the document's title: drop the markdown's own
                 "# Title" and nest the remaining headings beneath it */}

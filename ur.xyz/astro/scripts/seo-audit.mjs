@@ -24,6 +24,9 @@ if (!existsSync(DIST)) {
 const errors = [];
 const err = (msg) => errors.push(msg);
 
+// the documents published as their own pages, outside /docs (docs-shared.js)
+const LEGAL_PAGES = Object.values(DOC_PAGE_PATHS);
+
 function walk(dir, out = []) {
   for (const e of readdirSync(dir, { withFileTypes: true })) {
     const p = path.join(dir, e.name);
@@ -331,6 +334,31 @@ for (const p of pages.values()) {
   }
 }
 
+// ── document headers and names ──
+// A docs page says under its title when its content last changed, the day its
+// TechArticle and the sitemap give, where it printed the repository path of
+// its source file (miner/README.md). A legal page's title names the document
+// its heading names: /terms was titled "Terms of Use" over "TERMS OF SERVICE".
+for (const p of pages.values()) {
+  if (p.redirectStub || p.noindex) continue;
+  const body = p.html.slice(p.html.indexOf("<body"));
+  if (p.urlPath.startsWith("/docs/")) {
+    const meta = (body.match(/<h1\b[^>]*>[\s\S]*?<\/h1>\s*<p class="explorer-page-meta">([\s\S]*?)<\/p>/) || [])[1];
+    const modified = (p.html.match(/"dateModified":"([^"]+)"/) || [])[1];
+    if (meta === undefined) err(`${p.urlPath}: no line under the document title`);
+    else if (/\.md\b/.test(meta)) err(`${p.urlPath}: the line under the title is a repository path (${meta.trim()})`);
+    // attribute names are case-insensitive (React writes dateTime)
+    else if (!modified || !meta.toLowerCase().includes(`<time datetime="${modified}">`)) {
+      err(`${p.urlPath}: the line under the title does not give the day the page last changed (${modified})`);
+    }
+  }
+  if (LEGAL_PAGES.includes(p.urlPath)) {
+    const heading = decodeHtmlEntities((body.match(/<h1\b[^>]*>([\s\S]*?)<\/h1>/) || [])[1]?.replace(/<[^>]+>/g, "") || "").toLowerCase();
+    const name = decodeHtmlEntities(p.title).replace(/\s+[—–|-]\s+UR\s*$/u, "").toLowerCase();
+    if (!heading.includes(name)) err(`${p.urlPath}: titled "${name}", but its heading names "${heading}"`);
+  }
+}
+
 // ── media + og resolution across all pages ──
 for (const p of pages.values()) {
   for (const m of p.html.matchAll(/<(?:img|audio|video|source)[^>]*\ssrc="(\/[^"]+)"/g)) {
@@ -442,7 +470,6 @@ if (existsSync(secPath)) {
 // publishes outside /docs) names its markdown twin with <link rel="alternate"
 // type="text/markdown">, and the twin it names is served: the legal pages
 // had no twin, so an agent got their text only by scraping the page.
-const LEGAL_PAGES = Object.values(DOC_PAGE_PATHS);
 for (const p of pages.values()) {
   if (p.redirectStub) continue;
   const head = p.html.slice(0, p.html.indexOf("</head>") + 7);

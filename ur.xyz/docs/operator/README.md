@@ -6,7 +6,7 @@ description: Run a URnetwork operator in one binary, configure PostgreSQL, Redis
 
 A network operator runs the servers of the UR privacy network: the API and connect services that users and miners attach to, the `/verify` endpoint that validators walk, and the epoch pipeline that settles its miners' rewards on **Bittensor SN25 (netuid 25)**. An operator brings its own users and products (the ur.io apps are one operator's), deposits α as a revenue-backed signal of real demand, and each settlement epoch commits the Merkle payout list that splits its pool among its miners. It directs where the pool goes but never holds anyone else's α: the immutable settlement vault owns the pool and every miner claims from it directly.
 
-The [`server/cli/all/main.go`](https://github.com/urnetwork/server/blob/main/cli/all/main.go) entry point runs the API, Connect and the production taskworker together. You deploy one operator executable; PostgreSQL, Redis, artifact storage and public TLS ingress remain backing services. For the mechanism read the [litepaper](/docs/litepaper); for the other roles see [How to become a miner](/docs/miner) and [How to become a validator](/docs/validator).
+The [`server/cli/all/main.go`](https://github.com/urnetwork/server/blob/main/cli/all/main.go) entry point runs the API, Connect and the production taskworker together. You deploy one operator executable; PostgreSQL, Redis, artifact storage and public TLS ingress remain backing services. For the mechanism read the [litepaper](/docs/litepaper); for the other roles see [How to run a miner](/docs/miner) and [How to run a validator](/docs/validator).
 
 ## Who this is for
 

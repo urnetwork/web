@@ -30,7 +30,7 @@ export default {
         license:    'MPLv2',
         disclaimer: 'Este sitio es un protocolo de utilidad de código abierto impulsado por una comunidad de participantes, operado de forma independiente al operador de red que vende el acceso a la red.',
         languagesAria: 'Idiomas',
-        terms:      'Términos de uso',
+        terms:      'Términos de servicio',
         privacy:    'Privacidad',
         vdp:        'VDP',
         protocol:   'Protocolo',
@@ -163,7 +163,7 @@ export default {
     legal: {
         eyebrow: 'Legal',
         terms: {
-            title: 'Términos de uso',
+            title: 'Términos de servicio',
             body:  'Los Términos de Servicio de ur.xyz, el sitio informativo del protocolo UR alojado por UR Foundation.'
         },
         privacy: {

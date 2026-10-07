@@ -1,9 +1,9 @@
-# URnetwork docs
+# UR docs
 
 The documentation of the UR privacy network, published at [ur.xyz/docs](https://ur.xyz/docs). Four documents:
 
-- [How to become a miner](miner/README.md) — `/docs/miner`
-- [How to become a validator](validator/README.md) — `/docs/validator`
+- [How to run a miner](miner/README.md) — `/docs/miner`
+- [How to run a validator](validator/README.md) — `/docs/validator`
 - [How to become a network operator](operator/README.md) — `/docs/operator`
 - [Litepaper](litepaper.md) — `/docs/litepaper`
 
