@@ -11,6 +11,9 @@
  * resolves it (react/src/lib/markdown.jsx resolveHref).
  */
 
+import path from 'node:path';
+import { docImages } from '../react/src/lib/docs-shared.js';
+
 export const SITE = 'https://ur.xyz';
 
 // a fenced code block, from its opening fence to the closing one
@@ -35,6 +38,24 @@ export function absoluteUrl(target, pagePath = '/') {
     // anchors, schemes (https:, mailto:) and protocol-relative targets stay as written
     if (target.startsWith('#') || target.startsWith('//') || HAS_SCHEME.test(target)) return target;
     return new URL(target, `${SITE}${pagePath}`).href;
+}
+
+/**
+ * The image files the published documents show, as paths under docs/ (what
+ * the build mirrors into public/docs/): each document's ![alt](src) resolved
+ * as its page resolves it (docs-shared.js docImages). `docs` is the published
+ * documents, [{ rel, body }] with `rel` the source path under docs/. An image
+ * no document shows is not among them, so it is not published.
+ */
+export function publishedImages(docs) {
+    const out = new Set();
+    for (const { rel, body } of docs) {
+        for (const src of docImages(body, `/docs/${rel}`)) {
+            const file = path.posix.normalize(decodeURIComponent(src));
+            if (file.startsWith('/docs/')) out.add(file.slice('/docs/'.length));
+        }
+    }
+    return [...out].sort();
 }
 
 /**

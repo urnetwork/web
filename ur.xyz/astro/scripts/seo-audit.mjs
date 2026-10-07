@@ -359,6 +359,23 @@ for (const p of pages.values()) {
   }
 }
 
+// ── document images nothing shows ──
+// The asset generator published every image in docs/, including a 3.3 MB
+// picture (/docs/res/ur.png and its WebP) no page used. An image under /docs/
+// is published because a page shows it.
+{
+  const shown = new Set();
+  for (const p of pages.values()) {
+    for (const m of p.html.matchAll(/<img\b[^>]*\ssrc="(\/docs\/[^"]+)"/g)) shown.add(decodeURIComponent(m[1]));
+  }
+  for (const f of files) {
+    const rel = relOf(f);
+    if (rel.startsWith("/docs/") && /\.(?:png|jpe?g|gif|svg|webp|avif)$/i.test(rel) && !shown.has(rel)) {
+      err(`${rel}: published document image that no page shows`);
+    }
+  }
+}
+
 // ── media + og resolution across all pages ──
 for (const p of pages.values()) {
   for (const m of p.html.matchAll(/<(?:img|audio|video|source)[^>]*\ssrc="(\/[^"]+)"/g)) {

@@ -12,7 +12,7 @@ import { tmpdir } from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
 import { DOC_ORDER } from '../react/src/lib/docs-shared.js';
-import { absoluteLinks, absoluteUrl } from './agent-markdown.mjs';
+import { absoluteLinks, absoluteUrl, publishedImages } from './agent-markdown.mjs';
 import { buildLlms } from './generate-agent-assets-llms.mjs';
 
 test('absoluteLinks resolves root-relative and relative targets the way the page does', () => {
@@ -38,6 +38,14 @@ test('absoluteLinks leaves anchors, schemes and fenced code as written', () => {
     ].join('\n');
     assert.equal(absoluteLinks(md, '/docs/miner/README.md'), md.replace('](/docs)', '](https://ur.xyz/docs)'));
     assert.equal(absoluteUrl('#x', '/docs/a.md'), '#x');
+});
+
+test('publishedImages is what the documents show, resolved as their pages resolve it', () => {
+    const docs = [
+        { rel: 'support/delete.md', body: '![a](shot.webp)\n\n```md\n![in code](code-only.webp)\n```\n![b](../shared/diagram.svg "Diagram")' },
+        { rel: 'miner/README.md', body: '![remote](https://example.invalid/x.png) ![site](/docs/support/shot.webp) [a link](not-an-image.png)' },
+    ];
+    assert.deepEqual(publishedImages(docs), ['shared/diagram.svg', 'support/shot.webp']);
 });
 
 /** A synthetic build: the pages buildLlms reads and the machine-readable files. */
