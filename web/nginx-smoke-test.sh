@@ -312,6 +312,57 @@ expect_response docs.ur.io '/legal/privacy?smoke=1' 301 'https://ur.io/privacy?s
 expect_response docs.ur.io '/api/api-reference/auth/code-login?smoke=1' 301 \
     'https://ur.io/docs/api/auth?smoke=1'
 
+# The earlier Framer site's pages, in every language, which search engines
+# still list, go to their successors in one hop, and every successor is a
+# page of this build.
+expect_successor() {
+    local host=$1
+    local path=$2
+    local target=$3
+
+    expect_response "$host" "$path" 301 "$target"
+    expect_response "$host" "$target" 200
+}
+
+# Each country of the Framer map has its location page, so dropping a country
+# from the site fails the image instead of sending its old page to a 404.
+framer_countries=0
+while read -r slug path; do
+    framer_countries=$((framer_countries + 1))
+    expect_successor ur.io "/how-to-get-a-vpn/vpn-access-in-$slug" "/location$path"
+done < <(awk '
+    /map \$framer_country \$framer_country_path/ { in_map = 1; next }
+    in_map && /^[[:space:]]*}/ { exit }
+    in_map && $1 != "default" { sub(/;$/, "", $2); print $1, $2 }' /etc/nginx/nginx.conf)
+[[ "$framer_countries" -gt 0 ]] || fail 'nginx.conf has no $framer_country map'
+
+for lang in '' /es /de /zh /ru /ar; do
+    expect_successor ur.io "$lang/how-to-get-a-vpn/vpn-access-in-canada" "$lang/location/ca"
+    expect_successor ur.io "$lang/how-to-get-a-vpn/vpn-access-in-united-states/" "$lang/location/us"
+    # a Framer country without a location page, and the index
+    expect_successor ur.io "$lang/how-to-get-a-vpn/vpn-access-in-northern-mariana-islands" "$lang/location"
+    expect_successor ur.io "$lang/how-to-get-a-vpn" "$lang/location"
+    for page in newsletter newsletter/issue-12 podcast podcast/episode-3; do
+        expect_successor ur.io "$lang/$page" "$lang/blog"
+    done
+    for page in better-vpn privacy-and-security/; do
+        expect_successor ur.io "$lang/$page" "$lang/products"
+    done
+    expect_successor ur.io "$lang/seeker" "$lang/install"
+    expect_response ur.io "$lang/earn" 301 https://ur.xyz/
+done
+# the form search engines list for a name outside ASCII
+expect_successor ur.io /how-to-get-a-vpn/vpn-access-in-r%C3%A9union /location/re
+
+# The legacy bringyour.com blog has no page-by-page successor: its links land
+# on the ur.io blog.
+for host in bringyour.com main-web.bringyour.com; do
+    for path in /blog /blog/ /blog/visual/ '/blog/visual/vis/latencymap/?smoke=1'; do
+        expect_response "$host" "$path" 301 https://ur.io/blog
+    done
+done
+expect_response ur.io /blog 200
+
 # /ip remains HTML for browsers, but negotiates a tiny, non-cacheable JSON
 # response for API clients. Cloudflare is authoritative on the public host;
 # Warp's bracketed address is the direct/preview fallback.

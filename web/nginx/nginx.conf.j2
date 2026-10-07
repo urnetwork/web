@@ -223,6 +223,110 @@ http {
         preview.ur.xyz   "noindex, nofollow";
     }
 
+    # ur.io's earlier Framer site had a page per country,
+    # /how-to-get-a-vpn/vpn-access-in-<name>, in every language, and search
+    # engines still list them. The name is the country's English name,
+    # lowercased, with hyphens for spaces. A country with a location page goes
+    # to it (this map); the ur.io block sends every other path there to the
+    # location index. One line per country of mmm
+    # ur.io/react/src/data/countries.js.
+    map $framer_country $framer_country_path {
+        default                 "";
+        albania                 /al;
+        argentina               /ar;
+        australia               /au;
+        austria                 /at;
+        bahrain                 /bh;
+        bangladesh              /bd;
+        belarus                 /by;
+        belgium                 /be;
+        bolivia                 /bo;
+        bosnia-and-herzegovina  /ba;
+        botswana                /bw;
+        brazil                  /br;
+        bulgaria                /bg;
+        cambodia                /kh;
+        canada                  /ca;
+        chile                   /cl;
+        china                   /cn;
+        colombia                /co;
+        costa-rica              /cr;
+        croatia                 /hr;
+        cyprus                  /cy;
+        czechia                 /cz;
+        denmark                 /dk;
+        dominican-republic      /do;
+        ecuador                 /ec;
+        egypt                   /eg;
+        estonia                 /ee;
+        finland                 /fi;
+        france                  /fr;
+        georgia                 /ge;
+        germany                 /de;
+        greece                  /gr;
+        hong-kong               /hk;
+        hungary                 /hu;
+        iceland                 /is;
+        india                   /in;
+        indonesia               /id;
+        ireland                 /ie;
+        israel                  /il;
+        italy                   /it;
+        jamaica                 /jm;
+        japan                   /jp;
+        kazakhstan              /kz;
+        kenya                   /ke;
+        kyrgyzstan              /kg;
+        latvia                  /lv;
+        lebanon                 /lb;
+        liechtenstein           /li;
+        lithuania               /lt;
+        luxembourg              /lu;
+        malaysia                /my;
+        malta                   /mt;
+        mexico                  /mx;
+        moldova                 /md;
+        myanmar                 /mm;
+        nepal                   /np;
+        netherlands             /nl;
+        new-zealand             /nz;
+        nigeria                 /ng;
+        north-macedonia         /mk;
+        norway                  /no;
+        oman                    /om;
+        pakistan                /pk;
+        panama                  /pa;
+        peru                    /pe;
+        philippines             /ph;
+        poland                  /pl;
+        portugal                /pt;
+        puerto-rico             /pr;
+        réunion                 /re;
+        romania                 /ro;
+        russia                  /ru;
+        saudi-arabia            /sa;
+        serbia                  /rs;
+        singapore               /sg;
+        slovakia                /sk;
+        slovenia                /si;
+        south-africa            /za;
+        south-korea             /kr;
+        spain                   /es;
+        sri-lanka               /lk;
+        sweden                  /se;
+        switzerland             /ch;
+        taiwan                  /tw;
+        thailand                /th;
+        turkey                  /tr;
+        ukraine                 /ua;
+        united-arab-emirates    /ae;
+        united-kingdom          /gb;
+        united-states           /us;
+        uruguay                 /uy;
+        uzbekistan              /uz;
+        vietnam                 /vn;
+    }
+
     server {
         listen 80 default_server;
 
@@ -255,6 +359,12 @@ http {
         location ^~ /res/emails/ {
             try_files $uri =404;
             add_header 'Cache-Control' 'public, max-age=2592000, stale-while-revalidate=86400';
+        }
+
+        # The legacy blog (/blog/ and its one article, /blog/visual/) has no
+        # page-by-page successor: its links land on the ur.io blog.
+        location ^~ /blog/ {
+            return 301 https://ur.io/blog;
         }
 
         location / {
@@ -392,6 +502,32 @@ http {
         }
 
         location ~ ^/(?:(?:ru|ar|zh|de|es)/)?protocol(?:\.html|/)?$ {
+            return 301 https://ur.xyz/;
+        }
+
+        # The earlier Framer site's pages, in every language, which search
+        # engines still list, go to their successors in one hop: the country
+        # pages to the country's location page ($framer_country_path) or else
+        # the location index, the newsletter and podcast to the blog, the VPN
+        # pitch pages to the products, the Seeker page to the install page,
+        # and the earn page to the protocol's site.
+        location ~ ^(?<framer_lang>/(?:es|de|zh|ru|ar))?/how-to-get-a-vpn(?:/vpn-access-in-(?<framer_country>[^/]+?))?(?:/.*)?$ {
+            return 301 $framer_lang/location$framer_country_path;
+        }
+
+        location ~ ^(?<framer_lang>/(?:es|de|zh|ru|ar))?/(?:newsletter|podcast)(?:\.html|/.*)?$ {
+            return 301 $framer_lang/blog;
+        }
+
+        location ~ ^(?<framer_lang>/(?:es|de|zh|ru|ar))?/(?:better-vpn|privacy-and-security)(?:\.html|/)?$ {
+            return 301 $framer_lang/products;
+        }
+
+        location ~ ^(?<framer_lang>/(?:es|de|zh|ru|ar))?/seeker(?:\.html|/)?$ {
+            return 301 $framer_lang/install;
+        }
+
+        location ~ ^/(?:(?:es|de|zh|ru|ar)/)?earn(?:\.html|/)?$ {
             return 301 https://ur.xyz/;
         }
 
