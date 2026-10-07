@@ -576,7 +576,7 @@ http {
             add_header 'X-Robots-Tag' $ur_preview_robots always;
         }
 
-        location ~ ^/(?<md_page>products|about|agents|changelog)\.md$ {
+        location ~ ^/(?<md_page>products|about|agents|changelog|install)\.md$ {
             add_header 'Link' '<https://ur.io/$md_page>; rel="canonical"';
             add_header 'Cache-Control' 'public, max-age=3600, stale-while-revalidate=86400';
             add_header 'X-Robots-Tag' $ur_preview_robots always;

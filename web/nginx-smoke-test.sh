@@ -371,6 +371,18 @@ done
 expect_successor ur.io /sitemap.xml /sitemap-index.xml
 expect_successor ur.io /AGENTS.md /agents.md
 
+# The markdown twins of ur.io's pages point search engines at the page they
+# mirror. The site publishes /install.md from mmm's generate-agents-md.mjs;
+# until the build has it, say so instead of failing the image.
+for page in products about agents changelog install; do
+    if [[ "$page" == install && ! -f /www/preview.ur.io/install.md ]]; then
+        printf 'nginx smoke test: skipped ur.io/install.md, not in this build\n'
+        continue
+    fi
+    expect_response ur.io "/$page.md" 200
+    expect_header ur.io "/$page.md" Link "<https://ur.io/$page>; rel=\"canonical\""
+done
+
 # /ip remains HTML for browsers, but negotiates a tiny, non-cacheable JSON
 # response for API clients. Cloudflare is authoritative on the public host;
 # Warp's bracketed address is the direct/preview fallback.
