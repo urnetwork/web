@@ -8,8 +8,8 @@ Under the Account -> Settings section, find the Delete Account button. Tap the b
 
 ### Android screenshot
 
-![Delete Account Android](DeleteAccountAndroid.png)
+![Delete Account Android](DeleteAccountAndroid.webp)
 
 ### iOS screenshot
 
-![Delete Account iOS](DeleteAccountiOS.png)
+![Delete Account iOS](DeleteAccountiOS.webp)

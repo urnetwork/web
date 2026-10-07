@@ -14,9 +14,10 @@ import { useLanguage } from '../i18n';
  * Renders the /docs page. The shared `<Explorer>` chrome handles the
  * sidebar and search; this component owns the right pane: a landing
  * placeholder when no slug is selected, otherwise the markdown body of
- * the requested doc.
+ * the requested doc. `images` is the static build's size map for the page's
+ * own document (lib/markdown.jsx).
  */
-export default function DocsExplorer({ activeRoute, initialSlug = null } = {}) {
+export default function DocsExplorer({ activeRoute, initialSlug = null, images = null } = {}) {
     const route = useRoute();
     const { code } = useLanguage();
 
@@ -42,7 +43,7 @@ export default function DocsExplorer({ activeRoute, initialSlug = null } = {}) {
             <Disclaimer visible={disclaimerVisible} />
             <Nav disclaimerVisible={disclaimerVisible} activeRoute={activeRoute} />
             <Explorer initialSlug={initialSlug}>
-                {!doc ? <DocsLanding code={code} /> : <DocBody doc={doc} />}
+                {!doc ? <DocsLanding code={code} /> : <DocBody doc={doc} images={doc.slug === initialSlug ? images : null} />}
             </Explorer>
             <Footer />
         </div>
@@ -90,7 +91,7 @@ function DocsLanding({ code }) {
     );
 }
 
-function DocBody({ doc }) {
+function DocBody({ doc, images }) {
     // Reset scroll on doc change so a long previous doc doesn't strand
     // the visitor in the middle of the new one.
     useEffect(() => {
@@ -108,7 +109,7 @@ function DocBody({ doc }) {
             </header>
             {/* the header's h1 is the document's title: drop the markdown's own
                 "# Title" and nest the remaining headings beneath it */}
-            <Markdown source={doc.content} baseHref={`/docs/${doc.path}`} dropTitle headingBase={1} />
+            <Markdown source={doc.content} baseHref={`/docs/${doc.path}`} dropTitle headingBase={1} images={images} />
         </article>
     );
 }

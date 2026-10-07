@@ -48,6 +48,23 @@ export function docPath(slug) {
 }
 
 /**
+ * The site images a document shows: each ![alt](src) outside its fenced code,
+ * resolved as its page resolves it (lib/markdown.jsx resolveHref) against
+ * `base`, the document's /docs/<source path>. An image on another host is not
+ * among them.
+ */
+export function docImages(content, base) {
+    const prose = String(content || '').replace(/^```[^\n]*\n[\s\S]*?^```[ \t]*$/gm, '');
+    const out = new Set();
+    for (const m of prose.matchAll(/!\[[^\]]*\]\(([^)\s]+)(?:\s+"[^"]*")?\)/g)) {
+        const src = m[1];
+        if (/^[a-z][a-z0-9+.-]*:/i.test(src) || src.startsWith('//') || src.startsWith('#')) continue;
+        out.add(src.startsWith('/') ? src : base.replace(/\/[^/]*$/, '/') + src);
+    }
+    return [...out];
+}
+
+/**
  * Split optional YAML front matter off a document. Only flat `key: value`
  * lines are read: a document may set `title` (the whole <title>) and
  * `description` (the meta description) when the ones derived from its heading

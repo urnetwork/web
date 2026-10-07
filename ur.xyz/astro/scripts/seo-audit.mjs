@@ -300,6 +300,25 @@ for (const p of pages.values()) {
   if (skips.length) err(`${p.urlPath}: heading levels skip (${skips.join(", ")})`);
 }
 
+// an unlisted document's page (docs-shared.js UNLISTED_DOC_SLUGS)
+const unlistedDocPage = (p) => p.startsWith("/docs/") && UNLISTED_DOC_SLUGS.has(p.slice("/docs/".length));
+
+// ── unlisted documents and document images ──
+// An unlisted document (docs-shared.js) is published for links from outside
+// the site, but is no page of this site's own: it was indexable and in the
+// sitemap (the 41-word account-deletion walkthrough for ur.io's apps). And a
+// document's images carry their size, so the page reserves their box before
+// they load (the walkthrough's two tall screenshots shifted the page).
+for (const p of pages.values()) {
+  if (p.redirectStub) continue;
+  if (unlistedDocPage(p.urlPath) && !p.noindex) err(`${p.urlPath}: unlisted document is indexable`);
+  for (const m of p.html.matchAll(/<img\b[^>]*\bclass="md-img"[^>]*>/g)) {
+    if (!/\swidth="\d+"/.test(m[0]) || !/\sheight="\d+"/.test(m[0])) {
+      err(`${p.urlPath}: document image without width and height (${attr(m[0], "src")})`);
+    }
+  }
+}
+
 // ── media + og resolution across all pages ──
 for (const p of pages.values()) {
   for (const m of p.html.matchAll(/<(?:img|audio|video|source)[^>]*\ssrc="(\/[^"]+)"/g)) {
@@ -320,7 +339,6 @@ for (const p of pages.values()) {
 // while the sidebar that should link them rendered buttons. Only real pages
 // count as an inbound link. An unlisted document (docs-shared.js) is linked
 // from outside the site, by the app-store listings, and is exempt.
-const unlistedDocPage = (p) => p.startsWith("/docs/") && UNLISTED_DOC_SLUGS.has(p.slice("/docs/".length));
 const inbound = new Map();
 for (const p of pages.values()) {
   if (p.redirectStub) continue;

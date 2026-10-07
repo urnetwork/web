@@ -1,8 +1,12 @@
 ---
+import { existsSync, readFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
+import { publicDir } from 'astro:config/server';
+import { imageMetadata } from 'astro/assets/utils';
 import Base from '../../layouts/Base.astro';
 import DocsIsland from '../../islands/DocsIsland.jsx';
 import { docs } from '@react/lib/docs.js';
-import { DOC_PAGE_PATHS } from '@react/lib/docs-shared.js';
+import { DOC_PAGE_PATHS, UNLISTED_DOC_SLUGS, docImages } from '@react/lib/docs-shared.js';
 import { docDescription } from '../../lib/meta.js';
 import { LASTMOD_TOKEN } from '../../lib/lastmod.js';
 
@@ -23,13 +27,30 @@ export function getStaticPaths() {
             ),
             // a document with code in it paints with the code face (Explorer.css)
             hasCode: d.content.includes('`'),
+            imageSrcs: docImages(d.content, `/docs/${d.path}`),
         },
     }));
 }
 
 const { slug } = Astro.params;
-const { title, meta, description, hasCode } = Astro.props;
+const { title, meta, description, hasCode, imageSrcs } = Astro.props;
 const url = `https://ur.xyz/docs/${slug}`;
+// An unlisted document (docs-shared.js) is published for the links that lead
+// to it, the app-store listings, but it is not this site's content: the
+// account-deletion walkthrough belongs to ur.io's apps. It is noindex, so it
+// is out of the sitemap and the page-dates record too.
+const noindex = UNLISTED_DOC_SLUGS.has(slug);
+
+// Each image's intrinsic size, read from the file the build serves (the asset
+// generator mirrors the docs' images into public/docs/), so the <img> carries
+// width and height and the page reserves its box before the image loads.
+const images = {};
+for (const src of imageSrcs) {
+    const file = fileURLToPath(new URL(src.slice(1), publicDir));
+    if (!existsSync(file)) continue;
+    const { width, height } = await imageMetadata(readFileSync(file), src);
+    images[src] = { width, height };
+}
 
 const jsonLd = [{
     '@type': 'TechArticle',
@@ -58,9 +79,10 @@ const jsonLd = [{
     lang="en"
     jsonLd={jsonLd}
     alternate={{ href: `/docs-md/${slug}.md`, type: 'text/markdown' }}
+    noindex={noindex}
 >
     {/* fetched with the page, not after its stylesheet: the guides are mostly code.
         A document without code never paints with it, so it is not preloaded there. */}
     {hasCode && <link slot="head" rel="preload" href="/JetBrainsMono-Regular.woff2" as="font" type="font/woff2" crossorigin />}
-    <DocsIsland activeRoute="docs" lang="en" initialSlug={slug} client:load />
+    <DocsIsland activeRoute="docs" lang="en" initialSlug={slug} images={images} client:load />
 </Base>
