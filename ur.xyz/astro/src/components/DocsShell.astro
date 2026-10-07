@@ -1,0 +1,144 @@
+---
+/**
+ * The /docs chrome as static HTML: the markup react/src/components/Explorer.jsx
+ * renders (the SPA's version, which visual parity compares this with), with
+ * the page body in the default slot.
+ *
+ * The docs pages used to hydrate the whole explorer, and with it the entire
+ * docs corpus (virtual:ur-docs), on every docs page. Now only the search box
+ * is an island (DocsSearchIsland, client:idle): it fetches /docs-search.json
+ * the first time it is used. The sidebar is plain links, and the two things
+ * that need a script, the mobile sidebar toggle and the code blocks' Copy
+ * buttons, get the small one below.
+ */
+import '@react/components/Explorer.css';
+import DocsSearchIsland from '../islands/DocsSearchIsland.jsx';
+import { docGroups } from '@react/lib/docs.js';
+import { docPath } from '@react/lib/docs-shared.js';
+import en from '@react/i18n/en.js';
+
+interface Props {
+    // the document the page shows, marked current in the sidebar
+    activeSlug?: string | null;
+}
+const { activeSlug = null } = Astro.props;
+const t = en;
+---
+<div class="explorer" id="docs-explorer">
+    <button
+        type="button"
+        class="explorer-sidebar-toggle"
+        aria-expanded="false"
+        aria-controls="explorer-sidebar"
+    >
+        <span class="explorer-sidebar-toggle-label">{t.nav.browseDocs} &middot; {t.nav.search}</span>
+        <span class="explorer-sidebar-toggle-icon" aria-hidden="true">☰</span>
+    </button>
+
+    <aside id="explorer-sidebar" class="explorer-sidebar" aria-label="Documentation navigation">
+        <DocsSearchIsland client:idle={{ timeout: 2000 }} />
+        <nav class="explorer-nav" aria-label="Documentation sections">
+            {docGroups.map((group) => (
+                <div class="explorer-group">
+                    <div class="explorer-group-label">{group.label}</div>
+                    <ul class="explorer-group-list">
+                        {group.docs.map((d) => (
+                            <li>
+                                <a
+                                    href={docPath(d.slug)}
+                                    class:list={['explorer-doc-link', { 'is-active': d.slug === activeSlug }]}
+                                    aria-current={d.slug === activeSlug ? 'page' : undefined}
+                                >{d.title}</a>
+                            </li>
+                        ))}
+                    </ul>
+                </div>
+            ))}
+        </nav>
+    </aside>
+
+    <main class="explorer-main">
+        <slot />
+    </main>
+</div>
+
+<script>
+    // The mobile sidebar toggle (Explorer.jsx keeps it in state): the sidebar
+    // is collapsed until tapped, so the document is what a phone shows first.
+    const explorer = document.getElementById('docs-explorer');
+    const toggle = explorer?.querySelector('.explorer-sidebar-toggle');
+    toggle?.addEventListener('click', () => {
+        const open = !explorer.classList.contains('sidebar-open');
+        explorer.classList.toggle('sidebar-open', open);
+        toggle.setAttribute('aria-expanded', String(open));
+        const icon = toggle.querySelector('.explorer-sidebar-toggle-icon');
+        if (icon) icon.textContent = open ? '✕' : '☰';
+    });
+
+    // The code blocks' Copy buttons and keyboard scrolling, as the CodeBlock
+    // component (react/src/lib/markdown.jsx) does once hydrated: copy the
+    // block's text (what it draws is the source, character for character), say
+    // "Copied" only when it was, and make a block that scrolls a tab stop.
+    const COPY_ICON = '<rect x="5.5" y="5.5" width="8" height="8" rx="1.6" /><path d="M10.5 5.5V4.1a1.6 1.6 0 0 0-1.6-1.6H4.1a1.6 1.6 0 0 0-1.6 1.6v4.8a1.6 1.6 0 0 0 1.6 1.6h1.4" />';
+    const COPIED_ICON = '<path d="M3.2 8.4l3 3 6.6-6.8" />';
+    const selectAndCopy = (el) => {
+        if (!el || !window.getSelection) return false;
+        const range = document.createRange();
+        range.selectNodeContents(el);
+        const selection = window.getSelection();
+        selection?.removeAllRanges();
+        selection?.addRange(range);
+        try {
+            return document.execCommand('copy');
+        } catch {
+            return false;
+        }
+    };
+    for (const block of document.querySelectorAll('.md-codeblock')) {
+        const button = block.querySelector('.md-codeblock-copy');
+        const code = block.querySelector('.md-pre > code');
+        const status = block.querySelector('[role="status"]');
+        let reset = 0;
+        const show = (copied) => {
+            if (copied) button.setAttribute('data-state', 'copied');
+            else button.removeAttribute('data-state');
+            const icon = button.querySelector('svg');
+            if (icon) icon.innerHTML = copied ? COPIED_ICON : COPY_ICON;
+            const [copyLabel, copiedLabel] = button.querySelectorAll('.md-codeblock-copy-label > span');
+            copyLabel?.setAttribute('data-shown', String(!copied));
+            copiedLabel?.setAttribute('data-shown', String(copied));
+            if (status) status.textContent = copied ? 'Copied to the clipboard' : '';
+        };
+        button?.addEventListener('click', async () => {
+            const text = code?.textContent ?? '';
+            let copied = false;
+            try {
+                await navigator.clipboard.writeText(text);
+                copied = true;
+            } catch {
+                // otherwise the text is left selected to copy by hand
+                copied = selectAndCopy(code);
+            }
+            if (!copied) return;
+            show(true);
+            clearTimeout(reset);
+            reset = window.setTimeout(() => show(false), 2000);
+        });
+    }
+    const measure = (pre) => {
+        if (pre.scrollWidth > pre.clientWidth + 1) pre.setAttribute('tabindex', '0');
+        else pre.removeAttribute('tabindex');
+    };
+    const pres = [...document.querySelectorAll('.md-pre')];
+    pres.forEach(measure);
+    if (typeof ResizeObserver !== 'undefined') {
+        // the block's width changes with the window, the text's with the font arriving
+        const watch = new ResizeObserver((entries) => {
+            for (const entry of entries) measure(entry.target.closest('.md-pre') || entry.target);
+        });
+        for (const pre of pres) {
+            watch.observe(pre);
+            if (pre.firstElementChild) watch.observe(pre.firstElementChild);
+        }
+    }
+</script>

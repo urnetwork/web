@@ -12,8 +12,9 @@
 import { existsSync, readFileSync, readdirSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { UNLISTED_DOC_SLUGS } from "../../react/src/lib/docs-shared.js";
+import { DOC_ORDER, DOC_PAGE_PATHS, UNLISTED_DOC_SLUGS } from "../../react/src/lib/docs-shared.js";
 import { contentDay, investorLetterMetadata } from "./pdf-freshness.mjs";
+import { reserve } from "../../react/src/data/reserve.js";
 
 const DIST = path.resolve(process.argv[2] || "dist");
 if (!existsSync(DIST)) {
@@ -23,6 +24,9 @@ if (!existsSync(DIST)) {
 
 const errors = [];
 const err = (msg) => errors.push(msg);
+
+// the documents published as their own pages, outside /docs (docs-shared.js)
+const LEGAL_PAGES = Object.values(DOC_PAGE_PATHS);
 
 function walk(dir, out = []) {
   for (const e of readdirSync(dir, { withFileTypes: true })) {
@@ -216,6 +220,18 @@ const canonicalSelf = [...pages.values()].filter(
   (p) => !p.noindex && p.canonical && toPath(p.canonical) === (p.urlPath === "/" ? "/" : p.urlPath),
 );
 
+// ── title length ──
+// A result shows about 60 characters of a title before cutting it, and the
+// translated section titles ran to 71 (/ru/miners). Counted in graphemes, as a
+// reader sees them: an Arabic vowel mark adds no width.
+const TITLE_MAX = 60;
+const graphemes = new Intl.Segmenter(undefined, { granularity: "grapheme" });
+for (const p of canonicalSelf) {
+  const title = decodeHtmlEntities(p.title);
+  const length = [...graphemes.segment(title)].length;
+  if (length > TITLE_MAX) err(`${p.urlPath}: title ${length} characters (cap ${TITLE_MAX}): ${title}`);
+}
+
 // ── unique titles/descriptions per language among canonical-self pages ──
 for (const key of ["title", "description"]) {
   const seen = new Map();
@@ -300,6 +316,187 @@ for (const p of pages.values()) {
   if (skips.length) err(`${p.urlPath}: heading levels skip (${skips.join(", ")})`);
 }
 
+// an unlisted document's page (docs-shared.js UNLISTED_DOC_SLUGS)
+const unlistedDocPage = (p) => p.startsWith("/docs/") && UNLISTED_DOC_SLUGS.has(p.slice("/docs/".length));
+
+// ── unlisted documents and document images ──
+// An unlisted document (docs-shared.js) is published for links from outside
+// the site, but is no page of this site's own: it was indexable and in the
+// sitemap (the 41-word account-deletion walkthrough for ur.io's apps). And a
+// document's images carry their size, so the page reserves their box before
+// they load (the walkthrough's two tall screenshots shifted the page).
+for (const p of pages.values()) {
+  if (p.redirectStub) continue;
+  if (unlistedDocPage(p.urlPath) && !p.noindex) err(`${p.urlPath}: unlisted document is indexable`);
+  for (const m of p.html.matchAll(/<img\b[^>]*\bclass="md-img"[^>]*>/g)) {
+    if (!/\swidth="\d+"/.test(m[0]) || !/\sheight="\d+"/.test(m[0])) {
+      err(`${p.urlPath}: document image without width and height (${attr(m[0], "src")})`);
+    }
+  }
+}
+
+// ── document headers and names ──
+// A docs page says under its title when its content last changed, the day its
+// TechArticle and the sitemap give, where it printed the repository path of
+// its source file (miner/README.md). A legal page's title names the document
+// its heading names: /terms was titled "Terms of Use" over "TERMS OF SERVICE".
+for (const p of pages.values()) {
+  if (p.redirectStub || p.noindex) continue;
+  const body = p.html.slice(p.html.indexOf("<body"));
+  if (p.urlPath.startsWith("/docs/")) {
+    const meta = (body.match(/<h1\b[^>]*>[\s\S]*?<\/h1>\s*<p class="explorer-page-meta">([\s\S]*?)<\/p>/) || [])[1];
+    const modified = (p.html.match(/"dateModified":"([^"]+)"/) || [])[1];
+    if (meta === undefined) err(`${p.urlPath}: no line under the document title`);
+    else if (/\.md\b/.test(meta)) err(`${p.urlPath}: the line under the title is a repository path (${meta.trim()})`);
+    // attribute names are case-insensitive (React writes dateTime)
+    else if (!modified || !meta.toLowerCase().includes(`<time datetime="${modified}">`)) {
+      err(`${p.urlPath}: the line under the title does not give the day the page last changed (${modified})`);
+    }
+  }
+  if (LEGAL_PAGES.includes(p.urlPath)) {
+    const heading = decodeHtmlEntities((body.match(/<h1\b[^>]*>([\s\S]*?)<\/h1>/) || [])[1]?.replace(/<[^>]+>/g, "") || "").toLowerCase();
+    const name = decodeHtmlEntities(p.title).replace(/\s+[—–|-]\s+UR\s*$/u, "").toLowerCase();
+    if (!heading.includes(name)) err(`${p.urlPath}: titled "${name}", but its heading names "${heading}"`);
+  }
+}
+
+// ── structured data for documents ──
+// A docs page's TechArticle says when it was first published, beside when it
+// last changed, and names the image that represents it (it had neither); each
+// investor document page declares the dated work it publishes (the deck
+// declared none).
+{
+  const WORK_TYPES = new Set(["CreativeWork", "Article", "NewsArticle", "TechArticle", "Report", "DigitalDocument", "PresentationDigitalDocument"]);
+  const DAY = /^\d{4}-\d{2}-\d{2}$/;
+  for (const p of canonicalSelf) {
+    let graph = [];
+    try {
+      graph = JSON.parse((p.html.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/) || [])[1])["@graph"] || [];
+    } catch {
+      /* reported above */
+    }
+    if (p.urlPath.startsWith("/docs/")) {
+      const article = graph.find((n) => n["@type"] === "TechArticle");
+      if (!article) {
+        err(`${p.urlPath}: no TechArticle`);
+        continue;
+      }
+      for (const field of ["datePublished", "dateModified"]) {
+        if (!DAY.test(article[field] || "")) err(`${p.urlPath}: TechArticle ${field} is missing or not a day (${article[field]})`);
+      }
+      if (DAY.test(article.datePublished || "") && article.datePublished > article.dateModified) {
+        err(`${p.urlPath}: TechArticle was published ${article.datePublished}, after it last changed ${article.dateModified}`);
+      }
+      const image = typeof article.image === "string" ? article.image : article.image?.url;
+      const imagePath = image ? toPath(image) : null;
+      if (!imagePath || !resolves(imagePath)) err(`${p.urlPath}: TechArticle image ${image || "missing"} is not served`);
+    }
+    if (/^\/investors\/[^/]+$/.test(p.urlPath) && !graph.some((n) => WORK_TYPES.has(n["@type"]) && DAY.test(n.datePublished || ""))) {
+      err(`${p.urlPath}: investor document declares no dated CreativeWork`);
+    }
+  }
+}
+
+// ── what a reader without JavaScript (or an agent reading the HTML) gets ──
+// /build's six opportunity briefs were reachable only through ?op=&brief=1,
+// which the page reads once it runs: each brief now has its own address
+// (#brief-<slug>), which a stylesheet rule shows before hydration, and the
+// static page marks every brief it does not show hidden. /reserve's figures
+// are read from the chain in the browser: its HTML says so, with the reserve's
+// account and where to check it.
+{
+  const build = pages.get("/build");
+  if (build) {
+    const panels = [...build.html.matchAll(/<section class="brief-panel"[^>]*>/g)].map((m) => m[0]);
+    if (!panels.length) err("/build: no opportunity briefs in the page");
+    for (const tag of panels) {
+      const id = attr(tag, "id") || "";
+      if (!/^brief-[a-z0-9-]+$/.test(id)) err(`/build: brief ${id || "(no id)"} has no #brief-<slug> address`);
+      if (!/\shidden(?:=""|[\s>])/.test(tag)) err(`/build: brief ${id} is not marked hidden in the static page`);
+    }
+    const css = files.filter((f) => f.endsWith(".css")).map((f) => readFileSync(f, "utf8")).join("\n");
+    if (!/\.brief-panel:target\b/.test(css)) err("/build: no stylesheet rule shows a brief at its address (.brief-panel:target)");
+  }
+  const reservePage = pages.get("/reserve");
+  if (reservePage) {
+    const verify = (reservePage.html.match(/<p class="reserve-verify">([\s\S]*?)<\/p>/) || [])[1] || "";
+    if (!verify.includes(reserve.address) || !verify.includes(`href="${reserve.explorerUrl}"`)) {
+      err("/reserve: the static page does not say where to verify its figures (the account and its explorer link)");
+    }
+  }
+}
+
+// ── what a page hydrates, and how much script it references ──
+// Every docs page hydrated the whole docs explorer on load, with the entire
+// docs corpus bundled in (about 380 KB of script per page), and every page
+// hydrated the nav on load. The docs pages are static HTML now: the nav and
+// the docs search box hydrate when the browser is idle, and the search fetches
+// its index on first use. A docs page hydrates nothing on load and references
+// at most DOCS_JS_BUDGET of script (the whole static import graph of its
+// islands and scripts), and no page hydrates the nav on load.
+{
+  const DOCS_JS_BUDGET = 200 * 1024;
+  const jsImports = new Map();
+  const importsOf = (rel) => {
+    if (jsImports.has(rel)) return jsImports.get(rel);
+    const file = path.join(DIST, rel);
+    const out = [];
+    if (existsSync(file)) {
+      const src = readFileSync(file, "utf8");
+      for (const m of src.matchAll(/(?:\bimport|\bfrom)\s*["'](\.{1,2}\/[^"']+\.js)["']/g)) out.push(path.posix.join(path.posix.dirname(rel), m[1]));
+    }
+    jsImports.set(rel, out);
+    return out;
+  };
+  const scriptBytes = (html) => {
+    const seen = new Set();
+    const queue = [...html.matchAll(/(?:src|href|component-url|renderer-url)="(\/_astro\/[^"]+\.js)"/g)].map((m) => m[1].slice(1));
+    let bytes = 0;
+    while (queue.length) {
+      const rel = queue.shift();
+      if (seen.has(rel)) continue;
+      seen.add(rel);
+      const file = path.join(DIST, rel);
+      if (!existsSync(file)) continue;
+      bytes += readFileSync(file).length;
+      queue.push(...importsOf(rel));
+    }
+    return bytes;
+  };
+  const islands = (html) => [...html.matchAll(/<astro-island\b[^>]*>/g)].map((m) => ({
+    name: (decodeHtmlEntities(attr(m[0], "opts") || "").match(/"name":"([^"]+)"/) || [])[1] || "?",
+    client: attr(m[0], "client"),
+  }));
+  for (const p of pages.values()) {
+    if (p.redirectStub) continue;
+    for (const island of islands(p.html)) {
+      if (island.name === "NavIsland" && island.client === "load") err(`${p.urlPath}: the nav hydrates on load (client:idle keeps it off the critical path)`);
+    }
+    if (p.urlPath !== "/docs" && !p.urlPath.startsWith("/docs/")) continue;
+    const onLoad = islands(p.html).filter((i) => i.client === "load").map((i) => i.name);
+    if (onLoad.length) err(`${p.urlPath}: a docs page hydrates ${onLoad.join(", ")} on load`);
+    const bytes = scriptBytes(p.html);
+    if (bytes > DOCS_JS_BUDGET) err(`${p.urlPath}: references ${(bytes / 1024).toFixed(1)} KB of script, over the docs pages' ${DOCS_JS_BUDGET / 1024} KB budget`);
+  }
+}
+
+// ── document images nothing shows ──
+// The asset generator published every image in docs/, including a 3.3 MB
+// picture (/docs/res/ur.png and its WebP) no page used. An image under /docs/
+// is published because a page shows it.
+{
+  const shown = new Set();
+  for (const p of pages.values()) {
+    for (const m of p.html.matchAll(/<img\b[^>]*\ssrc="(\/docs\/[^"]+)"/g)) shown.add(decodeURIComponent(m[1]));
+  }
+  for (const f of files) {
+    const rel = relOf(f);
+    if (rel.startsWith("/docs/") && /\.(?:png|jpe?g|gif|svg|webp|avif)$/i.test(rel) && !shown.has(rel)) {
+      err(`${rel}: published document image that no page shows`);
+    }
+  }
+}
+
 // ── media + og resolution across all pages ──
 for (const p of pages.values()) {
   for (const m of p.html.matchAll(/<(?:img|audio|video|source)[^>]*\ssrc="(\/[^"]+)"/g)) {
@@ -320,7 +517,6 @@ for (const p of pages.values()) {
 // while the sidebar that should link them rendered buttons. Only real pages
 // count as an inbound link. An unlisted document (docs-shared.js) is linked
 // from outside the site, by the app-store listings, and is exempt.
-const unlistedDocPage = (p) => p.startsWith("/docs/") && UNLISTED_DOC_SLUGS.has(p.slice("/docs/".length));
 const inbound = new Map();
 for (const p of pages.values()) {
   if (p.redirectStub) continue;
@@ -335,6 +531,36 @@ for (const p of canonicalSelf) {
   const selfPath = p.urlPath === "/" ? "/" : p.urlPath;
   if (selfPath === "/" || unlistedDocPage(selfPath)) continue;
   if (!(inbound.get(selfPath)?.size > 0)) err(`${selfPath}: orphan — zero inbound internal links`);
+}
+
+// ── the publisher entity ──
+// The Organization the site-wide graph declares is the publisher the footer
+// names (© <year> UR Foundation), and its sameAs lists only that publisher's
+// profiles. It was named "UR" and claimed the urnetwork GitHub and X
+// accounts, which are URnetwork's: the product at ur.io, a different company.
+{
+  const PRODUCT_PROFILES = /^https:\/\/(?:www\.)?(?:github\.com\/urnetwork|x\.com\/urnetwork|twitter\.com\/urnetwork|ur\.io)(?:[/?#]|$)/i;
+  const seen = new Set();
+  for (const p of pages.values()) {
+    if (p.redirectStub) continue;
+    const json = (p.html.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/) || [])[1];
+    let org = null;
+    try {
+      org = (JSON.parse(json)["@graph"] || []).find((n) => n["@type"] === "Organization") || null;
+    } catch {
+      /* reported above */
+    }
+    if (!org) continue;
+    const footerName = (p.html.match(/<div class="footer-utility">\s*<p>©\s*\d{4}\s+([^<]+?)\s*<\/p>/) || [])[1];
+    const problems = [
+      footerName && org.name !== footerName && `the Organization is named "${org.name}", the footer's publisher "${footerName}"`,
+      ...[].concat(org.sameAs || []).filter((u) => PRODUCT_PROFILES.test(u)).map((u) => `the Organization claims ${u}, a URnetwork (ur.io) profile`),
+    ].filter(Boolean);
+    for (const problem of problems) {
+      if (!seen.has(problem)) err(`${p.urlPath}: ${problem}`);
+      seen.add(problem);
+    }
+  }
 }
 
 // ── machine/agent assets ──
@@ -359,10 +585,39 @@ for (const rel of mustExist) {
 // security.txt must not be expired (the deployed one had been, for months)
 const secPath = path.join(DIST, ".well-known/security.txt");
 if (existsSync(secPath)) {
-  const m = readFileSync(secPath, "utf8").match(/^Expires:\s*(.+)$/m);
+  const secText = readFileSync(secPath, "utf8");
+  const m = secText.match(/^Expires:\s*(.+)$/m);
   if (!m) err("security.txt: no Expires line");
   else if (new Date(m[1]).getTime() < Date.now() + 30 * 86400_000)
     err(`security.txt: Expires ${m[1].trim()} is past or within 30 days`);
+  // The preferred (first) contact is the reporting address itself, as a
+  // mailto: an agent or a scanner can use without running the policy page,
+  // whose address the CDN's email obfuscation rewrites into a script. It is
+  // the address the policy page names.
+  const contacts = [...secText.matchAll(/^Contact:\s*(\S+)/gm)].map((c) => c[1]);
+  const vdp = pages.get("/vdp");
+  if (!contacts.length || !contacts[0].startsWith("mailto:")) {
+    err(`security.txt: the first Contact is ${contacts[0] || "missing"}, not the mailto: reporting address`);
+  } else if (vdp && !vdp.html.includes(contacts[0].slice("mailto:".length))) {
+    err(`security.txt: ${contacts[0]} is not the address /vdp names`);
+  }
+}
+
+// ── markdown twins ──
+// A document page (each /docs page, and the legal pages docs-shared.js
+// publishes outside /docs) names its markdown twin with <link rel="alternate"
+// type="text/markdown">, and the twin it names is served: the legal pages
+// had no twin, so an agent got their text only by scraping the page.
+for (const p of pages.values()) {
+  if (p.redirectStub) continue;
+  const head = p.html.slice(0, p.html.indexOf("</head>") + 7);
+  const twin = attr((head.match(/<link rel="alternate" type="text\/markdown"[^>]*>/) || [])[0] || "", "href");
+  if (twin) {
+    const twinPath = toPath(twin);
+    if (twinPath === null || !resolves(twinPath)) err(`${p.urlPath}: markdown twin ${twin} is not served`);
+  } else if (p.urlPath.startsWith("/docs/") || LEGAL_PAGES.includes(p.urlPath)) {
+    err(`${p.urlPath}: document page names no markdown twin`);
+  }
 }
 
 // llms.txt + top-level twins: internal links resolve, no template placeholders.
@@ -388,6 +643,54 @@ for (const rel of ["llms.txt", "llms-full.txt", "litepaper.md"]) {
     if (m[1].includes("<") || m[1].includes("...")) continue; // documented templates / elided examples
     const p = m[1].replace(/[`*.,;:!?]+$/, "");
     if (!resolves(p)) err(`${rel}: links to unserved https://ur.xyz${p}`);
+  }
+}
+
+// The markdown an agent reads out of context (the docs and legal twins,
+// litepaper.md, llms-full.txt) links absolutely: a target relative to the page
+// it was written for (/docs/miner, a screenshot beside the walkthrough) means
+// nothing in a file fetched on its own or concatenated into llms-full.txt.
+{
+  const agentMarkdown = files.filter((f) => f.endsWith(".md") || /\/llms(?:-full)?\.txt$/.test(f));
+  for (const f of agentMarkdown) {
+    const prose = readFileSync(f, "utf8").replace(/^```[^\n]*\n[\s\S]*?^```[ \t]*$/gm, "");
+    const relative = [...new Set([...prose.matchAll(/\]\(([^)\s]+)/g)].map((m) => m[1]))]
+      .filter((t) => !/^(?:[a-z][a-z0-9+.-]*:|#)/i.test(t));
+    if (relative.length) err(`${relOf(f)}: links relative to a page (${relative.slice(0, 4).join(", ")})`);
+  }
+}
+
+// llms.txt lists every machine-readable file the site publishes for programs,
+// and the security contact's address itself: the operator list, the price
+// sheet and its feed, and security.txt were served but listed nowhere.
+{
+  const llmsPath = path.join(DIST, "llms.txt");
+  const llms = existsSync(llmsPath) ? readFileSync(llmsPath, "utf8") : "";
+  for (const f of ["/llms-full.txt", "/litepaper.md", "/operators.yml", "/price.yml", "/price.rss", "/.well-known/security.txt"]) {
+    if (existsSync(path.join(DIST, f)) && !llms.includes(`(${siteOrigin}${f})`)) err(`llms.txt: does not list ${f}`);
+  }
+  const mailto = existsSync(secPath) ? (readFileSync(secPath, "utf8").match(/^Contact:\s*(mailto:\S+)/m) || [])[1] : null;
+  if (mailto && !llms.includes(`(${mailto})`)) err(`llms.txt: does not give the security contact ${mailto}`);
+}
+
+// llms-full.txt opens each embedded docs document with a source marker and,
+// under its H1, where it lives and the day its page last changed: the page's
+// own dateModified, filled in by the page-dates step before the llms step runs.
+{
+  const fullPath = path.join(DIST, "llms-full.txt");
+  const full = existsSync(fullPath) ? readFileSync(fullPath, "utf8") : "";
+  for (const slug of DOC_ORDER) {
+    const page = pages.get(`/docs/${slug}`);
+    if (!page || !full) continue;
+    const modified = (page.html.match(/"dateModified":"([^"]+)"/) || [])[1];
+    const url = `${siteOrigin}/docs/${slug}`;
+    const want = `<!-- source: ${url} -->\n\n# `;
+    const at = full.indexOf(want);
+    const where = at === -1 ? "" : full.slice(at + want.length).split("\n").slice(2, 3)[0];
+    if (at === -1) err(`llms-full.txt: no source marker for ${url}`);
+    else if (where !== `Source: ${url} · Markdown: ${siteOrigin}/docs-md/${slug}.md · Updated: ${modified}`) {
+      err(`llms-full.txt: ${slug} says "${where}" under its H1, not its page, twin and dateModified ${modified}`);
+    }
   }
 }
 

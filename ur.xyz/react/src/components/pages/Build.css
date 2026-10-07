@@ -1361,3 +1361,10 @@
 .build-page .brief-panel[hidden] {
     display: none !important;
 }
+
+/* A brief's address (/build#brief-<slug>) shows that brief before the page
+   hydrates, and without JavaScript at all; once hydrated (data-hydrated) the
+   page opens the brief the address names itself. */
+.build-page:not([data-hydrated]) .brief-panel:target {
+    display: block !important;
+}

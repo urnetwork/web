@@ -42,8 +42,8 @@
       "lastmod": "2026-09-25"
     },
     "/de/miners": {
-      "fingerprint": "37b517209d834b14",
-      "lastmod": "2026-10-06"
+      "fingerprint": "25359591eb7ea81e",
+      "lastmod": "2026-10-07"
     },
     "/de/operators": {
       "fingerprint": "afaecea56462daa4",
@@ -54,44 +54,40 @@
       "lastmod": "2026-09-27"
     },
     "/de/validators": {
-      "fingerprint": "8f2624a69f8dea00",
-      "lastmod": "2026-09-25"
+      "fingerprint": "7affbf410116fb54",
+      "lastmod": "2026-10-07"
     },
     "/docs": {
-      "fingerprint": "e35c09895f2fd135",
-      "lastmod": "2026-10-06"
+      "fingerprint": "d78a3137114cb541",
+      "lastmod": "2026-10-07"
     },
     "/docs/litepaper": {
-      "fingerprint": "b5cc10e20d54d9c4",
-      "lastmod": "2026-09-25"
+      "fingerprint": "0b8619f9cc0f3592",
+      "lastmod": "2026-10-07"
     },
     "/docs/miner": {
-      "fingerprint": "031861c01e64a51b",
-      "lastmod": "2026-10-06"
+      "fingerprint": "45252c874253bcd5",
+      "lastmod": "2026-10-07"
     },
     "/docs/operator": {
-      "fingerprint": "05cdabf16c2bc3f5",
-      "lastmod": "2026-10-06"
-    },
-    "/docs/support/delete": {
-      "fingerprint": "9dc5b2d9e6febabc",
-      "lastmod": "2026-09-25"
+      "fingerprint": "35165f36ea60425a",
+      "lastmod": "2026-10-07"
     },
     "/docs/validator": {
-      "fingerprint": "15645b2d463fd58f",
-      "lastmod": "2026-10-06"
+      "fingerprint": "e941b645b8e584ed",
+      "lastmod": "2026-10-07"
     },
     "/es": {
       "fingerprint": "b8783032fd01f193",
       "lastmod": "2026-09-25"
     },
     "/es/miners": {
-      "fingerprint": "39efc849c44d6282",
-      "lastmod": "2026-10-06"
+      "fingerprint": "d503cf04a2fc5120",
+      "lastmod": "2026-10-07"
     },
     "/es/operators": {
-      "fingerprint": "3ed00a40f55dd88b",
-      "lastmod": "2026-09-25"
+      "fingerprint": "daf2fae2b4e6b9f7",
+      "lastmod": "2026-10-07"
     },
     "/es/research": {
       "fingerprint": "5b6fd8752554d121",
@@ -146,32 +142,32 @@
       "lastmod": "2026-09-27"
     },
     "/reserve": {
-      "fingerprint": "2f28c0d56a0ffcc4",
-      "lastmod": "2026-10-06"
+      "fingerprint": "b8b77d873ccb339f",
+      "lastmod": "2026-10-07"
     },
     "/ru": {
-      "fingerprint": "8e927c0c6770db66",
-      "lastmod": "2026-09-25"
+      "fingerprint": "f8a8ce1a17913481",
+      "lastmod": "2026-10-07"
     },
     "/ru/miners": {
-      "fingerprint": "9c1b3520f9b309a6",
-      "lastmod": "2026-10-06"
+      "fingerprint": "3dcddeb1ca9ddc8b",
+      "lastmod": "2026-10-07"
     },
     "/ru/operators": {
-      "fingerprint": "deada2e29894fb50",
-      "lastmod": "2026-09-25"
+      "fingerprint": "1a26e0b2eaad09cb",
+      "lastmod": "2026-10-07"
     },
     "/ru/research": {
       "fingerprint": "52d6826519e2dce2",
       "lastmod": "2026-09-27"
     },
     "/ru/validators": {
-      "fingerprint": "44b25f8d2f7fda85",
-      "lastmod": "2026-09-25"
+      "fingerprint": "27a02f30eaf105ca",
+      "lastmod": "2026-10-07"
     },
     "/terms": {
-      "fingerprint": "54eda4f227fcb9fa",
-      "lastmod": "2026-08-21"
+      "fingerprint": "4b2c884bb4f4da33",
+      "lastmod": "2026-10-07"
     },
     "/validators": {
       "fingerprint": "f8bdea96812e7a04",

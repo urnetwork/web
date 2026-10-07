@@ -16,7 +16,7 @@ const t = en;
 <Base title="Page not found — UR" description="This page does not exist." lang="en" noindex>
     <div class="app">
         <DisclaimerStatic />
-        <NavIsland lang="en" client:load />
+        <NavIsland lang="en" client:idle={{ timeout: 1000 }} />
 
         <main id="main" class="notfound-page">
             <p class="notfound-code" aria-hidden="true">404</p>

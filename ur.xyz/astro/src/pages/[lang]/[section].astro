@@ -53,7 +53,7 @@ const jsonLd = section === 'research'
 >
     <div class="app">
         <DisclaimerStatic t={t} />
-        <NavIsland activeRoute={section} lang={lang} client:load />
+        <NavIsland activeRoute={section} lang={lang} client:idle={{ timeout: 1000 }} />
 
         <main class="section-page">
             <Section id={section} eyebrow={sectionData.eyebrow} title={sectionData.title} headingLevel="h1">

@@ -47,7 +47,7 @@ const jsonLd = section === 'research'
         reads this page in it) is in Base's head */}
     <div class="app">
         <DisclaimerStatic t={t} />
-        <NavIsland activeRoute={section} lang="en" client:load />
+        <NavIsland activeRoute={section} lang="en" client:idle={{ timeout: 1000 }} />
 
         <main class="section-page">
             <Section id={section} eyebrow={sectionData.eyebrow} title={sectionData.title} headingLevel="h1">

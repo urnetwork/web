@@ -2,7 +2,6 @@ import React, { useEffect, useRef, useState } from 'react';
 import './Nav.css';
 import { useLanguage, LANG_ORDER } from '../i18n';
 import { buildPath, navigate, useRoute } from '../router';
-import { useAlphaPrice } from '../lib/usePrice';
 
 const NETWORK_LINKS = [
     'operators',

@@ -55,7 +55,7 @@ const jsonLd = [{
 
     <div class="app">
         <DisclaimerStatic t={t} />
-        <NavIsland activeRoute="price" lang="en" client:load />
+        <NavIsland activeRoute="price" lang="en" client:idle={{ timeout: 1000 }} />
 
         <main class="section-page">
             <PriceIsland lang="en" initialSheet={sheet} client:load />

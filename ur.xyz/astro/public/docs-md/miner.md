@@ -5,14 +5,14 @@ A UR miner supplies an internet exit for a network operator. Validators measure 
 
 Most miners join an operator's **pool**. You register a provider identity with that operator, without buying your own Bittensor UID or paying a subnet registration burn. The immutable settlement vault owns the operator's shared pool hotkey and pays your entitlement directly to your Bittensor coldkey. Larger fleets can register their own **head-tier** hotkey and earn native miner emission; [that path](#larger-fleets-and-the-head-tier) has additional requirements.
 
-The steps below serve one operator, the default. One command can instead serve every operator in the published [operator list](/operators.yml); see [Mine every listed operator](#mine-every-listed-operator).
+The steps below serve one operator, the default. One command can instead serve every operator in the published [operator list](https://ur.xyz/operators.yml); see [Mine every listed operator](#mine-every-listed-operator).
 
-This guide follows the current [`sn/miner` implementation](https://github.com/urfoundation/sn/tree/main/miner) and [`cli/miner` entry point](https://github.com/urfoundation/sn/tree/main/cli/miner). The executable is named `provider` in these examples. For the other roles, see [Run a validator](/docs/validator) and [Run a network operator](/docs/operator).
+This guide follows the current [`sn/miner` implementation](https://github.com/urfoundation/sn/tree/main/miner) and [`cli/miner` entry point](https://github.com/urfoundation/sn/tree/main/cli/miner). The executable is named `provider` in these examples. For the other roles, see [Run a validator](https://ur.xyz/docs/validator) and [Run a network operator](https://ur.xyz/docs/operator).
 
 ## Before you start
 
 - Use a Linux or macOS host with a stable internet connection. Current provider identity storage supports these platforms; a build for another platform does not imply support for its durable registration path.
-- Create an account with the [network operator](/operators) you want to serve. Obtain its API URL, connect URL and current subnet deployment information, including the settlement vault and EVM RPC endpoints.
+- Create an account with the [network operator](https://ur.xyz/operators) you want to serve. Obtain its API URL, connect URL and current subnet deployment information, including the settlement vault and EVM RPC endpoints.
 - To mine every listed operator instead, the list supplies each operator's URLs. In auto mode a Bittensor sr25519 hotkey seed file replaces the operator accounts: the hotkey signs in to each operator without a chain transaction.
 - Use one stable public exit address per provider identity. If you run several exits, give each its own provider slot; see [Several exits on one host](#several-exits-on-one-host).
 - Have a Bittensor sr25519 coldkey with a prefix-42 SS58 address for receiving rewards. You can sign wallet consent on a separate device and keep the coldkey seed off the provider host.
@@ -81,7 +81,7 @@ Run these commands and the eventual service as the same operating-system user. N
 
 ### Mine every listed operator
 
-`provider provide --all-operators` mines every operator in the operator list published at [ur.xyz/operators.yml](/operators.yml), with one provider process per operator. The one-line auto mode signs in to each operator with your Bittensor hotkey, as a TAO wallet:
+`provider provide --all-operators` mines every operator in the operator list published at [ur.xyz/operators.yml](https://ur.xyz/operators.yml), with one provider process per operator. The one-line auto mode signs in to each operator with your Bittensor hotkey, as a TAO wallet:
 
 ```bash
 provider provide --all-operators --auto-register --hotkey_seed_file=/absolute/private/hotkey.seed

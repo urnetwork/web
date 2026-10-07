@@ -30,7 +30,7 @@ export default {
         license:    'MPLv2',
         disclaimer: 'هذا الموقع بروتوكول منفعة مفتوح المصدر يشغّله مجتمع من المشاركين، ويعمل بشكل منفصل عن مشغّل الشبكة الذي يبيع الوصول إلى الشبكة.',
         languagesAria: 'اللغات',
-        terms:      'شروط الاستخدام',
+        terms:      'شروط الخدمة',
         privacy:    'الخصوصية',
         vdp:        'VDP',
         protocol:   'البروتوكول',
@@ -162,7 +162,7 @@ export default {
     legal: {
         eyebrow: 'قانوني',
         terms: {
-            title: 'شروط الاستخدام',
+            title: 'شروط الخدمة',
             body:  'شروط خدمة ur.xyz، موقع معلومات بروتوكول UR الذي تستضيفه UR Foundation.'
         },
         privacy: {

@@ -33,8 +33,11 @@ const TABLE_SEP  = /^\s*\|?\s*:?-+:?\s*(?:\|\s*:?-+:?\s*)+\|?\s*$/;
  * headings as an outline beneath that level: each heading one level below the
  * heading it sits under, so a document that jumps from "#" to "###" does not
  * skip a level. The visual size still follows the markdown (md-h3 stays md-h3).
+ * `images` maps an image's resolved src to its intrinsic { width, height },
+ * which the <img> carries so the page reserves its box before it loads (the
+ * static build reads the files; without a size the image is drawn as before).
  */
-export function Markdown({ source, baseHref, dropTitle = false, headingBase = null }) {
+export function Markdown({ source, baseHref, dropTitle = false, headingBase = null, images = null }) {
     if (!source) return null;
     let blocks = parseBlocks(source);
     if (dropTitle) {
@@ -42,9 +45,11 @@ export function Markdown({ source, baseHref, dropTitle = false, headingBase = nu
         if (title !== -1) blocks = blocks.filter((_, i) => i !== title);
     }
     const levels = headingBase == null ? null : outlineLevels(blocks, headingBase);
+    // what inline rendering resolves against: links and images, and the images' sizes
+    const ctx = { baseHref, images };
     return (
         <div className="md">
-            {blocks.map((b, i) => renderBlock(b, i, baseHref, levels))}
+            {blocks.map((b, i) => renderBlock(b, i, ctx, levels))}
         </div>
     );
 }
@@ -204,21 +209,21 @@ function splitRow(line) {
         .map(c => c.trim());
 }
 
-function renderBlock(block, idx, baseHref, levels = null) {
+function renderBlock(block, idx, ctx, levels = null) {
     switch (block.type) {
         case 'heading': {
             const Tag = `h${levels?.get(block) ?? Math.min(6, Math.max(1, block.level))}`;
             const id = slugify(block.text);
-            return <Tag key={idx} id={id} className={`md-h md-h${block.level}`}>{renderInline(block.text, baseHref)}</Tag>;
+            return <Tag key={idx} id={id} className={`md-h md-h${block.level}`}>{renderInline(block.text, ctx)}</Tag>;
         }
         case 'paragraph':
-            return <p key={idx} className="md-p">{renderInline(block.text, baseHref)}</p>;
+            return <p key={idx} className="md-p">{renderInline(block.text, ctx)}</p>;
         case 'hr':
             return <hr key={idx} className="md-hr" />;
         case 'quote':
             return (
                 <blockquote key={idx} className="md-quote">
-                    {parseBlocks(block.content).map((b, j) => renderBlock(b, j, baseHref))}
+                    {parseBlocks(block.content).map((b, j) => renderBlock(b, j, ctx))}
                 </blockquote>
             );
         case 'code':
@@ -226,13 +231,13 @@ function renderBlock(block, idx, baseHref, levels = null) {
         case 'ulist':
             return (
                 <ul key={idx} className="md-ul">
-                    {block.items.map((it, j) => <li key={j}>{renderInline(it, baseHref)}</li>)}
+                    {block.items.map((it, j) => <li key={j}>{renderInline(it, ctx)}</li>)}
                 </ul>
             );
         case 'olist':
             return (
                 <ol key={idx} className="md-ol">
-                    {block.items.map((it, j) => <li key={j}>{renderInline(it, baseHref)}</li>)}
+                    {block.items.map((it, j) => <li key={j}>{renderInline(it, ctx)}</li>)}
                 </ol>
             );
         case 'table': {
@@ -245,12 +250,12 @@ function renderBlock(block, idx, baseHref, levels = null) {
                 <div key={idx} className="md-table-wrap">
                     <table className="md-table" role="table">
                         <thead role="rowgroup">
-                            <tr role="row">{head.map((c, j) => <th key={j} role="columnheader">{renderInline(c, baseHref)}</th>)}</tr>
+                            <tr role="row">{head.map((c, j) => <th key={j} role="columnheader">{renderInline(c, ctx)}</th>)}</tr>
                         </thead>
                         <tbody role="rowgroup">
                             {body.map((row, j) => (
                                 <tr key={j} role="row">
-                                    {row.map((c, k) => <td key={k} role="cell" data-label={labels[k] || undefined}>{renderInline(c, baseHref)}</td>)}
+                                    {row.map((c, k) => <td key={k} role="cell" data-label={labels[k] || undefined}>{renderInline(c, ctx)}</td>)}
                                 </tr>
                             ))}
                         </tbody>
@@ -379,7 +384,7 @@ function codeItems(items) {
  * but keep their text content so the colored `<span>` decorations in
  * the changelog read as normal sentences.
  */
-function renderInline(input, baseHref) {
+function renderInline(input, ctx) {
     if (!input) return null;
     const text = stripHtmlTags(input);
     const out = [];
@@ -403,8 +408,9 @@ function renderInline(input, baseHref) {
         if (text[i] === '!' && text[i + 1] === '[') {
             const m = text.slice(i).match(/^!\[([^\]]*)\]\(([^)\s]+)(?:\s+"[^"]*")?\)/);
             if (m) {
-                const url = resolveHref(m[2], baseHref);
-                push(<img className="md-img" src={url} alt={m[1] || ''} loading="lazy" />);
+                const url = resolveHref(m[2], ctx.baseHref);
+                const size = ctx.images?.[url];
+                push(<img className="md-img" src={url} alt={m[1] || ''} width={size?.width} height={size?.height} loading="lazy" decoding="async" />);
                 i += m[0].length;
                 continue;
             }
@@ -414,7 +420,7 @@ function renderInline(input, baseHref) {
         if (text[i] === '[') {
             const m = text.slice(i).match(/^\[([^\]]+)\]\(([^)\s]+)(?:\s+"[^"]*")?\)/);
             if (m) {
-                const href = resolveHref(m[2], baseHref);
+                const href = resolveHref(m[2], ctx.baseHref);
                 const external = /^(https?:|mailto:)/i.test(href);
                 push(
                     <a
@@ -423,7 +429,7 @@ function renderInline(input, baseHref) {
                         target={external ? '_blank' : undefined}
                         rel={external ? 'noopener noreferrer' : undefined}
                     >
-                        {renderInline(m[1], baseHref)}
+                        {renderInline(m[1], ctx)}
                     </a>
                 );
                 i += m[0].length;
@@ -435,7 +441,7 @@ function renderInline(input, baseHref) {
         if (text[i] === '*' && text[i + 1] === '*') {
             const end = text.indexOf('**', i + 2);
             if (end !== -1) {
-                push(<strong className="md-strong">{renderInline(text.slice(i + 2, end), baseHref)}</strong>);
+                push(<strong className="md-strong">{renderInline(text.slice(i + 2, end), ctx)}</strong>);
                 i = end + 2;
                 continue;
             }
@@ -447,7 +453,7 @@ function renderInline(input, baseHref) {
             const end = text.indexOf(ch, i + 1);
             // Reject empty or multi-line spans, plus the obvious "list dash" case.
             if (end !== -1 && end > i + 1 && !text.slice(i + 1, end).includes('\n')) {
-                push(<em className="md-em">{renderInline(text.slice(i + 1, end), baseHref)}</em>);
+                push(<em className="md-em">{renderInline(text.slice(i + 1, end), ctx)}</em>);
                 i = end + 1;
                 continue;
             }

@@ -29,7 +29,7 @@ export default {
         license:    'MPLv2',
         disclaimer: '本网站是一个由参与者社区提供支持的开源实用协议，与销售网络访问权的网络运营商分开运行。',
         languagesAria: '语言',
-        terms:      '使用条款',
+        terms:      '服务条款',
         privacy:    '隐私政策',
         vdp:        'VDP',
         protocol:   '协议',
@@ -161,7 +161,7 @@ export default {
     legal: {
         eyebrow: '法律',
         terms: {
-            title: '使用条款',
+            title: '服务条款',
             body:  'ur.xyz（由 UR Foundation 托管的 UR 协议信息网站）的服务条款。'
         },
         privacy: {

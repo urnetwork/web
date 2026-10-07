@@ -32,7 +32,7 @@ const description = `The ${reserve.name} receives the SN25 miner emissions momen
 
     <div class="app">
         <DisclaimerStatic t={en} />
-        <NavIsland activeRoute="reserve" lang="en" client:load />
+        <NavIsland activeRoute="reserve" lang="en" client:idle={{ timeout: 1000 }} />
 
         <main class="section-page">
             <ReservePage route={{ name: 'reserve', slug: null }} client:load />

@@ -31,7 +31,7 @@ export default {
         license:    'MPLv2',
         disclaimer: 'This site is an open source utility protocol powered by a community of participants, run separately from the network operator that sells access to the network.',
         languagesAria: 'Languages',
-        terms:      'Terms of Use',
+        terms:      'Terms of Service',
         privacy:    'Privacy Policy',
         vdp:        'VDP',
         protocol:   'Protocol',
@@ -181,7 +181,7 @@ export default {
     legal: {
         eyebrow: 'Legal',
         terms: {
-            title: 'Terms of Use',
+            title: 'Terms of Service',
             body:  'The Terms of Service for ur.xyz, the UR protocol information site hosted by UR Foundation.'
         },
         privacy: {

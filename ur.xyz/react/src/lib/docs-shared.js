@@ -15,6 +15,19 @@ export const HIDDEN_DOC_SLUGS = new Set([]);
 // listed after them, so a new document is never silently missing.
 export const DOC_ORDER = Object.freeze(['miner', 'validator', 'operator', 'litepaper']);
 
+// The day each document was first published at its URL, for its TechArticle
+// datePublished; a document's front matter may set `published` instead. From
+// the git history: the role guides replaced the provider guide on 2026-09-26,
+// whitepaper.md became the litepaper on 2026-08-18, and the account-deletion
+// walkthrough has been served since 2026-04-16.
+export const DOC_PUBLISHED = Object.freeze({
+    miner: '2026-09-26',
+    validator: '2026-09-26',
+    operator: '2026-09-26',
+    litepaper: '2026-08-18',
+    'support/delete': '2026-04-16',
+});
+
 // Published (the page, its /<lang>/docs stub and its markdown twin) but listed
 // nowhere on the site: not in the sidebar, the landing, the docs index
 // structured data, search or the llms files. The account-deletion walkthrough
@@ -33,7 +46,8 @@ export function slugFor(filePath) {
 // under /docs. The legal documents render at /terms, /privacy and /vdp (the
 // generated react/src/data/legal.js); /docs/legal/* was a second, indexable
 // copy of each. They stay in the docs sidebar and search, linking to their page,
-// but get no /docs page, no /<lang>/docs stub and no docs-md twin.
+// but get no /docs page and no /<lang>/docs stub; their markdown twin sits
+// beside the page (/terms.md), not under /docs-md.
 export const DOC_PAGE_PATHS = Object.freeze({
     'legal/terms': '/terms',
     'legal/privacy': '/privacy',
@@ -44,6 +58,23 @@ export const DOC_PAGE_PATHS = Object.freeze({
 export function docPath(slug) {
     if (DOC_PAGE_PATHS[slug]) return DOC_PAGE_PATHS[slug];
     return slug ? `/docs/${slug}` : '/docs';
+}
+
+/**
+ * The site images a document shows: each ![alt](src) outside its fenced code,
+ * resolved as its page resolves it (lib/markdown.jsx resolveHref) against
+ * `base`, the document's /docs/<source path>. An image on another host is not
+ * among them.
+ */
+export function docImages(content, base) {
+    const prose = String(content || '').replace(/^```[^\n]*\n[\s\S]*?^```[ \t]*$/gm, '');
+    const out = new Set();
+    for (const m of prose.matchAll(/!\[[^\]]*\]\(([^)\s]+)(?:\s+"[^"]*")?\)/g)) {
+        const src = m[1];
+        if (/^[a-z][a-z0-9+.-]*:/i.test(src) || src.startsWith('//') || src.startsWith('#')) continue;
+        out.add(src.startsWith('/') ? src : base.replace(/\/[^/]*$/, '/') + src);
+    }
+    return [...out];
 }
 
 /**

@@ -24,6 +24,10 @@ import './Build.css';
  *   ?model=chassis|spine|tower|foundation|terminal|terminal3   version 10
  *   ?op=1..6                    the initially selected opportunity
  *   ?brief=1                    open the opportunity brief
+ *   #brief-<slug>               open that opportunity's brief: each brief's own
+ *                               address, which the page keeps while a brief is
+ *                               open and which shows the brief before hydration
+ *                               too (Build.css :target)
  *
  * The attributes the scripts set on <html> (data-model, data-version,
  * data-content-view, data-brief-mode, data-brief-open, data-op and the accent
@@ -171,14 +175,23 @@ const GLYPHS = { play: '▶', stop: '■', replay: '↻' };
 const traceCopyFor = (mode) => TRACE_MODE_COPY[mode] || TRACE_MODE_COPY.roundtrip;
 const idleStatus = (model, traceMode) => (model === 'terminal3' ? traceCopyFor(traceMode).idle : 'WATCH ONE PRODUCT SESSION ROUTE + VALIDATE');
 
-/** Keep ?op= (and ?model=) in the address so a selected example can be shared. */
-function syncOpParam(index) {
+/** The element id, and so the address (#brief-<slug>), of an opportunity's brief. */
+const briefId = (o) => `brief-${o.slug}`;
+/** The opportunity whose brief an address names, or -1. */
+const briefIndexOf = (hash) => OPS.findIndex((o) => hash === `#${briefId(o)}`);
+
+/**
+ * Keep ?op= (and ?model=) in the address so a selected example can be shared,
+ * and, while its brief is open, the brief's own address (#brief-<slug>).
+ */
+function syncAddress(index, briefOpen) {
     const current = new URLSearchParams(window.location.search);
     const next = new URLSearchParams();
     if (current.get('model')) next.set('model', current.get('model'));
     if (index) next.set('op', String(index + 1));
     const qs = next.toString();
-    window.history.replaceState(window.history.state, '', `${window.location.pathname}${qs ? `?${qs}` : ''}`);
+    const hash = briefOpen ? `#${briefId(OPS[index])}` : '';
+    window.history.replaceState(window.history.state, '', `${window.location.pathname}${qs ? `?${qs}` : ''}${hash}`);
 }
 
 export default function BuildPage() {
@@ -203,6 +216,8 @@ export default function BuildPage() {
     const [stageHeight, setStageHeight] = useState(null);
     const [viewport, setViewport] = useState({ mobile: false, compact: false });
     const [sim, setSim] = useState(SIM_IDLE);
+    // set once mounted: until then a brief's address shows it through CSS (Build.css)
+    const [hydrated, setHydrated] = useState(false);
 
     const variantRef = useRef(DEFAULT_VARIANT);
     const progressRef = useRef(0);
@@ -217,6 +232,8 @@ export default function BuildPage() {
     const briefPanelRef = useRef(null);
     const worldRef = useRef(null);
     const world3Ref = useRef(null);
+    // a brief opened from its address is scrolled to once it is drawn
+    const revealBriefRef = useRef(false);
 
     const op = OPS[opIndex];
     const briefIsOpen = briefOpen === true;
@@ -327,10 +344,39 @@ export default function BuildPage() {
         const initialOp = Math.max(0, Math.min(OPS.length - 1, (Number(params.get('op')) || 1) - 1));
         if (initialOp) setOpIndex(initialOp);
         if (params.get('brief') === '1') { setBriefOpen(true); setTriggerOpen(true); }
+        const fromAddress = briefIndexOf(window.location.hash);
+        if (fromAddress !== -1) {
+            setOpIndex(fromAddress);
+            setBriefOpen(true);
+            setTriggerOpen(true);
+            revealBriefRef.current = true;
+        }
         setViewport(viewportFlags());
         applyProgress(0);
+        setHydrated(true);
         return () => resetSimulation(true);
     }, [applyProgress, resetSimulation]);
+
+    // a link to a brief's address on the page itself opens that brief
+    useEffect(() => {
+        const onHashChange = () => {
+            const index = briefIndexOf(window.location.hash);
+            if (index === -1) return;
+            if (variantRef.current.model === 'terminal3') resetSimulation();
+            setOpIndex(index);
+            setBriefOpen(true);
+            setTriggerOpen(true);
+            revealBriefRef.current = true;
+        };
+        window.addEventListener('hashchange', onHashChange);
+        return () => window.removeEventListener('hashchange', onHashChange);
+    }, [resetSimulation]);
+
+    useEffect(() => {
+        if (!revealBriefRef.current || briefOpen !== true) return;
+        revealBriefRef.current = false;
+        briefPanelRef.current?.scrollIntoView({ block: 'start' });
+    }, [briefOpen, opIndex]);
 
     useEffect(() => {
         const onResize = () => {
@@ -365,7 +411,7 @@ export default function BuildPage() {
     const selectOpportunity = (index, fromUser) => {
         if (variantRef.current.model === 'terminal3') resetSimulation();
         setOpIndex(index);
-        if (fromUser) syncOpParam(index);
+        if (fromUser) syncAddress(index, briefIsOpen);
     };
     const stepOpportunity = (direction) => {
         selectOpportunity((opIndex + direction + OPS.length) % OPS.length, true);
@@ -389,13 +435,14 @@ export default function BuildPage() {
         selected?.focus();
     };
 
-    const setInlineBrief = (open) => { setBriefOpen(open); setTriggerOpen(open); };
+    const setInlineBrief = (open) => { setBriefOpen(open); setTriggerOpen(open); syncAddress(opIndex, open); };
     const onOpenBrief = () => (model === 'terminal3' ? setInlineBrief(!briefIsOpen) : setContentView('brief'));
     const onCloseBrief = () => setInlineBrief(false);
     const onToggleBrief = () => {
         if (isTerminal) { setContentView('brief'); return; }
         setBriefOpen(!briefIsOpen);
         setToggleOpen(!briefIsOpen);
+        syncAddress(opIndex, !briefIsOpen);
     };
 
     const setScrubFromPointer = (e) => {
@@ -543,6 +590,7 @@ export default function BuildPage() {
             data-brief-mode={briefMode}
             data-brief-open={isV12 && briefOpen !== null ? String(briefIsOpen) : undefined}
             data-op={op.slug}
+            data-hydrated={hydrated ? '' : undefined}
             style={{ '--accent': op.accent, '--accent-rgb': op.rgb }}
         >
             <header className="build-hero shell">
@@ -664,7 +712,7 @@ export default function BuildPage() {
                                 key={o.slug}
                                 id={`opportunity-readout-${o.slug}`}
                                 labelledBy={`op-tab-${o.slug}`}
-                                briefId={`architecture-brief-${o.slug}`}
+                                briefId={briefId(o)}
                                 hidden={i !== opIndex}
                                 op={o}
                                 readout={readoutFor(i)}
@@ -693,8 +741,10 @@ export default function BuildPage() {
                 {OPS.map((o, i) => (
                     <BriefPanel
                         key={o.slug}
-                        id={`architecture-brief-${o.slug}`}
-                        hidden={i !== opIndex}
+                        id={briefId(o)}
+                        // version 12 draws only the open brief (Build.css), so the
+                        // static page marks every other one hidden, as it is shown
+                        hidden={i !== opIndex || (isV12 && !briefIsOpen)}
                         panelRef={i === opIndex ? briefPanelRef : undefined}
                         op={o}
                         v12={isV12 ? BUILD_V12[i] : null}

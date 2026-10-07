@@ -14,7 +14,9 @@ import { useLanguage } from '../i18n';
  * Renders the /docs page. The shared `<Explorer>` chrome handles the
  * sidebar and search; this component owns the right pane: a landing
  * placeholder when no slug is selected, otherwise the markdown body of
- * the requested doc.
+ * the requested doc. The static build renders the docs pages without React
+ * (astro/src/pages/docs/*.astro, components/DocsShell.astro); this is the
+ * SPA's, which the visual parity test compares the /docs landing with.
  */
 export default function DocsExplorer({ activeRoute, initialSlug = null } = {}) {
     const route = useRoute();
@@ -64,7 +66,7 @@ function DocsLanding({ code }) {
         <>
             <header className="explorer-page-header">
                 <span className="explorer-page-eyebrow">Documentation</span>
-                <h1 className="explorer-page-title">URnetwork docs</h1>
+                <h1 className="explorer-page-title">UR docs</h1>
                 <p className="explorer-page-meta">
                     How to take part in the UR privacy network on Bittensor SN25, one guide
                     per role, and the litepaper that explains the mechanism they take part in.
@@ -103,8 +105,9 @@ function DocBody({ doc }) {
         <article>
             <header className="explorer-page-header">
                 <span className="explorer-page-eyebrow">Docs</span>
+                {/* the static page says under the title when the content last
+                    changed (the sitemap's lastmod), which the SPA does not know */}
                 <h1 className="explorer-page-title">{doc.title}</h1>
-                <p className="explorer-page-meta">{doc.path}</p>
             </header>
             {/* the header's h1 is the document's title: drop the markdown's own
                 "# Title" and nest the remaining headings beneath it */}
