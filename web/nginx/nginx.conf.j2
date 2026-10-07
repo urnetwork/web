@@ -873,6 +873,12 @@ http {
             add_header 'X-Robots-Tag' $ur_preview_robots always;
         }
 
+        location = /investors/ur-network-capacity-letter.pdf {
+            add_header 'Link' '<https://ur.xyz/investors/funding-network-capacity>; rel="canonical"';
+            add_header 'Cache-Control' 'public, max-age=2592000, stale-while-revalidate=86400';
+            add_header 'X-Robots-Tag' $ur_preview_robots always;
+        }
+
         # Markdown and text twins of HTML pages, for agents: canonical to the
         # page they mirror, so the page is what search engines index. Ahead of
         # the generic machine-readable rule below, which they would otherwise

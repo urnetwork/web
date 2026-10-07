@@ -416,6 +416,21 @@ done
 expect_response ur.xyz /docs 200
 expect_response ur.xyz /docs/miner 200
 
+# Each investor PDF is a printout of an investor page: it stays a month-long
+# download and points search engines at the page it prints.
+while read -r pdf page; do
+    expect_response ur.xyz "/investors/$pdf.pdf" 200
+    expect_response ur.xyz "/investors/$page" 200
+    expect_header ur.xyz "/investors/$pdf.pdf" Link "<https://ur.xyz/investors/$page>; rel=\"canonical\""
+    expect_header ur.xyz "/investors/$pdf.pdf" Cache-Control 'public, max-age=2592000, stale-while-revalidate=86400'
+done <<'EOF'
+ur-investor-deck deck
+our-letter-to-bittensor our-letter-to-bittensor
+ur-conviction-lock-announcement conviction-lock
+ur-letter-to-tokenholders-september-2026 letter-to-tokenholders-september-2026
+ur-network-capacity-letter funding-network-capacity
+EOF
+
 # llms.txt and llms-full.txt are not copies of the home page, so they carry no
 # canonical Link to it, and they cache like the other machine-readable files.
 for host in ur.io ur.xyz; do
