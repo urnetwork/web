@@ -12,7 +12,7 @@
 import { existsSync, readFileSync, readdirSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { DOC_ORDER, DOC_PAGE_PATHS, UNLISTED_DOC_SLUGS } from "../../react/src/lib/docs-shared.js";
+import { DOC_ORDER, DOC_PAGE_PATHS, UNLISTED_DOC_SLUGS, slugFor, splitFrontMatter } from "../../react/src/lib/docs-shared.js";
 import { contentDay, investorLetterMetadata } from "./pdf-freshness.mjs";
 import { reserve } from "../../react/src/data/reserve.js";
 
@@ -331,6 +331,53 @@ for (const p of pages.values()) {
   for (const m of p.html.matchAll(/<img\b[^>]*\bclass="md-img"[^>]*>/g)) {
     if (!/\swidth="\d+"/.test(m[0]) || !/\sheight="\d+"/.test(m[0])) {
       err(`${p.urlPath}: document image without width and height (${attr(m[0], "src")})`);
+    }
+  }
+}
+
+// ── inline code reads as the document writes it ──
+// The markdown renderer read markup inside code spans. It dropped raw HTML
+// from a line before it found the line's code spans, so a placeholder went
+// too, as if it were a tag: `provider auth --operator=<domain>` showed as
+// `provider auth --operator=` and `vault/main/tls/<hostname>/<hostname>.crt`
+// as `vault/main/tls//.crt`. And the search index's text read the underscores
+// of `client_id` or `--hotkey_seed_file` as emphasis, so searching for them
+// found nothing. Every inline code span in a document (outside its fenced
+// code, and apart from its title, which the page prints itself) is shown
+// whole on its page, and each of its words is in the document's entry in
+// /docs-search.json.
+{
+  const DOCS_DIR = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../docs");
+  const FENCE = /^```\s*([a-zA-Z0-9_+-]*)\s*$/;
+  const spansOf = new Map(); // slug -> the inline code spans of its document
+  for (const file of walk(DOCS_DIR).filter((f) => f.endsWith(".md")).sort()) {
+    const slug = slugFor(path.relative(DOCS_DIR, file).split(path.sep).join("/"));
+    if (!slug || spansOf.has(slug)) continue;
+    const spans = new Set();
+    let fenced = false;
+    for (const line of splitFrontMatter(readFileSync(file, "utf8")).body.split("\n")) {
+      if (FENCE.test(line)) fenced = !fenced;
+      else if (!fenced && !/^#\s/.test(line)) for (const m of line.matchAll(/`([^`]+)`/g)) spans.add(m[1]);
+    }
+    spansOf.set(slug, [...spans]);
+  }
+  const listed = (spans) => `${spans.slice(0, 4).map((s) => `\`${s}\``).join(", ")}${spans.length > 4 ? ", …" : ""}`;
+  for (const [slug, spans] of spansOf) {
+    const p = pages.get(`/docs/${slug}`);
+    if (!p || p.redirectStub) continue;
+    const shown = new Set(
+      [...p.html.matchAll(/<code class="md-icode"[^>]*>([\s\S]*?)<\/code>/g)].map((m) => decodeHtmlEntities(m[1].replace(/<[^>]+>/g, ""))),
+    );
+    const cut = spans.filter((s) => !shown.has(s));
+    if (cut.length) err(`${p.urlPath}: ${cut.length} inline code span(s) shown without all of their text: ${listed(cut)}`);
+  }
+  // a query matches where each of its words occurs within a word of the entry (lib/docs-search.js)
+  const searchFile = path.join(DIST, "docs-search.json");
+  if (!existsSync(searchFile)) err("/docs-search.json: not built");
+  else {
+    for (const entry of JSON.parse(readFileSync(searchFile, "utf8"))) {
+      const unfound = (spansOf.get(entry.slug) || []).filter((s) => s.toLowerCase().split(/\s+/).some((w) => w && !entry.haystack.includes(w)));
+      if (unfound.length) err(`/docs-search.json: ${unfound.length} inline code span(s) of ${entry.slug} cannot be found as written: ${listed(unfound)}`);
     }
   }
 }
