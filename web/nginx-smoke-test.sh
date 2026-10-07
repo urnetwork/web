@@ -405,6 +405,17 @@ for variant in / .html; do
 done
 expect_successor ur.xyz /sitemap.xml /sitemap-index.xml
 
+# A localized docs URL goes to the English document in one hop, from its
+# trailing-slash and .html forms too.
+for lang in ru ar zh de es; do
+    for variant in '' / .html; do
+        expect_response ur.xyz "/$lang/docs$variant" 301 /docs
+        expect_response ur.xyz "/$lang/docs/miner$variant" 301 /docs/miner
+    done
+done
+expect_response ur.xyz /docs 200
+expect_response ur.xyz /docs/miner 200
+
 # llms.txt and llms-full.txt are not copies of the home page, so they carry no
 # canonical Link to it, and they cache like the other machine-readable files.
 for host in ur.io ur.xyz; do

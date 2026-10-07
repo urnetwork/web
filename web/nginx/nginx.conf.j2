@@ -834,8 +834,10 @@ http {
         }
 
         # Docs are English-only; the localized docs URLs are redirect stubs.
-        # Serve the redirect at the HTTP layer instead of via meta refresh.
-        location ~ ^/(?:ru|ar|zh|de|es)/docs(?<docpath>/.*)?$ {
+        # Serve the redirect at the HTTP layer instead of via meta refresh, in
+        # one hop: the target leaves off a trailing slash or .html, which the
+        # canonical rules below would otherwise redirect again.
+        location ~ ^/(?:ru|ar|zh|de|es)/docs(?<docpath>/.*?[^/])?(?:\.html|/+)?$ {
             return 301 /docs$docpath;
         }
 
