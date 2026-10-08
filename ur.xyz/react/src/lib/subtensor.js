@@ -20,6 +20,8 @@
  *                                           reshuffles between runtimes)
  *   SubtensorModule.OwnedHotkeys(coldkey)   the recipient hotkeys registered
  *                                           to the coldkey, and their UIDs
+ *   BlockAtRegistration(netuid, uid)        when each recipient registered:
+ *                                           where the balance history starts
  *   SubnetTAO / SubnetAlphaIn / SubnetAlphaOut(netuid)
  *                                           the subnet pool: α price in TAO
  *   SubnetAlphaOutEmission(netuid)          α emitted per block
@@ -262,6 +264,23 @@ export function ss58Encode(pubkey, prefix = 42) {
     while (n > 0n) { s = B58[Number(n % 58n)] + s; n /= 58n; }
     for (const x of all) { if (x !== 0) break; s = '1' + s; }
     return s;
+}
+
+const cmpBytes = (a, b) => {
+    for (let i = 0; i < Math.min(a.length, b.length); i++) if (a[i] !== b[i]) return a[i] - b[i];
+    return a.length - b.length;
+};
+
+/**
+ * The AccountId32 of a native multi-signature account (pallet_multisig):
+ * blake2_256 of "modlpy/utilisuba", the SCALE Vec of the signers' AccountIds
+ * in byte order, and the threshold as a u16. Signers may be SS58 addresses or
+ * 32-byte keys; the result is the 32-byte key (ss58Encode gives its address).
+ */
+export function multisigAccountId(signers, threshold) {
+    const keys = signers.map((s) => (typeof s === 'string' ? ss58Decode(s) : s)).sort(cmpBytes);
+    if (keys.length >= 64) throw new Error('multisig: too many signers');
+    return blake2b(concat(utf8('modlpy/utilisuba'), new Uint8Array([keys.length << 2]), ...keys, u16le(threshold)), 32);
 }
 
 // ── SCALE ───────────────────────────────────────────────────────────────────
@@ -574,9 +593,20 @@ export async function readReserve({ address, netuid = NETUID, endpoints = FINNEY
     const shareOf = (uid) => (uid == null || incentiveSum === 0 ? 0 : incentive[uid] / incentiveSum);
     const uidOf = (i) => decodeU16(unwrap(uidResults[i], 'uid'));
 
+    // When each registered recipient took its UID: the earliest is where the
+    // balance history starts (one small read per recipient, at the head).
+    const registeredUids = ownedHotkeys.map((_, i) => uidOf(i)).filter((uid) => uid != null);
+    const fourth = registeredUids.length
+        ? await rpcBatch(endpoints, registeredUids.map((uid) => ['state_getStorage', [storageKey('SubtensorModule', 'BlockAtRegistration', u16le(netuid), u16le(uid)), hash]]), signal)
+        : [];
+    const registeredAt = new Map(registeredUids.map((uid, i) => {
+        const block = decodeU64(unwrap(fourth[i], 'registration block'));
+        return [uid, block == null ? null : Number(block)];
+    }));
+
     const hotkeys = ownedHotkeys.map((hot, i) => {
         const uid = uidOf(i);
-        return { hotkey: ss58Encode(hot), uid, incentiveShare: shareOf(uid) };
+        return { hotkey: ss58Encode(hot), uid, incentiveShare: shareOf(uid), registeredAt: uid == null ? null : registeredAt.get(uid) ?? null };
     });
     const ownerUid = ownerHotkey ? uidOf(ownedHotkeys.length) : null;
     const ownerHotkeyAddress = ownerHotkey ? ss58Encode(ownerHotkey) : null;

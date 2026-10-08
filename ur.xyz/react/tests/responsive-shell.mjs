@@ -96,10 +96,11 @@ async function visible(locator) {
 async function auditPage(browser, base, route, profile) {
   const page = await browser.newPage({ viewport: { width: profile.width, height: profile.height } });
   await page.emulateMedia({ reducedMotion: 'reduce' });
-  // opentensor.ai: the reserve page reads Bittensor mainnet in the browser; an
-  // empty answer keeps this audit independent of the chain (the page then shows
-  // its "waiting for the chain" state, which is the layout under test).
-  await page.route(/bringyour\.com|ur\.network|opentensor\.ai/, (request) => request.fulfill({ json: {} }).catch(() => request.abort()));
+  // opentensor.ai: the reserve page reads Bittensor mainnet in the browser, and
+  // geckoterminal.com the α price with USD selected; an empty answer keeps this
+  // audit independent of the chain (the page then shows its "waiting for the
+  // chain" state, which is the layout under test).
+  await page.route(/bringyour\.com|ur\.network|opentensor\.ai|geckoterminal\.com/, (request) => request.fulfill({ json: {} }).catch(() => request.abort()));
   const errors = [];
   page.on('console', (message) => {
     if (message.type() === 'error') errors.push(message.text());

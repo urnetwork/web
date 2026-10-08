@@ -21,13 +21,16 @@ const SPOT_CACHE_MAX_AGE_MS = 24 * 60 * 60 * 1000;
  *   alphaUsd       — current USD price of 1 α (cached value until a feed answers)
  *   alphaUsdSource — 'operators' (mean of the operators' stats feeds) or
  *                    'gecko' (the public subnet pool feed)
+ *   alphaUsdAt     — ms timestamp of the feed answer behind alphaUsd; null
+ *                    while it is the cached value (a consumer that must not
+ *                    show a stale price waits for this)
  *   closes         — hourly USD closes for the last 24h, oldest → newest
  *                    (only polled while a `series: true` consumer is mounted)
  *
  * Every fetch retries on failure (10s) instead of waiting out its full
  * poll interval, and the last good value is always kept.
  */
-let state = { sheet: null, alphaUsd: null, alphaUsdSource: null, closes: null };
+let state = { sheet: null, alphaUsd: null, alphaUsdSource: null, alphaUsdAt: null, closes: null };
 const listeners = new Set();
 
 function setState(patch) {
@@ -97,7 +100,7 @@ function start() {
     // from an effect (client only), so hydration stays deterministic.
     const cached = readSpotCache();
     if (cached && state.alphaUsd == null) {
-        setState({ alphaUsd: cached.usd, alphaUsdSource: cached.source || null });
+        setState({ alphaUsd: cached.usd, alphaUsdSource: cached.source || null, alphaUsdAt: null });
     }
     loadSheet();
 }
@@ -131,7 +134,7 @@ async function loadSpot() {
     try {
         const spot = await fetchSpot(sn, ctrl.signal);
         writeSpotCache(sn, spot.usd, spot.source);
-        setState({ alphaUsd: spot.usd, alphaUsdSource: spot.source });
+        setState({ alphaUsd: spot.usd, alphaUsdSource: spot.source, alphaUsdAt: Date.now() });
         timers.spot = setTimeout(loadSpot, SPOT_POLL_MS);
     } catch {
         if (ctrl.signal.aborted) return;
@@ -161,10 +164,17 @@ async function loadSeries() {
     }
 }
 
-export function useAlphaPrice({ series = false } = {}) {
+/**
+ * Subscribe to the feed. With `enabled: false` the component reads the
+ * store without counting as a consumer, so nothing is fetched on its
+ * account (the reserve page contacts the price feeds only while USD is
+ * selected).
+ */
+export function useAlphaPrice({ series = false, enabled = true } = {}) {
     const snapshot = useSyncExternalStore(subscribe, () => state, () => state);
 
     useEffect(() => {
+        if (!enabled) return undefined;
         consumers++;
         if (series) {
             seriesConsumers++;
@@ -177,7 +187,7 @@ export function useAlphaPrice({ series = false } = {}) {
             if (series) seriesConsumers--;
             if (consumers === 0) stop();
         };
-    }, [series]);
+    }, [series, enabled]);
 
     return snapshot;
 }

@@ -45,6 +45,7 @@ export function pct(ratio, dp = 1) {
 }
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+const MONTHS_LONG = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 const DAY_MS = 86_400_000;
 
 /** "2026-10-12" → "12 Oct". */
@@ -57,6 +58,49 @@ export function shortDate(iso) {
 export function longDate(iso) {
     const [y, m, d] = String(iso).split('-').map(Number);
     return `${d} ${MONTHS[m - 1]} ${y}`;
+}
+
+/** "2026-10-12" → "12 Oct 26": for a span that crosses a year. */
+export function shortDateYear(iso) {
+    const [y, m, d] = String(iso).split('-').map(Number);
+    return `${d} ${MONTHS[m - 1]} ${String(y).slice(2)}`;
+}
+
+/** "2026-10" → "Oct 26". */
+export function monthLabel(ym) {
+    const [y, m] = String(ym).split('-').map(Number);
+    return `${MONTHS[m - 1]} ${String(y).slice(2)}`;
+}
+
+/** "2026-10" → "October 2026". */
+export function monthLong(ym) {
+    const [y, m] = String(ym).split('-').map(Number);
+    return `${MONTHS_LONG[m - 1]} ${y}`;
+}
+
+/** "2026-10" → "Oct 2026". */
+export function monthShort(ym) {
+    const [y, m] = String(ym).split('-').map(Number);
+    return `${MONTHS[m - 1]} ${y}`;
+}
+
+/** A USD amount: cents below $1,000 ("$1.97"), whole dollars above ("$4,650"), nothing as "$0". */
+export function usd(v) {
+    const n = Number(v) || 0;
+    const a = Math.abs(n);
+    const sign = n < 0 ? '−' : '';
+    if (a === 0) return '$0';
+    if (a >= 1000) return `${sign}$${whole(a)}`;
+    return `${sign}$${a.toLocaleString(LOCALE, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+}
+
+/** A USD amount in compact form: "$1.35M", "$80.9K", "$4,650", "$1.97". */
+export function usdCompact(v) {
+    const n = Number(v) || 0;
+    const a = Math.abs(n);
+    const sign = n < 0 ? '−' : '';
+    if (a >= 1e4) return `${sign}$${compact(a)}`;
+    return usd(n);
 }
 
 /** A UTC timestamp (ms) → "2026-10-12". */

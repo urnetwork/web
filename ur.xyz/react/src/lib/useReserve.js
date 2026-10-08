@@ -26,14 +26,15 @@ const POLL_MS = 60_000;
 const RETRY_MS = 10_000;
 const HISTORY_REFRESH_MS = 15 * 60_000;
 // One sample a day for the last five weeks, then one per settlement epoch
-// (7 days, 50,400 blocks) back to the launch, on fixed block boundaries so
-// every visit asks for the same blocks. A sample at a finalized block never
-// changes, so each is read once and kept in localStorage: a first visit reads
-// a month of history in ~3 s; a year (about 80 samples) takes two passes a
-// minute apart, newest first, because the public archive node rations
-// historical reads (see lib/subtensor.js); later visits read only the new
-// days. A sample that comes back unusable is asked for a few times and then
-// left out; one the node had no budget for is simply asked for again.
+// (7 days, 50,400 blocks) back to the first receipt, on fixed block
+// boundaries so every visit asks for the same blocks. A sample at a
+// finalized block never changes, so each is read once and kept in
+// localStorage: a first visit reads a month of history in ~3 s; a year
+// (about 80 samples) takes two passes a minute apart, newest first, because
+// the public archive node rations historical reads (see lib/subtensor.js);
+// later visits read only the new days. A sample that comes back unusable is
+// asked for a few times and then left out; one the node had no budget for is
+// simply asked for again.
 const DAILY_WINDOW_DAYS = 35;
 const WEEK_BLOCKS = 7 * BLOCKS_PER_DAY;
 const MAX_SAMPLE_ATTEMPTS = 3;
@@ -59,11 +60,23 @@ function writeCache(address, netuid, samples) {
     } catch { /* private mode or full */ }
 }
 
-/** The blocks to sample between the launch estimate and the snapshot's block, ascending. */
-function sampleBlocks(snapshot, launchIso) {
+/**
+ * The block the history starts at: the earliest registration of a recipient
+ * hotkey, which is the first block the reserve could have been paid at (the
+ * recipients registered before the launch date); failing that, the launch
+ * date's block, estimated from the snapshot's time.
+ */
+function historyStart(snapshot, launchIso) {
+    const registered = snapshot.hotkeys.map((h) => h.registeredAt).filter((b) => Number.isFinite(b) && b > 0);
+    if (registered.length) return Math.min(...registered);
     const launchMs = Date.parse(`${launchIso}T00:00:00Z`);
     const blocksSinceLaunch = Math.max(0, Math.round((snapshot.time - launchMs) / 12_000));
-    const from = Math.max(snapshot.emission.firstEmissionBlock || 0, snapshot.block - blocksSinceLaunch);
+    return snapshot.block - blocksSinceLaunch;
+}
+
+/** The blocks to sample between the history's start and the snapshot's block, ascending. */
+function sampleBlocks(snapshot, launchIso) {
+    const from = Math.max(snapshot.emission.firstEmissionBlock || 0, historyStart(snapshot, launchIso));
     const dailyFrom = Math.max(from, snapshot.block - DAILY_WINDOW_DAYS * BLOCKS_PER_DAY);
     const blocks = new Set();
     for (let b = Math.ceil(from / WEEK_BLOCKS) * WEEK_BLOCKS; b < dailyFrom; b += WEEK_BLOCKS) blocks.add(b);

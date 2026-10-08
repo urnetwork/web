@@ -89,9 +89,9 @@ function startServer(cmd, args, cwd, port) {
 async function stub(page) {
   // ur.xyz bakes its content at build time; stub any stray first-party calls so both
   // renders are deterministic. The reserve page reads Bittensor mainnet (its public
-  // RPC, *.opentensor.ai); an empty answer puts both renders in the same "waiting
-  // for the chain" state.
-  await page.route(/bringyour\.com|ur\.network|opentensor\.ai/, (r) => r.fulfill({ json: {} }).catch(() => r.abort()));
+  // RPC, *.opentensor.ai) and, with USD selected, the α price (geckoterminal.com);
+  // an empty answer puts both renders in the same "waiting for the chain" state.
+  await page.route(/bringyour\.com|ur\.network|opentensor\.ai|geckoterminal\.com/, (r) => r.fulfill({ json: {} }).catch(() => r.abort()));
 }
 
 // Injected AFTER navigation (a style added before goto lands on about:blank and is lost).

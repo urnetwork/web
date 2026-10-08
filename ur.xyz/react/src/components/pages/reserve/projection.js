@@ -39,6 +39,32 @@ export function flowsOf(live) {
     return { received, spent };
 }
 
+/**
+ * The balance by calendar month (UTC): what the reserve received and paid out
+ * in each month of the live history (a rise between two samples is emission
+ * received, a fall a payment out; the first sample's balance counts as
+ * received), and the inflow the projection adds for the days after the last
+ * sample. [{ month: 'YYYY-MM', received, spent, projected }] in order.
+ */
+export function monthlyFlows({ live, projected }) {
+    const months = new Map();
+    const at = (date) => {
+        const key = date.slice(0, 7);
+        if (!months.has(key)) months.set(key, { month: key, received: 0, spent: 0, projected: 0 });
+        return months.get(key);
+    };
+    live.forEach((s, i) => {
+        const delta = i === 0 ? s.alpha : s.alpha - live[i - 1].alpha;
+        const m = at(s.date);
+        if (delta >= 0) m.received += delta; else m.spent -= delta;
+    });
+    projected.forEach((p, i) => {
+        const before = i === 0 ? (live.length ? live[live.length - 1].alpha : 0) : projected[i - 1].alpha;
+        at(p.date).projected += p.alpha - before;
+    });
+    return [...months.values()];
+}
+
 /** Average α per day over the trailing `days` of samples (null with fewer than two samples). */
 export function observedInflow(live, days = 7) {
     const tail = live.filter((s) => s.time >= live[live.length - 1].time - days * 86_400_000);
