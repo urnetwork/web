@@ -2,8 +2,8 @@
  * The Network Capacity Reserve (/reserve): the on-chain account the page
  * reads, the launch policy it explains, and the editorial content around the
  * live figures. Like data/investors.js, this is the file to edit when the
- * reserve's facts change (a published multisig, an approved
- * program); the page itself only renders what is here and what the chain says.
+ * reserve's facts change (a signer, an approved program, a published ceiling);
+ * the page itself only renders what is here and what the chain says.
  *
  * The reserve is not a fixed share of the miner emissions. Momentum is the
  * share used now to power the network, as rewards to providers; the reserve
@@ -11,27 +11,32 @@
  *
  *     reserve = miner emissions × (1 − momentum)
  *
- * Sources: the launch policy and the receive-only destination are documented
- * in the sn repo (mainnet/TREASURY-EMISSIONS.md, validator/TREASURY-PRODUCTION.md)
- * and the miner guide (/docs/miner): at launch, 10% of the native miner
- * allocation for providers and the rest received by `ur-reserve`, which only
- * receives funds and never sends. The 2-of-3 multisig is the optional sending
- * custody for later.
+ * Sources: the launch policy and the reserve's custody are documented in the
+ * sn repo (mainnet/TREASURY-EMISSIONS.md, mainnet/TREASURY-RECEIVE-SETUP.md,
+ * mainnet/LAUNCH.md) and the miner guide (/docs/miner): at launch, 10% of the
+ * native miner allocation for providers and the rest received by `ur-reserve`.
+ * `ur-reserve` is itself a native 2-of-3 multisig over the three signer keys
+ * below (tests/reserve-multisig.test.mjs derives the account from them); it
+ * signs only to register its own recipients, and the same multisig signs any
+ * program payment.
  */
 
 export const reserve = {
     name: 'Network Capacity Reserve',
+    tagline: 'Reserve for ongoing capacity optimisations.',
     netuid: 25,
-    // the receive-only destination, SS58 (prefix 42) and its raw AccountId32
+    // the reserve account, SS58 (prefix 42) and its raw AccountId32: the
+    // 2-of-3 multisig of the signers in `custody`
     address: '5CcHGEqKK3RXeEA2sVycHQAQGrqsyhWaYu9FjGtDVN6nwMwR',
     accountId: '0x1815103f41a8d1e24c55d380c6f843fb36d715b4322a4e4f02bff36dfe74a410',
-    // the day the launch policy starts routing emission to the reserve, and
-    // how far the pre-launch projection runs
+    // the day the launch policy starts routing emission to the reserve (its
+    // recipients were registered earlier, so the chain decides when history
+    // starts), and how far the projection runs: a year from launch
     launch: '2026-10-12',
-    projectThrough: '2026-12-31',
+    projectThrough: '2027-10-12',
     // momentum at launch, in basis points of the native miner allocation: the
     // share paid to providers. The reserve receives the rest, (1 − momentum).
-    // Once the reserve is live the page reads momentum from the chain instead.
+    // The page follows the chain's momentum once the chain shows one.
     launchMomentumBps: 1000,
 
     explorerUrl: 'https://taostats.io/account/5CcHGEqKK3RXeEA2sVycHQAQGrqsyhWaYu9FjGtDVN6nwMwR',
@@ -40,16 +45,19 @@ export const reserve = {
     contactUrl: 'https://t.me/ursn25',
 
     custody: {
-        mode: 'Receive-only',
-        modeNote: 'The account receives native emission and makes no outgoing transfers.',
+        mode: '2-of-3 multisig',
+        modeNote: 'The reserve account is a native 2-of-3 multisig. It signs only to register its own recipients, paying their SN25 registration burns from its own balance.',
         threshold: '2 of 3',
-        thresholdNote: 'Multisig for spending, to be published',
-        multisig: null, // the published spending multisig address, when there is one
-        // Signer identities are redacted in the public custody section.
+        thresholdNote: 'Program payments are signed by the same multisig: any 2 of the 3 signers.',
+        // the spending multisig is the reserve account itself
+        multisig: '5CcHGEqKK3RXeEA2sVycHQAQGrqsyhWaYu9FjGtDVN6nwMwR',
+        multisigThreshold: 2,
+        // The signer keys, as the sn repo publishes them. Identities, names
+        // and device paths are not published; only the addresses are.
         signers: [
-            { label: 'Signer 1' },
-            { label: 'Signer 2' },
-            { label: 'Signer 3' },
+            { label: 'Signer 1', address: '5FYohgZfJQqHgPDQzF8SZ2jxn8dveW5JEXoTYugjrTuHDKGW' },
+            { label: 'Signer 2', address: '5GeoGiGEvUEQqTfTaUsvXqMQD4zVMNeYtYqMN8JLaMfiDp4J' },
+            { label: 'Signer 3', address: '5DFCNQmzRedo6hbZci4PTFMRuQJQ5PX6f6WrJBxDCDU3yBzS' },
         ],
     },
 
@@ -78,11 +86,30 @@ export const reserve = {
         },
     ],
 
-    // 03 / First programs: what is being prepared. `status` is 'indicative'
-    // until a program's terms are published; a published program carries its
-    // ceiling, and a paid one its payments (α and the transaction), which the
-    // page then shows against the ceiling.
-    firstPrograms: [
+    // 03 / Current programs. A program's `status` is what the page may say
+    // about it: 'preparing' (being prepared with partners), 'indicative'
+    // (an expected program whose terms are not yet published), 'active'
+    // (terms published and accepted; it carries its ceiling, and its payments
+    // as they are made: α and the transaction) or 'complete'. Only an active
+    // or complete program has figures; the table shows sizes and payments
+    // only when one does.
+    programStatus: {
+        preparing: 'In preparation',
+        indicative: 'Indicative',
+        active: 'Active',
+        complete: 'Complete',
+    },
+    programs: [
+        {
+            id: 'regional-pre-install',
+            title: 'Regional Pre-Install',
+            summary: "Partners who will increase the network's presence in certain regions.",
+            type: 'Network coverage',
+            payRule: null, // terms to be published
+            status: 'preparing',
+            ceilingAlpha: null,
+            payments: [],
+        },
         {
             id: 'coverage-1',
             title: 'Additional exit coverage for an existing operator',
@@ -126,5 +153,8 @@ export const reserve = {
     ],
 };
 
-/** The programs with a published ceiling: the ones the use bars and the spent total describe. */
-export const publishedPrograms = reserve.firstPrograms.filter((p) => p.ceilingAlpha != null);
+/** The programs with a published ceiling: the ones the use bars and the committed total describe. */
+export const publishedPrograms = reserve.programs.filter((p) => p.ceilingAlpha != null);
+
+/** The programs that are running or finished: the only ones the page may call active. */
+export const activePrograms = reserve.programs.filter((p) => p.status === 'active' || p.status === 'complete');

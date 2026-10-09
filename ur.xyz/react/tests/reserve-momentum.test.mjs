@@ -1,7 +1,8 @@
 // The reserve page's momentum (src/components/pages/reserve/momentum.js): it
-// shows momentum's launch value until the chain shows momentum of its own,
-// and then follows the chain. Mainnet cannot exercise the switch before
-// launch, so each state the chain can be in is checked here.
+// shows momentum's launch value until the chain shows momentum of its own
+// (at least MIN_SEEN, live or not), and then follows the chain. Mainnet
+// cannot exercise the switch before providers are paid, so each state the
+// chain can be in is checked here.
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { MIN_SEEN, inflowPerDay, momentumOf } from '../src/components/pages/reserve/momentum.js';
@@ -65,11 +66,25 @@ test('once the reserve is live, a burn left on chain is not counted as momentum 
     near(inflowPerDay(MINER_PER_DAY, m.momentum, m.burned), MINER_PER_DAY * routing.reserve);
 });
 
-test('once the reserve is live, a momentum of zero is real', () => {
+test('a live reserve whose chain momentum is zero keeps the launch value', () => {
+    // mainnet on 2026-10-08: the recipients registered, the whole miner
+    // allocation routed to them, and no provider paid on chain yet
     const m = momentumOf({ routing: { reserve: 1, burned: 0 }, live: true, launchMomentum });
-    assert.equal(m.fromChain, true);
-    assert.equal(m.momentum, 0);
-    near(inflowPerDay(MINER_PER_DAY, m.momentum, m.burned), MINER_PER_DAY);
+    assert.equal(m.fromChain, false);
+    assert.equal(m.momentum, 0.1);
+    assert.equal(m.onChain, 0);
+    assert.equal(m.burned, 0);
+    near(inflowPerDay(MINER_PER_DAY, m.momentum, m.burned), MINER_PER_DAY * 0.9);
+});
+
+test('a live reserve follows the chain once its momentum is at least MIN_SEEN', () => {
+    const dust = momentumOf({ routing: { reserve: 1 - MIN_SEEN / 4, burned: 0 }, live: true, launchMomentum });
+    assert.equal(dust.fromChain, false);
+    assert.equal(dust.momentum, 0.1);
+    const seen = momentumOf({ routing: { reserve: 1 - MIN_SEEN, burned: 0 }, live: true, launchMomentum });
+    assert.equal(seen.fromChain, true);
+    near(seen.momentum, MIN_SEEN);
+    near(inflowPerDay(MINER_PER_DAY, seen.momentum, seen.burned), MINER_PER_DAY * (1 - MIN_SEEN));
 });
 
 test('the inflow is never negative', () => {

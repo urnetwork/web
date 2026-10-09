@@ -11,7 +11,10 @@
 //   - on /reserve only: *.opentensor.ai, the public Bittensor RPC endpoints. The
 //     page's purpose is to read the reserve's balance from mainnet in the visitor's
 //     browser, and it says so on the page; nothing else on the site may contact
-//     them, and the page contacts nothing else (it shows no fiat price).
+//     them. With USD selected the page also reads the α price through the site's
+//     price feed (lib/usePrice.js): the operators' stats feeds (first-party) or
+//     CoinGecko's GeckoTerminal (*.geckoterminal.com), which /price reads too;
+//     in α, the default, it contacts nothing but the chain.
 // SSO / WalletConnect / payment SDKs are intentionally NOT allowlisted — they may load
 // only inside their own flows, which this test does not trigger.
 import { chromium } from "playwright-core";
@@ -28,7 +31,7 @@ const ROUTES = ["/", "/operators", "/miners", "/validators", "/research", "/docs
 
 const ALLOWED = ["ur.xyz", "ur.io", "bringyour.com", "ur.network", "urnetwork.com"];
 // hosts a single route may contact, for the reason stated on that page
-const ALLOWED_ON_ROUTE = { "/reserve": ["opentensor.ai"] };
+const ALLOWED_ON_ROUTE = { "/reserve": ["opentensor.ai", "geckoterminal.com"] };
 
 function isAllowed(host, route) {
   if (host.startsWith("localhost") || host.startsWith("127.")) return true;

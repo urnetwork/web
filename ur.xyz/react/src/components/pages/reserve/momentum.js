@@ -8,10 +8,12 @@
  *
  * The page shows momentum's launch value (data/reserve.js) until the chain
  * shows momentum of its own: from the first finalized block at which
- * providers are paid a measurable share of the miner incentive, or at which
- * the reserve has received anything (its split is then in effect, and even
- * a momentum of zero is real). A share below MIN_SEEN counts as none: it is
- * the dust of the chain's fixed-point shares, not a payout.
+ * providers are paid a measurable share of the miner incentive, whether or
+ * not the reserve is live yet. A live reserve whose chain momentum is zero
+ * keeps the launch value (the user's rule: "keep the launch value, but have
+ * the page be able to update itself correctly once the on chain value is
+ * not 0"). A share below MIN_SEEN counts as none: it is the dust of the
+ * chain's fixed-point shares, not a payout.
  *
  * No imports, so tests/reserve-momentum.test.mjs runs it under plain node.
  */
@@ -27,7 +29,7 @@ export const MIN_SEEN = 0.001;
  *
  * Returns
  * momentum   the momentum to show and compute with
- * fromChain  whether it is the chain's
+ * fromChain  whether it is the chain's (at least MIN_SEEN on chain)
  * burned     the share the chain burns instead, which the reserve does not
  *            receive. It counts once the reserve is live; before that the
  *            page states what the reserve receives once it is paid, and the
@@ -37,7 +39,7 @@ export const MIN_SEEN = 0.001;
  */
 export function momentumOf({ routing, live, launchMomentum }) {
     const onChain = routing ? Math.max(0, 1 - routing.reserve - routing.burned) : null;
-    const fromChain = onChain != null && (live || onChain >= MIN_SEEN);
+    const fromChain = onChain != null && onChain >= MIN_SEEN;
     return {
         momentum: fromChain ? onChain : launchMomentum,
         fromChain,
