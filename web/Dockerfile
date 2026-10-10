@@ -1,3 +1,17 @@
+FROM --platform=$BUILDPLATFORM ubuntu:24.04 AS static-sites
+
+COPY build/bringyour.com /www/bringyour.com
+COPY build/ur.network /www/ur.network
+COPY build/preview.ur.xyz /www/preview.ur.xyz
+COPY build/preview.ur.io /www/preview.ur.io
+
+# Normalize permissions before copying into the runtime image. chmod after a
+# runtime COPY creates another full payload layer, doubling the image download.
+RUN find /www/bringyour.com /www/ur.network /www/preview.ur.xyz /www/preview.ur.io \
+        -type d -exec chmod ugo=rx {} + \
+    && find /www/bringyour.com /www/ur.network /www/preview.ur.xyz /www/preview.ur.io \
+        -type f -exec chmod ugo=r {} +
+
 FROM ubuntu:24.04
 # see https://docs.docker.com/develop/develop-images/dockerfile_best-practices/
 
@@ -37,22 +51,11 @@ RUN nginx -V
 RUN nginx -t -g "error_log /dev/null;" 2>/dev/null || true
 
 ADD nginx/build/ /etc/nginx/
-ADD build/bringyour.com /www/bringyour.com
-ADD build/ur.network /www/ur.network
-ADD build/preview.ur.xyz /www/preview.ur.xyz
-ADD build/preview.ur.io /www/preview.ur.io
+COPY --from=static-sites /www /www
 
 COPY build/${WARP_ENV}/status.json /srv/warp/status/status.json
 
-# make sure all static files can be read
-RUN find /www/bringyour.com -type d -exec chmod ugo=rx {} +
-RUN find /www/bringyour.com -type f -exec chmod ugo=r {} +
-RUN find /www/ur.network -type d -exec chmod ugo=rx {} +
-RUN find /www/ur.network -type f -exec chmod ugo=r {} +
-RUN find /www/preview.ur.xyz -type d -exec chmod ugo=rx {} +
-RUN find /www/preview.ur.xyz -type f -exec chmod ugo=r {} +
-RUN find /www/preview.ur.io -type d -exec chmod ugo=rx {} +
-RUN find /www/preview.ur.io -type f -exec chmod ugo=r {} +
+# make sure the status response can be read
 RUN find /srv/warp/status -type d -exec chmod ugo=rx {} +
 RUN find /srv/warp/status -type f -exec chmod ugo=r {} +
 
