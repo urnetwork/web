@@ -380,7 +380,7 @@ deploy_block: <coordinator deployment block>
 
 An enabled operator requires **three distinct** deposit, root and artifact keys. They must match the admitted operator identity. Missing or malformed `st.yml` is logged as a disabled subsystem; check that state explicitly after startup. `attempt_upload` and `reserved_attempt_upload` bound validator evidence uploads; `ops_key` and `contract_address` are legacy fields and should not be used for a new deployment.
 
-Mainnet activation also requires the reviewed `config/main/sn.yml` earnings declaration, including the selected chain/genesis, coordinator, settlement vault, policy and readiness receipt. Its exact file digest is used by the migration command below, and its readiness digest must match `st.yml`'s `launch_readiness_sha256`. Obtain these deployment-specific values through operator admission and preserve the reviewed bytes. The server keeps post-cutoff usage separate from legacy obligations and refuses mainnet settlement when activation is blocked or the identities differ.
+Mainnet activation also requires the reviewed `config/main/sn.yml` earnings declaration, including the selected chain/genesis, coordinator, settlement vault, policy and readiness receipt. Install it before the first `db migrate` in Step 6, which fixes this database's permanent earning boundary from it, and make sure its readiness digest matches `st.yml`'s `launch_readiness_sha256`. Obtain these deployment-specific values through operator admission and preserve the reviewed bytes. The server keeps post-cutoff usage separate from legacy obligations and refuses mainnet settlement when activation is blocked or the identities differ.
 
 Before any mainnet EVM publishing can succeed, install the independently signed `operator_gas_policy` in `st.yml` and its matching `config/main/operator-gas-authority.yml`. The approval binds the operator, deposit/root accounts, policy revision, validity window, transaction-history pins and gas/attempt limits. The [gas policy implementation](https://github.com/urnetwork/server/blob/main/st_operator_gas_policy.go) defines its schema. Funding a signer does not replace this approval, and the approver's private key does not belong on this host.
 
@@ -388,7 +388,9 @@ The deposit tiers must be the signed policy's schedule: validators recompute you
 
 ## Step 6: migrate, initialize and run
 
-Install the probe resources in Step 7 before starting the worker. Use the same binary and environment for all three commands below. `db migrate` applies the server's complete PostgreSQL migration catalog; it does not create the PostgreSQL role or database. For `main`, supply the independently reviewed **64-character lowercase SHA-256** of the exact `sn.yml` bytes, without a `sha256:` prefix. The command checks the schedule before DDL and prepares the payout boundary after migration. Its `earning_boundary` output reports `deployment_verified: false` and `chain_readiness_authorized: false`: preparation does not activate mainnet. Use the digest from your release review, rather than treating a hash of an unreviewed edit as approval.
+Install the probe resources in Step 7 before starting the worker. Use the same binary and environment for all three commands below. `db migrate` takes no options. It applies the server's complete PostgreSQL migration catalog; it does not create the PostgreSQL role or database. It then checks the provider earning boundary: one immutable database row holding the earning cutoff and mainnet chain identity from `sn.yml`, which decides which completed usage earns on SN25 and which finishes as legacy USDC. On a fresh database the first `db migrate` prepares the boundary from the installed `sn.yml` and prints `Prepared provider earning boundary:` with the cutoff, the identity and initial `sn.yml` digests and the preparation time. Every later run leaves the boundary unchanged without reading `sn.yml` and prints `Retained provider earning boundary:` with the same values, so an edited `sn.yml` never changes the boundary or fails a migration; workers hold new earning allocations and payout submissions while an edited earning identity differs from it. If `sn.yml` is missing or invalid before the boundary exists, the command reports that error after applying the migrations; correct the file and run it again. Preparing the boundary does not activate mainnet.
+
+**Review `sn.yml` before the first `db migrate` on a fresh database.** That run fixes the permanent earning boundary from the installed file with no digest check, and the boundary can never be changed afterwards. Every other earning field must equal its published value (schema, attribution and legacy policy, profile `mainnet`, chain 964, netuid 25), so `cutoff_utc` and `genesis_hash` are the values that must be right before that first run.
 
 Open a shell as the service user, then load the environment:
 
@@ -398,8 +400,7 @@ set -a
 . /etc/urnetwork/operator.env
 set +a
 
-SN_SCHEDULE_SHA256='replace-with-the-reviewed-64-character-sha256'
-ur-operator db migrate --sn-schedule-sha256="$SN_SCHEDULE_SHA256"
+ur-operator db migrate
 ur-operator init-tasks
 ur-operator run --require-subnet
 ```
