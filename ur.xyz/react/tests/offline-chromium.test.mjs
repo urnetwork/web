@@ -3,7 +3,8 @@
 // Each launches Chromium with OFFLINE_CHROMIUM_ARGS, so a host that no stub
 // answers fails to resolve instead of reaching production, the chain or a
 // third party. The privacy guard answers the hosts allowed on each route
-// itself and still records every host requested.
+// itself and still records every host requested, and the astro builds and
+// previews the parity suites start send no telemetry.
 //
 // Usage: node --test tests/offline-chromium.test.mjs
 import assert from "node:assert/strict";
@@ -32,4 +33,15 @@ test("the privacy guard answers the hosts allowed on each route and records ever
   const guard = source("network-privacy.mjs");
   assert.match(guard, /page\.context\(\)\.route\(\(url\) => !isLocal\(url\.host\) && isAllowed\(url\.host, route\), \(r\) => r\.fulfill\(\{ json: \{\} \}\)/);
   assert.match(guard, /page\.on\("request", /);
+});
+
+test("a parity run disables astro's telemetry before astro loads or starts", () => {
+  for (const name of ["visual-parity.mjs", "interactive-wiring.mjs"]) {
+    const text = source(name);
+    const disabled = text.indexOf('\nprocess.env.ASTRO_TELEMETRY_DISABLED = "1";\n');
+    assert.ok(disabled > 0, name);
+    for (const use of ["await import(", '"astro"', '["run", "build"]', "ASTRO_BIN"]) {
+      if (text.includes(use)) assert.ok(disabled < text.indexOf(use), `${name}: ${use}`);
+    }
+  }
 });

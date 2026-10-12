@@ -17,6 +17,10 @@ import net from "node:net";
 import { fileURLToPath } from "node:url";
 import { OFFLINE_CHROMIUM_ARGS } from "./offline-chromium.mjs";
 
+// Astro reports every build and preview to telemetry.astro.build unless this is
+// set before it loads; the builds and previews this starts inherit it.
+process.env.ASTRO_TELEMETRY_DISABLED = "1";
+
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const REACT_DIR = path.resolve(__dirname, "..");
 const ASTRO_DIR = path.resolve(__dirname, "../../astro");
