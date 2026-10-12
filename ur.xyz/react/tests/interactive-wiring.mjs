@@ -15,6 +15,7 @@ import fs from "node:fs";
 import path from "node:path";
 import net from "node:net";
 import { fileURLToPath } from "node:url";
+import { OFFLINE_CHROMIUM_ARGS } from "./offline-chromium.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const REACT_DIR = path.resolve(__dirname, "..");
@@ -106,7 +107,8 @@ async function main() {
   const rBase = `http://localhost:${rp}`, aBase = `http://localhost:${ap}`;
   await waitFor(rBase + "/"); await waitFor(aBase + "/");
 
-  const browser = await chromium.launch();
+  // offline: stub() answers the feeds and the chain; any other host (a button that leaves the site) fails to resolve
+  const browser = await chromium.launch({ args: OFFLINE_CHROMIUM_ARGS });
   let dead = 0, diffState = 0, mism = 0, ok = 0, skip = 0;
 
   // WIRING_PROFILES=desktop,iphone (comma-sep) runs a subset — lets the long full sweep be

@@ -8,6 +8,7 @@ import http from 'node:http';
 import net from 'node:net';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { OFFLINE_CHROMIUM_ARGS } from './offline-chromium.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ASTRO_DIR = path.resolve(__dirname, '../../astro');
@@ -251,9 +252,11 @@ async function main() {
   const server = staticServer(ROOT);
   await new Promise((resolve) => server.listen(port, '127.0.0.1', resolve));
   const base = `http://127.0.0.1:${port}`;
-  const browser = await chromium.launch(process.env.PLAYWRIGHT_EXECUTABLE_PATH
-    ? { executablePath: process.env.PLAYWRIGHT_EXECUTABLE_PATH }
-    : {});
+  // offline: auditPage answers the feeds and the chain; any other host fails to resolve
+  const browser = await chromium.launch({
+    args: OFFLINE_CHROMIUM_ARGS,
+    ...(process.env.PLAYWRIGHT_EXECUTABLE_PATH ? { executablePath: process.env.PLAYWRIGHT_EXECUTABLE_PATH } : {}),
+  });
 
   let passed = 0;
   try {
