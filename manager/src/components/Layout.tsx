@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from "react";
-import { Routes, Route, useNavigate, useLocation } from "react-router-dom";
+import React, { useState, useEffect, useRef } from "react";
+import { Routes, Route, matchPath, useNavigate, useLocation } from "react-router-dom";
 import { TerminalSquare, LogOut } from "lucide-react";
 import AuthSection from "./AuthSection";
 import ClientsSection from "./ClientsSection";
@@ -15,7 +15,10 @@ import { useAutoLogin } from "../hooks/useAutoLogin";
 import BalanceCodesSection from "./BalanceCodesSection";
 import ApiKeysSection from "./ApiKeysSection";
 import LoginExtension from "../pages/LoginExtension";
+import LoginApp from "../pages/LoginApp";
 import ConfirmModal from "./ConfirmModal";
+import { APP_REQUEST_PATH } from "../services/appAuth";
+import { appRequestStorage, nextRouteAfterSignIn } from "../services/appRequestStash";
 
 const EXTENSION_RETURN_KEY = 'extension_return_to';
 
@@ -39,6 +42,11 @@ const Layout: React.FC = () => {
 	const viewportType = useViewportType();
 
 	const isExtensionRoute = location.pathname.startsWith('/login-extension');
+	// the approval page for a native app (/login-app) shows no dashboard either
+	const isAppRoute = matchPath(APP_REQUEST_PATH, location.pathname) !== null;
+	const hidesDashboard = isExtensionRoute || isAppRoute;
+	// set once the way back to the approval page has been asked for (see below)
+	const appReturnRequested = useRef(false);
 
 	useEffect(() => {
 		if (isAuthenticated) {
@@ -46,6 +54,24 @@ const Layout: React.FC = () => {
 			if (returnTo && returnTo.startsWith('/login-extension')) {
 				sessionStorage.removeItem(EXTENSION_RETURN_KEY);
 				navigate(returnTo, { replace: true });
+				return;
+			}
+
+			// the approval page sent this tab to sign in for a native app: go back to
+			// it. Only such a tab (nextRouteAfterSignIn needs the page's marker), as a
+			// hard load of the one canonical path so the page starts from a clean document.
+			// React's StrictMode (development builds only) runs this effect twice when
+			// Layout mounts, and the first run has used the marker up: the flag keeps the
+			// second run from starting the dashboard on its way out. What stays: with the
+			// extension's key in the same tab the first run takes the extension's way and
+			// uses its key up, so the second takes this one. The extension's branch above
+			// is a published contract and is not touched; a production build runs the
+			// effect once and has no such crossover.
+			if (appReturnRequested.current) return;
+			const appRoute = nextRouteAfterSignIn(appRequestStorage(), location.pathname, Date.now());
+			if (appRoute) {
+				appReturnRequested.current = true;
+				window.location.replace(appRoute);
 				return;
 			}
 
@@ -181,12 +207,13 @@ const Layout: React.FC = () => {
 				</header>
 			)}
 			<main className="flex-grow container mx-auto px-4 py-8">
-				{isAuthenticated && isExtensionRoute && (
+				{isAuthenticated && hidesDashboard && (
 					<Routes>
 						<Route path="/login-extension" element={<LoginExtension />} />
+						<Route path="/login-app" element={<LoginApp />} />
 					</Routes>
 				)}
-				{isAuthenticated && !isExtensionRoute && (
+				{isAuthenticated && !hidesDashboard && (
 					<>
 						<div className={`bg-ur-panel rounded-ur border border-ur-border shadow-ur-flat ${isLoggingOut ? 'animate-unlockSequence' : showDashboard ? 'animate-expandFromCenter' : ''}`} style={{ opacity: showDashboard ? 1 : 0, overflow: viewportType === ViewportType.Mobile ? 'visible' : 'hidden', position: 'relative', zIndex: 10 }}>
 							{viewportType === ViewportType.Mobile ? (
@@ -306,6 +333,7 @@ const Layout: React.FC = () => {
 				{!isAuthenticated && (
 					<Routes>
 						<Route path="/login-extension" element={<LoginExtension />} />
+						<Route path="/login-app" element={<LoginApp />} />
 						<Route path="*" element={<AuthSection />} />
 					</Routes>
 				)}

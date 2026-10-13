@@ -16,7 +16,8 @@ interface AuthContextType {
 	isTransitioning: boolean;
 	isLoggingOut: boolean;
 	setIsAutoLoginAttempted: (value: boolean) => void;
-	setToken: (token: string) => void;
+	/** null signs out without the logout animation (the approval page uses it when the api rejects the session) */
+	setToken: (token: string | null) => void;
 	login: (code: string) => Promise<AuthResponse | null>;
 	/** POST /auth/code-login without signing in: the caller decides */
 	exchangeAuthCode: (code: string) => Promise<AuthResponse>;

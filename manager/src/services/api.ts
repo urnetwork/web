@@ -316,10 +316,12 @@ export const fetchWalletChallenge = async (
 /**
  * Get network user information
  * @param token - JWT authentication token
+ * @param signal - Optional: aborts the request (only the app approval page passes one)
  * @returns NetworkUserResponse with user info or error
  */
 export const fetchNetworkUser = async (
-  token: string
+  token: string,
+  signal?: AbortSignal
 ): Promise<NetworkUserResponse> => {
   try {
     const response = await fetch(`${getApiBase()}/network/user`, {
@@ -328,6 +330,7 @@ export const fetchNetworkUser = async (
         Authorization: `Bearer ${token}`,
         Accept: "application/json",
       },
+      ...(signal ? { signal } : {}),
     });
 
     if (!response.ok) {
@@ -342,6 +345,7 @@ export const fetchNetworkUser = async (
       return {
         error: {
           message: `HTTP error! status: ${response.status}`,
+          status: response.status,
         },
       };
     }
@@ -797,16 +801,64 @@ export const fetchWalletStats = async (
 };
 
 /**
+ * What createAuthCode says about an answer it cannot use: fixed text, so
+ * nothing in the message, or in the log line made from it, comes from the answer.
+ */
+const AUTH_CODE_ANSWER_NOT_JSON =
+  "Expected JSON response but got a different content type";
+const AUTH_CODE_ANSWER_UNREADABLE = "Failed to parse response as JSON";
+
+/**
+ * Read the answer to POST /auth/code-create. Its body is the credential
+ * itself, so nothing taken from it may reach a thrown message, a returned
+ * message or a log line: an answer that is not declared as JSON, cannot be read
+ * or does not parse is one of the two fixed messages above, and the parser's
+ * own error (which can quote the text it stopped at) is dropped.
+ */
+async function readAuthCodeAnswer(
+  response: Response
+): Promise<CreateAuthCodeResponse> {
+  // Handle empty responses (204 No Content)
+  if (response.status === 204) {
+    return {};
+  }
+
+  let text: string;
+  try {
+    text = await response.text();
+  } catch {
+    throw new Error(AUTH_CODE_ANSWER_UNREADABLE);
+  }
+
+  const contentType = response.headers.get("content-type");
+  if (!contentType || !contentType.includes("application/json")) {
+    throw new Error(AUTH_CODE_ANSWER_NOT_JSON);
+  }
+  if (text.trim() === "") {
+    return {};
+  }
+  try {
+    return JSON.parse(text) as CreateAuthCodeResponse;
+  } catch {
+    throw new Error(AUTH_CODE_ANSWER_UNREADABLE);
+  }
+}
+
+/**
  * Create a new authentication code
  * @param token - JWT authentication token
  * @param durationMinutes - How long the code is valid (in minutes)
  * @param uses - Number of times the code can be used
- * @returns CreateAuthCodeResponse with new code or error
+ * @param signal - Optional: aborts the request (only the app approval page passes one)
+ * @returns CreateAuthCodeResponse with new code or error. The answer holds the
+ * code, so one that cannot be read is reported with fixed text only (see
+ * readAuthCodeAnswer).
  */
 export const createAuthCode = async (
   token: string,
   durationMinutes: number,
-  uses: number
+  uses: number,
+  signal?: AbortSignal
 ): Promise<CreateAuthCodeResponse> => {
   try {
     const response = await fetch(`${getApiBase()}/auth/code-create`, {
@@ -819,6 +871,7 @@ export const createAuthCode = async (
         duration_minutes: durationMinutes,
         uses: uses,
       }),
+      ...(signal ? { signal } : {}),
     });
 
     if (!response.ok) {
@@ -833,11 +886,12 @@ export const createAuthCode = async (
       return {
         error: {
           message: `HTTP error! status: ${response.status}`,
+          status: response.status,
         },
       };
     }
 
-    return await safeJsonParse<CreateAuthCodeResponse>(response);
+    return await readAuthCodeAnswer(response);
   } catch (error) {
     console.error("Create auth code error:", error);
     return {

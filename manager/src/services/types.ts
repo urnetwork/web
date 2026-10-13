@@ -555,7 +555,11 @@ export interface NetworkUserResponse {
   /** User information (present on success) */
   network_user?: NetworkUser;
   /** Error information if request failed */
-  error?: { message?: string };
+  error?: {
+    message?: string;
+    /** HTTP status when the api answered with an error status (401: the session is no longer valid) */
+    status?: number;
+  };
 }
 
 /**
@@ -573,6 +577,8 @@ export interface CreateAuthCodeResponse {
     /** Whether the limit for active auth codes was exceeded */
     auth_code_limit_exceeded?: boolean;
     message: string;
+    /** HTTP status when the api answered with an error status (401: the session is no longer valid) */
+    status?: number;
   };
 }
 
