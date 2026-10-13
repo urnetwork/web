@@ -15,8 +15,11 @@ import { OFFLINE_CHROMIUM_ARGS } from "./offline-chromium.mjs";
 const SCRIPTS = ["network-privacy.mjs", "visual-parity.mjs", "interactive-wiring.mjs", "responsive-shell.mjs", "static-affordances.mjs"];
 const source = (name) => readFileSync(new URL(name, import.meta.url), "utf8");
 
-test("the browser resolves only the local servers", () => {
-  assert.deepEqual(OFFLINE_CHROMIUM_ARGS, ["--host-resolver-rules=MAP * ~NOTFOUND , EXCLUDE localhost , EXCLUDE 127.0.0.1"]);
+test("the browser connects directly and resolves only the local servers", () => {
+  assert.deepEqual(OFFLINE_CHROMIUM_ARGS, [
+    "--proxy-server=direct://",
+    "--host-resolver-rules=MAP * ~NOTFOUND , EXCLUDE localhost , EXCLUDE 127.0.0.1",
+  ]);
 });
 
 test("every browser check launches Chromium offline", () => {
