@@ -3,7 +3,8 @@
 // On normal browsing the site must contact ONLY first-party hosts plus the explicitly
 // allowed first-party feeds. No analytics, no telemetry, no unexpected third-party data. This
 // loads the main routes, records every host contacted, and fails on anything not on the
-// allowlist.
+// allowlist. The requests are observed, not sent: the browser resolves only the local
+// server, and allowed hosts get an empty answer.
 //
 // Allowed:
 //   - first-party: *.ur.xyz, *.ur.io, *.bringyour.com (whitelisted network
@@ -22,6 +23,7 @@ import { spawn } from "node:child_process";
 import net from "node:net";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { OFFLINE_CHROMIUM_ARGS } from "./offline-chromium.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const REACT_DIR = path.resolve(__dirname, "..");
@@ -33,8 +35,12 @@ const ALLOWED = ["ur.xyz", "ur.io", "bringyour.com", "ur.network", "urnetwork.co
 // hosts a single route may contact, for the reason stated on that page
 const ALLOWED_ON_ROUTE = { "/reserve": ["opentensor.ai", "geckoterminal.com"] };
 
+function isLocal(host) {
+  return host.startsWith("localhost") || host.startsWith("127.");
+}
+
 function isAllowed(host, route) {
-  if (host.startsWith("localhost") || host.startsWith("127.")) return true;
+  if (isLocal(host)) return true;
   const allowed = [...ALLOWED, ...(ALLOWED_ON_ROUTE[route] || [])];
   return allowed.some((d) => host === d || host.endsWith("." + d));
 }
@@ -69,18 +75,23 @@ async function main() {
   const base = `http://localhost:${port}`;
   await waitFor(base + "/");
 
-  const browser = await chromium.launch(process.env.PLAYWRIGHT_EXECUTABLE_PATH
-    ? { executablePath: process.env.PLAYWRIGHT_EXECUTABLE_PATH }
-    : {});
+  const browser = await chromium.launch({
+    args: OFFLINE_CHROMIUM_ARGS,
+    ...(process.env.PLAYWRIGHT_EXECUTABLE_PATH ? { executablePath: process.env.PLAYWRIGHT_EXECUTABLE_PATH } : {}),
+  });
   const offenders = new Map();
   const allHosts = new Set();
 
   for (const route of ROUTES) {
     const page = await browser.newPage({ viewport: { width: 1280, height: 900 } });
+    // Nothing leaves the machine: hosts allowed on this route get an empty JSON
+    // answer, as in the parity suites, and any other host fails to resolve.
+    // Every request is still recorded below before it is answered or refused.
+    await page.context().route((url) => !isLocal(url.host) && isAllowed(url.host, route), (r) => r.fulfill({ json: {} }).catch(() => r.abort()));
     page.on("request", (r) => {
       let host;
       try { host = new URL(r.url()).host; } catch { return; }
-      if (host.startsWith("localhost") || host.startsWith("127.")) return;
+      if (isLocal(host)) return;
       allHosts.add(host);
       if (!isAllowed(host, route)) {
         if (!offenders.has(host)) offenders.set(host, new Set());

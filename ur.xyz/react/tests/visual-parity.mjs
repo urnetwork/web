@@ -16,6 +16,11 @@ import fs from "node:fs";
 import path from "node:path";
 import net from "node:net";
 import { fileURLToPath, pathToFileURL } from "node:url";
+import { OFFLINE_CHROMIUM_ARGS } from "./offline-chromium.mjs";
+
+// Astro reports every build and preview to telemetry.astro.build unless this is
+// set before it loads; the builds and previews this starts inherit it.
+process.env.ASTRO_TELEMETRY_DISABLED = "1";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const REACT_DIR = path.resolve(__dirname, "..");
@@ -184,9 +189,11 @@ async function main() {
   await waitFor(reactBase + "/");
   await waitFor(astroBase + "/");
 
-  const browser = await chromium.launch(process.env.PLAYWRIGHT_EXECUTABLE_PATH
-    ? { executablePath: process.env.PLAYWRIGHT_EXECUTABLE_PATH }
-    : {});
+  // offline: stub() answers the feeds and the chain; any other host fails to resolve
+  const browser = await chromium.launch({
+    args: OFFLINE_CHROMIUM_ARGS,
+    ...(process.env.PLAYWRIGHT_EXECUTABLE_PATH ? { executablePath: process.env.PLAYWRIGHT_EXECUTABLE_PATH } : {}),
+  });
   let failures = 0, total = 0;
   for (const profile of PROFILES) {
     const dpr = profile.deviceScaleFactor > 1 ? ` @${profile.deviceScaleFactor}x` : "";
