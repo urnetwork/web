@@ -1,61 +1,24 @@
 
+# web serves only the sites in this repo: ur.xyz. The mmm sites (ur.io,
+# bringyour.com, ur.network, vpn.dev and lag.dev) are built and served by the
+# mmm service, mmm/mmm (mmm/mmm/PLAN.md).
 NODE_VERSION := v22.23.2
-MMM_HOME := ${WARP_HOME}/mmm
-BRINGYOUR_SITE_DIR := ${MMM_HOME}/bringyour.com
-UR_NETWORK_SITE_DIR := ${MMM_HOME}/ur.network
-UR_IO_SITE_DIR := ${MMM_HOME}/ur.io
 WEB_BUILD_CHECKS ?= 1
 
-.PHONY: all init clean build check build_external_sites check_external_sites build-preview warp_build warp_build_image
+.PHONY: all init clean build check build-preview warp_build warp_build_image
 
 all: init clean build
 
-# brew install pandoc
 init:
 	pip install -r ../requirements.txt
-	(. ${NVM_DIR}/nvm.sh && \
-		nvm install ${NODE_VERSION} && \
-		nvm exec ${NODE_VERSION} npm install html-validate -g && \
-		nvm exec ${NODE_VERSION} npm install html-minifier -g && \
-		nvm exec ${NODE_VERSION} npm install uglify-js -g && \
-		nvm exec ${NODE_VERSION} npm install lightningcss-cli -g && \
-		nvm exec ${NODE_VERSION} npm install purgecss -g)
+	(. ${NVM_DIR}/nvm.sh && nvm install ${NODE_VERSION})
 	go clean -cache
 	go clean -modcache
 
 clean:
-	if [ -f "${BRINGYOUR_SITE_DIR}/gen.py" ]; then python ../webgen/webgen.py clean "${BRINGYOUR_SITE_DIR}/gen.py"; fi
-	if [ -f "${UR_NETWORK_SITE_DIR}/gen.py" ]; then python ../webgen/webgen.py clean "${UR_NETWORK_SITE_DIR}/gen.py"; fi
 	rm -rf build
 
-check_external_sites:
-	test -f "${BRINGYOUR_SITE_DIR}/gen.py"
-	test -f "${UR_NETWORK_SITE_DIR}/gen.py"
-	test -f "${UR_IO_SITE_DIR}/astro/Makefile"
-
-build_external_sites: check_external_sites
-	(. ${NVM_DIR}/nvm.sh && \
-		nvm use ${NODE_VERSION} && \
-		python ../webgen/webgen.py build "${BRINGYOUR_SITE_DIR}/gen.py")
-	# generate the api docs into the latest build
-	npx -y @redocly/cli build-docs ${BRINGYOUR_HOME}/connect/api/bringyour.yml -o "${BRINGYOUR_SITE_DIR}/build/api.html"
-# 	npx -y @redocly/cli build-docs ${BRINGYOUR_HOME}/connect/api/gpt.yml -o "${BRINGYOUR_SITE_DIR}/build/gpt.html"
-	# Use the same canonical legal documents as ur.io; the GitBook docs repo is retired.
-	# Include the documents verbatim as per privacytxt.dev.
-	pandoc -f markdown -t plain "${UR_IO_SITE_DIR}/docs/legal/privacy.md" -o "${BRINGYOUR_SITE_DIR}/build/privacy.txt"
-	pandoc -f markdown -t plain "${UR_IO_SITE_DIR}/docs/legal/terms.md" -o "${BRINGYOUR_SITE_DIR}/build/terms.txt"
-	pandoc -f markdown -t plain "${UR_IO_SITE_DIR}/docs/legal/vdp.md" -o "${BRINGYOUR_SITE_DIR}/build/vdp.txt"
-	(. ${NVM_DIR}/nvm.sh && \
-		nvm use ${NODE_VERSION} && \
-		python ../webgen/webgen.py build "${UR_NETWORK_SITE_DIR}/gen.py")
-	# Docker can only ADD files from this repository's build context. Mirror the
-	# externally owned mmm sites into the same staging tree used by mmm/ur.io.
-	rm -rf build/bringyour.com build/ur.network
-	mkdir -p build
-	cp -R -L "${BRINGYOUR_SITE_DIR}/build" build/bringyour.com
-	cp -R -L "${UR_NETWORK_SITE_DIR}/build" build/ur.network
-
-build: build_external_sites
+build:
 	env GOOS=linux GOARCH=arm64 go build -ldflags "-X main.Version=${WARP_VERSION}" -o build/linux/arm64/
 	env GOOS=linux GOARCH=amd64 go build -ldflags "-X main.Version=${WARP_VERSION}" -o build/linux/amd64/
 	env GOOS=darwin GOARCH=arm64 go build -ldflags "-X main.Version=${WARP_VERSION}" -o build/darwin/arm64/
@@ -66,22 +29,16 @@ build: build_external_sites
 # checks-disabled environment. No service binaries or images are published.
 check:
 	(. "${NVM_DIR}/nvm.sh" && nvm install ${NODE_VERSION})
-	$(MAKE) -C "${UR_IO_SITE_DIR}/astro" generate-locales
 	$(MAKE) build-preview WEB_BUILD_CHECKS=1
 
 build-preview:
-	rm -rf build/preview.ur.xyz build/preview.ur.io
+	rm -rf build/preview.ur.xyz
 	mkdir -p build
 	(. ${NVM_DIR}/nvm.sh && \
 		nvm use ${NODE_VERSION} && \
 		cd ${BRINGYOUR_HOME}/web/ur.xyz/astro && \
 		$(MAKE) clean build-main WEB_BUILD_CHECKS=$(WEB_BUILD_CHECKS) && \
 		cp -r build/main ${BRINGYOUR_HOME}/web/web/build/preview.ur.xyz)
-	(. ${NVM_DIR}/nvm.sh && \
-		nvm use ${NODE_VERSION} && \
-		cd ${UR_IO_SITE_DIR}/astro && \
-		$(MAKE) clean build-main WEB_BUILD_CHECKS=$(WEB_BUILD_CHECKS) && \
-		cp -r build/main ${BRINGYOUR_HOME}/web/web/build/preview.ur.io)
 	
 
 warp_build:
@@ -108,7 +65,7 @@ warp_build_image:
 # see https://guumaster.github.io/hostctl/docs/installation/#homebrew
 
 local_routing_on:
-	sudo hostctl add domains bringyour_web_local bringyour.com api.bringyour.com
+	sudo hostctl add domains bringyour_web_local api.bringyour.com
 
 local_routing_off:
 	sudo hostctl remove bringyour_web_local
