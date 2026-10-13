@@ -20,8 +20,10 @@ const sameDeps = (a, b) =>
 	a.length === b.length &&
 	a.every((v, i) => Object.is(v, b[i]));
 
-/** a turn of the event loop, for the promises a component's effects start */
-export const settle = () => new Promise((resolve) => setTimeout(resolve, 0));
+/** a turn of the event loop, for the promises a component's effects start. An immediate, not
+ * a zero-length timer: a timer waits for the next tick of the system clock (about 15 ms on
+ * Windows), and a test that flushes a few hundred times would spend its time there. */
+export const settle = () => new Promise((resolve) => setImmediate(resolve));
 
 export function createHooksRuntime({ strict = false } = {}) {
 	const slots = [];

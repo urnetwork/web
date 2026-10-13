@@ -13,10 +13,12 @@ import {
 	captureAppRequest,
 	clearAppRequest,
 	markSignInPending,
+	nextRouteAfterSignIn,
 	readAppRequest,
 	resolveAppRequest,
 } from "../src/services/appRequestStash.ts";
 import {
+	API,
 	NOW,
 	PK,
 	STATE,
@@ -104,8 +106,11 @@ test("the page can ask why there is no request without being told: it remembers 
 	const empty = () => fakeStorage();
 	const cases = [
 		[fragment({ state: "short" }), "invalid"],
-		[fragment({ v: "2" }), "unsupported"],
+		[fragment({ v: "3" }), "unsupported"],
+		[fragment({ v: "2" }), "invalid"], // version 2 without its api is a damaged request
+		[fragment({ v: "2", api: "localhost" }), "invalid"],
 		[fragment({ ts: String(TS - 3600) }), "stale"],
+		[fragment({ v: "2", api: API, ts: String(TS - 3600) }), "stale"],
 		[fragment() + "&redirect_uri=x", "invalid"],
 	];
 	for (const [hash, kind] of cases) {
@@ -267,6 +272,10 @@ test("links the contract does not allow are refused whole, and leave the address
 		fragment({ platform: "linux" }),
 		fragment({ platform: "__proto__" }),
 		fragment({ v: "2" }),
+		fragment({ v: "3" }),
+		fragment({ api: API }),
+		fragment({ v: "2", api: "API.beta-test.net" }),
+		fragment({ v: "2", api: "api.beta-test.net:443" }),
 		fragment({ ts: String(TS - 3600) }),
 		"#" + "a=b&".repeat(500),
 		`#v=1&platform=windows&ѕtate=${STATE}&pk=${PK}&ts=${TS}`,
@@ -409,6 +418,231 @@ test("a malformed slot is dropped on read, whatever is in it", () => {
 		status: "ready",
 		request: request(),
 	});
+});
+
+// ----- version 2: the request that names its network -----
+
+const v2Link = (over = {}) => fragment({ v: "2", api: API, ...over });
+
+test("a version 2 request is stored with its api, in one slot, and read back whole", () => {
+	const storage = fakeStorage();
+	const win = fakeWindow({ hash: v2Link() });
+	assert.deepEqual(captureAppRequest(win, storage, NOW), {
+		outcome: "stored",
+	});
+	assert.deepEqual([...storage.map.keys()], [APP_REQUEST_KEY], "one slot");
+	assert.deepEqual(slotOf(storage), {
+		platform: "windows",
+		state: STATE,
+		pk: PK,
+		ts: TS,
+		api: API,
+	});
+	assert.deepEqual(
+		Object.keys(slotOf(storage)),
+		["platform", "state", "pk", "ts", "api"],
+		"the validated request, api last, and no version number",
+	);
+	assert.equal(win.location.hash, "", "the fragment is gone");
+	assert.deepEqual(readAppRequest(storage, NOW), {
+		status: "ready",
+		request: request({ api: API }),
+	});
+	assert.deepEqual(resolveAppRequest(storage, NOW), {
+		kind: "ready",
+		request: request({ api: API }),
+	});
+	const raw = storage.map.get(APP_REQUEST_KEY);
+	for (const forbidden of ["v=", "https", "://", "/login-app", "#"]) {
+		assert.equal(raw.includes(forbidden), false, forbidden);
+	}
+	assert.ok(raw.length < 260, `${raw.length} characters`);
+});
+
+test("a version 2 request with a port is stored as written", () => {
+	const storage = fakeStorage();
+	captureAppRequest(
+		fakeWindow({ hash: v2Link({ api: "mock.localhost:5198" }) }),
+		storage,
+		NOW,
+	);
+	assert.equal(slotOf(storage).api, "mock.localhost:5198");
+	assert.equal(
+		readAppRequest(storage, NOW).request.api,
+		"mock.localhost:5198",
+	);
+});
+
+test("a stored version 2 request survives the trip through sign-in: the marker, the way back, the request after", () => {
+	const storage = fakeStorage();
+	captureAppRequest(fakeWindow({ hash: v2Link() }), storage, NOW);
+	assert.equal(markSignInPending(storage, NOW + 1000), true);
+	// signing in on the other page: back to the approval, with the slot and its api untouched
+	assert.equal(
+		nextRouteAfterSignIn(storage, "/", NOW + 20_000),
+		"/login-app",
+	);
+	assert.deepEqual(readAppRequest(storage, NOW + 20_000), {
+		status: "ready",
+		request: request({ api: API }),
+	});
+	// the hard load that follows has no fragment: the slot stays
+	const reload = fakeWindow({ hash: "" });
+	assert.deepEqual(captureAppRequest(reload, storage, NOW + 21_000), {
+		outcome: "unchanged",
+	});
+	assert.deepEqual(resolveAppRequest(storage, NOW + 21_000), {
+		kind: "ready",
+		request: request({ api: API }),
+	});
+	// and it is used up like any other
+	clearAppRequest(storage);
+	assert.deepEqual(readAppRequest(storage, NOW + 22_000), { status: "none" });
+});
+
+test("a second link replaces the first, across versions, and leaves no api behind", () => {
+	const storage = fakeStorage();
+	captureAppRequest(fakeWindow({ hash: v2Link() }), storage, NOW);
+	assert.equal(slotOf(storage).api, API);
+	captureAppRequest(
+		fakeWindow({ hash: fragment({ state: "Z".repeat(43) }) }),
+		storage,
+		NOW + 1000,
+	);
+	assert.equal(storage.map.size, 1);
+	assert.deepEqual(Object.keys(slotOf(storage)), [
+		"platform",
+		"state",
+		"pk",
+		"ts",
+	]);
+	assert.equal(
+		"api" in readAppRequest(storage, NOW + 1000).request,
+		false,
+		"a version 1 request has no api, not an old one",
+	);
+	// and the other way round
+	captureAppRequest(
+		fakeWindow({ hash: v2Link({ api: "api.example.com:8443" }) }),
+		storage,
+		NOW + 2000,
+	);
+	assert.equal(slotOf(storage).api, "api.example.com:8443");
+	// an invalid version 2 link empties the slot like any invalid link
+	const result = captureAppRequest(
+		fakeWindow({ hash: v2Link({ api: "localhost" }) }),
+		storage,
+		NOW + 3000,
+	);
+	assert.deepEqual(result, { outcome: "rejected", reason: "api" });
+	assert.equal(storage.map.size, 0);
+	assert.deepEqual(resolveAppRequest(storage, NOW + 3000, result), {
+		kind: "invalid",
+	});
+});
+
+test("a version 2 slot is re-validated like a link, and one that is not a request is dropped", () => {
+	const good = {
+		platform: "windows",
+		state: STATE,
+		pk: PK,
+		ts: TS,
+		api: API,
+	};
+	const bad = [
+		["api null", { ...good, api: null }],
+		["api a number", { ...good, api: 5 }],
+		["api an array", { ...good, api: [API] }],
+		["api an object", { ...good, api: {} }],
+		["api true", { ...good, api: true }],
+		["api empty", { ...good, api: "" }],
+		["api upper case", { ...good, api: "API.beta-test.net" }],
+		["api a single label", { ...good, api: "localhost" }],
+		["api port 443", { ...good, api: "api.beta-test.net:443" }],
+		["api with a scheme", { ...good, api: "https://api.beta-test.net" }],
+		["api with a path", { ...good, api: "api.beta-test.net/x" }],
+		["api with userinfo", { ...good, api: "u@api.beta-test.net" }],
+		["api an ip", { ...good, api: "127.0.0.1:5198" }],
+		[
+			"api too long",
+			{ ...good, api: `${"a".repeat(63)}.`.repeat(4) + "net" },
+		],
+		["api with a newline", { ...good, api: API + "\n" }],
+		["api that adds a key", { ...good, api: API + "&redirect_uri=x" }],
+		["api that adds a second version", { ...good, api: API + "&v=1" }],
+		[
+			"api that adds a second state",
+			{ ...good, api: `${API}&state=${STATE}` },
+		],
+		["api that adds a second api", { ...good, api: `${API}&api=${API}` }],
+		["a version number in the slot", { ...good, v: "2" }],
+		["an extra key", { ...good, extra: 1 }],
+		["two extra keys", { ...good, extra: 1, other: 2 }],
+		["ts as text", { ...good, ts: String(TS) }],
+		["platform that adds a key", { ...good, platform: "windows&x=1" }],
+		["state that adds a key", { ...good, state: STATE + "&x=1" }],
+	];
+	for (const [name, slot] of bad) {
+		const storage = fakeStorage();
+		storage.setItem(APP_REQUEST_KEY, JSON.stringify(slot));
+		assert.deepEqual(
+			readAppRequest(storage, NOW),
+			{ status: "invalid" },
+			name,
+		);
+		assert.equal(storage.map.size, 0, `dropped: ${name}`);
+	}
+	// the same slot, good, is read back as the request
+	const storage = fakeStorage();
+	storage.setItem(APP_REQUEST_KEY, JSON.stringify(good));
+	assert.deepEqual(readAppRequest(storage, NOW), {
+		status: "ready",
+		request: request({ api: API }),
+	});
+	// in any key order and with other spacing
+	storage.setItem(
+		APP_REQUEST_KEY,
+		`{ "api": "${API}", "ts": ${TS}, "pk": "${PK}", "state": "${STATE}", "platform": "windows" }`,
+	);
+	assert.deepEqual(readAppRequest(storage, NOW), {
+		status: "ready",
+		request: request({ api: API }),
+	});
+	// a version 2 slot that has aged out is stale, not invalid
+	const old = fakeStorage();
+	old.setItem(APP_REQUEST_KEY, JSON.stringify({ ...good, ts: TS - 3600 }));
+	assert.deepEqual(readAppRequest(old, NOW), { status: "stale" });
+	assert.equal(old.map.size, 0);
+});
+
+test("a version 1 slot cannot carry an api into a request, and a version 2 slot cannot lose it", () => {
+	// four keys: version 1, whatever else is true; five with api: version 2
+	const v1 = fakeStorage();
+	v1.setItem(
+		APP_REQUEST_KEY,
+		JSON.stringify({ platform: "windows", state: STATE, pk: PK, ts: TS }),
+	);
+	assert.equal("api" in readAppRequest(v1, NOW).request, false);
+	// the stored api is the one read back, to the byte
+	for (const api of [
+		API,
+		"mock.localhost:5198",
+		"a.b",
+		"xn--bcher-kva.example:8443",
+	]) {
+		const storage = fakeStorage();
+		storage.setItem(
+			APP_REQUEST_KEY,
+			JSON.stringify({
+				platform: "windows",
+				state: STATE,
+				pk: PK,
+				ts: TS,
+				api,
+			}),
+		);
+		assert.equal(readAppRequest(storage, NOW).request.api, api);
+	}
 });
 
 test("a slot written in another key order, with other spacing, is still the same request", () => {

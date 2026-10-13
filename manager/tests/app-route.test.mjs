@@ -83,6 +83,51 @@ test("a fresh request waits and the page sent this tab to sign in: signing in on
 	}
 });
 
+test("a version 2 request, with its api, is followed back to /login-app like a version 1 one; one with a bad api is dropped, not followed", () => {
+	for (const pathname of ["/", "/stats", "/account"]) {
+		const storage = storageWith(slot({ api: "mock.localhost:5198" }), {
+			marked: true,
+		});
+		assert.equal(
+			nextRouteAfterSignIn(storage, pathname, NOW),
+			"/login-app",
+			pathname,
+		);
+		assert.equal(
+			JSON.parse(storage.map.get(APP_REQUEST_KEY)).api,
+			"mock.localhost:5198",
+		);
+	}
+	// not sent by the page: left alone, as ever
+	assert.equal(
+		nextRouteAfterSignIn(
+			storageWith(slot({ api: "api.beta-test.net" })),
+			"/",
+			NOW,
+		),
+		null,
+	);
+	for (const api of [
+		"localhost",
+		"API.beta-test.net",
+		"api.beta-test.net:443",
+		5,
+		null,
+	]) {
+		const storage = storageWith(slot({ api }), { marked: true });
+		assert.equal(
+			nextRouteAfterSignIn(storage, "/", NOW),
+			null,
+			String(api),
+		);
+		assert.equal(
+			storage.map.size,
+			0,
+			`${String(api)}: dropped, marker and all`,
+		);
+	}
+});
+
 test("a fresh request and no marker: this tab was not sent to sign in by the page, so it is left alone", () => {
 	// a tab that holds a request and nothing more: the dashboard opened in it, a custom
 	// api server, a window the page refused, a request from an earlier visit

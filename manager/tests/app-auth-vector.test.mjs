@@ -10,12 +10,17 @@ import nacl from "tweetnacl";
 import bs58 from "bs58";
 
 import {
+	appRequestFragment,
 	buildApproveReturn,
 	buildDenyReturn,
 	parseAppRequest,
 } from "../src/services/appAuth.ts";
 import { sealCode } from "../src/services/appSeal.ts";
-import { readFixture } from "./helpers/app-request.mjs";
+import {
+	fragment,
+	readFixture,
+	readRequestVectorV2,
+} from "./helpers/app-request.mjs";
 
 const vector = readFixture();
 const bytes = (length, at) => Uint8Array.from({ length }, (_, i) => at(i));
@@ -159,5 +164,128 @@ test("the fixture carries nothing but the documented fields", () => {
 		"plaintext",
 		"recipe",
 		"request",
+	]);
+});
+
+// ----- the version 2 request vector: what the app builds and what the page reads -----
+
+const requestVector = readRequestVectorV2();
+/** the contract's vector, written out here as well, so that a change to the fixture alone is noticed */
+const REQUEST_VECTOR_V2 =
+	"v=2&platform=windows&state=SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS&pk=WpSggvhoqoVW4XJvfjsB52dvVunYSQWrz6XiuMQVsCf&ts=1790000000&api=api.beta-test.net";
+
+test("the version 2 request vector holds the documented fixed values", () => {
+	assert.equal(requestVector.contract, 2);
+	assert.equal(requestVector.fragment, REQUEST_VECTOR_V2);
+	assert.equal(requestVector.fragment.length, 153);
+	assert.equal(requestVector.fragmentLength, 153);
+	assert.deepEqual(requestVector.recipe, {
+		appSecretKey: "bytes 1..32",
+		state: "43 x 'S'",
+		ts: "1790000000 (the clock of the test)",
+		api: "api.beta-test.net",
+	});
+	// the public key is the one of the app secret key of the sealing vector (bytes 1..32)
+	assert.equal(
+		requestVector.request.pk,
+		bs58.encode(
+			nacl.box.keyPair.fromSecretKey(bytes(32, (i) => i + 1)).publicKey,
+		),
+	);
+	assert.equal(requestVector.request.pk, vector.appPk, "the same app key");
+	assert.equal(requestVector.request.state, "S".repeat(43));
+	assert.equal(requestVector.request.ts, 1_790_000_000);
+	assert.equal(requestVector.request.api, "api.beta-test.net");
+	assert.equal(requestVector.request.platform, "windows");
+	assert.deepEqual(requestVector.keys, [
+		"v",
+		"platform",
+		"state",
+		"pk",
+		"ts",
+		"api",
+	]);
+});
+
+test("the app builds exactly this request from those values: the keys in this order, api last", () => {
+	const { request } = requestVector;
+	assert.equal(appRequestFragment(request), requestVector.fragment);
+	// and written out by hand, so the builder is not the only witness
+	assert.equal(
+		`v=2&platform=${request.platform}&state=${request.state}&pk=${request.pk}&ts=${request.ts}&api=${request.api}`,
+		requestVector.fragment,
+	);
+	assert.equal(
+		fragment(
+			{
+				v: "2",
+				state: request.state,
+				pk: request.pk,
+				ts: String(request.ts),
+				api: request.api,
+			},
+			{ hash: false },
+		),
+		requestVector.fragment,
+	);
+	assert.deepEqual(
+		requestVector.fragment.split("&").map((field) => field.split("=")[0]),
+		requestVector.keys,
+	);
+});
+
+test("the page reads exactly those values from it, with its clock at ts, with or without the #", () => {
+	const { request, fragment: text } = requestVector;
+	const clock = request.ts * 1000;
+	for (const written of [text, `#${text}`]) {
+		assert.deepEqual(parseAppRequest(written, clock), {
+			ok: true,
+			request,
+		});
+	}
+	// the window is the one of version 1: 240 s old, 120 s ahead
+	assert.equal(parseAppRequest(text, clock + 240_999).ok, true);
+	assert.deepEqual(parseAppRequest(text, clock + 241_000), {
+		ok: false,
+		reason: "stale",
+	});
+	assert.equal(parseAppRequest(text, clock - 120_000).ok, true);
+	assert.deepEqual(parseAppRequest(text, clock - 121_000), {
+		ok: false,
+		reason: "stale",
+	});
+	// it is a version 2 request through and through: as version 1 it has a key too many,
+	// and without its api it has one too few
+	assert.deepEqual(parseAppRequest(text.replace("v=2", "v=1"), clock), {
+		ok: false,
+		reason: "unknown-key",
+	});
+	assert.deepEqual(parseAppRequest(text.replace(/&api=.*$/, ""), clock), {
+		ok: false,
+		reason: "shape",
+	});
+	// and on a page address with a query string it is not a request at all
+	assert.deepEqual(parseAppRequest(text, clock, "?auth_code=X"), {
+		ok: false,
+		reason: "query",
+	});
+});
+
+test("the version 2 request vector carries nothing but the documented fields", () => {
+	assert.deepEqual(Object.keys(requestVector).sort(), [
+		"contract",
+		"description",
+		"fragment",
+		"fragmentLength",
+		"keys",
+		"recipe",
+		"request",
+	]);
+	assert.deepEqual(Object.keys(requestVector.request).sort(), [
+		"api",
+		"pk",
+		"platform",
+		"state",
+		"ts",
 	]);
 });

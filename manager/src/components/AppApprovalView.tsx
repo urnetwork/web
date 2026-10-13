@@ -9,7 +9,8 @@ export interface ApprovalActions {
 	onApprove: ClickHandler;
 	onOpenApp: ClickHandler;
 	onSignOut: () => void;
-	onUseDefaultServer: () => void;
+	onUseDefaultServer: ClickHandler;
+	onSwitchServer: ClickHandler;
 	onRetry: () => void;
 	onReload: () => void;
 }
@@ -58,7 +59,8 @@ const Notice: React.FC<{
 
 /** What /login-app shows. A pure function of the model: every decision is made
  * in deriveApprovalModel, every effect in the page that owns the actions.
- * Request values never reach this file; the platform name is the closed
+ * Request values reach this file in one place only, the api host a version 2
+ * request names, and it is rendered as text; the platform name is the closed
  * table's label and the network name is the server's, rendered as text. */
 export const AppApprovalView: React.FC<{
 	model: ApprovalModel;
@@ -110,7 +112,8 @@ export const AppApprovalView: React.FC<{
 			);
 
 		case "server":
-			return (
+			// the hosts are text and nothing else: the app's comes from a link
+			return model.requestedHost === null ? (
 				<Notice tone="warn" title="Different API server">
 					<p>
 						This browser is set to use a different API server,{" "}
@@ -123,10 +126,61 @@ export const AppApprovalView: React.FC<{
 					<button
 						type="button"
 						onClick={actions.onUseDefaultServer}
+						disabled={!model.armed}
 						className={SECONDARY_BUTTON}
 					>
 						Use the default server
 					</button>
+				</Notice>
+			) : (
+				<Notice tone="warn" title="Different API server">
+					<p>
+						{model.label} is set to use the API server{" "}
+						<span className="font-mono break-words text-ur-white">
+							{model.requestedHost}
+						</span>
+						, and this browser is set to use{" "}
+						<span className="font-mono break-words text-ur-white">
+							{model.apiHost}
+						</span>
+						. Approving a sign-in only works on the server the app
+						uses.
+					</p>
+					<p>
+						Switching signs you out of this browser, in every tab,
+						and points it at{" "}
+						<span className="font-mono break-words">
+							{model.requestedHost}
+						</span>
+						. You sign in there next, so your password, seed phrase
+						or wallet signature goes to{" "}
+						<span className="font-mono break-words">
+							{model.requestedHost}
+						</span>
+						. This browser stays set to it until you choose Use
+						Default under Change Network API on the sign-in page.
+					</p>
+					<p className="font-medium text-ur-white">
+						Only continue if you set this server in URnetwork
+						yourself.
+					</p>
+					<div className="flex space-x-3">
+						<button
+							type="button"
+							onClick={actions.onCancel}
+							className={`flex-1 ${SECONDARY_BUTTON}`}
+						>
+							Cancel
+						</button>
+						<button
+							type="button"
+							onClick={actions.onSwitchServer}
+							disabled={!model.armed}
+							className={`flex-1 break-all ${PRIMARY_BUTTON}`}
+						>
+							{`Switch to ${model.requestedHost}`}
+						</button>
+					</div>
 				</Notice>
 			);
 
@@ -201,6 +255,14 @@ export const AppApprovalView: React.FC<{
 								</span>
 								.
 							</p>
+							{model.server !== null && (
+								<p className="text-ur-gray text-sm leading-relaxed">
+									API server:{" "}
+									<span className="font-mono text-ur-white break-words">
+										{model.server}
+									</span>
+								</p>
+							)}
 							<p className="text-ur-gray text-sm leading-relaxed">
 								If you approve, that app gets full access to
 								this account, the same as signing in there

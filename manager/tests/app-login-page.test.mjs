@@ -2,9 +2,15 @@
 // services and a minimal hooks runtime in the style of the useAutoLogin test:
 // the gates, the sign-in redirect, the identity check, the 800 ms inert time
 // (which only runs while the tab is showing and the window has the focus), trusted
-// clicks only, one mint, the single navigation, the 15 s limit on the two api calls
-// and on the sealing chunk, and the 60 s Open button. The api, the session, the
-// window and the document are fakes; time is a fake clock.
+// clicks only, one mint, the single navigation, the 30 s limit on the two api calls
+// and the 15 s one on the sealing chunk, and the 60 s Open button; and the server
+// the request is for (the default one for version 1, the one it names for version 2),
+// judged before any sign-in or any call, with Switch and Cancel on the card that
+// says it is not. That card is inert for the same 800 ms as Approve, a request that
+// goes stale before Switch is told so, and the page never sends a copy of the
+// session that another tab has taken out of the storage or moved to another server
+// (the last tests: those, and a seeded run of random events against the page). The
+// api, the session, the window and the document are fakes; time is a fake clock.
 //
 // Every test runs twice: as the production build runs the page, and as React's
 // StrictMode runs it in a development build, where the effects are set up, torn
@@ -21,6 +27,7 @@ import * as appApprovalView from "../src/services/appApprovalView.ts";
 import * as appAuth from "../src/services/appAuth.ts";
 import * as appRequestStash from "../src/services/appRequestStash.ts";
 import * as appSeal from "../src/services/appSeal.ts";
+import * as sessionBinding from "../src/services/sessionBinding.ts";
 import * as authCodeUrl from "../src/services/authCodeUrl.ts";
 import nacl from "tweetnacl";
 import bs58 from "bs58";
@@ -80,6 +87,11 @@ const ALPHA = jwt({ network_id: "net-alpha", network_name: "jwt-alpha" });
 const BETA = jwt({ network_id: "net-beta", network_name: "beta" });
 const CODE = "Z".repeat(683) + "=";
 const DEFAULT_BASE = "https://api.example.test";
+/** where the page itself is served from, and where a relative api base would resolve to */
+const PAGE_ORIGIN = "https://manager.example";
+/** the host a version 2 request names in most of these tests, and the base Switch makes of it */
+const APP_API = "mock.localhost:5198";
+const APP_BASE = `https://${APP_API}`;
 
 const alphaUser = {
 	network_user: { network_name: "alpha-net", auth_types: ["email"] },
@@ -129,6 +141,9 @@ function mountPage({
 	topThrows = false,
 	opener = null,
 	apiBase = DEFAULT_BASE,
+	// the server this build calls when the person has chosen none, and the page's own origin
+	defaultBase = DEFAULT_BASE,
+	origin = PAGE_ORIGIN,
 	userResponse = alphaUser,
 	mint = async () => ({ auth_code: CODE }),
 	isLoggingOut = false,
@@ -136,13 +151,22 @@ function mountPage({
 	visible = true,
 	focused = true,
 	olderSlot = false,
+	// a request already kept in this tab (the way back after signing in): what the slot holds
+	seededSlot = null,
 	sessionSetFails = false,
+	// the browser's storage refuses to remove the session: by throwing, or by quietly keeping it
+	removeSessionThrows = false,
+	removeSessionKeeps = false,
+	// the browser's storage refuses to write the server
+	writeServerThrows = false,
 	// what importing the sealing chunk does: "ok", "reject" (the download failed;
 	// the browser keeps a failed import for the life of the document, so it fails
 	// every time) or "hang" (it never arrives, until page.arrive())
 	seal = "ok",
 	// the browser refuses to navigate to the address
 	assignThrows = false,
+	// the record beside the stored session of the server that issued it (null: none was kept)
+	sessionServer = null,
 } = {}) {
 	const calls = [];
 	const timers = [];
@@ -158,8 +182,16 @@ function mountPage({
 	const docListeners = [];
 	const localData = new Map();
 	if (token) localData.set("byToken", token);
-	if (apiBase !== DEFAULT_BASE) localData.set("urApiBase", apiBase);
+	if (token && sessionServer !== null) {
+		localData.set("byTokenServer", sessionServer);
+	}
+	if (apiBase !== defaultBase) localData.set("urApiBase", apiBase);
+	/** the order of what touched the session and the server: storage writes and the context's token */
+	const events = [];
 	const sessionData = new Map();
+	if (seededSlot !== null) {
+		sessionData.set(APP_REQUEST_KEY, JSON.stringify(seededSlot));
+	}
 	if (olderSlot) {
 		sessionData.set(
 			APP_REQUEST_KEY,
@@ -176,6 +208,7 @@ function mountPage({
 			pathname,
 			search,
 			hash,
+			origin,
 			assign: (url) => {
 				calls.push({ assign: url });
 				if (assignThrows)
@@ -244,8 +277,19 @@ function mountPage({
 	};
 	const localStorage = {
 		getItem: (k) => (localData.has(k) ? localData.get(k) : null),
-		setItem: (k, v) => localData.set(k, String(v)),
-		removeItem: (k) => localData.delete(k),
+		setItem: (k, v) => {
+			if (writeServerThrows && k === "urApiBase")
+				throw new Error("the storage is full");
+			events.push(`set ${k}=${v}`);
+			localData.set(k, String(v));
+		},
+		removeItem: (k) => {
+			if (removeSessionThrows && k === "byToken")
+				throw new Error("the storage is blocked");
+			events.push(`remove ${k}`);
+			if (removeSessionKeeps && k === "byToken") return;
+			localData.delete(k);
+		},
 	};
 
 	// the hooks the page runs on (tests/helpers/hooks-runtime.mjs)
@@ -258,28 +302,46 @@ function mountPage({
 		isLoggingOut,
 		isTransitioning,
 		setToken: (value) => {
+			const same = Object.is(auth.token, value);
 			auth.token = value;
 			auth.isAuthenticated = !!value;
 			calls.push({ setToken: value });
-			hooks.invalidate();
+			events.push(`setToken ${value === null ? "null" : "a session"}`);
+			// as React's state does: setting what is already there renders nothing, so a page
+			// that relied on this call alone to show a changed server would stay on its card
+			if (!same) hooks.invalidate();
 		},
 		logout: () => calls.push({ logout: true }),
 	};
 
+	// the server a call goes to is read when the call is made, as the real api layer does
+	const serverNow = () => localStorage.getItem("urApiBase") || defaultBase;
 	const api = {
 		CUSTOM_API_BASE_KEY: "urApiBase",
-		DEFAULT_API_BASE: DEFAULT_BASE,
-		getApiBase: () => localStorage.getItem("urApiBase") || DEFAULT_BASE,
+		DEFAULT_API_BASE: defaultBase,
+		getApiBase: serverNow,
 		fetchNetworkUser: async (t, signal) => {
 			calls.push({ fetchNetworkUser: t });
-			signals.push({ api: "user", signal });
+			signals.push({
+				api: "user",
+				signal,
+				base: serverNow(),
+				token: t,
+				stored: localStorage.getItem("byToken"),
+			});
 			return typeof userResponse === "function"
 				? userResponse(t, signal)
 				: userResponse;
 		},
 		createAuthCode: async (t, minutes, uses, signal) => {
 			calls.push({ mint: { token: t, minutes, uses } });
-			signals.push({ api: "mint", signal });
+			signals.push({
+				api: "mint",
+				signal,
+				base: serverNow(),
+				token: t,
+				stored: localStorage.getItem("byToken"),
+			});
 			return mint(t, minutes, uses, signal);
 		},
 	};
@@ -299,6 +361,7 @@ function mountPage({
 		"../services/appApproval": appApproval,
 		"../services/appApprovalView": appApprovalView,
 		"../services/appRequestStash": appRequestStash,
+		"../services/sessionBinding": sessionBinding,
 		"../components/AppApprovalView": { AppApprovalView: View },
 	};
 	// import("../services/appSeal") becomes require() here, asked at the moment the
@@ -371,6 +434,7 @@ function mountPage({
 
 	const page = {
 		calls,
+		events,
 		warnings,
 		auth,
 		win,
@@ -690,8 +754,14 @@ test("signed in: the api is asked who this is and the card shows the server's na
 			"minting",
 			"networkName",
 			"problem",
+			"server",
 		]);
 		assert.equal(model.kind, "consent");
+		assert.equal(
+			model.server,
+			null,
+			"a version 1 request is for the default server, which the card does not name",
+		);
 		assert.equal(
 			model.networkName,
 			"alpha-net",
@@ -792,22 +862,84 @@ test("a different api server is refused before the session is sent, until the pe
 		await page.flush();
 		assert.deepEqual(page.model(), {
 			kind: "server",
+			label: "URnetwork for Windows",
 			apiHost: "other.example.test",
+			requestedHost: null,
+			armed: false,
 		});
 		assert.equal(
 			page.calls.some((c) => c.fetchNetworkUser),
 			false,
 			"no call with the session",
 		);
-		page.actions().onUseDefaultServer();
+		// the button answers once the card has been in front of the person for a moment
+		await page.advance(800);
+		assert.equal(page.model().armed, true);
+		page.actions().onUseDefaultServer(page.trusted);
 		assert.equal(page.localData.has("urApiBase"), false);
 		await page.flush();
-		assert.equal(page.model().kind, "consent");
+		// the session belongs to the server that was left: it is gone, and the default server never
+		// sees it; the person signs in there, and the request comes back with them
+		assert.equal(page.localData.has("byToken"), false);
 		assert.deepEqual(
 			page.calls.filter((c) => c.fetchNetworkUser),
-			[{ fetchNetworkUser: ALPHA }],
+			[],
+			"the session is not sent to the default server",
 		);
+		assert.deepEqual(page.events, [
+			"remove byToken",
+			"setToken null",
+			"remove urApiBase",
+		]);
+		assert.equal(page.model().kind, "redirecting");
+		assert.deepEqual(page.replaced(), ["/"]);
+		assert.match(page.sessionData.get(APP_SIGN_IN_KEY), /^[0-9]{13}$/);
 	});
+});
+
+test("Use the default server needs a settled session and a storage that really lets go of it; otherwise nothing changes", async () => {
+	for (const options of [{ isLoggingOut: true }, { isTransitioning: true }]) {
+		await withPage(
+			{ apiBase: "https://other.example.test", ...options },
+			async (page) => {
+				await page.flush();
+				await page.advance(800);
+				page.actions().onUseDefaultServer(page.trusted);
+				await page.flush();
+				assert.deepEqual(page.events, []);
+				assert.equal(
+					page.localData.get("urApiBase"),
+					"https://other.example.test",
+				);
+			},
+		);
+	}
+	for (const options of [
+		{ removeSessionThrows: true },
+		{ removeSessionKeeps: true },
+	]) {
+		await withPage(
+			{ apiBase: "https://other.example.test", ...options },
+			async (page) => {
+				await page.flush();
+				await page.advance(800);
+				page.actions().onUseDefaultServer(page.trusted);
+				await page.flush();
+				assert.equal(
+					page.localData.get("urApiBase"),
+					"https://other.example.test",
+					"the server did not change",
+				);
+				assert.deepEqual(
+					page.calls.filter(
+						(c) => c.setToken !== undefined || c.fetchNetworkUser,
+					),
+					[],
+				);
+				assert.equal(page.model().kind, "server");
+			},
+		);
+	}
 });
 
 // ----- the account on the card changes -----
@@ -1411,9 +1543,9 @@ test("a document that cannot say whether it has the focus counts as not in front
 	});
 });
 
-// ----- the api calls give up after 15 seconds -----
+// ----- the api calls give up after 30 seconds -----
 
-test("an api that never answers the identity check is given up after 15 seconds, and the person gets Try again", async () => {
+test("an api that never answers the identity check is given up after 30 seconds, and the person gets Try again", async () => {
 	let behaviour = "hang";
 	await withPage(
 		{
@@ -1431,11 +1563,16 @@ test("an api that never answers the identity check is given up after 15 seconds,
 				signal instanceof AbortSignal,
 				"the page hands the call a signal",
 			);
-			await page.advance(14_999);
+			await page.advance(29_999);
 			assert.equal(signal.aborted, false);
 			assert.deepEqual(page.model(), { kind: "checking" });
 			await page.advance(1);
-			assert.equal(signal.aborted, true, "aborted at 15 s");
+			assert.equal(signal.aborted, true, "aborted at 30 s");
+			assert.equal(
+				signal.reason.name,
+				"AbortError",
+				"the time limit gives the ordinary reason, not the one of a call that was called back",
+			);
 			assert.deepEqual(page.model(), {
 				kind: "identity",
 				problem: "failed",
@@ -1466,10 +1603,9 @@ test("an answer that comes in time stops the clock: the signal is never aborted 
 		await consentReady(page);
 		await page.advance(60_000);
 		assert.equal(page.signals.length, perRun([0]).length);
-		assert.equal(
-			page.signals.every((s) => s.signal.aborted === false),
-			true,
-		);
+		// the request that counts is the last one; a first run that was torn down (StrictMode)
+		// has been called back, and the clock of the last one is what this is about
+		assert.equal(page.signals.at(-1).signal.aborted, false);
 		assert.equal(page.model().kind, "consent");
 	});
 	await withPage({}, async (page) => {
@@ -1484,7 +1620,7 @@ test("an answer that comes in time stops the clock: the signal is never aborted 
 	});
 });
 
-test("an api that never answers the mint is given up after 15 seconds: nothing is navigated, the person can try again", async () => {
+test("an api that never answers the mint is given up after 30 seconds: nothing is navigated, the person can try again", async () => {
 	let behaviour = "hang";
 	await withPage(
 		{
@@ -1499,13 +1635,13 @@ test("an api that never answers the mint is given up after 15 seconds: nothing i
 			assert.equal(page.model().busy, true);
 			const signal = page.signals.find((s) => s.api === "mint").signal;
 			assert.ok(signal instanceof AbortSignal);
-			await page.advance(14_999);
+			await page.advance(29_999);
 			assert.equal(signal.aborted, false);
 			assert.equal(page.model().busy, true);
 			await page.advance(1);
 			await answered(click);
 			await page.flush();
-			assert.equal(signal.aborted, true, "aborted at 15 s");
+			assert.equal(signal.aborted, true, "aborted at 30 s");
 			assert.equal(page.model().busy, false);
 			assert.equal(page.model().problem, "failed");
 			assert.deepEqual(page.assigned(), []);
@@ -1869,5 +2005,1314 @@ test("the problem from the last try is gone while the next mint is pending", asy
 			await page.flush();
 			assert.equal(page.model().kind, "approved");
 		},
+	);
+});
+
+// ----- version 2: a request that names its network -----
+
+const v2Hash = (over = {}) => requestHash({ v: "2", api: APP_API, ...over });
+
+/** the slot the page keeps for a version 2 request, as the hard load after signing in finds it */
+const v2Slot = (over = {}) => ({
+	platform: "windows",
+	state: Buffer.from(nacl.randomBytes(32)).toString("base64url"),
+	pk: bs58.encode(appKeys.publicKey),
+	ts: Math.floor(Date.now() / 1000),
+	api: APP_API,
+	...over,
+});
+
+/** what the card for a browser on the wrong server says, for a request that names APP_API
+ * (inert, as it is when it appears: its buttons answer 800 ms after the person has it in front of them) */
+const wrongServer = (apiHost = "api.example.test", over = {}) => ({
+	kind: "server",
+	label: "URnetwork for Windows",
+	apiHost,
+	requestedHost: APP_API,
+	armed: false,
+	...over,
+});
+
+/** every call that carries the session or asks for a code */
+const apiCalls = (page) =>
+	page.calls.filter((c) => c.fetchNetworkUser || c.mint);
+
+test("a version 2 request while the browser is set to another server: the card names the app's host, and nothing is called, nobody is sent to sign in", async () => {
+	for (const token of [ALPHA, null]) {
+		await withPage({ token, hash: v2Hash() }, async (page) => {
+			await page.flush();
+			assert.deepEqual(page.model(), wrongServer());
+			// time passes, the tab is hidden and shown, the window loses the focus: still nothing
+			await page.advance(60_000);
+			await page.setVisible(false);
+			await page.setVisible(true);
+			await page.setFocused(false);
+			await page.setFocused(true);
+			assert.equal(page.model().kind, "server");
+			assert.deepEqual(
+				apiCalls(page),
+				[],
+				"no call with the session, and none without",
+			);
+			assert.deepEqual(
+				page.calls.filter((c) => c.replace || c.assign),
+				[],
+				"nobody is sent anywhere",
+			);
+			assert.equal(
+				page.sessionData.has(APP_SIGN_IN_KEY),
+				false,
+				"no marker",
+			);
+			assert.equal(
+				JSON.parse(page.sessionData.get(APP_REQUEST_KEY)).api,
+				APP_API,
+				"the request is kept",
+			);
+			assert.equal(
+				page.localData.get("byToken") ?? null,
+				token,
+				"the session is as it was",
+			);
+			assert.deepEqual(
+				page.calls.filter((c) => c.setToken !== undefined),
+				[],
+			);
+			assert.deepEqual(
+				page.events,
+				[],
+				"and nothing was written to the storage",
+			);
+		});
+	}
+});
+
+test("Switch: the session goes first, then the server is set to https://host, then the tab is sent to sign in; no call is made with the session", async () => {
+	const hash = v2Hash();
+	for (const token of [ALPHA, null]) {
+		await withPage({ token, hash }, async (page) => {
+			await page.flush();
+			assert.equal(page.model().kind, "server");
+			await page.advance(800);
+			page.actions().onSwitchServer(page.trusted);
+			await page.flush();
+			assert.deepEqual(
+				page.events,
+				[
+					"remove byToken",
+					"setToken null",
+					`set urApiBase=${APP_BASE}`,
+				],
+				"the stored session, the page's copy, then the server: in that order",
+			);
+			assert.equal(page.localData.has("byToken"), false);
+			assert.equal(page.localData.get("urApiBase"), APP_BASE);
+			assert.equal(page.auth.token, null);
+			// the person is sent to sign in on the server that was just set, with the way back
+			assert.equal(page.model().kind, "redirecting");
+			assert.deepEqual(page.replaced(), ["/"]);
+			assert.match(page.sessionData.get(APP_SIGN_IN_KEY), /^[0-9]{13}$/);
+			const kept = JSON.parse(page.sessionData.get(APP_REQUEST_KEY));
+			assert.equal(kept.state, stateOf(hash));
+			assert.equal(kept.api, APP_API);
+			// not once was the api called, with the session or without it, and the app was not answered
+			assert.deepEqual(apiCalls(page), []);
+			assert.deepEqual(page.assigned(), []);
+			assert.deepEqual(
+				page.warnings,
+				[],
+				"Switch writes no console line, and is not logout",
+			);
+			assert.equal(
+				page.calls.some((c) => c.logout),
+				false,
+			);
+		});
+	}
+});
+
+test("the way back after Switch and sign-in: the stored version 2 request meets the server it names, the account check and the mint go there, and the answer is the contract's", async () => {
+	const slot = v2Slot();
+	await withPage(
+		{ hash: "", seededSlot: slot, apiBase: APP_BASE },
+		async (page) => {
+			await consentReady(page);
+			assert.deepEqual(
+				page.signals.filter((s) => s.api === "user").map((s) => s.base),
+				perRun([APP_BASE]),
+				"the account check went to the server the app is on",
+			);
+			assert.equal(page.model().networkName, "alpha-net");
+			await page.advance(800);
+			await page.actions().onApprove(page.trusted);
+			await page.flush();
+			assert.deepEqual(
+				page.signals.filter((s) => s.api === "mint").map((s) => s.base),
+				[APP_BASE],
+				"and so did the one mint",
+			);
+			assert.equal(page.minted().length, 1);
+			const [address] = page.assigned();
+			assert.equal(page.assigned().length, 1);
+			const q = Object.fromEntries(new URL(address).searchParams);
+			assert.deepEqual(Object.keys(q), ["state", "epk", "n", "d"]);
+			assert.equal(q.state, slot.state);
+			const shared = nacl.box.before(
+				bs58.decode(q.epk),
+				appKeys.secretKey,
+			);
+			const opened = JSON.parse(
+				new TextDecoder().decode(
+					nacl.box.open.after(
+						bs58.decode(q.d),
+						bs58.decode(q.n),
+						shared,
+					),
+				),
+			);
+			assert.deepEqual(
+				opened,
+				{ c: CODE, s: slot.state },
+				"the box holds the code and the state, as in version 1",
+			);
+			assert.equal(
+				address.includes(APP_API),
+				false,
+				"the host is in no address",
+			);
+			assert.deepEqual(page.model(), { kind: "approved", canOpen: true });
+			assert.equal(
+				page.sessionData.has(APP_REQUEST_KEY),
+				false,
+				"the request is used up",
+			);
+			assert.deepEqual(page.warnings, [
+				"[AppAuth] action=approve platform=windows",
+			]);
+		},
+	);
+});
+
+test("a version 2 request on the server it names: signed out, the tab is sent to sign in at once, with no card in between", async () => {
+	await withPage(
+		{ token: null, hash: v2Hash(), apiBase: APP_BASE },
+		async (page) => {
+			await page.flush();
+			assert.equal(page.model().kind, "redirecting");
+			assert.deepEqual(page.replaced(), perRun(["/"]));
+			assert.match(page.sessionData.get(APP_SIGN_IN_KEY), /^[0-9]{13}$/);
+			assert.deepEqual(apiCalls(page), []);
+			assert.deepEqual(
+				page.events,
+				[],
+				"the server and the storage are as they were",
+			);
+		},
+	);
+});
+
+test("a version 2 request is for the server it names and for no other, at the click as well as at the card", async () => {
+	await withPage({ hash: v2Hash(), apiBase: APP_BASE }, async (page) => {
+		await consentReady(page);
+		await page.advance(800);
+		// another tab, or Change Network API, moves the browser after the card was drawn
+		page.localData.set("urApiBase", "https://evil.example.test");
+		await page.actions().onApprove(page.trusted);
+		await page.flush();
+		assert.equal(page.minted().length, 0, "no code is asked for anywhere");
+		assert.deepEqual(page.assigned(), []);
+		assert.deepEqual(page.model(), wrongServer("evil.example.test"));
+		assert.deepEqual(
+			page.signals.filter((s) => s.api === "mint"),
+			[],
+		);
+		// Switch from there goes to the server the app is on, and signs out of the one it leaves
+		// (the card that has just replaced the consent card starts inert, like any card)
+		await page.actions().onSwitchServer(page.trusted);
+		await page.flush();
+		assert.equal(
+			page.model().kind,
+			"server",
+			"still inert: the card is new",
+		);
+		assert.equal(page.localData.has("urApiBase"), true);
+		assert.equal(
+			page.localData.get("urApiBase"),
+			"https://evil.example.test",
+		);
+		await page.advance(800);
+		page.actions().onSwitchServer(page.trusted);
+		await page.flush();
+		assert.equal(page.localData.get("urApiBase"), APP_BASE);
+		assert.equal(page.localData.has("byToken"), false);
+		assert.equal(page.model().kind, "redirecting");
+		assert.equal(page.minted().length, 0);
+	});
+	// and the default server is not the server it names
+	await withPage({ hash: v2Hash() }, async (page) => {
+		await page.flush();
+		assert.equal(page.model().kind, "server");
+		assert.equal(page.minted().length, 0);
+		await page.actions().onApprove(page.trusted);
+		assert.equal(
+			page.minted().length,
+			0,
+			"there is no Approve to press, and a stray call mints nothing",
+		);
+	});
+});
+
+test("Cancel on the Different API server card answers the app like any Cancel: access_denied with the state, nothing called, nothing written", async () => {
+	for (const token of [ALPHA, null]) {
+		const hash = v2Hash();
+		await withPage({ token, hash }, async (page) => {
+			await page.flush();
+			page.actions().onCancel(page.untrusted);
+			await page.flush();
+			assert.deepEqual(
+				page.assigned(),
+				[],
+				"a script-made click does nothing",
+			);
+			page.actions().onCancel(page.trusted);
+			await page.flush();
+			assert.deepEqual(page.assigned(), [denyAddress(hash)]);
+			assert.deepEqual(page.model(), { kind: "cancelled" });
+			assert.equal(
+				page.sessionData.has(APP_REQUEST_KEY),
+				false,
+				"the request is used up",
+			);
+			assert.equal(page.sessionData.has(APP_SIGN_IN_KEY), false);
+			assert.deepEqual(apiCalls(page), []);
+			assert.deepEqual(
+				page.events,
+				[],
+				"the session and the server are left as they were",
+			);
+			assert.equal(page.localData.get("byToken") ?? null, token);
+			assert.deepEqual(page.warnings, [
+				"[AppAuth] action=deny platform=windows",
+			]);
+		});
+	}
+});
+
+test("Switch needs a trusted click and a settled session, and a storage that really lets go of the session; otherwise nothing changes", async () => {
+	await withPage({ hash: v2Hash() }, async (page) => {
+		await page.flush();
+		await page.advance(800);
+		page.actions().onSwitchServer(page.untrusted);
+		await page.flush();
+		assert.deepEqual(page.events, [], "a script-made click does nothing");
+		assert.equal(page.model().kind, "server");
+	});
+	for (const options of [{ isLoggingOut: true }, { isTransitioning: true }]) {
+		await withPage({ hash: v2Hash(), ...options }, async (page) => {
+			await page.flush();
+			await page.advance(800);
+			page.actions().onSwitchServer(page.trusted);
+			await page.flush();
+			assert.deepEqual(
+				page.events,
+				[],
+				`${Object.keys(options)[0]}: the session is about to change`,
+			);
+			assert.equal(page.model().kind, "server");
+		});
+	}
+	for (const options of [
+		{ removeSessionThrows: true },
+		{ removeSessionKeeps: true },
+	]) {
+		await withPage({ hash: v2Hash(), ...options }, async (page) => {
+			await page.flush();
+			await page.advance(800);
+			page.actions().onSwitchServer(page.trusted);
+			await page.flush();
+			const why = Object.keys(options)[0];
+			assert.equal(
+				page.localData.has("urApiBase"),
+				false,
+				`${why}: the server did not change`,
+			);
+			assert.deepEqual(
+				page.calls.filter((c) => c.setToken !== undefined),
+				[],
+				`${why}: nothing was half done`,
+			);
+			assert.equal(page.model().kind, "server", `${why}: the card stays`);
+			assert.deepEqual(apiCalls(page), []);
+			assert.deepEqual(page.replaced(), []);
+		});
+	}
+	// the session went but the server cannot be written: the card stays, signed out, nothing is called
+	await withPage(
+		{ hash: v2Hash(), writeServerThrows: true },
+		async (page) => {
+			await page.flush();
+			await page.advance(800);
+			page.actions().onSwitchServer(page.trusted);
+			await page.flush();
+			assert.deepEqual(page.events, ["remove byToken", "setToken null"]);
+			assert.equal(page.localData.has("urApiBase"), false);
+			assert.equal(page.model().kind, "server");
+			assert.deepEqual(apiCalls(page), []);
+			assert.deepEqual(page.replaced(), []);
+		},
+	);
+});
+
+test("Switch does nothing for a host the page could not use: the card stays, the session stays, nothing is written", async () => {
+	// each passes the grammar and the url parser of the engine running this test does not give it
+	// back as the same host: a bad punycode label is no name (a last label that reads as a number is
+	// refused by the grammar itself, and never gets a card: the next test)
+	const unusable = [
+		"xn--a.example",
+		"xn--aa.example",
+		"xn--zzzz.example",
+		"a.xn--a",
+	].filter((host) => {
+		try {
+			return new URL(`https://${host}`).host !== host;
+		} catch {
+			return true;
+		}
+	});
+	assert.ok(
+		unusable.length > 0,
+		"this engine refuses at least one bad punycode label",
+	);
+	for (const api of unusable) {
+		await withPage({ hash: requestHash({ v: "2", api }) }, async (page) => {
+			await page.flush();
+			assert.deepEqual(
+				page.model(),
+				wrongServer("api.example.test", { requestedHost: api }),
+				api,
+			);
+			await page.advance(800);
+			page.actions().onSwitchServer(page.trusted);
+			await page.flush();
+			assert.deepEqual(page.events, [], `${api}: nothing was touched`);
+			assert.equal(
+				page.localData.get("byToken"),
+				ALPHA,
+				`${api}: still signed in`,
+			);
+			assert.equal(page.localData.has("urApiBase"), false);
+			assert.deepEqual(page.replaced(), []);
+			assert.deepEqual(apiCalls(page), []);
+			// and Cancel still answers the app
+			page.actions().onCancel(page.trusted);
+			assert.equal(page.assigned().length, 1, `${api}: Cancel answers`);
+		});
+	}
+});
+
+test("Switch is not a version 1 action: no request names a server to go to, so a stray call changes nothing", async () => {
+	await withPage({ apiBase: "https://other.example.test" }, async (page) => {
+		await page.flush();
+		assert.equal(page.model().requestedHost, null);
+		await page.advance(800);
+		page.actions().onSwitchServer(page.trusted);
+		await page.flush();
+		assert.deepEqual(page.events, []);
+		assert.equal(
+			page.localData.get("urApiBase"),
+			"https://other.example.test",
+		);
+		assert.equal(page.localData.get("byToken"), ALPHA);
+	});
+	// no request at all
+	await withPage({ hash: "" }, async (page) => {
+		await page.flush();
+		await page.advance(800);
+		page.actions().onSwitchServer(page.trusted);
+		await page.flush();
+		assert.deepEqual(page.events, []);
+	});
+});
+
+test("two clicks on Switch do what one does", async () => {
+	await withPage({ hash: v2Hash() }, async (page) => {
+		await page.flush();
+		await page.advance(800);
+		const { onSwitchServer } = page.actions();
+		onSwitchServer(page.trusted);
+		onSwitchServer(page.trusted);
+		await page.flush();
+		assert.equal(page.localData.get("urApiBase"), APP_BASE);
+		assert.equal(page.localData.has("byToken"), false);
+		assert.deepEqual(page.replaced(), ["/"], "sent to sign in once");
+		assert.deepEqual(apiCalls(page), []);
+		for (const event of page.events) {
+			assert.ok(
+				[
+					"remove byToken",
+					"setToken null",
+					`set urApiBase=${APP_BASE}`,
+				].includes(event),
+				event,
+			);
+		}
+	});
+});
+
+test("Switch to the host the default server already has removes the override instead of setting one", async () => {
+	// the browser is on some other server; the app is on the default server's host
+	const hash = requestHash({ v: "2", api: "api.example.test" });
+	await withPage(
+		{ hash, apiBase: "https://other.example.test" },
+		async (page) => {
+			await page.flush();
+			assert.deepEqual(
+				page.model(),
+				wrongServer("other.example.test", {
+					requestedHost: "api.example.test",
+				}),
+			);
+			await page.advance(800);
+			page.actions().onSwitchServer(page.trusted);
+			await page.flush();
+			assert.equal(page.localData.has("urApiBase"), false);
+			assert.deepEqual(page.events, [
+				"remove byToken",
+				"setToken null",
+				"remove urApiBase",
+			]);
+			assert.equal(page.model().kind, "redirecting");
+			assert.deepEqual(page.replaced(), ["/"]);
+		},
+	);
+	// the browser already is on the default server: that is the server the request names
+	await withPage({ hash }, async (page) => {
+		await consentReady(page);
+		assert.deepEqual(
+			page.signals.filter((s) => s.api === "user").map((s) => s.base),
+			perRun([DEFAULT_BASE]),
+		);
+	});
+});
+
+test("a default server that is http can never be the one a version 2 request names: Switch sets the https one", async () => {
+	const plain = "http://mock.localhost:5198";
+	await withPage(
+		{ hash: v2Hash(), defaultBase: plain, apiBase: plain },
+		async (page) => {
+			await page.flush();
+			assert.deepEqual(
+				page.model(),
+				wrongServer("http://mock.localhost:5198"),
+				"the same host over http reads as another server",
+			);
+			assert.deepEqual(apiCalls(page), []);
+			await page.advance(800);
+			page.actions().onSwitchServer(page.trusted);
+			await page.flush();
+			assert.equal(
+				page.localData.get("urApiBase"),
+				APP_BASE,
+				"set, not removed",
+			);
+			assert.deepEqual(page.events, [
+				"remove byToken",
+				"setToken null",
+				`set urApiBase=${APP_BASE}`,
+			]);
+		},
+	);
+});
+
+test("a relative default server resolves against the page: on an https page it can be the one the request names, on an http page it cannot", async () => {
+	const onThePage = requestHash({ v: "2", api: "manager.example" });
+	await withPage(
+		{
+			hash: onThePage,
+			defaultBase: "/api",
+			apiBase: "/api",
+			origin: "https://manager.example",
+		},
+		async (page) => {
+			await consentReady(page);
+			assert.deepEqual(
+				page.signals.filter((s) => s.api === "user").map((s) => s.base),
+				perRun(["/api"]),
+			);
+		},
+	);
+	await withPage(
+		{
+			hash: onThePage,
+			defaultBase: "/api",
+			apiBase: "/api",
+			origin: "http://manager.example",
+		},
+		async (page) => {
+			await page.flush();
+			assert.deepEqual(
+				page.model(),
+				wrongServer("http://manager.example", {
+					requestedHost: "manager.example",
+				}),
+				"a relative base on an http page is shown with its scheme",
+			);
+			assert.deepEqual(apiCalls(page), []);
+		},
+	);
+	// version 1 compares the base with the default as text, and a relative default is the default
+	await withPage(
+		{
+			defaultBase: "/api",
+			apiBase: "/api",
+			origin: "http://manager.example",
+		},
+		async (page) => {
+			await consentReady(page);
+		},
+	);
+});
+
+test("a version 1 request is for the default server only, even where a version 2 request would be at home", async () => {
+	// the browser is on the very server a version 2 request would name: still not the default
+	await withPage({ apiBase: APP_BASE }, async (page) => {
+		await page.flush();
+		assert.deepEqual(page.model(), {
+			kind: "server",
+			label: "URnetwork for Windows",
+			apiHost: APP_API,
+			requestedHost: null,
+			armed: false,
+		});
+		assert.deepEqual(apiCalls(page), []);
+	});
+});
+
+test("a version 1 request on another server is judged first, signed out too: the card, no sign-in; the default server then brings the sign-in", async () => {
+	await withPage(
+		{ token: null, apiBase: "https://other.example.test" },
+		async (page) => {
+			await page.flush();
+			assert.equal(page.model().kind, "server");
+			assert.deepEqual(page.replaced(), []);
+			assert.equal(page.sessionData.has(APP_SIGN_IN_KEY), false);
+			assert.deepEqual(apiCalls(page), []);
+			await page.advance(800);
+			page.actions().onUseDefaultServer(page.trusted);
+			await page.flush();
+			assert.equal(page.model().kind, "redirecting");
+			assert.deepEqual(page.replaced(), ["/"]);
+			assert.match(page.sessionData.get(APP_SIGN_IN_KEY), /^[0-9]{13}$/);
+		},
+	);
+});
+
+test("an api that takes 20 seconds to say who this is, or to mint, is waited for: the limit is 30", async () => {
+	const slow = deferred();
+	await withPage({ userResponse: () => slow.promise }, async (page) => {
+		await page.flush();
+		assert.equal(page.model().kind, "checking");
+		await page.advance(20_000);
+		assert.equal(page.model().kind, "checking", "not Try again");
+		slow.resolve(alphaUser);
+		await page.flush();
+		assert.equal(page.model().kind, "consent");
+		assert.equal(
+			page.signals.at(-1).signal.aborted,
+			false,
+			"the request that counts was never given up",
+		);
+	});
+	const slowMint = deferred();
+	await withPage({ mint: () => slowMint.promise }, async (page) => {
+		await consentReady(page);
+		await page.advance(800);
+		const click = page.actions().onApprove(page.trusted);
+		await page.flush();
+		await page.advance(20_000);
+		assert.equal(page.model().busy, true);
+		assert.equal(page.model().problem, null, "not a failure yet");
+		slowMint.resolve({ auth_code: CODE });
+		await answered(click);
+		await page.flush();
+		assert.equal(page.model().kind, "approved");
+	});
+});
+
+test("the sealing chunk keeps its own, shorter limit while the api calls wait 30 seconds", async () => {
+	await withPage({ seal: "hang" }, async (page) => {
+		await consentReady(page);
+		await page.advance(800);
+		const click = page.actions().onApprove(page.trusted);
+		await page.flush();
+		await page.advance(14_999);
+		assert.equal(page.model().busy, true);
+		await page.advance(1);
+		await answered(click);
+		await page.flush();
+		assert.equal(
+			page.model().problem,
+			"broken",
+			"given up at 15 s, not at 30",
+		);
+		assert.equal(page.minted().length, 0);
+	});
+});
+
+test("a version 2 request that is not valid is the generic card, and calls and writes nothing", async () => {
+	for (const api of [
+		"localhost",
+		"API.beta-test.net",
+		"api.beta-test.net:443",
+		"127.0.0.1:5198",
+		// last labels a url parser reads as a number: an address in disguise, or no host at all
+		"example.0x10",
+		"1.2.3.0x4",
+		"0x7f.0x0.0x0.0x1",
+		"a.0x",
+		"x".repeat(300),
+	]) {
+		for (const token of [ALPHA, null]) {
+			await withPage(
+				{ token, hash: requestHash({ v: "2", api }) },
+				async (page) => {
+					await page.flush();
+					assert.deepEqual(
+						page.model(),
+						{ kind: "request", problem: "invalid" },
+						api.slice(0, 30),
+					);
+					assert.deepEqual(apiCalls(page), []);
+					assert.deepEqual(page.replaced(), []);
+					assert.equal(page.sessionData.has(APP_REQUEST_KEY), false);
+					assert.deepEqual(page.events, []);
+				},
+			);
+		}
+	}
+	// version 2 without api, version 1 with api, and a version the page does not know
+	for (const hash of [
+		requestHash({ v: "2" }),
+		requestHash({ api: APP_API }),
+	]) {
+		await withPage({ hash }, async (page) => {
+			await page.flush();
+			assert.deepEqual(page.model(), {
+				kind: "request",
+				problem: "invalid",
+			});
+		});
+	}
+	await withPage({ hash: requestHash({ v: "3" }) }, async (page) => {
+		await page.flush();
+		assert.deepEqual(page.model(), {
+			kind: "request",
+			problem: "unsupported",
+		});
+	});
+});
+
+test("framed, or opened by another page, a version 2 request is blocked and sends nobody anywhere", async () => {
+	for (const options of [{ framed: true }, { opener: {} }]) {
+		await withPage({ hash: v2Hash(), ...options }, async (page) => {
+			await page.flush();
+			assert.equal(page.model().kind, "blocked");
+			assert.deepEqual(apiCalls(page), []);
+			assert.deepEqual(page.replaced(), []);
+		});
+	}
+});
+
+// ----- the review round: the session of another tab, the inert server card, a stale request, a torn-down check -----
+
+/** Tab 2 pressed Switch (or Change Network API): the stored session is gone and the browser is
+ * set to another server. This page's tab was not told; its copy of the session is still in memory. */
+const anotherTabSwitched = (page, base = APP_BASE) => {
+	page.localData.delete("byToken");
+	page.localData.set("urApiBase", base);
+};
+
+test("the person leaves a card, switches in another tab and comes back: this tab's copy of the session is not sent to the new server, the page signs itself out", async () => {
+	await withPage({ hash: v2Hash() }, async (page) => {
+		await page.flush();
+		assert.equal(
+			page.model().kind,
+			"server",
+			"the browser is on another server",
+		);
+		await page.setVisible(false);
+		anotherTabSwitched(page);
+		// back in this tab: the server is the one the request names, and the page still holds the session
+		await page.setVisible(true);
+		await page.setFocused(true);
+		assert.deepEqual(
+			apiCalls(page),
+			[],
+			"the session was not sent to the server it never belonged to",
+		);
+		assert.deepEqual(
+			page.calls.filter((c) => c.setToken !== undefined),
+			[{ setToken: null }],
+			"the page's copy is dropped",
+		);
+		assert.equal(page.auth.token, null);
+		// signed out on the right server: the way to sign-in, as ever
+		assert.equal(page.model().kind, "redirecting");
+		assert.deepEqual(page.replaced(), ["/"]);
+		assert.match(page.sessionData.get(APP_SIGN_IN_KEY), /^[0-9]{13}$/);
+	});
+});
+
+test("another tab signed in to something else: the page does not send its own copy either, and signs out to find what is stored", async () => {
+	await withPage({ hash: v2Hash(), apiBase: APP_BASE }, async (page) => {
+		// the account check is under way on the right server when the other tab replaces the session
+		await consentReady(page);
+		await page.advance(800);
+		page.localData.set("byToken", BETA);
+		// anything that makes the page look again: a retry of the account check
+		page.actions().onRetry();
+		await page.flush();
+		assert.deepEqual(
+			page.signals.filter((s) => s.token === ALPHA && s.stored !== ALPHA),
+			[],
+			"no request carried a session the browser no longer has",
+		);
+		assert.equal(page.auth.token, null);
+		assert.equal(page.model().kind, "redirecting");
+	});
+});
+
+test("a stored session that names another server is nobody's to send here: the page treats it as no session", async () => {
+	// the record beside the stored session says the default server issued it; the browser is set to B
+	await withPage(
+		{ hash: v2Hash(), apiBase: APP_BASE, sessionServer: "default" },
+		async (page) => {
+			await page.flush();
+			assert.deepEqual(
+				page.signals,
+				[],
+				"no account check went out with it",
+			);
+			assert.equal(page.auth.token, null);
+			assert.equal(page.model().kind, "redirecting");
+		},
+	);
+	// a record that names this very server changes nothing; neither does having none
+	for (const record of [APP_BASE, null]) {
+		await withPage(
+			{ hash: v2Hash(), apiBase: APP_BASE, sessionServer: record },
+			async (page) => {
+				await consentReady(page);
+				assert.equal(page.model().kind, "consent");
+			},
+		);
+	}
+});
+
+test("the Different API server card is inert for 800 ms, like Approve: Switch answers after that and not before, Cancel at once", async () => {
+	await withPage({ hash: v2Hash() }, async (page) => {
+		await page.flush();
+		assert.equal(page.model().armed, false);
+		const { onSwitchServer } = page.actions();
+		onSwitchServer(page.trusted);
+		await page.flush();
+		assert.deepEqual(page.events, [], "an early click changes nothing");
+		await page.advance(798);
+		assert.equal(page.model().armed, false);
+		await page.advance(1);
+		assert.equal(page.model().armed, false, "799 ms");
+		onSwitchServer(page.trusted);
+		await page.flush();
+		assert.deepEqual(page.events, [], "still nothing at 799 ms");
+		await page.advance(1);
+		assert.equal(page.model().armed, true, "armed at 800 ms");
+		page.actions().onSwitchServer(page.trusted);
+		await page.flush();
+		assert.equal(page.localData.get("urApiBase"), APP_BASE);
+	});
+	// Cancel never waits: the person can always say no
+	await withPage({ hash: v2Hash() }, async (page) => {
+		await page.flush();
+		page.actions().onCancel(page.trusted);
+		await page.flush();
+		assert.equal(page.assigned().length, 1);
+		assert.equal(page.model().kind, "cancelled");
+	});
+});
+
+test("Use the default server (version 1) is inert for 800 ms and needs a trusted click", async () => {
+	await withPage({ apiBase: "https://other.example.test" }, async (page) => {
+		await page.flush();
+		assert.equal(page.model().armed, false);
+		page.actions().onUseDefaultServer(page.trusted);
+		await page.flush();
+		assert.deepEqual(page.events, [], "too early");
+		await page.advance(800);
+		assert.equal(page.model().armed, true);
+		page.actions().onUseDefaultServer(page.untrusted);
+		await page.flush();
+		assert.deepEqual(page.events, [], "a script-made click does nothing");
+		assert.equal(
+			page.localData.get("urApiBase"),
+			"https://other.example.test",
+		);
+		assert.equal(page.localData.get("byToken"), ALPHA);
+		page.actions().onUseDefaultServer(page.trusted);
+		await page.flush();
+		assert.equal(page.localData.has("urApiBase"), false);
+		assert.equal(page.localData.has("byToken"), false);
+	});
+});
+
+test("the server card is armed only while it is in front of the person: a hidden tab waits, a window that loses the focus is inert again", async () => {
+	await withPage({ hash: v2Hash(), visible: false }, async (page) => {
+		await page.flush();
+		await page.advance(10_000);
+		assert.equal(page.model().armed, false, "never by the clock alone");
+		page.actions().onSwitchServer(page.trusted);
+		await page.flush();
+		assert.deepEqual(page.events, []);
+		await page.setVisible(true);
+		await page.advance(799);
+		assert.equal(page.model().armed, false);
+		await page.advance(1);
+		assert.equal(page.model().armed, true);
+		await page.setFocused(false);
+		assert.equal(page.model().armed, false, "the window lost the focus");
+		await page.setFocused(true);
+		await page.advance(799);
+		assert.equal(page.model().armed, false, "the 800 ms start over");
+		await page.advance(1);
+		assert.equal(page.model().armed, true);
+	});
+	// a click is refused while the window has lost the focus, even before the page has heard of it
+	await withPage({ hash: v2Hash() }, async (page) => {
+		await page.flush();
+		await page.advance(800);
+		page.doc.focused = false;
+		page.actions().onSwitchServer(page.trusted);
+		await page.flush();
+		assert.deepEqual(page.events, []);
+	});
+	await withPage({ apiBase: "https://other.example.test" }, async (page) => {
+		await page.flush();
+		await page.advance(800);
+		page.doc.focused = false;
+		page.actions().onUseDefaultServer(page.trusted);
+		await page.flush();
+		assert.deepEqual(page.events, []);
+	});
+});
+
+test("the server card that takes the place of the consent card is inert in the very render it appears: a second click aimed at Approve cannot reach Switch", async () => {
+	await withPage({ hash: v2Hash(), apiBase: APP_BASE }, async (page) => {
+		await consentReady(page);
+		await page.advance(800);
+		assert.equal(page.model().armed, true);
+		// another tab moves the browser, and the click on Approve finds out
+		page.localData.set("urApiBase", "https://evil.example.test");
+		await page.actions().onApprove(page.trusted);
+		const first = page.render().props.model;
+		assert.equal(first.kind, "server");
+		assert.equal(
+			first.armed,
+			false,
+			"the first frame of the new card is inert",
+		);
+		page.actions().onSwitchServer(page.trusted);
+		await page.flush();
+		assert.deepEqual(
+			page.events,
+			[],
+			"the second click of a double click lands on nothing",
+		);
+		await page.advance(800);
+		assert.equal(page.model().armed, true);
+	});
+});
+
+test("after a server mismatch at the click, putting the server back gives a consent card that is not busy", async () => {
+	await withPage({}, async (page) => {
+		await consentReady(page);
+		await page.advance(800);
+		page.localData.set("urApiBase", "https://evil.example.test");
+		await page.actions().onApprove(page.trusted);
+		await page.flush();
+		assert.equal(page.model().kind, "server");
+		// another tab puts the server back; any render finds the right server again
+		page.localData.delete("urApiBase");
+		await page.setFocused(false);
+		await page.setFocused(true);
+		await page.advance(900);
+		const model = page.model();
+		assert.equal(model.kind, "consent", "the consent card is back");
+		assert.equal(model.busy, false, "and it is not stuck busy");
+		assert.equal(model.armed, true, "and Approve can be armed again");
+	});
+});
+
+test("Switch for a request that has gone stale while the card was shown says so, and touches neither the session nor the server", async () => {
+	const realNow = Date.now;
+	// 232 s old when the page loads: still good for the card
+	const hash = v2Hash({ ts: String(Math.floor(realNow() / 1000) - 232) });
+	try {
+		await withPage({ hash }, async (page) => {
+			await page.flush();
+			assert.equal(page.model().kind, "server");
+			await page.advance(800);
+			Date.now = () => realNow() + 10_000; // 242 s old at the click
+			page.actions().onSwitchServer(page.trusted);
+			await page.flush();
+			assert.deepEqual(page.model(), { kind: "expired" });
+			assert.deepEqual(
+				page.events,
+				[],
+				"the session and the server are as they were",
+			);
+			assert.equal(page.localData.get("byToken"), ALPHA);
+			assert.equal(page.localData.has("urApiBase"), false);
+			assert.equal(
+				page.sessionData.has(APP_REQUEST_KEY),
+				false,
+				"the request is used up",
+			);
+			assert.deepEqual(
+				page.replaced(),
+				[],
+				"nobody is sent to sign in on a server for nothing",
+			);
+			assert.deepEqual(apiCalls(page), []);
+			assert.deepEqual(page.assigned(), []);
+		});
+		// a request that is still fresh at the click is switched for, as ever
+		Date.now = realNow;
+		await withPage({ hash }, async (page) => {
+			await page.flush();
+			await page.advance(800);
+			page.actions().onSwitchServer(page.trusted);
+			await page.flush();
+			assert.equal(page.localData.get("urApiBase"), APP_BASE);
+		});
+	} finally {
+		Date.now = realNow;
+	}
+});
+
+test("an account check that is torn down is called back: a session that changes aborts the request it replaced, and the late answer is ignored", async () => {
+	await withPage(
+		{
+			userResponse: (t, signal) =>
+				t === ALPHA ? hang(signal) : betaUser,
+		},
+		async (page) => {
+			await page.flush();
+			assert.equal(page.model().kind, "checking");
+			const asked = page.signals.length;
+			await page.swapToken(BETA);
+			const [...all] = page.signals;
+			assert.equal(all.length, asked + 1);
+			for (const s of all.filter((s) => s.token === ALPHA)) {
+				assert.equal(
+					s.signal.aborted,
+					true,
+					"the replaced session's request was called back",
+				);
+				// and it says why, so the one console line the api layer writes for it explains itself
+				assert.ok(s.signal.reason instanceof Error);
+				assert.match(s.signal.reason.message, /^called back: /);
+			}
+			assert.equal(all.at(-1).token, BETA);
+			assert.equal(all.at(-1).signal.aborted, false);
+			assert.equal(page.model().kind, "consent");
+			assert.equal(page.model().networkName, "beta-net");
+			assert.equal(page.localData.get("byToken"), BETA);
+			assert.deepEqual(
+				page.calls.filter((c) => c.setToken !== undefined),
+				[],
+				"the late answer for the old session ended nothing",
+			);
+		},
+	);
+});
+
+test("StrictMode's first run of the account check is called back before the second one asks, so the browser has no request to hold the second behind", async () => {
+	await withPage({}, async (page) => {
+		await consentReady(page);
+		const users = page.signals.filter((s) => s.api === "user");
+		assert.equal(users.length, perRun([0]).length);
+		// the run that counts is open; the one that was torn down at mount is not
+		assert.equal(users.at(-1).signal.aborted, false);
+		for (const s of users.slice(0, -1)) {
+			assert.equal(s.signal.aborted, true);
+			assert.match(s.signal.reason.message, /^called back: /);
+		}
+	});
+});
+
+// ----- random events against the real page code -----
+
+function fuzzRng(seed) {
+	let a = seed >>> 0;
+	return () => {
+		a = (a + 0x6d2b79f5) >>> 0;
+		let t = a;
+		t = Math.imul(t ^ (t >>> 15), t | 1);
+		t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+		return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+	};
+}
+
+test("random sequences of events: no session goes to a server the request is not for or that no longer backs it, the card is never busy with no click in flight, one navigation and one mint at most, the server is written only after the session is taken out and only from an armed card", async () => {
+	const SEEDS = Number(process.env.FUZZ_SEEDS || 150);
+	const STEPS = 28;
+	const violations = [];
+	for (let seed = 1; seed <= SEEDS; seed++) {
+		const rnd = fuzzRng(seed * 7919 + (strict ? 1 : 0));
+		const pick = (list) => list[Math.floor(rnd() * list.length)];
+		const version2 = rnd() < 0.6;
+		const hash = version2 ? v2Hash() : requestHash();
+		const parsed = appAuth.parseAppRequest(hash, Date.now());
+		const request = parsed.ok ? parsed.request : null;
+		const startServer = pick([
+			DEFAULT_BASE,
+			APP_BASE,
+			"https://other.example.test",
+		]);
+		const startToken = pick([ALPHA, BETA, null]);
+		const log = [
+			`seed ${seed}: ${version2 ? "v2" : "v1"}, server ${startServer}, token ${startToken ? (startToken === ALPHA ? "alpha" : "beta") : "none"}`,
+		];
+		await withPage(
+			{ hash, apiBase: startServer, token: startToken },
+			async (page) => {
+				const fail = (what) =>
+					violations.push(`${log.join(" | ")} :: ${what}`);
+				const serverNow = () =>
+					page.localData.get("urApiBase") || DEFAULT_BASE;
+				const fits = () =>
+					request !== null &&
+					appAuth.isServerForRequest(
+						request,
+						serverNow(),
+						DEFAULT_BASE,
+						PAGE_ORIGIN,
+					);
+				await page.flush();
+				let writes = 0;
+				for (let step = 0; step < STEPS; step++) {
+					const action = pick([
+						"advance",
+						"advance",
+						"focus",
+						"visible",
+						"server",
+						"token",
+						"other-tab-switch",
+						"approve",
+						"approve",
+						"cancel",
+						"switch",
+						"switch",
+						"default",
+						"retry",
+						"render",
+					]);
+					log.push(action);
+					let armedBefore = false;
+					try {
+						switch (action) {
+							case "advance": {
+								const ms = pick([0, 100, 800, 900, 5000]);
+								log[log.length - 1] += ` ${ms}`;
+								await page.advance(ms);
+								break;
+							}
+							case "focus":
+								await page.setFocused(rnd() < 0.5);
+								break;
+							case "visible":
+								await page.setVisible(rnd() < 0.5);
+								break;
+							case "server": {
+								const to = pick([
+									null,
+									APP_BASE,
+									"https://other.example.test",
+									DEFAULT_BASE,
+								]);
+								log[log.length - 1] += ` ${to}`;
+								if (to === null)
+									page.localData.delete("urApiBase");
+								else page.localData.set("urApiBase", to);
+								break;
+							}
+							case "token":
+								await page.swapToken(pick([ALPHA, BETA, null]));
+								break;
+							case "other-tab-switch": {
+								// what Switch in another tab does to the storage of this one, with nobody telling the page
+								const to = pick([
+									APP_BASE,
+									"https://other.example.test",
+									DEFAULT_BASE,
+								]);
+								log[log.length - 1] += ` ${to}`;
+								page.localData.delete("byToken");
+								if (to === DEFAULT_BASE)
+									page.localData.delete("urApiBase");
+								else page.localData.set("urApiBase", to);
+								break;
+							}
+							case "approve":
+								await answered(
+									Promise.resolve(
+										page
+											.actions()
+											.onApprove(
+												pick([
+													page.trusted,
+													page.trusted,
+													page.untrusted,
+												]),
+											),
+									),
+								);
+								break;
+							case "cancel":
+								page.actions().onCancel(
+									pick([page.trusted, page.untrusted]),
+								);
+								break;
+							case "switch":
+							case "default": {
+								const event = pick([
+									page.trusted,
+									page.trusted,
+									page.untrusted,
+								]);
+								const model = page.model();
+								armedBefore =
+									model.kind === "server" &&
+									model.armed === true;
+								if (action === "switch")
+									page.actions().onSwitchServer(event);
+								else page.actions().onUseDefaultServer(event);
+								break;
+							}
+							case "retry":
+								page.actions().onRetry();
+								break;
+							case "render":
+								page.render();
+								break;
+						}
+						await page.flush();
+					} catch (error) {
+						fail(`${action} threw: ${error.message}`);
+						break;
+					}
+					// no api call was ever made on a server the request is not for ...
+					for (const s of page.signals) {
+						if (
+							request !== null &&
+							!appAuth.isServerForRequest(
+								request,
+								s.base,
+								DEFAULT_BASE,
+								PAGE_ORIGIN,
+							)
+						) {
+							fail(
+								`an api call (${s.api}) went to ${s.base}, which the request is not for`,
+							);
+						}
+						// ... and none carried a session the browser no longer had stored
+						if (s.token !== s.stored) {
+							fail(
+								`an api call (${s.api}) carried a session that was not the stored one`,
+							);
+						}
+					}
+					// at most one navigation to the app, and only to the contract's addresses
+					const goes = page.assigned();
+					if (goes.length > 1)
+						fail(`more than one navigation: ${goes.length}`);
+					for (const g of goes) {
+						if (
+							!/^urnetwork:\/\/auth\?state=[A-Za-z0-9_-]{43}&(error=access_denied|epk=)/.test(
+								g,
+							)
+						) {
+							fail(`odd navigation ${g.slice(0, 40)}`);
+						}
+					}
+					// the consent card only on the right server, and never busy once every click has finished
+					// (it is drawn from storage on every render, so look after one)
+					page.render();
+					await page.flush();
+					const model = page.model();
+					if (model.kind === "consent") {
+						if (!fits())
+							fail(
+								"the consent card shows on a server the request is not for",
+							);
+						if (model.busy)
+							fail(
+								"the consent card is busy with no click in flight",
+							);
+						if (model.minting)
+							fail(
+								"the consent card says minting with no click in flight",
+							);
+					}
+					// the page writes the server only right after it has taken the session out, in this order,
+					// only the server the request names (or removes the override), and only from an armed card
+					const ev = page.events;
+					for (let k = 0; k < ev.length; k++) {
+						if (/^(set|remove) urApiBase/.test(ev[k])) {
+							if (
+								!(
+									ev[k - 1] === "setToken null" &&
+									ev[k - 2] === "remove byToken"
+								)
+							) {
+								fail(
+									`the server was written without the session going first: ${ev.slice(Math.max(0, k - 2), k + 1).join(", ")}`,
+								);
+							}
+							if (
+								ev[k].startsWith("set urApiBase=") &&
+								(request === null ||
+									ev[k] !==
+										`set urApiBase=https://${request.api}`)
+							) {
+								fail(
+									`the page set a server the request does not name: ${ev[k]}`,
+								);
+							}
+						}
+					}
+					const written = ev.filter((e) =>
+						/^(set|remove) urApiBase/.test(e),
+					).length;
+					if (written > writes) {
+						if (!armedBefore)
+							fail(
+								"the server was written from a card that was not armed",
+							);
+						writes = written;
+					}
+					if (page.minted().length > 1)
+						fail(`minted ${page.minted().length} codes`);
+					if (violations.length > 12) break;
+				}
+			},
+		);
+		if (violations.length > 12) break;
+	}
+	assert.deepEqual(
+		violations.slice(0, 6),
+		[],
+		`${violations.length} violation(s)`,
 	);
 });

@@ -17,7 +17,14 @@ import {
 	resolveIdentity,
 } from "../src/services/appApproval.ts";
 import { sealCode } from "../src/services/appSeal.ts";
-import { CODE, NOW, STATE, appKeys, request } from "./helpers/app-request.mjs";
+import {
+	API,
+	CODE,
+	NOW,
+	STATE,
+	appKeys,
+	request,
+} from "./helpers/app-request.mjs";
 
 const NETWORKS = new Map([
 	["token-alpha", "network-alpha"],
@@ -27,16 +34,22 @@ const NETWORKS = new Map([
 
 function ports(over = {}) {
 	const calls = [];
+	/** every request the server check was asked about */
+	const asked = [];
 	let clock = NOW;
 	const p = {
 		calls,
+		asked,
 		advance: (ms) => {
 			clock += ms;
 		},
 		now: () => clock,
 		readToken: () => "token-alpha",
 		networkIdOf: (token) => NETWORKS.get(token) ?? null,
-		usesDefaultServer: () => true,
+		serverMatches: (req) => {
+			asked.push(req);
+			return true;
+		},
 		createAuthCode: async (token, minutes, uses) => {
 			calls.push({ token, minutes, uses });
 			return { auth_code: CODE };
@@ -456,7 +469,7 @@ test("the page is told about the mint only when there is one", async () => {
 			"identity-changed",
 		],
 		["signed out", { readToken: () => null }, "signed-out"],
-		["other server", { usesDefaultServer: () => false }, "custom-server"],
+		["other server", { serverMatches: () => false }, "custom-server"],
 	]) {
 		const progress = [];
 		const p = ports(over);
@@ -599,9 +612,148 @@ test("a request that went stale before the click mints nothing", async () => {
 });
 
 test("a pointed-away api server mints nothing and never receives the session", async () => {
-	const p = ports({ usesDefaultServer: () => false });
+	const p = ports({ serverMatches: () => false });
 	assert.deepEqual(await approve(p), { kind: "custom-server" });
 	assert.equal(p.calls.length, 0);
+});
+
+// ----- version 2: the server is the one the request names -----
+
+test("the server check is asked about the very request being approved, in the middle of the click: after the session is read, before the mint", async () => {
+	const order = [];
+	const p = ports({
+		readToken: () => {
+			order.push("readToken");
+			return "token-alpha";
+		},
+		networkIdOf: (token) => {
+			order.push("networkIdOf");
+			return NETWORKS.get(token) ?? null;
+		},
+		serverMatches: (req) => {
+			order.push(`serverMatches:${req.api ?? "-"}`);
+			return true;
+		},
+		createAuthCode: async (token, minutes, uses) => {
+			order.push("createAuthCode");
+			p.calls.push({ token, minutes, uses });
+			return { auth_code: CODE };
+		},
+	});
+	const req = request({ api: API });
+	assert.equal(
+		(await controllerFor(p).approve(req, "network-alpha")).kind,
+		"approved",
+	);
+	assert.deepEqual(order, [
+		"readToken",
+		"networkIdOf",
+		`serverMatches:${API}`,
+		"createAuthCode",
+	]);
+});
+
+test("a version 2 request is approved when the server matches it, exactly as a version 1 request is", async () => {
+	const v1 = ports();
+	const v2 = ports();
+	const one = await controllerFor(v1).approve(request(), "network-alpha");
+	const two = await controllerFor(v2).approve(
+		request({ api: API }),
+		"network-alpha",
+	);
+	assert.equal(one.kind, "approved");
+	assert.equal(two.kind, "approved");
+	assert.deepEqual(v1.calls, [{ token: "token-alpha", minutes: 2, uses: 1 }]);
+	assert.deepEqual(
+		v2.calls,
+		v1.calls,
+		"the same code of 2 minutes and 1 use",
+	);
+	assert.deepEqual(v2.asked, [request({ api: API })]);
+	// the answer is the contract's, unchanged: the same four keys, the same box inside, no api anywhere
+	assert.deepEqual(Object.keys(one), ["kind", "url"]);
+	assert.deepEqual(Object.keys(two), ["kind", "url"]);
+	const { query, plain } = openAnswer(two.url);
+	assert.deepEqual(Object.keys(query), ["state", "epk", "n", "d"]);
+	assert.deepEqual(plain, { c: CODE, s: STATE });
+	// (the dots and the colon of a host are in no base58 text, so this cannot be matched by chance)
+	assert.equal(two.url.includes(API), false);
+	assert.equal(two.url.includes("beta-test"), false);
+	assert.match(two.url, /^urnetwork:\/\/auth\?state=[A-Za-z0-9_-]{43}&epk=/);
+});
+
+test("a request on a server that is not the one it is for mints nothing and the page is never told a mint began, for either version", async () => {
+	for (const req of [request({ api: API }), request()]) {
+		const p = ports({ serverMatches: () => false });
+		const progress = [];
+		const outcome = await controllerFor(p).approve(
+			req,
+			"network-alpha",
+			() => progress.push("minting"),
+		);
+		assert.deepEqual(outcome, { kind: "custom-server" });
+		assert.equal(p.calls.length, 0, "nothing was minted");
+		assert.deepEqual(
+			progress,
+			[],
+			"and the page was never told a mint began",
+		);
+	}
+});
+
+test("the server is judged at the click, not at the card: one that matched when the card was drawn and does not now mints nothing", async () => {
+	let onTheRightServer = true;
+	const p = ports({ serverMatches: () => onTheRightServer });
+	const controller = controllerFor(p);
+	const req = request({ api: API });
+	// (the card was drawn while the browser was on the right server)
+	onTheRightServer = false; // another tab, or Change Network API, moved it
+	assert.deepEqual(await controller.approve(req, "network-alpha"), {
+		kind: "custom-server",
+	});
+	assert.equal(p.calls.length, 0);
+	// it is not latched: back on the right server, the same click works and mints once
+	onTheRightServer = true;
+	assert.equal(
+		(await controller.approve(req, "network-alpha")).kind,
+		"approved",
+	);
+	assert.equal(p.calls.length, 1);
+});
+
+test("a server that does not match is no reason to refuse Cancel: the app is answered all the same", async () => {
+	const p = ports({ serverMatches: () => false });
+	const controller = controllerFor(p);
+	const req = request({ api: API });
+	assert.deepEqual(controller.deny(req), {
+		kind: "denied",
+		url: `urnetwork://auth?state=${STATE}&error=access_denied`,
+	});
+	assert.equal(p.calls.length, 0);
+	assert.deepEqual(
+		p.asked,
+		[],
+		"Cancel does not ask about the server at all",
+	);
+	assert.deepEqual(controller.deny(req), { kind: "already-denied" });
+});
+
+test("the box holds the code and the state for a version 2 request too, and nothing of its api", async () => {
+	const sealed = [];
+	const p = ports({
+		loadSeal: async () => (code, req) => {
+			sealed.push(req);
+			return sealCode(code, req);
+		},
+	});
+	const outcome = await controllerFor(p).approve(
+		request({ api: "mock.localhost:5198" }),
+		"network-alpha",
+	);
+	assert.equal(outcome.kind, "approved");
+	assert.equal(sealed.length, 2, "the dry run and the real answer");
+	assert.deepEqual(sealed[1], request({ api: "mock.localhost:5198" }));
+	assert.deepEqual(openAnswer(outcome.url).plain, { c: CODE, s: STATE });
 });
 
 test("the server's code limit and other failures are reported, and a failure may be retried", async () => {
@@ -671,7 +823,7 @@ test("a port that throws is a failure, not a crash", async () => {
 			},
 		},
 		{
-			usesDefaultServer: () => {
+			serverMatches: () => {
 				throw new Error("storage");
 			},
 		},

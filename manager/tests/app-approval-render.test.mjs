@@ -51,6 +51,7 @@ const actions = Object.fromEntries(
 		"onOpenApp",
 		"onSignOut",
 		"onUseDefaultServer",
+		"onSwitchServer",
 		"onRetry",
 		"onReload",
 	].map((name) => [
@@ -83,12 +84,27 @@ const consent = (over = {}) => ({
 	kind: "consent",
 	label: "URnetwork for Windows",
 	networkName: "alpha-net",
+	// the host of the api server, for a version 2 request; null for version 1
+	server: null,
 	armed: true,
 	busy: false,
 	minting: false,
 	problem: null,
 	...over,
 });
+
+/** the card for a browser that is set to another server: version 1 names no host, version 2 names the app's.
+ * Armed unless a test says it is not: its buttons answer 800 ms after the card is in front of the person. */
+const server = (over = {}) => ({
+	kind: "server",
+	label: "URnetwork for Windows",
+	apiHost: "api.example.test",
+	requestedHost: null,
+	armed: true,
+	...over,
+});
+const serverNamed = (over = {}) =>
+	server({ requestedHost: "api.beta-test.net", ...over });
 
 const everyModel = [
 	{ kind: "blocked", reason: "framed" },
@@ -97,7 +113,8 @@ const everyModel = [
 	{ kind: "request", problem: "stale" },
 	{ kind: "request", problem: "unsupported" },
 	{ kind: "redirecting" },
-	{ kind: "server", apiHost: "api.example.test" },
+	server(),
+	serverNamed(),
 	{ kind: "checking" },
 	{ kind: "identity", problem: "failed" },
 	{ kind: "identity", problem: "unreadable" },
@@ -144,6 +161,29 @@ test("the consent card says what the contract says and nothing more: the app, th
 	);
 });
 
+test("a version 2 consent card names the api server the code would be minted on, as plain text; a version 1 card names none", () => {
+	const v2 = consent({ server: "api.beta-test.net" });
+	const html = render(v2);
+	assert.match(html, /API server:\s*<span[^>]*>api\.beta-test\.net<\/span>/);
+	assert.equal(
+		textOf(html),
+		"Sign in to URnetwork for Windows? " +
+			"URnetwork for Windows is asking to sign in to your network alpha-net . " +
+			"API server: api.beta-test.net " +
+			"If you approve, that app gets full access to this account, the same as signing in there yourself: balance, plans, payout wallet and settings. " +
+			"Signing out of this page does not sign that computer out. " +
+			"Cancel Approve " +
+			"Not alpha-net ? Sign out and use a different account.",
+	);
+	assert.equal(textOf(render(consent())).includes("API server"), false);
+	// a hostile host is text on the card, as it is everywhere else
+	const hostile = `</span><img src=x onerror=alert(1)><script>alert(2)</script>"'&`;
+	const bad = render(consent({ server: hostile }));
+	assert.equal(/<img\b/i.test(bad), false);
+	assert.equal(/<script\b/i.test(bad), false);
+	assert.ok(bad.includes("&lt;img src=x onerror=alert(1)&gt;"));
+});
+
 test("no card says anything about 30 days, a password, a reset, a computer it cannot see, or a code to compare", () => {
 	const removed = [
 		/30 days/i,
@@ -156,12 +196,27 @@ test("no card says anything about 30 days, a password, a reset, a computer it ca
 		/matches the code/i,
 		new RegExp(["check", "\\s?code"].join(""), "i"),
 	];
+	// the one card that says where a password goes is the one that offers to switch servers
+	const namesWhereCredentialsGo = (model) =>
+		model.kind === "server" && model.requestedHost !== null;
 	for (const model of everyCard) {
 		const text = textOf(render(model));
 		for (const pattern of removed) {
+			if (
+				/password/i.test(pattern.source) &&
+				namesWhereCredentialsGo(model)
+			) {
+				continue;
+			}
 			assert.doesNotMatch(text, pattern, JSON.stringify(model));
 		}
 	}
+	const switching = textOf(render(serverNamed()));
+	assert.match(
+		switching,
+		/your password, seed phrase or wallet signature goes to api\.beta-test\.net/,
+	);
+	assert.doesNotMatch(switching, /reset|30 days|this computer/i);
 });
 
 test("Cancel comes first, Approve comes second, and neither is focused", () => {
@@ -175,6 +230,74 @@ test("Cancel comes first, Approve comes second, and neither is focused", () => {
 	assert.equal(/tabindex/i.test(html), false, "no tab order games");
 	for (const b of all) assert.match(b.tag, /type="button"/);
 	assert.equal(/<form\b/.test(html), false);
+});
+
+test("the Different API server card of a version 2 request: the warning stands in front of both buttons, Cancel comes before Switch, nothing is focused or inert", () => {
+	const warning =
+		"Only continue if you set this server in URnetwork yourself.";
+	const html = render(serverNamed({ requestedHost: "mock.localhost:5198" }));
+	assert.ok(html.includes(warning), "the sentence is on the card");
+	assert.ok(
+		html.indexOf(warning) < html.indexOf("<button"),
+		"and it comes before either button",
+	);
+	assert.deepEqual(
+		buttons(html).map((b) => b.text),
+		["Cancel", "Switch to mock.localhost:5198"],
+	);
+	assert.equal(/autofocus/i.test(html), false);
+	assert.equal(/tabindex/i.test(html), false);
+	for (const b of buttons(html)) assert.match(b.tag, /type="button"/);
+	assert.equal(
+		/\sdisabled=""/.test(html),
+		false,
+		"armed: neither button is inert",
+	);
+	assert.equal(/<form\b/.test(html), false);
+	// both hosts are named, as text in a span of their own
+	assert.match(html, /<span[^>]*>mock\.localhost:5198<\/span>/);
+	assert.match(html, /<span[^>]*>api\.example\.test<\/span>/);
+	// no Approve on it, and no word of approving beyond the sentence about the server
+	assert.equal(
+		buttons(html).some((b) => /^Approv/.test(b.text)),
+		false,
+	);
+	// a long host breaks inside the button instead of widening the card
+	const long = `${"a".repeat(63)}.${"b".repeat(63)}.${"c".repeat(63)}.de`;
+	const [, switchButton] = buttons(
+		render(serverNamed({ requestedHost: long })),
+	);
+	assert.match(switchButton.tag, /break-all/);
+	assert.equal(switchButton.text, `Switch to ${long}`);
+	// a card that has just appeared is inert: Switch waits for its moment, Cancel never does
+	const waiting = buttons(
+		render(
+			serverNamed({ requestedHost: "mock.localhost:5198", armed: false }),
+		),
+	);
+	assert.deepEqual(
+		waiting.map((b) => [b.text, /\sdisabled=""/.test(b.tag)]),
+		[
+			["Cancel", false],
+			["Switch to mock.localhost:5198", true],
+		],
+	);
+	// version 1: its one button, and none of this
+	const v1 = render(server());
+	assert.equal(v1.includes(warning), false);
+	assert.deepEqual(
+		buttons(v1).map((b) => b.text),
+		["Use the default server"],
+	);
+	assert.equal(/Switch/.test(textOf(v1)), false);
+	// and its one button waits for its moment the same way
+	assert.deepEqual(
+		buttons(render(server({ armed: false }))).map((b) => [
+			b.text,
+			/\sdisabled=""/.test(b.tag),
+		]),
+		[["Use the default server", true]],
+	);
 });
 
 test("Approve is inert until the card is armed, and while it is busy; Cancel waits for a mint and for nothing else; Sign out waits for both", () => {
@@ -253,9 +376,26 @@ test("the network name and the api host are text, never markup", () => {
 		false,
 	);
 	assert.ok(html.includes("&lt;img src=x onerror=alert(1)&gt;"));
-	const server = render({ kind: "server", apiHost: hostile });
-	assert.equal(/<img\b/i.test(server), false);
-	assert.ok(server.includes("&lt;script&gt;"));
+	for (const model of [
+		server({ apiHost: hostile }),
+		serverNamed({ apiHost: hostile }),
+		serverNamed({ requestedHost: hostile }),
+		serverNamed({ requestedHost: hostile, apiHost: hostile }),
+	]) {
+		const html = render(model);
+		assert.equal(/<img\b/i.test(html), false);
+		assert.equal(/<script\b/i.test(html), false);
+		assert.ok(html.includes("&lt;script&gt;"));
+		assert.ok(html.includes("&lt;img src=x onerror=alert(1)&gt;"));
+		assert.equal(
+			/onerror=|onclick=|onload=/i.test(html.replace(/>[^<]*</g, "><")),
+			false,
+			"no attribute came out of the text: the tags alone hold none",
+		);
+		// every button on it still runs only the action it is labelled for
+		for (const b of buttons(html))
+			assert.equal(/<[a-z]/i.test(b.text), false);
+	}
 });
 
 test("only the consent card has an Approve button, and no card has a link", () => {
@@ -360,8 +500,15 @@ test("the messages are the ones in the contract", () => {
 		["Sign out and use a different account."],
 	);
 	assert.deepEqual(
-		buttons(render({ kind: "server", apiHost: "x" })).map((b) => b.text),
+		buttons(render(server({ apiHost: "x" }))).map((b) => b.text),
 		["Use the default server"],
+	);
+	// version 2: Cancel, then Switch to the host the app is on
+	assert.deepEqual(
+		buttons(
+			render(serverNamed({ requestedHost: "mock.localhost:5198" })),
+		).map((b) => b.text),
+		["Cancel", "Switch to mock.localhost:5198"],
 	);
 	assert.deepEqual(
 		buttons(render({ kind: "session-changed" })).map((b) => b.text),
@@ -394,8 +541,19 @@ test("every card says exactly what it says, word for word, including the ones th
 		],
 		[{ kind: "redirecting" }, "Sign in first Taking you to sign in..."],
 		[
-			{ kind: "server", apiHost: "api.example.test" },
+			server(),
 			"Different API server This browser is set to use a different API server, api.example.test . Approving a sign-in only works with the default server. Use the default server",
+		],
+		[
+			serverNamed(),
+			"Different API server " +
+				"URnetwork for Windows is set to use the API server api.beta-test.net , and this browser is set to use api.example.test . " +
+				"Approving a sign-in only works on the server the app uses. " +
+				"Switching signs you out of this browser, in every tab, and points it at api.beta-test.net . " +
+				"You sign in there next, so your password, seed phrase or wallet signature goes to api.beta-test.net . " +
+				"This browser stays set to it until you choose Use Default under Change Network API on the sign-in page. " +
+				"Only continue if you set this server in URnetwork yourself. " +
+				"Cancel Switch to api.beta-test.net",
 		],
 		[{ kind: "checking" }, "Checking your account One moment..."],
 		[
@@ -507,23 +665,33 @@ const WIRING = [
 	[/^Sign out and use a different account\.$/, "onSignOut"],
 	[/^Try again$/, "onRetry"],
 	[/^Use the default server$/, "onUseDefaultServer"],
+	[/^Switch to \S+$/, "onSwitchServer"],
 	[/^Reload$/, "onReload"],
 ];
-/** The three actions that decide something take the click itself: the page
+/** The five actions that decide something take the click itself: the page
  * ignores a click that is not a trusted one, so a view that drops the click
  * breaks them. */
-const TAKES_THE_CLICK = new Set(["onCancel", "onApprove", "onOpenApp"]);
+const TAKES_THE_CLICK = new Set([
+	"onCancel",
+	"onApprove",
+	"onOpenApp",
+	"onUseDefaultServer",
+	"onSwitchServer",
+]);
 
 const everyCard = [
 	...everyModel,
 	consent({ armed: false }),
+	consent({ server: "api.beta-test.net" }),
+	server({ armed: false }),
+	serverNamed({ armed: false }),
 	consent({ busy: true }),
 	consent({ problem: "failed" }),
 	consent({ problem: "too-many" }),
 	consent({ problem: "broken", armed: false }),
 ];
 
-test("every button runs the action it is labelled for, on every card, and the three that decide are handed the click", () => {
+test("every button runs the action it is labelled for, on every card, and the five that decide are handed the click", () => {
 	const reached = new Set();
 	for (const model of everyCard) {
 		for (const node of hostNodes(model)) {

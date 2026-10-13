@@ -8,10 +8,12 @@ import nacl from "tweetnacl";
 import bs58 from "bs58";
 
 import {
+	API_MAX_LENGTH,
 	APP_CONTRACTS,
 	APP_PLATFORMS,
 	APP_REQUEST_PATH,
 	APP_REQUEST_VERSION,
+	APP_REQUEST_VERSION_API,
 	CODE_MINUTES,
 	CODE_USES,
 	FRAGMENT_MAX_LENGTH,
@@ -30,6 +32,7 @@ import {
 } from "../src/services/appAuth.ts";
 import { sealCode } from "../src/services/appSeal.ts";
 import {
+	API,
 	CODE,
 	NOW,
 	PK,
@@ -57,15 +60,18 @@ const reasonOf = (text, now = NOW) => {
 
 test("the contract constants are the ones the app and the page agree on", () => {
 	assert.equal(APP_REQUEST_VERSION, "1");
+	assert.equal(APP_REQUEST_VERSION_API, "2");
 	assert.equal(APP_REQUEST_PATH, "/login-app");
 	assert.equal(REQUEST_MAX_AGE_S, 240);
 	assert.equal(REQUEST_MAX_AHEAD_S, 120);
 	assert.equal(CODE_MINUTES, 2);
 	assert.equal(CODE_USES, 1);
 	assert.equal(FRAGMENT_MAX_LENGTH, 400);
+	assert.equal(API_MAX_LENGTH, 200);
 	assert.equal(RETURN_MAX_LENGTH, 2000);
 	assert.equal(MAX_CODE_LENGTH, 1277);
 	assert.deepEqual([...REJECT_REASONS].sort(), [
+		"api",
 		"duplicate",
 		"empty",
 		"pk",
@@ -81,21 +87,29 @@ test("the contract constants are the ones the app and the page agree on", () => 
 	assert.equal(STATE.length, 43);
 });
 
-test("the contract versions the page serves are the one version its parser accepts", () => {
-	assert.deepEqual([...APP_CONTRACTS], [1]);
-	assert.deepEqual(APP_CONTRACTS.map(String), [APP_REQUEST_VERSION]);
+test("the contract versions the page serves are the two versions its parser accepts", () => {
+	assert.deepEqual([...APP_CONTRACTS], [1, 2]);
+	assert.deepEqual(APP_CONTRACTS.map(String), [
+		APP_REQUEST_VERSION,
+		APP_REQUEST_VERSION_API,
+	]);
 	assert.equal(Object.isFrozen(APP_CONTRACTS), true);
 	assert.throws(() => {
-		APP_CONTRACTS.push(2);
+		APP_CONTRACTS.push(3);
 	}, TypeError);
-	// the only version the parser lets through is the one listed
-	for (const v of ["1", "2", "0"]) {
+	// the only versions the parser lets through are the ones listed, each with its own keys:
+	// version 1 as it is, version 2 with `api`
+	for (const v of ["1", "2", "3", "0", "01", "02"]) {
+		const text = v === "2" ? fragment({ v, api: API }) : fragment({ v });
 		assert.equal(
-			parseAppRequest(fragment({ v }), NOW).ok,
+			parseAppRequest(text, NOW).ok,
 			APP_CONTRACTS.map(String).includes(v),
 			`v=${v}`,
 		);
 	}
+	// and version 2 is not version 1 with another number: each lacks what the other has
+	assert.equal(parseAppRequest(fragment({ v: "2" }), NOW).ok, false);
+	assert.equal(parseAppRequest(fragment({ api: API }), NOW).ok, false);
 });
 
 test("a well-formed request parses, with or without the leading #, in any field order", () => {
@@ -173,7 +187,13 @@ test("every key outside the five, in any spelling, refuses the whole request", (
 	);
 	assert.equal(reasonOf(fragment({ pk: null }) + `&PK=${PK}`), "unknown-key");
 	// and an unknown key cannot hide behind a bad version
-	assert.equal(reasonOf(fragment({ v: "2" }) + "&redirect_uri=x"), "version");
+	assert.equal(reasonOf(fragment({ v: "3" }) + "&redirect_uri=x"), "version");
+	// api is a key of version 2 alone: to version 1 it is as unknown as any other
+	assert.equal(reasonOf(`${fragment()}&api=${API}`), "unknown-key");
+	assert.equal(
+		reasonOf(`${fragment({ v: "2", api: API })}&redirect_uri=x`),
+		"unknown-key",
+	);
 });
 
 test("a repeated key refuses the request, whichever copy would have been first", () => {
@@ -205,7 +225,7 @@ test("a missing key refuses the request", () => {
 	assert.equal(reasonOf(`#v=1`), "shape");
 });
 
-test("nothing outside [A-Za-z0-9_=&-] is accepted: no escapes, no plus, no space, no control characters", () => {
+test("nothing outside [A-Za-z0-9_=&.:-] is accepted: no escapes, no plus, no space, no control characters", () => {
 	assert.equal(reasonOf(""), "empty");
 	assert.equal(reasonOf("#"), "empty");
 	assert.equal(reasonOf("##"), "shape");
@@ -254,7 +274,6 @@ test("nothing outside [A-Za-z0-9_=&-] is accepted: no escapes, no plus, no space
 		["a second #", fragment() + "#x"],
 		["a # first", "#" + fragment()],
 		["a ? inside", fragment({ platform: "windows?x" })],
-		["a dot", fragment({ platform: "windows." })],
 		["a slash", fragment({ platform: "windows/x" })],
 		["an emoji", fragment() + "\u{1F600}"],
 		["a double ampersand", fragment() + "&&"],
@@ -270,6 +289,23 @@ test("nothing outside [A-Za-z0-9_=&-] is accepted: no escapes, no plus, no space
 	for (const [what, text] of bad) {
 		assert.equal(reasonOf(text), "shape", what);
 	}
+	// the dot and the colon joined the alphabet for api: a version 1 value that holds one is
+	// no longer a shape problem, and is refused by the pattern of its own key all the same
+	assert.equal(
+		reasonOf(fragment({ platform: "windows." })),
+		"platform",
+		"a dot",
+	);
+	assert.equal(
+		reasonOf(fragment({ platform: "windows:" })),
+		"platform",
+		"a colon",
+	);
+	assert.equal(
+		reasonOf(fragment({ v: "1.0" })),
+		"version",
+		"a dot in the version",
+	);
 });
 
 test("the fragment is refused over 400 characters before anything is parsed", () => {
@@ -298,22 +334,37 @@ test("the fragment is refused over 400 characters before anything is parsed", ()
 	assert.equal(reasonOf(fragment({ platform: "w".repeat(3000) })), "shape");
 });
 
-test("anything but v=1 is a version the page does not speak", () => {
-	for (const v of ["2", "0", "01", "10", "A", "-1", "11"]) {
+test("anything but v=1 and v=2 is a version the page does not speak", () => {
+	for (const v of [
+		"3",
+		"0",
+		"01",
+		"10",
+		"A",
+		"-1",
+		"11",
+		"22",
+		"2.0",
+		"1.0",
+	]) {
 		assert.equal(reasonOf(fragment({ v })), "version", `v=${v}`);
+		assert.equal(
+			reasonOf(fragment({ v, api: API })),
+			"version",
+			`v=${v}, with api`,
+		);
 	}
-	assert.equal(
-		reasonOf(fragment({ v: "1.0" })),
-		"shape",
-		"a dot is outside the alphabet",
-	);
 	assert.equal(reasonOf(fragment({ v: "" })), "shape");
 	assert.equal(
-		reasonOf("#v=2&platform=windows"),
+		reasonOf("#v=3&platform=windows"),
 		"version",
 		"a later version may carry other fields",
 	);
-	assert.equal(reasonOf("#v=2"), "version");
+	assert.equal(reasonOf("#v=3"), "version");
+	// version 2 is spoken, with its sixth key: without it the request is a damaged one, not a later one
+	assert.equal(reasonOf(fragment({ v: "2" })), "shape");
+	assert.equal(reasonOf("#v=2&platform=windows"), "shape");
+	assert.equal(reasonOf("#v=2"), "shape");
 });
 
 test("the platform must be an own key of the closed table", () => {
@@ -351,7 +402,8 @@ test("the state is exactly 43 url-safe base64 characters", () => {
 	assert.equal(reasonOf(fragment({ state: STATE + "A" })), "state");
 	assert.equal(reasonOf(fragment({ state: "S".repeat(42) })), "state");
 	assert.equal(reasonOf(fragment({ state: "S".repeat(44) })), "state");
-	assert.equal(reasonOf(fragment({ state: STATE.slice(1) + "." })), "shape");
+	assert.equal(reasonOf(fragment({ state: STATE.slice(1) + "." })), "state");
+	assert.equal(reasonOf(fragment({ state: STATE.slice(1) + ":" })), "state");
 	assert.equal(reasonOf(fragment({ state: STATE.slice(1) + "+" })), "shape");
 	assert.equal(reasonOf(fragment({ state: STATE.slice(1) + "/" })), "shape");
 	for (const state of [

@@ -39,6 +39,8 @@ const NEW_FILES = [
 	"src/services/appApprovalView.ts",
 	"src/components/AppApprovalView.tsx",
 	"src/pages/LoginApp.tsx",
+	// keeps a session with the server that issued it (and the auth context that uses it)
+	"src/services/sessionBinding.ts",
 ];
 const PAGE_FILES = [
 	"src/pages/LoginApp.tsx",
@@ -148,8 +150,8 @@ test("the page is guarded: top window, no opener, trusted clicks only", () => {
 	assert.match(page, /evaluateAppGate\(/);
 	assert.equal(
 		page.split("event.isTrusted").length - 1,
-		3,
-		"Approve, Cancel and Open URnetwork each require a trusted click",
+		5,
+		"Approve, Cancel, Open URnetwork, Use the default server and Switch each require a trusted click",
 	);
 	assert.doesNotMatch(
 		page,
@@ -161,7 +163,228 @@ test("the page is guarded: top window, no opener, trusted clicks only", () => {
 	);
 	assert.match(page, /const APPROVE_DELAY_MS = 800;/);
 	assert.match(page, /const OPEN_BUTTON_MS = 60_000;/);
-	assert.match(page, /getApiBase\(\) === DEFAULT_API_BASE/);
+	// the server the request is for is judged in one place, from the live server and the
+	// build's default (the page's own origin stands in for its address)
+	assert.match(
+		page,
+		/const serverFits = \(request\) => isServerForRequest\(request, getApiBase\(\), DEFAULT_API_BASE, window\.location\.origin\);/,
+	);
+	assert.doesNotMatch(page, /getApiBase\(\) === DEFAULT_API_BASE/);
+});
+
+/** the emitted code with every run of white space made one space, for patterns that span lines */
+const flat = (text) => text.replace(/\s+/g, " ");
+
+test("the server the request is for is judged before the sign-in and before any call, and the controller asks the same question at the click", () => {
+	const page = flat(code("src/pages/LoginApp.tsx"));
+	// one answer, used by the render, the two effects that may send the session or the tab somewhere,
+	// and the controller's port
+	assert.ok(
+		page.includes(
+			"const serverMatches = request !== null && serverFits(request);",
+		),
+	);
+	assert.ok(page.includes("serverMatches: serverFits,"));
+	assert.ok(
+		page.includes(
+			'const needsSignIn = gate === "ok" && request !== null && serverMatches && !isAuthenticated;',
+		),
+	);
+	assert.ok(
+		page.includes(
+			'const checking = gate === "ok" && request !== null && isAuthenticated && serverMatches && done === null;',
+		),
+	);
+	// the account check is made in one place, and it is the one under `checking`
+	assert.equal(page.split("fetchNetworkUser(token, signal)").length - 1, 1);
+	assert.ok(
+		page.includes(
+			'if (!checking || !token) return; if (readStoredToken() !== token) { setToken(null); return; } let current = true; const cancel = new AbortController(); setIdentity({ kind: "loading" }); void withTimeout((signal) => fetchNetworkUser(token, signal), cancel.signal)',
+		),
+	);
+	// the page never sends a session its stored copy no longer backs: the check comes first, and a
+	// run that is torn down calls its request back
+	assert.ok(
+		page.indexOf("readStoredToken() !== token") <
+			page.indexOf("fetchNetworkUser(token, signal)"),
+		"the stored session is asked before the request goes out",
+	);
+	assert.ok(
+		page.includes(
+			'current = false; cancel.abort(new Error("called back: this run of the account check was replaced"));',
+		),
+		"and a run that is torn down calls its request back, saying why",
+	);
+	assert.ok(
+		page.includes("}, [checking, token, retry, endSession, setToken]);"),
+		"the check runs again whenever the session, the server or the retry changes",
+	);
+	// the way to sign-in is taken in one place, and it is the one under `needsSignIn`
+	assert.equal(page.split('window.location.replace("/")').length - 1, 1);
+	assert.ok(
+		page.includes(
+			'if (needsSignIn) { markSignInPending(appRequestStorage(), Date.now()); window.location.replace("/"); }',
+		),
+	);
+	// the view model gets the same answer, and takes the server before the sign-in
+	assert.ok(page.includes("serverMatches, apiHost: hostOf(getApiBase()),"));
+	const view = code("src/services/appApprovalView.ts");
+	assert.ok(
+		view.indexOf("if (!i.serverMatches)") <
+			view.indexOf("if (!i.authenticated)"),
+		"the server before the sign-in",
+	);
+	assert.ok(
+		view.indexOf("if (!i.authenticated)") <
+			view.indexOf("switch (i.identity.kind)"),
+		"and the sign-in before the account check",
+	);
+	// the controller's check sits between reading the session and the mint, with nothing in between
+	// that yields: no code is asked for on a server the check did not just see
+	const approval = code("src/services/appApproval.ts");
+	const check = approval.indexOf("if (!ports.serverMatches(request))");
+	assert.ok(check > 0);
+	assert.ok(approval.indexOf("ports.readToken()") < check);
+	const mint = approval.indexOf("const result = await ports.createAuthCode(");
+	assert.ok(check < mint);
+	assert.doesNotMatch(
+		approval.slice(check, mint),
+		/\bawait\b/,
+		"no yield between the check and the mint (the call itself runs before its await)",
+	);
+	assert.doesNotMatch(approval, /usesDefaultServer/);
+});
+
+test("Switch: the session goes before the server, the server is written in one place, and the app's host is never made into an address by the page", () => {
+	const page = flat(code("src/pages/LoginApp.tsx"));
+	const handler = page.slice(
+		page.indexOf("const handleSwitchServer = "),
+		page.indexOf("const model = deriveApprovalModel("),
+	);
+	assert.ok(handler.length > 200, "found the handler");
+	// the order: guards, the choice, the stored session out, the page's copy out, the server written
+	const steps = [
+		"if (!event.isTrusted) return;",
+		"request.api === undefined",
+		"if (!serverArmed || !hasAttention()) return;",
+		"if (!isFresh(request, Date.now())) {",
+		"clearAppRequest(appRequestStorage());",
+		'setDone("expired");',
+		"serverChoiceFor(request.api, DEFAULT_API_BASE, window.location.origin)",
+		"if (!forgetStoredSession()) return;",
+		"setToken(null);",
+		"localStorage.removeItem(CUSTOM_API_BASE_KEY)",
+		"localStorage.setItem(CUSTOM_API_BASE_KEY, choice.base)",
+		"setServerChanges((n) => n + 1);",
+	];
+	let at = -1;
+	for (const step of steps) {
+		const found = handler.indexOf(step, at + 1);
+		assert.ok(found > at, `${step} comes in order`);
+		at = found;
+	}
+	assert.doesNotMatch(handler, /logout\(/, "Switch is not logout");
+	// "Use the default server" leaves a server as well: its session goes first, by the same function,
+	// and the override only after the page's copy
+	const useDefault = page.slice(
+		page.indexOf("const handleUseDefaultServer = "),
+		page.indexOf("const handleSwitchServer = "),
+	);
+	assert.ok(
+		useDefault.includes(
+			"if (settling || !forgetStoredSession()) return; setToken(null); try { localStorage.removeItem(CUSTOM_API_BASE_KEY); }",
+		),
+	);
+	assert.equal(
+		page.split("forgetStoredSession()").length - 1,
+		3,
+		"defined once, asked by the two ways off a server",
+	);
+	// the session is read back after it is removed, and a session that is still there stops Switch
+	assert.ok(
+		page.includes(
+			'function forgetStoredSession() { try { localStorage.removeItem("byToken"); return localStorage.getItem("byToken") === null; } catch { return false; } }',
+		),
+	);
+	// the page writes storage in exactly one place, and it is the server override in Switch
+	assert.deepEqual(
+		[...page.matchAll(/\.setItem\(([^;]*)\);/g)].map((m) => m[1]),
+		["CUSTOM_API_BASE_KEY, choice.base"],
+	);
+	// the host a request names reaches the page's code in two places, and neither makes an address
+	assert.deepEqual(
+		[...page.matchAll(/request\.api\b[^;]*/g)].map((m) => m[0]),
+		[
+			"request.api === undefined || settling) return",
+			"request.api, DEFAULT_API_BASE, window.location.origin)",
+		],
+	);
+	assert.doesNotMatch(page, /https?:\/\//, "no address in the page");
+	// the one place an address is made of it is a pure function, behind the parser's own grammar
+	const contract = flat(code("src/services/appAuth.ts"));
+	assert.deepEqual(
+		[...contract.matchAll(/`https:\/\/[^`]*`/g)].map((m) => m[0]),
+		["`https://${api}`"],
+	);
+	assert.ok(
+		contract.includes(
+			"export function apiBaseOfHost(api) { return isValidApiHost(api) ? `https://${api}` : null; }",
+		),
+	);
+	// one grammar: the parser, the comparison and the base all ask isValidApiHost
+	assert.equal(
+		contract.split("isValidApiHost(").length - 1,
+		4,
+		"the definition, the parser, the comparison and the base",
+	);
+	assert.ok(
+		contract.includes(
+			'if (!isValidApiHost(apiText)) return refuse("api");',
+		),
+	);
+	assert.ok(
+		contract.includes(
+			'if (typeof base !== "string" || !isValidApiHost(api)) return false;',
+		),
+	);
+});
+
+test("the card names the app's host as text and in no attribute, and the page does not render it", () => {
+	const relative = "src/components/AppApprovalView.tsx";
+	const file = ts.createSourceFile(
+		relative,
+		source(relative),
+		ts.ScriptTarget.ESNext,
+		true,
+		ts.ScriptKind.TSX,
+	);
+	// every use of the host, by what it sits in: the test that picks the card, and then a child of an
+	// element (a text node) four times: twice in the paragraph about switching, once in the one about
+	// what is switched to, the last of them in the label of the Switch button
+	const uses = [];
+	const visit = (node) => {
+		if (
+			ts.isPropertyAccessExpression(node) &&
+			node.getText(file) === "model.requestedHost"
+		) {
+			let place = node.parent;
+			if (ts.isTemplateSpan(place)) place = place.parent.parent;
+			uses.push([
+				ts.SyntaxKind[place.kind],
+				ts.SyntaxKind[place.parent.kind],
+			]);
+		}
+		ts.forEachChild(node, visit);
+	};
+	visit(file);
+	assert.deepEqual(uses, [
+		["BinaryExpression", "ConditionalExpression"],
+		["JsxExpression", "JsxElement"],
+		["JsxExpression", "JsxElement"],
+		["JsxExpression", "JsxElement"],
+		["JsxExpression", "JsxElement"],
+	]);
+	assert.doesNotMatch(code("src/pages/LoginApp.tsx"), /requestedHost/);
 });
 
 test("Approve counts only while the card is in front of the person: visible tab, focused window, restarted on every change", () => {
@@ -184,9 +407,34 @@ test("Approve counts only while the card is in front of the person: visible tab,
 			`and stops listening for ${type}`,
 		);
 	}
-	// the timer depends on the card, on the attention and on the account, and a click needs the attention too
-	assert.match(page, /\[consentShown, attention, accountId\]/);
-	assert.match(page, /!armed \|\| busy \|\| settling \|\| !hasAttention\(\)/);
+	// the timer depends on the card (the account is part of the consent card's name) and on the
+	// attention, and a click needs the attention too. Armed is the card it was earned on: a card that
+	// takes the place of another is inert in its first render, and each button answers on its own card
+	assert.match(page, /\[cardKey, attention\]/);
+	assert.match(
+		flat(page),
+		/const cardKey = serverCardShown \? "server" : consentShown \? `consent:\$\{accountId\}` : null;/,
+	);
+	assert.match(
+		page,
+		/const armed = cardKey !== null && armedFor === cardKey;/,
+	);
+	assert.match(page, /const consentArmed = armed && !serverCardShown;/);
+	assert.match(page, /const serverArmed = armed && serverCardShown;/);
+	assert.match(
+		page,
+		/!consentArmed \|\| busy \|\| settling \|\| !hasAttention\(\)/,
+		"Approve",
+	);
+	assert.equal(
+		page.split("!serverArmed || !hasAttention()").length - 1,
+		2,
+		"Use the default server and Switch: armed, and the window in front of the person",
+	);
+	assert.match(
+		flat(page),
+		/serverCardShown = gate === "ok" && request !== null && !serverMatches && done === null;/,
+	);
 	assert.match(
 		page,
 		/const accountId = identity\.kind === "ready" \? identity\.networkId : null;/,
@@ -320,20 +568,27 @@ test("nothing logs the state, the key, the code or the answer; the one console l
 	);
 });
 
-test("web storage: the page writes none, the stash writes only the validated request", () => {
+test("web storage: the page writes the api server and nothing else, the stash writes only the validated request", () => {
 	const page = code("src/pages/LoginApp.tsx");
 	assert.doesNotMatch(
 		page,
-		/setItem|sessionStorage|document\.cookie|indexedDB|caches\./,
+		/sessionStorage|document\.cookie|indexedDB|caches\./,
 	);
+	// the one write is Switch's server (the next test pins where); the session is only read and removed
 	const used = [...page.matchAll(/localStorage\.(\w+)\(([^)]*)\)/g)]
 		.map((m) => `${m[1]}(${m[2]})`)
 		.sort();
 	assert.deepEqual(used, [
 		'getItem("byToken")',
 		'removeItem("byToken")',
+		'removeItem("byToken")',
 		"removeItem(CUSTOM_API_BASE_KEY)",
+		"removeItem(CUSTOM_API_BASE_KEY)",
+		"setItem(CUSTOM_API_BASE_KEY, choice.base)",
 	]);
+	// the page reads the stored session through the helper that knows which server issued it, and
+	// reads it in one place (the one getItem above is the read-back after Switch removed it)
+	assert.equal(page.split("readSession(localStorage").length - 1, 1);
 	// the stored session is removed only when it is the one the api turned away: the one read
 	// of it is the page's own, guarded read, and the removal sits behind it
 	assert.match(
@@ -582,12 +837,17 @@ test("the nginx template is as it was: this page has no block of its own", () =>
 
 test("the descriptor lists the contract versions and the platforms of the table, and nothing else", () => {
 	const text = source("public/approval-contract.json");
-	assert.equal(text, '{"contracts":[1],"platforms":["windows"]}\n');
+	assert.equal(text, '{"contracts":[1,2],"platforms":["windows"]}\n');
 	const descriptor = JSON.parse(text);
 	assert.deepEqual(Object.keys(descriptor), ["contracts", "platforms"]);
 	assert.deepEqual(descriptor.contracts, [...APP_CONTRACTS]);
 	assert.deepEqual(descriptor.platforms, Object.keys(APP_PLATFORMS));
-	assert.deepEqual(descriptor, { contracts: [1], platforms: ["windows"] });
+	assert.deepEqual(descriptor, { contracts: [1, 2], platforms: ["windows"] });
+	// the versions it lists are the versions the parser reads, and no other
+	assert.match(
+		code("src/services/appAuth.ts"),
+		/export const APP_CONTRACTS = Object\.freeze\(\[1, 2\]\);/,
+	);
 	// the retired readiness file is gone, and its name is nowhere (built from pieces, so this file does not spell it)
 	const retired = ["app", "approval.json"].join("-");
 	assert.equal(
@@ -684,6 +944,7 @@ test("the files this change adds or edits mention no internal repository", () =>
 		"src/main.tsx",
 		"src/components/Layout.tsx",
 		"src/services/api.ts",
+		"src/context/AuthContext.tsx",
 		"public/approval-contract.json",
 		"package.json",
 	];
@@ -725,8 +986,22 @@ test("README documents the contract and says the extension is a separate, frozen
 		"SHA-256",
 		"XJ4BNP",
 		"public/approval-contract.json",
-		'{"contracts":[1],"platforms":["windows"]}',
+		'{"contracts":[1,2],"platforms":["windows"]}',
 		"tests/fixtures/app-auth-vector.json",
+		// version 2: the request that names its network, its grammar, its card and its timeouts
+		"### A request that names its network (version 2)",
+		"#v=2&platform=windows&state=<S>&pk=<PK>&ts=<T>&api=<A>",
+		"`isValidApiHost`",
+		"`serverMatchesRequest(base, api, pageHref)`",
+		"337 characters",
+		'"Different API server"',
+		'"Switch to {host}"',
+		"Only continue if you set this server in URnetwork yourself.",
+		"`setToken(null)`",
+		"`API_TIMEOUT_MS`",
+		"`SEAL_TIMEOUT_MS`",
+		"tests/fixtures/app-request-vector-v2.json",
+		"v=2&platform=windows&state=SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS&pk=WpSggvhoqoVW4XJvfjsB52dvVunYSQWrz6XiuMQVsCf&ts=1790000000&api=api.beta-test.net",
 		"npm test",
 		"Navigation Timing",
 		"no approval control is interactive",
@@ -745,9 +1020,41 @@ test("README documents the contract and says the extension is a separate, frozen
 		"A public key the page cannot seal to",
 		"only if it is still the session the API turned away",
 		"StrictMode",
+		// the timings, as a table row each
+		"| The two API calls | 30 s |",
+		"| The sealing chunk at the click | 15 s |",
+		"| Approve inert (and Switch, Use the default server) | about 800 ms once the tab is showing and the window has the focus |",
+		// a session belongs to the server that issued it
+		"### A session belongs to the server that issued it",
+		"`byTokenServer`",
+		"`src/services/sessionBinding.ts`",
+		"`auth-session-binding.test.mjs`",
 	]) {
 		assert.ok(readme.includes(fact), `README mentions ${fact}`);
 	}
+	// facts that the README wraps across lines
+	const flatReadme = readme.replace(/\s+/g, " ");
+	for (const fact of [
+		"Switch removes the stored session first",
+		"are given up after 30 s through an abort signal (`API_TIMEOUT_MS`)",
+		"The sealing chunk keeps its own, shorter 15 s (`SEAL_TIMEOUT_MS`",
+		"A request that went stale while the card was shown is told so",
+		"needs a trusted click, as Approve and Cancel do, on a card that has been in front of the person for about 800 ms",
+		"The API server changed while you were signing in. Sign in again.",
+		"The override stays set, for the whole browser, until somebody chooses Use Default",
+		"the last label is neither all digits nor `0x` and hex digits",
+		"calls its request back at once",
+		"sends its copy of the session to a server it was not issued by",
+	]) {
+		assert.ok(flatReadme.includes(fact), `README says: ${fact}`);
+	}
+	// the claim that cannot be kept is not made: a session is never "never sent" by a page alone,
+	// and whether a bad xn-- label is a name is the browser's call
+	assert.doesNotMatch(flatReadme, /bad `xn--` label is no name\)/);
+	assert.doesNotMatch(
+		flatReadme,
+		/a last label such as `0x10` reads as a number, a bad/,
+	);
 	// every test file the README names exists, and every app test file is named
 	const named = new Set(readme.match(/app-[a-z-]+\.test\.mjs/g));
 	for (const name of named) {
@@ -858,9 +1165,10 @@ test("no operating-system check remains: not in the table, not in the page, not 
 	);
 });
 
-test("the two api calls the page makes are limited to 15 seconds, each with a signal of its own, and so is the sealing chunk", () => {
+test("the two api calls the page makes are limited to 30 seconds, each with a signal of its own, and the sealing chunk to 15", () => {
 	const page = code("src/pages/LoginApp.tsx");
-	assert.match(page, /const API_TIMEOUT_MS = 15_000;/);
+	assert.match(page, /const API_TIMEOUT_MS = 30_000;/);
+	assert.match(page, /const SEAL_TIMEOUT_MS = 15_000;/);
 	assert.match(page, /fetchNetworkUser\(token, signal\)/);
 	assert.match(page, /createAuthCode\(token, minutes, uses, signal\)/);
 	assert.match(page, /new AbortController\(\)/);
@@ -869,7 +1177,7 @@ test("the two api calls the page makes are limited to 15 seconds, each with a si
 		/window\.setTimeout\(\(\) => abort\.abort\(\), API_TIMEOUT_MS\)/,
 	);
 	assert.match(page, /window\.clearTimeout\(timer\)/);
-	// an import cannot be aborted, so the chunk's wait is raced against the same limit: the
+	// an import cannot be aborted, so the chunk's wait is raced against a limit of its own: the
 	// load Approve waits on goes through the deadline, and the prefetch (which nothing waits on) does not
 	assert.match(
 		page,
@@ -878,8 +1186,17 @@ test("the two api calls the page makes are limited to 15 seconds, each with a si
 	assert.match(page, /void importSeal\(\)\.catch\(\(\) => undefined\)/);
 	assert.equal(
 		page.split("API_TIMEOUT_MS").length - 1,
-		3,
-		"the constant, the abort timer, and the deadline's timer",
+		2,
+		"the constant and the abort timer: the api calls only",
+	);
+	assert.equal(
+		page.split("SEAL_TIMEOUT_MS").length - 1,
+		2,
+		"the constant and the deadline's timer: the download only",
+	);
+	assert.match(
+		page,
+		/window\.setTimeout\(\(\) => reject\(new Error\("the download took too long"\)\), SEAL_TIMEOUT_MS\)/,
 	);
 	// the extension's calls are not given one
 	const extension = source("src/pages/LoginExtension.tsx");

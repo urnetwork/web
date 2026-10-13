@@ -24,6 +24,9 @@ const CHECKED = [
 	"src/components/AppApprovalView.tsx",
 	"src/pages/LoginApp.tsx",
 	"src/components/Layout.tsx",
+	// the auth context keeps a session with the server that issued it
+	"src/services/sessionBinding.ts",
+	"src/context/AuthContext.tsx",
 ];
 
 /** TypeScript spells paths with forward slashes, whatever the platform */

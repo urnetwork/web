@@ -20,8 +20,10 @@
 //   - the request is checked again for age;
 //   - the stored session is read again and must belong to the network the card
 //     displayed (the card may be minutes old; another tab may have signed in
-//     to something else), and the api server must still be the default one
-//     (the bearer token is never sent to a server the person typed in);
+//     to something else), and the api server must still be the one this very
+//     request is for: the default one for a version 1 request, the one it names
+//     for a version 2 request (the bearer token and the code are never sent to
+//     any other server);
 //   - one code of 2 minutes and 1 use is minted, sealed to the app's key at
 //     once and never stored, logged or returned in the clear.
 import {
@@ -79,8 +81,11 @@ export interface ApprovalPorts {
 	/** the stored session, read again at the click (not the copy the card was drawn from) */
 	readToken(): string | null;
 	networkIdOf(token: string): string | null;
-	/** false when the person has pointed the dashboard at another api server */
-	usesDefaultServer(): boolean;
+	/** false when the api server this browser is set to is not the one `request`
+	 * is for (the person has pointed the dashboard elsewhere, or another tab has).
+	 * Read again at the click, and nothing yields between this answer and the
+	 * mint's url, so no code is minted anywhere else. */
+	serverMatches(request: AppRequest): boolean;
 	createAuthCode(
 		token: string,
 		minutes: number,
@@ -165,7 +170,7 @@ export function createApprovalController(
 				) {
 					return { kind: "identity-changed" };
 				}
-				if (!ports.usesDefaultServer())
+				if (!ports.serverMatches(request))
 					return { kind: "custom-server" };
 
 				// from here a code is being asked for: no Cancel can call it back

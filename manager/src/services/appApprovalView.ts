@@ -31,7 +31,9 @@ export interface ViewInputs {
 	gate: AppGate;
 	status: AppRequestStatus;
 	authenticated: boolean;
-	defaultServer: boolean;
+	/** the api server this browser is set to is the one the request is for: the
+	 * default server for a version 1 request, the one it names for version 2 */
+	serverMatches: boolean;
 	/** the host of the api server the browser is set to, for the message */
 	apiHost: string;
 	done: DoneState;
@@ -50,7 +52,18 @@ export type ApprovalModel =
 	| { kind: "blocked"; reason: "framed" | "opener" }
 	| { kind: "request"; problem: "invalid" | "stale" | "unsupported" }
 	| { kind: "redirecting" }
-	| { kind: "server"; apiHost: string }
+	// the browser is set to a server the request is not for. `requestedHost` is
+	// the host a version 2 request names (the card offers Switch to it) and null
+	// for a version 1 request (the card offers the default server). `armed`: the
+	// card has been in front of the person for a moment, and only then do Switch
+	// and Use the default server answer (Cancel always does)
+	| {
+			kind: "server";
+			label: string;
+			apiHost: string;
+			requestedHost: string | null;
+			armed: boolean;
+	  }
 	| { kind: "checking" }
 	| {
 			kind: "identity";
@@ -60,6 +73,9 @@ export type ApprovalModel =
 			kind: "consent";
 			label: string;
 			networkName: string;
+			// the host of the api server the code would be minted on, for a version 2
+			// request (the default server is not named); null for version 1
+			server: string | null;
 			armed: boolean;
 			busy: boolean;
 			minting: boolean;
@@ -90,8 +106,19 @@ export function deriveApprovalModel(i: ViewInputs): ApprovalModel {
 	const row = platformRow(i.status.request.platform);
 	if (row === null) return { kind: "request", problem: "invalid" };
 
+	// The server comes before the sign-in and before the account check: a browser
+	// that is set to another server is not sent to sign in there, and no call is
+	// made with its session.
+	if (!i.serverMatches) {
+		return {
+			kind: "server",
+			label: row.label,
+			apiHost: i.apiHost,
+			requestedHost: i.status.request.api ?? null,
+			armed: i.armed,
+		};
+	}
 	if (!i.authenticated) return { kind: "redirecting" };
-	if (!i.defaultServer) return { kind: "server", apiHost: i.apiHost };
 
 	switch (i.identity.kind) {
 		case "idle":
@@ -111,6 +138,9 @@ export function deriveApprovalModel(i: ViewInputs): ApprovalModel {
 		kind: "consent",
 		label: row.label,
 		networkName: i.identity.networkName,
+		// the server is the one the request names (the card is only here because it is),
+		// and the person is told which, since the network's name is the server's own word
+		server: i.status.request.api === undefined ? null : i.apiHost,
 		// after `broken` another Approve could only be refused: the page says to reload
 		armed: i.armed && i.problem !== "broken",
 		busy: i.busy,

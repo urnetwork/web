@@ -5,13 +5,13 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import { deriveApprovalModel } from "../src/services/appApprovalView.ts";
-import { mulberry32, request } from "./helpers/app-request.mjs";
+import { API, mulberry32, request } from "./helpers/app-request.mjs";
 
 const base = (over = {}) => ({
 	gate: "ok",
 	status: { kind: "ready", request: request() },
 	authenticated: true,
-	defaultServer: true,
+	serverMatches: true,
 	apiHost: "api.example.test",
 	done: null,
 	identity: {
@@ -32,6 +32,7 @@ test("with every check passed the card is the consent card, named from the table
 		kind: "consent",
 		label: "URnetwork for Windows",
 		networkName: "alpha",
+		server: null,
 		armed: true,
 		busy: false,
 		minting: false,
@@ -109,20 +110,165 @@ test("a request that is missing, invalid, stale or from another version offers n
 	}
 });
 
-test("signed out: sent to sign in; a different api server: refused", () => {
+test("signed out on the right server: sent to sign in; on another server: the server card, version 1 as it was", () => {
 	assert.deepEqual(deriveApprovalModel(base({ authenticated: false })), {
 		kind: "redirecting",
 	});
-	assert.deepEqual(deriveApprovalModel(base({ defaultServer: false })), {
+	assert.deepEqual(deriveApprovalModel(base({ serverMatches: false })), {
 		kind: "server",
+		label: "URnetwork for Windows",
 		apiHost: "api.example.test",
+		requestedHost: null,
+		armed: true,
 	});
+});
+
+test("the server card is inert exactly when the page says so: its buttons wait for the same 800 ms as Approve", () => {
+	const named = { kind: "ready", request: request({ api: API }) };
+	for (const status of [{ kind: "ready", request: request() }, named]) {
+		for (const armed of [true, false]) {
+			const model = deriveApprovalModel(
+				base({ status, serverMatches: false, armed }),
+			);
+			assert.equal(model.kind, "server");
+			assert.equal(model.armed, armed);
+		}
+	}
+});
+
+test("the server is judged first: before the sign-in and before the account check, whatever they say", () => {
+	const identities = [
+		{ kind: "idle" },
+		{ kind: "loading" },
+		{ kind: "signed-out" },
+		{ kind: "failed" },
+		{ kind: "unreadable" },
+		{ kind: "no-sign-in-method" },
+		{ kind: "ready", networkId: "n", networkName: "a" },
+	];
+	for (const status of [
+		{ kind: "ready", request: request() },
+		{ kind: "ready", request: request({ api: API }) },
+	]) {
+		for (const authenticated of [true, false]) {
+			for (const identity of identities) {
+				const model = deriveApprovalModel(
+					base({
+						status,
+						serverMatches: false,
+						authenticated,
+						identity,
+					}),
+				);
+				assert.equal(
+					model.kind,
+					"server",
+					`${authenticated ? "signed in" : "signed out"}, ${identity.kind}`,
+				);
+			}
+		}
+	}
+	// on the right server the sign-in and the account check go on as before
+	assert.equal(
+		deriveApprovalModel(base({ authenticated: false })).kind,
+		"redirecting",
+	);
+	assert.equal(
+		deriveApprovalModel(base({ identity: { kind: "loading" } })).kind,
+		"checking",
+	);
+});
+
+test("a version 2 request names its host on the server card; a version 1 request names none", () => {
+	const named = {
+		kind: "ready",
+		request: request({ api: "mock.localhost:5198" }),
+	};
+	assert.deepEqual(
+		deriveApprovalModel(base({ status: named, serverMatches: false })),
+		{
+			kind: "server",
+			label: "URnetwork for Windows",
+			apiHost: "api.example.test",
+			requestedHost: "mock.localhost:5198",
+			armed: true,
+		},
+	);
+	// signed out makes no difference, and nor does the account check
 	assert.equal(
 		deriveApprovalModel(
-			base({ defaultServer: false, authenticated: false }),
-		).kind,
-		"redirecting",
-		"sign in first, then the server is judged",
+			base({ status: named, serverMatches: false, authenticated: false }),
+		).requestedHost,
+		"mock.localhost:5198",
+	);
+	assert.equal(
+		deriveApprovalModel(base({ serverMatches: false })).requestedHost,
+		null,
+	);
+	// on the right server a version 2 request gets the consent card, which names the api server the
+	// code would be minted on (the browser's host: the request's host is the card's text only on the
+	// server card), and a version 1 request, which is for the default server, names none
+	const consent = deriveApprovalModel(base({ status: named }));
+	assert.equal(consent.kind, "consent");
+	assert.equal(consent.server, "api.example.test");
+	assert.equal(JSON.stringify(consent).includes("localhost"), false);
+	assert.deepEqual(
+		{ ...consent, server: null },
+		deriveApprovalModel(base()),
+		"and it is otherwise the very card a version 1 request gets",
+	);
+	assert.equal(deriveApprovalModel(base()).server, null);
+});
+
+test("what comes before the server still comes first: the end states, the gates, a request that is not valid", () => {
+	const named = { kind: "ready", request: request({ api: API }) };
+	const mismatch = { serverMatches: false, status: named };
+	assert.deepEqual(
+		deriveApprovalModel(base({ ...mismatch, done: "cancelled" })),
+		{
+			kind: "cancelled",
+		},
+	);
+	assert.deepEqual(
+		deriveApprovalModel(
+			base({ ...mismatch, done: "approved", canOpen: true }),
+		),
+		{
+			kind: "approved",
+			canOpen: true,
+		},
+	);
+	assert.equal(
+		deriveApprovalModel(base({ ...mismatch, done: "expired" })).kind,
+		"expired",
+	);
+	assert.equal(
+		deriveApprovalModel(base({ ...mismatch, gate: "framed" })).kind,
+		"blocked",
+	);
+	assert.equal(
+		deriveApprovalModel(base({ ...mismatch, gate: "opener" })).kind,
+		"blocked",
+	);
+	for (const kind of ["none", "invalid", "stale", "unsupported"]) {
+		assert.equal(
+			deriveApprovalModel(base({ ...mismatch, status: { kind } })).kind,
+			"request",
+			kind,
+		);
+	}
+	// a platform the table lacks is an invalid request, not a server problem
+	assert.deepEqual(
+		deriveApprovalModel(
+			base({
+				serverMatches: false,
+				status: {
+					kind: "ready",
+					request: request({ platform: "linux", api: API }),
+				},
+			}),
+		),
+		{ kind: "request", problem: "invalid" },
 	);
 });
 
@@ -209,9 +355,11 @@ test("property: the consent card appears only when every check has passed", () =
 				{ kind: "stale" },
 				{ kind: "unsupported" },
 				{ kind: "ready", request: request({ platform: "linux" }) },
+				{ kind: "ready", request: request({ api: API }) },
+				{ kind: "ready", request: request({ api: API }) },
 			]),
 			authenticated: pick([true, true, true, false]),
-			defaultServer: pick([true, true, true, false]),
+			serverMatches: pick([true, true, true, false]),
 			apiHost: "h",
 			done: pick([
 				null,
@@ -248,7 +396,7 @@ test("property: the consent card appears only when every check has passed", () =
 		assert.equal(inputs.status.kind, "ready");
 		assert.equal(inputs.status.request.platform, "windows");
 		assert.equal(inputs.authenticated, true);
-		assert.equal(inputs.defaultServer, true);
+		assert.equal(inputs.serverMatches, true);
 		assert.equal(inputs.done, null);
 		assert.equal(inputs.identity.kind, "ready");
 		assert.equal(

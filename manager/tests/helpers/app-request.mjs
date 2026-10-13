@@ -25,7 +25,12 @@ export const STATE = Buffer.from(
 /** a code like the server's: 683 url-safe base64 characters and a padding '=' */
 export const CODE = "Q".repeat(683) + "=";
 
-/** the fragment of a request; `over` replaces fields, a null field is left out */
+/** the api host of a version 2 request in most tests: valid, no port */
+export const API = "api.beta-test.net";
+
+/** the fragment of a request; `over` replaces fields, a null field is left out.
+ * A version 2 request is fragment({ v: "2", api: API }): `api` comes last, where
+ * the app writes it. */
 export function fragment(over = {}, { hash = true } = {}) {
 	const fields = {
 		v: "1",
@@ -63,6 +68,16 @@ export function readFixture() {
 	return JSON.parse(
 		fs.readFileSync(
 			new URL("../fixtures/app-auth-vector.json", import.meta.url),
+			"utf8",
+		),
+	);
+}
+
+/** the shared version 2 request vector (tests/fixtures/app-request-vector-v2.json) */
+export function readRequestVectorV2() {
+	return JSON.parse(
+		fs.readFileSync(
+			new URL("../fixtures/app-request-vector-v2.json", import.meta.url),
 			"utf8",
 		),
 	);

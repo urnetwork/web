@@ -22,10 +22,11 @@
 // storage access is wrapped: storage can throw (blocked, full, private mode).
 import {
 	APP_REQUEST_PATH,
-	APP_REQUEST_VERSION,
 	REQUEST_MAX_AGE_S,
 	REQUEST_MAX_AHEAD_S,
+	appRequestFragment,
 	parseAppRequest,
+	type AppPlatform,
 	type AppRequest,
 	type RejectReason,
 } from "./appAuth.ts";
@@ -144,11 +145,13 @@ export function captureAppRequest(
 function write(storage: StorageLike | null, request: AppRequest): boolean {
 	if (!storage) return false;
 	try {
+		// `api` is in the slot exactly when the request has one (version 2)
 		const slot: AppRequest = {
 			platform: request.platform,
 			state: request.state,
 			pk: request.pk,
 			ts: request.ts,
+			...(request.api === undefined ? {} : { api: request.api }),
 		};
 		storage.setItem(APP_REQUEST_KEY, JSON.stringify(slot));
 	} catch {
@@ -190,23 +193,38 @@ export function readAppRequest(
 	return { status: parsed.reason === "stale" ? "stale" : "invalid" };
 }
 
+/** The slot as the fragment the app would have sent: version 1 for the four
+ * fields, version 2 for the four and `api`. Any other set of keys, or a value of
+ * the wrong type, is not a request ("!" is not a fragment). Nothing here judges
+ * a value: parseAppRequest does that, with the same patterns as for a link. */
 function fragmentOfSlot(raw: string): string {
 	try {
 		const slot: unknown = JSON.parse(raw);
 		if (slot === null || typeof slot !== "object" || Array.isArray(slot))
 			return "";
 		const keys = Object.keys(slot).sort().join(",");
-		if (keys !== "pk,platform,state,ts") return "!";
-		const { platform, state, pk, ts } = slot as Record<string, unknown>;
+		const named = keys === "api,pk,platform,state,ts";
+		if (!named && keys !== "pk,platform,state,ts") return "!";
+		const { platform, state, pk, ts, api } = slot as Record<
+			string,
+			unknown
+		>;
 		if (
 			typeof platform !== "string" ||
 			typeof state !== "string" ||
 			typeof pk !== "string" ||
-			typeof ts !== "number"
+			typeof ts !== "number" ||
+			(named && typeof api !== "string")
 		) {
 			return "!";
 		}
-		return `v=${APP_REQUEST_VERSION}&platform=${platform}&state=${state}&pk=${pk}&ts=${ts}`;
+		return appRequestFragment({
+			platform: platform as AppPlatform,
+			state,
+			pk,
+			ts,
+			...(named ? { api: api as string } : {}),
+		});
 	} catch {
 		return "!";
 	}
