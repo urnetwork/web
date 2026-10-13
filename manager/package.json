@@ -3,15 +3,19 @@
   "private": true,
   "version": "0.1.0",
   "type": "module",
+  "engines": {
+    "node": ">=22.6"
+  },
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
-    "test": "node --test tests/*.test.mjs",
+    "test": "node --experimental-strip-types --test tests/*.test.mjs",
     "preview": "vite preview"
   },
   "dependencies": {
     "@types/qrcode": "^1.5.6",
+    "bs58": "6.0.0",
     "chart.js": "^4.5.0",
     "lodash": "^4.17.21",
     "lucide-react": "^0.525.0",
@@ -21,6 +25,7 @@
     "react-dom": "^19.1.0",
     "react-hot-toast": "^2.4.1",
     "react-router-dom": "^7.6.3",
+    "tweetnacl": "1.0.3",
     "zod": "^4.1.12"
   },
   "devDependencies": {

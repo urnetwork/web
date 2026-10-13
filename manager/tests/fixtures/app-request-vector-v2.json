@@ -1,0 +1,20 @@
+{
+  "description": "Cross-implementation vector for the /login-app request, contract version 2 (the request that names its network). Every value is fixed and NOT secret; never use them for anything else. The app builds exactly `fragment` from `request` (the six keys in the order of `keys`, after the page address and the '#'); the page, with its clock at request.ts, parses `fragment` into exactly `request`. pk is the public key of the app secret key in tests/fixtures/app-auth-vector.json (bytes 1..32), the same key as its appPk.",
+  "contract": 2,
+  "fragment": "v=2&platform=windows&state=SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS&pk=WpSggvhoqoVW4XJvfjsB52dvVunYSQWrz6XiuMQVsCf&ts=1790000000&api=api.beta-test.net",
+  "fragmentLength": 153,
+  "keys": ["v", "platform", "state", "pk", "ts", "api"],
+  "request": {
+    "platform": "windows",
+    "state": "SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS",
+    "pk": "WpSggvhoqoVW4XJvfjsB52dvVunYSQWrz6XiuMQVsCf",
+    "ts": 1790000000,
+    "api": "api.beta-test.net"
+  },
+  "recipe": {
+    "appSecretKey": "bytes 1..32",
+    "state": "43 x 'S'",
+    "ts": "1790000000 (the clock of the test)",
+    "api": "api.beta-test.net"
+  }
+}
