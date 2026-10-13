@@ -62,52 +62,6 @@ http {
         "~^[0-9A-Fa-f]{16,32}-[A-Za-z]{3}:(?<analytics_country>[A-Z]{2})$" $analytics_country;
     }
 
-    # /ip has a small machine-readable representation in addition to its HTML
-    # page. Cloudflare terminates the public ur.io connection, so its
-    # CF-Connecting-IP is the address the caller actually used; require a
-    # structurally valid Ray id before considering that header. Direct and
-    # preview traffic falls back to Warp's ingress-owned ip:port header, then
-    # finally to the socket peer. Every accepted character is JSON-safe.
-    map "$http_cf_ray:$http_cf_connecting_ip" $cloudflare_client_ip {
-        default "";
-        "~^[0-9A-Fa-f]{16,32}-[A-Za-z]{3}:(?<cf_client_ipv4>(?:[0-9]{1,3}\.){3}[0-9]{1,3})$" $cf_client_ipv4;
-        "~^[0-9A-Fa-f]{16,32}-[A-Za-z]{3}:(?<cf_client_ipv6>[0-9A-Fa-f:.]*:[0-9A-Fa-f:.]+)$" $cf_client_ipv6;
-    }
-
-    map $http_x_ur_forwarded_for $forwarded_client_ip {
-        default "";
-        "~^(?<forwarded_client_ipv4>(?:[0-9]{1,3}\.){3}[0-9]{1,3}):[0-9]{1,5}$" $forwarded_client_ipv4;
-        "~^\[(?<forwarded_client_ipv6>[0-9A-Fa-f:.]*:[0-9A-Fa-f:.]+)\]:[0-9]{1,5}$" $forwarded_client_ipv6;
-        # Compatibility with the pre-bracketing Warp header. Its contract made
-        # the final decimal group the source port, so split at the last colon.
-        "~^(?<forwarded_client_legacy_ipv6>[0-9A-Fa-f:.]*:[0-9A-Fa-f:.]+):[0-9]{1,5}$" $forwarded_client_legacy_ipv6;
-    }
-
-    map $cloudflare_client_ip $preferred_client_ip {
-        default $cloudflare_client_ip;
-        "" $forwarded_client_ip;
-    }
-
-    map $preferred_client_ip $ip_response_address {
-        default $preferred_client_ip;
-        "" $remote_addr;
-    }
-
-    # Accept is the response-content negotiation header. A request-body
-    # Content-Type on this GET route does not select the representation.
-    # Honor application/json and structured +json media types unless that
-    # media range was explicitly disabled with q=0.
-    map $http_accept $accepts_json {
-        default 0;
-        "~*(?:^|,)[[:space:]]*application/(?:[a-z0-9!#$&^_.+-]+\+)?json(?:(?:[[:space:]]*;)(?![^,]*\bq=0(?:\.0*)?(?![0-9.]))[^,]*)?[[:space:]]*(?:,|$)" 1;
-    }
-
-    map "$request_method:$accepts_json" $ip_json_requested {
-        default 0;
-        "GET:1" 1;
-        "HEAD:1" 1;
-    }
-
     # Reduce Referer to a small source/engine vocabulary in nginx memory. The
     # original value never enters stdout, a queue, Prometheus, or Loki.
     map $http_referer $analytics_source {
@@ -154,7 +108,6 @@ http {
 
     map $host $analytics_site {
         default "";
-        ur.io "ur.io";
         ur.xyz "ur.xyz";
     }
 
@@ -173,8 +126,8 @@ http {
     # errors, and health checks are excluded.
     map "$request_method:$status:$sent_http_content_type:$analytics_site:$uri" $analytics_page_view {
         default 0;
-        "~^GET:2[0-9][0-9]:text/html(?:;[^:]*)?:(?:ur\.io|ur\.xyz):" 1;
-        "~^GET:304::(?:ur\.io|ur\.xyz):.*\.html$" 1;
+        "~^GET:2[0-9][0-9]:text/html(?:;[^:]*)?:ur\.xyz:" 1;
+        "~^GET:304::ur\.xyz:.*\.html$" 1;
     }
 
     log_format privacy_safe_page_view escape=json
@@ -222,7 +175,6 @@ http {
     # out of indexes entirely. An empty value means the header is not sent.
     map $host $ur_preview_robots {
         default          "";
-        preview.ur.io    "noindex, nofollow";
         preview.ur.xyz   "noindex, nofollow";
     }
 
@@ -239,110 +191,6 @@ http {
         "https://ur.io"  "";
     }
 
-    # ur.io's earlier Framer site had a page per country,
-    # /how-to-get-a-vpn/vpn-access-in-<name>, in every language, and search
-    # engines still list them. The name is the country's English name,
-    # lowercased, with hyphens for spaces. A country with a location page goes
-    # to it (this map); the ur.io block sends every other path there to the
-    # location index. One line per country of mmm
-    # ur.io/react/src/data/countries.js.
-    map $framer_country $framer_country_path {
-        default                 "";
-        albania                 /al;
-        argentina               /ar;
-        australia               /au;
-        austria                 /at;
-        bahrain                 /bh;
-        bangladesh              /bd;
-        belarus                 /by;
-        belgium                 /be;
-        bolivia                 /bo;
-        bosnia-and-herzegovina  /ba;
-        botswana                /bw;
-        brazil                  /br;
-        bulgaria                /bg;
-        cambodia                /kh;
-        canada                  /ca;
-        chile                   /cl;
-        china                   /cn;
-        colombia                /co;
-        costa-rica              /cr;
-        croatia                 /hr;
-        cyprus                  /cy;
-        czechia                 /cz;
-        denmark                 /dk;
-        dominican-republic      /do;
-        ecuador                 /ec;
-        egypt                   /eg;
-        estonia                 /ee;
-        finland                 /fi;
-        france                  /fr;
-        georgia                 /ge;
-        germany                 /de;
-        greece                  /gr;
-        hong-kong               /hk;
-        hungary                 /hu;
-        iceland                 /is;
-        india                   /in;
-        indonesia               /id;
-        ireland                 /ie;
-        israel                  /il;
-        italy                   /it;
-        jamaica                 /jm;
-        japan                   /jp;
-        kazakhstan              /kz;
-        kenya                   /ke;
-        kyrgyzstan              /kg;
-        latvia                  /lv;
-        lebanon                 /lb;
-        liechtenstein           /li;
-        lithuania               /lt;
-        luxembourg              /lu;
-        malaysia                /my;
-        malta                   /mt;
-        mexico                  /mx;
-        moldova                 /md;
-        myanmar                 /mm;
-        nepal                   /np;
-        netherlands             /nl;
-        new-zealand             /nz;
-        nigeria                 /ng;
-        north-macedonia         /mk;
-        norway                  /no;
-        oman                    /om;
-        pakistan                /pk;
-        panama                  /pa;
-        peru                    /pe;
-        philippines             /ph;
-        poland                  /pl;
-        portugal                /pt;
-        puerto-rico             /pr;
-        réunion                 /re;
-        romania                 /ro;
-        russia                  /ru;
-        saudi-arabia            /sa;
-        serbia                  /rs;
-        singapore               /sg;
-        slovakia                /sk;
-        slovenia                /si;
-        south-africa            /za;
-        south-korea             /kr;
-        spain                   /es;
-        sri-lanka               /lk;
-        sweden                  /se;
-        switzerland             /ch;
-        taiwan                  /tw;
-        thailand                /th;
-        turkey                  /tr;
-        ukraine                 /ua;
-        united-arab-emirates    /ae;
-        united-kingdom          /gb;
-        united-states           /us;
-        uruguay                 /uy;
-        uzbekistan              /uz;
-        vietnam                 /vn;
-    }
-
     server {
         listen 80 default_server;
 
@@ -354,54 +202,24 @@ http {
         }
     }
 
-    # TLS terminates at the public load balancer. Direct ingress forwards the
-    # public Host, while the bringyour.com CDN deliberately normalizes its
-    # origin Host to main-web.bringyour.com. Keep the load-balancer status
-    # endpoint and the transactional-email images available under either
-    # identity, but retire the rest of the legacy site.
+    # Transitional. bringyour.com moved to the mmm service with the other mmm
+    # sites (mmm/mmm/PLAN.md), but its CloudFront distribution still reaches the
+    # origin as main-web.bringyour.com. Until that origin is switched to
+    # main-mmm.bringyour.com, send its requests there, so the images the
+    # server's emails link to under /res/emails/ keep loading. Remove this
+    # block in the release after the switch.
     server {
         listen 80;
-        server_name bringyour.com main-web.bringyour.com main-web.ur.network;
-
-        root /www/bringyour.com;
+        server_name main-web.bringyour.com main-web.ur.network;
 
         location = /status {
             alias /srv/warp/status/status.json;
             add_header 'Content-Type' 'application/json';
         }
 
-        # Server email templates use these stable absolute URLs. They remain a
-        # live dependency after the legacy HTML site redirects to ur.io.
-        location ^~ /res/emails/ {
-            try_files $uri =404;
-            add_header 'Cache-Control' 'public, max-age=2592000, stale-while-revalidate=86400';
-        }
-
-        # The legacy blog (/blog/ and its one article, /blog/visual/) has no
-        # page-by-page successor: its links land on the ur.io blog.
-        location ^~ /blog/ {
-            return 301 https://ur.io/blog;
-        }
-
         location / {
-            return 301 https://ur.io$request_uri;
+            return 302 https://main-mmm.bringyour.com$request_uri;
         }
-    }
-
-    # The legacy hosts use the same redirect for requests that entered through
-    # either the public HTTP or HTTPS listener.
-    server {
-        listen 80;
-        server_name www.bringyour.com ur.network www.ur.network;
-
-        return 301 https://ur.io$request_uri;
-    }
-
-    server {
-        listen 80;
-        server_name www.ur.io;
-
-        return 301 https://ur.io$request_uri;
     }
 
     server {
@@ -409,318 +227,6 @@ http {
         server_name www.ur.xyz;
 
         return 301 https://ur.xyz$request_uri;
-    }
-
-    # docs.ur.io was the GitBook docs site; the docs are now ur.io/docs. Each
-    # GitBook page with a successor 301s to it in one hop, with its .md and
-    # trailing-slash variants, and every other path, the root included, 301s
-    # to the docs index, so no old link 404s. The query string carries over,
-    # ahead of any fragment: ur.io/docs reads ?q=, the parameter of GitBook's
-    # search links. The smoke test checks each target is a page of the build.
-    server {
-        listen 80;
-        server_name docs.ur.io;
-
-        location ~ ^/provider(?:\.md|/)?$ {
-            return 301 "https://ur.io/docs/faq$is_args$args#sharing-your-connection";
-        }
-
-        location ~ ^/support/delete(?:\.md|/)?$ {
-            return 301 "https://ur.io/docs/faq$is_args$args#how-do-i-delete-my-account";
-        }
-
-        location ~ ^/protocol/protocol-research(?:\.md|/)?$ {
-            return 301 https://ur.io/docs/overview$is_args$args;
-        }
-
-        location ~ ^/trust-and-safety/trust-and-safety(?:\.md|/)?$ {
-            return 301 "https://ur.io/docs/overview$is_args$args#safe-to-share-the-ipsecurity-layer";
-        }
-
-        # the legal documents are pages of their own on ur.io, outside /docs
-        location ~ ^/legal/(?<docs_legal_doc>terms|privacy|vdp)(?:\.md|/)?$ {
-            return 301 https://ur.io/$docs_legal_doc$is_args$args;
-        }
-
-        # the agent skill documents became the agents page
-        location ~ ^/mcp/skill2?(?:\.md|/)?$ {
-            return 301 https://ur.io/agents$is_args$args;
-        }
-
-        # GitBook's API reference had a page per section and per operation
-        # (/api/api-reference/auth/code-login); ur.io/docs has one page per
-        # section, named by the first segment of its routes. Any other API
-        # path goes to the reference index.
-        location ~ ^/api/api-reference/(?<docs_api_group>auth|network|stats|subscription|wallet|device|account|preferences|feedback|connect|transfer|solana|referral-code)(?:\.md|/.*)?$ {
-            return 301 https://ur.io/docs/api/$docs_api_group$is_args$args;
-        }
-
-        location ~ ^/api(?:\.md|/.*)?$ {
-            return 301 https://ur.io/docs/api$is_args$args;
-        }
-
-        # the machine-readable entry points have the same files on ur.io
-        location ~ ^/(?<docs_site_file>robots\.txt|llms\.txt|llms-full\.txt)$ {
-            return 301 https://ur.io/$docs_site_file$is_args$args;
-        }
-
-        location / {
-            return 301 https://ur.io/docs$is_args$args;
-        }
-    }
-
-    server {
-        listen 80;
-        server_name ur.io preview.ur.io;
-
-        absolute_redirect off;
-        root /www/preview.ur.io;
-
-        # A missing path serves the site's own 404 page with a real 404 status
-        # instead of nginx's stock page. The page ships noindex.
-        error_page 404 /404.html;
-
-        # Exact match beats the .html-canonicalization regex below, and
-        # `internal` keeps direct hits on /404.html out of the duplicate-URL
-        # space: externally it 404s (which serves this same file via
-        # error_page), internally it renders the branded page.
-        location = /404.html {
-            internal;
-            add_header 'Cache-Control' 'no-cache';
-        }
-
-        # Serve the homepage file in this exact location. Letting `location /`
-        # resolve the document root as a directory invokes nginx's index
-        # module, which internally redirects to /index.html. That internal
-        # lookup must not enter the public /index.html canonical redirect
-        # below, or / permanently redirects to itself.
-        location = / {
-            try_files /index.html =404;
-
-            # Always check for updates in the background. The validators are
-            # nginx's own Last-Modified and ETag (the file's mtime and size):
-            # its 304 check compares conditional requests with those, so a
-            # hand-set Last-Modified or ETag never matched and every
-            # revalidation got the whole page.
-            add_header 'Cache-Control' 'max-age=0, stale-while-revalidate=86400';
-            add_header 'X-Robots-Tag' $ur_preview_robots always;
-        }
-
-        # The build is flat files (products.html), but the public URL space is
-        # clean (/products). Collapse the .html twins and trailing-slash
-        # variants onto the canonical form with real 301s.
-        location = /index.html {
-            return 301 /;
-        }
-
-        # Retired paths, in every language: the UR node is sold at shop.ur.io
-        # and the protocol has its own site, ur.xyz.
-        location ~ ^/(?:(?:ru|ar|zh|de|es)/)?urnode(?:\.html|/)?$ {
-            return 301 https://shop.ur.io/;
-        }
-
-        location ~ ^/(?:(?:ru|ar|zh|de|es)/)?protocol(?:\.html|/)?$ {
-            return 301 https://ur.xyz/;
-        }
-
-        # The earlier Framer site's pages, in every language, which search
-        # engines still list, go to their successors in one hop: the country
-        # pages to the country's location page ($framer_country_path) or else
-        # the location index, the newsletter and podcast to the blog, the VPN
-        # pitch pages to the products, the Seeker page to the install page,
-        # and the earn page to the protocol's site.
-        location ~ ^(?<framer_lang>/(?:es|de|zh|ru|ar))?/how-to-get-a-vpn(?:/vpn-access-in-(?<framer_country>[^/]+?))?(?:/.*)?$ {
-            return 301 $framer_lang/location$framer_country_path;
-        }
-
-        location ~ ^(?<framer_lang>/(?:es|de|zh|ru|ar))?/(?:newsletter|podcast)(?:\.html|/.*)?$ {
-            return 301 $framer_lang/blog;
-        }
-
-        location ~ ^(?<framer_lang>/(?:es|de|zh|ru|ar))?/(?:better-vpn|privacy-and-security)(?:\.html|/)?$ {
-            return 301 $framer_lang/products;
-        }
-
-        location ~ ^(?<framer_lang>/(?:es|de|zh|ru|ar))?/seeker(?:\.html|/)?$ {
-            return 301 $framer_lang/install;
-        }
-
-        location ~ ^/(?:(?:es|de|zh|ru|ar)/)?earn(?:\.html|/)?$ {
-            return 301 https://ur.xyz/;
-        }
-
-        # /404 is the not-found page's own URL: answer it with a 404 (which
-        # error_page renders with that page) rather than a 200 copy of it.
-        location = /404 {
-            return 404;
-        }
-
-        # The code examples are English-only; their localized paths 301 to them.
-        location ~ ^/(?:ru|ar|zh|de|es)(?<examples_path>/docs/examples(?:/.*)?)$ {
-            return 301 $examples_path;
-        }
-
-        # Markdown and text twins of HTML pages, for agents: canonical to the
-        # page they mirror, so the page is what search engines index. Ahead of
-        # the generic machine-readable rule below, which they would otherwise
-        # match first.
-        location = /docs-md/index.md {
-            add_header 'Link' '<https://ur.io/docs>; rel="canonical"';
-            add_header 'Cache-Control' 'public, max-age=3600, stale-while-revalidate=86400';
-            add_header 'X-Robots-Tag' $ur_preview_robots always;
-            add_header 'Access-Control-Allow-Origin' $public_cors_origin always;
-        }
-
-        location ~ ^/docs-md/(?<md_lang>es|de|zh|ru|ar)/(?<md_slug>[a-z0-9-]+)\.md$ {
-            add_header 'Link' '<https://ur.io/$md_lang/docs/$md_slug>; rel="canonical"';
-            add_header 'Cache-Control' 'public, max-age=3600, stale-while-revalidate=86400';
-            add_header 'X-Robots-Tag' $ur_preview_robots always;
-            add_header 'Access-Control-Allow-Origin' $public_cors_origin always;
-        }
-
-        location ~ ^/docs-md/(?<md_slug>[a-z0-9-]+)\.md$ {
-            add_header 'Link' '<https://ur.io/docs/$md_slug>; rel="canonical"';
-            add_header 'Cache-Control' 'public, max-age=3600, stale-while-revalidate=86400';
-            add_header 'X-Robots-Tag' $ur_preview_robots always;
-            add_header 'Access-Control-Allow-Origin' $public_cors_origin always;
-        }
-
-        location ~ ^/blog-md/(?<md_lang>es|de|zh|ru|ar)/(?<md_slug>[a-z0-9-]+)\.md$ {
-            add_header 'Link' '<https://ur.io/$md_lang/blog/$md_slug>; rel="canonical"';
-            add_header 'Cache-Control' 'public, max-age=3600, stale-while-revalidate=86400';
-            add_header 'X-Robots-Tag' $ur_preview_robots always;
-            add_header 'Access-Control-Allow-Origin' $public_cors_origin always;
-        }
-
-        location ~ ^/blog-md/(?<md_slug>[a-z0-9-]+)\.md$ {
-            add_header 'Link' '<https://ur.io/blog/$md_slug>; rel="canonical"';
-            add_header 'Cache-Control' 'public, max-age=3600, stale-while-revalidate=86400';
-            add_header 'X-Robots-Tag' $ur_preview_robots always;
-            add_header 'Access-Control-Allow-Origin' $public_cors_origin always;
-        }
-
-        location ~ ^/(?<md_page>products|about|agents|changelog|install)\.md$ {
-            add_header 'Link' '<https://ur.io/$md_page>; rel="canonical"';
-            add_header 'Cache-Control' 'public, max-age=3600, stale-while-revalidate=86400';
-            add_header 'X-Robots-Tag' $ur_preview_robots always;
-            add_header 'Access-Control-Allow-Origin' $public_cors_origin always;
-        }
-
-        # mime.types has no entry for the web app manifest, which went out as
-        # application/octet-stream.
-        location = /site.webmanifest {
-            types { application/manifest+json webmanifest; }
-            add_header 'Cache-Control' 'public, max-age=3600, stale-while-revalidate=86400';
-            add_header 'X-Robots-Tag' $ur_preview_robots always;
-        }
-
-        # Keep /ip a browser page by default, while giving command-line and API
-        # clients a one-field representation through ordinary HTTP content
-        # negotiation. The internal status never escapes this server block.
-        location = /ip {
-            error_page 418 = @ip_json;
-            if ($ip_json_requested) {
-                return 418;
-            }
-
-            try_files /ip.html =404;
-
-            # nginx's own validators, as for the other pages (location = /)
-            add_header 'Cache-Control' 'max-age=0, stale-while-revalidate=86400';
-            add_header 'Vary' 'Accept' always;
-            add_header 'X-Robots-Tag' $ur_preview_robots always;
-        }
-
-        location @ip_json {
-            default_type application/json;
-            add_header 'Cache-Control' 'no-store' always;
-            add_header 'Vary' 'Accept' always;
-            add_header 'X-Robots-Tag' $ur_preview_robots always;
-            return 200 '{"ip":"$ip_response_address"}';
-        }
-
-        # The feed is advertised everywhere as /blog/rss.xml; the bare /blog/rss
-        # twin used to ship as a byte-identical duplicate.
-        location = /blog/rss {
-            return 301 /blog/rss.xml;
-        }
-
-        # The paths where crawlers and agents guess the feed, the sitemap and
-        # the agents file lead to the real ones.
-        location = /feed {
-            return 301 /blog/rss.xml;
-        }
-
-        location = /feed/ {
-            return 301 /blog/rss.xml;
-        }
-
-        location = /rss.xml {
-            return 301 /blog/rss.xml;
-        }
-
-        location = /sitemap.xml {
-            return 301 /sitemap-index.xml;
-        }
-
-        location = /AGENTS.md {
-            return 301 /agents.md;
-        }
-
-        # Universal Links / password AutoFill discovery. Apple fetches this
-        # extensionless path and wants JSON.
-        location = /.well-known/apple-app-site-association {
-            default_type application/json;
-            # Apple documents exactly application/json for this file.
-            charset off;
-            add_header 'Cache-Control' 'max-age=3600';
-        }
-
-        # Content-hashed bundles never change under the same name.
-        location ^~ /_astro/ {
-            add_header 'Cache-Control' 'public, max-age=31536000, immutable';
-            add_header 'X-Robots-Tag' $ur_preview_robots always;
-        }
-
-        # The onboarding emails' feedback links carry their token in the
-        # path (/f/<token>?r=n); the site builds one page for all of them
-        # (astro src/pages/f.astro → /f.html) and the island reads the token.
-        location ^~ /f/ {
-            try_files /f.html =404;
-            add_header 'Cache-Control' 'max-age=0, stale-while-revalidate=86400';
-            add_header 'X-Robots-Tag' 'noindex, nofollow' always;
-        }
-
-        location ~ ^(?<clean>.+)/$ {
-            return 301 $clean$is_args$args;
-        }
-
-        location ~ ^(?<clean>.+)\.html$ {
-            return 301 $clean$is_args$args;
-        }
-
-        # Media and fonts: stable-named, safe to hold for a month.
-        location ~* \.(?:png|jpe?g|webp|avif|gif|svg|ico|woff2?|ttf|mp4|mp3|wasm)$ {
-            add_header 'Cache-Control' 'public, max-age=2592000, stale-while-revalidate=86400';
-            add_header 'X-Robots-Tag' $ur_preview_robots always;
-        }
-
-        # Machine-readable surfaces (sitemaps, feeds, llms.txt, markdown
-        # twins, openapi): fresh within the hour without hammering.
-        location ~* \.(?:xml|txt|md|ya?ml|json)$ {
-            add_header 'Cache-Control' 'public, max-age=3600, stale-while-revalidate=86400';
-            add_header 'X-Robots-Tag' $ur_preview_robots always;
-            add_header 'Access-Control-Allow-Origin' $public_cors_origin always;
-        }
-
-        location / {
-            try_files $uri $uri.html $uri/ $uri/index.html =404;
-
-            # always check for updates in the background, with nginx's own
-            # validators (see location = /)
-            add_header 'Cache-Control' 'max-age=0, stale-while-revalidate=86400';
-            add_header 'X-Robots-Tag' $ur_preview_robots always;
-        }
     }
 
     server {

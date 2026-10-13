@@ -18,9 +18,6 @@ case "${0##*/}:$*" in
         printf 'fresh site\n' > "build/$UR_ENV/index.html" ;;
     'node:scripts/precompress.mjs '*)
         printf 'compressed\n' > "$2/index.html.br" ;;
-    pandoc:*)
-        [ "$#" = 7 ] && [ "$1 $2 $3 $4 $6" = '-f markdown -t plain -o' ] || exit 41
-        cp "$5" "$7" ;;
 esac
 '''
 
@@ -41,26 +38,13 @@ class BuildChecksTest(unittest.TestCase):
         shutil.copy(REPO / "web/Makefile", self.service / "Makefile")
         fake_bin = self.root / "bin"
         fake_bin.mkdir()
-        for name in ("node", "npm", "npx", "python", "pandoc"):
+        for name in ("node", "npm", "npx", "python"):
             command = fake_bin / name
             command.write_text(STUB)
             command.chmod(0o755)
         nvm = self.root / "nvm"
         nvm.mkdir()
         (nvm / "nvm.sh").write_text('nvm() { printf "nvm:%s\\n" "$*" >> "$EVENTS"; }\n')
-        other = self.root / "mmm/ur.io/astro"
-        other.mkdir(parents=True)
-        (other / "Makefile").write_text(""".PHONY: generate-locales clean build-main
-generate-locales:
-\t@printf 'ur.io:locales:%s\\n' "$$URNETWORK_ROOT" >> "$$EVENTS"
-\t@test "$$FAIL_COMMAND" != ur.io-locales
-clean:
-\trm -rf build
-build-main:
-\t@printf 'ur.io:checks:%s\\n' "$(WEB_BUILD_CHECKS)" >> "$$EVENTS"
-\tmkdir -p build/main
-\tprintf 'fresh ur.io\\n' > build/main/index.html
-""")
         self.env = {**os.environ, "PATH": f"{fake_bin}:{os.environ['PATH']}",
                     "EVENTS": str(self.events), "FAIL_COMMAND": "",
                     "NVM_DIR": str(nvm), "WARP_HOME": str(self.root),
@@ -106,81 +90,42 @@ build-main:
                 self.assertIn(f"node:scripts/modulepreload.mjs build/{target}\n", events)
                 self.assertTrue((self.astro / f"build/{target}/index.html.br").is_file())
 
-    def test_preflight_forces_checks_after_locale_generation(self):
+    def test_preflight_forces_checks(self):
         result = self.run_make("check", checks="0", service=True)
         self.assertEqual(result.returncode, 0, result.stdout)
         events = self.events.read_text()
-        self.assertLess(events.index(f"ur.io:locales:{self.root}\n"),
-                        events.index("node:../react/tests/visual-parity.mjs\n"))
-        self.assertIn("ur.io:checks:1\n", events)
+        self.assertIn("node:../react/tests/visual-parity.mjs\n", events)
+        self.assertIn("node:scripts/seo-audit.mjs build/main\n", events)
 
-    def test_preflight_stops_on_locale_failure(self):
-        result = self.run_make("check", failure="ur.io-locales", service=True)
+    def test_preflight_stops_on_a_failed_gate(self):
+        result = self.run_make("check", failure="../react/tests/visual-parity.mjs", service=True)
         self.assertNotEqual(result.returncode, 0)
-        self.assertNotIn("npx:astro build", self.events.read_text())
+        self.assertNotIn("node:scripts/precompress.mjs", self.events.read_text())
+        self.assertFalse((self.service / "build/preview.ur.xyz").exists())
 
     def test_final_build_forwards_skip_and_stages_fresh_artifacts(self):
-        for site in ("ur.xyz", "ur.io"):
-            previous = self.service / f"build/preview.{site}"
-            previous.mkdir(parents=True)
-            (previous / "stale.html").write_text("previous build")
+        previous = self.service / "build/preview.ur.xyz"
+        previous.mkdir(parents=True)
+        (previous / "stale.html").write_text("previous build")
         result = self.run_make("build-preview", checks="0", service=True,
                                failure="../react/tests/visual-parity.mjs")
         self.assertEqual(result.returncode, 0, result.stdout)
-        events = self.events.read_text()
-        self.assertNotIn("tests/", events)
-        self.assertIn("ur.io:checks:0\n", events)
+        self.assertNotIn("tests/", self.events.read_text())
         self.assertEqual((self.service / "build/preview.ur.xyz/index.html").read_text(), "fresh site\n")
-        self.assertEqual((self.service / "build/preview.ur.io/index.html").read_text(), "fresh ur.io\n")
-        for site in ("ur.xyz", "ur.io"):
-            self.assertFalse((self.service / f"build/preview.{site}/stale.html").exists())
+        self.assertFalse((self.service / "build/preview.ur.xyz/stale.html").exists())
 
-    def prepare_external_sites(self):
-        for site in ("bringyour.com", "ur.network"):
-            directory = self.root / "mmm" / site
-            (directory / "build").mkdir(parents=True)
-            (directory / "gen.py").touch()
-            (directory / "build/index.html").write_text(f"{site}\n")
-        legal = self.root / "mmm/ur.io/docs/legal"
-        legal.mkdir(parents=True)
-        for name in ("privacy", "terms", "vdp"):
-            (legal / f"{name}.md").write_text(f"Current {name} document\n")
-        return legal
-
-    def test_external_sites_build_without_the_retired_docs_checkout(self):
-        legal = self.prepare_external_sites()
-        self.assertFalse((self.root / "docs").exists())
-        result = self.run_make("build_external_sites", service=True)
+    def test_web_builds_no_mmm_site(self):
+        # The mmm sites belong to the mmm service (mmm/mmm). This tree has no
+        # mmm checkout, and web's builds must not need one.
+        self.assertFalse((self.root / "mmm").exists())
+        result = self.run_make("build-preview", checks="0", service=True)
         self.assertEqual(result.returncode, 0, result.stdout)
-        for name in ("privacy", "terms", "vdp"):
-            self.assertEqual((self.service / f"build/bringyour.com/{name}.txt").read_text(),
-                             (legal / f"{name}.md").read_text())
-
-    def test_missing_current_legal_document_fails_even_with_an_archived_copy(self):
-        legal = self.prepare_external_sites()
-        archived = self.root / "docs/legal"
-        archived.mkdir(parents=True)
-        for name in ("privacy", "terms", "vdp"):
-            (archived / f"{name}.md").write_text(f"Archived {name} document\n")
-        for name in ("privacy", "terms", "vdp"):
-            with self.subTest(document=name):
-                source = legal / f"{name}.md"
-                content = source.read_text()
-                source.unlink()
-                result = self.run_make("build_external_sites", service=True)
-                source.write_text(content)
-                self.assertNotEqual(result.returncode, 0, result.stdout)
-                self.assertFalse((self.service / "build/bringyour.com").exists())
-
-    def test_legal_conversion_failure_stops_site_staging(self):
-        legal = self.prepare_external_sites()
-        failure = (f"-f markdown -t plain {legal}/terms.md -o "
-                   f"{self.root}/mmm/bringyour.com/build/terms.txt")
-        result = self.run_make("build_external_sites", service=True, failure=failure)
-        self.assertNotEqual(result.returncode, 0, result.stdout)
-        self.assertIn("Error 37", result.stdout)
-        self.assertNotIn(f"{legal}/vdp.md", self.events.read_text())
-        self.assertFalse((self.service / "build/bringyour.com").exists())
+        self.assertEqual(sorted(path.name for path in (self.service / "build").iterdir()),
+                         ["preview.ur.xyz"])
+        makefile = (REPO / "web/Makefile").read_text()
+        for reference in ("MMM_HOME", "WARP_HOME}/mmm", "preview.ur.io", "BRINGYOUR_SITE_DIR",
+                          "UR_NETWORK_SITE_DIR", "UR_IO_SITE_DIR", "pandoc", "redocly"):
+            self.assertNotIn(reference, makefile)
 
 
 if __name__ == "__main__":

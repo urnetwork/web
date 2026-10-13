@@ -9,7 +9,7 @@ import unittest
 
 
 DOCKERFILE = Path(__file__).with_name("Dockerfile")
-SITES = ("bringyour.com", "ur.network", "preview.ur.xyz", "preview.ur.io")
+SITES = ("preview.ur.xyz",)
 
 
 def stages():

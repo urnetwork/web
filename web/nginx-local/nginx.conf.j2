@@ -43,25 +43,14 @@ http {
     gzip on;
 
 
+    # web's own site, ur.xyz. The mmm sites, bringyour.com among them, are
+    # served by the mmm service (mmm/mmm).
     server {
         listen 80 default_server;
 
         location / {
             try_files $uri $uri.html $uri/ =404;
-            alias {{ bringyour_home }}/web/web/build/bringyour.com/;
-        }
-    }
-    server {
-        listen 443 ssl;
-        server_name bringyour.com;
-        ssl_certificate     {{ bringyour_home }}/vault/all/tls/2024.5.24/bringyour.com/bringyour.com.pem;
-        ssl_certificate_key {{ bringyour_home }}/vault/all/tls/2024.5.24/bringyour.com/bringyour.com.key;
-
-        location / {
-            try_files $uri $uri.html $uri/ =404;
-            alias {{ bringyour_home }}/web/web/build/bringyour.com/;
-
-            add_header 'Cache-Control' 'no-cache';
+            alias {{ bringyour_home }}/web/web/build/preview.ur.xyz/;
         }
     }
     server {

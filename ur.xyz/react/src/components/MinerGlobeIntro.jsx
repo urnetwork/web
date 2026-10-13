@@ -17,7 +17,7 @@ import { MINER_GLOBE_STEP, MINER_GLOBE_PALETTE, MINER_GLOBE_DOTS } from '../data
  *
  * Canvas 2D, no library. The land dots are data/minerGlobeDots.js (Natural
  * Earth 110m sampled on a 3° grid, each dot with its country's palette color,
- * see scripts/generate-miner-globe-dots.mjs); the projection is a hand-rolled
+ * generated once and kept as fixed data); the projection is a hand-rolled
  * orthographic globe. The prototype this was ported from is
  * prototypes/miner-globe-intro.html.
  */

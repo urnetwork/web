@@ -1,16 +1,11 @@
 FROM --platform=$BUILDPLATFORM ubuntu:24.04 AS static-sites
 
-COPY build/bringyour.com /www/bringyour.com
-COPY build/ur.network /www/ur.network
 COPY build/preview.ur.xyz /www/preview.ur.xyz
-COPY build/preview.ur.io /www/preview.ur.io
 
 # Normalize permissions before copying into the runtime image. chmod after a
 # runtime COPY creates another full payload layer, doubling the image download.
-RUN find /www/bringyour.com /www/ur.network /www/preview.ur.xyz /www/preview.ur.io \
-        -type d -exec chmod ugo=rx {} + \
-    && find /www/bringyour.com /www/ur.network /www/preview.ur.xyz /www/preview.ur.io \
-        -type f -exec chmod ugo=r {} +
+RUN find /www/preview.ur.xyz -type d -exec chmod ugo=rx {} + \
+    && find /www/preview.ur.xyz -type f -exec chmod ugo=r {} +
 
 FROM ubuntu:24.04
 # see https://docs.docker.com/develop/develop-images/dockerfile_best-practices/
