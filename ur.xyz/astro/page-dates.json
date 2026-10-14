@@ -2,28 +2,28 @@
   "about": "The day each ur.xyz page last changed, for the sitemap <lastmod>: a fingerprint of what the page says and the day it last changed. The build maintains this file (scripts/page-dates.mjs); commit it with the content it dates.",
   "pages": {
     "/": {
-      "fingerprint": "3212360bf8a0509b",
-      "lastmod": "2026-09-25"
+      "fingerprint": "ffab891975f1c26b",
+      "lastmod": "2026-10-14"
     },
     "/about": {
       "fingerprint": "5a2aca1212fe371f",
       "lastmod": "2026-09-25"
     },
     "/ar": {
-      "fingerprint": "84627eb68b409f90",
-      "lastmod": "2026-09-25"
+      "fingerprint": "08dd5e1e22a8304c",
+      "lastmod": "2026-10-14"
     },
     "/ar/miners": {
-      "fingerprint": "0bf3682ef707b9d2",
-      "lastmod": "2026-10-06"
+      "fingerprint": "b1c7a0849ee1356a",
+      "lastmod": "2026-10-14"
     },
     "/ar/operators": {
-      "fingerprint": "d15169a6d8b123e9",
-      "lastmod": "2026-09-25"
+      "fingerprint": "096d46f6b1f0e321",
+      "lastmod": "2026-10-14"
     },
     "/ar/research": {
-      "fingerprint": "dcb122e9af11c8ca",
-      "lastmod": "2026-09-27"
+      "fingerprint": "97b1adf1cbc786aa",
+      "lastmod": "2026-10-14"
     },
     "/ar/validators": {
       "fingerprint": "307cc71152692456",
@@ -38,20 +38,20 @@
       "lastmod": "2026-09-25"
     },
     "/de": {
-      "fingerprint": "2265067f61a4bc13",
-      "lastmod": "2026-09-25"
+      "fingerprint": "35d3cc2ed3d9b6e2",
+      "lastmod": "2026-10-14"
     },
     "/de/miners": {
-      "fingerprint": "25359591eb7ea81e",
-      "lastmod": "2026-10-07"
+      "fingerprint": "922a1cf17c00c348",
+      "lastmod": "2026-10-14"
     },
     "/de/operators": {
-      "fingerprint": "afaecea56462daa4",
-      "lastmod": "2026-09-25"
+      "fingerprint": "c6d8658486c33930",
+      "lastmod": "2026-10-14"
     },
     "/de/research": {
-      "fingerprint": "3e98648b4898d49a",
-      "lastmod": "2026-09-27"
+      "fingerprint": "f8e0e613a3aa7d60",
+      "lastmod": "2026-10-14"
     },
     "/de/validators": {
       "fingerprint": "7affbf410116fb54",
@@ -62,36 +62,36 @@
       "lastmod": "2026-10-07"
     },
     "/docs/litepaper": {
-      "fingerprint": "0b8619f9cc0f3592",
-      "lastmod": "2026-10-07"
+      "fingerprint": "46d8efc515ec1266",
+      "lastmod": "2026-10-14"
     },
     "/docs/miner": {
-      "fingerprint": "77edd7bbd29758d3",
-      "lastmod": "2026-10-08"
+      "fingerprint": "83ef8efca6f6f975",
+      "lastmod": "2026-10-14"
     },
     "/docs/operator": {
-      "fingerprint": "628a8aa38ce6d3ba",
-      "lastmod": "2026-10-10"
+      "fingerprint": "d9bde24e0a5943c5",
+      "lastmod": "2026-10-14"
     },
     "/docs/validator": {
       "fingerprint": "379ef84ea8d1a11b",
       "lastmod": "2026-10-07"
     },
     "/es": {
-      "fingerprint": "b8783032fd01f193",
-      "lastmod": "2026-09-25"
+      "fingerprint": "4877064d4ede4a7f",
+      "lastmod": "2026-10-14"
     },
     "/es/miners": {
-      "fingerprint": "d503cf04a2fc5120",
-      "lastmod": "2026-10-07"
+      "fingerprint": "a42998c868e84300",
+      "lastmod": "2026-10-14"
     },
     "/es/operators": {
-      "fingerprint": "daf2fae2b4e6b9f7",
-      "lastmod": "2026-10-07"
+      "fingerprint": "4cf9751e033cead3",
+      "lastmod": "2026-10-14"
     },
     "/es/research": {
-      "fingerprint": "5b6fd8752554d121",
-      "lastmod": "2026-09-27"
+      "fingerprint": "eb39d8edbb9c34af",
+      "lastmod": "2026-10-14"
     },
     "/es/validators": {
       "fingerprint": "b19a149314e5bbd7",
@@ -122,12 +122,12 @@
       "lastmod": "2026-08-18"
     },
     "/miners": {
-      "fingerprint": "90fb52a3d6970670",
-      "lastmod": "2026-10-06"
+      "fingerprint": "017465877eafc6ae",
+      "lastmod": "2026-10-14"
     },
     "/operators": {
-      "fingerprint": "4769f8f5096c50cf",
-      "lastmod": "2026-09-25"
+      "fingerprint": "03c74d42e6503d13",
+      "lastmod": "2026-10-14"
     },
     "/price": {
       "fingerprint": "83df0721f46586da",
@@ -138,28 +138,28 @@
       "lastmod": "2026-09-25"
     },
     "/research": {
-      "fingerprint": "ddafd228a9250800",
-      "lastmod": "2026-09-27"
+      "fingerprint": "d59389200fdabc1a",
+      "lastmod": "2026-10-14"
     },
     "/reserve": {
       "fingerprint": "b457d7c457b62c91",
       "lastmod": "2026-10-08"
     },
     "/ru": {
-      "fingerprint": "f8a8ce1a17913481",
-      "lastmod": "2026-10-07"
+      "fingerprint": "cc8748da94050d2b",
+      "lastmod": "2026-10-14"
     },
     "/ru/miners": {
-      "fingerprint": "3dcddeb1ca9ddc8b",
-      "lastmod": "2026-10-07"
+      "fingerprint": "5cf877d46896f666",
+      "lastmod": "2026-10-14"
     },
     "/ru/operators": {
-      "fingerprint": "1a26e0b2eaad09cb",
-      "lastmod": "2026-10-07"
+      "fingerprint": "268ff8190455f88c",
+      "lastmod": "2026-10-14"
     },
     "/ru/research": {
-      "fingerprint": "52d6826519e2dce2",
-      "lastmod": "2026-09-27"
+      "fingerprint": "9387450a2b24a1f8",
+      "lastmod": "2026-10-14"
     },
     "/ru/validators": {
       "fingerprint": "27a02f30eaf105ca",
@@ -178,20 +178,20 @@
       "lastmod": "2026-08-14"
     },
     "/zh": {
-      "fingerprint": "e7a5ed2f4d016a6e",
-      "lastmod": "2026-09-25"
+      "fingerprint": "958694d8eeff277a",
+      "lastmod": "2026-10-14"
     },
     "/zh/miners": {
-      "fingerprint": "75f2e8b043b09472",
-      "lastmod": "2026-10-06"
+      "fingerprint": "6bf33da1bfb30bae",
+      "lastmod": "2026-10-14"
     },
     "/zh/operators": {
-      "fingerprint": "1afba986c09392ac",
-      "lastmod": "2026-09-25"
+      "fingerprint": "305ffd0e5e58dd2c",
+      "lastmod": "2026-10-14"
     },
     "/zh/research": {
-      "fingerprint": "0e3c9bb850bad27b",
-      "lastmod": "2026-09-27"
+      "fingerprint": "72a9fb9ad37ee9ea",
+      "lastmod": "2026-10-14"
     },
     "/zh/validators": {
       "fingerprint": "beb18ab2dde5e282",

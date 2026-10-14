@@ -12,13 +12,13 @@ Bittensor's Yuma Consensus turns the validators' measurements into token emissio
 
 ## II. Roles
 
-Network operators run the privacy servers and the verification endpoint. An operator deposits into the subnet, co-signs each measured path, and commits a payout list that splits its rewards among the miners attached to it. An operator directs where its rewards go but never holds anyone else's funds.
+Network operators run the privacy servers and the verification endpoint. An operator deposits into the subnet, co-signs each measured path, and commits a payout list that splits its rewards among the miners attached to it. An operator reports the usage its rewards follow but never holds anyone else's funds.
 
-Miners are the ingress and egress of the network. They run a safe-by-default security model, block known-malicious IPs, and route only encrypted traffic. A miner carries traffic for one or more operators and is paid for the routable capacity it contributes.
+Miners are the ingress and egress of the network. They run a safe-by-default security model, block known-malicious IPs, and route only encrypted traffic. A miner carries traffic for one or more operators and is paid for the traffic it carries and, in the top fleets, for the routable capacity it contributes.
 
 Validators are independent. Each stakes its own UR, runs the routing-verification protocol, and scores every operator's pool by demand and measured quality. Validators earn the network's native dividends for accurate, consensus-aligned scoring. No operator owns a validator, and the set is permissionless.
 
-The Subnet Owner governs the settlement contract and operates the network's reserve. That role is transitional: control begins centralized but bounded and progressively decentralizes, as described in clause V.
+The Subnet Owner governs the settlement contracts' upgradeable coordinators, not the immutable vaults that hold miners' rewards, and operates the network's reserve. That role is transitional: control begins centralized but bounded and progressively decentralizes, as described in clause V.
 
 ## III. The UR token
 
@@ -29,7 +29,7 @@ New UR is emitted by Bittensor's coinbase each cycle and split three ways:
 | Stream | Share | Recipients |
 | --- | ---: | --- |
 | Owner | 18% | Subnet Owner |
-| Miners | 41% | Miners through operator pools and top-level miner slots |
+| Miners | 41% | Providers receive the momentum share, 10% at launch, through operator pools and top-level miner slots; the Network Capacity Reserve receives the rest |
 | Validators | 41% | Independent validators, receiving native dividends for accurate scoring |
 
 Operators fund the network by depositing UR sized to their real usage, at a published reference rate. A deposit is a revenue-backed signal of real demand: the contract moves every deposit into the subnet reserve. An operator's cumulative deposits lower the rate it must post, so committed operators can onboard with less up-front capital. During the initial period the published rate is 0, no deposits are required, and every operator pool is given equal demand, so measured quality alone steers the pool channel.
@@ -44,21 +44,21 @@ The pool is the on-ramp. Every operator holds one on-chain slot for all of its m
 
 Top-level miners are the supply apex. The roughly 200 largest fleets, ranked by how many distinct, routable exit IPs they actually serve rather than by traffic volume, each claim their own on-chain slot and are paid directly by the network, with no operator in the payout path. A shared IP is split among the fleets that claim it, so breadth cannot be double-counted.
 
-The two tiers are one tournament: a miner starts in a pool, graduates to a top slot as its routable-IP breadth grows, and falls back to the pool if it slips. A governance-set share divides emission between the head and the tail.
+The two tiers are one tournament: a miner starts in a pool, graduates to a top slot as its routable-IP breadth grows, and falls back to the pool if it slips. A governance-set share divides the providers' share of emission between the head and the tail.
 
-- Pool tier: the on-ramp. Join an operator with no slot and no registration cost; validators weight the pool by demand and quality; each miner claims its share by proof every settlement period.
+- Pool tier: the on-ramp. Join an operator with no slot and no registration cost; validators weight the pool by demand and quality; each miner's share accrues every settlement period and is claimed by proof (with settlement v2, into one account that never expires).
 - Top-level miners: the apex. The roughly 200 fleets with the broadest routable-IP coverage claim their own slot and are paid directly by the network, with no operator, pool, or intermediary.
 
 ## V. Custody, settlement, and decentralization
 
-Settlement runs on a seven-day cycle. The contract accrues each pool's emission over the period, then opens claims: miners pull their UR directly from the contract against their operator's committed payout list. Top-level miners need no settlement step because the chain pays their slot natively every cycle.
+Settlement runs on a seven-day cycle. The contract accrues each pool's emission over the period, then opens claims: miners pull their UR directly from the contract against their operator's committed payout list. With settlement v2 a payout root opens only after the validator approves it and a 14,400-block challenge window passes, and an account's balance never expires. Top-level miners need no settlement step because the chain pays their slot natively every cycle.
 
-No one holds anyone else's funds. The settlement contract is the sole custodian of in-transit UR, every pool payout is a direct on-chain claim, and top-level miners are paid natively to their own keys. Operators and the owner never take custody of miners' rewards.
+No one holds anyone else's funds. The settlement contracts are the sole custodians of in-transit UR, every pool payout is a direct on-chain claim, and top-level miners are paid natively to their own keys. Operators and the owner never take custody of miners' rewards.
 
-Earned claims are final. Once a settlement period is finalized, the tokens backing its claims are committed. No upgrade, pause, or administrative action can block or reverse them.
+Earned claims are final. Once a settlement period is finalized, the tokens backing its claims are committed. No contract upgrade, pause, or administrative action can block or reverse them; only the chain-level switch that disables stake transfers on SN25 can freeze claims, and it cannot take or redirect them.
 
-Control decentralizes over time. The network launches with the contract upgradeable behind an owner multisig, providing deliberate, bounded central control for early bug fixes, and hardens in stages: a public timelock on every change, a pause-only guardian that can stop an exploit but can never move funds or block finalized claims, and, in time, on-chain governance and an immutable settlement core.
+Control decentralizes over time. The network launches with its policy coordinators upgradeable behind an owner multisig, providing deliberate, bounded central control for early bug fixes, while the settlement vaults and the deposit reserve are immutable from day one and a pause-only guardian can stop an exploit but can never move funds or block finalized claims. It hardens in stages: a public timelock on every change and, in time, on-chain governance.
 
 ---
 
-_This is a living document. Testnet will inform how the network evolves, and the design described here, including the incentive mechanism, may change as we iterate._
+_This is a living document. The live network will inform how it evolves, and the design described here, including the incentive mechanism, may change as we iterate._
