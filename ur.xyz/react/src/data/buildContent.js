@@ -65,7 +65,7 @@ export const BUILD_ARCH = {
       verb: 'REWARDS',
       name: 'Emission + settlement',
       short: 'Measured useful service is rewarded separately from operator deposits.',
-      detail: 'Bittensor emission rewards miners and validators. Pool miners claim through the settlement contract on a seven-day cycle; top-level miner slots are paid natively.'
+      detail: 'Bittensor emission rewards miners and validators. Pool miners\' shares settle through the settlement contract on a seven-day cycle and are claimed from it directly; top-level miner slots are paid natively.'
     }
   ],
 
