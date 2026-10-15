@@ -244,8 +244,7 @@
       "title": "Settlement v2 pool registered",
       "detail": "The governance Safe registers the v2 pool for epoch 3. This is the activation.",
       "sources": [
-        { "label": "Registration through the governance Safe", "kind": "evm_tx", "ref": "" },
-        { "label": "Governance Safe", "kind": "evm_address", "ref": "0x56F4Dad575576CC0B679FEf52899630f9F605418" }
+        { "label": "Registration through the governance Safe", "kind": "evm_tx", "ref": "" }
       ]
     },
     {
