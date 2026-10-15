@@ -69,7 +69,7 @@ export default function NetworkCapacityLetter() {
                     <section className="announcement-document-section" aria-labelledby="capacity-working-capital">
                         <h3 id="capacity-working-capital">Why retain emissions as working capital?</h3>
                         <p>We do not expect network capacity and customer demand to grow in perfect alignment. In conversations with operators, they seek evidence of reliable supply PRIOR to launching on the subnet. Take a new VPN operator that may have an existing product and customers: broader coverage or dependable availability in particular markets will be critical to support their growth. UR needs to coordinate those providers that can fulfil those requirements as quickly as possible.</p>
-                        <p>We therefore propose SN25 should use excess emissions to bootstrap miners to demonstrate network strength to attract new Network operators.</p>
+                        <p>SN25 therefore uses excess emissions, meaning miner emissions beyond what goes directly to providers, to bootstrap miners and demonstrate network strength to attract new Network operators.</p>
                         <figure className="capacity-letter-diagram">
                             <img src="/investors/network-capacity-gap.png" width="1140" height="606" alt="Operators want supply before demand arrives. Capacity is established before an operator launches, while customer traffic grows later. The Network Capacity Reserve funds the gap and is released against verified delivery. Operators launch with capacity already in place; the reserve carries the cost until traffic catches up, so early customers get full service from day one." />
                             <figcaption><a href="/investors/network-capacity-gap.png" target="_blank" rel="noopener noreferrer">View diagram at full size ↗</a></figcaption>
@@ -105,10 +105,10 @@ export default function NetworkCapacityLetter() {
                     <section className="announcement-document-section" aria-labelledby="capacity-operations">
                         <h3 id="capacity-operations">Reserve Operations</h3>
                         <ul>
-                            <li>Start with a dedicated multisig treasury wallet.</li>
+                            <li>The reserve is a dedicated multisig, separate from owner emissions and not used for team or operating costs: 5CcHGEqKK3RXeEA2sVycHQAQGrqsyhWaYu9FjGtDVN6nwMwR (SN25 UIDs 170 and 250).</li>
                             <li>Publish objectives, eligibility, measurement and duration when excess miner rewards are used.</li>
                             <li>Reserve funds for accepted commitments and account for existing baseline rewards.</li>
-                            <li>Verify delivery, publish the reward calculation and approve payments through the multisig.</li>
+                            <li>Verify delivery, publish the reward calculation, approve payments through the multisig and disclose every transfer out.</li>
                             <li>Keep unused funds available for future operator and network needs.</li>
                         </ul>
                     </section>

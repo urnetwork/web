@@ -6,12 +6,12 @@ import React from 'react';
  * is read from colour alone. Segments with no value stay in the key as a
  * zero and leave the bar.
  */
-export default function SplitBar({ title, meta, segments, fmt, note }) {
+export default function SplitBar({ title, meta, segments, fmt, note, showPercentages = true }) {
     const total = segments.reduce((s, x) => s + Math.max(0, x.value || 0), 0);
     const shown = segments.filter((s) => (s.value || 0) > 0);
     const share = (v) => (total > 0 ? v / total : 0);
     const pctOf = (v) => `${(share(v) * 100).toLocaleString('en-US', { maximumFractionDigits: 1 })}%`;
-    const summary = segments.map((s) => `${s.label} ${pctOf(s.value || 0)}`).join(', ');
+    const summary = segments.map((s) => `${s.label} ${showPercentages ? pctOf(s.value || 0) : fmt(s.value || 0)}`).join(', ');
 
     return (
         <div className="reserve-split">
@@ -25,7 +25,7 @@ export default function SplitBar({ title, meta, segments, fmt, note }) {
                         key={s.label}
                         className={s.className || ''}
                         style={{ flexBasis: `${share(s.value) * 100}%`, background: s.color }}
-                        title={`${s.label}: ${fmt(s.value)} (${pctOf(s.value)})`}
+                        title={`${s.label}: ${fmt(s.value)}${showPercentages ? ` (${pctOf(s.value)})` : ''}`}
                     />
                 ))}
             </div>
@@ -34,7 +34,7 @@ export default function SplitBar({ title, meta, segments, fmt, note }) {
                     <li key={s.label}>
                         <i className={s.className || ''} style={{ background: s.color }} aria-hidden="true" />
                         <span>{s.label}</span>
-                        <b>{fmt(s.value || 0)} · {pctOf(s.value || 0)}</b>
+                        <b>{fmt(s.value || 0)}{showPercentages ? ` · ${pctOf(s.value || 0)}` : ''}</b>
                     </li>
                 ))}
             </ul>

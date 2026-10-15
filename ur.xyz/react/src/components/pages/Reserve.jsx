@@ -228,7 +228,7 @@ export default function ReservePage() {
     const balanceLabel = chart.livePts.length
         ? (chart.projected.length ? `Reserve balance · live, projected to ${dateLabel(end.date)}` : 'Reserve balance · live')
         : (end ? `Reserve balance · projected to ${dateLabel(end.date)}` : 'Reserve balance');
-    const momentumBasis = fromChain ? `${pct(momentum)}, its value on chain` : `its launch value of ${pct(launchMomentum)}`;
+    const momentumBasis = fromChain ? 'its value on chain' : 'its launch value';
     const balanceNote = chart.livePts.length
         ? `Live balance sampled daily from finalized chain state; projected at miner emissions × (1 − momentum) with momentum at ${momentumBasis}, and no program payments.`
         : `Projected at miner emissions × (1 − momentum) with momentum at ${momentumBasis} and no programs paid. Switches to the live balance once the reserve receives emission.`;
@@ -291,11 +291,11 @@ export default function ReservePage() {
                             <span className="reserve-nw">{calcLabel}</span>{' '}
                             <span className="reserve-nw">{whole(perDay)} α a day</span>{' '}
                             <span className="reserve-nw">= {whole(minerPerDay)} α a day</span>{' '}
-                            <span className="reserve-nw">× (1 − {pct(momentum)}{burnedShare >= 0.0005 ? ` − ${pct(burnedShare)} burned` : ''})</span>
+                            <span className="reserve-nw">× (1 − momentum{burnedShare >= 0.0005 ? ` − ${pct(burnedShare)} burned` : ''})</span>
                         </p>
                         <p className="reserve-formula-def">
-                            <dfn>Momentum</dfn> is the share of the miner emissions used now to power the network, as rewards to providers: {fromChain ? `${pct(momentum)} at block ${whole(snapshot.block)}, from ${pct(launchMomentum)} at launch` : `${pct(launchMomentum)} at launch`}. The reserve is not a fixed share. It receives whatever momentum does not use, so it receives less as momentum grows.
-                            {live && !fromChain && routing ? ` The chain shows no momentum yet: at block ${whole(snapshot.block)} the reserve's recipients receive ${pct(routing.reserve)} of the miner allocation, and the page follows the chain's momentum once it is at least 0.1%.` : ''}
+                            <dfn>Momentum</dfn> is the share of the miner emissions used now to power the network, as rewards to providers. The reserve is not a fixed share. It receives whatever momentum does not use, so it receives less as momentum grows.
+                            {live && !fromChain && routing ? ` The chain shows no momentum yet: at block ${whole(snapshot.block)} the reserve's recipients receive the remainder of the miner allocation, and the page follows the chain's momentum once it is at least 0.1%.` : ''}
                         </p>
                     </div>
                     <div className="reserve-wallet">
@@ -344,7 +344,7 @@ export default function ReservePage() {
             <section className="reserve-block" id="balance" aria-labelledby="reserve-balance-h">
                 <div className="reserve-shell">
                     <span className="reserve-kicker">01 / The reserve</span>
-                    <h2 id="reserve-balance-h">Watch the reserve grow.</h2>
+                    <h2 id="reserve-balance-h">Reserve balance.</h2>
                     <p className="reserve-sub">
                         {chart.livePts.length
                             ? `The balance and its flows by month, read from finalized chain state and projected to ${dateLabel(reserve.projectThrough)} at momentum's ${fromChain ? 'on-chain' : 'launch'} value.`
@@ -471,6 +471,7 @@ export default function ReservePage() {
                         {routing ? (
                             <SplitBar
                                 title="Miner allocation, on chain now"
+                                showPercentages={false}
                                 meta={`${whole(minerPerDay)} α a day`}
                                 fmt={(v) => `${whole(v)} α a day`}
                                 segments={[
@@ -479,21 +480,22 @@ export default function ReservePage() {
                                     { label: 'Owner-directed, burned', value: minerPerDay * routing.burned, color: 'var(--rv-burn)' },
                                 ]}
                                 note={live
-                                    ? `The reserve receives what momentum leaves: 1 − momentum. At this block its recipients take ${pct(routing.reserve)} of the miner allocation and momentum on chain is ${pct(otherShare)}${fromChain ? ', the value the page uses' : `, below the 0.1% the page follows, so the formula keeps momentum's launch value of ${pct(launchMomentum)}`}.`
+                                    ? 'The reserve receives what momentum leaves: 1 − momentum.'
                                     : fromChain
-                                        ? `Momentum is on chain now: ${pct(momentum)} of the miner allocation (${whole(momentumPerDay)} α a day) goes to providers. The reserve receives the rest, 1 − momentum (${whole(perDay)} α a day), once its hotkeys are paid.`
-                                        : `From ${shortDate(reserve.launch)}, momentum goes to providers, ${pct(launchMomentum)} at launch (${whole(momentumPerDay)} α a day), and the reserve receives the rest, 1 − momentum (${whole(perDay)} α a day). Until then the chain burns the owner-directed share.`}
+                                        ? `Momentum is on chain now: ${whole(momentumPerDay)} α a day goes to providers. The reserve receives the rest, 1 − momentum (${whole(perDay)} α a day), once its hotkeys are paid.`
+                                        : `From ${shortDate(reserve.launch)}, momentum goes to providers (${whole(momentumPerDay)} α a day), and the reserve receives the rest, 1 − momentum (${whole(perDay)} α a day). Until then the chain burns the owner-directed share.`}
                             />
                         ) : (
                             <SplitBar
                                 title={`Miner allocation from ${shortDate(reserve.launch)}`}
+                                showPercentages={false}
                                 meta={`${whole(minerPerDay)} α a day`}
                                 fmt={(v) => `${whole(v)} α a day`}
                                 segments={[
                                     { label: 'Momentum, to providers', value: momentumPerDay, color: 'var(--rv-providers)' },
                                     { label: 'Reserve, 1 − momentum', value: perDay, color: 'var(--rv-reserve)' },
                                 ]}
-                                note={`Momentum at its launch value, ${pct(launchMomentum)}. The live split shows once the chain answers.`}
+                                note="The live split shows once the chain answers."
                             />
                         )}
                     </div>
@@ -625,7 +627,7 @@ export default function ReservePage() {
                                 <dt>Recipient hotkeys</dt>
                                 {!snapshot ? <dd>—</dd> : snapshot.hotkeys.length === 0 ? <dd>Not yet registered</dd> : snapshot.hotkeys.map((h) => (
                                     <dd key={h.hotkey}>
-                                        <code title={h.hotkey} translate="no">{shortKey(h.hotkey)}</code> UID {h.uid ?? '—'} · {pct(h.incentiveShare)} of incentive{h.registeredAt ? ` · registered at block ${whole(h.registeredAt)}` : ''}
+                                        <code title={h.hotkey} translate="no">{shortKey(h.hotkey)}</code> UID {h.uid ?? '—'}{h.registeredAt ? ` · registered at block ${whole(h.registeredAt)}` : ''}
                                     </dd>
                                 ))}
                             </dl>
@@ -661,12 +663,12 @@ export default function ReservePage() {
             <section className="reserve-block reserve-fine-block" aria-label="Methodology">
                 <div className="reserve-shell">
                     <p className="reserve-fine">
-                        <span><b>Mechanism.</b> SN25 emits {whole(emission.alphaPerDay)} α a day: {pct(emission.ownerCut, 0)} to the subnet owner and the rest split evenly between validators and miners, so the miner allocation is {whole(minerPerDay)} α a day. From {shortDate(reserve.launch)}, momentum, the share used now to power the network, goes to providers as rewards: {pct(launchMomentum)} at launch. The reserve's recipient hotkeys receive the rest, miner emissions × (1 − momentum), so the reserve's share is not fixed. It falls as momentum grows. The page keeps momentum at its launch value until the chain shows one of at least 0.1%, then follows the chain.</span>
+                        <span><b>Mechanism.</b> SN25 emits {whole(emission.alphaPerDay)} α a day: {pct(emission.ownerCut, 0)} to the subnet owner and the rest split evenly between validators and miners, so the miner allocation is {whole(minerPerDay)} α a day. From {shortDate(reserve.launch)}, momentum, the share used now to power the network, goes to providers as rewards. The reserve's recipient hotkeys receive the rest, miner emissions × (1 − momentum), so the reserve's share is not fixed. It falls as momentum grows. The page keeps momentum at its launch value until the chain shows one of at least 0.1%, then follows the chain.</span>
                         {snapshot && !live && (
-                            <span><b>{overdue ? 'Before the first receipt.' : 'Before launch.'}</b> At finalized block {whole(snapshot.block)} ({timeUtc(snapshot.time)}) {pct(snapshot.routing.burned, 0)} of the miner allocation was directed to the subnet owner hotkey and burned by the chain, and the reserve account held nothing. The projection holds momentum at {fromChain ? `its value on chain now, ${pct(momentum)},` : 'its launch value'} and assumes no program payments.</span>
+                            <span><b>{overdue ? 'Before the first receipt.' : 'Before launch.'}</b> At finalized block {whole(snapshot.block)} ({timeUtc(snapshot.time)}) {pct(snapshot.routing.burned, 0)} of the miner allocation was directed to the subnet owner hotkey and burned by the chain, and the reserve account held nothing. The projection holds momentum at {fromChain ? 'its value on chain now' : 'its launch value'} and assumes no program payments.</span>
                         )}
                         {snapshot && live && (
-                            <span><b>Balance.</b> The reserve is α staked on SN25 under its recipient hotkeys, owned by coldkey {shortKey(reserve.address)}, read from finalized chain state (block {whole(snapshot.block)}, {timeUtc(snapshot.time)}); any free TAO is shown separately. At this block the chain routes {pct(routing.reserve)} of the miner allocation to those hotkeys{routing.burned >= 0.0005 ? `, burns ${pct(routing.burned)}` : ''} and pays providers {pct(otherShare)}. Receipts and payments are the rises and falls between daily samples, from the recipients' registration{Number.isFinite(firstRegistration) ? ` at block ${whole(firstRegistration)}` : ''}; the projection continues from the latest balance at momentum's {fromChain ? 'on-chain' : 'launch'} value and assumes no program payments.</span>
+                            <span><b>Balance.</b> The reserve is α staked on SN25 under its recipient hotkeys, owned by coldkey {shortKey(reserve.address)}, read from finalized chain state (block {whole(snapshot.block)}, {timeUtc(snapshot.time)}); any free TAO is shown separately. Receipts and payments are the rises and falls between daily samples, from the recipients' registration{Number.isFinite(firstRegistration) ? ` at block ${whole(firstRegistration)}` : ''}; the projection continues from the latest balance at momentum's {fromChain ? 'on-chain' : 'launch'} value and assumes no program payments.</span>
                         )}
                         {priceTao && (
                             <span><b>Valuation.</b> TAO figures are a spot mark, not a realisable value: α at {priceTao.toFixed(6)} TAO, the SN25 pool's ratio of TAO in to α in at this block.{denom.usd
