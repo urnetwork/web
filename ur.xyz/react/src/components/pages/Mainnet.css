@@ -1,0 +1,141 @@
+/* Mainnet.css — the /mainnet page body (components/pages/Mainnet.jsx).
+ *
+ * Global stylesheet (the SPA bundles every component's CSS into one sheet
+ * that is loaded on every route), so nothing here may leak onto other pages:
+ * every rule is scoped under the page's .mainnet-page wrapper.
+ *
+ * The page is the site's section shell (Section.jsx: eyebrow, title, rule),
+ * spaced like /about, around the roadmap's vertical track (RoadmapTrack.css:
+ * a hairline with a node per milestone, the small-caps date and the status
+ * pill), set denser here for a few dozen milestones. A done milestone's node
+ * is filled, one in progress is filled and ringed, a scheduled or planned one
+ * is outlined;
+ * the pill beside the date names the status in words, so nothing is read from
+ * the node alone. Settlement v2 is marked in the settlement green
+ * (--brand-usd). Addresses are in the code face (--code-font), as on /reserve.
+ *
+ * The site has no callout component, so the box at the top (what miners need
+ * to do) is built from its parts: the card's hairline border and wash in the
+ * token pink (Section.css .card:hover), the section eyebrow, and PPNeueBit
+ * step numbers, in the content column every page shares.
+ */
+
+/* --- What miners need to do ---
+   main clears the nav's height; the disclaimer bar above the nav takes as
+   much again, so the box starts below both, as /reserve's hero does. */
+.mainnet-page .mainnet-actions { padding: 88px var(--content-gutter) 0; }
+.mainnet-page .mainnet-actions-box { max-width: var(--content-width); margin: 0 auto; padding: 30px 32px 28px; border: 1px solid rgba(237, 143, 255, 0.45); background: rgba(237, 143, 255, 0.04); }
+.mainnet-page .mainnet-actions-headline { margin: 0; font-family: 'PPNeueMontreal', sans-serif; font-size: clamp(2rem, 4vw, 2.75rem); font-weight: 400; line-height: 1.05; letter-spacing: -0.01em; color: var(--brand-white); }
+.mainnet-page .mainnet-actions-title { margin: 18px 0 0; font-size: 0.72rem; font-weight: 600; letter-spacing: 0.22em; line-height: 1.4; text-transform: uppercase; color: var(--brand-ur); }
+.mainnet-page .mainnet-actions-steps { margin: 18px 0 0; padding: 0; list-style: none; border-top: 1px solid rgba(214, 230, 244, 0.14); }
+.mainnet-page .mainnet-actions-steps li { display: grid; grid-template-columns: 44px minmax(0, 1fr); gap: 0 12px; padding: 16px 0; border-bottom: 1px solid rgba(214, 230, 244, 0.14); }
+.mainnet-page .mainnet-actions-no { font-family: 'PPNeueBit', monospace; font-size: 1.05rem; line-height: 1.5; letter-spacing: 0.05em; color: var(--brand-ur); }
+.mainnet-page .mainnet-actions-step p { margin: 0; font-size: 1.02rem; line-height: 1.55; color: var(--brand-ui); }
+.mainnet-page .mainnet-actions-step strong { font-weight: 400; color: var(--brand-white); }
+.mainnet-page .mainnet-actions-link { display: inline-block; margin-top: 8px; font-size: 0.85rem; line-height: 1.45; letter-spacing: 0.02em; color: var(--brand-ur); text-decoration: none; }
+.mainnet-page .mainnet-actions-link:hover { color: var(--brand-white); }
+.mainnet-page .mainnet-actions-closing { margin: 18px 0 0; font-size: 1.02rem; line-height: 1.6; color: var(--brand-white); }
+.mainnet-page .mainnet-actions-closing a { color: var(--brand-ur); text-decoration-thickness: 1px; text-underline-offset: 0.18em; }
+.mainnet-page .mainnet-actions-closing a:hover { color: var(--brand-white); }
+.mainnet-page .mainnet-actions a:focus-visible { outline: 2px solid var(--brand-ur); outline-offset: 3px; }
+
+.mainnet-page #mainnet { border-top: 0; padding-top: 88px; padding-bottom: 72px; }
+.mainnet-page #settlement { padding-top: 72px; padding-bottom: 72px; }
+.mainnet-page #milestones { padding-top: 72px; }
+/* the epoch list links each epoch's milestones: land below the fixed nav */
+.mainnet-page [id] { scroll-margin-top: calc(var(--nav-height) + 24px); }
+
+.mainnet-page .mainnet-lede p { margin: 0; color: var(--brand-white); font-size: 1.12rem; line-height: 1.62; }
+.mainnet-page .mainnet-lede .mainnet-note { margin-top: 1.1em; color: var(--brand-ui); font-size: 1rem; line-height: 1.65; }
+.mainnet-page .mainnet-note .roadmap-flag { display: inline-block; margin: 0 2px; vertical-align: 0.12em; }
+
+/* --- The epochs at a glance: hairline rows, like /about's contributors --- */
+.mainnet-page .mainnet-epochs { list-style: none; margin: 40px 0 0; padding: 0; border-bottom: 1px solid rgba(214, 230, 244, 0.14); }
+.mainnet-page .mainnet-epochs li { border-top: 1px solid rgba(214, 230, 244, 0.14); }
+.mainnet-page .mainnet-epochs li > a,
+.mainnet-page .mainnet-epochs li > div { display: grid; grid-template-columns: 112px minmax(0, 1fr) auto; gap: 6px 24px; align-items: baseline; padding: 16px 0; color: inherit; text-decoration: none; transition: background 0.2s ease; }
+.mainnet-page .mainnet-epochs li > a:hover { background: rgba(237, 143, 255, 0.025); }
+.mainnet-page .mainnet-epochs li > a:hover .mainnet-epoch-days { color: var(--brand-ur); }
+.mainnet-page .mainnet-epochs li > a:focus-visible { outline: 2px solid var(--brand-ur); outline-offset: 2px; }
+.mainnet-page .mainnet-epoch-no { font-family: 'PPNeueBit', monospace; font-size: 0.95rem; letter-spacing: 0.05em; color: var(--brand-ur); }
+.mainnet-page .mainnet-epoch-days { color: var(--brand-white); font-size: 1rem; transition: color 0.2s ease; }
+.mainnet-page .mainnet-epoch-by { font-size: 0.68rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--brand-ui); white-space: nowrap; }
+.mainnet-page .mainnet-epoch-by[data-settlement="v2"] { color: var(--brand-usd); }
+
+/* --- The milestones, one group per epoch --- */
+.mainnet-page .mainnet-group + .mainnet-group { margin-top: 64px; }
+.mainnet-page .mainnet-group-head { margin-bottom: 32px; padding-bottom: 18px; border-bottom: 1px solid rgba(214, 230, 244, 0.14); }
+.mainnet-page .mainnet-group-head h3 { margin: 0; font-family: 'PPNeueMontreal', sans-serif; font-size: clamp(1.5rem, 3vw, 2rem); font-weight: 400; line-height: 1.1; letter-spacing: -0.01em; color: var(--brand-white); }
+.mainnet-page .mainnet-group-when { margin: 12px 0 0; font-size: 0.68rem; letter-spacing: 0.14em; line-height: 1.5; text-transform: uppercase; color: var(--brand-ui); opacity: 0.75; }
+.mainnet-page .mainnet-group-sub { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; margin: 6px 0 0; font-size: 0.92rem; line-height: 1.5; color: var(--brand-ui); }
+.mainnet-page .mainnet-group-about { opacity: 0.82; }
+
+.mainnet-page .mainnet-track { margin: 0; }
+.mainnet-page .mainnet-track .roadmap-stop { padding-bottom: 36px; }
+.mainnet-page .mainnet-track .roadmap-stop:last-child { padding-bottom: 0; }
+.mainnet-page .mainnet-track .roadmap-meta { margin-bottom: 10px; }
+.mainnet-page .mainnet-track .roadmap-title { margin-bottom: 8px; font-size: clamp(1.12rem, 1.8vw, 1.3rem); line-height: 1.25; }
+.mainnet-page .mainnet-track .roadmap-body { max-width: none; font-size: 0.98rem; line-height: 1.6; }
+
+/* status, not position: the roadmap fills its first stop (what ships next) */
+.mainnet-page .mainnet-track .roadmap-stop .roadmap-node { background: var(--brand-bg); box-shadow: none; }
+.mainnet-page .mainnet-track .roadmap-stop[data-status="done"] .roadmap-node { background: var(--brand-ur); }
+.mainnet-page .mainnet-track .roadmap-stop[data-status="in_progress"] .roadmap-node { background: var(--brand-ur); box-shadow: 0 0 0 4px rgba(237, 143, 255, 0.16); }
+.mainnet-page .roadmap-flag[data-status="in_progress"] { background: rgba(237, 143, 255, 0.12); }
+.mainnet-page .roadmap-flag[data-status="scheduled"],
+.mainnet-page .roadmap-flag[data-status="planned"] { border-color: rgba(214, 230, 244, 0.32); color: var(--brand-ui); }
+
+/* --- Sources: a label, an address, and the explorer link --- */
+.mainnet-page .mainnet-sources { display: grid; gap: 4px; margin: 14px 0 0; padding: 0; list-style: none; font-size: 0.82rem; line-height: 1.5; }
+.mainnet-page .mainnet-sources li { display: flex; flex-wrap: wrap; align-items: baseline; column-gap: 10px; min-width: 0; }
+.mainnet-page .mainnet-source-label { color: var(--brand-ui); opacity: 0.72; }
+.mainnet-page .mainnet-sources code { font-family: var(--code-font); font-size: 0.93em; letter-spacing: 0; font-variant-ligatures: none; font-variant-numeric: slashed-zero; color: var(--brand-ui); }
+.mainnet-page .mainnet-sources a { color: var(--brand-ur); text-decoration: none; white-space: nowrap; }
+.mainnet-page .mainnet-sources a:hover { color: var(--brand-white); }
+.mainnet-page .mainnet-sources a:focus-visible { outline: 2px solid var(--brand-ur); outline-offset: 2px; }
+/* a run of transactions, closed under the contracts (native <details>, no script) */
+.mainnet-page .mainnet-sources-more { margin: 8px 0 0; font-size: 0.82rem; line-height: 1.5; }
+.mainnet-page .mainnet-sources-more > summary { display: inline-flex; align-items: center; gap: 8px; min-height: 28px; color: var(--brand-ui); cursor: pointer; list-style: none; }
+.mainnet-page .mainnet-sources-more > summary::-webkit-details-marker { display: none; }
+.mainnet-page .mainnet-sources-more > summary::before { content: '\25BE'; display: inline-block; color: var(--brand-ur); transform: rotate(-90deg); transition: transform 0.2s ease; }
+.mainnet-page .mainnet-sources-more[open] > summary::before { transform: none; }
+.mainnet-page .mainnet-sources-more > summary:hover { color: var(--brand-white); }
+.mainnet-page .mainnet-sources-more > summary:focus-visible { outline: 2px solid var(--brand-ur); outline-offset: 2px; }
+.mainnet-page .mainnet-sources-more > .mainnet-sources { margin-top: 4px; padding-left: 18px; }
+
+.mainnet-page .mainnet-fine { margin: 64px 0 0; padding-top: 22px; border-top: 1px solid rgba(214, 230, 244, 0.14); font-size: 0.82rem; line-height: 1.6; color: var(--brand-ui); opacity: 0.75; }
+
+@media (max-width: 820px) {
+    .mainnet-page .mainnet-actions { padding-top: 72px; }
+    .mainnet-page #mainnet { padding-top: 64px; padding-bottom: 52px; }
+    .mainnet-page #settlement { padding-top: 52px; padding-bottom: 52px; }
+    .mainnet-page #milestones { padding-top: 52px; }
+    .mainnet-page .mainnet-group + .mainnet-group { margin-top: 52px; }
+}
+
+@media (max-width: 520px) {
+    .mainnet-page .mainnet-actions-box { padding: 22px 18px 20px; }
+    .mainnet-page .mainnet-actions-steps li { grid-template-columns: 32px minmax(0, 1fr); gap: 0 8px; }
+    .mainnet-page .mainnet-actions-step p,
+    .mainnet-page .mainnet-actions-closing { font-size: 0.98rem; }
+    .mainnet-page .mainnet-lede p { font-size: 1.03rem; line-height: 1.58; }
+    .mainnet-page .mainnet-epochs li > a,
+    .mainnet-page .mainnet-epochs li > div { grid-template-columns: minmax(0, 1fr) auto; gap: 4px 16px; }
+    .mainnet-page .mainnet-epoch-days { grid-column: 1 / -1; grid-row: 2; }
+    .mainnet-page .mainnet-track .roadmap-stop { padding-bottom: 32px; }
+}
+
+/* Touch: give each source link a taller row to land on */
+@media (pointer: coarse) {
+    .mainnet-page .mainnet-sources { gap: 0; }
+    .mainnet-page .mainnet-sources li { align-items: center; min-height: 36px; }
+    .mainnet-page .mainnet-sources a { display: inline-flex; align-items: center; min-height: 36px; }
+    .mainnet-page .mainnet-sources-more > summary { min-height: 40px; }
+    .mainnet-page .mainnet-actions-link { margin-top: 2px; padding: 8px 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .mainnet-page .mainnet-epochs li > a,
+    .mainnet-page .mainnet-epoch-days,
+    .mainnet-page .mainnet-sources-more > summary::before { transition: none; }
+}

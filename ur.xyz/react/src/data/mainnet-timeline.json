@@ -1,0 +1,297 @@
+{
+  "explorers": {
+    "evm_tx": "https://evm.taostats.io/tx/{hash}",
+    "substrate_extrinsic": "https://taostats.io/extrinsic/{block}-{index}",
+    "evm_address": "https://evm.taostats.io/address/{address}",
+    "evm_block": "https://evm.taostats.io/block/{number}",
+    "substrate_block": "https://taostats.io/block/{number}/extrinsics"
+  },
+  "events": [
+    {
+      "id": "provider-earnings-move-to-sn25",
+      "date": "2026-10-06T00:00:00Z",
+      "status": "done",
+      "title": "Provider earnings move to SN25",
+      "detail": "Earnings from contracts settled after this cutoff are paid through SN25. Legacy USDC payouts cover only earlier earnings.",
+      "sources": []
+    },
+    {
+      "id": "v1-contracts-deployed",
+      "date": "2026-10-08T17:59:12Z/2026-10-08T18:16:00Z",
+      "status": "done",
+      "title": "Version 1 contracts deployed",
+      "detail": "Eight deployment steps on Bittensor's EVM, in blocks 9,239,983 to 9,240,067. The coordinator, created at 18:08 UTC, starts epoch 0.",
+      "sources": [
+        { "label": "Coordinator", "kind": "evm_address", "ref": "0xC18925925E2B7bb9059b7d696b8c92762AE86406" },
+        { "label": "Coordinator implementation", "kind": "evm_address", "ref": "0x5177268c0a22154866c7a6a79df3deab77c1e509" },
+        { "label": "Settlement vault", "kind": "evm_address", "ref": "0x98BF47ba01828676855B5ED10F2f22a867F0cB59" },
+        { "label": "Reserve sink", "kind": "evm_address", "ref": "0x134a70Cbe45eA14324536feca4d6F08FDDee9245" },
+        { "label": "Validator evidence", "kind": "evm_address", "ref": "0x170617750c98968185b2f40540e60b49adaf7448" },
+        { "label": "Reserve sink created, block 9,239,983", "kind": "evm_tx", "ref": "0x44909b59e1cd41aa8d13078b78a93ba8d990ddb2a38921fc24adc307559afe3f" },
+        { "label": "Settlement vault created, block 9,239,994", "kind": "evm_tx", "ref": "0xd2fb5d900d7ecab26bdbd15992ad04b333179b35adab4ebf2c0f2906f33a9936" },
+        { "label": "Coordinator implementation created, block 9,240,004", "kind": "evm_tx", "ref": "0xf20ebc80adcd892871933610b6d3971664d818e3b1c6c1c7311e0477ebaccf32" },
+        { "label": "Escrow registered, block 9,240,015", "kind": "evm_tx", "ref": "0xef9edb5624a08ff5a7904a2118c31781d081a3502820b0224e655749a818f260" },
+        { "label": "Coordinator created, epoch 0 starts, block 9,240,028", "kind": "evm_tx", "ref": "0x03f442f0e5628b4aaaa2dfb00f1a012b2660ddd02587452063b93d9baa255bf4" },
+        { "label": "Reserve sink linked to the coordinator, block 9,240,039", "kind": "evm_tx", "ref": "0xef30c1a70c2837cc47bd120bb101c0fe58241c17fe6b77eef54b9acf343439a2" },
+        { "label": "Vault linked to the coordinator, block 9,240,049", "kind": "evm_tx", "ref": "0xf510c8501f6a6c7934378c19f143d519fa9feea1d0f54f7f5df1295740a44803" },
+        { "label": "Validator evidence created, block 9,240,067", "kind": "evm_tx", "ref": "0x81caf9d7a2ea81c4b34226190fd473db1a30c9586cff9fc1d45da4e651b4c18e" }
+      ]
+    },
+    {
+      "id": "network-operator-registered",
+      "date": "2026-10-08T18:36:12Z",
+      "status": "done",
+      "title": "Network operator 1 registered",
+      "detail": "The governance Safe registers the UR operator, network operator 1, and its pool, SN25 UID 169.",
+      "sources": [
+        { "label": "Registration through the governance Safe, block 9,240,168", "kind": "evm_tx", "ref": "0x0f9494d8db70e46d5b07606ec1fcdb0d8ccf07df97ea71e95686ffd82c9e5050" },
+        { "label": "Governance Safe", "kind": "evm_address", "ref": "0x56F4Dad575576CC0B679FEf52899630f9F605418" },
+        { "label": "Governance Safe created, block 9,229,341", "kind": "evm_tx", "ref": "0x2167a4e3957c5f1e4a3fce41a94add000f4f01c71423239302de7e8469f71dcd" }
+      ]
+    },
+    {
+      "id": "v1-validator-activated",
+      "date": "2026-10-08T19:23:00Z",
+      "status": "done",
+      "title": "Version 1 validator activated",
+      "detail": "SN25's sole validator, UID 1, publishes its activation for epoch 1 on chain.",
+      "sources": [
+        { "label": "Activation, block 9,240,402", "kind": "evm_tx", "ref": "0xd2d713d5f842156ea76c0271e8aa2f69cb8088ca133da241bca0433954f84ffb" }
+      ]
+    },
+    {
+      "id": "weekly-epochs-scheduled",
+      "date": "2026-10-08T19:24:00Z",
+      "status": "done",
+      "title": "Weekly epochs scheduled",
+      "detail": "The governance Safe sets 7-day epochs of 50,400 blocks from epoch 1.",
+      "sources": [
+        { "label": "Epoch schedule through the governance Safe, block 9,240,407", "kind": "evm_tx", "ref": "0x088b29ff3cb8f8e23088f381fe5fad1af62fc1876ad03d27afa70ee46b51d930" },
+        { "label": "Governance Safe", "kind": "evm_address", "ref": "0x56F4Dad575576CC0B679FEf52899630f9F605418" }
+      ]
+    },
+    {
+      "id": "operator-settlement-enabled",
+      "date": "2026-10-09T03:22:45Z",
+      "status": "done",
+      "title": "Network operator settlement switched on",
+      "detail": "The network operator's servers switch on SN25 mainnet settlement.",
+      "sources": []
+    },
+    {
+      "id": "client-key-registration-live",
+      "date": "2026-10-09T17:55:00Z",
+      "status": "done",
+      "approximate": true,
+      "title": "Signed client-key registration live",
+      "detail": "The first providers register their client keys with a signature for SN25.",
+      "sources": []
+    },
+    {
+      "id": "epoch-1-begins",
+      "date": "2026-10-09T18:09:00Z",
+      "status": "done",
+      "title": "Epoch 1 begins: the first payout epoch",
+      "detail": "The first weekly payout epoch, and the one the version 1 validator activated for, starts at block 9,247,228.",
+      "sources": [
+        { "label": "Epoch 1's first block, 9,247,228", "kind": "evm_block", "ref": "9247228" }
+      ]
+    },
+    {
+      "id": "last-usdc-payout-batch",
+      "date": "2026-10-11",
+      "status": "done",
+      "title": "Last USDC payout batch",
+      "detail": "The last batch of legacy USDC provider payouts.",
+      "sources": []
+    },
+    {
+      "id": "bittensor-runtime-478",
+      "date": "2026-10-13T21:08:36Z",
+      "status": "done",
+      "title": "Bittensor runtime 478 on mainnet",
+      "detail": "The chain upgrades again, after runtime 477 on October 12. The settlement v2 contracts passed their rehearsal on runtime 478.",
+      "sources": [
+        { "label": "Runtime 478 upgrade, extrinsic 9276925-0010", "kind": "substrate_block", "ref": "9276925" },
+        { "label": "Runtime 477 upgrade on October 12, extrinsic 9267632-0020", "kind": "substrate_block", "ref": "9267632" }
+      ]
+    },
+    {
+      "id": "settlement-v2-moved-to-epoch-3",
+      "date": "2026-10-14T05:43:56Z",
+      "status": "done",
+      "title": "Settlement v2 start moved to epoch 3",
+      "detail": "The subnet owner moves the start of settlement v2 from epoch 2 to epoch 3.",
+      "sources": []
+    },
+    {
+      "id": "settlement-v2-gas-policy",
+      "date": "2026-10-14T19:20:00Z",
+      "status": "done",
+      "title": "Gas policy for settlement v2 in place",
+      "detail": "The network operator's servers load the gas policy for settlement v2's epoch closes.",
+      "sources": []
+    },
+    {
+      "id": "settlement-v2-release-checks",
+      "date": "2026-10-16",
+      "status": "planned",
+      "title": "Settlement v2 release checks",
+      "detail": "The rollout dates that follow hold if the settlement v2 release passes its final checks by the morning of October 16.",
+      "sources": []
+    },
+    {
+      "id": "operator-services-updated",
+      "date": "2026-10-16",
+      "status": "planned",
+      "title": "Network operator services updated, v2 off",
+      "detail": "During the day, the network operator's services move to the settlement v2 release, with v2 still switched off.",
+      "sources": []
+    },
+    {
+      "id": "epoch-1-closes",
+      "date": "2026-10-16T18:09:00Z/2026-10-16T18:33:00Z",
+      "status": "scheduled",
+      "title": "Epoch 1 closes on version 1",
+      "detail": "The close window is 120 blocks, from block 9,297,628 to 9,297,748. The epoch 1 payout root is due by block 9,298,828, around 22:09 UTC.",
+      "sources": [
+        { "label": "Epoch 1 close", "kind": "evm_tx", "ref": "" },
+        { "label": "Epoch 1 payout root", "kind": "evm_tx", "ref": "" }
+      ]
+    },
+    {
+      "id": "connect-service-updated",
+      "date": "2026-10-17T08:35:00Z",
+      "status": "planned",
+      "title": "Connect service updated, v2 off",
+      "detail": "The network operator's connect service follows its other services, ahead of the validator.",
+      "sources": []
+    },
+    {
+      "id": "v2-validator-starts",
+      "date": "2026-10-17T15:48:00Z/2026-10-17T16:08:00Z",
+      "status": "planned",
+      "title": "Settlement v2 validator starts, v2 off",
+      "detail": "The validator runs its new release on unchanged settings, after the connect service.",
+      "sources": []
+    },
+    {
+      "id": "v2-contracts-deployed",
+      "date": "2026-10-17",
+      "status": "planned",
+      "approximate": true,
+      "title": "Settlement v2 contracts deployed",
+      "detail": "After the validator starts, vault2, which holds the funds, and STSettlement2 go on chain beside the unchanged version 1 contracts.",
+      "sources": [
+        { "label": "vault2", "kind": "evm_address", "ref": "" },
+        { "label": "STSettlement2", "kind": "evm_address", "ref": "" },
+        { "label": "STSettlement2 implementation", "kind": "evm_address", "ref": "" },
+        { "label": "vault2 created", "kind": "evm_tx", "ref": "" },
+        { "label": "Escrow registered", "kind": "evm_tx", "ref": "" },
+        { "label": "STSettlement2 implementation created", "kind": "evm_tx", "ref": "" },
+        { "label": "STSettlement2 created", "kind": "evm_tx", "ref": "" },
+        { "label": "vault2 linked to STSettlement2", "kind": "evm_tx", "ref": "" }
+      ]
+    },
+    {
+      "id": "first-v1-claims",
+      "date": "2026-10-18T18:09:00Z",
+      "status": "scheduled",
+      "title": "First version 1 claims (epoch 1)",
+      "detail": "The epoch 1 payout root can finalize from block 9,312,028 at the earliest, and claims open then. As explained above, version 1 does not pay every miner.",
+      "sources": [
+        { "label": "Epoch 1 finalized", "kind": "evm_tx", "ref": "" },
+        { "label": "First version 1 claim", "kind": "evm_tx", "ref": "" }
+      ]
+    },
+    {
+      "id": "validator-adopts-v2-settings",
+      "date": "2026-10-18/2026-10-19",
+      "status": "planned",
+      "title": "Validator adopts its settlement v2 settings",
+      "detail": "Kept clear of the epoch 1 finalization on the evening of October 18.",
+      "sources": []
+    },
+    {
+      "id": "operator-switches-to-v2-contracts",
+      "date": "2026-10-19/2026-10-20",
+      "status": "planned",
+      "title": "Network operator switches to the v2 contracts",
+      "detail": "The network operator's servers switch to the settlement v2 contracts on October 19, and checks run on October 20. Apps pin vault2 from October 18 to 20.",
+      "sources": []
+    },
+    {
+      "id": "fp2-modern-provider-gate",
+      "date": "2026-10-21T00:00:00Z",
+      "status": "scheduled",
+      "approximate": false,
+      "title": "Modern provider gate turns on",
+      "detail": "Quality and Speed admit only providers verified as modern. The gate turns on automatically at 00:00 UTC, as decided on October 15, and it can be postponed.",
+      "sources": []
+    },
+    {
+      "id": "v2-pool-registration-window",
+      "date": "2026-10-21T18:09:00Z/2026-10-22T18:09:00Z",
+      "status": "scheduled",
+      "title": "Settlement v2 pool registration window",
+      "detail": "Blocks 9,333,628 to 9,340,828. The v2 pool must register in this window to activate in epoch 3.",
+      "sources": []
+    },
+    {
+      "id": "v2-pool-registered",
+      "date": "2026-10-21T19:00:00Z/2026-10-21T22:00:00Z",
+      "status": "planned",
+      "title": "Settlement v2 pool registered",
+      "detail": "The governance Safe registers the v2 pool for epoch 3. This is the activation.",
+      "sources": [
+        { "label": "Registration through the governance Safe", "kind": "evm_tx", "ref": "" },
+        { "label": "Governance Safe", "kind": "evm_address", "ref": "0x56F4Dad575576CC0B679FEf52899630f9F605418" }
+      ]
+    },
+    {
+      "id": "settlement-v2-active",
+      "date": "2026-10-23T18:09:00Z",
+      "status": "scheduled",
+      "title": "Settlement v2 active: epoch 3 begins",
+      "detail": "From block 9,348,028, the validator weights the v2 pool. Epoch 2 still closes on version 1, with its payout root due by around 22:09 UTC.",
+      "sources": [
+        { "label": "Epoch 3's first block, 9,348,028", "kind": "evm_block", "ref": "" },
+        { "label": "Epoch 2 close", "kind": "evm_tx", "ref": "" },
+        { "label": "Epoch 2 payout root", "kind": "evm_tx", "ref": "" }
+      ]
+    },
+    {
+      "id": "last-v1-claims",
+      "date": "2026-10-25T18:09:00Z",
+      "status": "scheduled",
+      "title": "Last version 1 claims (epoch 2)",
+      "detail": "The epoch 2 payout root can finalize from block 9,362,428 at the earliest. The same version 1 limit applies.",
+      "sources": [
+        { "label": "Epoch 2 finalized", "kind": "evm_tx", "ref": "" }
+      ]
+    },
+    {
+      "id": "first-v2-close-and-commit",
+      "date": "2026-10-30T18:09:00Z/2026-10-30T22:09:00Z",
+      "status": "scheduled",
+      "title": "First settlement v2 close and commit",
+      "detail": "The first v2 close window opens at block 9,398,428, and the first v2 ledger root is due by block 9,399,628.",
+      "sources": [
+        { "label": "First v2 close", "kind": "evm_tx", "ref": "" },
+        { "label": "First v2 ledger root", "kind": "evm_tx", "ref": "" },
+        { "label": "Validator approval", "kind": "evm_tx", "ref": "" }
+      ]
+    },
+    {
+      "id": "first-v2-claim",
+      "date": "2026-11-01T18:09:00Z/2026-11-01T22:09:00Z",
+      "status": "scheduled",
+      "title": "First settlement v2 claim",
+      "detail": "The first v2 root can finalize 14,400 blocks after its commit, from block 9,412,828 at the earliest, and the first claims follow.",
+      "sources": [
+        { "label": "First v2 root finalized", "kind": "evm_tx", "ref": "" },
+        { "label": "First v2 claim", "kind": "evm_tx", "ref": "" }
+      ]
+    }
+  ]
+}

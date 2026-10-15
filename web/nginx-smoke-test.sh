@@ -152,6 +152,7 @@ done
 
 expect_response ur.xyz /investors 200
 expect_response ur.xyz /reserve 200
+expect_response ur.xyz /mainnet 200
 expect_operator_list
 expect_response www.ur.xyz / 301 https://ur.xyz/
 
