@@ -91,22 +91,23 @@ export default {
     stats: {
         protocolLedger:  'Libro de la subred',
         refresh:         'Actualizar estadísticas',
-        blockNumber:     'NÚMERO DE BLOQUE',
+        epoch:           'ÉPOCA',
+        epochEnds:       'Termina ≈ {date} UTC',
+        dataPerEpoch:    'DATOS TOTALES / ÉPOCA (GiB)',
+        usersPerEpoch:   'USUARIOS TOTALES / ÉPOCA',
+        demandDepositsPerEpoch: 'DEPÓSITOS DE DEMANDA / ÉPOCA (α)',
         dataPerBlock:    'DATOS TOTALES / BLOQUE (GiB)',
         usersPerBlock:   'USUARIOS TOTALES / BLOQUE',
-        totalNetworks:   'REDES TOTALES',
-        stakedInContract:'EN STAKE EN EL CONTRATO (α)',
         demandDeposits:  'DEPÓSITOS DE DEMANDA / BLOQUE (α)',
-        minerEmissions:  'EMISIÓN DE MINEROS / BLOQUE (α)',
-        networkOperators:'OPERADORES DE RED',
-        testnet:         'Estado: TESTNET. Solo se muestran valores de la red de prueba.'
+        totalNetworks:   'REDES TOTALES'
     },
 
     sim: {
-        block: 'BLOQUE',
+        epochTitle: 'ÉPOCA {n}',
+        prevEpoch: 'ÉPOCA ANTERIOR',
         prevBlock: 'BLOQUE ANTERIOR',
-        blockProgressAria: 'Progreso del bloque actual',
-        endsAt: 'Termina a las 00:00 UTC del {date}. {d}d {h}h {m}m {s}s hasta el fin del bloque',
+        epochProgressAria: 'Progreso de la época actual',
+        epochEndsAt: 'Termina ≈ {date} UTC. {d}d {h}h {m}m {s}s hasta el fin de la época',
         heroAria: 'Simulación de la red',
         ops:      'OPERADORES',
         protocol: 'PROTOCOLO'

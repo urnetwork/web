@@ -125,17 +125,6 @@
     font-weight: 600;
 }
 
-.stats-testnet {
-    max-width: 190px;
-    padding-inline-end: 24px;
-    color: var(--brand-ur);
-    font-size: 0.6rem;
-    line-height: 1.35;
-    letter-spacing: 0.06em;
-    text-align: end;
-    text-transform: uppercase;
-}
-
 /* --- Refresh dial ---------------------------------------------------------
  * Tap-to-refresh countdown ring in the panel's top-right corner (inline-end
  * under RTL). It is positioned off the same --p/--q interpolation as the
@@ -228,7 +217,9 @@
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    justify-content: center;
+    /* top-aligned: the epoch box is a line taller than the others, and the
+       labels of a row keep one line */
+    justify-content: flex-start;
 }
 
 .stat-label {
@@ -262,6 +253,53 @@
     overflow: hidden;
     text-overflow: ellipsis;
     max-width: 100%;
+}
+
+/* The epoch box: its percentage rides the value line, then a bar that
+   fills as the epoch elapses, then the epoch's projected end. */
+.stat-epoch-pct {
+    margin-inline-start: 0.45em;
+    font-size: 0.62em;
+    opacity: 0.85;
+}
+
+.stat-epoch-bar {
+    width: 100%;
+    height: 2px;
+    margin-top: calc(6px * (1 - var(--q)) + 4px * var(--q));
+    background: rgba(214, 230, 244, 0.12);
+    overflow: hidden;
+}
+
+.stat-epoch-bar > span {
+    display: block;
+    height: 100%;
+    background: var(--brand-ur);
+}
+
+.stat-epoch-ends {
+    margin-top: calc(5px * (1 - var(--q)) + 3px * var(--q));
+    font-size: calc(0.58rem * (1 - var(--q)) + 0.55rem * var(--q));
+    letter-spacing: 0.04em;
+    opacity: 0.65;
+    color: var(--brand-ui);
+
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+}
+
+.stats-visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    border: 0;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
 }
 
 .tone-ur    { color: var(--brand-ur); }
@@ -306,7 +344,6 @@
     }
 
     .stats-panel-eyebrow { display: none; }
-    .stats-testnet { display: block; max-width: none; padding-inline-end: 0; font-size: 0.56rem; text-align: start; }
 
     /* No header row on mobile: center the dial in the bar's end gutter. */
     .stats-refresh {
@@ -333,6 +370,21 @@
     }
 
     .stat-value { font-size: 1rem; }
+
+    /* The pinned bar stays compact: the percentage carries the progress
+       here, and the hero's epoch toast has the bar. */
+    .stat-epoch-bar { display: none; }
+
+    /* Phone legibility: no smaller than the labels (10px); it wraps, as the
+       labels do, rather than cut the date off. */
+    .stat-epoch-ends {
+        margin-top: 2px;
+        font-size: 0.625rem;
+        line-height: 1.2;
+        white-space: normal;
+        overflow: visible;
+        text-overflow: clip;
+    }
 }
 
 /* Touch hit-areas: extend small controls to a ~44px tap box without any

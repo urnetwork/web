@@ -8,7 +8,7 @@ import HomepageIntro from './components/HomepageIntro';
 import StatsPanel from './components/StatsPanel';
 import Footer from './components/Footer';
 import LaunchVideo from './components/LaunchVideo';
-import { useBlockClock, useNetworkTotals } from './lib/network';
+import { useClock, useNetworkTotals } from './lib/network';
 
 import LandingOverview from './components/LandingOverview';
 import Research from './components/sections/Research';
@@ -74,7 +74,7 @@ export default function App() {
  * into a sticky ticker bar.
  */
 function HomePage() {
-    const block = useBlockClock();
+    const now = useClock();
     const network = useNetworkTotals();
     const disclaimerVisible = useDisclaimerVisible();
 
@@ -82,9 +82,9 @@ function HomePage() {
         <div className="app">
             <Disclaimer visible={disclaimerVisible} />
             <Nav disclaimerVisible={disclaimerVisible} />
-            <Hero block={block} network={network} />
+            <Hero network={network} />
             <StatsPanel
-                block={block}
+                now={now}
                 network={network}
                 anchorId="stats-anchor"
                 disclaimerVisible={disclaimerVisible}

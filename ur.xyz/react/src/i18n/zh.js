@@ -89,22 +89,23 @@ export default {
     stats: {
         protocolLedger:  '子网账本',
         refresh:         '刷新统计数据',
-        blockNumber:     '区块编号',
+        epoch:           '周期',
+        epochEnds:       '预计 {date} UTC 结束',
+        dataPerEpoch:    '每周期总数据量 (GiB)',
+        usersPerEpoch:   '每周期总用户数',
+        demandDepositsPerEpoch: '每周期需求存款 (α)',
         dataPerBlock:    '每区块总数据量 (GiB)',
         usersPerBlock:   '每区块总用户数',
-        totalNetworks:   '网络总数',
-        stakedInContract:'合约质押量 (α)',
         demandDeposits:  '每区块需求存款 (α)',
-        minerEmissions:  '每区块矿工发行 (α)',
-        networkOperators:'网络运营商',
-        testnet:         '状态：TESTNET。仅显示测试网数据。'
+        totalNetworks:   '网络总数'
     },
 
     sim: {
-        block: '区块',
+        epochTitle: '周期 {n}',
+        prevEpoch: '上一周期',
         prevBlock: '上一区块',
-        blockProgressAria: '当前区块进度',
-        endsAt: '于 {date} 00:00 UTC 结束。距区块结束还有 {d}天 {h}时 {m}分 {s}秒',
+        epochProgressAria: '当前周期进度',
+        epochEndsAt: '预计 {date} UTC 结束。距周期结束还有 {d}天 {h}时 {m}分 {s}秒',
         heroAria: '网络模拟',
         ops:      '运营商',
         protocol: '协议'

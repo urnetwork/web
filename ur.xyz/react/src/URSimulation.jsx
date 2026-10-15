@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import './Simulation.css';
 import { useLanguage, intlLocale } from './i18n';
-import { blockEndAt, blockNumberAt } from './lib/network';
+import { displayEpoch, epochProgress, fillDate, formatEpochEnd } from './lib/epoch.js';
 
 // Brand Constants mapped from the CSS variables
 const COLORS = {
@@ -29,65 +29,50 @@ function useSecondTick() {
 }
 
 /**
- * BlockToast
+ * EpochToast
  *
- * Persistent progress card for the current block (7 days). The bar along
- * its top edge fills as the block elapses and a live countdown runs to
- * the block's end (always 00:00 UTC).
+ * Persistent progress card for the current settlement epoch (7 days, 50,400
+ * blocks). The bar along its top edge fills as the epoch elapses and a live
+ * countdown runs to its projected end. The epoch and its bounds are the
+ * operator feeds' when they report one, else the chain anchor's
+ * (lib/epoch.js). An epoch ends at a block, so the end is marked ≈.
  */
-function BlockToast({ block, network }) {
+function EpochToast({ network }) {
     const { t, code } = useLanguage();
     const now = useSecondTick();
 
-    if (!block) return null;
-    const pct = block.progress * 100;
+    // Nothing in the static render or the hydration render: the clock
+    // starts in an effect, and a number before it would be a guess.
+    const epoch = now == null ? null : displayEpoch(network?.epoch ?? null, now);
+    if (!epoch) return null;
 
-    // The countdown reads its own clock so the title, end date, and the
-    // remaining time all agree to the second — including at rollover.
-    let blockNumber = block.number;
-    let countdown = null;
-    if (now != null) {
-        blockNumber = Number.isFinite(network?.blockNumber)
-            ? network.blockNumber
-            : blockNumberAt(now);
-        const end = blockEndAt(now);
-        const left = Math.max(0, end - now);
-        const endDate = new Date(end).toLocaleDateString(intlLocale(code), {
-            month: 'short',
-            day: 'numeric',
-            timeZone: 'UTC'
-        });
-        // An abbreviated month can end in its own period (de "27. Sept.",
-        // ru "27 сент."): it doubles as the sentence's full stop rather than
-        // printing "Sept.." before the countdown.
-        const template = endDate.endsWith('.') ? t.sim.endsAt.replace('{date}.', '{date}') : t.sim.endsAt;
-        countdown = template
-            .replace('{date}', endDate)
-            .replace('{d}', Math.floor(left / 86400000))
-            .replace('{h}', Math.floor(left / 3600000) % 24)
-            .replace('{m}', Math.floor(left / 60000) % 60)
-            .replace('{s}', Math.floor(left / 1000) % 60);
-    }
+    // The countdown reads the same clock as the title and the bar, so the
+    // three agree to the second, rollover included.
+    const pct = epochProgress(epoch, now) * 100;
+    const left = Math.max(0, epoch.endMs - now);
+    const countdown = fillDate(t.sim.epochEndsAt, formatEpochEnd(epoch.endMs, intlLocale(code)))
+        .replace('{d}', Math.floor(left / 86400000))
+        .replace('{h}', Math.floor(left / 3600000) % 24)
+        .replace('{m}', Math.floor(left / 60000) % 60)
+        .replace('{s}', Math.floor(left / 1000) % 60);
 
     return (
-        <div className="block-toast" role="status" aria-label={t.sim.blockProgressAria}>
-            <div className="block-toast-progress" aria-hidden="true">
+        <div className="epoch-toast" role="status" aria-label={t.sim.epochProgressAria}>
+            <div className="epoch-toast-progress" aria-hidden="true">
                 <span
-                    className="block-toast-progress-fill"
+                    className="epoch-toast-progress-fill"
                     style={{ width: `${pct.toFixed(3)}%` }}
                 />
             </div>
-            <div className="block-toast-head">
-                <span className="block-toast-title">⚡ {t.sim.block} #{blockNumber}</span>
-                <span className="block-toast-pct">{Math.floor(pct)}%</span>
+            <div className="epoch-toast-head">
+                <span className="epoch-toast-title">⚡ {t.sim.epochTitle.replace('{n}', epoch.number)}</span>
+                <span className="epoch-toast-pct">{Math.floor(pct)}%</span>
             </div>
             {/* aria-hidden: a per-second text change inside a role="status"
                 live region would be announced continuously. */}
-            {countdown && (
-                <div className="block-toast-countdown" aria-hidden="true">
-                    {countdown}
-                </div>
-            )}
+            <div className="epoch-toast-countdown" aria-hidden="true">
+                {countdown}
+            </div>
         </div>
     );
 }
@@ -101,9 +86,9 @@ function BlockToast({ block, network }) {
  * cadence. It carries no synthetic statistics: the one real magnitude in
  * the scene is the contract pool, whose size tracks the staked α the
  * operators' feeds report. Every figure lives in the StatsPanel and the
- * BlockToast, fed by the same feeds.
+ * EpochToast, fed by the same feeds and the chain anchor.
  */
-export default function URSimulation({ block, network }) {
+export default function URSimulation({ network }) {
     const { t } = useLanguage();
     const canvasRef = useRef(null);
     const wrapperRef = useRef(null);
@@ -372,7 +357,7 @@ export default function URSimulation({ block, network }) {
     return (
         <div className="simulation-wrapper" ref={wrapperRef}>
             <canvas ref={canvasRef} className="sim-canvas"></canvas>
-            <BlockToast block={block} network={network} />
+            <EpochToast network={network} />
         </div>
     );
 }

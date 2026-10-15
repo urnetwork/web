@@ -91,22 +91,23 @@ export default {
     stats: {
         protocolLedger:  'Subnet-Ledger',
         refresh:         'Statistiken aktualisieren',
-        blockNumber:     'BLOCKNUMMER',
+        epoch:           'EPOCHE',
+        epochEnds:       'Endet ≈ {date} UTC',
+        dataPerEpoch:    'GESAMTDATEN / EPOCHE (GiB)',
+        usersPerEpoch:   'GESAMTNUTZER / EPOCHE',
+        demandDepositsPerEpoch: 'NACHFRAGE-EINLAGEN / EPOCHE (α)',
         dataPerBlock:    'GESAMTDATEN / BLOCK (GiB)',
         usersPerBlock:   'GESAMTNUTZER / BLOCK',
-        totalNetworks:   'NETZWERKE GESAMT',
-        stakedInContract:'IM VERTRAG GESTAKT (α)',
         demandDeposits:  'NACHFRAGE-EINLAGEN / BLOCK (α)',
-        minerEmissions:  'MINER-EMISSION / BLOCK (α)',
-        networkOperators:'NETZBETREIBER',
-        testnet:         'Status: TESTNET. Es werden nur Testnet-Werte angezeigt.'
+        totalNetworks:   'NETZWERKE GESAMT'
     },
 
     sim: {
-        block: 'BLOCK',
+        epochTitle: 'EPOCHE {n}',
+        prevEpoch: 'VORHERIGE EPOCHE',
         prevBlock: 'VORHERIGER BLOCK',
-        blockProgressAria: 'Fortschritt des aktuellen Blocks',
-        endsAt: 'Endet um 00:00 UTC am {date}. Noch {d}T {h}h {m}min {s}s bis zum Blockende',
+        epochProgressAria: 'Fortschritt der aktuellen Epoche',
+        epochEndsAt: 'Endet ≈ {date} UTC. Noch {d}T {h}h {m}min {s}s bis zum Epochenende',
         heroAria: 'Netzwerksimulation',
         ops:      'BETREIBER',
         protocol: 'PROTOKOLL'

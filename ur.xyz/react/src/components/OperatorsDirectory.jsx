@@ -2,6 +2,7 @@ import React from 'react';
 import './OperatorsDirectory.css';
 import { useLanguage, intlLocale } from '../i18n';
 import { useOperatorFeeds } from '../lib/network';
+import { feedEpoch } from '../lib/epoch.js';
 
 // Figures are formatted in the page's language (intlLocale), never the
 // browser's.
@@ -109,9 +110,15 @@ function StoreLinks({ operator, label }) {
  * The baked-in network operator registry as a table: each operator's app
  * and store listings next to the core stats read live from its public
  * feed, ranked by total networks. Unreachable feeds rank last and show
- * placeholders. The block-scoped columns reset at every block rollover,
- * so each also shows the operator's last finished block underneath as a
- * stable reference (hidden until the feed publishes one).
+ * placeholders. The windowed columns reset at every rollover, so each
+ * also shows the operator's last finished window underneath as a stable
+ * reference (hidden until the feed publishes one).
+ *
+ * The windows are the feed's: settlement epochs when it reports its
+ * epoch, else the older form's Sunday-to-Sunday weeks, which the site
+ * called blocks. The column labels follow; under epoch labels a feed of
+ * the older form shows no windowed figures, so a week is never called an
+ * epoch.
  */
 export default function OperatorsDirectory() {
     const { t, code } = useLanguage();
@@ -121,9 +128,15 @@ export default function OperatorsDirectory() {
     const s = t.operators;
     const rows = useOperatorFeeds();
 
+    const byEpoch = rows.some(({ feed }) => feedEpoch(feed));
+    const label = byEpoch
+        ? { users: t.stats.usersPerEpoch, data: t.stats.dataPerEpoch, deposits: t.stats.demandDepositsPerEpoch, prev: t.sim.prevEpoch }
+        : { users: t.stats.usersPerBlock, data: t.stats.dataPerBlock, deposits: t.stats.demandDeposits, prev: t.sim.prevBlock };
+
+    // each row with its windowed figures (w) under these labels, if any
     const ranked = [...rows].sort((a, b) =>
         (b.feed ? b.feed.totalNetworks : -1) - (a.feed ? a.feed.totalNetworks : -1)
-    );
+    ).map(row => ({ ...row, w: row.feed && !!feedEpoch(row.feed) === byEpoch ? row.feed : null }));
 
     return (
         <div className="operators-directory">
@@ -136,13 +149,13 @@ export default function OperatorsDirectory() {
                         <tr>
                             <th>{s.colOperator}</th>
                             <th>{t.stats.totalNetworks}</th>
-                            <th>{t.stats.usersPerBlock}</th>
-                            <th>{t.stats.dataPerBlock}</th>
-                            <th>{t.stats.demandDeposits}</th>
+                            <th>{label.users}</th>
+                            <th>{label.data}</th>
+                            <th>{label.deposits}</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {ranked.map(({ operator, feed }) => (
+                        {ranked.map(({ operator, feed, w }) => (
                             <tr key={operator.name}>
                                 {/* Identity cell: operator, its app, and the app's
                                     store listings together, so the stores can never
@@ -184,22 +197,22 @@ export default function OperatorsDirectory() {
                                     </div>
                                 </td>
                                 <td data-label={t.stats.totalNetworks}>{feed?.totalNetworks != null ? fmtInt(feed.totalNetworks) : DASH}</td>
-                                <td data-label={t.stats.usersPerBlock}>
-                                    {feed?.users != null ? fmtInt(feed.users) : DASH}
-                                    {feed && feed.prevUsers != null && (
-                                        <div className="op-stat-prev">{t.sim.prevBlock} {fmtInt(feed.prevUsers)}</div>
+                                <td data-label={label.users}>
+                                    {w?.users != null ? fmtInt(w.users) : DASH}
+                                    {w && w.prevUsers != null && (
+                                        <div className="op-stat-prev">{label.prev} {fmtInt(w.prevUsers)}</div>
                                     )}
                                 </td>
-                                <td data-label={t.stats.dataPerBlock}>
-                                    {feed?.dataGib != null ? fmt(feed.dataGib) : DASH}
-                                    {feed && feed.prevDataGib != null && (
-                                        <div className="op-stat-prev">{t.sim.prevBlock} {fmt(feed.prevDataGib)}</div>
+                                <td data-label={label.data}>
+                                    {w?.dataGib != null ? fmt(w.dataGib) : DASH}
+                                    {w && w.prevDataGib != null && (
+                                        <div className="op-stat-prev">{label.prev} {fmt(w.prevDataGib)}</div>
                                     )}
                                 </td>
-                                <td data-label={t.stats.demandDeposits}>
-                                    {feed?.demandDepositsAlpha != null ? fmt(feed.demandDepositsAlpha) : DASH}
-                                    {feed && feed.prevDemandDepositsAlpha != null && (
-                                        <div className="op-stat-prev">{t.sim.prevBlock} {fmt(feed.prevDemandDepositsAlpha)}</div>
+                                <td data-label={label.deposits}>
+                                    {w?.demandDepositsAlpha != null ? fmt(w.demandDepositsAlpha) : DASH}
+                                    {w && w.prevDemandDepositsAlpha != null && (
+                                        <div className="op-stat-prev">{label.prev} {fmt(w.prevDemandDepositsAlpha)}</div>
                                     )}
                                 </td>
                             </tr>
