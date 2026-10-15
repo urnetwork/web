@@ -20,6 +20,10 @@ The $UR token can be traded on the following exchanges:
 Jupiter
 Meteora
 
+# 6. Mainnet
+
+The SN25 mainnet launch timeline at /mainnet, English-only like /about and /reserve: the payout epochs, version 1 then settlement v2 from epoch 3, and each milestone with its status (done, in progress or planned) and its on-chain sources. The milestones are data, in react/src/data/mainnet-timeline.json. The footer's Network column links it.
+
 # Footer
 
 Include the github link (https://github.com/urnetwork), discord link (https://discord.gg/urnetwork).

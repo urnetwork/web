@@ -18,7 +18,7 @@ const ROOT = path.join(ASTRO_DIR, 'build', UR_ENV);
 // /docs/operator: the guide with the longest code lines and two tables of
 // code; /docs/miner: a directory tree. Their code wraps and their tables stack,
 // so neither a code block nor a table scrolls sideways at any width.
-const ROUTES = ['/build', '/about', '/investors', '/reserve', '/', '/operators', '/miners', '/validators', '/research', '/docs', '/docs/operator', '/docs/miner'];
+const ROUTES = ['/build', '/about', '/investors', '/reserve', '/mainnet', '/', '/operators', '/miners', '/validators', '/research', '/docs', '/docs/operator', '/docs/miner'];
 const PROFILES = [
   { name: 'desktop', width: 1280, height: 900 },
   { name: 'desktop-edge', width: 1080, height: 800 },

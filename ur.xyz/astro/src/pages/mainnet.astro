@@ -1,0 +1,36 @@
+---
+// /mainnet — the SN25 mainnet launch timeline.
+//
+// The page body is the React component the SPA renders for this route
+// (react/src/components/pages/Mainnet.jsx). It needs no script, so it is
+// rendered to static HTML here and only the nav hydrates. The milestones are
+// data (react/src/data/mainnet-timeline.json); the shell around them is the
+// section pages' exactly, so the SPA and this render are pixel-identical.
+// English-only, like /about and /reserve.
+import Base from '../layouts/Base.astro';
+import DisclaimerStatic from '../components/DisclaimerStatic.astro';
+import NavIsland from '../islands/NavIsland.jsx';
+import FooterStatic from '../components/FooterStatic.astro';
+import MainnetPage from '@react/components/pages/Mainnet.jsx';
+import en from '@react/i18n/en.js';
+import { LASTMOD_TOKEN } from '../lib/lastmod.js';
+
+import '@react/components/Nav.css';
+
+const title = 'SN25 mainnet launch timeline | UR';
+const description = 'The SN25 mainnet launch by payout epoch: version 1 from October 8, then settlement v2, planned from epoch 3 (October 23), with first claims from November 1.';
+---
+<Base title={title} description={description} breadcrumbName="Mainnet" lang="en">
+    <div class="app">
+        <DisclaimerStatic t={en} />
+        <NavIsland activeRoute="mainnet" lang="en" client:idle={{ timeout: 1000 }} />
+
+        <main class="section-page">
+            {/* "Updated" states the sitemap's lastmod: the build fills the
+                token in once the page is fingerprinted (src/lib/lastmod.js) */}
+            <MainnetPage route={{ name: 'mainnet', slug: null }} updated={LASTMOD_TOKEN} />
+        </main>
+
+        <FooterStatic t={en} lang="en" />
+    </div>
+</Base>
