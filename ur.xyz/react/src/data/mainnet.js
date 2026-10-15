@@ -5,7 +5,9 @@
  * sources link to, are data/mainnet-timeline.json; edit that file when a
  * milestone happens, moves, or gains a transaction. A milestone's status is
  * done, in_progress, scheduled (set for a fixed time, shown at that time) or
- * planned (a plan, its time shown as approximate, ≈).
+ * planned (a plan, its time shown as approximate, ≈). A key milestone
+ * (`key: true`) is also marked on the summary timeline under the page's title
+ * (components/pages/mainnet/summary.js), which draws these epochs as its bands.
  *
  * These are UR settlement epochs, not the chain's 72-minute tempo: epoch 0 was
  * a 7,200-block bootstrap, and each later epoch is 50,400 blocks (7 days at 12

@@ -49,6 +49,91 @@
 .mainnet-page .mainnet-lede .mainnet-note { margin-top: 1.1em; color: var(--brand-ui); font-size: 1rem; line-height: 1.65; }
 .mainnet-page .mainnet-note .roadmap-flag { display: inline-block; margin: 0 2px; vertical-align: 0.12em; }
 
+/* --- At a glance: the summary timeline under the title (mainnet/MainnetSummary.jsx) ---
+   The sn repo's epoch ribbon (mainnet/timeline.html) in the page's terms. Each
+   payout epoch is a band as long as it lasts (flex-grow is its hours; the
+   one-day epoch 0 and the tail keep a minimum width, so a marker in them is
+   placed within its own band), version 1 in the page's hairline and wash,
+   settlement v2 in the settlement green. The key milestones hang from the
+   axis on stems, numbered, in two lanes so that close ones never overlap:
+   filled when done and outlined while scheduled or planned, as the track's
+   nodes are. The v2 pool registration window is hatched across its days, and
+   "now" (white, drawn only once the browser's clock runs) fills the axis in
+   pink up to it, like the landing page's epoch bar. */
+.mainnet-page .mainnet-summary { --glance-box: 60px; --glance-dot: 20px; --glance-stem: 8px; --glance-lane: 26px; margin: 56px 0 0; }
+.mainnet-page .mainnet-summary-title { margin: 0; font-size: 0.72rem; font-weight: 600; letter-spacing: 0.22em; line-height: 1.4; text-transform: uppercase; color: var(--brand-ur); }
+.mainnet-page .mainnet-summary-figure { margin: 18px 0 0; }
+.mainnet-page .mainnet-visually-hidden { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+
+/* the bands; the room above is the now label's */
+.mainnet-page .mainnet-summary-bands { display: flex; gap: 4px; margin: 0; padding: 24px 0 0; list-style: none; }
+.mainnet-page .mainnet-summary-band { position: relative; flex: var(--hours) 1 0; min-width: 52px; padding-bottom: calc(var(--glance-stem) + var(--glance-dot) + 6px); }
+.mainnet-page .mainnet-summary[data-lanes="2"] .mainnet-summary-band { padding-bottom: calc(var(--glance-stem) + var(--glance-lane) + var(--glance-dot) + 6px); }
+.mainnet-page .mainnet-summary-box { position: relative; display: flex; flex-direction: column; justify-content: center; gap: 3px; height: var(--glance-box); padding: 0 10px; overflow: hidden; border: 1px solid rgba(214, 230, 244, 0.2); border-bottom: 0; background: rgba(214, 230, 244, 0.035); }
+.mainnet-page .mainnet-summary-band[data-settlement="v2"] .mainnet-summary-box { border-color: rgba(135, 251, 103, 0.4); background: rgba(135, 251, 103, 0.055); }
+/* the tail runs on past the last epoch: open at its end, fading out */
+.mainnet-page .mainnet-summary-band[data-tail] { min-width: 76px; }
+.mainnet-page .mainnet-summary-band[data-tail] .mainnet-summary-box { border-style: dashed; border-right: 0; background: linear-gradient(90deg, rgba(135, 251, 103, 0.055), rgba(135, 251, 103, 0)); }
+.mainnet-page .mainnet-summary-name,
+.mainnet-page .mainnet-summary-days { position: relative; z-index: 2; white-space: nowrap; text-shadow: 0 0 3px var(--brand-bg), 0 0 6px var(--brand-bg); }
+.mainnet-page .mainnet-summary-name { font-family: 'PPNeueBit', monospace; font-size: 0.92rem; line-height: 1.1; letter-spacing: 0.05em; color: var(--brand-ur); }
+.mainnet-page .mainnet-summary-days { font-size: 0.8rem; line-height: 1.25; color: var(--brand-white); }
+
+/* the axis: the bands' bottom edge, filled up to now */
+.mainnet-page .mainnet-summary-track { position: relative; display: block; height: 2px; background: rgba(214, 230, 244, 0.26); }
+.mainnet-page .mainnet-summary-band[data-settlement="v2"] .mainnet-summary-track { background: rgba(135, 251, 103, 0.5); }
+.mainnet-page .mainnet-summary-band[data-tail] .mainnet-summary-track { background: linear-gradient(90deg, rgba(135, 251, 103, 0.5), rgba(135, 251, 103, 0)); }
+.mainnet-page .mainnet-summary-elapsed { position: absolute; top: 0; bottom: 0; left: 0; width: calc(var(--elapsed) * 100%); background: var(--brand-ur); }
+
+/* the v2 pool registration window, hatched across its days of the band */
+.mainnet-page .mainnet-summary-window { position: absolute; z-index: 1; top: 1px; left: calc(var(--from) * 100%); width: calc((var(--to) - var(--from)) * 100%); height: calc(var(--glance-box) - 1px); }
+.mainnet-page .mainnet-summary-span { display: block; width: 100%; height: 100%; border-inline: 1px solid rgba(237, 143, 255, 0.75); background: repeating-linear-gradient(135deg, rgba(237, 143, 255, 0.5) 0 1.5px, transparent 1.5px 6px); transition: background-color 0.2s ease; }
+.mainnet-page .mainnet-summary-span[data-look="filled"],
+.mainnet-page .mainnet-summary-span[data-look="ringed"] { background-color: rgba(237, 143, 255, 0.35); }
+.mainnet-page a.mainnet-summary-span:hover { background-color: rgba(237, 143, 255, 0.18); }
+.mainnet-page a.mainnet-summary-span:focus-visible { outline: 2px solid var(--brand-ur); outline-offset: -2px; }
+
+/* a numbered milestone: the node of the track, with its number */
+.mainnet-page .mainnet-summary-dot { display: inline-grid; place-items: center; flex: none; width: var(--glance-dot); height: var(--glance-dot); padding: 1px 0 0; border: 1px solid var(--brand-ur); border-radius: 50%; background: var(--brand-bg); color: var(--brand-ur); font-family: 'PPNeueBit', monospace; font-size: 0.8rem; line-height: 1; letter-spacing: 0; text-decoration: none; }
+.mainnet-page .mainnet-summary-dot[data-look="filled"],
+.mainnet-page .mainnet-summary-dot[data-look="ringed"] { background: var(--brand-ur); color: var(--brand-bg); }
+.mainnet-page .mainnet-summary-dot[data-look="ringed"] { box-shadow: 0 0 0 4px rgba(237, 143, 255, 0.16); }
+.mainnet-page .mainnet-summary-marks { margin: 0; padding: 0; list-style: none; }
+.mainnet-page .mainnet-summary-mark { position: absolute; top: calc(var(--glance-box) + 2px); left: calc(var(--at) * 100%); width: 0; height: 0; }
+.mainnet-page .mainnet-summary-mark::before { content: ''; position: absolute; top: 0; left: -0.5px; width: 1px; height: var(--glance-stem); background: rgba(237, 143, 255, 0.6); }
+.mainnet-page .mainnet-summary-mark[data-lane="2"]::before { height: calc(var(--glance-stem) + var(--glance-lane)); }
+.mainnet-page .mainnet-summary-mark .mainnet-summary-dot { position: absolute; z-index: 1; top: var(--glance-stem); left: calc(var(--glance-dot) / -2); transition: box-shadow 0.2s ease; }
+.mainnet-page .mainnet-summary-mark[data-lane="2"] .mainnet-summary-dot { top: calc(var(--glance-stem) + var(--glance-lane)); }
+.mainnet-page .mainnet-summary-mark .mainnet-summary-dot:hover { box-shadow: 0 0 0 4px rgba(237, 143, 255, 0.22); }
+.mainnet-page .mainnet-summary-mark .mainnet-summary-dot:focus-visible { outline: 2px solid var(--brand-ur); outline-offset: 2px; }
+
+/* now: a white rule through its band, its label above, a node on the axis */
+.mainnet-page .mainnet-summary-now { position: absolute; z-index: 1; top: -20px; left: calc(var(--at) * 100%); width: 2px; height: calc(20px + var(--glance-box) + 8px); margin-left: -1px; background: var(--brand-white); pointer-events: none; }
+.mainnet-page .mainnet-summary-now::after { content: ''; position: absolute; top: calc(20px + var(--glance-box) + 1px); left: 50%; width: 8px; height: 8px; margin: -4px 0 0 -4px; border-radius: 50%; background: var(--brand-white); }
+.mainnet-page .mainnet-summary-now-label { position: absolute; top: -1px; left: 8px; font-size: 0.64rem; font-weight: 600; letter-spacing: 0.16em; line-height: 1; text-transform: uppercase; color: var(--brand-white); white-space: nowrap; }
+.mainnet-page .mainnet-summary-now[data-flip] .mainnet-summary-now-label { left: auto; right: 8px; }
+
+/* the legend */
+.mainnet-page .mainnet-summary-legend { display: grid; gap: 8px; margin: 6px 0 0; }
+.mainnet-page .mainnet-summary-legend ul { display: flex; flex-wrap: wrap; gap: 8px 22px; margin: 0; padding: 0; list-style: none; font-size: 0.8rem; line-height: 1.4; color: var(--brand-ui); }
+.mainnet-page .mainnet-summary-legend li { display: inline-flex; align-items: center; gap: 8px; }
+.mainnet-page .mainnet-summary-swatch { flex: none; width: 18px; height: 11px; border: 1px solid rgba(214, 230, 244, 0.3); background: rgba(214, 230, 244, 0.06); }
+.mainnet-page .mainnet-summary-swatch[data-settlement="v2"] { border-color: rgba(135, 251, 103, 0.55); background: rgba(135, 251, 103, 0.1); }
+.mainnet-page .mainnet-summary-swatch[data-span] { border-color: rgba(237, 143, 255, 0.75); background: repeating-linear-gradient(135deg, rgba(237, 143, 255, 0.55) 0 1.5px, transparent 1.5px 5px); }
+.mainnet-page .mainnet-summary-swatch[data-now] { width: 2px; height: 14px; margin: 0 8px; border: 0; background: var(--brand-white); }
+.mainnet-page .mainnet-summary-legend .mainnet-summary-dot { --glance-dot: 12px; padding: 0; }
+
+/* the key dates, numbered as on the axis, each linking to its milestone */
+.mainnet-page .mainnet-summary-dates { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0 28px; margin: 34px 0 0; padding: 0; list-style: none; }
+.mainnet-page .mainnet-summary-dates li { min-width: 0; border-top: 1px solid rgba(214, 230, 244, 0.14); }
+.mainnet-page .mainnet-summary-date { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: 10px 12px; padding: 14px 0 20px; color: inherit; text-decoration: none; }
+.mainnet-page .mainnet-summary-date-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; min-width: 0; line-height: 1.2; }
+.mainnet-page .mainnet-summary-date-meta .roadmap-flag { margin-inline-start: 0; }
+.mainnet-page .mainnet-summary-day { font-size: 0.68rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--brand-ui); white-space: nowrap; }
+.mainnet-page .mainnet-summary-date-title { grid-column: 1 / -1; font-size: 0.95rem; line-height: 1.4; color: var(--brand-white); transition: color 0.2s ease; }
+.mainnet-page .mainnet-summary-date:hover .mainnet-summary-date-title { color: var(--brand-ur); }
+.mainnet-page .mainnet-summary-date:focus-visible { outline: 2px solid var(--brand-ur); outline-offset: 2px; }
+
 /* --- The epochs at a glance: hairline rows, like /about's contributors --- */
 .mainnet-page .mainnet-epochs { list-style: none; margin: 40px 0 0; padding: 0; border-bottom: 1px solid rgba(214, 230, 244, 0.14); }
 .mainnet-page .mainnet-epochs li { border-top: 1px solid rgba(214, 230, 244, 0.14); }
@@ -111,6 +196,8 @@
     .mainnet-page #settlement { padding-top: 52px; padding-bottom: 52px; }
     .mainnet-page #milestones { padding-top: 52px; }
     .mainnet-page .mainnet-group + .mainnet-group { margin-top: 52px; }
+    .mainnet-page .mainnet-summary { margin-top: 48px; }
+    .mainnet-page .mainnet-summary-dates { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
 @media (max-width: 520px) {
@@ -123,6 +210,32 @@
     .mainnet-page .mainnet-epochs li > div { grid-template-columns: minmax(0, 1fr) auto; gap: 4px 16px; }
     .mainnet-page .mainnet-epoch-days { grid-column: 1 / -1; grid-row: 2; }
     .mainnet-page .mainnet-track .roadmap-stop { padding-bottom: 32px; }
+    /* the ribbon compresses, as the sn page's does: a smaller band, the
+       one-day epoch and the tail at their minimum, and the registration
+       window a strip along the axis, clear of the band's name */
+    .mainnet-page .mainnet-summary { --glance-box: 52px; --glance-dot: 18px; --glance-stem: 7px; --glance-lane: 23px; margin-top: 40px; }
+    .mainnet-page .mainnet-summary-bands { gap: 3px; }
+    .mainnet-page .mainnet-summary-band { min-width: 44px; }
+    .mainnet-page .mainnet-summary-band[data-tail] { min-width: 58px; }
+    .mainnet-page .mainnet-summary-box { gap: 2px; padding: 0 6px; }
+    .mainnet-page .mainnet-summary-name { font-size: 0.8rem; }
+    .mainnet-page .mainnet-summary-days { font-size: 0.7rem; }
+    .mainnet-page .mainnet-summary-window { top: calc(var(--glance-box) - 8px); height: 8px; }
+    .mainnet-page .mainnet-summary-legend ul { gap: 6px 16px; font-size: 0.76rem; }
+    .mainnet-page .mainnet-summary-dates { gap: 0 18px; margin-top: 28px; }
+    .mainnet-page .mainnet-summary-date { gap: 8px; padding: 12px 0 16px; }
+    .mainnet-page .mainnet-summary-date-meta { gap: 4px 6px; }
+    .mainnet-page .mainnet-summary-day { letter-spacing: 0.1em; }
+    .mainnet-page .mainnet-summary-date-title { font-size: 0.9rem; }
+}
+
+/* The narrowest phones: the bands' text a size down, so a week's dates fit */
+@media (max-width: 360px) {
+    .mainnet-page .mainnet-summary-bands { gap: 2px; }
+    .mainnet-page .mainnet-summary-band[data-tail] { min-width: 52px; }
+    .mainnet-page .mainnet-summary-box { padding: 0 4px; }
+    .mainnet-page .mainnet-summary-name { font-size: 0.74rem; }
+    .mainnet-page .mainnet-summary-days { font-size: 0.64rem; }
 }
 
 /* Touch: give each source link a taller row to land on */
@@ -132,10 +245,15 @@
     .mainnet-page .mainnet-sources a { display: inline-flex; align-items: center; min-height: 36px; }
     .mainnet-page .mainnet-sources-more > summary { min-height: 40px; }
     .mainnet-page .mainnet-actions-link { margin-top: 2px; padding: 8px 0; }
+    /* a summary marker is small: a larger, invisible target around it */
+    .mainnet-page .mainnet-summary-mark .mainnet-summary-dot::after { content: ''; position: absolute; inset: -6px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
     .mainnet-page .mainnet-epochs li > a,
     .mainnet-page .mainnet-epoch-days,
-    .mainnet-page .mainnet-sources-more > summary::before { transition: none; }
+    .mainnet-page .mainnet-sources-more > summary::before,
+    .mainnet-page .mainnet-summary-span,
+    .mainnet-page .mainnet-summary-mark .mainnet-summary-dot,
+    .mainnet-page .mainnet-summary-date-title { transition: none; }
 }

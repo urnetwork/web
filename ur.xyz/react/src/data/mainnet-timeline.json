@@ -19,6 +19,7 @@
       "id": "v1-contracts-deployed",
       "date": "2026-10-08T17:59:12Z/2026-10-08T18:16:00Z",
       "status": "done",
+      "key": true,
       "title": "Version 1 contracts deployed",
       "detail": "Eight deployment steps on Bittensor's EVM, in blocks 9,239,983 to 9,240,067. The coordinator, created at 18:08 UTC, starts epoch 0.",
       "sources": [
@@ -91,6 +92,7 @@
       "id": "epoch-1-begins",
       "date": "2026-10-09T18:09:00Z",
       "status": "done",
+      "key": true,
       "title": "Epoch 1 begins: the first payout epoch",
       "detail": "The first weekly payout epoch, and the one the version 1 validator activated for, starts at block 9,247,228.",
       "sources": [
@@ -101,6 +103,7 @@
       "id": "last-usdc-payout-batch",
       "date": "2026-10-11",
       "status": "done",
+      "key": true,
       "title": "Last USDC payout batch",
       "detail": "The last batch of legacy USDC provider payouts.",
       "sources": []
@@ -179,6 +182,7 @@
       "id": "v2-contracts-deployed",
       "date": "2026-10-17",
       "status": "planned",
+      "key": true,
       "approximate": true,
       "title": "Settlement v2 contracts deployed",
       "detail": "After the validator starts, vault2, which holds the funds, and STSettlement2 go on chain beside the unchanged version 1 contracts.",
@@ -224,6 +228,7 @@
       "id": "fp2-modern-provider-gate",
       "date": "2026-10-21T00:00:00Z",
       "status": "scheduled",
+      "key": true,
       "approximate": false,
       "title": "Modern provider gate turns on",
       "detail": "Quality and Speed admit only providers verified as modern. The gate turns on automatically at 00:00 UTC, as decided on October 15, and it can be postponed.",
@@ -233,6 +238,7 @@
       "id": "v2-pool-registration-window",
       "date": "2026-10-21T18:09:00Z/2026-10-22T18:09:00Z",
       "status": "scheduled",
+      "key": true,
       "title": "Settlement v2 pool registration window",
       "detail": "Blocks 9,333,628 to 9,340,828. The v2 pool must register in this window to activate in epoch 3.",
       "sources": []
@@ -241,6 +247,7 @@
       "id": "v2-pool-registered",
       "date": "2026-10-21T19:00:00Z/2026-10-21T22:00:00Z",
       "status": "planned",
+      "key": true,
       "title": "Settlement v2 pool registered",
       "detail": "The governance Safe registers the v2 pool for epoch 3. This is the activation.",
       "sources": [
@@ -251,6 +258,7 @@
       "id": "settlement-v2-active",
       "date": "2026-10-23T18:09:00Z",
       "status": "scheduled",
+      "key": true,
       "title": "Settlement v2 active: epoch 3 begins",
       "detail": "From block 9,348,028, the validator weights the v2 pool. Epoch 2 still closes on version 1, with its payout root due by around 22:09 UTC.",
       "sources": [
@@ -285,6 +293,7 @@
       "id": "first-v2-claim",
       "date": "2026-11-01T18:09:00Z/2026-11-01T22:09:00Z",
       "status": "scheduled",
+      "key": true,
       "title": "First settlement v2 claim",
       "detail": "The first v2 root can finalize 14,400 blocks after its commit, from block 9,412,828 at the earliest, and the first claims follow.",
       "sources": [
