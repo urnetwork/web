@@ -29,6 +29,8 @@ const VITE_BIN = path.join(REACT_DIR, "node_modules/vite/bin/vite.js");
 const ASTRO_PACKAGE = path.join(ASTRO_DIR, "node_modules/astro/package.json");
 const ASTRO_PACKAGE_JSON = JSON.parse(fs.readFileSync(ASTRO_PACKAGE, "utf8"));
 const ASTRO_ENTRY = path.resolve(path.dirname(ASTRO_PACKAGE), ASTRO_PACKAGE_JSON.exports["."]);
+// the CLI that builds the output when it is missing (test.sh deletes it first)
+const ASTRO_BIN = path.resolve(path.dirname(ASTRO_PACKAGE), ASTRO_PACKAGE_JSON.bin.astro);
 const { preview: startAstroPreview } = await import(pathToFileURL(ASTRO_ENTRY).href);
 const UR_ENV = process.env.UR_ENV || "main";
 const ASTRO_OUT = path.join(ASTRO_DIR, "build", UR_ENV);
