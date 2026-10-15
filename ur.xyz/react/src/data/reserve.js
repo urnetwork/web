@@ -59,7 +59,7 @@ export const reserve = {
             tag: 'Type 01',
             title: 'Network coverage',
             summary: "Adds capacity where an operator's demand outruns supply: more exit locations and routes in the places customers need them.",
-            verifiedBy: 'Independent verifiers from multiple vantage points, with overlap and routing checks',
+            verifiedBy: 'Verifiers from multiple vantage points, with overlap and routing checks',
             paidAs: 'Weekly, per verified unit of coverage',
         },
         {
@@ -73,7 +73,7 @@ export const reserve = {
             tag: 'Type 03',
             title: 'Operator onboarding',
             summary: 'Funds provider capacity for a new Network Operator, so a second product can launch on shared supply.',
-            verifiedBy: 'Independent sign-off on working routes and sustained availability',
+            verifiedBy: 'Sign-off on working routes and sustained availability',
             paidAs: 'Milestones to service providers, never a registration grant to the operator',
         },
     ],

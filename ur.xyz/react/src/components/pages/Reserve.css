@@ -270,12 +270,12 @@
 
 /* ── program types ── */
 .reserve-boundary { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border-top: 1px solid var(--rv-line); border-bottom: 1px solid var(--rv-line); margin-top: 36px; }
-.reserve-boundary article { padding: 26px 28px 28px; border-left: 1px solid var(--rv-line); }
+.reserve-boundary article { display: grid; grid-template-rows: subgrid; grid-row: span 5; align-items: start; padding: 26px 28px 28px; border-left: 1px solid var(--rv-line); }
 .reserve-boundary article:first-child { padding-left: 0; border-left: 0; }
 .reserve-type-tag { font-family: var(--rv-mono); font-size: 10px; font-weight: 400; letter-spacing: 0.8px; text-transform: uppercase; color: var(--brand-ur); }
 .reserve-boundary h3 { font-size: 22px; line-height: 33px; font-weight: 400; letter-spacing: -0.77px; color: var(--rv-h2); margin-top: 19px; }
 .reserve-boundary p { font-size: 13px; line-height: 20.15px; color: var(--rv-quiet); margin-top: 7px; }
-.reserve-boundary dl { margin-top: 18px; display: grid; gap: 12px; }
+.reserve-boundary dl { margin-top: 18px; display: grid; grid-template-rows: subgrid; grid-row: span 2; gap: 12px; }
 .reserve-boundary dt { font-size: 10px; letter-spacing: 0.8px; text-transform: uppercase; color: var(--rv-dim); }
 .reserve-boundary dd { font-size: 13px; line-height: 20px; color: var(--brand-ui); margin-top: 3px; }
 

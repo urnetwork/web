@@ -162,8 +162,8 @@ const capacityLetter = {
     headline: 'Funding network capacity for UR’s operator ecosystem',
     summary:
         'Introducing the Network Capacity Reserve, which retains excess emissions to fund the capacity UR’s operators need.',
-    date: '6 October 2026',
-    dateIso: '2026-10-06',
+    date: '15 October 2026',
+    dateIso: '2026-10-15',
     readTime: '5 min read',
     cta: 'Read the letter',
     href: '/investors/funding-network-capacity',
@@ -171,8 +171,8 @@ const capacityLetter = {
 };
 
 export const investorCentre = {
-    updated: '6 October 2026',
-    updatedIso: '2026-10-06',
+    updated: '15 October 2026',
+    updatedIso: '2026-10-15',
     about: [
         'Our mission is to make privacy the default for every user by providing the encryption layer for the open internet. We are building a user-powered network and a privacy product suite designed to serve people, not surveil them.',
         'Anyone, anywhere should be able to access the internet freely and privately.',

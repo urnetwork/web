@@ -6,7 +6,7 @@ import { copyText } from '../../lib/clipboard';
 import XYChart from './reserve/XYChart';
 import SplitBar from './reserve/SplitBar';
 import { axisCompact, compact, whole, alpha as fmtAlpha, pct, shortDate, longDate, isoDay, timeUtc, daysBetween } from './reserve/format';
-import { projectBalance, spliceLive, flowsOf, observedInflow } from './reserve/projection';
+import { flowsOf, observedInflow } from './reserve/projection';
 import { inflowPerDay, momentumOf } from './reserve/momentum';
 import './Reserve.css';
 
@@ -23,10 +23,8 @@ import './Reserve.css';
  * SN25 pool and emission, and how the miner allocation is routed. The
  * reserve is not a fixed share of it: momentum, the share paid to providers
  * now, comes out of the miner emissions and the reserve receives the rest,
- * miner emissions × (1 − momentum). Before the reserve receives anything the
- * chart is the projection the launch policy implies, at momentum's launch
- * value; once it is live the chart is the daily balance history with the
- * projection continuing from it, at the momentum the chain shows. Amounts
+ * miner emissions × (1 − momentum). The chart shows observed balance history
+ * through the latest finalized reading, without a projection. Amounts
  * are in α, with a TAO mark at the SN25 pool's own ratio; the page shows no
  * fiat value, so it reads nothing but the chain.
  *
@@ -34,8 +32,8 @@ import './Reserve.css';
  * deterministic); the client fills both in and keeps them fresh.
  */
 
-// The emission schedule the chain confirms on every read, used for the
-// projection until it does: 1 α per block (7,200 a day), an 18% owner share,
+// The emission schedule shown until the chain answers:
+// 1 α per block (7,200 a day), an 18% owner share,
 // and the remainder split evenly between validators and miners.
 const FALLBACK_EMISSION = { alphaPerDay: 7200, ownerCut: 11_796 / 65_535 };
 const minerPerDayOf = (em) => (em.alphaPerDay * (1 - em.ownerCut)) / 2;
@@ -92,24 +90,20 @@ export default function ReservePage() {
     const priceTao = snapshot?.pool.priceTao ?? null;
     const daysToLaunch = today ? daysBetween(today, reserve.launch) : null;
 
-    // a launch day that has passed with nothing received: the projection
-    // restarts from today instead of crediting days that did not happen
     const overdue = !live && daysToLaunch != null && daysToLaunch <= 0;
-    const projectFrom = overdue ? today : reserve.launch;
 
-    // ── the chart: live history, then the projection ──
+    // Keep the latest observed balance for each UTC day.
     const chart = useMemo(() => {
-        const livePoints = live && history?.length ? history : [];
-        const { live: livePts, projected } = livePoints.length
-            ? spliceLive({ live: livePoints, through: reserve.projectThrough, perDay })
-            : { live: [], projected: live ? [] : projectBalance({ launch: projectFrom, through: reserve.projectThrough, perDay }) };
-        const points = [...livePts, ...projected];
-        const n = livePts.length;
-        const liveValues = points.map((p, i) => (i < n ? p.alpha : undefined));
-        // the projection starts at the last live point so the two series join
-        const projValues = points.map((p, i) => (n === 0 || i >= n - 1 ? p.alpha : undefined));
-        return { livePts, projected, points, liveValues, projValues: projected.length ? projValues : points.map(() => undefined) };
-    }, [history, live, perDay, projectFrom]);
+        const byDay = new Map();
+        if (live && history?.length) {
+            for (const sample of history) {
+                const date = isoDay(sample.time);
+                byDay.set(date, { ...sample, date });
+            }
+        }
+        const points = [...byDay.values()];
+        return { livePts: points, points, liveValues: points.map((p) => p.alpha) };
+    }, [history, live]);
     const end = chart.points[chart.points.length - 1] || null;
     // receipts, payments and the observed inflow need the whole history, not
     // only the snapshot's own point
@@ -124,10 +118,10 @@ export default function ReservePage() {
         ? (error ? 'Chain read unavailable · retrying' : 'Reading Bittensor mainnet…')
         : live
             ? `Live · Bittensor mainnet · finalized block ${whole(snapshot.block)}`
-            : `${overdue ? 'Awaiting the first receipt' : 'Pre-launch'} · projected from on-chain emission · block ${whole(snapshot.block)}`;
+            : `${overdue ? 'Awaiting the first receipt' : 'Pre-launch'} · block ${whole(snapshot.block)}`;
     const statusState = !snapshot ? (error ? 'error' : 'loading') : live ? 'live' : 'pre';
 
-    const custodyStat = { label: 'Custody', value: reserve.custody.mode, sub: `${reserve.custody.threshold} multisig for spending · ${reserve.custody.multisig ? 'published' : 'to be published'}` };
+    const custodyStat = { label: 'Custody', value: `${reserve.custody.threshold} multisig` };
     const stats = live
         ? [
             observed && observed.perDay < 0
@@ -137,28 +131,18 @@ export default function ReservePage() {
             custodyStat,
         ]
         : [
-            { label: 'Inflow per day', value: `${whole(perDay)} α`, sub: `${whole(minerPerDay)} α × (1 − ${pct(momentum)} momentum)` },
-            { label: `Reserve by ${shortDate(reserve.projectThrough)}`, value: snapshot && end ? pct(end.alpha / snapshot.pool.alphaOut) : end ? `${compact(end.alpha)} α` : '—', sub: snapshot ? `of the ${compact(snapshot.pool.alphaOut)} α outstanding today` : 'projected, no programs paid' },
+            { label: 'Inflow per day', value: `${whole(perDay)} α`, sub: 'miner emissions × (1 − momentum)' },
+            { label: 'In the reserve', value: snapshot ? `${compact(snapshot.alpha)} α` : '—' },
             custodyStat,
         ];
 
     const chartFmt = (v) => `${compact(v)} α${priceTao ? ` · ≈ ${compact(v * priceTao)} TAO` : ''}`;
     const chartSeries = [
         ...(chart.livePts.length ? [{ name: 'Live balance', color: 'var(--rv-live)', type: 'area', values: chart.liveValues }] : []),
-        ...(chart.projected.length ? [{ name: 'Projected', color: 'var(--rv-reserve)', type: 'dash', values: chart.projValues, end: end ? `${compact(end.alpha)} α` : undefined }] : []),
     ];
-    const chartTag = chart.livePts.length
-        ? (chart.projected.length ? `Live + projected to ${shortDate(end.date)}` : `Live to ${shortDate(end.date)}`)
-        : end ? `Projected · ${shortDate(end.date)}` : 'Projected';
+    const chartTag = end ? `Live to ${shortDate(end.date)}` : '';
 
-    // the table twin of the chart: every live day, then the projection's
-    // first day, month ends and last day
-    const tableRows = [
-        ...chart.livePts.map((p, i) => ({ date: p.date, alpha: p.alpha, change: i === 0 ? null : p.alpha - chart.livePts[i - 1].alpha, kind: 'live' })),
-        ...chart.projected
-            .filter((p, i, arr) => i === 0 || i === arr.length - 1 || arr[i + 1].date.slice(5, 7) !== p.date.slice(5, 7))
-            .map((p) => ({ date: p.date, alpha: p.alpha, change: null, kind: 'projected' })),
-    ];
+    const tableRows = chart.livePts.map((p, i) => ({ date: p.date, alpha: p.alpha, change: i === 0 ? null : p.alpha - chart.livePts[i - 1].alpha }));
 
     return (
         <div className="reserve-page">
@@ -181,10 +165,10 @@ export default function ReservePage() {
                             <span className="reserve-nw">{live && routing ? `At block ${whole(snapshot.block)}:` : fromChain ? 'At the current momentum:' : 'At launch:'}</span>{' '}
                             <span className="reserve-nw">{whole(perDay)} α a day</span>{' '}
                             <span className="reserve-nw">= {whole(minerPerDay)} α a day</span>{' '}
-                            <span className="reserve-nw">× (1 − {pct(momentum)}{burnedShare >= 0.0005 ? ` − ${pct(burnedShare)} burned` : ''})</span>
+                            <span className="reserve-nw">× (1 − momentum{burnedShare >= 0.0005 ? ` − ${pct(burnedShare)} burned` : ''})</span>
                         </p>
                         <p className="reserve-formula-def">
-                            <dfn>Momentum</dfn> is the share of the miner emissions used now to power the network, as rewards to providers: {fromChain ? `${pct(momentum)} at block ${whole(snapshot.block)}, from ${pct(launchMomentum)} at launch` : `${pct(launchMomentum)} at launch`}. The reserve is not a fixed share. It receives whatever momentum does not use, so it receives less as momentum grows.
+                            <dfn>Momentum</dfn> is the share of the miner emissions used now to power the network, as rewards to providers. The reserve is not a fixed share. It receives whatever momentum does not use, so it receives less as momentum grows.
                         </p>
                     </div>
                     <div className="reserve-wallet">
@@ -227,20 +211,15 @@ export default function ReservePage() {
             <section className="reserve-block" id="balance" aria-labelledby="reserve-balance-h">
                 <div className="reserve-shell">
                     <span className="reserve-kicker">01 / The reserve</span>
-                    <h2 id="reserve-balance-h">Watch the reserve grow.</h2>
-                    <p className="reserve-sub">
-                        {chart.livePts.length
-                            ? 'Live balance sampled daily from finalized chain state, then projected at miner emissions × (1 − momentum), with momentum as the chain shows it now.'
-                            : `Miner emissions × (1 − momentum), with momentum at ${fromChain ? `${pct(momentum)}, its value on chain now,` : `its launch value of ${pct(launchMomentum)}`} and no programs paid. Switches to the live balance once the reserve receives emission.`}
-                    </p>
+                    <h2 id="reserve-balance-h">Reserve balance.</h2>
+                    <p className="reserve-sub">Live balance sampled daily from finalized chain state.</p>
 
                     <div className="reserve-panel">
                         <div className="reserve-panel-head">
-                            <b>{end ? `${compact(end.alpha)} α${chart.projected.length ? ' projected' : ''}` : '—'}</b>
-                            <em>{end && priceTao ? `≈ ${compact(end.alpha * priceTao)} TAO spot mark` : ''}</em>
+                            <b>{snapshot ? `${compact(snapshot.alpha)} α` : '—'}</b>
                             <span className="reserve-tag">{chartTag}</span>
                         </div>
-                        {chart.points.length === 0 && <p className="reserve-chart-note">Nothing to chart yet: the reserve has received no emission.</p>}
+                        {chart.points.length === 0 && <p className="reserve-chart-note">{!snapshot ? (error ? 'Chain read unavailable · retrying' : 'Reading Bittensor mainnet…') : 'Nothing to chart yet: the reserve has received no emission.'}</p>}
                         {/* two geometries of the same chart; Reserve.css shows the one that fits */}
                         {chart.points.length > 0 && [false, true].map((narrow) => (
                             <XYChart
@@ -253,12 +232,11 @@ export default function ReservePage() {
                                 series={chartSeries}
                                 fmt={chartFmt}
                                 axisFmt={axisCompact}
-                                aria={`Reserve balance, α: ${chart.livePts.length ? `live to ${shortDate(chart.livePts[chart.livePts.length - 1].date)}${chart.projected.length ? ', then ' : ''}` : ''}${chart.projected.length ? `projected to ${compact(end.alpha)} α by ${shortDate(end.date)}` : ''}. Arrow keys read each day.`}
+                                aria={`Reserve balance, α: live to ${shortDate(end.date)}. Arrow keys read each sample.`}
                             />
                         ))}
                         <div className="reserve-legend">
                             {chart.livePts.length > 0 && <span><i className="is-live" />Live balance</span>}
-                            {chart.projected.length > 0 && <span><i className="is-proj" />Projected balance</span>}
                             {live && !historyReady && <span className="is-note">Reading the balance history…</span>}
                         </div>
                         {tableRows.length > 0 && (
@@ -269,11 +247,11 @@ export default function ReservePage() {
                                         <thead><tr><th scope="col">Day</th><th scope="col">Balance, α</th><th scope="col">Change, α</th><th scope="col">Basis</th></tr></thead>
                                         <tbody>
                                             {tableRows.map((r) => (
-                                                <tr key={`${r.kind}-${r.date}`}>
+                                                <tr key={r.date}>
                                                     <td>{longDate(r.date)}</td>
                                                     <td>{fmtAlpha(r.alpha, 1)}</td>
                                                     <td>{r.change == null ? '—' : `${r.change >= 0 ? '+' : '−'}${fmtAlpha(Math.abs(r.change), 1)}`}</td>
-                                                    <td>{r.kind === 'live' ? 'Chain' : 'Projected'}</td>
+                                                    <td>Chain</td>
                                                 </tr>
                                             ))}
                                         </tbody>
@@ -290,18 +268,6 @@ export default function ReservePage() {
                             <Stat label="Earmarked" value={`${compact(earmarked)} α`} sub={publishedPrograms.length ? `${publishedPrograms.length} published program${publishedPrograms.length === 1 ? '' : 's'}` : 'no published programs'} />
                             <Stat label="Unallocated" value={`${compact(Math.max(0, snapshot.alpha - earmarked))} α`} sub="free for new programs" />
                         </div>
-                    )}
-                    {flows && flows.received > 0 && (
-                        <SplitBar
-                            title="Everything the reserve has received"
-                            meta={`${compact(flows.received)} α`}
-                            fmt={(v) => `${compact(v)} α`}
-                            segments={[
-                                { label: 'Spent', value: flows.spent, color: 'var(--rv-gray-1)' },
-                                { label: 'Earmarked', value: Math.min(earmarked, Math.max(0, flows.received - flows.spent)), color: 'var(--rv-reserve)', className: 'is-earmarked' },
-                                { label: 'Unallocated', value: Math.max(0, flows.received - flows.spent - earmarked), color: 'var(--rv-reserve)' },
-                            ]}
-                        />
                     )}
 
                     <h3 className="reserve-h3">Where the miner allocation goes</h3>
@@ -320,6 +286,7 @@ export default function ReservePage() {
                         {routing ? (
                             <SplitBar
                                 title="Miner allocation, on chain now"
+                                showPercentages={false}
                                 meta={`${whole(minerPerDay)} α a day`}
                                 fmt={(v) => `${whole(v)} α a day`}
                                 segments={[
@@ -328,21 +295,22 @@ export default function ReservePage() {
                                     { label: 'Owner-directed, burned', value: minerPerDay * routing.burned, color: 'var(--rv-burn)' },
                                 ]}
                                 note={live
-                                    ? `The reserve receives what momentum leaves: 1 − momentum. Momentum was ${pct(otherShare)} of the miner allocation at this block, from ${pct(launchMomentum)} at launch.`
+                                    ? 'The reserve receives what momentum leaves: 1 − momentum.'
                                     : fromChain
-                                        ? `Momentum is on chain now: ${pct(momentum)} of the miner allocation (${whole(momentumPerDay)} α a day) goes to providers. The reserve receives the rest, 1 − momentum (${whole(perDay)} α a day), once its hotkeys are paid.`
-                                        : `From ${shortDate(reserve.launch)}, momentum goes to providers, ${pct(launchMomentum)} at launch (${whole(momentumPerDay)} α a day), and the reserve receives the rest, 1 − momentum (${whole(perDay)} α a day). Until then the chain burns the owner-directed share.`}
+                                        ? `Momentum is on chain now: ${whole(momentumPerDay)} α a day goes to providers. The reserve receives the rest, 1 − momentum (${whole(perDay)} α a day), once its hotkeys are paid.`
+                                        : `From ${shortDate(reserve.launch)}, momentum goes to providers (${whole(momentumPerDay)} α a day), and the reserve receives the rest, 1 − momentum (${whole(perDay)} α a day). Until then the chain burns the owner-directed share.`}
                             />
                         ) : (
                             <SplitBar
                                 title={`Miner allocation from ${shortDate(reserve.launch)}`}
+                                showPercentages={false}
                                 meta={`${whole(minerPerDay)} α a day`}
                                 fmt={(v) => `${whole(v)} α a day`}
                                 segments={[
                                     { label: 'Momentum, to providers', value: momentumPerDay, color: 'var(--rv-providers)' },
                                     { label: 'Reserve, 1 − momentum', value: perDay, color: 'var(--rv-reserve)' },
                                 ]}
-                                note={`Momentum at its launch value, ${pct(launchMomentum)}. The live split shows once the chain answers.`}
+                                note="The live split shows once the chain answers."
                             />
                         )}
                     </div>
@@ -426,27 +394,13 @@ export default function ReservePage() {
                             </dd>
                         </div>
                         <div>
-                            <dt>Mode</dt>
-                            <dd>{reserve.custody.mode}<small>{snapshot ? `${snapshot.account.nonce} outgoing transaction${snapshot.account.nonce === 1 ? '' : 's'} on chain` : reserve.custody.modeNote}</small></dd>
-                        </div>
-                        <div>
                             <dt>Recipient hotkeys</dt>
                             <dd>
                                 {!snapshot ? '—' : snapshot.hotkeys.length === 0 ? 'Not yet registered' : snapshot.hotkeys.map((h) => (
-                                    <span key={h.hotkey} className="reserve-hotkey"><code title={h.hotkey}>{shortKey(h.hotkey)}</code> UID {h.uid ?? '—'} · {pct(h.incentiveShare)} of incentive</span>
+                                    <span key={h.hotkey} className="reserve-hotkey"><code title={h.hotkey}>{shortKey(h.hotkey)}</code> UID {h.uid ?? '—'}</span>
                                 ))}
                             </dd>
                         </div>
-                        <div>
-                            <dt>Spending custody</dt>
-                            <dd className={reserve.custody.multisig ? '' : 'is-placeholder'}>{reserve.custody.threshold} multisig<small>{reserve.custody.multisig || reserve.custody.thresholdNote}</small></dd>
-                        </div>
-                        {reserve.custody.signers.map((s) => (
-                            <div key={s.label}>
-                                <dt>{s.label}</dt>
-                                <dd className="is-placeholder">Redacted</dd>
-                            </div>
-                        ))}
                     </dl>
 
                     <div className="reserve-ctas">
@@ -460,9 +414,9 @@ export default function ReservePage() {
             <section className="reserve-block reserve-fine-block" aria-label="Methodology">
                 <div className="reserve-shell">
                     <p className="reserve-fine">
-                        <span><b>Mechanism.</b> SN25 emits {whole(emission.alphaPerDay)} α a day: {pct(emission.ownerCut, 0)} to the subnet owner and the rest split evenly between validators and miners, so the miner allocation is {whole(minerPerDay)} α a day. From {shortDate(reserve.launch)}, momentum, the share used now to power the network, goes to providers as rewards: {pct(launchMomentum)} at launch. The reserve's recipient hotkeys receive the rest, miner emissions × (1 − momentum), so the reserve's share is not fixed. It falls as momentum grows.</span>
+                        <span><b>Mechanism.</b> SN25 emits {whole(emission.alphaPerDay)} α a day: {pct(emission.ownerCut, 0)} to the subnet owner and the rest split evenly between validators and miners, so the miner allocation is {whole(minerPerDay)} α a day. From {shortDate(reserve.launch)}, momentum, the share used now to power the network, goes to providers as rewards. The reserve's recipient hotkeys receive the rest, miner emissions × (1 − momentum), so the reserve's share is not fixed. It falls as momentum grows.</span>
                         {snapshot && !live && (
-                            <span><b>{overdue ? 'Before the first receipt.' : 'Before launch.'}</b> At finalized block {whole(snapshot.block)} ({timeUtc(snapshot.time)}) {pct(snapshot.routing.burned, 0)} of the miner allocation was directed to the subnet owner hotkey and burned by the chain, and the reserve account held nothing. The projection holds momentum at {fromChain ? `its value on chain now, ${pct(momentum)},` : 'its launch value'} and assumes no program payments.</span>
+                            <span><b>{overdue ? 'Before the first receipt.' : 'Before launch.'}</b> At finalized block {whole(snapshot.block)} ({timeUtc(snapshot.time)}) {pct(snapshot.routing.burned, 0)} of the miner allocation was directed to the subnet owner hotkey and burned by the chain, and the reserve account held nothing.</span>
                         )}
                         {snapshot && live && (
                             <span><b>Balance.</b> The reserve is α staked on SN25 under its recipient hotkeys, owned by coldkey {shortKey(reserve.address)}, read from finalized chain state (block {whole(snapshot.block)}, {timeUtc(snapshot.time)}); any free TAO is shown separately. Receipts and payments are the rises and falls between daily samples.</span>
