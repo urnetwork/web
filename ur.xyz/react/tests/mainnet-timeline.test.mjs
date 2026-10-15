@@ -7,7 +7,9 @@
 // the page would link has a well-formed ref and an explorer to link it with.
 // A source whose ref is still empty is allowed: the page leaves it out. Besides
 // the fields every milestone has, one may say whether its time is approximate
-// (`approximate`), where the default for its status is wrong.
+// (`approximate`), where the default for its status is wrong, and a key
+// milestone says so (`key: true`): the summary timeline under the page's title
+// marks it (tests/mainnet-summary.test.mjs).
 //
 // Usage: node --test tests/mainnet-timeline.test.mjs   (no network)
 import assert from 'node:assert/strict';
@@ -54,9 +56,10 @@ test('every milestone has a unique id, a readable date, a known status, a title 
     // ids the page itself uses: the sections and the epoch groups
     const reserved = new Set(['actions', 'mainnet', 'settlement', 'milestones', 'before-launch', ...mainnetEpochs.map((e) => `epoch-${e.number}`), `after-epoch-${mainnetEpochs.at(-1).number}`]);
     for (const event of events) {
-        const fields = Object.keys(event).filter((key) => key !== 'approximate').sort();
+        const fields = Object.keys(event).filter((key) => key !== 'approximate' && key !== 'key').sort();
         assert.deepEqual(fields, ['date', 'detail', 'id', 'sources', 'status', 'title'], `${event.id}: fields`);
         if ('approximate' in event) assert.equal(typeof event.approximate, 'boolean', `${event.id}: approximate is true or false`);
+        if ('key' in event) assert.equal(event.key, true, `${event.id}: key is true, or left out`);
         assert.match(event.id, /^[a-z0-9]+(?:-[a-z0-9]+)*$/, `${event.id}: a lowercase slug`);
         assert.ok(!ids.has(event.id), `${event.id}: duplicate id`);
         assert.ok(!reserved.has(event.id) && !event.id.endsWith('-heading'), `${event.id}: an id the page uses`);

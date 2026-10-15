@@ -15,6 +15,8 @@ import {
     sourceRows,
     whenParts,
 } from './mainnet/timeline';
+import { summaryModel } from './mainnet/summary';
+import MainnetSummary from './mainnet/MainnetSummary';
 import '../RoadmapTrack.css';
 import './Mainnet.css';
 
@@ -27,13 +29,20 @@ import './Mainnet.css';
  * renders share one source. The milestones are data
  * (data/mainnet-timeline.json), grouped by the payout epochs of
  * data/mainnet.js and drawn on the roadmap's vertical track
- * (RoadmapTrack.css). The page is English-only, so no i18n lookup, and it
- * needs no browser: the Astro page renders it to static HTML.
+ * (RoadmapTrack.css). The page is English-only, so no i18n lookup, and
+ * apart from the summary's "now" it needs no browser: the Astro page renders
+ * it to static HTML.
  *
  * `updated` is the day the page's content last changed (the sitemap's
  * lastmod), which only the static build knows; the SPA leaves it out.
+ *
+ * Under the title, the launch at a glance (mainnet/MainnetSummary.jsx)
+ * draws the epochs and the key milestones on one axis, with "now", which
+ * needs the visitor's clock. The SPA renders it here; the static page,
+ * which renders the rest without script, passes it in as `summary`, an
+ * island that hydrates by itself (astro/src/pages/mainnet.astro).
  */
-export default function MainnetPage({ updated = null }) {
+export default function MainnetPage({ updated = null, summary = null }) {
     const groups = groupByEpoch(timeline.events, mainnetEpochs, { before: mainnetBeforeEpochs, after: mainnetAfterEpochs });
     const grouped = new Set(groups.map((group) => group.id));
 
@@ -50,6 +59,7 @@ export default function MainnetPage({ updated = null }) {
                         Milestones marked <span className="roadmap-flag" data-status="scheduled">Scheduled</span> or <span className="roadmap-flag" data-status="planned">Planned</span> are still ahead, and their dates may change. All times are UTC, and a time marked ≈ is approximate: most are projected from block numbers.
                     </p>
                 </div>
+                {summary || <MainnetSummary model={summaryModel(timeline.events, mainnetEpochs)} />}
             </Section>
 
             <Section id="settlement" eyebrow="Settlement" title="Version 1, then settlement v2">
