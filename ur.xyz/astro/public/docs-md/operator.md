@@ -486,7 +486,12 @@ The ur.xyz operators directory is the registry baked into the site at `web/ur.xy
 
 ```json
 {
-  "block": 13,
+  "epoch": 1,
+  "epoch_start": 1791569340,
+  "epoch_end": 1792174140,
+  "epoch_start_block": 9247228,
+  "epoch_end_block": 9297628,
+  "block": 1,
   "users": 125000,
   "data_gib": 812345.5,
   "total_networks": 250000,
@@ -502,7 +507,7 @@ The ur.xyz operators directory is the registry baked into the site at `web/ur.xy
 }
 ```
 
-`block` is the settlement epoch number, the accumulators are for the current epoch and `prev_*` for the last finished one (omit them when there is no finished epoch), `alpha_usd` is the α price you observe (the site takes the mean across operators), and `countries` is informational. Missing fields parse as null, never as zero.
+`epoch` is the current settlement epoch, `epoch_start` and `epoch_end` are its bounds in unix seconds, and `epoch_start_block` and `epoch_end_block` are its bounds in chain blocks: on mainnet, epoch n ≥ 1 runs from block 9,247,228 + (n − 1) × 50,400 for 50,400 blocks, and a bound the chain has not reached yet is projected at 12 seconds a block. The accumulators are for that epoch and `prev_*` for the one before (omit them when there is no finished epoch). `block` is a deprecated alias that equals `epoch`. The site reads a feed without `epoch` as the older form, whose windows were not settlement epochs: it then runs its own epoch clock and shows none of that feed's windowed figures. `alpha_usd` is the α price you observe (the site takes the mean across operators), and `countries` is informational. Missing fields parse as null, never as zero.
 
 ## What the server does every epoch
 

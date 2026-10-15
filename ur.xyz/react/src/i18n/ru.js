@@ -90,22 +90,23 @@ export default {
     stats: {
         protocolLedger:  'Реестр подсети',
         refresh:         'Обновить статистику',
-        blockNumber:     'НОМЕР БЛОКА',
+        epoch:           'ЭПОХА',
+        epochEnds:       'Завершится ≈ {date} UTC',
+        dataPerEpoch:    'ВСЕГО ДАННЫХ / ЭПОХА (GiB)',
+        usersPerEpoch:   'ВСЕГО ПОЛЬЗОВАТЕЛЕЙ / ЭПОХА',
+        demandDepositsPerEpoch: 'ДЕПОЗИТЫ СПРОСА / ЭПОХА (α)',
         dataPerBlock:    'ВСЕГО ДАННЫХ / БЛОК (GiB)',
         usersPerBlock:   'ВСЕГО ПОЛЬЗОВАТЕЛЕЙ / БЛОК',
-        totalNetworks:   'ВСЕГО СЕТЕЙ',
-        stakedInContract:'В СТЕЙКЕ КОНТРАКТА (α)',
         demandDeposits:  'ДЕПОЗИТЫ СПРОСА / БЛОК (α)',
-        minerEmissions:  'ЭМИССИЯ МАЙНЕРОВ / БЛОК (α)',
-        networkOperators:'СЕТЕВЫЕ ОПЕРАТОРЫ',
-        testnet:         'Статус: TESTNET. Показаны только данные тестовой сети.'
+        totalNetworks:   'ВСЕГО СЕТЕЙ'
     },
 
     sim: {
-        block: 'БЛОК',
+        epochTitle: 'ЭПОХА {n}',
+        prevEpoch: 'ПРЕД. ЭПОХА',
         prevBlock: 'ПРЕД. БЛОК',
-        blockProgressAria: 'Прогресс текущего блока',
-        endsAt: 'Завершается в 00:00 UTC {date}. До конца блока {d}д {h}ч {m}м {s}с',
+        epochProgressAria: 'Прогресс текущей эпохи',
+        epochEndsAt: 'Завершится ≈ {date} UTC. До конца эпохи {d}д {h}ч {m}м {s}с',
         heroAria: 'Симуляция сети',
         ops:      'ОПЕРАТОРЫ',
         protocol: 'ПРОТОКОЛ'

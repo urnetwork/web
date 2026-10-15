@@ -90,22 +90,23 @@ export default {
     stats: {
         protocolLedger:  'سجل الشبكة الفرعية',
         refresh:         'تحديث الإحصائيات',
-        blockNumber:     'رقم الكتلة',
+        epoch:           'الحقبة',
+        epochEnds:       'تنتهي ≈ {date} UTC',
+        dataPerEpoch:    'إجمالي البيانات / حقبة (GiB)',
+        usersPerEpoch:   'إجمالي المستخدمين / حقبة',
+        demandDepositsPerEpoch: 'ودائع الطلب / حقبة (α)',
         dataPerBlock:    'إجمالي البيانات / كتلة (GiB)',
         usersPerBlock:   'إجمالي المستخدمين / كتلة',
-        totalNetworks:   'إجمالي الشبكات',
-        stakedInContract:'المرهون في العقد (α)',
         demandDeposits:  'ودائع الطلب / كتلة (α)',
-        minerEmissions:  'إصدار المُعدِّنين / كتلة (α)',
-        networkOperators:'مشغّلو الشبكة',
-        testnet:         'الحالة: TESTNET. تُعرض قيم شبكة الاختبار فقط.'
+        totalNetworks:   'إجمالي الشبكات'
     },
 
     sim: {
-        block: 'كتلة',
+        epochTitle: 'الحقبة {n}',
+        prevEpoch: 'الحقبة السابقة',
         prevBlock: 'الكتلة السابقة',
-        blockProgressAria: 'تقدّم الكتلة الحالية',
-        endsAt: 'تنتهي عند 00:00 UTC {date}. تبقّى {d}ي {h}س {m}د {s}ث حتى نهاية الكتلة',
+        epochProgressAria: 'تقدّم الحقبة الحالية',
+        epochEndsAt: 'تنتهي ≈ {date} UTC. تبقّى {d}ي {h}س {m}د {s}ث حتى نهاية الحقبة',
         heroAria: 'محاكاة الشبكة',
         ops:      'المشغّلون',
         protocol: 'البروتوكول'

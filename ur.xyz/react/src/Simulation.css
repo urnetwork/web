@@ -1,5 +1,5 @@
 /* Simulation.css
- * Visual styles for the URSimulation canvas + its block-progress toast.
+ * Visual styles for the URSimulation canvas + its epoch-progress toast.
  * The Dashboard / Stats panel lives in components/StatsPanel.css since it
  * detaches from the simulation as the user scrolls.
  */
@@ -36,12 +36,12 @@
     height: 100%;
 }
 
-/* --- Block Toast ---
- * Persistent progress card for the current block (7 days), pinned at the
- * bottom center of the simulation. The bar along its top edge fills as
- * the block elapses.
+/* --- Epoch Toast ---
+ * Persistent progress card for the current settlement epoch (7 days),
+ * pinned at the bottom center of the simulation. The bar along its top
+ * edge fills as the epoch elapses.
  */
-.block-toast {
+.epoch-toast {
     position: absolute;
     bottom: 30px;
     left: 50%;
@@ -64,16 +64,16 @@
     color: var(--brand-ui);
     pointer-events: none;
     z-index: 5;
-    animation: block-toast-in 0.5s ease-out;
+    animation: epoch-toast-in 0.5s ease-out;
 }
 
-@keyframes block-toast-in {
+@keyframes epoch-toast-in {
     from { transform: translate(-50%, 24px); opacity: 0; }
     to   { transform: translate(-50%, 0);    opacity: 1; }
 }
 
 /* Progress bar riding the toast's top edge. */
-.block-toast-progress {
+.epoch-toast-progress {
     position: absolute;
     top: 0;
     left: 0;
@@ -82,7 +82,7 @@
     background: rgba(214, 230, 244, 0.12);
 }
 
-.block-toast-progress-fill {
+.epoch-toast-progress-fill {
     display: block;
     height: 100%;
     background: var(--brand-ur);
@@ -90,7 +90,7 @@
     transition: width 1s linear;
 }
 
-.block-toast-head {
+.epoch-toast-head {
     display: flex;
     align-items: baseline;
     justify-content: space-between;
@@ -98,7 +98,7 @@
     margin-bottom: 0;
 }
 
-.block-toast-title {
+.epoch-toast-title {
     font-family: 'PPNeueBit', monospace;
     font-weight: bold;
     font-size: 1rem;
@@ -107,15 +107,15 @@
     white-space: nowrap;
 }
 
-.block-toast-pct {
+.epoch-toast-pct {
     font-family: 'PPNeueBit', monospace;
     font-size: 0.8rem;
     color: var(--brand-ur);
     font-variant-numeric: tabular-nums;
 }
 
-/* Live countdown to the block's end (00:00 UTC). */
-.block-toast-countdown {
+/* Live countdown to the epoch's projected end. */
+.epoch-toast-countdown {
     margin-top: 9px;
     font-size: 0.55rem;
     letter-spacing: 0.06em;
@@ -125,26 +125,26 @@
 }
 
 @media (max-width: 768px) {
-    .block-toast {
+    .epoch-toast {
         bottom: 20px;
         width: 90%;
         min-width: 0;
         padding: 11px 14px 9px;
     }
 
-    .block-toast-countdown {
+    .epoch-toast-countdown {
         white-space: normal;
     }
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .block-toast { animation: none; }
-    .block-toast-progress-fill { transition: none; }
+    .epoch-toast { animation: none; }
+    .epoch-toast-progress-fill { transition: none; }
 }
 
-/* Phone legibility: the block-ticker chrome must not dip below 10px. */
+/* Phone legibility: the epoch-ticker chrome must not dip below 10px. */
 @media (max-width: 768px) {
-    .block-toast-countdown {
+    .epoch-toast-countdown {
         font-size: 0.625rem;
     }
 }

@@ -10,11 +10,11 @@ import './Hero.css';
  * The StatsPanel is rendered separately at the App level so it can detach
  * and animate independently as the user scrolls.
  */
-export default function Hero({ block, network }) {
+export default function Hero({ network }) {
     const { t } = useLanguage();
     return (
         <section className="hero" aria-label={t.sim.heroAria}>
-            <URSimulation block={block} network={network} />
+            <URSimulation network={network} />
         </section>
     );
 }

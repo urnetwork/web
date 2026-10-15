@@ -1,32 +1,46 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { parseFeed, sumFeeds } from './epoch.js';
 
 /**
  * Live network stats, aggregated from the network operators' public
  * grafana feeds.
  *
- * Each operator publishes a public stats JSON with accumulators for the
- * current block (7 days) plus its cumulative contract stake:
+ * Each operator publishes a public stats JSON. Its windowed fields cover
+ * the current settlement epoch (epoch.js) and its prev_* fields the epoch
+ * before; the rest are cumulative or live:
  *
  *   {
- *     "users": 125000,                   // users served this block (unique top-level clients)
- *     "data_gib": 812345.5,              // data transferred this block (GiB)
+ *     "epoch": 1,                        // the settlement epoch
+ *     "epoch_start": 1791569340,         // its bounds: unix seconds...
+ *     "epoch_end": 1792174140,
+ *     "epoch_start_block": 9247228,      // ...and chain blocks
+ *     "epoch_end_block": 9297628,
+ *     "users": 125000,                   // users served this epoch (unique top-level clients)
+ *     "data_gib": 812345.5,              // data transferred this epoch (GiB)
+ *     "demand_deposits_alpha": 1234.5,   // demand deposits this epoch (α)
+ *     "miner_emissions_alpha": 5678.9,   // miner emission captured this epoch (α)
+ *     "prev_users": 118000,              // ...and the same for the last
+ *     "prev_data_gib": 1012345.5,        //    FINISHED epoch, the stable
+ *     "prev_demand_deposits_alpha": 1100.5, // reference while the current
+ *     "prev_miner_emissions_alpha": 5200.1, // one accumulates from zero
  *     "total_networks": 250000,          // total networks at the operator
  *     "staked_alpha": 250000.0,          // cumulative α staked in the contract
- *     "demand_deposits_alpha": 1234.5,   // demand deposits this block (α)
- *     "miner_emissions_alpha": 5678.9,   // miner emission captured this block (α)
  *     "alpha_usd": 1.75,                 // the α price in USD, as the operator observes it
  *     "countries": 123,                  // countries with a connected valid provider
- *     "prev_users": 118000,              // ...and the same accumulators for the
- *     "prev_data_gib": 1012345.5,        //    last FINISHED block — the stable
- *     "prev_demand_deposits_alpha": 1100.5, // reference while the current block
- *     "prev_miner_emissions_alpha": 5200.1  // accumulates from zero
+ *     "block": 1                         // deprecated alias of epoch
  *   }
+ *
+ * A feed without `epoch` is the older form: `block` there counts the
+ * site's former 7-day blocks (Sundays 00:00 UTC from June 28, 2026), which
+ * are not mainnet epochs, and the windowed fields cover those weeks. The
+ * page never shows such a window as an epoch's: it runs the epoch clock
+ * from the chain anchor (epoch.js) and leaves the windowed figures out.
+ * `block` is never read.
  *
  * countries is informational (overlapping between operators, so never
  * summed here); ur.io's own site reads it from this same feed. The prev_*
- * fields are optional: they parse as null (not 0) when unpublished — e.g.
- * during block 1, which has no finished predecessor — so the UI can hide
- * the reference rather than misreport a zero.
+ * fields are optional: they parse as null (not 0) when unpublished, so the
+ * UI can hide the reference rather than misreport a zero.
  *
  * All fields are numeric; missing values remain null so the UI can clearly
  * distinguish unavailable data from a measured zero. The endpoint
@@ -64,31 +78,6 @@ export const NETWORK_OPERATORS = [
     }
 ];
 
-/**
- * The application-layer block clock: blocks are the subnet's 7-day
- * settlement periods, and every block starts and ends at 00:00 UTC on
- * Sunday. Block 1 opened Sunday June 28, 2026 — the Sunday of the
- * launch week — so block 2 was July 5–12, block 3 July 12–19, and so on.
- */
-export const BLOCK_GENESIS_MS = Date.UTC(2026, 5, 28);
-export const BLOCK_MS = 7 * 24 * 60 * 60 * 1000;
-
-export function blockNumberAt(nowMs = Date.now()) {
-    return Math.max(1, Math.floor((nowMs - BLOCK_GENESIS_MS) / BLOCK_MS) + 1);
-}
-
-/** 0 → 1 progress through the current block. */
-export function blockProgressAt(nowMs = Date.now()) {
-    if (nowMs <= BLOCK_GENESIS_MS) return 0;
-    return ((nowMs - BLOCK_GENESIS_MS) % BLOCK_MS) / BLOCK_MS;
-}
-
-/** Timestamp (ms) when the current block ends — always 00:00 UTC. */
-export function blockEndAt(nowMs = Date.now()) {
-    const index = Math.max(0, Math.floor((nowMs - BLOCK_GENESIS_MS) / BLOCK_MS));
-    return BLOCK_GENESIS_MS + (index + 1) * BLOCK_MS;
-}
-
 const CLOCK_TICK_MS = 30_000;
 // Feed refresh: the hero simulation and stats read live totals, so poll
 // every 5s (the operator feeds cache briefly server side, so this stays
@@ -97,25 +86,24 @@ const FEED_POLL_MS = 5_000;
 const FEED_TIMEOUT_MS = 10_000;
 
 /**
- * { number, progress } for the current block, ticking every 30s.
+ * The wall clock (ms) the epoch display reads, ticking every `tickMs`
+ * (30s by default; the epoch toast runs its own per-second one).
  *
- * The initial state is a fixed zero rather than the wall clock so the
- * static build's server render and the client's first hydration render
- * agree; the real values land in an effect on the very next tick.
+ * It is null in the static build's server render and in the client's
+ * first hydration render, so the two agree; the real time lands in an
+ * effect on the very next tick.
  */
-export function useBlockClock() {
-    const [block, setBlock] = useState({ number: 1, progress: 0 });
+export function useClock(tickMs = CLOCK_TICK_MS) {
+    const [now, setNow] = useState(null);
 
     useEffect(() => {
-        const update = () => {
-            setBlock({ number: blockNumberAt(), progress: blockProgressAt() });
-        };
+        const update = () => setNow(Date.now());
         update();
-        const id = setInterval(update, CLOCK_TICK_MS);
+        const id = setInterval(update, tickMs);
         return () => clearInterval(id);
-    }, []);
+    }, [tickMs]);
 
-    return block;
+    return now;
 }
 
 export async function fetchOperatorFeed(statsUrl, signal) {
@@ -126,29 +114,7 @@ export async function fetchOperatorFeed(statsUrl, signal) {
     try {
         const res = await fetch(statsUrl, { signal: ctrl.signal, mode: 'cors' });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const body = await res.json();
-        const optional = (key) => {
-            if (body?.[key] == null || body?.[key] === '') return null;
-            const v = Number(body?.[key]);
-            return Number.isFinite(v) ? v : null;
-        };
-        const alphaUsd = Number(body?.alpha_usd);
-        return {
-            blockNumber: optional('block'),
-            users: optional('users'),
-            dataGib: optional('data_gib'),
-            totalNetworks: optional('total_networks'),
-            stakedAlpha: optional('staked_alpha'),
-            demandDepositsAlpha: optional('demand_deposits_alpha'),
-            minerEmissionsAlpha: optional('miner_emissions_alpha'),
-            // A price of 0 is no price; null marks "not published".
-            alphaUsd: Number.isFinite(alphaUsd) && alphaUsd > 0 ? alphaUsd : null,
-            // The last finished block (see the schema note above).
-            prevUsers: optional('prev_users'),
-            prevDataGib: optional('prev_data_gib'),
-            prevDemandDepositsAlpha: optional('prev_demand_deposits_alpha'),
-            prevMinerEmissionsAlpha: optional('prev_miner_emissions_alpha')
-        };
+        return parseFeed(await res.json());
     } finally {
         clearTimeout(timer);
         if (signal) signal.removeEventListener('abort', onOuterAbort);
@@ -193,7 +159,11 @@ export function useOperatorFeeds() {
  * Sums of every reachable operator feed, refreshed every 5s.
  *
  *   totals    — summed feed fields (null until at least one feed answers;
- *               the last good sums are kept if a later poll fails entirely)
+ *               the last good sums are kept if a later poll fails entirely).
+ *               The windowed fields are null unless every feed reports the
+ *               same epoch (epoch.js sumFeeds)
+ *   epoch     — that epoch, { number, startMs, endMs, startBlock, endBlock },
+ *               or null; displayEpoch decides whether it is still current
  *   loaded    — feeds that answered on the latest poll
  *   operators — size of the baked-in operator registry
  *   fetching  — a poll is in flight right now
@@ -209,7 +179,7 @@ export function useOperatorFeeds() {
 export function useNetworkTotals() {
     const [state, setState] = useState({
         totals: null,
-        blockNumber: null,
+        epoch: null,
         loaded: 0,
         operators: NETWORK_OPERATORS.length
     });
@@ -239,34 +209,12 @@ export function useNetworkTotals() {
                 .filter(r => r.status === 'fulfilled')
                 .map(r => r.value);
 
-            // Optional fields sum null-aware: the total stays null until
-            // at least one feed publishes the field.
-            const addOptional = (a, b) => (a == null && b == null ? null : (a ?? 0) + (b ?? 0));
-
-            setState(prev => ({
-                totals: ok.length === 0 ? prev.totals : ok.reduce((sum, f) => ({
-                    users: addOptional(sum.users, f.users),
-                    dataGib: addOptional(sum.dataGib, f.dataGib),
-                    totalNetworks: addOptional(sum.totalNetworks, f.totalNetworks),
-                    stakedAlpha: addOptional(sum.stakedAlpha, f.stakedAlpha),
-                    demandDepositsAlpha: addOptional(sum.demandDepositsAlpha, f.demandDepositsAlpha),
-                    minerEmissionsAlpha: addOptional(sum.minerEmissionsAlpha, f.minerEmissionsAlpha),
-                    prevUsers: addOptional(sum.prevUsers, f.prevUsers),
-                    prevDataGib: addOptional(sum.prevDataGib, f.prevDataGib),
-                    prevDemandDepositsAlpha: addOptional(sum.prevDemandDepositsAlpha, f.prevDemandDepositsAlpha),
-                    prevMinerEmissionsAlpha: addOptional(sum.prevMinerEmissionsAlpha, f.prevMinerEmissionsAlpha)
-                }), {
-                    users: null, dataGib: null, totalNetworks: null, stakedAlpha: null,
-                    demandDepositsAlpha: null, minerEmissionsAlpha: null,
-                    prevUsers: null, prevDataGib: null,
-                    prevDemandDepositsAlpha: null, prevMinerEmissionsAlpha: null
-                }),
-                blockNumber: ok.length === 0
-                    ? prev.blockNumber
-                    : (ok.map(f => f.blockNumber).filter(Number.isFinite).sort((a, b) => b - a)[0] ?? prev.blockNumber),
-                loaded: ok.length,
-                operators: NETWORK_OPERATORS.length
-            }));
+            // A poll that reached no feed keeps the last good sums.
+            setState(prev => {
+                if (ok.length === 0) return { ...prev, loaded: 0 };
+                const { totals, epoch } = sumFeeds(ok);
+                return { totals, epoch, loaded: ok.length, operators: NETWORK_OPERATORS.length };
+            });
 
             const now = Date.now();
             setCycle({ fetching: false, lastAt: now, nextAt: now + FEED_POLL_MS });

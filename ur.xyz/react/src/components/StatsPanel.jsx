@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import './StatsPanel.css';
 import { useLanguage, intlLocale } from '../i18n';
+import { displayEpoch, epochProgress, fillDate, formatEpochEnd } from '../lib/epoch.js';
 
 // Figures are formatted in the page's language (intlLocale), never the
 // browser's: a German page groups 12.345,67 whatever the visitor's settings.
@@ -36,9 +37,9 @@ const GIB_BYTES = 2 ** 30;
  * final frame lands on the exact target.
  *
  * It snaps (no count) when there is nothing sensible to count through:
- * the first reading after mount (— → value, and the block clock's
- * hydration correction from its fixed initial render), a change smaller
- * than one sub-unit, or when the visitor prefers reduced motion.
+ * the first reading after mount (— → value, as when the epoch clock
+ * starts after hydration), a change smaller than one sub-unit, or when
+ * the visitor prefers reduced motion.
  */
 function useCountUp(target, scale = 1) {
     const [display, setDisplay] = useState(target);
@@ -127,7 +128,7 @@ function useCountUp(target, scale = 1) {
  * On viewports below 768px the whole thing is disabled and CSS renders a
  * simple pinned top-bar instead.
  */
-export default function StatsPanel({ block, network, anchorId = 'whitepaper', disclaimerVisible = false }) {
+export default function StatsPanel({ now = null, network, anchorId = 'whitepaper', disclaimerVisible = false }) {
     const ref = useRef(null);
     const reflowRef = useRef(false);
     const { t, code } = useLanguage();
@@ -280,10 +281,15 @@ export default function StatsPanel({ block, network, anchorId = 'whitepaper', di
         };
     }, [anchorId, disclaimerVisible]);
 
-    // Everything except the block clock and the operator count comes from
-    // the operators' feeds; until at least one feed answers those fields
-    // show a placeholder.
+    // The epoch is the feeds' own while it is current, else the chain
+    // anchor's (lib/epoch.js); `now` is null until the clock starts after
+    // hydration. Every other figure comes from the operators' feeds and
+    // shows a placeholder until one answers. The per-epoch figures show
+    // only when the feeds' windows are the epoch on display: a feed that
+    // reports no epoch still windows by the site's former Sunday weeks.
+    const epoch = now == null ? null : displayEpoch(network ? network.epoch : null, now);
     const totals = network ? network.totals : null;
+    const perEpoch = epoch && epoch.fromFeed ? totals : null;
 
     return (
         <aside
@@ -304,9 +310,9 @@ export default function StatsPanel({ block, network, anchorId = 'whitepaper', di
             </div>
 
             <div className="stat-grid">
-                <Stat label={t.stats.blockNumber}      value={network?.blockNumber ?? block?.number ?? null} format={(n) => `#${n}`} tone="ur"                    />
-                <Stat label={t.stats.dataPerBlock}     value={totals ? totals.dataGib : null}             format={(n) => fmt(n, locale)}    tone="data"  scale={GIB_BYTES} />
-                <Stat label={t.stats.usersPerBlock}    value={totals ? totals.users : null}               format={(n) => fmtInt(n, locale)} tone="usd"                      />
+                <EpochStat epoch={epoch} now={now} locale={locale} label={t.stats.epoch} endsTemplate={t.stats.epochEnds} />
+                <Stat label={t.stats.dataPerEpoch}     value={perEpoch ? perEpoch.dataGib : null}         format={(n) => fmt(n, locale)}    tone="data"  scale={GIB_BYTES} />
+                <Stat label={t.stats.usersPerEpoch}    value={perEpoch ? perEpoch.users : null}           format={(n) => fmtInt(n, locale)} tone="usd"                      />
                 <Stat label={t.stats.totalNetworks}    value={totals ? totals.totalNetworks : null}       format={(n) => fmtInt(n, locale)} tone="white"                    />
             </div>
         </aside>
@@ -319,6 +325,35 @@ function Stat({ label, value, format, scale, tone }) {
         <div className="stat-box">
             <div className="stat-label">{label}</div>
             <div className={`stat-value tone-${tone}`}>{shown == null ? '—' : format(shown)}</div>
+        </div>
+    );
+}
+
+/**
+ * EpochStat
+ *
+ * The settlement epoch: its number and how far through it is, a bar that
+ * fills as it elapses, and its projected end in UTC (≈: an epoch ends at
+ * a block, not at a clock time). Until the clock starts the box keeps its
+ * shape with a placeholder, so nothing below it moves when it does.
+ */
+function EpochStat({ epoch, now, locale, label, endsTemplate }) {
+    const shown = useCountUp(epoch ? epoch.number : null);
+    const pct = epoch ? Math.floor(epochProgress(epoch, now) * 100) : null;
+    return (
+        <div className="stat-box">
+            <div className="stat-label">{label}</div>
+            <div className="stat-value tone-ur">
+                {shown == null ? '—' : fmtInt(shown, locale)}
+                {/* the hidden comma keeps a screen reader from reading "1 78%" as 178% */}
+                {pct != null && <span className="stat-epoch-pct"><span className="stats-visually-hidden">, </span>{pct}%</span>}
+            </div>
+            <div className="stat-epoch-bar" aria-hidden="true">
+                <span style={{ width: `${pct ?? 0}%` }} />
+            </div>
+            <div className="stat-epoch-ends">
+                {epoch ? fillDate(endsTemplate, formatEpochEnd(epoch.endMs, locale)) : '\u00a0'}
+            </div>
         </div>
     );
 }

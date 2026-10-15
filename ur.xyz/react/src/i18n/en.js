@@ -105,25 +105,33 @@ export default {
 
     // Stat labels are rendered verbatim (no CSS text-transform) so the α
     // glyph and the GiB unit keep their casing — write them display-ready.
+    // The /BLOCK labels name the older operator feed's Sunday-to-Sunday
+    // windows, which only the operators directory still shows; the epoch
+    // labels name settlement epochs.
     stats: {
         protocolLedger:  'Subnet Ledger',
         refresh:         'Refresh stats',
-        blockNumber:     'BLOCK NUMBER',
+        epoch:           'EPOCH',
+        // {date}: the epoch's projected end (month, day and time, in UTC);
+        // ≈ because an epoch ends at a block, not at a clock time
+        epochEnds:       'Ends ≈ {date} UTC',
+        dataPerEpoch:    'TOTAL DATA / EPOCH (GiB)',
+        usersPerEpoch:   'TOTAL USERS / EPOCH',
+        demandDepositsPerEpoch: 'DEMAND DEPOSITS / EPOCH (α)',
         dataPerBlock:    'TOTAL DATA / BLOCK (GiB)',
         usersPerBlock:   'TOTAL USERS / BLOCK',
-        totalNetworks:   'TOTAL NETWORKS',
-        stakedInContract:'STAKED IN CONTRACT (α)',
         demandDeposits:  'DEMAND DEPOSITS / BLOCK (α)',
-        minerEmissions:  'MINER EMISSIONS / BLOCK (α)',
-        networkOperators:'NETWORK OPERATORS',
-        testnet:         'Status: TESTNET. Data shows testnet values only.'
+        totalNetworks:   'TOTAL NETWORKS'
     },
 
     sim: {
-        block: 'BLOCK',
+        // {n}: the settlement epoch's number
+        epochTitle: 'EPOCH {n}',
+        prevEpoch: 'PREV EPOCH',
         prevBlock: 'PREV BLOCK',
-        blockProgressAria: 'Current block progress',
-        endsAt: 'Ends at 00:00 UTC {date}. {d}d {h}h {m}m {s}s until block end',
+        epochProgressAria: 'Current epoch progress',
+        // {date} as in stats.epochEnds
+        epochEndsAt: 'Ends ≈ {date} UTC. {d}d {h}h {m}m {s}s until epoch end',
         heroAria: 'Network simulation',
         // the two hubs labelled on the hero canvas
         ops:      'OPS',
