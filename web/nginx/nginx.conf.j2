@@ -240,6 +240,16 @@ http {
         # instead of nginx's stock page. The page ships noindex.
         error_page 404 /404.html;
 
+        # A path with a backslash or a control character is a real 404, ahead
+        # of every rule below. Redirects that echo the path would otherwise
+        # send it back in their Location, and a browser reads /\example.com
+        # and /<tab>/example.com as //example.com, another site; a CR would
+        # break the header. $uri is decoded, so %5C and %09 are caught too.
+        # nginx itself rejects %00 with a 400, before it picks a server.
+        if ($uri ~ "[\x00-\x1f\x5c\x7f]") {
+            return 404;
+        }
+
         location = /404.html {
             internal;
             add_header 'Cache-Control' 'no-cache';
@@ -464,12 +474,17 @@ http {
             add_header 'X-Robots-Tag' $ur_preview_robots always;
         }
 
+        # The .html twins and trailing-slash variants 301 to the clean URL,
+        # with the host spelled out: a relative Location starts with the
+        # request's own path, and a browser reads some paths, such as
+        # /\example.com, as another host. $host is ur.xyz or preview.ur.xyz;
+        # any other Host reaches the default server.
         location ~ ^(?<clean>.+)/$ {
-            return 301 $clean$is_args$args;
+            return 301 https://$host$clean$is_args$args;
         }
 
         location ~ ^(?<clean>.+)\.html$ {
-            return 301 $clean$is_args$args;
+            return 301 https://$host$clean$is_args$args;
         }
 
         location ~* \.(?:png|jpe?g|webp|avif|gif|svg|ico|woff2?|ttf|mp4|mp3|pdf)$ {
