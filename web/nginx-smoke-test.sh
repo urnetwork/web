@@ -47,12 +47,45 @@ expect_response() {
         fail "$host$path returned an empty successful response"
     fi
 
+    location=$(header_value "$headers" Location)
+    expect_location_on_site "$host$path" "$location"
+
     if [[ -n "$expected_location" ]]; then
-        location=$(awk 'BEGIN { IGNORECASE=1 } /^Location:/ { gsub(/\r/, "", $2); print $2; exit }' "$headers")
         if [[ "$location" != "$expected_location" ]]; then
             fail "$host$path redirected to ${location:-<missing>}, expected $expected_location"
         fi
     fi
+}
+
+# The first value of a response header in a dumped header file, the name
+# matched case-insensitively.
+header_value() {
+    local headers=$1
+    local name=$2
+
+    awk -v name="$name" '
+        BEGIN { name = tolower(name) }
+        index($0, ":") > 1 && tolower(substr($0, 1, index($0, ":") - 1)) == name {
+            value = substr($0, index($0, ":") + 1)
+            sub(/^[[:space:]]+/, "", value)
+            sub(/\r$/, "", value)
+            print value
+            exit
+        }' "$headers"
+}
+
+# A browser reads a Location of //example.com, or /\example.com, as another
+# site's address, and drops tabs and newlines before it looks. So no Location
+# may start with //, nor carry a backslash or a control character at all.
+# expect_response checks every response it gets.
+expect_location_on_site() {
+    local what=$1
+    local location=$2
+
+    case "$location" in
+        //* | *[[:cntrl:]\\]*)
+            fail "$what sent Location: $(printf '%q' "$location"), which starts with // or has a backslash or a control character" ;;
+    esac
 }
 
 expect_ip_json() {
@@ -177,6 +210,49 @@ expect_response main-web.bringyour.com /status 200
 for host in www.bringyour.com ur.network www.ur.network; do
     expect_response "$host" /status 301 https://ur.io/status
 done
+
+# A path with a backslash or a control character, raw or percent-encoded, is
+# a real 404 before any rule sees it, the prefix locations and the localized
+# redirects included. Echoed into a Location, a browser would read
+# /\example.com, or /<tab>/example.com, as another site's address. nginx
+# answers a NUL itself, with a 400.
+for host in ur.io preview.ur.io ur.xyz preview.ur.xyz; do
+    for path in '/%5Cexample.com/' '/%5cexample.com/' '/\example.com/' '/%5Cevil.example.html' \
+        '/%09/evil.example/' '/%0A/evil.example/' '/%0D/evil.example/' '/%1F/evil.example/' \
+        '/%7F/evil.example/'; do
+        expect_response "$host" "$path" 404
+    done
+    expect_response "$host" '/%00/evil.example/' 400
+done
+for host in ur.io preview.ur.io; do
+    expect_response "$host" '/ru/docs/examples/%5Cevil.example' 404
+    expect_response "$host" '/f/%5Cevil.example' 404
+done
+for host in ur.xyz preview.ur.xyz; do
+    expect_response "$host" '/ru/docs/%5Cevil.example' 404
+    expect_response "$host" '/ru/docs/%09/evil.example' 404
+    expect_response "$host" '/ru/about/%5Cevil.example' 404
+done
+
+# The .html and trailing-slash redirects name their host, so their Location
+# can't be read as another site's, and the query carries over.
+for host in ur.io preview.ur.io; do
+    expect_response "$host" /products/ 301 "https://$host/products"
+    expect_response "$host" /products.html 301 "https://$host/products"
+    expect_response "$host" '/products/?smoke=1' 301 "https://$host/products?smoke=1"
+done
+for host in ur.xyz preview.ur.xyz; do
+    expect_response "$host" /investors/ 301 "https://$host/investors"
+    expect_response "$host" /investors.html 301 "https://$host/investors"
+    expect_response "$host" '/investors/?smoke=1' 301 "https://$host/investors?smoke=1"
+done
+
+# The redirect-only hosts keep the path percent-encoded, on an absolute URL.
+for host in www.ur.io bringyour.com main-web.bringyour.com main-web.ur.network \
+    www.bringyour.com ur.network www.ur.network; do
+    expect_response "$host" '/%5Cexample.com/' 301 'https://ur.io/%5Cexample.com/'
+done
+expect_response www.ur.xyz '/%5Cexample.com/' 301 'https://ur.xyz/%5Cexample.com/'
 
 # /ip remains HTML for browsers, but negotiates a tiny, non-cacheable JSON
 # response for API clients. Cloudflare is authoritative on the public host;
