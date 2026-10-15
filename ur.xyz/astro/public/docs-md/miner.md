@@ -300,7 +300,7 @@ completed usage bytes × reliability
 reliability = confirmations / max(assignments, reliability_a_min)
 ```
 
-The implementation represents reliability in parts per million. To enter the payout list, a provider needs positive completed usage, at least the required number of assigned verification hops, at least one confirmation, a valid earning wallet and no active head-fleet exclusion. Eligible contributions sharing one coldkey are aggregated into one leaf, and the shares are allocated across the pool in basis points.
+The implementation represents reliability in parts per million. To enter the payout list, a provider needs positive completed usage, at least the required number of assigned verification hops, at least one confirmation, a valid earning wallet and no active head-fleet exclusion. Eligible contributions sharing one coldkey are aggregated into one leaf, and the shares are allocated across the pool in basis points. From settlement v2's switch epoch the pool is split by completed usage alone, with no reliability factor or minimum exposure, into one cumulative account per payout coldkey that never expires (see the [litepaper](https://ur.xyz/docs/litepaper)).
 
 Validators independently measure routing quality and weight the operator pools and eligible head fleets. Providers are paid **momentum**: the share of the native miner allocation used now to power the network, split between the pool and head channels by policy. Momentum is 10% at launch. The [Network Capacity Reserve](https://ur.xyz/reserve), the `ur-reserve` account, receives the rest: miner emissions × (1 − momentum). Its share is not fixed; it receives less as momentum grows. Momentum is a share of emission, not a fixed payment per byte; use the operator's activated policy and published payout artifacts to inspect actual earnings. The reserve is separate from the settlement vault's provider claim collateral.
 
@@ -352,7 +352,7 @@ Read the receipt events separately:
 | `ClaimPaid` | Accumulated credit was transferred to the coldkey. |
 | `ClaimPaymentDeferred` | Credit remains in the vault, for example because it is below the runtime transfer minimum, the price is unavailable or the runtime transfer failed. |
 
-Deferred credit survives entitlement expiry. A later claim can pay the accumulated credit once payment is possible. The vault also exposes the permissionless `withdrawClaimCredit(bytes32 coldkey)` method to retry existing credit; the current `provider` and `snclaim` CLIs do not provide a withdrawal subcommand. Re-submitting an already accepted leaf is not a withdrawal and will fail as already claimed.
+Deferred credit survives entitlement expiry. A later claim can pay the accumulated credit once payment is possible. The vault also exposes the permissionless `withdrawClaimCredit(bytes32 coldkey)` method to retry existing credit; `snclaim withdraw --vault=v1` (with `--coldkey`, `--contract`, `--rpc` and `--key_file`) calls it. Re-submitting an already accepted leaf is not a withdrawal and will fail as already claimed.
 
 ### Separate proof fetching from transaction submission
 
@@ -410,7 +410,7 @@ provider claim-daemon --config=/absolute/path/claim.yml \
 
 Run one owner for each queue and relayer key. Do not submit one-shot claims or run another daemon with that key concurrently. Preserve the complete queue directory, including custody side files, after an interrupted submission. A queue marked `uncertain` needs reconciliation of its original signed transaction. A finalized claim entry establishes acceptance; use payment events to distinguish paid rewards from deferred credit.
 
-Claim before the deployed entitlement expires. The mainnet reference window is eight epochs plus one grace epoch; unclaimed entitlements can then become carry for the same operator's pool. This expiry does not erase credit already accepted by `claim`.
+Claim before the deployed entitlement expires. The mainnet reference window is eight epochs plus one grace epoch; unclaimed entitlements can then become carry for the same operator's pool. This expiry does not erase credit already accepted by `claim`. From settlement v2's switch epoch, accounts never expire.
 
 ## Several exits on one host
 
