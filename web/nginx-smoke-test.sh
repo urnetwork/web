@@ -256,6 +256,9 @@ for host in ur.xyz preview.ur.xyz; do
     expect_response "$host" /investors/ 301 "https://$host/investors"
     expect_response "$host" /investors.html 301 "https://$host/investors"
     expect_response "$host" '/investors/?smoke=1' 301 "https://$host/investors?smoke=1"
+
+    # index.html is the homepage's file, but its URL is /.
+    expect_response "$host" /index 404
 done
 # www keeps the path percent-encoded on its way to the apex.
 expect_response www.ur.xyz '/%5Cexample.com/' 301 'https://ur.xyz/%5Cexample.com/'
