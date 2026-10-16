@@ -202,12 +202,10 @@ http {
         }
     }
 
-    # Transitional. bringyour.com moved to the mmm service with the other mmm
-    # sites (mmm/mmm/PLAN.md), but its CloudFront distribution still reaches the
-    # origin as main-web.bringyour.com. Until that origin is switched to
-    # main-mmm.bringyour.com, send its requests there, so the images the
-    # server's emails link to under /res/emails/ keep loading. Remove this
-    # block in the release after the switch.
+    # CloudFront still sends bringyour.com requests to this origin. Redirect
+    # directly to the public successor: main-mmm.bringyour.com has neither a
+    # public DNS record nor a current certificate. Keep the health endpoint
+    # local and map the retired blog articles to the current blog index.
     server {
         listen 80;
         server_name main-web.bringyour.com main-web.ur.network;
@@ -217,8 +215,12 @@ http {
             add_header 'Content-Type' 'application/json';
         }
 
+        location ^~ /blog/ {
+            return 301 https://ur.io/blog;
+        }
+
         location / {
-            return 302 https://main-mmm.bringyour.com$request_uri;
+            return 301 https://ur.io$request_uri;
         }
     }
 
