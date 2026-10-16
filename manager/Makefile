@@ -7,8 +7,6 @@ all: init clean build
 
 init:
 	pip install -r ../requirements.txt
-	go clean -cache
-	go clean -modcache
 
 clean:
 	rm -rf build

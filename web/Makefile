@@ -12,8 +12,6 @@ all: init clean build
 init:
 	pip install -r ../requirements.txt
 	(. ${NVM_DIR}/nvm.sh && nvm install ${NODE_VERSION})
-	go clean -cache
-	go clean -modcache
 
 clean:
 	rm -rf build
