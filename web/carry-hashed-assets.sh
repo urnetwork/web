@@ -8,6 +8,9 @@
 # blocks of either release. So each image carries the bundles of the images
 # deployed to the service's blocks when it is built: a page of the outgoing
 # release finds its bundles on a new block, during the rollout and after it.
+# A page of the new release that asks an old block for a new bundle gets a
+# 503 (nginx/nginx.conf.j2), which the load balancer retries on the other
+# block.
 #
 # An image carries only the deployed images' own bundles, never what they
 # carried in turn, so it holds its own release and the releases deployed when

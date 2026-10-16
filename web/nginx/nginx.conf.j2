@@ -469,9 +469,25 @@ http {
             add_header 'Access-Control-Allow-Origin' $public_cors_origin always;
         }
 
+        # Content-hashed bundles never change under the same name. The load
+        # balancer picks a block for each request, so during a staged rollout
+        # a page's bundles may come from a block of the other release. This
+        # image carries the bundles of the images deployed when it was built
+        # (carry-hashed-assets.sh), so it serves an older page's bundles too.
+        # A newer page's bundle is missing here: a 503, which no cache keeps
+        # and the load balancer retries on the service's other block (warp's
+        # proxy_next_upstream http_503, two tries), where the newer image
+        # has it. A missing bundle that no block has ends as that 503.
         location ^~ /_astro/ {
+            try_files $uri @hashed_asset_missing;
             add_header 'Cache-Control' 'public, max-age=31536000, immutable';
             add_header 'X-Robots-Tag' $ur_preview_robots always;
+        }
+
+        location @hashed_asset_missing {
+            add_header 'Cache-Control' 'no-store' always;
+            add_header 'X-Robots-Tag' $ur_preview_robots always;
+            return 503;
         }
 
         # The .html twins and trailing-slash variants 301 to the clean URL,

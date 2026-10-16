@@ -474,7 +474,9 @@ done
 #     nothing else accumulates;
 #   - this build's pages name only its own bundles, so its list is its build;
 #   - every carried bundle is served as an outgoing page asks for it:
-#     immutable, and brotli-compressed when its .br sibling came along.
+#     immutable, and brotli-compressed when its .br sibling came along;
+#   - a missing bundle is a 503 that no cache keeps, which the load balancer
+#     retries on the service's other block.
 expect_hashed_assets() {
     local host=$1
     local site=$2
@@ -525,6 +527,9 @@ expect_hashed_assets() {
     done < "$carried"
     printf 'nginx smoke test: %s carries %d bundles (%d files) beside its own %d files\n' \
         "$site" "$bundles" "$(wc -l < "$carried")" "$(wc -l < "$own")"
+
+    expect_response "$host" /_astro/no-such-bundle.js 503
+    expect_header "$host" /_astro/no-such-bundle.js Cache-Control no-store
 }
 
 expect_hashed_assets ur.xyz preview.ur.xyz
