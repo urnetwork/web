@@ -509,7 +509,16 @@ http {
             return 301 https://$host$clean$is_args$args;
         }
 
+        # These locations and `location /` serve files and pages only, never
+        # a directory. The build holds directories that are no page, such as
+        # /audits and /docs-md. Given a directory, nginx's static handler
+        # answers with a 301 that adds a slash, and the trailing-slash rule
+        # above takes it off again, so those paths looped. Now a directory
+        # with no page of its name is a 404, and its slashed form one
+        # redirect to that. There is no directory index page but the
+        # homepage: astro writes every page as a file (build.format "file").
         location ~* \.(?:png|jpe?g|webp|avif|gif|svg|ico|woff2?|ttf|mp4|mp3|pdf)$ {
+            try_files $uri =404;
             add_header 'Cache-Control' 'public, max-age=2592000, stale-while-revalidate=86400';
             add_header 'X-Robots-Tag' $ur_preview_robots always;
         }
@@ -518,13 +527,14 @@ http {
         # feed, llms.txt, markdown twins): fresh within the hour without
         # hammering.
         location ~* \.(?:xml|txt|md|ya?ml|json|rss)$ {
+            try_files $uri =404;
             add_header 'Cache-Control' 'public, max-age=3600, stale-while-revalidate=86400';
             add_header 'X-Robots-Tag' $ur_preview_robots always;
             add_header 'Access-Control-Allow-Origin' $public_cors_origin always;
         }
 
         location / {
-            try_files $uri $uri.html $uri/ $uri/index.html =404;
+            try_files $uri $uri.html =404;
 
             # always check for updates in the background, with nginx's own
             # validators (see location = /)

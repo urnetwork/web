@@ -237,6 +237,81 @@ done
 expect_response ur.xyz /docs 200
 expect_response ur.xyz /docs/miner 200
 
+# A directory of the build is no page: /audits, /team and /docs-md hold
+# files, and /docs/support holds a page. nginx's static handler answers a
+# directory with a 301 that adds a slash, which the trailing-slash rule took
+# off again, so these looped. A directory with no page of its name is a 404
+# and its slashed form one redirect to it; a page with a directory of the
+# same name, as /investors has, still answers, as its checks show. `location /`
+# serves no directory index page, and the build has none but the homepage,
+# which `location = /` serves: astro writes every page as a file.
+stray_index=$(cd /www/preview.ur.xyz && find . -mindepth 2 -name index.html -type f -print -quit)
+[[ -z "$stray_index" ]] || fail "preview.ur.xyz has a directory index page, ${stray_index#.}, which nothing serves"
+for host in ur.xyz preview.ur.xyz; do
+    for path in /audits /team /docs-md /docs-md/support /docs/support /.well-known /_astro; do
+        expect_response "$host" "$path" 404
+    done
+    for path in /audits /team /docs-md /docs/support; do
+        expect_response "$host" "$path/" 301 "https://$host$path"
+    done
+    # a localized docs path goes to the English one
+    expect_response "$host" /es/docs/support 301 /docs/support
+done
+
+# Every directory of the site, with its slash and without, ends within two
+# redirects in a page, a file or an error, never a loop. Two: a localized
+# path goes to the English one, which may then drop its slash. One curl run
+# per round requests every path, HEAD only. _astro/ is left to the bundles'
+# own location, which answers what it lacks itself.
+expect_no_redirect_loops() {
+    local host=$1
+    local root=$2
+    local round=0
+    local config="$test_dir/loops.curl"
+    local next
+
+    (cd "$root" && find . -mindepth 1 -type d) | sed 's|^\.||' | awk '!/^\/_astro(\/|$)/' |
+        LC_ALL=C sort > "$test_dir/dirs"
+    if grep -qvE '^[A-Za-z0-9/._~-]+$' "$test_dir/dirs"; then
+        fail "$root has a directory name this check cannot request: $(grep -vE '^[A-Za-z0-9/._~-]+$' "$test_dir/dirs" | head -n 1)"
+    fi
+    # each line: the path first asked for, then the path to ask now
+    awk '{ print $0 " " $0; print $0 "/ " $0 "/" }' "$test_dir/dirs" > "$test_dir/loops.0"
+    while [[ -s "$test_dir/loops.$round" ]]; do
+        if [[ "$round" == 3 ]]; then
+            fail "$host$(head -n 1 "$test_dir/loops.$round" | cut -d ' ' -f 1) still redirects after two redirects, to $(head -n 1 "$test_dir/loops.$round" | cut -d ' ' -f 2)"
+        fi
+        awk '{ printf "url = \"http://127.0.0.1%s\"\noutput = \"/dev/null\"\n", $2 }' \
+            "$test_dir/loops.$round" > "$config"
+        curl --silent --show-error --head --header "Host: $host" \
+            --write-out '%{http_code} %header{location}\n' --config "$config" \
+            > "$test_dir/loops.answers"
+        [[ "$(wc -l < "$test_dir/loops.answers")" == "$(wc -l < "$test_dir/loops.$round")" ]] || \
+            fail "curl answered $(wc -l < "$test_dir/loops.answers") of $(wc -l < "$test_dir/loops.$round") requests to $host"
+        next=$((round + 1))
+        # A redirect within the site is the next round's request; one to
+        # another site ends the chain; a 5xx fails.
+        paste -d ' ' "$test_dir/loops.$round" "$test_dir/loops.answers" | awk -v host="$host" '
+            $3 >= 500 { print "error " $1 " " $3 > "/dev/stderr"; next }
+            $3 >= 300 && $3 < 400 {
+                location = $4
+                sub(/\r$/, "", location)
+                if (index(location, "https://" host "/") == 1) {
+                    location = substr(location, length("https://" host) + 1)
+                }
+                if (location ~ /^\//) { print $1 " " location }
+            }' > "$test_dir/loops.$next" 2> "$test_dir/loops.errors"
+        if [[ -s "$test_dir/loops.errors" ]]; then
+            fail "$host answered a directory with a server error: $(head -n 1 "$test_dir/loops.errors")"
+        fi
+        round=$next
+    done
+    printf 'nginx smoke test: %s: %d directories of %s end within two redirects\n' \
+        "$host" "$(wc -l < "$test_dir/dirs")" "$root"
+}
+
+expect_no_redirect_loops ur.xyz /www/preview.ur.xyz
+
 # A path with a backslash or a control character, raw or percent-encoded, is
 # a real 404 before any redirect sees it, the localized docs and page
 # redirects included. Echoed into a Location, a browser would read
