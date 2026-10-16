@@ -613,3 +613,13 @@ expect_hashed_assets() {
 expect_hashed_assets ur.xyz preview.ur.xyz
 
 printf 'nginx smoke test: canonical routes and privacy-safe analytics passed\n'
+
+# CloudFront normalizes the retired site's origin Host to main-web. A redirect
+# to an internal mmm hostname is unusable in a browser; preserve path/query.
+for legacy_origin in main-web.bringyour.com main-web.ur.network; do
+    expect_response "$legacy_origin" '/' 301 'https://ur.io/'
+    expect_response "$legacy_origin" '/download?source=legacy' 301 'https://ur.io/download?source=legacy'
+    expect_response "$legacy_origin" '/blog/' 301 'https://ur.io/blog'
+    expect_response "$legacy_origin" '/blog/visual/?source=legacy' 301 'https://ur.io/blog'
+    expect_response "$legacy_origin" '/status' 200
+done
