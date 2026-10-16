@@ -1,11 +1,20 @@
 FROM --platform=$BUILDPLATFORM ubuntu:24.04 AS static-sites
 
 COPY build/preview.ur.xyz /www/preview.ur.xyz
+# The list of this build's own content-hashed bundles, and the bundles it
+# carries from the images deployed when it was built, which `make` stages
+# (carry-hashed-assets.sh).
+COPY build/hashed-assets /srv/hashed-assets
+COPY build/carried-assets /carried-assets
+COPY --chmod=755 carry-hashed-assets.sh /usr/local/sbin/carry-hashed-assets
 
-# Normalize permissions before copying into the runtime image. chmod after a
-# runtime COPY creates another full payload layer, doubling the image download.
-RUN find /www/preview.ur.xyz -type d -exec chmod ugo=rx {} + \
-    && find /www/preview.ur.xyz -type f -exec chmod ugo=r {} +
+# Add the carried bundles the site lacks, then normalize permissions before
+# copying into the runtime image. chmod after a runtime COPY creates another
+# full payload layer, doubling the image download.
+RUN /usr/local/sbin/carry-hashed-assets merge /carried-assets /www /srv/hashed-assets preview.ur.xyz \
+    && rm -rf /carried-assets \
+    && find /www /srv/hashed-assets -type d -exec chmod ugo=rx {} + \
+    && find /www /srv/hashed-assets -type f -exec chmod ugo=r {} +
 
 FROM ubuntu:24.04
 # see https://docs.docker.com/develop/develop-images/dockerfile_best-practices/
@@ -47,6 +56,7 @@ RUN nginx -t -g "error_log /dev/null;" 2>/dev/null || true
 
 ADD nginx/build/ /etc/nginx/
 COPY --from=static-sites /www /www
+COPY --from=static-sites /srv/hashed-assets /srv/hashed-assets
 
 COPY build/${WARP_ENV}/status.json /srv/warp/status/status.json
 
