@@ -4,8 +4,13 @@
 # mmm service, mmm/mmm (mmm/mmm/PLAN.md).
 NODE_VERSION := v22.23.2
 WEB_BUILD_CHECKS ?= 1
+# The sites whose content-hashed bundles each image carries across a staged
+# rollout (carry-hashed-assets.sh), and the platforms of the images.
+HASHED_ASSET_SITES := preview.ur.xyz
+IMAGE_PLATFORMS := linux/arm64/v8,linux/amd64
+LOCAL_IMAGE ?= web:local
 
-.PHONY: all init clean build check build-preview warp_build warp_build_image
+.PHONY: all init clean build check build-preview warp_build warp_build_image image_inputs local_image
 
 all: init clean build
 
@@ -43,18 +48,50 @@ warp_build:
 	@echo "warp_build must be run through warpctl build so govulncheck gates image publication." >&2
 	@false
 
-warp_build_image:
+# warpctl build runs this after `all`, with WARP_ENV, WARP_SERVICE and the
+# image names set. The image carries the content-hashed bundles of the images
+# deployed to this service's blocks now (CARRY_IMAGES=deployed), so a page of
+# the outgoing release loads on the new blocks, during the staged rollout and
+# after it. This build's own bundles go first to a small companion image,
+# which the next build reads instead of this whole image.
+# (Target-specific ?= is avoided here: make 3.81, macOS's, then stops
+# exporting the environment's value of that variable to every recipe.)
+warp_build_image: CARRY_IMAGES := $(if $(filter undefined,$(origin CARRY_IMAGES)),deployed,$(CARRY_IMAGES))
+warp_build_image: image_inputs
+	CARRY_PLATFORMS=$(IMAGE_PLATFORMS) ./carry-hashed-assets.sh publish \
+		${WARP_DOCKER_NAMESPACE}/${WARP_DOCKER_IMAGE}:hashed-assets-${WARP_DOCKER_VERSION} \
+		build $(HASHED_ASSET_SITES)
+	docker buildx build --progress plain \
+		--build-arg warp_env=${WARP_ENV} \
+		--platform $(IMAGE_PLATFORMS) \
+		-t ${WARP_DOCKER_NAMESPACE}/${WARP_DOCKER_IMAGE}:${WARP_DOCKER_VERSION} \
+		--no-cache \
+		--push \
+		.
+
+# What the image build reads besides the sites and binaries: the rendered
+# nginx config, the status file, the list of this build's hashed bundles and
+# the bundles it carries.
+image_inputs:
 	python ../webgen/webgen.py clean nginx/gen.py
 	python ../webgen/webgen.py build nginx/gen.py
 	mkdir -p build/${WARP_ENV}
 	echo "{\"version\":\"${WARP_VERSION}\",\"status\":\"ok\"}" > build/${WARP_ENV}/status.json
+	CARRY_IMAGES="$(CARRY_IMAGES)" ./carry-hashed-assets.sh stage build $(HASHED_ASSET_SITES)
 
+# The image warp_build_image publishes, smoke test included, built from
+# `make build` for this machine's platform and loaded into the local docker
+# instead of pushed. It carries the bundles of the images CARRY_IMAGES names,
+# none unless given: references, or "deployed" with the variables warpctl
+# build sets (carry-hashed-assets.sh). WARP_ENV and WARP_VERSION default to
+# local.
+local_image: WARP_ENV := $(or $(WARP_ENV),local)
+local_image: WARP_VERSION := $(or $(WARP_VERSION),local)
+local_image: image_inputs
 	docker buildx build --progress plain \
 		--build-arg warp_env=${WARP_ENV} \
-		--platform linux/arm64/v8,linux/amd64 \
-		-t ${WARP_DOCKER_NAMESPACE}/${WARP_DOCKER_IMAGE}:${WARP_DOCKER_VERSION} \
-		--no-cache \
-		--push \
+		-t $(LOCAL_IMAGE) \
+		--load \
 		.
 
 

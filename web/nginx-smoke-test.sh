@@ -256,6 +256,9 @@ for host in ur.xyz preview.ur.xyz; do
     expect_response "$host" /investors/ 301 "https://$host/investors"
     expect_response "$host" /investors.html 301 "https://$host/investors"
     expect_response "$host" '/investors/?smoke=1' 301 "https://$host/investors?smoke=1"
+
+    # index.html is the homepage's file, but its URL is /.
+    expect_response "$host" /index 404
 done
 # www keeps the path percent-encoded on its way to the apex.
 expect_response www.ur.xyz '/%5Cexample.com/' 301 'https://ur.xyz/%5Cexample.com/'
@@ -465,5 +468,73 @@ for host in ur.xyz; do
     [[ "$(page_view_count "$host" /llms.txt)" == 0 ]] || \
         fail "$host/llms.txt was logged as a page view"
 done
+
+# Content-hashed bundles across a staged rollout (carry-hashed-assets.sh). The
+# load balancer picks a block for each request, so a page of one release may
+# fetch its bundles from a block of the other. The image carries the bundles
+# of the images deployed when it was built, listed apart from its own:
+#   - every file under _astro/ is this build's own or carried, never both, so
+#     nothing else accumulates;
+#   - this build's pages name only its own bundles, so its list is its build;
+#   - every carried bundle is served as an outgoing page asks for it:
+#     immutable, and brotli-compressed when its .br sibling came along;
+#   - a missing bundle is a 503 that no cache keeps, which the load balancer
+#     retries on the service's other block.
+expect_hashed_assets() {
+    local host=$1
+    local site=$2
+    local root=/www/$site
+    local own=/srv/hashed-assets/$site.own
+    local carried=/srv/hashed-assets/$site.carried
+    local headers="$test_dir/hashed.headers"
+    local path
+    local page
+    local status
+    local bundles=0
+
+    [[ -f "$own" && -f "$carried" ]] || fail "the image does not list $site's hashed bundles"
+    if ! diff <(cd "$root" && find _astro -type f | LC_ALL=C sort) \
+        <(LC_ALL=C sort "$own" "$carried") >/dev/null; then
+        fail "$site's _astro/ does not hold exactly its own and its carried bundles"
+    fi
+    if [[ -n "$(LC_ALL=C comm -12 <(LC_ALL=C sort "$own") <(LC_ALL=C sort "$carried"))" ]]; then
+        fail "$site lists a bundle as both its own and carried"
+    fi
+
+    for page in "$root"/*.html; do
+        grep -oE '/_astro/[A-Za-z0-9._-]+' "$page" || true
+    done | sed 's|^/||' | LC_ALL=C sort -u | LC_ALL=C comm -23 - <(LC_ALL=C sort "$own") \
+        > "$test_dir/unlisted"
+    if [[ -s "$test_dir/unlisted" ]]; then
+        fail "$site's pages name bundles that are not its own: $(head -n 3 "$test_dir/unlisted" | tr '\n' ' ')"
+    fi
+
+    while IFS= read -r path; do
+        case "$path" in
+            *.br | *.gz) continue ;;
+        esac
+        bundles=$((bundles + 1))
+        status=$(curl --silent --show-error \
+            --output /dev/null \
+            --dump-header "$headers" \
+            --write-out '%{http_code}' \
+            --header "Host: $host" \
+            --header 'Accept-Encoding: br, gzip' \
+            "http://127.0.0.1/$path")
+        [[ "$status" == 200 ]] || fail "$host/$path, a carried bundle, returned $status"
+        [[ "$(header_value "$headers" Cache-Control)" == 'public, max-age=31536000, immutable' ]] || \
+            fail "$host/$path, a carried bundle, is not immutable"
+        if [[ -f "$root/$path.br" && "$(header_value "$headers" Content-Encoding)" != br ]]; then
+            fail "$host/$path, a carried bundle, did not use its .br sibling"
+        fi
+    done < "$carried"
+    printf 'nginx smoke test: %s carries %d bundles (%d files) beside its own %d files\n' \
+        "$site" "$bundles" "$(wc -l < "$carried")" "$(wc -l < "$own")"
+
+    expect_response "$host" /_astro/no-such-bundle.js 503
+    expect_header "$host" /_astro/no-such-bundle.js Cache-Control no-store
+}
+
+expect_hashed_assets ur.xyz preview.ur.xyz
 
 printf 'nginx smoke test: canonical routes and privacy-safe analytics passed\n'

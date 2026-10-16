@@ -114,6 +114,69 @@ class BuildChecksTest(unittest.TestCase):
         self.assertEqual((self.service / "build/preview.ur.xyz/index.html").read_text(), "fresh site\n")
         self.assertFalse((self.service / "build/preview.ur.xyz/stale.html").exists())
 
+    def image_target_fixture(self):
+        shutil.copy(REPO / "web/carry-hashed-assets.sh", self.service / "carry-hashed-assets.sh")
+        bundles = self.service / "build/preview.ur.xyz/_astro"
+        bundles.mkdir(parents=True)
+        (bundles / "site.Hashhash.js").write_text("site\n")
+        for name in ("docker", "warpctl"):
+            command = self.root / "bin" / name
+            command.write_text(STUB)
+            command.chmod(0o755)
+
+    def test_release_image_carries_the_deployed_bundles_and_publishes_its_own_first(self):
+        self.image_target_fixture()
+        self.env.update({"WARP_ENV": "main", "WARP_SERVICE": "web", "WARP_VERSION": "2026.10.15+5",
+                         "WARP_DOCKER_NAMESPACE": "bringyour", "WARP_DOCKER_IMAGE": "main-web",
+                         "WARP_DOCKER_VERSION": "2026.10.15-5"})
+        self.env.pop("CARRY_IMAGES", None)
+        result = self.run_make("warp_build_image", service=True)
+        self.assertEqual(result.returncode, 0, result.stdout)
+        events = self.events.read_text().splitlines()
+        # the images deployed to the service's blocks, none in this fixture
+        self.assertIn("warpctl:ls versions main web", events)
+        builds = [event for event in events if event.startswith("docker:buildx build")]
+        self.assertEqual(len(builds), 2, events)
+        self.assertIn("--platform linux/arm64/v8,linux/amd64", builds[0])
+        self.assertIn("-t bringyour/main-web:hashed-assets-2026.10.15-5 --push", builds[0])
+        self.assertTrue(builds[1].endswith(
+            "--build-arg warp_env=main --platform linux/arm64/v8,linux/amd64 "
+            "-t bringyour/main-web:2026.10.15-5 --no-cache --push ."), builds[1])
+        self.assertEqual((self.service / "build/hashed-assets/preview.ur.xyz.own").read_text(),
+                         "_astro/site.Hashhash.js\n")
+        self.assertTrue((self.service / "build/carried-assets/preview.ur.xyz").is_dir())
+
+    def test_an_empty_carry_images_carries_nothing_in_a_release(self):
+        # CARRY_IMAGES set and empty skips the carrying, as an override
+        self.image_target_fixture()
+        self.env.update({"WARP_ENV": "main", "WARP_SERVICE": "web", "WARP_VERSION": "2026.10.15+5",
+                         "WARP_DOCKER_NAMESPACE": "bringyour", "WARP_DOCKER_IMAGE": "main-web",
+                         "WARP_DOCKER_VERSION": "2026.10.15-5", "CARRY_IMAGES": ""})
+        result = self.run_make("warp_build_image", service=True)
+        self.assertEqual(result.returncode, 0, result.stdout)
+        events = self.events.read_text().splitlines()
+        self.assertFalse([event for event in events if event.startswith("warpctl:")], events)
+        self.assertIn("carrying no image's hashed files", result.stdout)
+        builds = [event for event in events if event.startswith("docker:buildx build")]
+        self.assertEqual(len(builds), 2, events)
+        self.assertIn("-t bringyour/main-web:hashed-assets-2026.10.15-5 --push", builds[0])
+
+    def test_local_image_loads_and_carries_only_named_images(self):
+        self.image_target_fixture()
+        for name in ("WARP_ENV", "WARP_SERVICE", "WARP_VERSION", "WARP_DOCKER_NAMESPACE",
+                     "WARP_DOCKER_IMAGE", "WARP_DOCKER_VERSION", "CARRY_IMAGES"):
+            self.env.pop(name, None)
+        result = self.run_make("local_image", service=True)
+        self.assertEqual(result.returncode, 0, result.stdout)
+        events = self.events.read_text().splitlines()
+        self.assertFalse([event for event in events if event.startswith("warpctl:")], events)
+        builds = [event for event in events if event.startswith("docker:buildx build")]
+        self.assertEqual(builds, ["docker:buildx build --progress plain --build-arg warp_env=local "
+                                  "-t web:local --load ."])
+        self.assertEqual((self.service / "build/local/status.json").read_text(),
+                         '{"version":"local","status":"ok"}\n')
+        self.assertIn("carrying no image's hashed files", result.stdout)
+
     def test_web_builds_no_mmm_site(self):
         # The mmm sites belong to the mmm service (mmm/mmm). This tree has no
         # mmm checkout, and web's builds must not need one.
