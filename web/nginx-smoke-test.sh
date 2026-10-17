@@ -172,17 +172,21 @@ expect_response ur.xyz /mainnet 200
 expect_operator_list
 expect_response www.ur.xyz / 301 https://ur.xyz/
 
-# bringyour.com moved to the mmm service with the other mmm sites
-# (mmm/mmm/PLAN.md), but its CloudFront distribution still reaches the origin
-# as main-web.bringyour.com. Until that origin is switched to
-# main-mmm.bringyour.com, web sends its requests there, so the images the
-# server's emails link to keep loading. Remove these checks with the redirect,
-# in the release after the switch.
+# CloudFront normalizes the retired site's origin Host to main-web. Redirect
+# permanently to the public successor, never the internal mmm hostname.
+# Ordinary paths, email assets and queries survive; retired blog articles map
+# to the blog index. Health stays local. Keep this contract in one place.
 for host in main-web.bringyour.com main-web.ur.network; do
-    expect_response "$host" / 302 https://main-mmm.bringyour.com/
-    expect_response "$host" '/legacy/path?smoke=1' 302 'https://main-mmm.bringyour.com/legacy/path?smoke=1'
-    expect_response "$host" /res/emails/ur-wordmark-bg-240.jpg 302 \
-        https://main-mmm.bringyour.com/res/emails/ur-wordmark-bg-240.jpg
+    expect_response "$host" / 301 https://ur.io/
+    expect_response "$host" '/?smoke=1' 301 'https://ur.io/?smoke=1'
+    expect_response "$host" '/legacy/path?smoke=1' 301 'https://ur.io/legacy/path?smoke=1'
+    expect_response "$host" /res/emails/ur-wordmark-bg-240.jpg 301 \
+        https://ur.io/res/emails/ur-wordmark-bg-240.jpg
+    expect_response "$host" '/res/emails/ur-wordmark-bg-240.jpg?smoke=1' 301 \
+        'https://ur.io/res/emails/ur-wordmark-bg-240.jpg?smoke=1'
+    expect_response "$host" '/download?source=legacy' 301 'https://ur.io/download?source=legacy'
+    expect_response "$host" /blog/ 301 https://ur.io/blog
+    expect_response "$host" '/blog/visual/?source=legacy' 301 https://ur.io/blog
     expect_response "$host" /status 200
 done
 
@@ -613,13 +617,3 @@ expect_hashed_assets() {
 expect_hashed_assets ur.xyz preview.ur.xyz
 
 printf 'nginx smoke test: canonical routes and privacy-safe analytics passed\n'
-
-# CloudFront normalizes the retired site's origin Host to main-web. A redirect
-# to an internal mmm hostname is unusable in a browser; preserve path/query.
-for legacy_origin in main-web.bringyour.com main-web.ur.network; do
-    expect_response "$legacy_origin" '/' 301 'https://ur.io/'
-    expect_response "$legacy_origin" '/download?source=legacy' 301 'https://ur.io/download?source=legacy'
-    expect_response "$legacy_origin" '/blog/' 301 'https://ur.io/blog'
-    expect_response "$legacy_origin" '/blog/visual/?source=legacy' 301 'https://ur.io/blog'
-    expect_response "$legacy_origin" '/status' 200
-done
