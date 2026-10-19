@@ -202,10 +202,13 @@ http {
         }
     }
 
-    # CloudFront still sends bringyour.com requests to this origin. Redirect
-    # directly to the public successor: main-mmm.bringyour.com has neither a
+    # CloudFront still sends bringyour.com requests to this origin as
+    # main-web.bringyour.com. Redirect permanently to the public successor, as
+    # mmm's bringyour.com block does: main-mmm.bringyour.com has neither a
     # public DNS record nor a current certificate. Keep the health endpoint
-    # local and map the retired blog articles to the current blog index.
+    # local and map the retired blog articles to the current blog index. Old
+    # emails' images stay on the mmm copy (web has none, ur.io has none), as a
+    # 302 so they move once main-mmm.bringyour.com is cut over.
     server {
         listen 80;
         server_name main-web.bringyour.com main-web.ur.network;
@@ -213,6 +216,10 @@ http {
         location = /status {
             alias /srv/warp/status/status.json;
             add_header 'Content-Type' 'application/json';
+        }
+
+        location ^~ /res/emails/ {
+            return 302 https://main-mmm.bringyour.com$request_uri;
         }
 
         location ^~ /blog/ {

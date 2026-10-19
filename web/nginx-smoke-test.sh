@@ -173,17 +173,20 @@ expect_operator_list
 expect_response www.ur.xyz / 301 https://ur.xyz/
 
 # CloudFront normalizes the retired site's origin Host to main-web. Redirect
-# permanently to the public successor, never the internal mmm hostname.
-# Ordinary paths, email assets and queries survive; retired blog articles map
-# to the blog index. Health stays local. Keep this contract in one place.
+# pages permanently to the public successor, never to the internal mmm
+# hostname, which has no DNS record or current certificate. Ordinary paths and
+# queries survive; retired blog articles map to the blog index; old emails'
+# images, which only mmm has, stay a 302 to mmm. Health stays local. Keep this
+# contract in one place.
 for host in main-web.bringyour.com main-web.ur.network; do
     expect_response "$host" / 301 https://ur.io/
     expect_response "$host" '/?smoke=1' 301 'https://ur.io/?smoke=1'
     expect_response "$host" '/legacy/path?smoke=1' 301 'https://ur.io/legacy/path?smoke=1'
-    expect_response "$host" /res/emails/ur-wordmark-bg-240.jpg 301 \
-        https://ur.io/res/emails/ur-wordmark-bg-240.jpg
-    expect_response "$host" '/res/emails/ur-wordmark-bg-240.jpg?smoke=1' 301 \
-        'https://ur.io/res/emails/ur-wordmark-bg-240.jpg?smoke=1'
+    expect_response "$host" /pricing 301 https://ur.io/pricing
+    expect_response "$host" /res/emails/ur-wordmark-bg-240.jpg 302 \
+        https://main-mmm.bringyour.com/res/emails/ur-wordmark-bg-240.jpg
+    expect_response "$host" '/res/emails/ur-wordmark-bg-240.jpg?smoke=1' 302 \
+        'https://main-mmm.bringyour.com/res/emails/ur-wordmark-bg-240.jpg?smoke=1'
     expect_response "$host" '/download?source=legacy' 301 'https://ur.io/download?source=legacy'
     expect_response "$host" /blog/ 301 https://ur.io/blog
     expect_response "$host" '/blog/visual/?source=legacy' 301 https://ur.io/blog
