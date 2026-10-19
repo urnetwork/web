@@ -174,22 +174,27 @@ expect_response www.ur.xyz / 301 https://ur.xyz/
 
 # CloudFront normalizes the retired site's origin Host to main-web. Redirect
 # pages permanently to the public successor, never to the internal mmm
-# hostname, which has no DNS record or current certificate. Ordinary paths and
-# queries survive; retired blog articles map to the blog index; old emails'
-# images, which only mmm has, stay a 302 to mmm. Health stays local. Keep this
-# contract in one place.
+# hostname, which has no DNS record or current certificate. Old pages map to
+# their ur.io successor, any other path to the ur.io homepage (ur.io has no
+# page for it), and queries survive. Old emails' images are served here.
+# Health stays local. Keep this contract in one place.
 for host in main-web.bringyour.com main-web.ur.network; do
     expect_response "$host" / 301 https://ur.io/
     expect_response "$host" '/?smoke=1' 301 'https://ur.io/?smoke=1'
-    expect_response "$host" '/legacy/path?smoke=1' 301 'https://ur.io/legacy/path?smoke=1'
-    expect_response "$host" /pricing 301 https://ur.io/pricing
-    expect_response "$host" /res/emails/ur-wordmark-bg-240.jpg 302 \
-        https://main-mmm.bringyour.com/res/emails/ur-wordmark-bg-240.jpg
-    expect_response "$host" '/res/emails/ur-wordmark-bg-240.jpg?smoke=1' 302 \
-        'https://main-mmm.bringyour.com/res/emails/ur-wordmark-bg-240.jpg?smoke=1'
-    expect_response "$host" '/download?source=legacy' 301 'https://ur.io/download?source=legacy'
+    expect_response "$host" '/legacy/path?smoke=1' 301 'https://ur.io/?smoke=1'
+    expect_response "$host" /pricing 301 https://ur.io/products
+    expect_response "$host" '/download?source=legacy' 301 'https://ur.io/install?source=legacy'
+    expect_response "$host" /faq.html 301 https://ur.io/docs/faq
+    expect_response "$host" /privacy.txt 301 https://ur.io/privacy
+    expect_response "$host" /warrant-canary 301 https://ur.io/
     expect_response "$host" /blog/ 301 https://ur.io/blog
-    expect_response "$host" '/blog/visual/?source=legacy' 301 https://ur.io/blog
+    expect_response "$host" '/blog/visual/?source=legacy' 301 'https://ur.io/blog?source=legacy'
+    expect_response "$host" /res/emails/ur-wordmark-bg-240.jpg 200
+    expect_response "$host" '/res/emails/ur-wordmark-bg-240.jpg?smoke=1' 200
+    cache_control=$(header_value "$test_dir/${host//./_}.headers" Cache-Control)
+    [[ "$cache_control" == 'public, max-age=2592000, stale-while-revalidate=86400' ]] || \
+        fail "$host/res/emails cache control was ${cache_control:-<missing>}"
+    expect_response "$host" /res/emails/missing.jpg 404
     expect_response "$host" /status 200
 done
 
