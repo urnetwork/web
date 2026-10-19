@@ -202,32 +202,63 @@ http {
         }
     }
 
+    # The retired bringyour.com site's paths and their ur.io successors.
+    # ur.io answers 404 for most old bringyour.com paths (/pricing,
+    # /download, /faq, ...), so the redirect maps each old page to the ur.io
+    # page that replaced it, keeps the paths ur.io serves as they are, and
+    # sends every other path to the ur.io homepage instead of to a 404. The
+    # old pages come from this repo's bringyour.com site before the mmm split
+    # (d0905ed6); the ur.io pages from its sitemap. mmm's bringyour.com block
+    # carries the same map (mmm/mmm/nginx/nginx.conf.j2): change both.
+    map $uri $bringyour_successor {
+        default                                          "/";
+        "~^/(?:index(?:\.html)?)?$"                      "/";
+        "~^/about(?:\.html|/)?$"                         "/about";
+        "~^/blog(?:\.html|/.*)?$"                        "/blog";
+        "~^/buy-data(?:\.html|/)?$"                      "/buy-data";
+        "~^/(?:pricing|products)(?:\.html|/)?$"          "/products";
+        "~^/(?:download|install)(?:\.html|/)?$"          "/install";
+        "~^/(?:login|connect|app)(?:\.html|/)?$"         "/app";
+        "~^/faq(?:\.html|/)?$"                           "/docs/faq";
+        "~^/developers(?:\.html|/)?$"                    "/docs/developers";
+        "~^/api(?:\.html|/)?$"                           "/docs/api";
+        "~^/docs/?$"                                     "/docs";
+        "~^/(?<legal_page>privacy|terms|vdp)(?:\.html|\.txt|/)?$" "/$legal_page";
+        "~^/(?:\.well-known/)?pgp-key\.txt$"             "/.well-known/pgp-key.txt";
+        "/.well-known/security.txt"                      "/.well-known/security.txt";
+        "/.well-known/assetlinks.json"                   "/.well-known/assetlinks.json";
+        "/robots.txt"                                    "/robots.txt";
+        "~^/sitemap\.(?:txt|xml)$"                       "/sitemap-index.xml";
+        "~^/(?<same_page>agents|changelog|ip|location|services|support)/?$" "/$same_page";
+    }
+
     # CloudFront still sends bringyour.com requests to this origin as
     # main-web.bringyour.com. Redirect permanently to the public successor, as
     # mmm's bringyour.com block does: main-mmm.bringyour.com has neither a
     # public DNS record nor a current certificate. Keep the health endpoint
-    # local and map the retired blog articles to the current blog index. Old
-    # emails' images stay on the mmm copy (web has none, ur.io has none), as a
-    # 302 so they move once main-mmm.bringyour.com is cut over.
+    # local, and serve old emails' images from this image: server email
+    # templates before 2026-09-01 link https://bringyour.com/res/emails/...,
+    # and ur.io has none of them.
     server {
         listen 80;
         server_name main-web.bringyour.com main-web.ur.network;
 
+        root /www/bringyour.com;
+
+        # The lb answers /status on public hosts itself (deny all); this one
+        # is for checks inside the image and the lb's per-block status.
         location = /status {
             alias /srv/warp/status/status.json;
             add_header 'Content-Type' 'application/json';
         }
 
         location ^~ /res/emails/ {
-            return 302 https://main-mmm.bringyour.com$request_uri;
-        }
-
-        location ^~ /blog/ {
-            return 301 https://ur.io/blog;
+            try_files $uri =404;
+            add_header 'Cache-Control' 'public, max-age=2592000, stale-while-revalidate=86400';
         }
 
         location / {
-            return 301 https://ur.io$request_uri;
+            return 301 https://ur.io$bringyour_successor$is_args$args;
         }
     }
 

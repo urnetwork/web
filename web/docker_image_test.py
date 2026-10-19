@@ -39,6 +39,7 @@ class DockerImageTest(unittest.TestCase):
         self.assertIn("--platform=$BUILDPLATFORM", stage[0])
         copies = [line for line in stage if line.startswith("COPY ")]
         self.assertEqual(copies, [f"COPY build/{site} /www/{site}" for site in SITES] + [
+            "COPY bringyour.com /www/bringyour.com",
             "COPY build/hashed-assets /srv/hashed-assets",
             "COPY build/carried-assets /carried-assets",
             "COPY --chmod=755 carry-hashed-assets.sh /usr/local/sbin/carry-hashed-assets",
@@ -47,6 +48,7 @@ class DockerImageTest(unittest.TestCase):
         site_instructions = [line for line in runtime if "/www" in line]
         self.assertEqual(site_instructions, ["COPY --from=static-sites /www /www"],
                          "later chmod/RUN or another site COPY duplicates the payload layer")
+        self.assertFalse(any("bringyour.com" in line for line in runtime))
         self.assertIn("COPY --from=static-sites /srv/hashed-assets /srv/hashed-assets", runtime)
         self.assertFalse(any(line.startswith(("ADD build/", "COPY build/"))
                              and any(site in line for site in SITES) for line in runtime))

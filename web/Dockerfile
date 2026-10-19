@@ -1,6 +1,9 @@
 FROM --platform=$BUILDPLATFORM ubuntu:24.04 AS static-sites
 
 COPY build/preview.ur.xyz /www/preview.ur.xyz
+# Old emails' images, which bringyour.com still serves (nginx.conf.j2). They
+# are committed here, as they were before the mmm split; mmm has a copy.
+COPY bringyour.com /www/bringyour.com
 # The list of this build's own content-hashed bundles, and the bundles it
 # carries from the images deployed when it was built, which `make` stages
 # (carry-hashed-assets.sh).
