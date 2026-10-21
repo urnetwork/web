@@ -41,7 +41,7 @@ provider --help
 
 ### Or build from source
 
-Use the Go version required by `sn/go.mod` (currently Go 1.26.5) and compatible revisions of the sibling repositories referenced by its `replace` directives. The source workspace must have this shape:
+Use the Go version required by `sn/go.mod` (currently Go 1.27.3) and compatible revisions of the sibling repositories referenced by its `replace` directives. The source workspace must have this shape:
 
 ```text
 urnetwork/
