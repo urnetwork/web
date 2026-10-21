@@ -13,7 +13,7 @@ The miner is a single program, `provider`. There are three ways to get it:
 | [Manual download](#manual-download-linux-and-macos) | Linux, macOS | By hand | macOS, or if you want full control |
 | [Build from source](#build-from-source) | Linux, macOS | By hand | Developers and auditors |
 
-Whichever you choose, the miner keeps its identity in `~/.urnetwork`, so you can switch later without registering again. After installing, go back to [the quick start](/docs/miner#2-sign-in).
+Whichever you choose, the miner keeps its identity in `~/.urnetwork`, so you can switch later without registering again. Back that folder up first, and stop the old way's service before starting the new one, so two copies never run at once. Don't switch by running `urnet-tools uninstall`: it deletes the folder (see [Uninstall](#uninstall)). After installing, go back to [the quick start](/docs/miner#2-sign-in).
 
 ## Linux installer
 
@@ -24,7 +24,7 @@ source ~/.bashrc
 
 The installer needs `curl` or `wget`, and `jq` or `python3`, which most Linux systems already have. It needs no `sudo`. It:
 
-- downloads the latest release for your processor (64-bit x86 or ARM, or 32-bit x86) into `~/.local/share/urnetwork-provider/bin`;
+- downloads the latest release for your processor (64-bit x86 or ARM, or 32-bit x86) into `~/.local/share/urnetwork-provider/bin`. It doesn't recognise 32-bit ARM, such as a Raspberry Pi on a 32-bit OS;
 - adds that folder to your `PATH` in `~/.bashrc`;
 - on systems with systemd, sets up a background service, `urnetwork.service`, and a daily [automatic update](/docs/miner/updates);
 - turns on lingering for your user, so the service keeps running after you log out. If that needs an administrator, it prints the `sudo loginctl enable-linger` command to run.
@@ -60,6 +60,7 @@ Every release on the [build releases page](https://github.com/urnetwork/build/re
 | --- | --- |
 | Linux PC or server (Intel or AMD, 64-bit) | `linux/amd64` |
 | Raspberry Pi 4 or 5 on a 64-bit OS, or another 64-bit ARM Linux | `linux/arm64` |
+| Older 32-bit Intel or AMD Linux PC | `linux/386` |
 | Mac with Apple silicon (M1 or later) | `darwin/arm64` |
 | Mac with an Intel processor | `darwin/amd64` |
 

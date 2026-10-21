@@ -20,22 +20,21 @@ For the other roles, see [Run a validator](https://ur.xyz/docs/validator) and [R
 ## How it works
 
 ```text
- you                          the operator                    Bittensor SN25
-┌─────────────────┐  traffic  ┌──────────────────────┐ scores ┌──────────────────┐
-│ miner (provider)├──────────→│ network operator     │←───────┤ validators       │
-│ on your machine │           │ pools miners' work   │        │ measure routing  │
-└────────┬────────┘           └──────────┬───────────┘        └──────────────────┘
-         │ signed payout wallet          │ pays the pool's rewards
-         ↓                               ↓
-   your Bittensor coldkey ←──── α ($UR) rewards, claimed per settlement epoch
+your miner (provider)
+  │ carries internet traffic for
+  ↓
+a network operator  ←─  validators
+  │ pays its pool       measure it
+  ↓ every epoch
+your Bittensor coldkey (α, $UR)
 ```
 
 Most miners join an operator's **pool**. You don't need your own Bittensor registration: you sign in to the operator, your miner registers itself as a device, and the pool's rewards are paid to the Bittensor wallet you choose. Large fleets can instead register their own hotkey; see [the head tier](https://ur.xyz/docs/miner/advanced#larger-fleets-and-the-head-tier).
 
 ## What you need
 
-- **A Linux or macOS computer that stays online.** A home PC, a server or a Raspberry Pi 4 or 5 with a 64-bit OS all work. Other systems aren't supported.
-- **One stable public internet address per miner.** To run more than one exit from a host, see [Several exits on one host](https://ur.xyz/docs/miner/advanced#several-exits-on-one-host).
+- **A Linux or macOS computer that stays online.** A home PC, a server or a Raspberry Pi 4 or 5 with a 64-bit OS all work. Other systems aren't supported for mining.
+- **One stable public internet address per miner.** The miner also tries to listen on TCP port 443 and on UDP ports 443, 53 and 4053 for its extender. To run more than one exit from a host, see [Several exits on one host](https://ur.xyz/docs/miner/advanced#several-exits-on-one-host).
 - **An account with a network operator.** The miner uses the default operator, `bringyour.com`, unless you [choose another](https://ur.xyz/docs/miner/run#choose-an-operator). You'll get an **auth code** from your account to sign the miner in.
 - **A Bittensor wallet address (coldkey)** for your rewards. It's an ss58 address that starts with `5`. You can sign for it on another device; its secret never needs to be on the miner.
 
@@ -52,7 +51,7 @@ curl -fsSL https://raw.githubusercontent.com/urnetwork/connect/main/scripts/Prov
 source ~/.bashrc
 ```
 
-The installer names the command `urnetwork`, not `provider`. If you used it, type `urnetwork` wherever this guide says `provider`.
+The installer names the command `urnetwork`, not `provider`. If you used it, type `urnetwork` wherever this guide says `provider`, including in commands the miner prints for you to copy.
 
 On **macOS**, or on Linux without the installer, download the release yourself: see [Manual download](https://ur.xyz/docs/miner/install#manual-download-linux-and-macos).
 
@@ -74,17 +73,17 @@ The very first start needs one extra flag, which lets the miner register this co
 provider provide --allow-client-registration
 ```
 
-Leave it running. It prints a lot of log lines; that's normal. Once you've done step 4, stop it with Ctrl-C. Only use `--allow-client-registration` this first time: later starts are just `provider provide`.
+It prints a lot of log lines; that's normal. Within a few seconds it has registered the device, and you can do step 4 in a second terminal while it keeps running. Stop it with Ctrl-C when you're ready for step 5. Only use `--allow-client-registration` this first time: later starts are just `provider provide`.
 
 ### 4. Set your payout wallet
 
-In a second terminal, while the miner from step 3 is running:
+In a second terminal:
 
 ```bash
 provider wallet challenge '<your coldkey ss58 address>'
 ```
 
-It prints a statement to sign. Sign it with that coldkey in your wallet app, then run the `provider wallet set` command it printed, with your signature filled in. [Get paid](https://ur.xyz/docs/miner/rewards#set-your-payout-wallet) explains the signing step in detail.
+It prints a statement to sign. Sign it with that coldkey in a wallet that can sign raw messages with sr25519, such as the Polkadot.js browser extension, then run the `provider wallet set` command it printed, with your signature filled in. [Get paid](https://ur.xyz/docs/miner/rewards#set-your-payout-wallet) explains the signing step in detail.
 
 The wallet has to come after step 3: it's tied to the device that step 3 registers.
 

@@ -23,7 +23,7 @@ A file downloaded with a web browser is quarantined. Run `xattr -d com.apple.qua
 
 That's on purpose: the prompt hides the code. Paste it and press Enter.
 
-To give up without a code, press Enter on the empty prompt; Ctrl-C doesn't stop this prompt. Have your code ready before you run `provider auth`.
+To give up without a code, press Enter on the empty prompt; Ctrl-C doesn't stop this prompt. It then prints `panic: no auth code entered` and some internal details, which is harmless. Have your code ready before you run `provider auth`.
 
 ### `panic: Invalid auth code.`
 
@@ -43,7 +43,7 @@ On a network that inspects encrypted traffic with its own certificate authority,
 
 ### The miner stops straight away
 
-It prints a JSON line with `"event":"startup_recovery_required"` and exits. The usual reasons, most likely first:
+It prints a JSON line with `"event":"startup_recovery_required"` and exits, with a success exit code, so a service shows it as stopped rather than failed. The usual reasons, most likely first:
 
 1. **You haven't signed in on this computer.** Run `provider auth` first.
 2. **This is a new device.** The first start needs `provider provide --allow-client-registration`. Later starts don't.
@@ -51,9 +51,10 @@ It prints a JSON line with `"event":"startup_recovery_required"` and exits. The 
 
 ### `registration parent must be owned and not writable by other users`
 
-The miner's folder can be changed by other users, so it refuses to save its identity there. Make it private and start again:
+The miner's folder belongs to another user (for example, after running the miner once with `sudo`) or can be changed by other users, so it refuses to save its identity there. Give it back to your user, make it private, and start again:
 
 ```bash
+sudo chown -R "$USER" ~/.urnetwork
 chmod 700 ~/.urnetwork
 ```
 
@@ -75,7 +76,7 @@ With `--all-operators`, that operator has no sign-in yet. Run `provider auth --o
 
 ## Getting paid
 
-### `wallet set` fails with `.provider.jwt: no such file`
+### `wallet challenge` or `wallet set` says `credential not ready`
 
 The device isn't registered yet. Start it once with `provider provide --allow-client-registration`, then set the wallet. See [Set your payout wallet](/docs/miner/rewards#set-your-payout-wallet).
 

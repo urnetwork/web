@@ -5,7 +5,7 @@ description: Keep the UR miner up to date. How automatic updates work with the L
 
 # Keep the miner up to date
 
-New miner releases fix problems and keep your miner compatible with the network, so it's best to run the latest one. If you used the Linux installer, there's nothing to do: it updates automatically.
+New miner releases fix problems and keep your miner compatible with the network, so it's best to run the latest one. If you used the Linux installer, it updates automatically; see the one thing to check below.
 
 ## Automatic updates (Linux installer)
 
@@ -16,6 +16,8 @@ The installer switches the daily check on for your next login or restart. To sta
 ```bash
 urnet-tools auto-update on
 ```
+
+> **Known issue:** after each update, whether automatic or with `urnet-tools update` or `reinstall`, the daily check is set back to daily and stays paused until the next restart or login, even though `urnet-tools auto-update` says `enabled`. Run `urnet-tools auto-update on` again after an update, or restart the computer from time to time, so the checks keep running.
 
 To see which version you have, and whether a newer one is out:
 
@@ -37,7 +39,7 @@ Automatic updates are on by default, and we recommend leaving them on. To see wh
 urnet-tools auto-update
 ```
 
-To check weekly or monthly instead of daily:
+To check weekly or monthly instead of daily (write `--interval weekly` with a space; the `--interval=weekly` form that `urnet-tools --help` shows doesn't work):
 
 ```bash
 urnet-tools auto-update on --interval weekly
@@ -50,11 +52,11 @@ urnet-tools auto-update off
 urnet-tools auto-update on
 ```
 
-With automatic updates off, run `urnet-tools update` yourself from time to time. Each update or reinstall sets the installer's defaults again: daily automatic updates on, and the service starting by itself. Run `urnet-tools auto-update off` again afterwards if you want them to stay off.
+With automatic updates off, run `urnet-tools update` yourself from time to time. Each update or reinstall sets the installer's defaults again: daily automatic updates on (from the next restart or login), and the service starting by itself. Run `urnet-tools auto-update off` again afterwards if you want them to stay off.
 
 ### Stay on one version
 
-To install a particular release, give its tag from the releases page:
+To install a particular release, give its tag from the releases page, with a space after `-t`:
 
 ```bash
 urnet-tools reinstall -t <version>

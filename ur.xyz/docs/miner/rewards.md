@@ -13,7 +13,7 @@ If you used the Linux installer, type `urnetwork` wherever this page says `provi
 
 Rewards go to a Bittensor **coldkey**: an ss58 address that starts with `5`. You prove the coldkey is yours by signing a short statement with it. The operator stores that signed statement for this device, so a wallet address saved in your account profile alone is not enough.
 
-Set the wallet **after** the device's first start (`provider provide --allow-client-registration`), because the statement names the device that start registers. Before that, the command fails with `.provider.jwt: no such file`.
+Set the wallet **after** the device's first start (`provider provide --allow-client-registration`), because the statement names the device that start registers. Before that, `wallet challenge` and `wallet set` fail with `claim/wallet credential not ready at …/.provider.jwt`.
 
 ### Sign in your wallet app (recommended)
 
@@ -23,7 +23,7 @@ This keeps your coldkey's secret off the miner. First, ask for the statement:
 provider wallet challenge '<coldkey_ss58>'
 ```
 
-Sign the exact printed statement with that coldkey, then run the `provider wallet set` command the challenge printed, with your signature. It looks like this:
+Sign the exact printed statement with that coldkey, in a wallet that can sign raw messages with sr25519, such as the Polkadot.js browser extension. Then run the `provider wallet set` command the challenge printed, with your signature. (If you used the Linux installer, change `provider` at its start to `urnetwork`.) It looks like this:
 
 ```bash
 provider wallet set '<coldkey_ss58>' \
@@ -79,7 +79,7 @@ A settlement epoch is set by the deployed contracts and policy. On mainnet it's 
 
 ## Claim your rewards
 
-A claim fetches your proof from the operator, checks it, and sends it to the settlement vault, which pays your coldkey.
+A claim fetches your proof from the operator, checks it, and sends it to the settlement vault, which pays your coldkey. You'll need your operator's published deployment details: its EVM RPC endpoint, settlement vault address and chain ID (964 on mainnet). Signing in and mining don't by themselves mean an operator's subnet rewards are active; its published deployment says so.
 
 ### 1. Check the claim
 

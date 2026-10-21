@@ -32,7 +32,7 @@ provider choose_network https://api.example.net wss://connect.example.net
 provider choose_network --show
 ```
 
-`--show` prints the operator in effect, and `provider choose_network --reset` goes back to the default. The choice is saved and applies to every later command. Then [sign in](https://ur.xyz/docs/miner#2-sign-in) with an auth code from that operator.
+API URLs must start with `https://` and connect URLs with `wss://`. `--show` prints the operator in effect, and `provider choose_network --reset` goes back to the default. The choice is saved and applies to every later command. Then [sign in](https://ur.xyz/docs/miner#2-sign-in) with an auth code from that operator.
 
 Changing the operator doesn't move a device that's already registered to the new one. Keep each operator in its own state and account. To serve every operator in the published list at once, see [Mine every listed operator](https://ur.xyz/docs/miner/advanced#mine-every-listed-operator).
 
@@ -91,8 +91,8 @@ Run `provider provide` in a terminal window and leave it open, or under a proces
 
 The miner writes a lot of log lines, in a few formats; most of them are routine. These lines are good signs:
 
-- `"event":"provider_started"`: the miner started.
 - `"event":"identity_available"`: it found or created this device's identity.
+- The miner keeps running. If it stops by itself within a few seconds, something is wrong, even when its exit looks clean.
 
 Warning signs:
 
@@ -115,7 +115,7 @@ Then, on the same machine:
 curl -s http://127.0.0.1:8080/
 ```
 
-It shows the miner's `version`, its `host` name, and a `diagnostics` section with the latest outcome of sign-in (`authentication`), `keys`, `extender` and `runtime`. The top-level `"status":"ok"` only means the miner process is up; it doesn't mean it's connected or earning, so read the `diagnostics` too.
+It shows the miner's `version` (release builds have one), its `host` name, and a `diagnostics` section with the latest outcome of sign-in (`authentication`), `keys`, `extender` and `runtime`. The top-level `"status":"ok"` only means the miner process is up; it doesn't mean it's connected or earning, so read the `diagnostics` too.
 
 The status page listens on every network interface, not just the local one. Block that port in your firewall, or allow only your monitoring network.
 

@@ -11,7 +11,7 @@ A quick reference for the `provider` command. `provider --help` prints every com
 
 | Command | What it does |
 | --- | --- |
-| `provider auth` | Sign in with an auth code, typed at a hidden prompt. `provider auth <auth_code>` takes the code directly. |
+| `provider auth` | Sign in with an auth code, typed at a hidden prompt. `provider auth <auth_code>` takes the code directly, but leaves it in your shell history. |
 | `provider auth --user_auth='you@example.com'` | Sign in with your account email; it asks for the password. |
 | `provider provide --allow-client-registration` | First start on a new device: registers it, then runs. |
 | `provider provide` | Start mining with this device's saved identity. |
@@ -33,7 +33,7 @@ The commands for every operator, hotkey wallets, the claim daemons and head-tier
 | `--allow-client-registration` | `provide` | Allow registering a new device. Never replaces an identity the miner already has. |
 | `--port=<port>` | `provide` | Serve the [status page](/docs/miner/run#the-status-page) on this port. `0`, the default, turns it off. |
 | `--max-memory=<mem>` | `provide`, `auth` | Soft memory target in bytes, or with `b`, `kib`, `mib` or `gib`. |
-| `-v`, `-vv` | most | More log detail. |
+| `-v`, `-vv` | most | More log detail. (For `urnet-tools`, `-v` means `--version`.) |
 | `-f` | `auth`, `proxy` | Replace an existing sign-in or proxy without asking. |
 | `--api_url=<url>` | most | Use this operator API URL for one command. |
 | `--connect_url=<url>` | `provide` | Use this operator connect URL for one run. |
@@ -52,7 +52,7 @@ The commands for every operator, hotkey wallets, the claim daemons and head-tier
 | `urnet-tools reinstall -t <version>` | Install a particular release. |
 | `urnet-tools uninstall` | Remove the miner, its service and **`~/.urnetwork`**. Back up first. |
 
-See [Updates](/docs/miner/updates) and [Run in the background](/docs/miner/run#with-the-linux-installer).
+Options take a space before their value (`-t <version>`, `--interval weekly`), not the `=` that `urnet-tools --help` shows. See [Updates](/docs/miner/updates) and [Run in the background](/docs/miner/run#with-the-linux-installer).
 
 ## Files the miner keeps
 
@@ -73,7 +73,7 @@ The miner keeps its state in `~/.urnetwork`. Back up the whole folder after stop
 | `operators/<domain>/` | One listed operator's own state, with the files above. |
 | `hotkey-wallet/` | The signed hotkey payout chain (`originals.json`) and any pending statement (`pending.json`). |
 
-The Linux installer keeps the program itself in `~/.local/share/urnetwork-provider`, separate from this folder.
+The Linux installer keeps its commands in `~/.local/share/urnetwork-provider/bin`, separate from this folder.
 
 ## Environment variables
 
