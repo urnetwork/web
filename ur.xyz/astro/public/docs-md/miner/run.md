@@ -32,7 +32,7 @@ provider choose_network https://api.example.net wss://connect.example.net
 provider choose_network --show
 ```
 
-API URLs must start with `https://` and connect URLs with `wss://`. `--show` prints the operator in effect, and `provider choose_network --reset` goes back to the default. The choice is saved and applies to every later command. Then [sign in](https://ur.xyz/docs/miner#2-sign-in) with an auth code from that operator.
+API URLs start with `https://` and connect URLs with `wss://` (plain `http://` and `ws://` work only for a local test server). `--show` prints the operator in effect, and `provider choose_network --reset` goes back to the default. The choice is saved and applies to every later command. Then [sign in](https://ur.xyz/docs/miner#2-sign-in) with an auth code from that operator.
 
 Changing the operator doesn't move a device that's already registered to the new one. Keep each operator in its own state and account. To serve every operator in the published list at once, see [Mine every listed operator](https://ur.xyz/docs/miner/advanced#mine-every-listed-operator).
 
@@ -43,7 +43,7 @@ Changing the operator doesn't move a device that's already registered to the new
 The installer has already set up a user service named `urnetwork`. Once the device is registered and your wallet is set:
 
 ```bash
-urnet-tools start          # start the service
+urnet-tools start          # start the service (says "already active" if it's running)
 urnet-tools status         # is it running?
 urnet-tools stop           # stop it
 journalctl --user -u urnetwork -f   # follow its log; Ctrl-C to stop reading
@@ -79,7 +79,11 @@ systemctl --user enable --now urnetwork-provider.service
 journalctl --user -u urnetwork-provider.service -f
 ```
 
-To keep it running after you log out, turn on lingering once: `sudo loginctl enable-linger "$USER"`. Keep `--allow-client-registration` out of the service command, so a missing identity stops the miner instead of registering a new device without you noticing.
+To keep it running after you log out, turn on lingering once: `sudo loginctl enable-linger "$USER"`. Keep `--allow-client-registration` out of the service command, so a missing identity makes the service fail and retry instead of registering a new device without you noticing. If it keeps restarting, check `journalctl`.
+
+### With the Windows installer
+
+Mining doesn't work on Windows yet (see [Windows installer](https://ur.xyz/docs/miner/install#windows-installer)). For when it does: `urnet-tools start` starts the miner in a hidden window, `urnet-tools stop` stops it and `urnet-tools status` says whether it's running. `urnet-tools auto-start-enable` and `auto-start-disable` choose whether it starts when you log in.
 
 ### On macOS
 

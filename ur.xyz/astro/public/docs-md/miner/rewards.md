@@ -19,7 +19,7 @@ This keeps your coldkey's secret off the miner. First, ask for the statement:
 provider wallet challenge '<coldkey_ss58>'
 ```
 
-Sign the exact printed statement with that coldkey, in a wallet that can sign raw messages with sr25519, such as the Polkadot.js browser extension. Then run the `provider wallet set` command the challenge printed, with your signature. (If you used the Linux installer, change `provider` at its start to `urnetwork`.) It looks like this:
+Sign the exact printed statement with that coldkey, in a wallet that can sign raw messages with sr25519, for example [polkadot.js Apps](https://polkadot.js.org/apps/#/signing) (Developer → Sign and verify) with your account from the Polkadot.js extension. Then run the `provider wallet set` command the challenge printed, with your signature. (If you used the Linux installer, change `provider` at its start to `urnetwork`.) It looks like this:
 
 ```bash
 provider wallet set '<coldkey_ss58>' \
@@ -31,7 +31,7 @@ What the signature has to be:
 
 - Over the exact statement as printed, as UTF-8 text with LF line endings and no extra newline at the end, signed with sr25519 in the `substrate` signing context. In `--message`, a literal `\n` stands for a line break.
 - A Polkadot extension `signRaw` of type `bytes`, which wraps the statement in `<Bytes>...</Bytes>`, is accepted too.
-- Submit it within five minutes of the challenge.
+- Submit it within the time the challenge prints, usually five minutes.
 
 The printed command keeps the operator and device you're using, so copy it rather than typing your own.
 

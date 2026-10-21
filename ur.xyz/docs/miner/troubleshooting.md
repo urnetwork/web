@@ -11,11 +11,19 @@ Find the message you're seeing, or the closest symptom, below. If you used the L
 
 ### `urnetwork: command not found` after installing
 
-The installer adds its folder to your `PATH` in `~/.bashrc`, which only new bash terminals read. Run `source ~/.bashrc`, or open a new terminal. If your shell isn't bash, add the folder yourself: see [Linux installer](/docs/miner/install#linux-installer).
+The installer adds its folder to your `PATH` in `~/.bashrc`, which only new bash terminals read. Run `source ~/.bashrc`, or open a new terminal. If your shell isn't bash, or you have no `~/.bashrc` (the installer then said `~/.bashrc is up-to-date`), add the folder yourself: see [Linux installer](/docs/miner/install#linux-installer).
+
+### `Could not enable the newly installed systemd service`
+
+The installer couldn't reach your user's systemd, which happens in a `sudo su` shell, in many containers and in WSL without systemd. Log in directly as the user who will run the miner (over SSH or at the console) and run the installer again, or use the [manual download](/docs/miner/install#manual-download-linux-and-macos).
+
+### `Provider binary was not found in the tarball!`
+
+The installer doesn't support your processor, usually 32-bit ARM. Use the [manual download](/docs/miner/install#manual-download-linux-and-macos) with `linux/arm`.
 
 ### macOS says the program can't be opened
 
-A file downloaded with a web browser is quarantined. Run `xattr -d com.apple.quarantine "$HOME/.local/bin/provider"` once.
+A file downloaded with a web browser is quarantined. Run `xattr -d com.apple.quarantine "$HOME/.local/bin/provider"` once. (A file downloaded with `curl` isn't, and the command then says `No such xattr`, which is harmless.)
 
 ## Signing in
 

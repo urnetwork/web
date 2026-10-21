@@ -36,7 +36,7 @@ Most miners join an operator's **pool**. You don't need your own Bittensor regis
 
 ## What you need
 
-- **A Linux or macOS computer that stays online.** A home PC, a server or a Raspberry Pi 4 or 5 with a 64-bit OS all work. Other systems aren't supported for mining.
+- **A Linux or macOS computer that stays online.** A home PC, a server or a Raspberry Pi all work (the Linux installer needs a 64-bit OS on a Pi). Other systems aren't supported for mining.
 - **One stable public internet address per miner.** The miner also tries to listen on TCP port 443 and on UDP ports 443, 53 and 4053 for its extender. To run more than one exit from a host, see [Several exits on one host](/docs/miner/advanced#several-exits-on-one-host).
 - **An account with a network operator.** The miner uses the default operator, `bringyour.com`, unless you [choose another](/docs/miner/run#choose-an-operator). You'll get an **auth code** from your account to sign the miner in.
 - **A Bittensor wallet address (coldkey)** for your rewards. It's an ss58 address that starts with `5`. You can sign for it on another device; its secret never needs to be on the miner.
@@ -86,7 +86,7 @@ In a second terminal:
 provider wallet challenge '<your coldkey ss58 address>'
 ```
 
-It prints a statement to sign. Sign it with that coldkey in a wallet that can sign raw messages with sr25519, such as the Polkadot.js browser extension, then run the `provider wallet set` command it printed, with your signature filled in. [Get paid](/docs/miner/rewards#set-your-payout-wallet) explains the signing step in detail.
+It prints a statement to sign. Sign it with that coldkey in a wallet that can sign raw messages with sr25519, for example [polkadot.js Apps](https://polkadot.js.org/apps/#/signing) (Developer → Sign and verify) with your account from the Polkadot.js extension, then run the `provider wallet set` command it printed, with your signature filled in. [Get paid](/docs/miner/rewards#set-your-payout-wallet) explains the signing step in detail.
 
 The wallet has to come after step 3: it's tied to the device that step 3 registers.
 

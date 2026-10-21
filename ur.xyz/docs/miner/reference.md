@@ -1,6 +1,6 @@
 ---
 published: 2026-10-21
-description: UR miner reference. The everyday provider commands and options, the Linux installer's urnet-tools commands, the files the miner keeps, environment variables and a glossary.
+description: UR miner reference. The everyday provider commands and options, the installers' urnet-tools commands, the files the miner keeps, environment variables and a glossary.
 ---
 
 # Miner reference
@@ -40,7 +40,9 @@ The commands for every operator, hotkey wallets, the claim daemons and head-tier
 | `--provider-jwt=<path>` | `wallet`, `claim` | Choose which device's credential to use, for extra exits or other operators. |
 | `--wallet=<coldkey_ss58>` | `provide` | Also set the payout wallet at start, like `wallet set`. A failure is logged and doesn't stop mining. |
 
-## Linux installer commands
+## Installer commands
+
+### Linux
 
 | Command | What it does |
 | --- | --- |
@@ -53,6 +55,23 @@ The commands for every operator, hotkey wallets, the claim daemons and head-tier
 | `urnet-tools uninstall` | Remove the miner, its service and **`~/.urnetwork`**. Back up first. |
 
 Options take a space before their value (`-t <version>`, `--interval weekly`), not the `=` that `urnet-tools --help` shows. See [Updates](/docs/miner/updates) and [Run in the background](/docs/miner/run#with-the-linux-installer).
+
+### Windows
+
+Mining doesn't work on Windows yet; see [Windows installer](/docs/miner/install#windows-installer).
+
+| Command | What it does |
+| --- | --- |
+| `urnet-tools start`, `stop`, `status` | Start the miner in a hidden window, stop it, or say whether it's running. |
+| `urnet-tools update` | Update now, if there's a newer release. |
+| `urnet-tools version` | Show the installed version, and whether a newer one is out. |
+| `urnet-tools auto-update-enable`, `auto-update-disable` | Turn automatic updates on or off. |
+| `urnet-tools auto-update-freq` | Choose daily, weekly or monthly update checks. |
+| `urnet-tools auto-start-enable`, `auto-start-disable` | Whether the miner starts when you log in. Disabling also turns off automatic updates. |
+| `urnet-tools reinstall` | Uninstall, then install the same version again. |
+| `urnet-tools uninstall` | Remove the miner, its startup entries and, as written, **`%USERPROFILE%\.urnetwork`**. Back up first. |
+
+The Windows installer keeps its files in `%LOCALAPPDATA%\urnetwork\provider`.
 
 ## Files the miner keeps
 
