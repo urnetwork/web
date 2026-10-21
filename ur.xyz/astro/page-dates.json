@@ -58,20 +58,48 @@
       "lastmod": "2026-10-07"
     },
     "/docs": {
-      "fingerprint": "d407e137a7c54e00",
-      "lastmod": "2026-10-07"
+      "fingerprint": "553b7f3efb5f74ed",
+      "lastmod": "2026-10-21"
     },
     "/docs/litepaper": {
       "fingerprint": "46d8efc515ec1266",
       "lastmod": "2026-10-14"
     },
     "/docs/miner": {
-      "fingerprint": "83ef8efca6f6f975",
-      "lastmod": "2026-10-14"
+      "fingerprint": "5080964e6a71c0c2",
+      "lastmod": "2026-10-21"
+    },
+    "/docs/miner/advanced": {
+      "fingerprint": "531fafac3cdf77bd",
+      "lastmod": "2026-10-21"
+    },
+    "/docs/miner/install": {
+      "fingerprint": "c456f9927f32f819",
+      "lastmod": "2026-10-21"
+    },
+    "/docs/miner/reference": {
+      "fingerprint": "c05d8bc8293bbaa3",
+      "lastmod": "2026-10-21"
+    },
+    "/docs/miner/rewards": {
+      "fingerprint": "e32fc66c06b0635c",
+      "lastmod": "2026-10-21"
+    },
+    "/docs/miner/run": {
+      "fingerprint": "aa8191cd49c414c4",
+      "lastmod": "2026-10-21"
+    },
+    "/docs/miner/troubleshooting": {
+      "fingerprint": "e53021e59e8dfb48",
+      "lastmod": "2026-10-21"
+    },
+    "/docs/miner/updates": {
+      "fingerprint": "d0392e1c91355ee6",
+      "lastmod": "2026-10-21"
     },
     "/docs/operator": {
-      "fingerprint": "ed7f2ae3f99cb90a",
-      "lastmod": "2026-10-15"
+      "fingerprint": "da0e99cd16f3c48b",
+      "lastmod": "2026-10-21"
     },
     "/docs/validator": {
       "fingerprint": "379ef84ea8d1a11b",
@@ -122,8 +150,8 @@
       "lastmod": "2026-08-18"
     },
     "/mainnet": {
-      "fingerprint": "763cf65b34fad339",
-      "lastmod": "2026-10-15"
+      "fingerprint": "3bbb4c53eea1e2c6",
+      "lastmod": "2026-10-21"
     },
     "/miners": {
       "fingerprint": "017465877eafc6ae",

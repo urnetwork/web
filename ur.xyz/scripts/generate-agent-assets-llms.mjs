@@ -30,7 +30,7 @@
 import { existsSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { DOC_ORDER, DOC_PAGE_PATHS, HIDDEN_DOC_SLUGS, UNLISTED_DOC_SLUGS, slugFor, splitFrontMatter } from '../react/src/lib/docs-shared.js';
+import { DOC_ORDER, DOC_PAGE_PATHS, HIDDEN_DOC_SLUGS, UNLISTED_DOC_SLUGS, slugFor, splitFrontMatter, withChapters } from '../react/src/lib/docs-shared.js';
 import { investorCentre } from '../react/src/data/investors.js';
 import { pageFacts, SITEMAP_FILES } from '../astro/scripts/page-dates.mjs';
 import { absoluteLinks } from './agent-markdown.mjs';
@@ -190,10 +190,12 @@ export function buildLlms(distDir) {
             const pdf = pdfFor[u] ? ` ([PDF](${SITE}${pdfFor[u]}))` : '';
             return `- [${label}](${SITE}${u === '/' ? '/' : u})${pdf}: ${p.description}`;
         });
-    // the documents in the sidebar's order (DOC_ORDER, then any other alphabetically);
-    // an unlisted document is served but listed nowhere, this file included
+    // the documents in the sidebar's order (DOC_ORDER, each guide followed by its
+    // chapters, then any other alphabetically); an unlisted document is served
+    // but listed nowhere, this file included
     const docSlug = (u) => u.slice('/docs/'.length);
-    const docRank = (u) => (DOC_ORDER.includes(docSlug(u)) ? DOC_ORDER.indexOf(docSlug(u)) : DOC_ORDER.length);
+    const docOrder = withChapters(DOC_ORDER);
+    const docRank = (u) => (docOrder.includes(docSlug(u)) ? docOrder.indexOf(docSlug(u)) : docOrder.length);
     const docLines = en
         .filter(([u]) => u.startsWith('/docs/') && !UNLISTED_DOC_SLUGS.has(docSlug(u)))
         .sort(([a], [b]) => docRank(a) - docRank(b) || a.localeCompare(b))
@@ -245,9 +247,10 @@ ${optionalLines.join('\n')}
 `;
 
     // llms-full: the map, the litepaper (the mechanism), the role guides in
-    // their order, then the investor materials as published
+    // their order, each followed by its chapters, then the investor materials
+    // as published
     const docs = docsIndex();
-    const embedded = ['litepaper', ...DOC_ORDER.filter((slug) => slug !== 'litepaper')]
+    const embedded = ['litepaper', ...withChapters(DOC_ORDER.filter((slug) => slug !== 'litepaper'))]
         .map((slug) => docs.find((d) => d.slug === slug))
         .filter(Boolean)
         .map((doc) => {
