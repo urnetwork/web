@@ -1,7 +1,7 @@
 
 # Run and monitor the miner
 
-This page assumes you've [installed](https://ur.xyz/docs/miner/install) the miner and [signed in](https://ur.xyz/docs/miner#2-sign-in). If you used the Linux installer, type `urnetwork` wherever this page says `provider`.
+This page assumes you've [installed](https://ur.xyz/docs/miner/install) the miner and [signed in](https://ur.xyz/docs/miner#2-sign-in). If you used an installer, type `urnetwork` wherever this page says `provider`.
 
 ## Start and stop
 
@@ -38,20 +38,21 @@ Changing the operator doesn't move a device that's already registered to the new
 
 ## Run in the background
 
-### With the Linux installer
+### With an installer
 
-The installer has already set up a user service named `urnetwork`. Once the device is registered and your wallet is set:
+The [installers](https://ur.xyz/docs/miner/install#the-installers) already run the miner in the background: a systemd user service on Linux, a launchd agent on macOS and Startup shortcuts on Windows. Once the device is registered and your wallet is set:
 
 ```bash
-urnet-tools start          # start the service (says "already active" if it's running)
-urnet-tools status         # is it running?
-urnet-tools stop           # stop it
-journalctl --user -u urnetwork -f   # follow its log; Ctrl-C to stop reading
+urnet-tools start          # start it (no error if it's already running)
+urnet-tools status         # version, signed in, running, updates; exits 3 when it isn't running
+urnet-tools logs           # follow its log; Ctrl-C to stop reading
+urnet-tools restart
+urnet-tools stop           # stop it until you start it again or the computer restarts
 ```
 
-The service starts when you log in, and at boot when lingering is on (the installer tries to turn it on). `urnet-tools auto-start off` stops it starting by itself, and `urnet-tools auto-start on` turns that back on.
+It starts by itself at boot on Linux (when lingering is on; the installer tries to turn it on), when you log in on macOS, and when you sign in on Windows, where it also **stops when you sign out**. `urnet-tools auto-start off` stops it starting by itself, and `urnet-tools auto-start on` turns that back on.
 
-The installer's service doesn't restart the miner if it stops. If `urnet-tools status` shows it inactive, start it again with `urnet-tools start` and look at its log.
+If the miner crashes, systemd on Linux restarts it after 30 seconds and launchd on macOS after 60. A miner that stops cleanly, for example because the device [isn't registered](https://ur.xyz/docs/miner/troubleshooting#the-miner-stops-straight-away), stays stopped: `urnet-tools status` then says it isn't running.
 
 ### With a manual install (Linux)
 
@@ -81,13 +82,9 @@ journalctl --user -u urnetwork-provider.service -f
 
 To keep it running after you log out, turn on lingering once: `sudo loginctl enable-linger "$USER"`. Keep `--allow-client-registration` out of the service command, so a missing identity makes the service fail and retry instead of registering a new device without you noticing. If it keeps restarting, check `journalctl`.
 
-### With the Windows installer
+### On macOS without the installer
 
-Mining doesn't work on Windows yet (see [Windows installer](https://ur.xyz/docs/miner/install#windows-installer)). For when it does: `urnet-tools start` starts the miner in a hidden window, `urnet-tools stop` stops it and `urnet-tools status` says whether it's running. `urnet-tools auto-start-enable` and `auto-start-disable` choose whether it starts when you log in.
-
-### On macOS
-
-Run `provider provide` in a terminal window and leave it open, or under a process manager you already use. This guide doesn't include a background service recipe for macOS yet.
+Run `provider provide` in a terminal window and leave it open, or use the [macOS installer](https://ur.xyz/docs/miner/install#macos), which keeps your identity.
 
 ## Check it's working
 

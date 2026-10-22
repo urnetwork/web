@@ -7,7 +7,7 @@ This page gets you from nothing to a running miner. The rest of the miner guide 
 
 | Page | What it covers |
 | --- | --- |
-| [Install](https://ur.xyz/docs/miner/install) | The Linux installer, a manual download for Linux and macOS, and building from source. |
+| [Install](https://ur.xyz/docs/miner/install) | The installers for Linux, macOS and Windows, a manual download, and building from source. |
 | [Run and monitor](https://ur.xyz/docs/miner/run) | Starting and stopping, running in the background, logs and the status page, backups. |
 | [Updates](https://ur.xyz/docs/miner/updates) | How the miner stays up to date, and how to control that. |
 | [Get paid](https://ur.xyz/docs/miner/rewards) | Setting your payout wallet, how rewards are counted, and claiming them. |
@@ -33,7 +33,7 @@ Most miners join an operator's **pool**. You don't need your own Bittensor regis
 
 ## What you need
 
-- **A Linux or macOS computer that stays online.** A home PC, a server or a Raspberry Pi all work (the Linux installer needs a 64-bit OS on a Pi). Other systems aren't supported for mining.
+- **A Linux or macOS computer that stays online.** A home PC, a server or a Raspberry Pi all work. Mining on Windows isn't ready yet.
 - **One stable public internet address per miner.** The miner also tries to listen on TCP port 443 and on UDP ports 443, 53 and 4053 for its extender. To run more than one exit from a host, see [Several exits on one host](https://ur.xyz/docs/miner/advanced#several-exits-on-one-host).
 - **An account with a network operator.** The miner uses the default operator, `bringyour.com`, unless you [choose another](https://ur.xyz/docs/miner/run#choose-an-operator). You'll get an **auth code** from your account to sign the miner in.
 - **A Bittensor wallet address (coldkey)** for your rewards. It's an ss58 address that starts with `5`. You can sign for it on another device; its secret never needs to be on the miner.
@@ -44,20 +44,29 @@ The miner program is called `provider`. The steps are the same on every system: 
 
 ### 1. Install
 
-On **Linux**, the installer is the easiest way. It puts the miner in your home folder, sets up a background service, and keeps the miner up to date automatically:
+The installer is the easiest way. It puts the miner in your home folder, runs it in the background, and keeps it up to date automatically.
+
+On **Linux**:
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/urnetwork/connect/main/scripts/Provider_Install_Linux.sh | sh
-source ~/.bashrc
 ```
+
+On **macOS** (not yet tested on a real Mac):
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/urnetwork/connect/main/scripts/Provider_Install_macOS.sh | sh
+```
+
+Then open a new terminal. The installer asks for your auth code (step 2) and starts the miner. On Windows, mining isn't ready yet; see [the Windows installer](https://ur.xyz/docs/miner/install#windows).
 
 The installer names the command `urnetwork`, not `provider`. If you used it, type `urnetwork` wherever this guide says `provider`, including in commands the miner prints for you to copy.
 
-On **macOS**, or on Linux without the installer, download the release yourself: see [Manual download](https://ur.xyz/docs/miner/install#manual-download-linux-and-macos).
+To install without an installer, see [Manual download](https://ur.xyz/docs/miner/install#manual-download-linux-and-macos).
 
 ### 2. Sign in
 
-Get an auth code from your operator account (for the default operator, from your URnetwork account at [ur.io](https://ur.io)), then run:
+Get an auth code from your operator account (for the default operator, from your URnetwork account at [ur.io](https://ur.io)). If the installer already asked for it and you pasted it, skip to step 3. Otherwise run:
 
 ```bash
 provider auth
@@ -67,7 +76,7 @@ Paste the code at the prompt and press Enter. The prompt hides what you paste, s
 
 ### 3. Start once to register this device
 
-The very first start needs one extra flag, which lets the miner register this computer as a new device:
+The very first start needs one extra flag, which lets the miner register this computer as a new device. If you used an installer, run `urnet-tools stop` first, so only one copy runs. Then:
 
 ```bash
 provider provide --allow-client-registration
@@ -89,15 +98,14 @@ The wallet has to come after step 3: it's tied to the device that step 3 registe
 
 ### 5. Leave it running
 
-With the Linux installer, the background service is already set up. Stop the miner from step 3 with Ctrl-C, then start the service and check it:
+If you used an installer, stop the miner from step 3 with Ctrl-C, then start the background miner again and check it:
 
 ```bash
 urnet-tools start
 urnet-tools status
-urnet-tools auto-update on   # start the daily update check now, not at the next restart
 ```
 
-The service starts again by itself when the computer restarts. For a manual install, see [Run in the background](https://ur.xyz/docs/miner/run#run-in-the-background).
+It starts again by itself when the computer restarts (on macOS, when you log in), and it updates itself. For a manual install, see [Run in the background](https://ur.xyz/docs/miner/run#run-in-the-background).
 
 ### 6. Back up your miner
 

@@ -5,21 +5,25 @@ description: Fix common UR miner problems. Sign-in errors, a miner that stops st
 
 # Miner troubleshooting
 
-Find the message you're seeing, or the closest symptom, below. If you used the Linux installer, type `urnetwork` wherever this page says `provider`. Still stuck? Ask [on our Discord](https://discord.gg/urnetwork), with the command you ran and what it printed. Never post your auth code, seed files or anything from `~/.urnetwork`.
+Find the message you're seeing, or the closest symptom, below. If you used an installer, type `urnetwork` wherever this page says `provider`. Still stuck? Ask [on our Discord](https://discord.gg/urnetwork), with the command you ran and what it printed. Never post your auth code, seed files or anything from `~/.urnetwork`.
 
 ## Installing
 
 ### `urnetwork: command not found` after installing
 
-The installer adds its folder to your `PATH` in `~/.bashrc`, which only new bash terminals read. Run `source ~/.bashrc`, or open a new terminal. If your shell isn't bash, or you have no `~/.bashrc` (the installer then said `~/.bashrc is up-to-date`), add the folder yourself: see [Linux installer](/docs/miner/install#linux-installer).
+The installer adds its folder to your `PATH` in your shell's startup file (`~/.bashrc` on Linux, `~/.zshrc` on macOS), which only new terminals read. Open a new terminal, or run the `export PATH=…` line the installer printed. On Windows, open a new PowerShell window. If you installed with `-B`, add the folder yourself: see [the installers](/docs/miner/install#the-installers).
 
-### `Could not enable the newly installed systemd service`
+### `urnet-tools` on Windows says running scripts is disabled
 
-The installer couldn't reach your user's systemd, which happens in a `sudo su` shell, in many containers and in WSL without systemd. Log in directly as the user who will run the miner (over SSH or at the console) and run the installer again, or use the [manual download](/docs/miner/install#manual-download-linux-and-macos).
+That's Windows' default script policy. Type `urnet-tools.cmd` instead of `urnet-tools`, for example `urnet-tools.cmd status`.
 
-### `Provider binary was not found in the tarball!`
+### `no systemd user session` (Linux)
 
-The installer doesn't support your processor, usually 32-bit ARM. Use the [manual download](/docs/miner/install#manual-download-linux-and-macos) with `linux/arm`.
+The installer couldn't reach your user's systemd, which happens in a `sudo su` shell, in many containers and in WSL without systemd. It installs the miner anyway, but can't run it in the background. Log in directly as the user who will run the miner (over SSH or at the console) and run the installer again, or run the miner in the foreground with `urnetwork provide`.
+
+### The installer says your processor isn't supported
+
+The releases cover 64-bit and 32-bit Intel, AMD and ARM on Linux, and Apple silicon and Intel Macs. On anything else, [build from source](/docs/miner/install#build-from-source).
 
 ### macOS says the program can't be opened
 
@@ -54,7 +58,7 @@ On a network that inspects encrypted traffic with its own certificate authority,
 It prints a JSON line with `"event":"startup_recovery_required"` and exits, with a success exit code, so a service shows it as stopped rather than failed. The usual reasons, most likely first:
 
 1. **You haven't signed in on this computer.** Run `provider auth` first.
-2. **This is a new device.** The first start needs `provider provide --allow-client-registration`. Later starts don't.
+2. **This is a new device.** The first start needs `provider provide --allow-client-registration`. Later starts don't. If you used the Linux or macOS installer, run `urnet-tools stop`, then [step 3 of the quick start](/docs/miner#3-start-once-to-register-this-device).
 3. **This device's identity files are missing or don't match**, for example after moving to a new computer or restoring part of a backup. Restore the whole `~/.urnetwork` folder from your backup. Signing in again doesn't replace a lost identity, and `--allow-client-registration` won't bring it back either: it only registers new devices. An installation upgrading from an old `.provider.key` may need the one-time `--adopt-legacy-provider-key`; see the [registration and recovery instructions](https://github.com/urfoundation/sn/blob/main/miner/PROVIDER-REGISTRATION.md) before using it.
 
 ### `registration parent must be owned and not writable by other users`
@@ -76,7 +80,9 @@ The miner started, but the operator isn't accepting its connection, and it keeps
 
 ### The miner stops when I log out
 
-Your user's services stop at logout unless lingering is on. Turn it on once with `sudo loginctl enable-linger "$USER"`.
+On Linux, your user's services stop at logout unless lingering is on. The installer tries to turn it on; if it printed a lingering warning, turn it on once with `sudo loginctl enable-linger "$USER"`.
+
+On Windows, the installer starts the miner when you sign in, and it stops when you sign out. That's a known limit: keep the user signed in (a locked screen is fine).
 
 ### `operator <domain> is awaiting auth`
 

@@ -1,7 +1,7 @@
 
 # Miner reference
 
-A quick reference for the `provider` command. `provider --help` prints every command and option. If you used the Linux installer, the command is called `urnetwork`.
+A quick reference for the `provider` command. `provider --help` prints every command and option. If you used an installer, the command is called `urnetwork`.
 
 ## Everyday commands
 
@@ -38,36 +38,29 @@ The commands for every operator, hotkey wallets, the claim daemons and head-tier
 
 ## Installer commands
 
-### Linux
+The installers for Linux, macOS and Windows share one command, `urnet-tools`:
 
 | Command | What it does |
 | --- | --- |
-| `urnet-tools start`, `stop`, `status` | Start, stop or show the background service. |
-| `urnet-tools update` | Update now, if there's a newer release. |
-| `urnet-tools --version` | Show the installed version, and the latest if it's newer. |
-| `urnet-tools auto-update` | Show whether automatic updates are on. Add `on` or `off` to change it, and `--interval weekly` or `monthly` with `on`. |
-| `urnet-tools auto-start on`, `off` | Whether the service starts by itself. |
+| `urnet-tools status` | One-screen summary: running or not, version, signed in, automatic updates. |
+| `urnet-tools start`, `stop`, `restart` | Start, stop or restart the miner in the background. |
+| `urnet-tools logs` | Follow the miner's output. Ctrl-C to leave. |
+| `urnet-tools version` | Show the installed version, and the latest if it's newer. |
+| `urnet-tools update` | Update now, if there's a newer release. Never moves to an older one. |
+| `urnet-tools auto-update` | Show whether automatic updates are on. Add `on` or `off` to change it, and `--interval 6h`, `daily`, `weekly` or `monthly` to change how often. |
+| `urnet-tools auto-start on`, `off` | Whether the miner starts by itself after a restart (on macOS and Windows, when you log in). |
 | `urnet-tools reinstall -t <version>` | Install a particular release. |
-| `urnet-tools uninstall` | Remove the miner, its service and **`~/.urnetwork`**. Back up first. |
+| `urnet-tools uninstall` | Remove the miner and its background jobs. Keeps `~/.urnetwork`. Add `--remove-identity` to delete it too, after you type `delete`. |
 
-Options take a space before their value (`-t <version>`, `--interval weekly`), not the `=` that `urnet-tools --help` shows. See [Updates](https://ur.xyz/docs/miner/updates) and [Run in the background](https://ur.xyz/docs/miner/run#with-the-linux-installer).
+Options take either `--interval weekly` or `--interval=weekly`. On Windows the PowerShell spellings work too (`-Interval`, `-RemoveIdentity`), and if PowerShell says running scripts is disabled, type `urnet-tools.cmd` instead. See [Updates](https://ur.xyz/docs/miner/updates) and [Run in the background](https://ur.xyz/docs/miner/run#with-an-installer).
 
-### Windows
+Where each installer keeps the miner:
 
-Mining doesn't work on Windows yet; see [Windows installer](https://ur.xyz/docs/miner/install#windows-installer).
-
-| Command | What it does |
-| --- | --- |
-| `urnet-tools start`, `stop`, `status` | Start the miner in a hidden window, stop it, or say whether it's running. |
-| `urnet-tools update` | Update now, if there's a newer release. |
-| `urnet-tools version` | Show the installed version, and whether a newer one is out. |
-| `urnet-tools auto-update-enable`, `auto-update-disable` | Turn automatic updates on or off. |
-| `urnet-tools auto-update-freq` | Choose daily, weekly or monthly update checks. |
-| `urnet-tools auto-start-enable`, `auto-start-disable` | Whether the miner starts when you log in. Disabling also turns off automatic updates. |
-| `urnet-tools reinstall` | Uninstall, then install the same version again. |
-| `urnet-tools uninstall` | Remove the miner, its startup entries and, as written, **`%USERPROFILE%\.urnetwork`**. Back up first. |
-
-The Windows installer keeps its files in `%LOCALAPPDATA%\urnetwork\provider`.
+| System | Folder | Log |
+| --- | --- | --- |
+| Linux | `~/.local/share/urnetwork-provider` | `urnet-tools logs` (the systemd journal) |
+| macOS | `~/.local/share/urnetwork-provider` | `~/Library/Logs/urnetwork/` |
+| Windows | `%LOCALAPPDATA%\urnetwork\provider` | `provider.log` in that folder |
 
 ## Files the miner keeps
 
@@ -88,7 +81,7 @@ The miner keeps its state in `~/.urnetwork`. Back up the whole folder after stop
 | `operators/<domain>/` | One listed operator's own state, with the files above. |
 | `hotkey-wallet/` | The signed hotkey payout chain (`originals.json`) and any pending statement (`pending.json`). |
 
-The Linux installer keeps its commands in `~/.local/share/urnetwork-provider/bin`, separate from this folder.
+The installers keep the miner program and `urnet-tools` in their own folder (see [Installer commands](#installer-commands)), separate from this folder.
 
 ## Environment variables
 

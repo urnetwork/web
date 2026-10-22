@@ -5,7 +5,7 @@ description: Advanced UR mining. Mine every listed operator with one hotkey, run
 
 # Advanced mining
 
-Most miners don't need this page: the [quick start](/docs/miner#quick-start) covers one device serving one operator. Read on if you want to serve every operator, run several exits from one host, automate claims or run a large fleet. If you used the Linux installer, type `urnetwork` wherever this page says `provider`.
+Most miners don't need this page: the [quick start](/docs/miner#quick-start) covers one device serving one operator. Read on if you want to serve every operator, run several exits from one host, automate claims or run a large fleet. If you used an installer, type `urnetwork` wherever this page says `provider`.
 
 ## Mine every listed operator
 

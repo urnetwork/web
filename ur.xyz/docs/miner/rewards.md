@@ -7,7 +7,7 @@ description: Get paid for mining on UR. Set the payout wallet your miner earns t
 
 Your miner earns for the traffic it carries. This page covers the three parts of getting paid: telling the operator which Bittensor wallet to pay ([set your payout wallet](#set-your-payout-wallet)), [how rewards are counted](#how-rewards-are-counted), and [claiming them](#claim-your-rewards).
 
-If you used the Linux installer, type `urnetwork` wherever this page says `provider`.
+If you used an installer, type `urnetwork` wherever this page says `provider`.
 
 ## Set your payout wallet
 
@@ -23,7 +23,7 @@ This keeps your coldkey's secret off the miner. First, ask for the statement:
 provider wallet challenge '<coldkey_ss58>'
 ```
 
-Sign the exact printed statement with that coldkey, in a wallet that can sign raw messages with sr25519, for example [polkadot.js Apps](https://polkadot.js.org/apps/#/signing) (Developer → Sign and verify) with your account from the Polkadot.js extension. Then run the `provider wallet set` command the challenge printed, with your signature. (If you used the Linux installer, change `provider` at its start to `urnetwork`.) It looks like this:
+Sign the exact printed statement with that coldkey, in a wallet that can sign raw messages with sr25519, for example [polkadot.js Apps](https://polkadot.js.org/apps/#/signing) (Developer → Sign and verify) with your account from the Polkadot.js extension. Then run the `provider wallet set` command the challenge printed, with your signature. (If you used an installer, change `provider` at its start to `urnetwork`.) It looks like this:
 
 ```bash
 provider wallet set '<coldkey_ss58>' \

@@ -1,48 +1,43 @@
 ---
 published: 2026-10-21
-description: Keep the UR miner up to date. How automatic updates work with the Linux and Windows installers, how to check, pause or pin them, and how to update by hand.
+description: Keep the UR miner up to date. How the installers update it automatically, how to check, change or turn off updates, stay on one version, and update by hand.
 ---
 
 # Keep the miner up to date
 
-New miner releases fix problems and keep your miner compatible with the network, so it's best to run the latest one. If you used the Linux or Windows installer, it updates automatically; on Linux, see the one thing to check below. There's no macOS installer yet, so a Mac is updated [by hand](#manual-installs).
+New miner releases fix problems and keep your miner compatible with the network, so it's best to run the latest one. If you used an [installer](/docs/miner/install#the-installers), there's nothing to do: it updates the miner automatically.
 
-## Automatic updates (Linux installer)
+## Automatic updates (installers)
 
-The [Linux installer](/docs/miner/install#linux-installer) sets up an update check on systems with systemd, daily by default. Each time, it looks for a newer release on the [build releases page](https://github.com/urnetwork/build/releases). When there is one, it stops the miner, installs the new version and starts the miner again. Your identity in `~/.urnetwork` isn't touched.
+Every installer turns on automatic updates. By default it checks for a newer release on the [build releases page](https://github.com/urnetwork/build/releases) about every 6 hours. When there is one, it downloads it, checks its SHA-256, makes sure the new program runs, and swaps it in. A miner that was running is restarted on the new version; one you stopped stays stopped. If anything fails, the old version keeps running. Your identity in `~/.urnetwork` isn't touched, and your update and start settings are kept.
 
-The installer switches the daily check on for your next login or restart. To start it straight away, run:
+How each system keeps to the schedule:
 
-```bash
-urnet-tools auto-update on
-```
+- **Linux:** a systemd timer, every 6 hours plus up to an hour of random delay.
+- **macOS:** a launchd agent that checks four times a day at times picked once per Mac, and again when you log in, so a Mac that was asleep or off catches up. (Not yet tested on a real Mac.)
+- **Windows:** an updater that starts, hidden, when you sign in and checks once the interval has passed, so sleep and restarts don't skip a check. (Not yet tested on a real PC.)
 
-> **Known issue:** after each update, whether automatic or with `urnet-tools update` or `reinstall`, the check stays paused until the next restart or login, even though `urnet-tools auto-update` says `enabled`. On an always-on server that can mean no more updates. After each update, run `urnet-tools auto-update on` again, adding `--interval weekly` or `--interval monthly` if you use one, because `on` on its own sets the check back to daily.
+An update also brings `urnet-tools` itself up to date, and never moves you to an older release.
 
-To see which version you have, and whether a newer one is out:
-
-```bash
-urnet-tools --version
-```
-
-To update straight away instead of waiting for the next check:
+To see which version you have, and whether a newer one is out, or to update straight away:
 
 ```bash
+urnet-tools version
 urnet-tools update
 ```
 
 ### Change or turn off automatic updates
 
-Automatic updates are on by default, and we recommend leaving them on. To see whether they're on:
+Automatic updates are on by default, and we recommend leaving them on. To see whether they're on, and how often they check:
 
 ```bash
 urnet-tools auto-update
 ```
 
-To check weekly or monthly instead of daily (write `--interval weekly` with a space; the `--interval=weekly` form that `urnet-tools --help` shows doesn't work):
+To check less often, choose `6h` (the default), `daily`, `weekly` or `monthly`. This keeps updates on or off as they are:
 
 ```bash
-urnet-tools auto-update on --interval weekly
+urnet-tools auto-update --interval daily
 ```
 
 To turn them off, and back on:
@@ -52,35 +47,21 @@ urnet-tools auto-update off
 urnet-tools auto-update on
 ```
 
-With automatic updates off, run `urnet-tools update` yourself from time to time. Each update or reinstall sets the installer's defaults again: daily automatic updates on (from the next restart or login), and the service starting by itself. Run `urnet-tools auto-update off` again afterwards if you want them to stay off.
+With automatic updates off, run `urnet-tools update` yourself from time to time. Your choice is kept when you update or run the installer again. To install with updates off from the start, pass `--no-auto-update` to the macOS installer, or `-NoAutoUpdate` to the Windows one.
 
 ### Stay on one version
 
-To install a particular release, give its tag from the releases page, with a space after `-t`:
+To install a particular release, give its tag from the releases page:
 
 ```bash
 urnet-tools reinstall -t <version>
 ```
 
-Then turn automatic updates off with `urnet-tools auto-update off`, or the next daily check will move you to the latest release again.
-
-## Automatic updates (Windows installer)
-
-The [Windows installer](/docs/miner/install#windows-installer) turns on automatic updates. A small updater starts, hidden, when you log in; every day it runs `urnet-tools update`, which installs a newer release if there is one. Your identity in `%USERPROFILE%\.urnetwork` isn't touched.
-
-```powershell
-urnet-tools version               # installed version, and whether a newer one is out
-urnet-tools update                # update now
-urnet-tools auto-update-freq      # asks: day, week or month
-urnet-tools auto-update-disable   # turn automatic updates off
-urnet-tools auto-update-enable    # and back on
-```
-
-`urnet-tools auto-start-disable` also turns automatic updates off; run `urnet-tools auto-update-enable` afterwards to keep them.
+Then turn automatic updates off with `urnet-tools auto-update off`, or the next check will move you to the latest release again.
 
 ## Manual installs
 
-A [manual download](/docs/miner/install#manual-download-linux-and-macos) or a [source build](/docs/miner/install#build-from-source) doesn't update itself. To update:
+A [manual download](/docs/miner/install#manual-download-linux-and-macos) or a [source build](/docs/miner/install#build-from-source) doesn't update itself. To switch to automatic updates, stop your own service and run an [installer](/docs/miner/install#the-installers): it keeps your identity. To update:
 
 1. Download the new release and unpack it, as in [Manual download](/docs/miner/install#manual-download-linux-and-macos).
 2. Stop the miner (Ctrl-C, or `systemctl --user stop urnetwork-provider.service` for the [service](/docs/miner/run#with-a-manual-install-linux)).
