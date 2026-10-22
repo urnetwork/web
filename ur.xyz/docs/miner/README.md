@@ -36,14 +36,14 @@ Most miners join an operator's **pool**. You don't need your own Bittensor regis
 
 ## What you need
 
-- **A Linux, macOS or Windows computer that stays online.** A home PC, a server or a Raspberry Pi all work. Windows needs the miner's next release, and on Windows the miner only runs while you're signed in.
+- **A Linux, macOS or Windows computer that stays online.** A home PC, a server or a Raspberry Pi all work. On Windows the miner only runs while you're signed in, and it hasn't been tested on a real PC yet.
 - **One stable public internet address per miner.** The miner also tries to listen on TCP port 443 and on UDP ports 443, 53 and 4053 for its extender. To run more than one exit from a host, see [Several exits on one host](/docs/miner/advanced#several-exits-on-one-host).
 - **An account with a network operator.** The miner uses the default operator, `bringyour.com`, unless you [choose another](/docs/miner/run#choose-an-operator). You'll get an **auth code** from your account to sign the miner in.
 - **A Bittensor wallet address (coldkey)** for your rewards. It's an ss58 address that starts with `5`. You can sign for it on another device; its secret never needs to be on the miner.
 
 ## Quick start
 
-> **Next miner release.** This guide uses the friendlier commands (`setup`, `status`, `login`, `start`) that come with the miner's next release. If `provider --version` prints a long usage text instead of a version, you have an older release: [update](/docs/miner/updates) first.
+> **Older miners.** This guide uses the commands of miner releases from late October 2026 on (`setup`, `status`, `login`, `start`). If `provider --help` doesn't start with `provider: the URnetwork miner`, you have an older release: [update it](/docs/miner/updates#without-automatic-updates), or use [the older commands](#on-an-older-release).
 
 The miner program is called `provider`. Install it, run `provider setup`, and check on it with `provider status`.
 
@@ -96,7 +96,7 @@ If you used an installer, it already did steps 1, 2 and 4. Run `urnetwork setup 
 provider status
 ```
 
-A minute after the miner starts, each line (Miner, Signed in, Device, Connected and Updates) should have a ✓. It exits with 0 when all is well, 3 when the device needs setup, and 4 when the miner isn't running or isn't connected, so scripts can check it too (`provider status --json` prints the details).
+A minute after the miner starts, the Miner, Signed in, Device and Connected lines should each have a ✓. It exits with 0 when all is well, 3 when the device needs setup, and 4 when the miner isn't running or isn't connected, so scripts can check it too (`provider status --json` prints the details).
 
 When something isn't right, `status` prints the command to run next. `provider doctor` looks for the reason: the state folder, DNS, the connection, a proxy that inspects TLS, and the clock. See [Run and monitor](/docs/miner/run) for logs and stopping and starting.
 
@@ -118,6 +118,18 @@ provider service install          # in a second terminal, after Ctrl-C in the fi
 ```
 
 `provider wallet challenge` prints a message to sign; then run the `provider wallet set` command it prints, with your signature. [Get paid](/docs/miner/rewards#set-your-payout-wallet) explains it. `login`, `start` and `network` are new names for `auth`, `provide` and `choose_network`, which still work.
+
+### On an older release
+
+Releases from before late October 2026 have no `setup`, `status` or `service`. Sign in, register on the first start, then set your wallet:
+
+```bash
+provider auth                                       # paste the auth code when asked
+provider provide --allow-client-registration        # first start only; later starts are provider provide
+provider wallet challenge '<your coldkey ss58 address>'   # in a second terminal
+```
+
+Then run the `provider wallet set` command it prints, with your signature, and run the miner under [a service of your own](/docs/miner/run#a-service-of-your-own). Windows needs a current release.
 
 ## Where this guide comes from
 

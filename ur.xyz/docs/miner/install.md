@@ -13,7 +13,7 @@ The miner is a single program, `provider`. There are three ways to get it:
 | [Manual download](#manual-download-linux-and-macos) | Linux, macOS | Automatic, with `provider setup` | Full control |
 | [Build from source](#build-from-source) | Linux, macOS | By hand | Developers and auditors |
 
-> **Windows** mining needs the miner's next release, and hasn't been tested on a real PC yet.
+> **Windows** mining needs a miner release from late October 2026 or later, and hasn't been tested on a real PC yet.
 
 Whichever you choose, the miner keeps its identity in `~/.urnetwork` (`%USERPROFILE%\.urnetwork` on Windows), so you can switch later without registering again. Back that folder up first, and stop the old way's background job before starting the new one, so two copies never run at once. After installing, go back to [the quick start](/docs/miner#2-run-setup).
 
@@ -62,7 +62,7 @@ Then open a new Terminal window. It needs macOS 12 or later and nothing else, an
 
 ### Windows
 
-> **Needs the miner's next release**, and not yet tested on a real PC. Older releases can't register a new device on Windows.
+> **Not yet tested on a real PC.** Mining on Windows needs a miner release from late October 2026 or later; older ones can't register a new device on Windows.
 
 In a normal PowerShell window (not "Run as administrator"):
 

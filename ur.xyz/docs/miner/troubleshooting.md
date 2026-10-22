@@ -35,19 +35,19 @@ A file downloaded with a web browser is quarantined. Run `xattr -d com.apple.qua
 
 That's on purpose: the prompt hides the code. Paste it and press Enter.
 
-To give up without a code, press Enter on the empty prompt; Ctrl-C doesn't stop this prompt. It then prints `panic: no auth code entered` and some internal details, which is harmless. Have your code ready before you run `provider login` or `provider setup`.
+To give up, press Ctrl-C: it says `Cancelled.` and changes nothing. Pressing Enter on the empty prompt says `No auth code was entered`. (On releases from before late October 2026, Ctrl-C doesn't stop the prompt, and Enter prints `panic: no auth code entered` with some internal details, which is harmless.) Have your code ready before you run `provider login` or `provider setup`.
 
-### `panic: Invalid auth code.`
+### `That auth code wasn't accepted`
 
-The code was mistyped, already used or expired. Get a new code from your operator account and run `provider login` again. The lines after `panic:` are internal details you can ignore.
+The code was mistyped, already used or expired. Get a new code from your operator account and run `provider login` again. Older releases, and a miner whose output goes to a log rather than a terminal, print `panic: Invalid auth code.` followed by internal details you can ignore.
 
 ### `… jwt exists. Overwrite? [yN]`
 
 This device is already signed in. Answer `y` to sign in again with the new code, or anything else to keep the current sign-in.
 
-### `panic: http request attempts exhausted`
+### `Couldn't reach the URnetwork API`
 
-The miner couldn't reach the operator. Check the computer's internet connection, and that the operator's URLs are right (`provider network`, or `provider choose_network --show` on an older release).
+In logs and on older releases this is `panic: http request attempts exhausted`. The miner couldn't reach the operator. Check the computer's internet connection, and that the operator's URLs are right (`provider network`, or `provider choose_network --show` on an older release).
 
 On a network that inspects encrypted traffic with its own certificate authority, such as some company networks, the miner rejects that authority. Point `URNETWORK_CONNECT_EXTRA_ROOT_CA_FILE` at a PEM file holding only that network's CA certificates, then try again.
 
@@ -55,21 +55,24 @@ On a network that inspects encrypted traffic with its own certificate authority,
 
 ### First, ask the miner
 
-On the miner's next release, `provider status` says what's missing and the command to run next, and `provider doctor` checks the state folder, DNS, the connection, TLS and the clock, and names the fix for each problem. Start there; the entries below explain the messages in more detail.
+`provider status` says what's missing and the command to run next, and `provider doctor` checks the state folder, DNS, the connection, TLS and the clock, and names the fix for each problem. Start there; the entries below explain the messages in more detail. (Both came with the miner releases of late October 2026.)
 
 ### The miner stops straight away
 
-On the next release, `provider start` says why in plain words: *This device isn't signed in yet* (run `provider setup`), or *This is the first start on this device* (answer yes, or add `--allow-client-registration` in a script).
+`provider start` and `provider provide` say why in plain words, and exit with code 3:
 
-On an older release, or with `provider provide`, it prints a JSON line with `"event":"startup_recovery_required"` and exits, with a success exit code, so a service shows it as stopped rather than failed. The usual reasons, most likely first:
+- *This device isn't signed in yet*: run `provider setup`, or `provider login`.
+- *This is the first start on this device*: answer yes in a terminal, or add `--allow-client-registration` in a script. If you used an installer, run `urnet-tools start`: it registers a new device once you're signed in.
 
-1. **You haven't signed in on this computer.** Run `provider setup`, or `provider login` (`auth`).
-2. **This is a new device.** The first start needs `provider start` in a terminal, or `--allow-client-registration`. Later starts don't. If you used an installer, run `urnet-tools start`: it registers a new device once you're signed in.
+Otherwise, and on releases from before late October 2026, the miner prints a JSON line with `"event":"startup_recovery_required"` and exits with a success exit code, so a service shows it as stopped rather than failed. The usual reasons, most likely first:
+
+1. **You haven't signed in on this computer.** On an older release, run `provider auth`.
+2. **This is a new device.** On an older release, the first start needs `provider provide --allow-client-registration`. Later starts don't.
 3. **This device's identity files are missing or don't match**, for example after moving to a new computer or restoring part of a backup. Restore the whole `~/.urnetwork` folder from your backup. Signing in again doesn't replace a lost identity, and `--allow-client-registration` won't bring it back either: it only registers new devices. An installation upgrading from an old `.provider.key` may need the one-time `--adopt-legacy-provider-key`; see the [registration and recovery instructions](https://github.com/urfoundation/sn/blob/main/miner/PROVIDER-REGISTRATION.md) before using it.
 
-### `registration parent must be owned and not writable by other users`
+### `The state folder … can be changed by other users`
 
-The miner's folder belongs to another user (for example, after running the miner once with `sudo`) or can be changed by other users, so it refuses to save its identity there. Give it back to your user, make it private, and start again:
+In logs and on older releases this is `registration parent must be owned and not writable by other users`. The miner's folder belongs to another user (for example, after running the miner once with `sudo`) or can be changed by other users, so it refuses to save its identity there. Give it back to your user, make it private, and start again:
 
 ```bash
 sudo chown -R "$USER" ~/.urnetwork

@@ -9,7 +9,7 @@ This page assumes you've [installed](/docs/miner/install) the miner and [set it 
 
 ## Start and stop
 
-> **Next miner release.** `start`, `status`, `doctor` and `service` come with the miner's next release. On an older release, use `provider provide` and the [manual service](#a-service-of-your-own) below.
+> **Older miners.** `start`, `status`, `doctor` and `service` came with the miner releases of late October 2026. On an older release, use `provider provide` and [a service of your own](#a-service-of-your-own).
 
 To mine in a terminal:
 
@@ -52,7 +52,7 @@ urnet-tools restart
 urnet-tools stop           # stop it until you start it again or the computer restarts
 ```
 
-`provider service start`, `stop`, `status` and `logs` work on the installer's service too.
+On Linux, `provider service start`, `stop`, `status` and `logs` work on the installer's service too.
 
 It starts by itself at boot on Linux (when lingering is on; the installer tries to turn it on), when you log in on macOS, and when you sign in on Windows, where it also **stops when you sign out**. `urnet-tools auto-start off` stops it starting by itself, and `urnet-tools auto-start on` turns that back on.
 
@@ -66,7 +66,7 @@ If the miner crashes, systemd on Linux restarts it after 30 seconds and launchd 
 provider service install
 ```
 
-It installs a systemd user service on Linux (`urnetwork-provider.service`, which turns on lingering so it keeps running after you log out, or prints the `sudo loginctl enable-linger` command to run) or a launchd agent on macOS, starts it, and starts it again after every restart. It also checks for [updates](/docs/miner/updates) every 6 hours. To manage it:
+On Linux it installs a systemd user service, `urnetwork-provider.service`, that starts at boot; it turns on lingering so the service keeps running after you log out, or prints the `sudo loginctl enable-linger` command to run. On macOS it installs a launchd agent that starts when you log in. Either way it starts the miner now, restarts it if it crashes, and checks for [updates](/docs/miner/updates) every 6 hours. To manage it:
 
 ```bash
 provider service status
@@ -76,9 +76,15 @@ provider service stop
 provider service uninstall       # your sign-in and identity are kept
 ```
 
-To run the miner as a system service for all users, run `sudo provider setup --system` or `sudo provider service install --system`. It runs as root, keeps its state in `/var/lib/urnetwork` instead of `~/.urnetwork`, and needs the `provider` program in a folder only root can change, such as `/usr/local/bin`.
+On Linux, `provider service install` won't add a second service beside an installer's `urnetwork.service`. On macOS it can't see the installer's agent yet, so if you used the macOS installer, keep using `urnet-tools` and don't install a second service.
 
-On a computer that already has an installer's service, `provider service install` won't add a second one.
+If you followed an older version of this guide and created `~/.config/systemd/user/urnetwork-provider.service` yourself, remove it first, because `provider service install` uses that name:
+
+```bash
+systemctl --user disable --now urnetwork-provider.service
+rm ~/.config/systemd/user/urnetwork-provider.service
+systemctl --user daemon-reload
+```
 
 ### A service of your own
 

@@ -61,11 +61,11 @@ Then turn automatic updates off with `urnet-tools auto-update off`, or the next 
 
 ## Automatic updates (provider service)
 
-> **Next miner release.** The miner's own updates come with its next release.
+> **Older miners.** The miner's own updates came with the releases of late October 2026. An older release has no `provider update`: see [Without automatic updates](#without-automatic-updates).
 
-The [background service](/docs/miner/run#with-provider-service-linux-and-macos) that `provider setup` or `provider service install` sets up also keeps the miner up to date. It checks the [build releases page](https://github.com/urnetwork/build/releases) 15 minutes after the computer starts, then every 6 hours. After a release, each miner waits its own random share of 16 hours, so every miner has it within a day without all of them restarting at once.
+The [background service](/docs/miner/run#with-provider-service-linux-and-macos) that `provider setup` or `provider service install` sets up also keeps the miner up to date. It checks the [build releases page](https://github.com/urnetwork/build/releases) every 6 hours: on Linux from 15 minutes after the computer starts, plus up to an hour of random delay; on macOS from when you log in. After a release, each miner waits its own random share of 16 hours, so every miner has it within a day without all of them restarting at once.
 
-An update checks the download against the SHA-256 the release lists, keeps the previous program beside the new one, and restarts the service. If the new version doesn't come back connected within 10 minutes, the previous one is put back, and that release is skipped for a week. Your identity in `~/.urnetwork` isn't touched.
+An update checks the download against the SHA-256 GitHub lists for it (that catches a damaged download; releases aren't signed yet), keeps the previous program beside the new one, and restarts the service. If the new version doesn't come back within 10 minutes (connected again, if it was connected before), the previous one is put back, and that release is skipped for a week. Your identity in `~/.urnetwork` isn't touched.
 
 ```bash
 provider update --check    # is a newer release out?
@@ -99,4 +99,4 @@ On an older release, which has no `provider update`:
 
 Don't add `--allow-client-registration` after an update: the miner keeps its identity in `~/.urnetwork`, so it continues as the same device.
 
-Watch the [releases page](https://github.com/urnetwork/build/releases) for new versions; GitHub can notify you about each release. `provider --version` prints the version you have; on an older release it prints the help instead, and the [status page](/docs/miner/run#the-status-page) shows the running version.
+Watch the [releases page](https://github.com/urnetwork/build/releases) for new versions; GitHub can notify you about each release. `provider --version` prints the version you have. On releases from before late October 2026 it doesn't work; the [status page](/docs/miner/run#the-status-page) shows the running version instead.
