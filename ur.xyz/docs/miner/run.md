@@ -9,8 +9,6 @@ This page assumes you've [installed](/docs/miner/install) the miner and [set it 
 
 ## Start and stop
 
-> **Older miners.** `start`, `status`, `doctor` and `service` came with the miner releases of late October 2026. On an older release, use `provider provide` and [a service of your own](#a-service-of-your-own).
-
 To mine in a terminal:
 
 ```bash
@@ -34,7 +32,7 @@ provider network use https://api.example.net wss://connect.example.net
 provider network
 ```
 
-API URLs start with `https://` and connect URLs with `wss://` (plain `http://` and `ws://` work only for a local test server). `provider network` on its own shows the operator in effect, and `provider network reset` goes back to the default. (On an older release, use `provider choose_network <api_url> <connect_url>`, `--show` and `--reset`.) The choice is saved and applies to every later command. Then run `provider setup`, or `provider login`, with an auth code from that operator.
+API URLs start with `https://` and connect URLs with `wss://` (plain `http://` and `ws://` work only for a local test server). `provider network` on its own shows the operator in effect, and `provider network reset` goes back to the default. The choice is saved and applies to every later command. Then run `provider setup`, or `provider login`, with an auth code from that operator.
 
 Changing the operator doesn't move a device that's already registered to the new one. Keep each operator in its own state and account. To serve every operator in the published list at once, see [Mine every listed operator](/docs/miner/advanced#mine-every-listed-operator).
 
@@ -52,13 +50,13 @@ urnet-tools restart
 urnet-tools stop           # stop it until you start it again, restart (Linux) or log in again (macOS, Windows)
 ```
 
-On Linux, `provider service start`, `stop`, `status` and `logs` work on the installer's service too.
+On Linux and Windows, `provider service start`, `stop`, `status` and `logs` work on the installer's miner too.
 
 It starts by itself at boot on Linux (when lingering is on; the installer tries to turn it on), when you log in on macOS, and when you sign in on Windows, where it also **stops when you sign out**. `urnet-tools auto-start off` stops it starting by itself, and `urnet-tools auto-start on` turns that back on.
 
 If the miner crashes, systemd on Linux restarts it after 30 seconds and launchd on macOS after 60. On Windows, a miner that stops stays stopped until you run `urnet-tools start` or sign in again. A miner that stops cleanly, for example because the device [isn't registered](/docs/miner/troubleshooting#the-miner-stops-straight-away), stays stopped: `urnet-tools status` then says it isn't running.
 
-### With provider service (Linux and macOS)
+### With provider service
 
 `provider setup` offers to set this up. To do it yourself, stop the miner if it's running in a terminal, then:
 
@@ -66,7 +64,13 @@ If the miner crashes, systemd on Linux restarts it after 30 seconds and launchd 
 provider service install
 ```
 
-On Linux it installs a systemd user service, `urnetwork-provider.service`, that starts at boot; it turns on lingering so the service keeps running after you log out, or prints the `sudo loginctl enable-linger` command to run. On macOS it installs a launchd agent that starts when you log in. Either way it starts the miner now, restarts it if it crashes, and checks for [updates](/docs/miner/updates) every 6 hours. To manage it:
+It starts the miner now, starts it again by itself, restarts it if it crashes, and checks for [updates](/docs/miner/updates) every 6 hours:
+
+- **Linux:** a systemd user service, `urnetwork-provider.service`, that starts at boot. It turns on lingering so the service keeps running after you log out, or prints the `sudo loginctl enable-linger` command to run.
+- **macOS:** a launchd agent that starts when you log in.
+- **Windows:** a Startup app that starts the miner, hidden, when you sign in to Windows, and stops when you sign out. It needs no administrator rights. Its log is `service.log` in `%USERPROFILE%\.urnetwork`.
+
+To manage it:
 
 ```bash
 provider service status
@@ -76,19 +80,11 @@ provider service stop
 provider service uninstall       # your sign-in and identity are kept
 ```
 
-On Linux, `provider service install` won't add a second service beside an installer's `urnetwork.service`. On macOS it can't see the installer's agent yet, so if you used the macOS installer, keep using `urnet-tools` and don't install a second service.
-
-If you followed an older version of this guide and created `~/.config/systemd/user/urnetwork-provider.service` yourself, remove it first, because `provider service install` uses that name:
-
-```bash
-systemctl --user disable --now urnetwork-provider.service
-rm ~/.config/systemd/user/urnetwork-provider.service
-systemctl --user daemon-reload
-```
+On Linux and Windows, `provider service install` won't add a second miner beside an installer's. On macOS it can't see the installer's agent, so if you used the macOS installer, keep using `urnet-tools` and don't install a second service.
 
 ### A service of your own
 
-Without systemd or launchd, on an older release, or to run the miner with options of your own, run `provider provide` under your own service manager, `tmux` or `screen`. On Linux, for example, create `~/.config/systemd/user/ur-miner.service`:
+To run the miner with options of your own, or without systemd or launchd, run `provider provide` under your own service manager, `tmux` or `screen`. On Linux, for example, create `~/.config/systemd/user/ur-miner.service`:
 
 ```ini
 [Unit]
@@ -112,9 +108,7 @@ systemctl --user enable --now ur-miner.service
 journalctl --user -u ur-miner.service -f
 ```
 
-To keep it running after you log out, turn on lingering once: `sudo loginctl enable-linger "$USER"`. Leave `--allow-client-registration` out of the service command, so a missing identity makes the service fail instead of registering a new device without you noticing. Don't run this and `provider service` at the same time.
-
-On Windows, `provider service` doesn't run the miner in the background yet. Use the [Windows installer](/docs/miner/install#windows), or leave `provider start` running in its own PowerShell window; it reconnects by itself.
+To keep it running after you log out, turn on lingering once: `sudo loginctl enable-linger "$USER"`. Leave `--allow-client-registration` out of the service command, so a missing identity makes the service fail instead of registering a new device without you noticing. Don't run this and `provider service` at the same time. A service of your own doesn't update the miner; see [Updates](/docs/miner/updates#without-automatic-updates).
 
 ## Check it's working
 

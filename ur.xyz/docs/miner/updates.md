@@ -14,8 +14,8 @@ Every installer turns on automatic updates. By default it checks for a newer rel
 How each system keeps to the schedule:
 
 - **Linux:** a systemd timer, every 6 hours plus up to an hour of random delay.
-- **macOS:** a launchd agent that checks four times a day at times picked once per Mac, and again when you log in, so a Mac that was asleep or off catches up. (Not yet tested on a real Mac.)
-- **Windows:** an updater that starts, hidden, when you sign in and checks once the interval has passed, so sleep and restarts don't skip a check. (Not yet tested on a real PC.)
+- **macOS:** a launchd agent that checks four times a day at times picked once per Mac, and again when you log in, so a Mac that was asleep or off catches up.
+- **Windows:** an updater that starts, hidden, when you sign in, wakes every hour and checks once the interval has passed, so sleep and restarts don't skip a check. It only installs a release whose SHA-256 GitHub lists.
 
 An update also brings `urnet-tools` itself up to date. On Linux it never moves you to an older release.
 
@@ -61,9 +61,7 @@ Then turn automatic updates off with `urnet-tools auto-update off`, or the next 
 
 ## Automatic updates (provider service)
 
-> **Older miners.** The miner's own updates came with the releases of late October 2026. An older release has no `provider update`: see [Without automatic updates](#without-automatic-updates).
-
-The [background service](/docs/miner/run#with-provider-service-linux-and-macos) that `provider setup` or `provider service install` sets up also keeps the miner up to date. It checks the [build releases page](https://github.com/urnetwork/build/releases) every 6 hours: on Linux from 15 minutes after the computer starts, plus up to an hour of random delay; on macOS from when you log in. After a release, each miner waits its own random share of 16 hours, so every miner has it within a day without all of them restarting at once.
+The [background service](/docs/miner/run#with-provider-service) that `provider setup` or `provider service install` sets up also keeps the miner up to date. It checks the [build releases page](https://github.com/urnetwork/build/releases) every 6 hours: on Linux from 15 minutes after the computer starts, plus up to an hour of random delay; on macOS from when you log in; on Windows from 15 minutes after you sign in, plus up to an hour of random delay. After a release, each miner waits its own random share of 16 hours, so every miner has it within a day without all of them restarting at once.
 
 An update checks the download against the SHA-256 GitHub lists for it (that catches a damaged download), keeps the previous program beside the new one, and restarts the service. If the new version doesn't come back within 10 minutes (connected again, if it was connected before), the previous one is put back, and that release is skipped for a week. Your identity in `~/.urnetwork` isn't touched.
 
@@ -88,15 +86,6 @@ Setting `URNETWORK_AUTO_UPDATE=0` in the service's environment also turns them o
 
 ## Without automatic updates
 
-A [source build](/docs/miner/install#build-from-source) never updates itself: build it again. A miner you run in a terminal, without a background service, updates with `provider update`; then stop it with Ctrl-C and start it again.
+A [source build](/docs/miner/install#build-from-source) never updates itself: build it again. A miner you run in a terminal, or under [a service of your own](/docs/miner/run#a-service-of-your-own), updates with `provider update`; then restart it.
 
-On an older release, which has no `provider update`:
-
-1. Download the new release and unpack it, as in [Manual download](/docs/miner/install#manual-download-linux-and-macos).
-2. Stop the miner (Ctrl-C, or your own service).
-3. Replace the program: `install -m 755 <os>/<arch>/provider "$HOME/.local/bin/provider"`.
-4. Start the miner again.
-
-Don't add `--allow-client-registration` after an update: the miner keeps its identity in `~/.urnetwork`, so it continues as the same device.
-
-Watch the [releases page](https://github.com/urnetwork/build/releases) for new versions; GitHub can notify you about each release. `provider --version` prints the version you have. On releases from before late October 2026 it doesn't work; the [status page](/docs/miner/run#the-status-page) shows the running version instead.
+Watch the [releases page](https://github.com/urnetwork/build/releases) for new versions; GitHub can notify you about each release. `provider --version` prints the version you have.

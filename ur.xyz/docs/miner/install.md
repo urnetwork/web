@@ -10,10 +10,8 @@ The miner is a single program, `provider`. There are three ways to get it:
 | Way | Systems | Updates | Best for |
 | --- | --- | --- | --- |
 | [Installer](#the-installers) | Linux, macOS, Windows | Automatic | Most people |
-| [Manual download](#manual-download-linux-and-macos) | Linux, macOS | Automatic, with `provider setup` | Full control |
-| [Build from source](#build-from-source) | Linux, macOS | By hand | Developers and auditors |
-
-> **Windows** mining needs a miner release from late October 2026 or later, and hasn't been tested on a real PC yet.
+| [Manual download](#manual-download) | Linux, macOS, Windows | Automatic, with `provider setup` | Full control |
+| [Build from source](#build-from-source) | Linux, macOS, Windows | By hand | Developers and auditors |
 
 Whichever you choose, the miner keeps its identity in `~/.urnetwork` (`%USERPROFILE%\.urnetwork` on Windows), so you can switch later without registering again. Back that folder up first, and stop the old way's background job before starting the new one, so two copies never run at once. After installing, go back to [the quick start](/docs/miner#2-run-setup).
 
@@ -46,8 +44,6 @@ Options go after `sh -s --`, for example `curl -fsSL … | sh -s -- --no-start`.
 
 ### macOS
 
-> Not yet tested on a real Mac.
-
 ```bash
 curl -fsSL https://raw.githubusercontent.com/urnetwork/connect/main/scripts/Provider_Install_macOS.sh | sh
 ```
@@ -61,8 +57,6 @@ Then open a new Terminal window. It needs macOS 12 or later and nothing else, an
 `--dry-run` prints everything it would do without changing anything, and `-y` answers every question itself. The miner's log is in `~/Library/Logs/urnetwork/`.
 
 ### Windows
-
-> **Not yet tested on a real PC.** Mining on Windows needs a miner release from late October 2026 or later; older ones can't register a new device on Windows.
 
 In a normal PowerShell window (not "Run as administrator"):
 
@@ -102,20 +96,22 @@ urnet-tools uninstall
 
 It removes the miner, its background job and its `PATH` entry, and **keeps** your identity in `~/.urnetwork`, so you can install again later as the same device. To delete the identity too, add `--remove-identity` (`-RemoveIdentity` on Windows); it asks you to type `delete` first. [Back it up](/docs/miner/run#back-up-your-miner) before you do: without it, the device can't be recovered.
 
-## Manual download (Linux and macOS)
+## Manual download
 
-Every release on the [build releases page](https://github.com/urnetwork/build/releases) has a file named `urnetwork-provider-<version>.tar.gz`. It's a large download, because it holds one `provider` program for every system, at `<os>/<arch>/provider`. It also has MIPS builds for routers and Windows builds; Windows users should use the [installer](#windows):
+Every release on the [build releases page](https://github.com/urnetwork/build/releases) has a file named `urnetwork-provider-<version>.tar.gz`. It's a large download (about 240 MB), because it holds one `provider` program for every system, at `<os>/<arch>/provider` (`provider.exe` on Windows). It also has MIPS builds for routers.
 
 | Your computer | Folder in the download |
 | --- | --- |
 | Linux PC or server (Intel or AMD, 64-bit) | `linux/amd64` |
-| Raspberry Pi 4 or 5 on a 64-bit OS, or another 64-bit ARM Linux | `linux/arm64` |
+| Raspberry Pi 3, 4 or 5 on a 64-bit OS, or another 64-bit ARM Linux | `linux/arm64` |
 | Older 32-bit Intel or AMD Linux PC | `linux/386` |
 | Raspberry Pi 2, 3, 4 or 5, or another ARMv7 board, on a 32-bit OS (not a Pi Zero or Pi 1) | `linux/arm` |
 | Mac with Apple silicon (M1 or later) | `darwin/arm64` |
 | Mac with an Intel processor | `darwin/amd64` |
+| Windows PC (Intel or AMD, 64-bit) | `windows/amd64` |
+| Windows on ARM | `windows/arm64` |
 
-Download and install it into `~/.local/bin`, choosing your folder from the table:
+On Linux or macOS, download and install it into `~/.local/bin`, choosing your folder from the table:
 
 ```bash
 VERSION=<version>   # the latest tag on the releases page, without the leading v
@@ -135,6 +131,20 @@ On macOS, a file downloaded with a web browser (not with `curl` as above) is qua
 ```bash
 xattr -d com.apple.quarantine "$HOME/.local/bin/provider"
 ```
+
+On Windows, in PowerShell, put it in a folder you own, so updates can replace it:
+
+```powershell
+$Version = "<version>"   # the latest tag on the releases page, without the leading v
+$Dir = "$env:LOCALAPPDATA\Programs\urnetwork"
+New-Item -ItemType Directory -Force $Dir | Out-Null
+Invoke-WebRequest -OutFile "$env:TEMP\urnetwork-provider.tar.gz" "https://github.com/urnetwork/build/releases/download/v$Version/urnetwork-provider-$Version.tar.gz"
+tar -xzf "$env:TEMP\urnetwork-provider.tar.gz" -C $env:TEMP windows/amd64/provider.exe   # your folder from the table
+Move-Item -Force "$env:TEMP\windows\amd64\provider.exe" "$Dir\provider.exe"
+& "$Dir\provider.exe" --version
+```
+
+Run it as `& "$Dir\provider.exe"`, or add that folder to your `PATH` to type `provider`. `provider.exe` isn't code-signed, so SmartScreen or Defender may ask before running it.
 
 Then go back to [the quick start](/docs/miner#2-run-setup) and run `provider setup`. Its background service also keeps a manual install up to date; see [Updates](/docs/miner/updates).
 

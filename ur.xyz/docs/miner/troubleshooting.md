@@ -35,11 +35,11 @@ A file downloaded with a web browser is quarantined. Run `xattr -d com.apple.qua
 
 That's on purpose: the prompt hides the code. Paste it and press Enter.
 
-To give up, press Ctrl-C: it says `Cancelled.` and changes nothing. Pressing Enter on the empty prompt says `No auth code was entered`. (On releases from before late October 2026, Ctrl-C doesn't stop the prompt, and Enter prints `panic: no auth code entered` with some internal details, which is harmless.) Have your code ready before you run `provider login` or `provider setup`.
+To give up, press Ctrl-C: it says `Cancelled.` and changes nothing. Pressing Enter on the empty prompt says `No auth code was entered`. Have your code ready before you run `provider login` or `provider setup`.
 
 ### `That auth code wasn't accepted`
 
-The code was mistyped, already used or expired. Get a new code from your operator account and run `provider login` again. Older releases, and a miner whose output goes to a log rather than a terminal, print `panic: Invalid auth code.` followed by internal details you can ignore.
+The code was mistyped, already used or expired. Get a new code from your operator account and run `provider login` again. In a log, rather than a terminal, the same error appears as `panic: Invalid auth code.` followed by internal details you can ignore.
 
 ### `… jwt exists. Overwrite? [yN]`
 
@@ -47,7 +47,7 @@ This device is already signed in. Answer `y` to sign in again with the new code,
 
 ### `Couldn't reach the URnetwork API`
 
-In logs and on older releases this is `panic: http request attempts exhausted`. The miner couldn't reach the operator. Check the computer's internet connection, and that the operator's URLs are right (`provider network`, or `provider choose_network --show` on an older release).
+In a log this appears as `panic: http request attempts exhausted`. The miner couldn't reach the operator. Check the computer's internet connection, and that the operator's URLs are right (`provider network`).
 
 On a network that inspects encrypted traffic with its own certificate authority, such as some company networks, the miner rejects that authority. Point `URNETWORK_CONNECT_EXTRA_ROOT_CA_FILE` at a PEM file holding only that network's CA certificates, then try again.
 
@@ -55,7 +55,7 @@ On a network that inspects encrypted traffic with its own certificate authority,
 
 ### First, ask the miner
 
-`provider status` says what's missing and the command to run next, and `provider doctor` checks the state folder, DNS, the connection, TLS and the clock, and names the fix for each problem. Start there; the entries below explain the messages in more detail. (Both came with the miner releases of late October 2026.)
+`provider status` says what's missing and the command to run next, and `provider doctor` checks the state folder, DNS, the connection, TLS and the clock, and names the fix for each problem. Start there; the entries below explain the messages in more detail.
 
 ### The miner stops straight away
 
@@ -64,15 +64,11 @@ On a network that inspects encrypted traffic with its own certificate authority,
 - *This device isn't signed in yet*: run `provider setup`, or `provider login`.
 - *This is the first start on this device*: answer yes in a terminal, or add `--allow-client-registration` in a script. If you used an installer, run `urnet-tools start`: it registers a new device once you're signed in.
 
-Otherwise, and on releases from before late October 2026, the miner prints a JSON line with `"event":"startup_recovery_required"` and exits with a success exit code, so a service shows it as stopped rather than failed. The usual reasons, most likely first:
-
-1. **You haven't signed in on this computer.** On an older release, run `provider auth`.
-2. **This is a new device.** On an older release, the first start needs `provider provide --allow-client-registration`. Later starts don't.
-3. **This device's identity files are missing or don't match**, for example after moving to a new computer or restoring part of a backup. Restore the whole `~/.urnetwork` folder from your backup. Signing in again doesn't replace a lost identity, and `--allow-client-registration` won't bring it back either: it only registers new devices. An installation upgrading from an old `.provider.key` may need the one-time `--adopt-legacy-provider-key`; see the [registration and recovery instructions](https://github.com/urfoundation/sn/blob/main/miner/PROVIDER-REGISTRATION.md) before using it.
+Otherwise the miner prints a JSON line with `"event":"startup_recovery_required"` and exits with a success exit code, so a service shows it as stopped rather than failed. That usually means **this device's identity files are missing or don't match**, for example after moving to a new computer or restoring part of a backup. Restore the whole `~/.urnetwork` folder from your backup. Signing in again doesn't replace a lost identity, and `--allow-client-registration` won't bring it back either: it only registers new devices.
 
 ### `The state folder … can be changed by other users`
 
-In logs and on older releases this is `registration parent must be owned and not writable by other users`. The miner's folder belongs to another user (for example, after running the miner once with `sudo`) or can be changed by other users, so it refuses to save its identity there. Give it back to your user, make it private, and start again:
+In a log this appears as `registration parent must be owned and not writable by other users`. The miner's folder belongs to another user (for example, after running the miner once with `sudo`) or can be changed by other users, so it refuses to save its identity there. Give it back to your user, make it private, and start again:
 
 ```bash
 sudo chown -R "$USER" ~/.urnetwork
@@ -84,7 +80,7 @@ chmod 700 ~/.urnetwork
 The miner started, but the operator isn't accepting its connection, and it keeps retrying every few seconds. The status page still says `"status":"ok"`, because the process itself is fine.
 
 - Make sure the computer has a normal home or server internet connection, without a VPN or proxy in front of the miner.
-- Check that you signed in to the operator the miner is using (`provider network`, or `provider choose_network --show` on an older release).
+- Check that you signed in to the operator the miner is using (`provider network`).
 - If it continues, ask your operator or [on our Discord](https://discord.gg/urnetwork), with the lines around `refused`.
 
 ### The miner stops when I log out
@@ -126,7 +122,3 @@ Look for `ClaimPaid` or `ClaimPaymentDeferred` in the receipt, and check the α 
 ### The connection dropped during a claim
 
 Check what happened to the transaction you sent, or to the claim daemon's queue, before using the relayer key again. Keep the signed transaction history.
-
-### Old wallets from before signed wallets
-
-`--legacy-network-wallet` and `claim --legacy-coldkey` are for records kept from before signed device wallets. They don't set a new wallet, and they don't work out old ownership from your current account wallet. Use them only with your operator's original records.

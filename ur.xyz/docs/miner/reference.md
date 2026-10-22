@@ -9,18 +9,18 @@ A quick reference for the `provider` command. `provider --help` prints a short o
 
 ## Everyday commands
 
-Commands marked *new* came with the miner releases of late October 2026. Older releases use the names in brackets.
+Names in brackets are other names for the same command.
 
 | Command | What it does |
 | --- | --- |
-| `provider setup` *new* | Set up this device step by step: sign in, register, payout address, background service. Safe to run again. `--no-service` skips the service, and `--yes --auth-code-file=<path>` runs it without questions (and skips the payout address). |
-| `provider status` *new* | Is it set up, running and connected? Exit code 0 when all is well, 3 when it needs setup, 4 when it isn't running or connected. `--json` for scripts. |
-| `provider doctor` *new* | Why it can't sign in or connect: state folder, DNS, connection, TLS, clock, updates. |
+| `provider setup` | Set up this device step by step: sign in, register, payout address, background service. Safe to run again. `--no-service` skips the service, and `--yes --auth-code-file=<path>` runs it without questions (and skips the payout address). |
+| `provider status` | Is it set up, running and connected? Exit code 0 when all is well, 3 when it needs setup, 4 when it isn't running or connected. `--json` for scripts. |
+| `provider doctor` | Why it can't sign in or connect: state folder, DNS, connection, TLS, clock, updates. |
 | `provider login` (`auth`) | Sign in with an auth code, typed at a hidden prompt. `provider login <auth_code>` takes the code directly, but leaves it in your shell history. `--user_auth='you@example.com'` signs in with your account email and asks for the password. |
-| `provider start` (`provide`) | Start mining in this terminal. The first start on a new device asks before registering it; `--allow-client-registration` registers without asking. `provide` keeps the full log output. |
-| `provider service install` *new* | Run the miner in the background and at every boot, with automatic updates (Linux and macOS). Also `start`, `stop`, `restart`, `status`, `logs --follow` and `uninstall`. |
-| `provider update` *new* | Update to the newest release. `--check` only looks, `--status` shows the automatic update settings. See [Updates](/docs/miner/updates). |
-| `provider --version` *new* | Print the version. |
+| `provider start` (`provide`) | Start mining in this terminal. The first start on a new device asks before registering it; `--allow-client-registration` registers without asking. `provide` prints the full log instead of the live view. |
+| `provider service install` | Run the miner in the background, with automatic updates: at every boot on Linux, at login on macOS, at sign-in on Windows. Also `start`, `stop`, `restart`, `status`, `logs --follow` and `uninstall`. |
+| `provider update` | Update to the newest release. `--check` only looks, `--status` shows the automatic update settings. See [Updates](/docs/miner/updates). |
+| `provider --version` | Print the version. |
 | `provider auth-provide` | Sign in and start in one command. |
 | `provider wallet challenge '<coldkey_ss58>'` | Print the statement to sign for your payout wallet. |
 | `provider wallet set '<coldkey_ss58>' …` | Set your payout wallet with a signature or a seed file. See [Get paid](/docs/miner/rewards#set-your-payout-wallet). |
@@ -89,8 +89,8 @@ The miner keeps its state in `~/.urnetwork`. Back up the whole folder after stop
 | `operators.yml` | The last good copy of the operator list, with `--all-operators`. |
 | `operators/<domain>/` | One listed operator's own state, with the files above. |
 | `hotkey-wallet/` | The signed hotkey payout chain (`originals.json`) and any pending statement (`pending.json`). |
-| `miner.log` | The log of `provider start` in a terminal. *new* |
-| `miner-status.json`, `miner-update.json` | What `provider status` reads, and the automatic update settings and last check. *new* |
+| `miner.log` | The log of `provider start` in a terminal. |
+| `miner-status.json`, `miner-update.json` | What `provider status` reads, and the automatic update settings and last check. |
 
 The installers keep the miner program and `urnet-tools` in their own folder (see [Installer commands](#installer-commands)), separate from this folder.
 
@@ -101,7 +101,7 @@ None are needed for a normal setup.
 | Variable | What it does |
 | --- | --- |
 | `URNETWORK_STATE_DIR` | Use this folder instead of `~/.urnetwork`. Handy for trying a test device without touching your real one. |
-| `URNETWORK_AUTO_UPDATE` | Set to `0` to turn off the miner's own automatic updates, like `provider update --off`. *new* |
+| `URNETWORK_AUTO_UPDATE` | Set to `0` to turn off the miner's own automatic updates, like `provider update --off`. |
 | `URNETWORK_CONNECT_EXTRA_ROOT_CA_FILE` | A PEM file of extra CA certificates to trust, for a network that inspects encrypted traffic. It must hold only CA certificates. |
 
 ## Glossary

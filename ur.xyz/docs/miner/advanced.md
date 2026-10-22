@@ -44,7 +44,7 @@ With `--all-operators`, one process looks after a miner for each listed operator
 - A miner that exits restarts after 30 seconds, doubling up to 10 minutes. Ctrl-C or a termination signal stops every miner.
 - `--max-memory` is split evenly between the miners, and a miner restarts when its share changes. `--port` serves the status of every operator; the miners themselves run without a status port.
 - The first miner process to take TCP port 443 serves the extender for the host.
-- `--all-operators` refuses `--api_url`, `--connect_url`, `--provider-jwt`, `--wallet` and its signing flags, `--adopt-legacy-provider-key`, `--test-egress-source-ip`, and the capture and close-report flags, which stay single-operator.
+- `--all-operators` refuses `--api_url`, `--connect_url`, `--provider-jwt`, `--wallet` and its signing flags, `--test-egress-source-ip`, and the capture and close-report flags, which stay single-operator.
 
 To run it as a [service of your own](/docs/miner/run#a-service-of-your-own), use `ExecStart=%h/.local/bin/provider provide --all-operators --auto-register --hotkey_seed_file=/absolute/private/hotkey.seed`. In auto mode the service keeps `--auto-register`, so each newly listed operator registers its first device; it never replaces an identity the miner already has. If you sign in to operators yourself, leave out `--auto-register`, keep `--hotkey_seed_file` if you use the hotkey payout below, and add `--allow-client-registration` only for the first start after signing in to a new operator.
 
@@ -111,7 +111,7 @@ To keep the relayer key off the miner, check the claim on the miner with `provid
 go build -o "$HOME/.local/bin/snclaim" ./cli/snclaim
 ```
 
-Or download it from the same release: the [releases page](https://github.com/urnetwork/build/releases) also has `urnetwork-snclaim-<version>.tar.gz`, with `<os>/<arch>/snclaim` for Linux and macOS. Install it the way [Manual download](/docs/miner/install#manual-download-linux-and-macos) installs the miner. Then:
+Or download it from the same release: the [releases page](https://github.com/urnetwork/build/releases) also has `urnetwork-snclaim-<version>.tar.gz`, with `<os>/<arch>/snclaim` for Linux and macOS. Install it the way [Manual download](/docs/miner/install#manual-download) installs the miner. Then:
 
 ```bash
 snclaim submit --calldata='0x<verified claim calldata>' \

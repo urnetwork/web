@@ -36,14 +36,12 @@ Most miners join an operator's **pool**. You don't need your own Bittensor regis
 
 ## What you need
 
-- **A Linux, macOS or Windows computer that stays online.** A home PC, a server or a Raspberry Pi 2 or newer all work. On Windows the miner only runs while you're signed in, and it hasn't been tested on a real PC yet.
+- **A Linux, macOS or Windows computer that stays online.** A home PC, a server or a Raspberry Pi 2 or newer all work. On Windows the miner runs while you're signed in.
 - **One stable public internet address per miner.** The miner also tries to listen on TCP port 443 and on UDP ports 443, 53 and 4053 for its extender. To run more than one exit from a host, see [Several exits on one host](/docs/miner/advanced#several-exits-on-one-host).
 - **An account with a network operator.** The miner uses the default operator, `bringyour.com`, unless you [choose another](/docs/miner/run#choose-an-operator). You'll get an **auth code** from your account to sign the miner in.
 - **A Bittensor wallet address (coldkey)** for your rewards. It's an ss58 address that starts with `5`. You can sign for it on another device; its secret never needs to be on the miner.
 
 ## Quick start
-
-> **Older miners.** This guide uses the commands of miner releases from late October 2026 on (`setup`, `status`, `login`, `start`). If `provider --help` doesn't start with `provider: the URnetwork miner`, you have an older release: [update it](/docs/miner/updates#without-automatic-updates), or use [the older commands](#on-an-older-release).
 
 The miner program is called `provider`. Install it, run `provider setup`, and check on it with `provider status`.
 
@@ -57,13 +55,13 @@ On **Linux**:
 curl -fsSL https://raw.githubusercontent.com/urnetwork/connect/main/scripts/Provider_Install_Linux.sh | sh
 ```
 
-On **macOS** (not yet tested on a real Mac):
+On **macOS**:
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/urnetwork/connect/main/scripts/Provider_Install_macOS.sh | sh
 ```
 
-On **Windows** (not yet tested on a real PC), in PowerShell:
+On **Windows**, in PowerShell (not as administrator):
 
 ```powershell
 irm https://raw.githubusercontent.com/urnetwork/connect/main/scripts/Provider_Install_Win32.ps1 | iex
@@ -73,7 +71,7 @@ Then open a new terminal. The installer asks for an auth code from your operator
 
 The installer names the command `urnetwork`, not `provider`. If you used it, type `urnetwork` wherever this guide says `provider`, including in commands the miner prints for you to copy.
 
-To install without an installer, see [Manual download](/docs/miner/install#manual-download-linux-and-macos).
+To install without an installer, see [Manual download](/docs/miner/install#manual-download).
 
 ### 2. Run setup
 
@@ -86,9 +84,9 @@ It walks you through four steps, and you can stop and run it again at any time; 
 1. **Sign in.** Paste an auth code from your operator account. The prompt hides what you paste.
 2. **Register this device.** A new device gets its own miner identity, saved in `~/.urnetwork`.
 3. **Payout address.** Your Bittensor coldkey address. Setup prints a short message; sign it in your wallet app (Polkadot.js, Talisman or btcli) and paste the signature. You can press Enter to skip this and [set it later](/docs/miner/rewards#set-your-payout-wallet).
-4. **Background service.** Runs the miner now and every time the computer starts, and keeps it up to date (Linux and macOS).
+4. **Keep it running.** Starts the miner in the background now and again after every restart (on Windows, whenever you sign in), and keeps it up to date.
 
-If you used an installer and signed in while installing, it already did steps 1, 2 and 4 (unless it told you to run the first start yourself). Run `urnetwork setup --no-service` to add your payout address.
+If you used an installer, it already signed you in, registered this device and runs the miner in the background. Run `urnetwork setup --no-service` to add your payout address; `--no-service` keeps setup from adding a second background miner beside the installer's.
 
 ### 3. Check on it
 
@@ -117,19 +115,7 @@ provider wallet challenge '<your coldkey ss58 address>'
 provider service install          # in a second terminal, after Ctrl-C in the first
 ```
 
-`provider wallet challenge` prints a message to sign; then run the `provider wallet set` command it prints, with your signature. [Get paid](/docs/miner/rewards#set-your-payout-wallet) explains it. `login`, `start` and `network` are new names for `auth`, `provide` and `choose_network`, which still work.
-
-### On an older release
-
-Releases from before late October 2026 have no `setup`, `status` or `service`. Sign in, register on the first start, then set your wallet:
-
-```bash
-provider auth                                       # paste the auth code when asked
-provider provide --allow-client-registration        # first start only; later starts are provider provide
-provider wallet challenge '<your coldkey ss58 address>'   # in a second terminal
-```
-
-Then run the `provider wallet set` command it prints, with your signature, and run the miner under [a service of your own](/docs/miner/run#a-service-of-your-own). Windows needs a current release.
+`provider wallet challenge` prints a message to sign; then run the `provider wallet set` command it prints, with your signature. [Get paid](/docs/miner/rewards#set-your-payout-wallet) explains it. `login`, `start` and `network` are the same commands as `auth`, `provide` and `choose_network`.
 
 ## Where this guide comes from
 
