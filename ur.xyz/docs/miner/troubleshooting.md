@@ -35,11 +35,11 @@ A file downloaded with a web browser is quarantined. Run `xattr -d com.apple.qua
 
 That's on purpose: the prompt hides the code. Paste it and press Enter.
 
-To give up without a code, press Enter on the empty prompt; Ctrl-C doesn't stop this prompt. It then prints `panic: no auth code entered` and some internal details, which is harmless. Have your code ready before you run `provider auth`.
+To give up without a code, press Enter on the empty prompt; Ctrl-C doesn't stop this prompt. It then prints `panic: no auth code entered` and some internal details, which is harmless. Have your code ready before you run `provider login` or `provider setup`.
 
 ### `panic: Invalid auth code.`
 
-The code was mistyped, already used or expired. Get a new code from your operator account and run `provider auth` again. The lines after `panic:` are internal details you can ignore.
+The code was mistyped, already used or expired. Get a new code from your operator account and run `provider login` again. The lines after `panic:` are internal details you can ignore.
 
 ### `… jwt exists. Overwrite? [yN]`
 
@@ -47,18 +47,24 @@ This device is already signed in. Answer `y` to sign in again with the new code,
 
 ### `panic: http request attempts exhausted`
 
-The miner couldn't reach the operator. Check the computer's internet connection, and that the operator's URLs are right (`provider choose_network --show`).
+The miner couldn't reach the operator. Check the computer's internet connection, and that the operator's URLs are right (`provider network`, or `provider choose_network --show` on an older release).
 
 On a network that inspects encrypted traffic with its own certificate authority, such as some company networks, the miner rejects that authority. Point `URNETWORK_CONNECT_EXTRA_ROOT_CA_FILE` at a PEM file holding only that network's CA certificates, then try again.
 
 ## Starting
 
+### First, ask the miner
+
+On the miner's next release, `provider status` says what's missing and the command to run next, and `provider doctor` checks the state folder, DNS, the connection, TLS and the clock, and names the fix for each problem. Start there; the entries below explain the messages in more detail.
+
 ### The miner stops straight away
 
-It prints a JSON line with `"event":"startup_recovery_required"` and exits, with a success exit code, so a service shows it as stopped rather than failed. The usual reasons, most likely first:
+On the next release, `provider start` says why in plain words: *This device isn't signed in yet* (run `provider setup`), or *This is the first start on this device* (answer yes, or add `--allow-client-registration` in a script).
 
-1. **You haven't signed in on this computer.** Run `provider auth` first.
-2. **This is a new device.** The first start needs `provider provide --allow-client-registration`. Later starts don't. If you used an installer, run `urnet-tools start`: it registers a new device once you're signed in.
+On an older release, or with `provider provide`, it prints a JSON line with `"event":"startup_recovery_required"` and exits, with a success exit code, so a service shows it as stopped rather than failed. The usual reasons, most likely first:
+
+1. **You haven't signed in on this computer.** Run `provider setup`, or `provider login` (`auth`).
+2. **This is a new device.** The first start needs `provider start` in a terminal, or `--allow-client-registration`. Later starts don't. If you used an installer, run `urnet-tools start`: it registers a new device once you're signed in.
 3. **This device's identity files are missing or don't match**, for example after moving to a new computer or restoring part of a backup. Restore the whole `~/.urnetwork` folder from your backup. Signing in again doesn't replace a lost identity, and `--allow-client-registration` won't bring it back either: it only registers new devices. An installation upgrading from an old `.provider.key` may need the one-time `--adopt-legacy-provider-key`; see the [registration and recovery instructions](https://github.com/urfoundation/sn/blob/main/miner/PROVIDER-REGISTRATION.md) before using it.
 
 ### `registration parent must be owned and not writable by other users`
@@ -75,12 +81,12 @@ chmod 700 ~/.urnetwork
 The miner started, but the operator isn't accepting its connection, and it keeps retrying every few seconds. The status page still says `"status":"ok"`, because the process itself is fine.
 
 - Make sure the computer has a normal home or server internet connection, without a VPN or proxy in front of the miner.
-- Check that you signed in to the operator the miner is using (`provider choose_network --show`).
+- Check that you signed in to the operator the miner is using (`provider network`, or `provider choose_network --show` on an older release).
 - If it continues, ask your operator or [on our Discord](https://discord.gg/urnetwork), with the lines around `refused`.
 
 ### The miner stops when I log out
 
-On Linux, your user's services stop at logout unless lingering is on. The installer tries to turn it on; if it printed a lingering warning, turn it on once with `sudo loginctl enable-linger "$USER"`.
+On Linux, your user's services stop at logout unless lingering is on. The installer and `provider service install` try to turn it on; if they printed a lingering warning, turn it on once with `sudo loginctl enable-linger "$USER"`.
 
 On Windows, the installer starts the miner when you sign in, and it stops when you sign out. That's a known limit: keep the user signed in (a locked screen is fine).
 
@@ -92,7 +98,7 @@ With `--all-operators`, that operator has no sign-in yet. Run `provider auth --o
 
 ### `wallet challenge` or `wallet set` says `credential not ready`
 
-The device isn't registered yet. Start it once with `provider provide --allow-client-registration`, then set the wallet. See [Set your payout wallet](/docs/miner/rewards#set-your-payout-wallet).
+The device isn't registered yet. Run `provider setup`, or start it once with `provider start` and let it register, then set the wallet. See [Set your payout wallet](/docs/miner/rewards#set-your-payout-wallet).
 
 ### A new wallet doesn't show up straight away
 

@@ -78,7 +78,7 @@ export const mainnetActions = {
         {
             title: 'Register your Bittensor wallet in the new miner.',
             detail: 'Your rewards are associated with the wallet you register.',
-            link: { label: 'Miner guide: Set your payout wallet', href: '/docs/miner#4-set-your-payout-wallet' },
+            link: { label: 'Miner guide: Run setup', href: '/docs/miner#2-run-setup' },
         },
         {
             title: 'Until settlement v2 starts, at most 1,500 miners are paid each epoch.',

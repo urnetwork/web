@@ -5,25 +5,23 @@ description: Run the UR miner day to day. Start and stop it, choose an operator,
 
 # Run and monitor the miner
 
-This page assumes you've [installed](/docs/miner/install) the miner and [signed in](/docs/miner#2-sign-in). If you used an installer, type `urnetwork` wherever this page says `provider`.
+This page assumes you've [installed](/docs/miner/install) the miner and [set it up](/docs/miner#2-run-setup). If you used an installer, type `urnetwork` wherever this page says `provider`.
 
 ## Start and stop
 
-The first start on a new device registers it, so it needs one extra flag:
+> **Next miner release.** `start`, `status`, `doctor` and `service` come with the miner's next release. On an older release, use `provider provide` and the [manual service](#a-service-of-your-own) below.
+
+To mine in a terminal:
 
 ```bash
-provider provide --allow-client-registration
+provider start
 ```
 
-Every start after that is just:
+It shows a short live view (Connecting, Connected, ● Mining) and runs until you stop it with Ctrl-C. The detailed log goes to `miner.log` in `~/.urnetwork`; add `-v` to see it in the terminal instead.
 
-```bash
-provider provide
-```
+The first start on a new device asks before registering it, and saves its identity in `~/.urnetwork`. Every later start reuses that identity. In a script, where nobody can answer, add `--allow-client-registration` to the first start. `provider provide` is the same command with the full log output, for scripts and services.
 
-The miner runs in the foreground until you stop it with Ctrl-C. It reuses the identity it saved in `~/.urnetwork` on the first start.
-
-Only use `--allow-client-registration` for a genuinely new device. It never replaces an identity the miner already has, but don't add it, or delete files, to get past an error about a missing or mismatched identity: see [Troubleshooting](/docs/miner/troubleshooting#the-miner-stops-straight-away) instead.
+Only register a genuinely new device. Registering never replaces an identity the miner already has, but don't delete files to get past an error about a missing or mismatched identity: see [Troubleshooting](/docs/miner/troubleshooting#the-miner-stops-straight-away) instead.
 
 Run every miner command, and the background service, as the same user. Each user has their own `~/.urnetwork`.
 
@@ -32,11 +30,11 @@ Run every miner command, and the background service, as the same user. Each user
 The miner serves the default operator, `bringyour.com` (`https://api.bringyour.com` and `wss://connect.bringyour.com`), unless you choose another. To serve a different operator, choose it **before** the first start, using the URLs it publishes:
 
 ```bash
-provider choose_network https://api.example.net wss://connect.example.net
-provider choose_network --show
+provider network use https://api.example.net wss://connect.example.net
+provider network
 ```
 
-API URLs start with `https://` and connect URLs with `wss://` (plain `http://` and `ws://` work only for a local test server). `--show` prints the operator in effect, and `provider choose_network --reset` goes back to the default. The choice is saved and applies to every later command. Then [sign in](/docs/miner#2-sign-in) with an auth code from that operator.
+API URLs start with `https://` and connect URLs with `wss://` (plain `http://` and `ws://` work only for a local test server). `provider network` on its own shows the operator in effect, and `provider network reset` goes back to the default. (On an older release, use `provider choose_network <api_url> <connect_url>`, `--show` and `--reset`.) The choice is saved and applies to every later command. Then run `provider setup`, or `provider login`, with an auth code from that operator.
 
 Changing the operator doesn't move a device that's already registered to the new one. Keep each operator in its own state and account. To serve every operator in the published list at once, see [Mine every listed operator](/docs/miner/advanced#mine-every-listed-operator).
 
@@ -44,7 +42,7 @@ Changing the operator doesn't move a device that's already registered to the new
 
 ### With an installer
 
-The [installers](/docs/miner/install#the-installers) already run the miner in the background: a systemd user service on Linux, a launchd agent on macOS and Startup shortcuts on Windows. Once the device is registered and your wallet is set:
+The [installers](/docs/miner/install#the-installers) already run the miner in the background: a systemd user service on Linux, a launchd agent on macOS and Startup shortcuts on Windows. Manage it with `urnet-tools`:
 
 ```bash
 urnet-tools start          # start it (no error if it's already running)
@@ -54,17 +52,41 @@ urnet-tools restart
 urnet-tools stop           # stop it until you start it again or the computer restarts
 ```
 
+`provider service start`, `stop`, `status` and `logs` work on the installer's service too.
+
 It starts by itself at boot on Linux (when lingering is on; the installer tries to turn it on), when you log in on macOS, and when you sign in on Windows, where it also **stops when you sign out**. `urnet-tools auto-start off` stops it starting by itself, and `urnet-tools auto-start on` turns that back on.
 
 If the miner crashes, systemd on Linux restarts it after 30 seconds and launchd on macOS after 60. A miner that stops cleanly, for example because the device [isn't registered](/docs/miner/troubleshooting#the-miner-stops-straight-away), stays stopped: `urnet-tools status` then says it isn't running.
 
-### With a manual install (Linux)
+### With provider service (Linux and macOS)
 
-Create the file `~/.config/systemd/user/urnetwork-provider.service`:
+`provider setup` offers to set this up. To do it yourself, stop the miner if it's running in a terminal, then:
+
+```bash
+provider service install
+```
+
+It installs a systemd user service on Linux (`urnetwork-provider.service`, which turns on lingering so it keeps running after you log out, or prints the `sudo loginctl enable-linger` command to run) or a launchd agent on macOS, starts it, and starts it again after every restart. It also checks for [updates](/docs/miner/updates) every 6 hours. To manage it:
+
+```bash
+provider service status
+provider service logs --follow   # Ctrl-C to stop reading
+provider service restart
+provider service stop
+provider service uninstall       # your sign-in and identity are kept
+```
+
+To run the miner as a system service for all users, run `sudo provider setup --system` or `sudo provider service install --system`. It runs as root, keeps its state in `/var/lib/urnetwork` instead of `~/.urnetwork`, and needs the `provider` program in a folder only root can change, such as `/usr/local/bin`.
+
+On a computer that already has an installer's service, `provider service install` won't add a second one.
+
+### A service of your own
+
+Without systemd or launchd, on an older release, or to run the miner with options of your own, run `provider provide` under your own service manager, `tmux` or `screen`. On Linux, for example, create `~/.config/systemd/user/ur-miner.service`:
 
 ```ini
 [Unit]
-Description=URnetwork provider
+Description=UR miner
 
 [Service]
 ExecStart=%h/.local/bin/provider provide
@@ -76,23 +98,37 @@ UMask=0077
 WantedBy=default.target
 ```
 
-Stop the miner if it's running in a terminal, then enable the service:
+Stop the miner if it's running, then enable the service and follow its log:
 
 ```bash
 systemctl --user daemon-reload
-systemctl --user enable --now urnetwork-provider.service
-journalctl --user -u urnetwork-provider.service -f
+systemctl --user enable --now ur-miner.service
+journalctl --user -u ur-miner.service -f
 ```
 
-To keep it running after you log out, turn on lingering once: `sudo loginctl enable-linger "$USER"`. Keep `--allow-client-registration` out of the service command, so a missing identity makes the service fail and retry instead of registering a new device without you noticing. If it keeps restarting, check `journalctl`.
+To keep it running after you log out, turn on lingering once: `sudo loginctl enable-linger "$USER"`. Leave `--allow-client-registration` out of the service command, so a missing identity makes the service fail instead of registering a new device without you noticing. Don't run this and `provider service` at the same time.
 
-### On macOS without the installer
-
-Run `provider provide` in a terminal window and leave it open, or use the [macOS installer](/docs/miner/install#macos), which keeps your identity.
+On Windows, `provider service` doesn't run the miner in the background yet. Use the [Windows installer](/docs/miner/install#windows), or leave `provider start` running in its own PowerShell window; it reconnects by itself.
 
 ## Check it's working
 
+### Status and doctor
+
+```bash
+provider status
+```
+
+One line each for the miner, sign-in, the device's registration, the connection and updates, and the command to run next when something isn't right. It exits with 0 when all is well, 3 when the device needs setup and 4 when the miner isn't running or isn't connected. `provider status --json` prints the same for scripts and monitoring.
+
+```bash
+provider doctor
+```
+
+Looks for why the miner can't sign in or connect: whether the state folder is private, DNS, the connection to the operator, a proxy or firewall that inspects TLS, the clock, and whether updates can install. It names the fix for each problem it finds.
+
 ### The log
+
+`provider start` writes its log to `miner.log` in `~/.urnetwork`. For a background miner, use `provider service logs --follow`, or `urnet-tools logs` with an installer.
 
 The miner writes a lot of log lines, in a few formats; most of them are routine. These lines are good signs:
 
@@ -132,7 +168,7 @@ The status page listens on every network interface, not just the local one. Bloc
 | `-v`, `-vv` | More log detail. |
 | `--port=<port>` | Serve the [status page](#the-status-page) on that port. `0`, the default, turns it off. |
 
-`provider auth-provide` signs in and starts in one command. A new device still needs `--allow-client-registration`. All options are in `provider --help` and in the [Reference](/docs/miner/reference).
+`provider auth-provide` signs in and starts in one command. A new device still needs `--allow-client-registration`. All options are in `provider help all` and in the [Reference](/docs/miner/reference).
 
 ## Back up your miner
 

@@ -1,7 +1,7 @@
 
 # Keep the miner up to date
 
-New miner releases fix problems and keep your miner compatible with the network, so it's best to run the latest one. If you used an [installer](https://ur.xyz/docs/miner/install#the-installers), there's nothing to do: it updates the miner automatically.
+New miner releases fix problems and keep your miner compatible with the network, so it's best to run the latest one. If you used an [installer](https://ur.xyz/docs/miner/install#the-installers), or let `provider setup` install the background service, there's nothing to do: the miner is updated automatically.
 
 ## Automatic updates (installers)
 
@@ -55,15 +55,44 @@ urnet-tools reinstall -t <version>
 
 Then turn automatic updates off with `urnet-tools auto-update off`, or the next check will move you to the latest release again.
 
-## Manual installs
+## Automatic updates (provider service)
 
-A [manual download](https://ur.xyz/docs/miner/install#manual-download-linux-and-macos) or a [source build](https://ur.xyz/docs/miner/install#build-from-source) doesn't update itself. To switch to automatic updates, stop your own service and run an [installer](https://ur.xyz/docs/miner/install#the-installers): it keeps your identity. To update:
+> **Next miner release.** The miner's own updates come with its next release.
+
+The [background service](https://ur.xyz/docs/miner/run#with-provider-service-linux-and-macos) that `provider setup` or `provider service install` sets up also keeps the miner up to date. It checks the [build releases page](https://github.com/urnetwork/build/releases) 15 minutes after the computer starts, then every 6 hours. After a release, each miner waits its own random share of 16 hours, so every miner has it within a day without all of them restarting at once.
+
+An update checks the download against the SHA-256 the release lists, keeps the previous program beside the new one, and restarts the service. If the new version doesn't come back connected within 10 minutes, the previous one is put back, and that release is skipped for a week. Your identity in `~/.urnetwork` isn't touched.
+
+```bash
+provider update --check    # is a newer release out?
+provider update            # update now
+provider update --status   # automatic update settings and the last check
+```
+
+The program's folder has to be writable by the service's user; `provider doctor` checks this. A miner an installer set up keeps updating through `urnet-tools`, and `provider update` runs it for you.
+
+### Turn off the miner's own updates
+
+Automatic updates are on by default, and we recommend leaving them on. To turn them off, and back on:
+
+```bash
+provider update --off
+provider update --on
+```
+
+Setting `URNETWORK_AUTO_UPDATE=0` in the service's environment also turns them off. With updates off, run `provider update` yourself from time to time.
+
+## Without automatic updates
+
+A [source build](https://ur.xyz/docs/miner/install#build-from-source) never updates itself: build it again. A miner you run in a terminal, without a background service, updates with `provider update`; then stop it with Ctrl-C and start it again.
+
+On an older release, which has no `provider update`:
 
 1. Download the new release and unpack it, as in [Manual download](https://ur.xyz/docs/miner/install#manual-download-linux-and-macos).
-2. Stop the miner (Ctrl-C, or `systemctl --user stop urnetwork-provider.service` for the [service](https://ur.xyz/docs/miner/run#with-a-manual-install-linux)).
+2. Stop the miner (Ctrl-C, or your own service).
 3. Replace the program: `install -m 755 <os>/<arch>/provider "$HOME/.local/bin/provider"`.
-4. Start the miner again with `provider provide`, or `systemctl --user start urnetwork-provider.service`.
+4. Start the miner again.
 
 Don't add `--allow-client-registration` after an update: the miner keeps its identity in `~/.urnetwork`, so it continues as the same device.
 
-Watch the [releases page](https://github.com/urnetwork/build/releases) for new versions; GitHub can notify you about each release. A manual install has no version command: `provider --version` prints the help instead. The [status page](https://ur.xyz/docs/miner/run#the-status-page) shows the running version.
+Watch the [releases page](https://github.com/urnetwork/build/releases) for new versions; GitHub can notify you about each release. `provider --version` prints the version you have; on an older release it prints the help instead, and the [status page](https://ur.xyz/docs/miner/run#the-status-page) shows the running version.

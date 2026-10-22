@@ -1,28 +1,33 @@
 ---
 published: 2026-10-21
-description: UR miner reference. The everyday provider commands and options, the installers' urnet-tools commands, the files the miner keeps, environment variables and a glossary.
+description: UR miner reference. The provider commands and options, the installers' urnet-tools commands, the files the miner keeps, environment variables and a glossary.
 ---
 
 # Miner reference
 
-A quick reference for the `provider` command. `provider --help` prints every command and option. If you used an installer, the command is called `urnetwork`.
+A quick reference for the `provider` command. `provider --help` prints a short overview, `provider <command> --help` explains one command, and `provider help all` prints every command and option. If you used an installer, the command is called `urnetwork`.
 
 ## Everyday commands
 
+Commands marked *next* come with the miner's next release. Older releases use the names in brackets.
+
 | Command | What it does |
 | --- | --- |
-| `provider auth` | Sign in with an auth code, typed at a hidden prompt. `provider auth <auth_code>` takes the code directly, but leaves it in your shell history. |
-| `provider auth --user_auth='you@example.com'` | Sign in with your account email; it asks for the password. |
-| `provider provide --allow-client-registration` | First start on a new device: registers it, then runs. |
-| `provider provide` | Start mining with this device's saved identity. |
+| `provider setup` *next* | Set up this device step by step: sign in, register, payout address, background service. Safe to run again. `--no-service` skips the service, and `--yes --auth-code-file=<path>` runs it without questions. |
+| `provider status` *next* | Is it set up, running and connected? Exit code 0 when all is well, 3 when it needs setup, 4 when it isn't running or connected. `--json` for scripts. |
+| `provider doctor` *next* | Why it can't sign in or connect: state folder, DNS, connection, TLS, clock, updates. |
+| `provider login` (`auth`) | Sign in with an auth code, typed at a hidden prompt. `provider login <auth_code>` takes the code directly, but leaves it in your shell history. `--user_auth='you@example.com'` signs in with your account email and asks for the password. |
+| `provider start` (`provide`) | Start mining in this terminal. The first start on a new device asks before registering it; `--allow-client-registration` registers without asking. `provide` keeps the full log output. |
+| `provider service install` *next* | Run the miner in the background and at every boot, with automatic updates (Linux and macOS). Also `start`, `stop`, `restart`, `status`, `logs --follow` and `uninstall`. |
+| `provider update` *next* | Update to the newest release. `--check` only looks, `--status` shows the automatic update settings. See [Updates](/docs/miner/updates). |
+| `provider --version` *next* | Print the version. |
 | `provider auth-provide` | Sign in and start in one command. |
 | `provider wallet challenge '<coldkey_ss58>'` | Print the statement to sign for your payout wallet. |
 | `provider wallet set '<coldkey_ss58>' …` | Set your payout wallet with a signature or a seed file. See [Get paid](/docs/miner/rewards#set-your-payout-wallet). |
 | `provider claim --epoch=<epoch> --rpc=<url>` | Check a pool reward claim; add `--key_file` to submit it. See [Claim your rewards](/docs/miner/rewards#claim-your-rewards). |
-| `provider choose_network <api_url> <connect_url>` | Choose another operator. `--show` prints the one in effect, `--reset` goes back to the default. |
+| `provider network` (`choose_network`) | Show the operator in effect. `provider network use <api_url> <connect_url>` chooses another, `provider network reset` goes back to the default. |
 | `provider operators` | List the operators in the published operator list and your sign-in state with each. |
 | `provider proxy add …` | Add SOCKS5 exits. See [Several exits on one host](/docs/miner/advanced#several-exits-on-one-host). |
-| `provider --help` | Every command and option. |
 
 The commands for every operator, hotkey wallets, the claim daemons and head-tier fleets are on the [Advanced](/docs/miner/advanced) page.
 
@@ -30,15 +35,15 @@ The commands for every operator, hotkey wallets, the claim daemons and head-tier
 
 | Option | Used with | What it does |
 | --- | --- | --- |
-| `--allow-client-registration` | `provide` | Allow registering a new device. Never replaces an identity the miner already has. |
-| `--port=<port>` | `provide` | Serve the [status page](/docs/miner/run#the-status-page) on this port. `0`, the default, turns it off. |
-| `--max-memory=<mem>` | `provide`, `auth` | Soft memory target in bytes, or with `b`, `kib`, `mib` or `gib`. |
+| `--allow-client-registration` | `start`, `provide` | Allow registering a new device. Never replaces an identity the miner already has. |
+| `--port=<port>` | `start`, `provide` | Serve the [status page](/docs/miner/run#the-status-page) on this port. `0`, the default, turns it off. |
+| `--max-memory=<mem>` | `start`, `provide`, `login` | Soft memory target in bytes, or with `b`, `kib`, `mib` or `gib`. |
 | `-v`, `-vv` | most | More log detail. (For `urnet-tools`, `-v` means `--version`.) |
-| `-f` | `auth`, `proxy` | Replace an existing sign-in or proxy without asking. |
+| `-f` | `login`, `proxy` | Replace an existing sign-in or proxy without asking. |
 | `--api_url=<url>` | most | Use this operator API URL for one command. |
-| `--connect_url=<url>` | `provide` | Use this operator connect URL for one run. |
+| `--connect_url=<url>` | `start`, `provide` | Use this operator connect URL for one run. |
 | `--provider-jwt=<path>` | `wallet`, `claim` | Choose which device's credential to use, for extra exits or other operators. |
-| `--wallet=<coldkey_ss58>` | `provide` | Also set the payout wallet at start, like `wallet set`. A failure is logged and doesn't stop mining. |
+| `--wallet=<coldkey_ss58>` | `start`, `provide` | Also set the payout wallet at start, like `wallet set`. A failure is logged and doesn't stop mining. |
 
 ## Installer commands
 
@@ -68,22 +73,24 @@ Where each installer keeps the miner:
 
 ## Files the miner keeps
 
-The miner keeps its state in `~/.urnetwork`. Back up the whole folder after stopping the miner, keep it private and restore it as one piece. Don't run two copies of the same folder at once. Losing or editing the identity files can make the device impossible to recover, even though your account sign-in still works.
+The miner keeps its state in `~/.urnetwork` (`/var/lib/urnetwork` for a system service set up with `--system`). Back up the whole folder after stopping the miner, keep it private and restore it as one piece. Don't run two copies of the same folder at once. Losing or editing the identity files can make the device impossible to recover, even though your account sign-in still works.
 
 | File or folder | What it holds |
 | --- | --- |
-| `jwt` | Your account sign-in, written by `provider auth`. |
+| `jwt` | Your account sign-in, written by `provider login` (`auth`). |
 | `.provider.key` and `.provider.key.identity` | The device's original Ed25519 key and its identity marker. |
 | `.provider.key.registration.lock` | A local lock for registering the device. |
 | `.provider.jwt` | The device's own renewable credential, used for wallets and claims. |
 | `.provider.jwt.registration*` | The kept registration request and recovery state. Keep every one of these files. |
 | `.provider.jwt.wallet-consent/` | Your signed wallet history, including statements not yet sent. |
 | `.provider.cert`, `.provider.extender.key` | The device's certificate and extender identity, when present. |
-| `network.json` | The operator chosen with `choose_network`. |
+| `network.json` | The operator chosen with `provider network use` (`choose_network`). |
 | `proxy` | Optional SOCKS5 exits. |
 | `operators.yml` | The last good copy of the operator list, with `--all-operators`. |
 | `operators/<domain>/` | One listed operator's own state, with the files above. |
 | `hotkey-wallet/` | The signed hotkey payout chain (`originals.json`) and any pending statement (`pending.json`). |
+| `miner.log` | The log of `provider start` in a terminal. *next* |
+| `miner-status.json`, `miner-update.json` | What `provider status` reads, and the automatic update settings and last check. *next* |
 
 The installers keep the miner program and `urnet-tools` in their own folder (see [Installer commands](#installer-commands)), separate from this folder.
 
@@ -94,6 +101,7 @@ None are needed for a normal setup.
 | Variable | What it does |
 | --- | --- |
 | `URNETWORK_STATE_DIR` | Use this folder instead of `~/.urnetwork`. Handy for trying a test device without touching your real one. |
+| `URNETWORK_AUTO_UPDATE` | Set to `0` to turn off the miner's own automatic updates, like `provider update --off`. *next* |
 | `URNETWORK_CONNECT_EXTRA_ROOT_CA_FILE` | A PEM file of extra CA certificates to trust, for a network that inspects encrypted traffic. It must hold only CA certificates. |
 
 ## Glossary

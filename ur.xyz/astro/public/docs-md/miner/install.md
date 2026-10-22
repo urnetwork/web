@@ -6,12 +6,12 @@ The miner is a single program, `provider`. There are three ways to get it:
 | Way | Systems | Updates | Best for |
 | --- | --- | --- | --- |
 | [Installer](#the-installers) | Linux, macOS, Windows | Automatic | Most people |
-| [Manual download](#manual-download-linux-and-macos) | Linux, macOS | By hand | Full control |
+| [Manual download](#manual-download-linux-and-macos) | Linux, macOS | Automatic, with `provider setup` | Full control |
 | [Build from source](#build-from-source) | Linux, macOS | By hand | Developers and auditors |
 
-> **Windows:** the installer works, but mining on Windows is not ready yet. Use Linux or macOS to mine for now.
+> **Windows** mining needs the miner's next release, and hasn't been tested on a real PC yet.
 
-Whichever you choose, the miner keeps its identity in `~/.urnetwork` (`%USERPROFILE%\.urnetwork` on Windows), so you can switch later without registering again. Back that folder up first, and stop the old way's background job before starting the new one, so two copies never run at once. After installing, go back to [the quick start](https://ur.xyz/docs/miner#2-sign-in).
+Whichever you choose, the miner keeps its identity in `~/.urnetwork` (`%USERPROFILE%\.urnetwork` on Windows), so you can switch later without registering again. Back that folder up first, and stop the old way's background job before starting the new one, so two copies never run at once. After installing, go back to [the quick start](https://ur.xyz/docs/miner#2-run-setup).
 
 ## The installers
 
@@ -58,7 +58,7 @@ Then open a new Terminal window. It needs macOS 12 or later and nothing else, an
 
 ### Windows
 
-> **Not ready for mining yet**, and not yet tested on a real PC. The current miner can't register a new device on Windows; signing in works. This section is here for when Windows support lands.
+> **Needs the miner's next release**, and not yet tested on a real PC. Older releases can't register a new device on Windows.
 
 In a normal PowerShell window (not "Run as administrator"):
 
@@ -121,7 +121,7 @@ tar -xzf urnetwork-provider.tar.gz linux/amd64/provider            # your folder
 mkdir -p "$HOME/.local/bin"
 install -m 755 linux/amd64/provider "$HOME/.local/bin/provider"   # your folder from the table
 export PATH="$HOME/.local/bin:$PATH"
-provider --help
+provider --version
 ```
 
 Add the `export PATH=…` line to your shell's startup file (`~/.bashrc` on most Linux systems, `~/.zshrc` on macOS) so the command is found in new terminals.
@@ -132,7 +132,7 @@ On macOS, a file downloaded with a web browser (not with `curl` as above) is qua
 xattr -d com.apple.quarantine "$HOME/.local/bin/provider"
 ```
 
-A manual install doesn't update itself. See [Updates](https://ur.xyz/docs/miner/updates#manual-installs).
+Then go back to [the quick start](https://ur.xyz/docs/miner#2-run-setup) and run `provider setup`. Its background service also keeps a manual install up to date; see [Updates](https://ur.xyz/docs/miner/updates).
 
 ## Build from source
 
@@ -163,6 +163,8 @@ export PATH="$HOME/.local/bin:$PATH"
 provider --help
 ```
 
+A build of your own says `development build` and never updates itself. Update it by building again.
+
 ## A binary from your operator
 
-You can also install a `provider` binary your operator supplies, if it's built from the same current source. Check that `provider --help` lists `--allow-client-registration`, `wallet challenge`, `--provider-jwt` and `claim`. An older binary may register devices and set wallets differently from this guide.
+You can also install a `provider` binary your operator supplies, if it's built from the same current source. Check that `provider --help` lists `setup`, `status` and `wallet`. An older binary may register devices and set wallets differently from this guide.

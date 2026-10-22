@@ -9,7 +9,9 @@ If you used an installer, type `urnetwork` wherever this page says `provider`.
 
 Rewards go to a Bittensor **coldkey**: an ss58 address that starts with `5`. You prove the coldkey is yours by signing a short statement with it. The operator stores that signed statement for this device, so a wallet address saved in your account profile alone is not enough.
 
-Set the wallet **after** the device's first start (`provider provide --allow-client-registration`), because the statement names the device that start registers. Before that, `wallet challenge` and `wallet set` fail with `claim/wallet credential not ready at …/.provider.jwt`.
+The easiest way is the payout step of [`provider setup`](https://ur.xyz/docs/miner#2-run-setup): it prints the message, you sign it in your wallet app, and paste the signature. You can run `provider setup` again later just for this step. The commands below do the same by hand.
+
+Set the wallet **after** the device's first start (`provider setup`, or the first `provider start`), because the statement names the device that start registers. Before that, `wallet challenge` and `wallet set` fail with `claim/wallet credential not ready at …/.provider.jwt`.
 
 ### Sign in your wallet app (recommended)
 

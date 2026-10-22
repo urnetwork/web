@@ -1,5 +1,5 @@
 ---
-description: Start mining on UR in a few steps. What a miner does, what you need, a quick start for Linux and macOS, and where each part of the miner guide lives.
+description: Start mining on UR in a few steps. What a miner does, what you need, a quick start, and where each part of the miner guide lives.
 ---
 
 # How to run a miner
@@ -36,14 +36,16 @@ Most miners join an operator's **pool**. You don't need your own Bittensor regis
 
 ## What you need
 
-- **A Linux or macOS computer that stays online.** A home PC, a server or a Raspberry Pi all work. Mining on Windows isn't ready yet.
+- **A Linux, macOS or Windows computer that stays online.** A home PC, a server or a Raspberry Pi all work. Windows needs the miner's next release, and on Windows the miner only runs while you're signed in.
 - **One stable public internet address per miner.** The miner also tries to listen on TCP port 443 and on UDP ports 443, 53 and 4053 for its extender. To run more than one exit from a host, see [Several exits on one host](/docs/miner/advanced#several-exits-on-one-host).
 - **An account with a network operator.** The miner uses the default operator, `bringyour.com`, unless you [choose another](/docs/miner/run#choose-an-operator). You'll get an **auth code** from your account to sign the miner in.
 - **A Bittensor wallet address (coldkey)** for your rewards. It's an ss58 address that starts with `5`. You can sign for it on another device; its secret never needs to be on the miner.
 
 ## Quick start
 
-The miner program is called `provider`. The steps are the same on every system: install, sign in, start once to register, set your payout wallet, then leave it running.
+> **Next miner release.** This guide uses the friendlier commands (`setup`, `status`, `login`, `start`) that come with the miner's next release. If `provider --version` prints a long usage text instead of a version, you have an older release: [update](/docs/miner/updates) first.
+
+The miner program is called `provider`. Install it, run `provider setup`, and check on it with `provider status`.
 
 ### 1. Install
 
@@ -61,62 +63,61 @@ On **macOS** (not yet tested on a real Mac):
 curl -fsSL https://raw.githubusercontent.com/urnetwork/connect/main/scripts/Provider_Install_macOS.sh | sh
 ```
 
-Then open a new terminal. The installer asks for your auth code (step 2) and starts the miner. On Windows, mining isn't ready yet; see [the Windows installer](/docs/miner/install#windows).
+On **Windows** (not yet tested on a real PC), in PowerShell:
+
+```powershell
+irm https://raw.githubusercontent.com/urnetwork/connect/main/scripts/Provider_Install_Win32.ps1 | iex
+```
+
+Then open a new terminal. The installer asks for an auth code from your operator account (for the default operator, from your URnetwork account at [ur.io](https://ur.io)), registers this device and starts mining.
 
 The installer names the command `urnetwork`, not `provider`. If you used it, type `urnetwork` wherever this guide says `provider`, including in commands the miner prints for you to copy.
 
 To install without an installer, see [Manual download](/docs/miner/install#manual-download-linux-and-macos).
 
-### 2. Sign in
-
-Get an auth code from your operator account (for the default operator, from your URnetwork account at [ur.io](https://ur.io)). If the installer already asked for it and you pasted it, skip to step 3. Otherwise run:
+### 2. Run setup
 
 ```bash
-provider auth
+provider setup
 ```
 
-Paste the code at the prompt and press Enter. The prompt hides what you paste, so nothing appears while you do it. When it works, it prints `Jwt written to …/.urnetwork/jwt`: that file is your sign-in.
+It walks you through four steps, and you can stop and run it again at any time; it keeps the steps you've finished:
 
-### 3. Start once to register this device
+1. **Sign in.** Paste an auth code from your operator account. The prompt hides what you paste.
+2. **Register this device.** A new device gets its own miner identity, saved in `~/.urnetwork`.
+3. **Payout address.** Your Bittensor coldkey address. Setup prints a short message; sign it in your wallet app (Polkadot.js, Talisman or btcli) and paste the signature. You can press Enter to skip this and [set it later](/docs/miner/rewards#set-your-payout-wallet).
+4. **Background service.** Runs the miner now and every time the computer starts, and keeps it up to date (Linux and macOS).
 
-If you used an installer and signed in while installing, it has already registered this device: skip to step 4.
+If you used an installer, it already did steps 1, 2 and 4. Run `urnetwork setup --no-service` to add your payout address.
 
-Otherwise, the very first start needs one extra flag, which lets the miner register this computer as a new device:
+### 3. Check on it
 
 ```bash
-provider provide --allow-client-registration
+provider status
 ```
 
-It prints a lot of log lines; that's normal. Within a few seconds it has registered the device, and you can do step 4 in a second terminal while it keeps running. Stop it with Ctrl-C when you're ready for step 5. Only use `--allow-client-registration` this first time: later starts are just `provider provide`.
+A minute after the miner starts, each line (Miner, Signed in, Device, Connected and Updates) should have a ✓. It exits with 0 when all is well, 3 when the device needs setup, and 4 when the miner isn't running or isn't connected, so scripts can check it too (`provider status --json` prints the details).
 
-### 4. Set your payout wallet
+When something isn't right, `status` prints the command to run next. `provider doctor` looks for the reason: the state folder, DNS, the connection, a proxy that inspects TLS, and the clock. See [Run and monitor](/docs/miner/run) for logs and stopping and starting.
 
-In a second terminal:
-
-```bash
-provider wallet challenge '<your coldkey ss58 address>'
-```
-
-It prints a statement to sign. Sign it with that coldkey in a wallet that can sign raw messages with sr25519, for example [polkadot.js Apps](https://polkadot.js.org/apps/#/signing) (Developer → Sign and verify) with your account from the Polkadot.js extension, then run the `provider wallet set` command it printed, with your signature filled in. [Get paid](/docs/miner/rewards#set-your-payout-wallet) explains the signing step in detail.
-
-The wallet has to come after step 3: it's tied to the device that step 3 registers.
-
-### 5. Leave it running
-
-If you used an installer, check that the background miner is running. If you ran step 3 by hand, stop it with Ctrl-C first:
-
-```bash
-urnet-tools start
-urnet-tools status
-```
-
-It starts again by itself when the computer restarts (on macOS, when you log in), and it updates itself. For a manual install, see [Run in the background](/docs/miner/run#run-in-the-background).
-
-### 6. Back up your miner
+### 4. Back up your miner
 
 Copy the folder `~/.urnetwork` somewhere private. It holds this device's identity and your signed wallet history. If you lose it, the device can't be recovered, even though you can still sign in to your account. See [Back up your miner](/docs/miner/run#back-up-your-miner).
 
 That's it. Rewards are counted per settlement epoch, about a week on mainnet, and are claimed after the epoch closes: see [Get paid](/docs/miner/rewards). If something didn't work, see [Troubleshooting](/docs/miner/troubleshooting).
+
+### Step by step instead of setup
+
+`provider setup` runs these commands for you. To do it by hand:
+
+```bash
+provider login                    # paste the auth code when asked
+provider start                    # the first start asks before registering this device
+provider wallet challenge '<your coldkey ss58 address>'
+provider service install          # in a second terminal, after Ctrl-C in the first
+```
+
+`provider wallet challenge` prints a message to sign; then run the `provider wallet set` command it prints, with your signature. [Get paid](/docs/miner/rewards#set-your-payout-wallet) explains it. `login`, `start` and `network` are new names for `auth`, `provide` and `choose_network`, which still work.
 
 ## Where this guide comes from
 

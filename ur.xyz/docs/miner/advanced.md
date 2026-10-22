@@ -46,7 +46,7 @@ With `--all-operators`, one process looks after a miner for each listed operator
 - The first miner process to take TCP port 443 serves the extender for the host.
 - `--all-operators` refuses `--api_url`, `--connect_url`, `--provider-jwt`, `--wallet` and its signing flags, `--adopt-legacy-provider-key`, `--test-egress-source-ip`, and the capture and close-report flags, which stay single-operator.
 
-To run it as a [service](/docs/miner/run#with-a-manual-install-linux), use `ExecStart=%h/.local/bin/provider provide --all-operators --auto-register --hotkey_seed_file=/absolute/private/hotkey.seed`. In auto mode the service keeps `--auto-register`, so each newly listed operator registers its first device; it never replaces an identity the miner already has. If you sign in to operators yourself, leave out `--auto-register`, keep `--hotkey_seed_file` if you use the hotkey payout below, and add `--allow-client-registration` only for the first start after signing in to a new operator.
+To run it as a [service of your own](/docs/miner/run#a-service-of-your-own), use `ExecStart=%h/.local/bin/provider provide --all-operators --auto-register --hotkey_seed_file=/absolute/private/hotkey.seed`. In auto mode the service keeps `--auto-register`, so each newly listed operator registers its first device; it never replaces an identity the miner already has. If you sign in to operators yourself, leave out `--auto-register`, keep `--hotkey_seed_file` if you use the hotkey payout below, and add `--allow-client-registration` only for the first start after signing in to a new operator.
 
 ### Sign once for every listed operator
 
