@@ -13,7 +13,7 @@ If you used an installer, type `urnetwork` wherever this page says `provider`.
 
 Rewards go to a Bittensor **coldkey**: an ss58 address that starts with `5`. You prove the coldkey is yours by signing a short statement with it. The operator stores that signed statement for this device, so a wallet address saved in your account profile alone is not enough.
 
-The easiest way is the payout step of [`provider setup`](/docs/miner#2-run-setup): it prints the message, you sign it in your wallet app, and paste the signature. You can run `provider setup` again later just for this step. The commands below do the same by hand.
+The easiest way is the payout step of [`provider setup`](/docs/miner#2-run-setup): it prints the message, you sign it in your wallet app, and paste the signature. You can run `provider setup` again later just for this step; if you used an installer, run `urnetwork setup --no-service`. The commands below do the same by hand.
 
 Set the wallet **after** the device's first start (`provider setup`, or the first `provider start`), because the statement names the device that start registers. Before that, `wallet challenge` and `wallet set` fail with `claim/wallet credential not ready at …/.provider.jwt`.
 
@@ -75,7 +75,7 @@ reliability = confirmations / max(assignments, reliability_a_min)
 
 To be paid for an epoch, a device needs completed usage above zero, at least the required number of verification checks, at least one confirmation, a signed wallet for that epoch and no active head-tier binding. Devices paying the same coldkey are added together into one payout. From settlement v2's switch epoch, the pool is split by completed usage alone, with no reliability factor or minimum, into one account per payout coldkey that never expires (see the [litepaper](/docs/litepaper)).
 
-Validators measure routing quality on their own and weight the operator pools and head fleets. Miners are paid **momentum**: the share of the subnet's miner emission used now to power the network, split between the pool and head tiers by policy. Momentum is 10% at launch. The [Network Capacity Reserve](/reserve), the `ur-reserve` account, receives the rest: miner emissions × (1 − momentum). Its share isn't fixed; it gets smaller as momentum grows. Momentum is a share of emission, not a fixed price per byte; your operator's published policy and payout files show actual earnings. The reserve is separate from the settlement vault's claim collateral.
+Validators measure routing quality on their own and weight the operator pools and head fleets. Miners are paid **momentum**: the share of the subnet's miner emission used now to power the network, split between the pool and head tiers by policy. Momentum is 10%; your operator's published policy gives the current value. The [Network Capacity Reserve](/reserve), the `ur-reserve` account, receives the rest: miner emissions × (1 − momentum). Its share isn't fixed; it gets smaller as momentum grows. Momentum is a share of emission, not a fixed price per byte; your operator's published policy and payout files show actual earnings. The reserve is separate from the settlement vault's claim collateral.
 
 A settlement epoch is set by the deployed contracts and policy. On mainnet it's 50,400 blocks, about seven days at 12 seconds a block. After an epoch closes, its payout root is committed and finalized before claims open, so recent work isn't claimable straight away. The `claim_open_block` the claim command prints, and your operator's published deployment windows, tell you when.
 

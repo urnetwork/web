@@ -32,7 +32,7 @@ a network operator  ←─  validators
 your Bittensor coldkey (α, $UR)
 ```
 
-Most miners join an operator's **pool**. You don't need your own Bittensor registration: you sign in to the operator, your miner registers itself as a device, and the pool's rewards are paid to the Bittensor wallet you choose. Large fleets can instead register their own hotkey; see [the head tier](/docs/miner/advanced#larger-fleets-and-the-head-tier).
+Most miners join an operator's **pool**. You don't need your own Bittensor registration: you sign in to the operator, your miner registers itself as a device, and the pool's rewards are paid to the Bittensor wallet you choose. Large fleets can instead claim their own miner UID; see [the head tier](/docs/miner/advanced#claim-your-own-miner-uid-head-tier).
 
 ## What you need
 

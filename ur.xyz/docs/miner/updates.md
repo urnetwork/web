@@ -9,13 +9,13 @@ New miner releases fix problems and keep your miner compatible with the network,
 
 ## Automatic updates (installers)
 
-Every installer turns on automatic updates. By default it checks for a newer release on the [build releases page](https://github.com/urnetwork/build/releases) about every 6 hours. When there is one, it downloads it, checks it against the SHA-256 GitHub lists for it, makes sure the new program runs, and swaps it in. A miner that was running is restarted on the new version; one you stopped stays stopped. If anything fails, the old version keeps running. Your identity in `~/.urnetwork` isn't touched, and your update and start settings are kept.
+Every installer turns on automatic updates, except on Linux without a systemd user session and on Windows when you install a particular version with `-Tag`. By default it checks for a newer release on the [build releases page](https://github.com/urnetwork/build/releases) about every 6 hours. When there is one, it downloads it, checks it against the SHA-256 GitHub lists for it (a release without one isn't installed), makes sure the new program runs, and swaps it in. A miner that was running is restarted on the new version; one you stopped stays stopped. If anything fails, the old version keeps running. Your identity in `~/.urnetwork` isn't touched, and your update and start settings are kept.
 
 How each system keeps to the schedule:
 
 - **Linux:** a systemd timer, every 6 hours plus up to an hour of random delay.
 - **macOS:** a launchd agent that checks four times a day at times picked once per Mac, and again when you log in, so a Mac that was asleep or off catches up.
-- **Windows:** an updater that starts, hidden, when you sign in, wakes every hour and checks once the interval has passed, so sleep and restarts don't skip a check. It only installs a release whose SHA-256 GitHub lists.
+- **Windows:** an updater that starts, hidden, when you sign in, wakes every hour and checks once the interval has passed, so sleep and restarts don't skip a check.
 
 An update also brings `urnet-tools` itself up to date. On Linux it never moves you to an older release.
 
@@ -82,7 +82,7 @@ provider update --off
 provider update --on
 ```
 
-Setting `URNETWORK_AUTO_UPDATE=0` in the service's environment also turns them off. With updates off, run `provider update` yourself from time to time.
+You can also install the service with updates off: `URNETWORK_AUTO_UPDATE=0 provider service install`. That doesn't affect a miner an installer set up; use `urnet-tools auto-update off` there. With updates off, run `provider update` yourself from time to time.
 
 ## Without automatic updates
 

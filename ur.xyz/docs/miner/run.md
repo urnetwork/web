@@ -48,7 +48,10 @@ urnet-tools status         # version, signed in, running, updates; exits 3 when 
 urnet-tools logs           # follow its log; Ctrl-C to stop reading
 urnet-tools restart
 urnet-tools stop           # stop it until you start it again, restart (Linux) or log in again (macOS, Windows)
+urnet-tools auto-update off   # turn automatic updates off; `on` turns them back on
 ```
+
+If you skipped signing in when you installed, run `urnetwork login`, then `urnet-tools start`: it registers the device and starts the miner. See [Updates](/docs/miner/updates) for how automatic updates work.
 
 On Linux and Windows, `provider service start`, `stop`, `status` and `logs` work on the installer's miner too.
 
@@ -67,7 +70,7 @@ provider service install
 It starts the miner now, starts it again by itself, restarts it if it crashes, and checks for [updates](/docs/miner/updates) every 6 hours:
 
 - **Linux:** a systemd user service, `urnetwork-provider.service`, that starts at boot. It turns on lingering so the service keeps running after you log out, or prints the `sudo loginctl enable-linger` command to run.
-- **macOS:** a launchd agent that starts when you log in.
+- **macOS:** a launchd agent that starts when you log in. Its log is `service.log` in `~/.urnetwork`.
 - **Windows:** a Startup app that starts the miner, hidden, when you sign in to Windows, and stops when you sign out. It needs no administrator rights. Its log is `service.log` in `%USERPROFILE%\.urnetwork`.
 
 To manage it:
@@ -79,6 +82,8 @@ provider service restart
 provider service stop
 provider service uninstall       # your sign-in and identity are kept
 ```
+
+On a server, or to mine for every user of the computer on Linux or macOS, use a system-wide service run as root, with its state in `/var/lib/urnetwork`: `sudo provider setup --system`, or `sudo provider service install --system`. Add `--system` to the other `provider service` commands to manage it. Windows has no system-wide service. For many machines, `provider setup --yes --auth-code-file=<path>` sets up without any questions; it skips the payout step, so [set the payout wallet](/docs/miner/rewards#set-your-payout-wallet) afterwards.
 
 On Linux and Windows, `provider service install` won't add a second miner beside an installer's. On macOS it can't see the installer's agent, so if you used the macOS installer, keep using `urnet-tools` and don't install a second service.
 
@@ -92,7 +97,8 @@ Description=UR miner
 
 [Service]
 ExecStart=%h/.local/bin/provider provide
-Restart=always
+Restart=on-failure
+RestartPreventExitStatus=3
 RestartSec=10
 UMask=0077
 
@@ -108,7 +114,7 @@ systemctl --user enable --now ur-miner.service
 journalctl --user -u ur-miner.service -f
 ```
 
-To keep it running after you log out, turn on lingering once: `sudo loginctl enable-linger "$USER"`. Leave `--allow-client-registration` out of the service command, so a missing identity makes the service fail instead of registering a new device without you noticing. Don't run this and `provider service` at the same time. A service of your own doesn't update the miner; see [Updates](/docs/miner/updates#without-automatic-updates).
+To keep it running after you log out, turn on lingering once: `sudo loginctl enable-linger "$USER"`. Leave `--allow-client-registration` out of the service command, so a missing identity stops the service instead of registering a new device without you noticing. Don't run this and `provider service` at the same time. A service of your own doesn't update the miner; see [Updates](/docs/miner/updates#without-automatic-updates).
 
 ## Check it's working
 

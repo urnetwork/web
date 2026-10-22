@@ -38,7 +38,7 @@ The commands for every operator, hotkey wallets, the claim daemons and head-tier
 | `--allow-client-registration` | `start`, `provide` | Allow registering a new device. Never replaces an identity the miner already has. |
 | `--port=<port>` | `start`, `provide` | Serve the [status page](/docs/miner/run#the-status-page) on this port. `0`, the default, turns it off. |
 | `--max-memory=<mem>` | `start`, `provide`, `login` | Soft memory target in bytes, or with `b`, `kib`, `mib` or `gib`. |
-| `-v`, `-vv` | most | More log detail. (For `urnet-tools`, `-v` means `--version`.) |
+| `-v`, `-vv` | most | More log detail. (For `urnet-tools` on Linux and macOS, `-v` means `version`; on Windows type `urnet-tools version`.) |
 | `-f` | `login`, `proxy` | Replace an existing sign-in or proxy without asking. |
 | `--api_url=<url>` | most | Use this operator API URL for one command. |
 | `--connect_url=<url>` | `start`, `provide` | Use this operator connect URL for one run. |
@@ -101,7 +101,8 @@ None are needed for a normal setup.
 | Variable | What it does |
 | --- | --- |
 | `URNETWORK_STATE_DIR` | Use this folder instead of `~/.urnetwork`. Handy for trying a test device without touching your real one. |
-| `URNETWORK_AUTO_UPDATE` | Set to `0` to turn off the miner's own automatic updates, like `provider update --off`. |
+| `URNETWORK_AUTO_UPDATE` | Set to `0` when you run `provider service install` to install the service with automatic updates off. It doesn't affect an installer's updates. |
+| `URNETWORK_AUTH_CODE` | The installers sign in with this auth code instead of asking for one. |
 | `URNETWORK_CONNECT_EXTRA_ROOT_CA_FILE` | A PEM file of extra CA certificates to trust, for a network that inspects encrypted traffic. It must hold only CA certificates. |
 
 ## Glossary

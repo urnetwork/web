@@ -1,6 +1,6 @@
 ---
 published: 2026-10-21
-description: Advanced UR mining. Mine every listed operator with one hotkey, run several exits on one host, automate or separate claims, and register a head-tier fleet.
+description: Advanced UR mining. Mine every listed operator with one hotkey, run several exits on one host, automate or separate claims, and claim your own miner UID as a head-tier fleet.
 ---
 
 # Advanced mining
@@ -158,17 +158,39 @@ Run one daemon for each queue and relayer key, and don't submit one-off claims o
 
 For settlement v2 accounts, `provider claim-daemon-v2` claims an account once its claimable balance reaches `--threshold-rao` (default 1.9 α), and `--claim-now` claims everything claimable once at start. `--v1-config` runs the v1 daemon above in the same process, sharing one relayer key. See `provider claim-daemon-v2 --help` for its options.
 
-## Larger fleets and the head tier
+## Claim your own miner UID (head tier)
 
-A head fleet binds many devices (provider client IDs) to one Bittensor hotkey. Validators score distinct routable exit prefixes, sharing a prefix's weight when fleets overlap. The hotkey earns native miner emission and uses the chain's normal coldkey and hotkey stake management; there's no pool claim for the head reward. Devices with active head bindings are left out of the pool payout for that epoch.
+By default every miner earns in its operator's **pool**: the operator's pool UID is paid, and the pool is split among its devices. A large fleet can instead claim **its own miner UID** on the subnet. Validators then weight that UID directly and the chain pays it natively, as α staked on the fleet's own hotkey under its own coldkey, every tempo. There's no pool, no operator and no claim in the payout path.
 
-Fleet registration and recovery run on Linux and macOS only. The current workflow is:
+### Who can get one
 
-1. Create a canonical `urnetwork-fleet-manifest-v1` JSON manifest with the deployment's chain ID, netuid and coordinator, a stable fleet ID, the fleet hotkey, a generation, and the devices' client IDs and public keys. `provider fleet init` prints one from local files; inspect it with `provider fleet manifest --manifest=/absolute/path/fleet.json`.
-2. Preview `provider fleet register` with the manifest, the hotkey and owning coldkey seed files, and native `--substrate` endpoints. It's a dry run unless you add `--apply`. Use `--burn_limit_rao` and `--fee_limit_rao` to cap the registration costs.
-3. Publish the manifest commitment with `provider fleet publish`, then run `provider fleet bind` for each member. Each binding needs both the original device key and the fleet hotkey's signature, a finite earning-epoch range and an EVM relayer.
-4. Inspect with `provider fleet status`, and revoke a member from a future epoch with `provider fleet revoke`.
+Validators give weight to the **top 200 fleets** only; every other fleet's UID gets nothing. Fleets are ranked by **routable exit breadth**, not by traffic:
 
-Production fleet commands need an independently reviewed `--mainnet-runtime-authority` document and its `--mainnet-runtime-authority-sha256`. Fleet writes also need the prepared owner-local durable-volume declaration, selected with `--durable-volumes` and `--durable-volumes-sha256`. The repository doesn't ship a universal mainnet authority pin. Get these deployment-specific inputs before signing; a testnet pin or a fresh RPC observation isn't enough. See the [fleet authority and recovery contract](https://github.com/urfoundation/sn/blob/main/miner/FLEET-MAINNET-RUNTIME.md) and `provider fleet --help` for the exact arguments.
+- Each exit address a validator routes a real verification hop through is reduced to its network prefix (a /29 for IPv4, a /48 for IPv6). A fleet's score is the number of distinct prefixes its devices exit from.
+- A prefix shared with other head fleets is split equally between them, so many devices behind one address or in one small range count once.
+- The score is smoothed over time (each tempo counts a quarter), so one bad measurement doesn't drop a fleet, and a new fleet takes a while to reach its full score.
 
-Keep the fleet coldkey on the registration and signing computer. The always-on miners only need their own identities and credentials. A larger fleet doesn't automatically keep a UID: native registration, validator scores and the chain's pruning rules still decide eligibility and emission.
+A single home connection counts as about one prefix. A head UID pays off for fleets whose devices exit from many different networks, such as hosts spread across many data centers or many residential connections.
+
+To see where you stand, the ur.io **Top 200** page shows your account's estimated score and rank against the cutoff, and whether your devices are bound to a hotkey yet.
+
+### What it costs, and the risks
+
+- **Registration burns α.** The fleet's coldkey pays the subnet's current registration burn, and each new registration raises the next one. `provider fleet register` shows the live burn before it signs anything.
+- **UIDs are limited.** When the subnet is full, a new registration replaces the UID with the lowest emission, once that UID's immunity period is over. A fleet that falls out of the top 200 earns nothing, is replaced by the next registration, and has to pay the burn again to come back.
+- **One tier at a time.** A device bound to a head fleet earns no pool share while the binding is active. If the fleet loses its UID, its devices go back to earning in their operator's pool. Pool rewards a device already earned stay claimable.
+- **Binding is public.** A binding publishes which devices belong to your hotkey, and so the network prefixes they exit from. Devices in the pool aren't linked to you this way.
+
+### How to claim one
+
+You need a Bittensor coldkey with enough TAO for the burn, a hotkey for the fleet, and the miners' identity files (`~/.urnetwork`). Keep the coldkey on one registration computer; the miners only need their own identities. Registering, publishing, binding and revoking on mainnet run on Linux and macOS only.
+
+1. **Write the fleet manifest.** It lists the network's chain ID, netuid and coordinator, a fleet ID, the fleet hotkey, a generation, and each device's client ID and public key. `provider fleet init` builds it from the miners' files, and `provider fleet manifest --manifest=<path>` checks it.
+2. **Register the UID.** Run `provider fleet register` with the manifest, the hotkey and coldkey seed files and `--substrate` endpoints. Without `--apply` it's a dry run that quotes the live burn and fee. Add `--apply` to sign and broadcast, with `--burn_limit_rao` and `--fee_limit_rao` as caps: the chain refuses a registration that would burn more than your limit.
+3. **Publish the manifest.** `provider fleet publish` puts the manifest's hash on chain from the fleet hotkey.
+4. **Bind each device to the hotkey.** Every binding is signed by both the device's key and the fleet hotkey, so nobody can claim devices they don't run. A binding starts no earlier than the next epoch and covers the epoch range you choose (`--valid_from_epoch`, `--valid_to_epoch`). Either:
+   - run `provider fleet sign` for each device, which only reads local files, then paste its output into the ur.io Top 200 page and submit the transaction it prepares from your own EVM wallet; or
+   - run `provider fleet bind` for each device, which submits the binding itself with an EVM relayer key and `--rpc` endpoints.
+5. **Check and maintain it.** `provider fleet status` shows a device's binding and the UID. `provider fleet revoke` removes a device from a future epoch. Bind new devices the same way, and bind again before a binding's last epoch.
+
+On mainnet, `register`, `publish`, `bind`, `status` and `revoke` also need the network's reviewed fleet runtime authority document (`--mainnet-runtime-authority` and its `--mainnet-runtime-authority-sha256`), and the writes need a durable-volume declaration (`--durable-volumes` and `--durable-volumes-sha256`). See the [fleet authority and recovery contract](https://github.com/urfoundation/sn/blob/main/miner/FLEET-MAINNET-RUNTIME.md) and `provider fleet --help` for every option. How the head and pool tiers are scored is in the [whitepaper](https://github.com/urfoundation/sn/blob/main/WHITEPAPER.md), sections 8.4 and 11.4.

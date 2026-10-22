@@ -6,10 +6,8 @@ The miner is a single program, `provider`. There are three ways to get it:
 | Way | Systems | Updates | Best for |
 | --- | --- | --- | --- |
 | [Installer](#the-installers) | Linux, macOS, Windows | Automatic | Most people |
-| [Manual download](#manual-download-linux-and-macos) | Linux, macOS | Automatic, with `provider setup` | Full control |
-| [Build from source](#build-from-source) | Linux, macOS | By hand | Developers and auditors |
-
-> **Windows** mining needs a miner release from late October 2026 or later, and hasn't been tested on a real PC yet.
+| [Manual download](#manual-download) | Linux, macOS, Windows | Automatic, with `provider setup` | Full control |
+| [Build from source](#build-from-source) | Linux, macOS, Windows | By hand | Developers and auditors |
 
 Whichever you choose, the miner keeps its identity in `~/.urnetwork` (`%USERPROFILE%\.urnetwork` on Windows), so you can switch later without registering again. Back that folder up first, and stop the old way's background job before starting the new one, so two copies never run at once. After installing, go back to [the quick start](https://ur.xyz/docs/miner#2-run-setup).
 
@@ -36,13 +34,13 @@ Then open a new terminal, or run the `export PATH=…` line it prints. It runs o
 
 - installs `urnetwork` and `urnet-tools` into `~/.local/share/urnetwork-provider/bin` and adds that folder to your `PATH` in `~/.bashrc` (creating it if needed) and in `~/.zshrc` if you have one. Pass `-B` to leave them alone. If a new terminal still can't find `urnetwork`, run the `export PATH=…` line the installer printed;
 - runs the miner as a systemd user service, `urnetwork.service`, with an update timer, and turns on lingering so the service keeps running after you log out (if that needs an administrator, it prints the `sudo loginctl enable-linger` command to run);
-- in a shell without a systemd user session (a `sudo su` shell, many containers, WSL), installs anyway and tells you how to run the miner in the foreground.
+- in a shell without a systemd user session (a `sudo su` shell, many containers, WSL), installs anyway, without a background service or automatic updates, and tells you how to run the miner in the foreground. Run `urnet-tools update` yourself from time to time.
+
+`--interval 6h`, `daily`, `weekly` or `monthly` sets how often it checks for updates.
 
 Options go after `sh -s --`, for example `curl -fsSL … | sh -s -- --no-start`. Run it with `--help` for all of them.
 
 ### macOS
-
-> Not yet tested on a real Mac.
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/urnetwork/connect/main/scripts/Provider_Install_macOS.sh | sh
@@ -54,11 +52,9 @@ Then open a new Terminal window. It needs macOS 12 or later and nothing else, an
 - runs the miner as a launchd agent that starts when you log in and restarts the miner if it crashes. macOS may show a "Background Items Added" notification; that's expected. It's listed as `urnet-tools` under System Settings → General → Login Items;
 - clears the download's quarantine flag for you, and refuses to run with `sudo`.
 
-`--dry-run` prints everything it would do without changing anything, and `-y` answers every question itself. The miner's log is in `~/Library/Logs/urnetwork/`.
+On macOS, `--dry-run` prints everything it would do without changing anything, and `-y` answers every question itself. The miner's log is in `~/Library/Logs/urnetwork/`.
 
 ### Windows
-
-> **Not yet tested on a real PC.** Mining on Windows needs a miner release from late October 2026 or later; older ones can't register a new device on Windows.
 
 In a normal PowerShell window (not "Run as administrator"):
 
@@ -69,10 +65,10 @@ irm https://raw.githubusercontent.com/urnetwork/connect/main/scripts/Provider_In
 It works in Windows PowerShell 5.1 and PowerShell 7, on 64-bit Intel or AMD and on ARM64. It:
 
 - installs `urnetwork.exe`, `urnet-tools` and the updater into `%LOCALAPPDATA%\urnetwork\provider` and adds that folder to your `PATH`. Open a new window afterwards;
-- asks whether to run the miner in the background, now and whenever you sign in to Windows. It runs hidden, from shortcuts in your Startup folder, so it **stops when you sign out**;
+- once you're signed in, asks whether to run the miner in the background, now and whenever you sign in to Windows. It runs hidden, from shortcuts in your Startup folder, so it **stops when you sign out**. If you sign in later, run `urnet-tools auto-start on` and `urnet-tools start`;
 - installs `urnet-tools.cmd` beside `urnet-tools.ps1`. If PowerShell says "running scripts is disabled", type `urnet-tools.cmd` instead of `urnet-tools`.
 
-`urnetwork.exe` isn't code-signed, so SmartScreen or Defender may ask before running it. Windows options are PowerShell-style: `-Tag`, `-AuthCode`, `-NoStart`, `-NoAutoUpdate`, `-AddToStartup`, `-NonInteractive`. They can't be passed through `irm … | iex`: save the script and run it, for example `powershell -ExecutionPolicy Bypass -File .\Provider_Install_Win32.ps1 -NoStart`, or set `$env:URNETWORK_AUTH_CODE` before the `irm` line. `Get-Help .\Provider_Install_Win32.ps1 -Detailed` lists them all.
+`urnetwork.exe` isn't code-signed, so SmartScreen or Defender may ask before running it. Windows options are PowerShell-style: `-Tag`, `-AuthCode`, `-NoStart`, `-NoAutoUpdate`, `-AddToStartup`, `-NoStartup`, `-NonInteractive`. Installing a particular version with `-Tag` leaves automatic updates off. They can't be passed through `irm … | iex`: save the script and run it, for example `powershell -ExecutionPolicy Bypass -File .\Provider_Install_Win32.ps1 -NoStart`, or set `$env:URNETWORK_AUTH_CODE` before the `irm` line. `Get-Help .\Provider_Install_Win32.ps1 -Detailed` lists them all.
 
 ### Manage it with urnet-tools
 
@@ -98,20 +94,22 @@ urnet-tools uninstall
 
 It removes the miner, its background job and its `PATH` entry, and **keeps** your identity in `~/.urnetwork`, so you can install again later as the same device. To delete the identity too, add `--remove-identity` (`-RemoveIdentity` on Windows); it asks you to type `delete` first. [Back it up](https://ur.xyz/docs/miner/run#back-up-your-miner) before you do: without it, the device can't be recovered.
 
-## Manual download (Linux and macOS)
+## Manual download
 
-Every release on the [build releases page](https://github.com/urnetwork/build/releases) has a file named `urnetwork-provider-<version>.tar.gz`. It's a large download, because it holds one `provider` program for every system, at `<os>/<arch>/provider`. It also has MIPS builds for routers and Windows builds; Windows users should use the [installer](#windows):
+Every release on the [build releases page](https://github.com/urnetwork/build/releases) has a file named `urnetwork-provider-<version>.tar.gz`. It's a large download (about 240 MB), because it holds one `provider` program for every system, at `<os>/<arch>/provider` (`provider.exe` on Windows). It also has MIPS builds for routers.
 
 | Your computer | Folder in the download |
 | --- | --- |
 | Linux PC or server (Intel or AMD, 64-bit) | `linux/amd64` |
-| Raspberry Pi 4 or 5 on a 64-bit OS, or another 64-bit ARM Linux | `linux/arm64` |
+| Raspberry Pi 3, 4 or 5 on a 64-bit OS, or another 64-bit ARM Linux | `linux/arm64` |
 | Older 32-bit Intel or AMD Linux PC | `linux/386` |
 | Raspberry Pi 2, 3, 4 or 5, or another ARMv7 board, on a 32-bit OS (not a Pi Zero or Pi 1) | `linux/arm` |
 | Mac with Apple silicon (M1 or later) | `darwin/arm64` |
 | Mac with an Intel processor | `darwin/amd64` |
+| Windows PC (Intel or AMD, 64-bit) | `windows/amd64` |
+| Windows on ARM | `windows/arm64` |
 
-Download and install it into `~/.local/bin`, choosing your folder from the table:
+On Linux or macOS, download and install it into `~/.local/bin`, choosing your folder from the table:
 
 ```bash
 VERSION=<version>   # the latest tag on the releases page, without the leading v
@@ -131,6 +129,22 @@ On macOS, a file downloaded with a web browser (not with `curl` as above) is qua
 ```bash
 xattr -d com.apple.quarantine "$HOME/.local/bin/provider"
 ```
+
+On Windows, in PowerShell, put it in a folder you own, so updates can replace it:
+
+```powershell
+$Version = "<version>"   # the latest tag on the releases page, without the leading v
+$Arch = "amd64"          # or arm64, from the table
+$Dir = "$env:LOCALAPPDATA\Programs\urnetwork"
+New-Item -ItemType Directory -Force $Dir | Out-Null
+$ProgressPreference = "SilentlyContinue"
+Invoke-WebRequest -UseBasicParsing -OutFile "$env:TEMP\urnetwork-provider.tar.gz" "https://github.com/urnetwork/build/releases/download/v$Version/urnetwork-provider-$Version.tar.gz"
+tar -xzf "$env:TEMP\urnetwork-provider.tar.gz" -C $env:TEMP "windows/$Arch/provider.exe"
+Move-Item -Force "$env:TEMP\windows\$Arch\provider.exe" "$Dir\provider.exe"
+& "$Dir\provider.exe" --version
+```
+
+Run it as `& "$Dir\provider.exe"`, or add that folder to your `PATH` to type `provider`. `provider.exe` isn't code-signed, so SmartScreen or Defender may ask before running it.
 
 Then go back to [the quick start](https://ur.xyz/docs/miner#2-run-setup) and run `provider setup`. Its background service also keeps a manual install up to date; see [Updates](https://ur.xyz/docs/miner/updates).
 
@@ -167,4 +181,4 @@ A build of your own says `development build` and never updates itself. Update it
 
 ## A binary from your operator
 
-You can also install a `provider` binary your operator supplies, if it's built from the same current source. Check that `provider --help` lists `setup`, `status` and `wallet`. An older binary may register devices and set wallets differently from this guide.
+You can also run a `provider` binary your operator builds from the same release source.

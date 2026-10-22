@@ -38,7 +38,9 @@ Then open a new terminal, or run the `export PATH=…` line it prints. It runs o
 
 - installs `urnetwork` and `urnet-tools` into `~/.local/share/urnetwork-provider/bin` and adds that folder to your `PATH` in `~/.bashrc` (creating it if needed) and in `~/.zshrc` if you have one. Pass `-B` to leave them alone. If a new terminal still can't find `urnetwork`, run the `export PATH=…` line the installer printed;
 - runs the miner as a systemd user service, `urnetwork.service`, with an update timer, and turns on lingering so the service keeps running after you log out (if that needs an administrator, it prints the `sudo loginctl enable-linger` command to run);
-- in a shell without a systemd user session (a `sudo su` shell, many containers, WSL), installs anyway and tells you how to run the miner in the foreground.
+- in a shell without a systemd user session (a `sudo su` shell, many containers, WSL), installs anyway, without a background service or automatic updates, and tells you how to run the miner in the foreground. Run `urnet-tools update` yourself from time to time.
+
+`--interval 6h`, `daily`, `weekly` or `monthly` sets how often it checks for updates.
 
 Options go after `sh -s --`, for example `curl -fsSL … | sh -s -- --no-start`. Run it with `--help` for all of them.
 
@@ -54,7 +56,7 @@ Then open a new Terminal window. It needs macOS 12 or later and nothing else, an
 - runs the miner as a launchd agent that starts when you log in and restarts the miner if it crashes. macOS may show a "Background Items Added" notification; that's expected. It's listed as `urnet-tools` under System Settings → General → Login Items;
 - clears the download's quarantine flag for you, and refuses to run with `sudo`.
 
-`--dry-run` prints everything it would do without changing anything, and `-y` answers every question itself. The miner's log is in `~/Library/Logs/urnetwork/`.
+On macOS, `--dry-run` prints everything it would do without changing anything, and `-y` answers every question itself. The miner's log is in `~/Library/Logs/urnetwork/`.
 
 ### Windows
 
@@ -67,10 +69,10 @@ irm https://raw.githubusercontent.com/urnetwork/connect/main/scripts/Provider_In
 It works in Windows PowerShell 5.1 and PowerShell 7, on 64-bit Intel or AMD and on ARM64. It:
 
 - installs `urnetwork.exe`, `urnet-tools` and the updater into `%LOCALAPPDATA%\urnetwork\provider` and adds that folder to your `PATH`. Open a new window afterwards;
-- asks whether to run the miner in the background, now and whenever you sign in to Windows. It runs hidden, from shortcuts in your Startup folder, so it **stops when you sign out**;
+- once you're signed in, asks whether to run the miner in the background, now and whenever you sign in to Windows. It runs hidden, from shortcuts in your Startup folder, so it **stops when you sign out**. If you sign in later, run `urnet-tools auto-start on` and `urnet-tools start`;
 - installs `urnet-tools.cmd` beside `urnet-tools.ps1`. If PowerShell says "running scripts is disabled", type `urnet-tools.cmd` instead of `urnet-tools`.
 
-`urnetwork.exe` isn't code-signed, so SmartScreen or Defender may ask before running it. Windows options are PowerShell-style: `-Tag`, `-AuthCode`, `-NoStart`, `-NoAutoUpdate`, `-AddToStartup`, `-NonInteractive`. They can't be passed through `irm … | iex`: save the script and run it, for example `powershell -ExecutionPolicy Bypass -File .\Provider_Install_Win32.ps1 -NoStart`, or set `$env:URNETWORK_AUTH_CODE` before the `irm` line. `Get-Help .\Provider_Install_Win32.ps1 -Detailed` lists them all.
+`urnetwork.exe` isn't code-signed, so SmartScreen or Defender may ask before running it. Windows options are PowerShell-style: `-Tag`, `-AuthCode`, `-NoStart`, `-NoAutoUpdate`, `-AddToStartup`, `-NoStartup`, `-NonInteractive`. Installing a particular version with `-Tag` leaves automatic updates off. They can't be passed through `irm … | iex`: save the script and run it, for example `powershell -ExecutionPolicy Bypass -File .\Provider_Install_Win32.ps1 -NoStart`, or set `$env:URNETWORK_AUTH_CODE` before the `irm` line. `Get-Help .\Provider_Install_Win32.ps1 -Detailed` lists them all.
 
 ### Manage it with urnet-tools
 
@@ -136,11 +138,13 @@ On Windows, in PowerShell, put it in a folder you own, so updates can replace it
 
 ```powershell
 $Version = "<version>"   # the latest tag on the releases page, without the leading v
+$Arch = "amd64"          # or arm64, from the table
 $Dir = "$env:LOCALAPPDATA\Programs\urnetwork"
 New-Item -ItemType Directory -Force $Dir | Out-Null
-Invoke-WebRequest -OutFile "$env:TEMP\urnetwork-provider.tar.gz" "https://github.com/urnetwork/build/releases/download/v$Version/urnetwork-provider-$Version.tar.gz"
-tar -xzf "$env:TEMP\urnetwork-provider.tar.gz" -C $env:TEMP windows/amd64/provider.exe   # your folder from the table
-Move-Item -Force "$env:TEMP\windows\amd64\provider.exe" "$Dir\provider.exe"
+$ProgressPreference = "SilentlyContinue"
+Invoke-WebRequest -UseBasicParsing -OutFile "$env:TEMP\urnetwork-provider.tar.gz" "https://github.com/urnetwork/build/releases/download/v$Version/urnetwork-provider-$Version.tar.gz"
+tar -xzf "$env:TEMP\urnetwork-provider.tar.gz" -C $env:TEMP "windows/$Arch/provider.exe"
+Move-Item -Force "$env:TEMP\windows\$Arch\provider.exe" "$Dir\provider.exe"
 & "$Dir\provider.exe" --version
 ```
 
@@ -181,4 +185,4 @@ A build of your own says `development build` and never updates itself. Update it
 
 ## A binary from your operator
 
-You can also install a `provider` binary your operator supplies, if it's built from the same current source. Check that `provider --help` lists `setup`, `status` and `wallet`. An older binary may register devices and set wallets differently from this guide.
+You can also run a `provider` binary your operator builds from the same release source.

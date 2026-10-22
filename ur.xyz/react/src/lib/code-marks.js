@@ -12,7 +12,7 @@
 // plain text (a directory tree with notes). Elsewhere `<` and `>` are
 // operators or tags and `#` is not a comment, so those blocks stay unmarked.
 const MARKED = new Set([
-    'bash', 'sh', 'shell', 'zsh', 'console',
+    'bash', 'sh', 'shell', 'zsh', 'console', 'powershell', 'ps1', 'pwsh',
     'yaml', 'yml', 'toml', 'ini', 'conf', 'dotenv', 'env',
     'text', '',
 ]);
