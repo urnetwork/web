@@ -79,9 +79,9 @@ Paste the code at the prompt and press Enter. The prompt hides what you paste, s
 
 ### 3. Start once to register this device
 
-If you used the Linux installer and signed in while installing, it has already registered this device: skip to step 4.
+If you used an installer and signed in while installing, it has already registered this device: skip to step 4.
 
-Otherwise, the very first start needs one extra flag, which lets the miner register this computer as a new device. If you used the macOS installer, run `urnet-tools stop` first, so only one copy runs. Then:
+Otherwise, the very first start needs one extra flag, which lets the miner register this computer as a new device:
 
 ```bash
 provider provide --allow-client-registration
