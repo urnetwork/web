@@ -36,7 +36,7 @@ Most miners join an operator's **pool**. You don't need your own Bittensor regis
 
 ## What you need
 
-- **A Linux, macOS or Windows computer that stays online.** A home PC, a server or a Raspberry Pi all work. On Windows the miner only runs while you're signed in, and it hasn't been tested on a real PC yet.
+- **A Linux, macOS or Windows computer that stays online.** A home PC, a server or a Raspberry Pi 2 or newer all work. On Windows the miner only runs while you're signed in, and it hasn't been tested on a real PC yet.
 - **One stable public internet address per miner.** The miner also tries to listen on TCP port 443 and on UDP ports 443, 53 and 4053 for its extender. To run more than one exit from a host, see [Several exits on one host](/docs/miner/advanced#several-exits-on-one-host).
 - **An account with a network operator.** The miner uses the default operator, `bringyour.com`, unless you [choose another](/docs/miner/run#choose-an-operator). You'll get an **auth code** from your account to sign the miner in.
 - **A Bittensor wallet address (coldkey)** for your rewards. It's an ss58 address that starts with `5`. You can sign for it on another device; its secret never needs to be on the miner.
@@ -88,7 +88,7 @@ It walks you through four steps, and you can stop and run it again at any time; 
 3. **Payout address.** Your Bittensor coldkey address. Setup prints a short message; sign it in your wallet app (Polkadot.js, Talisman or btcli) and paste the signature. You can press Enter to skip this and [set it later](/docs/miner/rewards#set-your-payout-wallet).
 4. **Background service.** Runs the miner now and every time the computer starts, and keeps it up to date (Linux and macOS).
 
-If you used an installer, it already did steps 1, 2 and 4. Run `urnetwork setup --no-service` to add your payout address.
+If you used an installer and signed in while installing, it already did steps 1, 2 and 4 (unless it told you to run the first start yourself). Run `urnetwork setup --no-service` to add your payout address.
 
 ### 3. Check on it
 

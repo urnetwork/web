@@ -5,7 +5,7 @@ New miner releases fix problems and keep your miner compatible with the network,
 
 ## Automatic updates (installers)
 
-Every installer turns on automatic updates. By default it checks for a newer release on the [build releases page](https://github.com/urnetwork/build/releases) about every 6 hours. When there is one, it downloads it, checks its SHA-256, makes sure the new program runs, and swaps it in. A miner that was running is restarted on the new version; one you stopped stays stopped. If anything fails, the old version keeps running. Your identity in `~/.urnetwork` isn't touched, and your update and start settings are kept.
+Every installer turns on automatic updates. By default it checks for a newer release on the [build releases page](https://github.com/urnetwork/build/releases) about every 6 hours. When there is one, it downloads it, checks it against the SHA-256 GitHub lists for it, makes sure the new program runs, and swaps it in. A miner that was running is restarted on the new version; one you stopped stays stopped. If anything fails, the old version keeps running. Your identity in `~/.urnetwork` isn't touched, and your update and start settings are kept.
 
 How each system keeps to the schedule:
 
@@ -13,7 +13,7 @@ How each system keeps to the schedule:
 - **macOS:** a launchd agent that checks four times a day at times picked once per Mac, and again when you log in, so a Mac that was asleep or off catches up. (Not yet tested on a real Mac.)
 - **Windows:** an updater that starts, hidden, when you sign in and checks once the interval has passed, so sleep and restarts don't skip a check. (Not yet tested on a real PC.)
 
-An update also brings `urnet-tools` itself up to date, and never moves you to an older release.
+An update also brings `urnet-tools` itself up to date. On Linux it never moves you to an older release.
 
 To see which version you have, and whether a newer one is out, or to update straight away:
 
@@ -43,7 +43,7 @@ urnet-tools auto-update off
 urnet-tools auto-update on
 ```
 
-With automatic updates off, run `urnet-tools update` yourself from time to time. Your choice is kept when you update or run the installer again. To install with updates off from the start, pass `--no-auto-update` to the macOS installer, or `-NoAutoUpdate` to the Windows one.
+With automatic updates off, run `urnet-tools update` yourself from time to time. Your choice is kept when you update or run the installer again. To install with updates off from the start, pass `--no-auto-update` to the macOS installer, or `-NoAutoUpdate` to the Windows one. On Linux, run `urnet-tools auto-update off` right after installing.
 
 ### Stay on one version
 
@@ -57,11 +57,11 @@ Then turn automatic updates off with `urnet-tools auto-update off`, or the next 
 
 ## Automatic updates (provider service)
 
-> **Next miner release.** The miner's own updates come with its next release.
+> **Older miners.** The miner's own updates came with the releases of late October 2026. An older release has no `provider update`: see [Without automatic updates](#without-automatic-updates).
 
-The [background service](https://ur.xyz/docs/miner/run#with-provider-service-linux-and-macos) that `provider setup` or `provider service install` sets up also keeps the miner up to date. It checks the [build releases page](https://github.com/urnetwork/build/releases) 15 minutes after the computer starts, then every 6 hours. After a release, each miner waits its own random share of 16 hours, so every miner has it within a day without all of them restarting at once.
+The [background service](https://ur.xyz/docs/miner/run#with-provider-service-linux-and-macos) that `provider setup` or `provider service install` sets up also keeps the miner up to date. It checks the [build releases page](https://github.com/urnetwork/build/releases) every 6 hours: on Linux from 15 minutes after the computer starts, plus up to an hour of random delay; on macOS from when you log in. After a release, each miner waits its own random share of 16 hours, so every miner has it within a day without all of them restarting at once.
 
-An update checks the download against the SHA-256 the release lists, keeps the previous program beside the new one, and restarts the service. If the new version doesn't come back connected within 10 minutes, the previous one is put back, and that release is skipped for a week. Your identity in `~/.urnetwork` isn't touched.
+An update checks the download against the SHA-256 GitHub lists for it (that catches a damaged download; releases aren't signed yet), keeps the previous program beside the new one, and restarts the service. If the new version doesn't come back within 10 minutes (connected again, if it was connected before), the previous one is put back, and that release is skipped for a week. Your identity in `~/.urnetwork` isn't touched.
 
 ```bash
 provider update --check    # is a newer release out?
@@ -95,4 +95,4 @@ On an older release, which has no `provider update`:
 
 Don't add `--allow-client-registration` after an update: the miner keeps its identity in `~/.urnetwork`, so it continues as the same device.
 
-Watch the [releases page](https://github.com/urnetwork/build/releases) for new versions; GitHub can notify you about each release. `provider --version` prints the version you have; on an older release it prints the help instead, and the [status page](https://ur.xyz/docs/miner/run#the-status-page) shows the running version.
+Watch the [releases page](https://github.com/urnetwork/build/releases) for new versions; GitHub can notify you about each release. `provider --version` prints the version you have. On releases from before late October 2026 it doesn't work; the [status page](https://ur.xyz/docs/miner/run#the-status-page) shows the running version instead.

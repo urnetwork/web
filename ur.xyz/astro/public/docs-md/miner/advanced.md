@@ -94,7 +94,7 @@ provider provide --allow-client-registration
 
 Use the registration flag only when you add genuinely new exits; ordinary restarts are `provider provide`. Each exit keeps a `.provider-<hash>.jwt` and its registration side files. Select that file with `--provider-jwt` when you set its wallet and claim for it. The shared `.provider.key` and every exit's files belong in the same backup. What counts is distinct, routable exits: adding accounts behind the same exit doesn't add coverage.
 
-`provider proxy remove` removes exits, and `provider proxy auth add` and `provider proxy auth remove` manage proxy credentials; see `provider --help`. With `--all-operators`, the `proxy` file in `~/.urnetwork` is copied into each operator's folder when its miner starts.
+`provider proxy remove` removes exits, and `provider proxy auth add` and `provider proxy auth remove` manage proxy credentials; see `provider proxy --help`. With `--all-operators`, the `proxy` file in `~/.urnetwork` is copied into each operator's folder when its miner starts.
 
 ## Claim automatically
 
@@ -125,7 +125,7 @@ snclaim status --epoch='<settlement_epoch>' --no_id='<operator id>' \
 
 ### The claim daemon
 
-The claim daemon keeps pending and signed claims in a durable queue and follows their results on the EVM chain across restarts. Its configuration is strict YAML:
+The claim daemons run on Linux and macOS only. The claim daemon keeps pending and signed claims in a durable queue and follows their results on the EVM chain across restarts. Its configuration is strict YAML:
 
 ```yaml
 schema_version: 1
@@ -152,19 +152,19 @@ provider claim-daemon --config=/absolute/path/claim.yml \
 
 Run one daemon for each queue and relayer key, and don't submit one-off claims or run another daemon with that key at the same time. Keep the whole queue folder, including its side files, after an interrupted submission. A queue entry marked `uncertain` needs its original signed transaction reconciled. A finalized claim entry shows the claim was accepted; the payment events tell paid rewards from deferred credit.
 
-For settlement v2 accounts, `provider claim-daemon-v2` claims an account once its claimable balance reaches `--threshold-rao` (default 1.9 α), and `--claim-now` claims everything claimable once at start. `--v1-config` runs the v1 daemon above in the same process, sharing one relayer key. See `provider --help` for its options.
+For settlement v2 accounts, `provider claim-daemon-v2` claims an account once its claimable balance reaches `--threshold-rao` (default 1.9 α), and `--claim-now` claims everything claimable once at start. `--v1-config` runs the v1 daemon above in the same process, sharing one relayer key. See `provider claim-daemon-v2 --help` for its options.
 
 ## Larger fleets and the head tier
 
 A head fleet binds many devices (provider client IDs) to one Bittensor hotkey. Validators score distinct routable exit prefixes, sharing a prefix's weight when fleets overlap. The hotkey earns native miner emission and uses the chain's normal coldkey and hotkey stake management; there's no pool claim for the head reward. Devices with active head bindings are left out of the pool payout for that epoch.
 
-The current workflow is:
+Fleet registration and recovery run on Linux and macOS only. The current workflow is:
 
 1. Create a canonical `urnetwork-fleet-manifest-v1` JSON manifest with the deployment's chain ID, netuid and coordinator, a stable fleet ID, the fleet hotkey, a generation, and the devices' client IDs and public keys. `provider fleet init` prints one from local files; inspect it with `provider fleet manifest --manifest=/absolute/path/fleet.json`.
 2. Preview `provider fleet register` with the manifest, the hotkey and owning coldkey seed files, and native `--substrate` endpoints. It's a dry run unless you add `--apply`. Use `--burn_limit_rao` and `--fee_limit_rao` to cap the registration costs.
 3. Publish the manifest commitment with `provider fleet publish`, then run `provider fleet bind` for each member. Each binding needs both the original device key and the fleet hotkey's signature, a finite earning-epoch range and an EVM relayer.
 4. Inspect with `provider fleet status`, and revoke a member from a future epoch with `provider fleet revoke`.
 
-Production fleet commands need an independently reviewed `--mainnet-runtime-authority` document and its `--mainnet-runtime-authority-sha256`. Fleet writes also need the prepared owner-local durable-volume declaration, selected with `--durable-volumes` and `--durable-volumes-sha256`. The repository doesn't ship a universal mainnet authority pin. Get these deployment-specific inputs before signing; a testnet pin or a fresh RPC observation isn't enough. See the [fleet authority and recovery contract](https://github.com/urfoundation/sn/blob/main/miner/FLEET-MAINNET-RUNTIME.md) and `provider --help` for the exact arguments.
+Production fleet commands need an independently reviewed `--mainnet-runtime-authority` document and its `--mainnet-runtime-authority-sha256`. Fleet writes also need the prepared owner-local durable-volume declaration, selected with `--durable-volumes` and `--durable-volumes-sha256`. The repository doesn't ship a universal mainnet authority pin. Get these deployment-specific inputs before signing; a testnet pin or a fresh RPC observation isn't enough. See the [fleet authority and recovery contract](https://github.com/urfoundation/sn/blob/main/miner/FLEET-MAINNET-RUNTIME.md) and `provider fleet --help` for the exact arguments.
 
 Keep the fleet coldkey on the registration and signing computer. The always-on miners only need their own identities and credentials. A larger fleet doesn't automatically keep a UID: native registration, validator scores and the chain's pruning rules still decide eligibility and emission.

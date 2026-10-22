@@ -9,19 +9,21 @@ The miner is a single program, `provider`. There are three ways to get it:
 | [Manual download](#manual-download-linux-and-macos) | Linux, macOS | Automatic, with `provider setup` | Full control |
 | [Build from source](#build-from-source) | Linux, macOS | By hand | Developers and auditors |
 
-> **Windows** mining needs the miner's next release, and hasn't been tested on a real PC yet.
+> **Windows** mining needs a miner release from late October 2026 or later, and hasn't been tested on a real PC yet.
 
 Whichever you choose, the miner keeps its identity in `~/.urnetwork` (`%USERPROFILE%\.urnetwork` on Windows), so you can switch later without registering again. Back that folder up first, and stop the old way's background job before starting the new one, so two copies never run at once. After installing, go back to [the quick start](https://ur.xyz/docs/miner#2-run-setup).
 
 ## The installers
 
+> **Rolling out.** These installers are being rolled out to the install links below. Until they are, a link may give you an older installer, and the macOS link may not work yet.
+
 Each installer puts the miner in your own user folder (no administrator rights needed), runs it in the background, keeps it up to date, and gives you one command to manage it all: `urnet-tools`. They live in the [`scripts` folder of urnetwork/connect](https://github.com/urnetwork/connect/tree/main/scripts).
 
 All three:
 
-- download the latest release for your processor, check its SHA-256 and install only your machine's program;
+- download the latest release for your processor, check it against the SHA-256 GitHub lists for it (that catches a damaged download; releases aren't signed yet), and install only your machine's program;
 - install the miner as **`urnetwork`**: type `urnetwork` wherever this guide says `provider`, including in commands the miner prints for you to copy;
-- ask for your auth code if you aren't signed in yet (press Enter to do it later; `--auth-code <code>`, or `-AuthCode` on Windows, signs in without asking);
+- ask for your auth code if you aren't signed in yet (press Enter to do it later; `--auth-code <code>`, or `-AuthCode` on Windows, signs in without asking, but leaves the code in your shell history; `URNETWORK_AUTH_CODE` or the prompt don't);
 - register a new device on its first start, once you've signed in;
 - turn on [automatic updates](https://ur.xyz/docs/miner/updates), every 6 hours by default;
 - can be run again at any time: a second run updates in place and keeps your settings and your identity.
@@ -32,9 +34,9 @@ All three:
 curl -fsSL https://raw.githubusercontent.com/urnetwork/connect/main/scripts/Provider_Install_Linux.sh | sh
 ```
 
-Then open a new terminal, or run the `export PATH=…` line it prints. It runs on 64-bit and 32-bit Intel, AMD and ARM, including a Raspberry Pi on a 32-bit OS, and needs `curl` or `wget`. It:
+Then open a new terminal, or run the `export PATH=…` line it prints. It runs on 64-bit and 32-bit Intel, AMD and ARM, including a Raspberry Pi 2 or newer on a 32-bit OS (not a Pi Zero or Pi 1), and needs `curl` or `wget`, and `jq` or `python3` (most systems have one). It:
 
-- installs `urnetwork` and `urnet-tools` into `~/.local/share/urnetwork-provider/bin` and adds that folder to your `PATH` in `~/.bashrc`, creating the file if needed. Pass `-B` to leave `~/.bashrc` alone;
+- installs `urnetwork` and `urnet-tools` into `~/.local/share/urnetwork-provider/bin` and adds that folder to your `PATH` in `~/.bashrc` (creating it if needed) and in `~/.zshrc` if you have one. Pass `-B` to leave them alone. If a new terminal still can't find `urnetwork`, run the `export PATH=…` line the installer printed;
 - runs the miner as a systemd user service, `urnetwork.service`, with an update timer, and turns on lingering so the service keeps running after you log out (if that needs an administrator, it prints the `sudo loginctl enable-linger` command to run);
 - in a shell without a systemd user session (a `sudo su` shell, many containers, WSL), installs anyway and tells you how to run the miner in the foreground.
 
@@ -58,7 +60,7 @@ Then open a new Terminal window. It needs macOS 12 or later and nothing else, an
 
 ### Windows
 
-> **Needs the miner's next release**, and not yet tested on a real PC. Older releases can't register a new device on Windows.
+> **Not yet tested on a real PC.** Mining on Windows needs a miner release from late October 2026 or later; older ones can't register a new device on Windows.
 
 In a normal PowerShell window (not "Run as administrator"):
 
@@ -72,7 +74,7 @@ It works in Windows PowerShell 5.1 and PowerShell 7, on 64-bit Intel or AMD and 
 - asks whether to run the miner in the background, now and whenever you sign in to Windows. It runs hidden, from shortcuts in your Startup folder, so it **stops when you sign out**;
 - installs `urnet-tools.cmd` beside `urnet-tools.ps1`. If PowerShell says "running scripts is disabled", type `urnet-tools.cmd` instead of `urnet-tools`.
 
-`urnetwork.exe` isn't code-signed, so SmartScreen or Defender may ask before running it. Windows options are PowerShell-style: `-Tag`, `-AuthCode`, `-NoStart`, `-NoAutoUpdate`, `-AddToStartup`, `-NonInteractive`. Save the script and run `Get-Help .\Provider_Install_Win32.ps1 -Detailed` for all of them.
+`urnetwork.exe` isn't code-signed, so SmartScreen or Defender may ask before running it. Windows options are PowerShell-style: `-Tag`, `-AuthCode`, `-NoStart`, `-NoAutoUpdate`, `-AddToStartup`, `-NonInteractive`. They can't be passed through `irm … | iex`: save the script and run it, for example `powershell -ExecutionPolicy Bypass -File .\Provider_Install_Win32.ps1 -NoStart`, or set `$env:URNETWORK_AUTH_CODE` before the `irm` line. `Get-Help .\Provider_Install_Win32.ps1 -Detailed` lists them all.
 
 ### Manage it with urnet-tools
 
@@ -107,7 +109,7 @@ Every release on the [build releases page](https://github.com/urnetwork/build/re
 | Linux PC or server (Intel or AMD, 64-bit) | `linux/amd64` |
 | Raspberry Pi 4 or 5 on a 64-bit OS, or another 64-bit ARM Linux | `linux/arm64` |
 | Older 32-bit Intel or AMD Linux PC | `linux/386` |
-| Raspberry Pi or another ARM board on a 32-bit OS | `linux/arm` |
+| Raspberry Pi 2, 3, 4 or 5, or another ARMv7 board, on a 32-bit OS (not a Pi Zero or Pi 1) | `linux/arm` |
 | Mac with Apple silicon (M1 or later) | `darwin/arm64` |
 | Mac with an Intel processor | `darwin/amd64` |
 
