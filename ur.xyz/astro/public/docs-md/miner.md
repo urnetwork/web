@@ -76,7 +76,9 @@ Paste the code at the prompt and press Enter. The prompt hides what you paste, s
 
 ### 3. Start once to register this device
 
-The very first start needs one extra flag, which lets the miner register this computer as a new device. If you used an installer, run `urnet-tools stop` first, so only one copy runs. Then:
+If you used the Linux installer and signed in while installing, it has already registered this device: skip to step 4.
+
+Otherwise, the very first start needs one extra flag, which lets the miner register this computer as a new device. If you used the macOS installer, run `urnet-tools stop` first, so only one copy runs. Then:
 
 ```bash
 provider provide --allow-client-registration
@@ -98,7 +100,7 @@ The wallet has to come after step 3: it's tied to the device that step 3 registe
 
 ### 5. Leave it running
 
-If you used an installer, stop the miner from step 3 with Ctrl-C, then start the background miner again and check it:
+If you used an installer, check that the background miner is running. If you ran step 3 by hand, stop it with Ctrl-C first:
 
 ```bash
 urnet-tools start

@@ -54,7 +54,7 @@ On a network that inspects encrypted traffic with its own certificate authority,
 It prints a JSON line with `"event":"startup_recovery_required"` and exits, with a success exit code, so a service shows it as stopped rather than failed. The usual reasons, most likely first:
 
 1. **You haven't signed in on this computer.** Run `provider auth` first.
-2. **This is a new device.** The first start needs `provider provide --allow-client-registration`. Later starts don't. If you used the Linux or macOS installer, run `urnet-tools stop`, then [step 3 of the quick start](https://ur.xyz/docs/miner#3-start-once-to-register-this-device).
+2. **This is a new device.** The first start needs `provider provide --allow-client-registration`. Later starts don't. If you used the macOS installer, run `urnet-tools stop`, then [step 3 of the quick start](https://ur.xyz/docs/miner#3-start-once-to-register-this-device).
 3. **This device's identity files are missing or don't match**, for example after moving to a new computer or restoring part of a backup. Restore the whole `~/.urnetwork` folder from your backup. Signing in again doesn't replace a lost identity, and `--allow-client-registration` won't bring it back either: it only registers new devices. An installation upgrading from an old `.provider.key` may need the one-time `--adopt-legacy-provider-key`; see the [registration and recovery instructions](https://github.com/urfoundation/sn/blob/main/miner/PROVIDER-REGISTRATION.md) before using it.
 
 ### `registration parent must be owned and not writable by other users`

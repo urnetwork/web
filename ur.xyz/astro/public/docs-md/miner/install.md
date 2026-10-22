@@ -25,7 +25,7 @@ All three:
 - turn on [automatic updates](https://ur.xyz/docs/miner/updates), every 6 hours by default;
 - can be run again at any time: a second run updates in place and keeps your settings and your identity.
 
-> **Linux and macOS: register the device once after installing.** These installers start the miner with plain `urnetwork provide`, which can't register a new device. On a new device, follow [step 3 of the quick start](https://ur.xyz/docs/miner#3-start-once-to-register-this-device) once after installing. The Windows installer registers a new device on its first start by itself.
+> **macOS: register the device once after installing.** The macOS installer starts the miner with plain `urnetwork provide`, which can't register a new device. On a new device, follow [step 3 of the quick start](https://ur.xyz/docs/miner#3-start-once-to-register-this-device) once after installing. The Linux and Windows installers register a new device on its first start by themselves.
 
 ### Linux
 
@@ -36,6 +36,7 @@ curl -fsSL https://raw.githubusercontent.com/urnetwork/connect/main/scripts/Prov
 Then open a new terminal, or run the `export PATH=…` line it prints. It runs on 64-bit and 32-bit Intel, AMD and ARM, including a Raspberry Pi on a 32-bit OS, and needs `curl` or `wget`. It:
 
 - installs `urnetwork` and `urnet-tools` into `~/.local/share/urnetwork-provider/bin` and adds that folder to your `PATH` in `~/.bashrc`, creating the file if needed. Pass `-B` to leave `~/.bashrc` alone;
+- registers a new device on its first start, once you've signed in, then hands over to the background service;
 - runs the miner as a systemd user service, `urnetwork.service`, with an update timer, and turns on lingering so the service keeps running after you log out (if that needs an administrator, it prints the `sudo loginctl enable-linger` command to run);
 - in a shell without a systemd user session (a `sudo su` shell, many containers, WSL), installs anyway and tells you how to run the miner in the foreground.
 
