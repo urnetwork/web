@@ -38,7 +38,7 @@ An operator without a sign-in gets no miner. The log shows `operator <domain> is
 
 With `--all-operators`, one process looks after a miner for each listed operator:
 
-- Each operator has its own folder, `~/.urnetwork/operators/<domain>/`, with its own sign-in, identity key and device credential. These are new device identities: the single-operator identity in `~/.urnetwork` isn't used, and an operator chosen with `choose_network` doesn't apply.
+- Each operator has its own folder, `~/.urnetwork/operators/<domain>/`, with its own sign-in, identity key and device credential. These are new device identities: the single-operator identity in `~/.urnetwork` isn't used, and an operator chosen with `provider network use` doesn't apply.
 - The list is fetched again every hour. `--operators-refresh=<duration>` changes that, as a Go duration of at least `1m` such as `30m`, and `--operators-url=<url>` follows another list. The last good copy is kept as `~/.urnetwork/operators.yml`, so mining continues while ur.xyz is unreachable.
 - A newly listed operator gets a miner once it has a sign-in, and an operator whose URLs change has its miner restarted. A delisted operator's miner gets SIGTERM, then SIGKILL after 60 seconds; its folder is kept.
 - A miner that exits restarts after 30 seconds, doubling up to 10 minutes. Ctrl-C or a termination signal stops every miner.
