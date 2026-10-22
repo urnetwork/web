@@ -65,7 +65,7 @@ Then turn automatic updates off with `urnet-tools auto-update off`, or the next 
 
 The [background service](/docs/miner/run#with-provider-service-linux-and-macos) that `provider setup` or `provider service install` sets up also keeps the miner up to date. It checks the [build releases page](https://github.com/urnetwork/build/releases) every 6 hours: on Linux from 15 minutes after the computer starts, plus up to an hour of random delay; on macOS from when you log in. After a release, each miner waits its own random share of 16 hours, so every miner has it within a day without all of them restarting at once.
 
-An update checks the download against the SHA-256 GitHub lists for it (that catches a damaged download; releases aren't signed yet), keeps the previous program beside the new one, and restarts the service. If the new version doesn't come back within 10 minutes (connected again, if it was connected before), the previous one is put back, and that release is skipped for a week. Your identity in `~/.urnetwork` isn't touched.
+An update checks the download against the SHA-256 GitHub lists for it (that catches a damaged download), keeps the previous program beside the new one, and restarts the service. If the new version doesn't come back within 10 minutes (connected again, if it was connected before), the previous one is put back, and that release is skipped for a week. Your identity in `~/.urnetwork` isn't touched.
 
 ```bash
 provider update --check    # is a newer release out?

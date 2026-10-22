@@ -15,13 +15,11 @@ Whichever you choose, the miner keeps its identity in `~/.urnetwork` (`%USERPROF
 
 ## The installers
 
-> **Rolling out.** These installers are being rolled out to the install links below. Until they are, a link may give you an older installer, and the macOS link may not work yet.
-
 Each installer puts the miner in your own user folder (no administrator rights needed), runs it in the background, keeps it up to date, and gives you one command to manage it all: `urnet-tools`. They live in the [`scripts` folder of urnetwork/connect](https://github.com/urnetwork/connect/tree/main/scripts).
 
 All three:
 
-- download the latest release for your processor, check it against the SHA-256 GitHub lists for it (that catches a damaged download; releases aren't signed yet), and install only your machine's program;
+- download the latest release for your processor, check it against the SHA-256 GitHub lists for it (that catches a damaged download), and install only your machine's program;
 - install the miner as **`urnetwork`**: type `urnetwork` wherever this guide says `provider`, including in commands the miner prints for you to copy;
 - ask for your auth code if you aren't signed in yet (press Enter to do it later; `--auth-code <code>`, or `-AuthCode` on Windows, signs in without asking, but leaves the code in your shell history; `URNETWORK_AUTH_CODE` or the prompt don't);
 - register a new device on its first start, once you've signed in;
