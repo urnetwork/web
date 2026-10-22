@@ -7,7 +7,7 @@ Find the message you're seeing, or the closest symptom, below. If you used an in
 
 ### `urnetwork: command not found` after installing
 
-The installer adds its folder to your `PATH` in your shell's startup file (`~/.bashrc` on Linux, `~/.zshrc` on macOS), which only new terminals read. Open a new terminal, or run the `export PATH=…` line the installer printed. On Windows, open a new PowerShell window. If you installed with `-B`, add the folder yourself: see [the installers](https://ur.xyz/docs/miner/install#the-installers).
+The installer adds its folder to your `PATH` in your shell's startup file (`~/.bashrc`, and `~/.zshrc` if you have one, on Linux; `~/.zshrc` on macOS), which only new terminals read. Open a new terminal, or run the `export PATH=…` line the installer printed. On Windows, open a new PowerShell window. If you installed with `-B`, add the folder yourself: see [the installers](https://ur.xyz/docs/miner/install#the-installers).
 
 ### `urnet-tools` on Windows says running scripts is disabled
 
@@ -19,7 +19,7 @@ The installer couldn't reach your user's systemd, which happens in a `sudo su` s
 
 ### The installer says your processor isn't supported
 
-The releases cover 64-bit and 32-bit Intel, AMD and ARM on Linux, and Apple silicon and Intel Macs. On anything else, [build from source](https://ur.xyz/docs/miner/install#build-from-source).
+The releases cover 64-bit and 32-bit Intel and AMD, 64-bit ARM, and 32-bit ARMv7 (a Raspberry Pi 2 or newer) on Linux, and Apple silicon and Intel Macs. A Pi Zero or Pi 1 isn't supported. On anything else, [build from source](https://ur.xyz/docs/miner/install#build-from-source).
 
 ### macOS says the program can't be opened
 

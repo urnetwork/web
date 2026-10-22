@@ -47,12 +47,12 @@ urnet-tools start          # start it (no error if it's already running)
 urnet-tools status         # version, signed in, running, updates; exits 3 when it isn't running
 urnet-tools logs           # follow its log; Ctrl-C to stop reading
 urnet-tools restart
-urnet-tools stop           # stop it until you start it again or the computer restarts
+urnet-tools stop           # stop it until you start it again, restart (Linux) or log in again (macOS, Windows)
 ```
 
 It starts by itself at boot on Linux (when lingering is on; the installer tries to turn it on), when you log in on macOS, and when you sign in on Windows, where it also **stops when you sign out**. `urnet-tools auto-start off` stops it starting by itself, and `urnet-tools auto-start on` turns that back on.
 
-If the miner crashes, systemd on Linux restarts it after 30 seconds and launchd on macOS after 60. A miner that stops cleanly, for example because the device [isn't registered](https://ur.xyz/docs/miner/troubleshooting#the-miner-stops-straight-away), stays stopped: `urnet-tools status` then says it isn't running.
+If the miner crashes, systemd on Linux restarts it after 30 seconds and launchd on macOS after 60. On Windows, a miner that stops stays stopped until you run `urnet-tools start` or sign in again. A miner that stops cleanly, for example because the device [isn't registered](https://ur.xyz/docs/miner/troubleshooting#the-miner-stops-straight-away), stays stopped: `urnet-tools status` then says it isn't running.
 
 ### With a manual install (Linux)
 

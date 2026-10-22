@@ -5,7 +5,7 @@ New miner releases fix problems and keep your miner compatible with the network,
 
 ## Automatic updates (installers)
 
-Every installer turns on automatic updates. By default it checks for a newer release on the [build releases page](https://github.com/urnetwork/build/releases) about every 6 hours. When there is one, it downloads it, checks its SHA-256, makes sure the new program runs, and swaps it in. A miner that was running is restarted on the new version; one you stopped stays stopped. If anything fails, the old version keeps running. Your identity in `~/.urnetwork` isn't touched, and your update and start settings are kept.
+Every installer turns on automatic updates. By default it checks for a newer release on the [build releases page](https://github.com/urnetwork/build/releases) about every 6 hours. When there is one, it downloads it, checks it against the SHA-256 GitHub lists for it, makes sure the new program runs, and swaps it in. A miner that was running is restarted on the new version; one you stopped stays stopped. If anything fails, the old version keeps running. Your identity in `~/.urnetwork` isn't touched, and your update and start settings are kept.
 
 How each system keeps to the schedule:
 
@@ -13,7 +13,7 @@ How each system keeps to the schedule:
 - **macOS:** a launchd agent that checks four times a day at times picked once per Mac, and again when you log in, so a Mac that was asleep or off catches up. (Not yet tested on a real Mac.)
 - **Windows:** an updater that starts, hidden, when you sign in and checks once the interval has passed, so sleep and restarts don't skip a check. (Not yet tested on a real PC.)
 
-An update also brings `urnet-tools` itself up to date, and never moves you to an older release.
+An update also brings `urnet-tools` itself up to date. On Linux it never moves you to an older release.
 
 To see which version you have, and whether a newer one is out, or to update straight away:
 
@@ -43,7 +43,7 @@ urnet-tools auto-update off
 urnet-tools auto-update on
 ```
 
-With automatic updates off, run `urnet-tools update` yourself from time to time. Your choice is kept when you update or run the installer again. To install with updates off from the start, pass `--no-auto-update` to the macOS installer, or `-NoAutoUpdate` to the Windows one.
+With automatic updates off, run `urnet-tools update` yourself from time to time. Your choice is kept when you update or run the installer again. To install with updates off from the start, pass `--no-auto-update` to the macOS installer, or `-NoAutoUpdate` to the Windows one. On Linux, run `urnet-tools auto-update off` right after installing.
 
 ### Stay on one version
 
