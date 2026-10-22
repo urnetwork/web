@@ -87,7 +87,7 @@ Every release on the [build releases page](https://github.com/urnetwork/build/re
 | Linux PC or server (Intel or AMD, 64-bit) | `linux/amd64` |
 | Raspberry Pi 4 or 5 on a 64-bit OS, or another 64-bit ARM Linux | `linux/arm64` |
 | Older 32-bit Intel or AMD Linux PC | `linux/386` |
-| Raspberry Pi or another ARM board on a 32-bit OS | `linux/arm` |
+| Raspberry Pi 2, 3, 4 or 5, or another ARMv7 board, on a 32-bit OS (not a Pi Zero or Pi 1) | `linux/arm` |
 | Mac with Apple silicon (M1 or later) | `darwin/arm64` |
 | Mac with an Intel processor | `darwin/amd64` |
 

@@ -15,7 +15,7 @@ The installer couldn't reach your user's systemd, which happens in a `sudo su` s
 
 ### `Provider binary was not found in the tarball!`
 
-The installer doesn't support your processor, usually 32-bit ARM. Use the [manual download](https://ur.xyz/docs/miner/install#manual-download-linux-and-macos) with `linux/arm`.
+The installer doesn't support your processor, usually 32-bit ARM. Use the [manual download](https://ur.xyz/docs/miner/install#manual-download-linux-and-macos) with `linux/arm`, which runs on ARMv7 and later (a Raspberry Pi 2 or newer). A Pi Zero or Pi 1 isn't supported.
 
 ### macOS says the program can't be opened
 

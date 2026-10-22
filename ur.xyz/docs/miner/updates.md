@@ -66,7 +66,7 @@ Then turn automatic updates off with `urnet-tools auto-update off`, or the next 
 
 ## Automatic updates (Windows installer)
 
-The [Windows installer](/docs/miner/install#windows-installer) turns on automatic updates. A small updater starts, hidden, when you log in; every day it runs `urnet-tools update`, which installs a newer release if there is one. Your identity in `%USERPROFILE%\.urnetwork` isn't touched.
+The [Windows installer](/docs/miner/install#windows-installer) turns on automatic updates. A small updater starts, hidden, when you log in. Once you've been signed in for a full day (or week or month, if you changed the frequency), it runs `urnet-tools update`, which installs a newer release if there is one. The wait starts again at each sign-in, so a PC that's never signed in for a full day doesn't update by itself: run `urnet-tools update` now and then. Your identity in `%USERPROFILE%\.urnetwork` isn't touched.
 
 ```powershell
 urnet-tools version               # installed version, and whether a newer one is out
