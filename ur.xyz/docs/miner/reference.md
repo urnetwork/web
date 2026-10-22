@@ -50,7 +50,7 @@ The installers for Linux, macOS and Windows share one command, `urnet-tools`:
 | `urnet-tools start`, `stop`, `restart` | Start, stop or restart the miner in the background. |
 | `urnet-tools logs` | Follow the miner's output. Ctrl-C to leave. |
 | `urnet-tools version` | Show the installed version, and the latest if it's newer. |
-| `urnet-tools update` | Update now, if there's a newer release. Never moves to an older one. |
+| `urnet-tools update` | Update now, if there's a newer release. On Linux it never moves to an older one. |
 | `urnet-tools auto-update` | Show whether automatic updates are on. Add `on` or `off` to change it, and `--interval 6h`, `daily`, `weekly` or `monthly` to change how often. |
 | `urnet-tools auto-start on`, `off` | Whether the miner starts by itself after a restart (on macOS and Windows, when you log in). |
 | `urnet-tools reinstall -t <version>` | Install a particular release. |
