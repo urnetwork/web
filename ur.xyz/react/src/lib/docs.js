@@ -1,13 +1,17 @@
 import rawDocs from 'virtual:ur-docs';
 import { extractTitle, markdownToText } from './markdown.jsx';
 import {
+    DOC_CHAPTERS,
     DOC_ORDER,
     DOC_PAGE_PATHS,
     HIDDEN_DOC_SLUGS,
     UNLISTED_DOC_SLUGS,
+    chapterSlugs,
     docPath,
+    isChapterSlug,
     slugFor,
     splitFrontMatter,
+    withChapters,
 } from './docs-shared.js';
 
 /**
@@ -24,7 +28,8 @@ import {
  *   text:    plain-text version used by the search index
  *
  * The corpus is four documents, the three role guides and the litepaper, in
- * DOC_ORDER (docs-shared.js). The legal documents, published as their own
+ * DOC_ORDER (docs-shared.js); a guide split over several pages has its
+ * chapters in DOC_CHAPTERS. The legal documents, published as their own
  * pages, follow them in the sidebar. An unlisted document (UNLISTED_DOC_SLUGS)
  * is in `docs`, so its page and markdown twin build and findDoc resolves it,
  * but in none of the lists.
@@ -76,24 +81,34 @@ for (const { path, content: source } of RAW_DOCS) {
 export const docs = [...BY_SLUG.values()].sort((a, b) => a.slug.localeCompare(b.slug));
 
 /**
- * The documents the site lists, in list order: DOC_ORDER, then any other
- * document under /docs alphabetically, then the documents published as their
+ * The documents the site lists, in list order: DOC_ORDER, each guide followed
+ * by its chapters, then any other document under /docs alphabetically, then the documents published as their
  * own pages (the legal documents).
  */
 export const listedDocs = (() => {
     const listed = docs.filter(d => !UNLISTED_DOC_SLUGS.has(d.slug));
-    const ordered = DOC_ORDER.map(slug => BY_SLUG.get(slug)).filter(Boolean);
-    const rest = listed.filter(d => !DOC_ORDER.includes(d.slug) && !DOC_PAGE_PATHS[d.slug]);
+    const order = withChapters(DOC_ORDER);
+    const ordered = order.map(slug => BY_SLUG.get(slug)).filter(Boolean);
+    const rest = listed.filter(d => !order.includes(d.slug) && !DOC_PAGE_PATHS[d.slug]);
     const ownPage = listed.filter(d => DOC_PAGE_PATHS[d.slug]);
     return [...ordered, ...rest, ...ownPage].filter(d => !UNLISTED_DOC_SLUGS.has(d.slug));
 })();
 
-/** The listed documents under /docs: what the landing and the docs index structured data list. */
-export const docsIndex = listedDocs.filter(d => !DOC_PAGE_PATHS[d.slug]);
+/**
+ * The listed documents under /docs: what the landing and the docs index
+ * structured data list. A guide's chapters are reached from the guide, so the
+ * landing lists the guide alone.
+ */
+export const docsIndex = listedDocs.filter(d => !DOC_PAGE_PATHS[d.slug] && !isChapterSlug(d.slug));
 
-/** The sidebar: the corpus as one flat list, then the legal documents. */
+/** The sidebar: the corpus, then each multi-page guide's chapters, then the legal documents. */
 export const docGroups = [
     { id: 'docs', label: 'Docs', docs: docsIndex },
+    ...Object.entries(DOC_CHAPTERS).map(([guide, { label }]) => ({
+        id: guide,
+        label,
+        docs: chapterSlugs(guide).map(slug => BY_SLUG.get(slug)).filter(d => d && !UNLISTED_DOC_SLUGS.has(d.slug)),
+    })),
     { id: 'legal', label: 'Legal', docs: listedDocs.filter(d => DOC_PAGE_PATHS[d.slug]) },
 ].filter(group => group.docs.length);
 

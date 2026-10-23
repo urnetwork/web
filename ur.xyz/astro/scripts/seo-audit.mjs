@@ -673,10 +673,11 @@ for (const p of pages.values()) {
 // generated files, the link check tolerates markdown punctuation.
 // The agent files are generated from the build (llms.txt lists every page);
 // they stay small, so an agent can take them in one fetch. As of 2026-10,
-// llms-full.txt is about 137 KB: the three role guides, the litepaper, the
-// page map and the investor materials as published. Its budget leaves room
-// for the guides to grow and fails a build that embeds something by mistake.
-const AGENT_FILE_BUDGET = { "llms.txt": 16 * 1024, "llms-full.txt": 160 * 1024 };
+// llms-full.txt is about 192 KB: the three role guides (the miner guide with
+// its chapters), the litepaper, the page map and the investor materials as
+// published. Its budget leaves room for the guides to grow and fails a build
+// that embeds something by mistake.
+const AGENT_FILE_BUDGET = { "llms.txt": 16 * 1024, "llms-full.txt": 224 * 1024 };
 for (const rel of ["llms.txt", "llms-full.txt", "litepaper.md"]) {
   const fp = path.join(DIST, rel);
   if (!existsSync(fp)) continue;

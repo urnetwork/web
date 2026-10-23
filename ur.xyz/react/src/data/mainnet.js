@@ -73,12 +73,12 @@ export const mainnetActions = {
         {
             title: 'Install the new miner before October 21, 2026.',
             detail: 'From 00:00 UTC on October 21, the old miner will be deprioritized.',
-            link: { label: 'Miner guide: Get the provider', href: '/docs/miner#1-get-the-provider' },
+            link: { label: 'Miner guide: Install', href: '/docs/miner#1-install' },
         },
         {
             title: 'Register your Bittensor wallet in the new miner.',
             detail: 'Your rewards are associated with the wallet you register.',
-            link: { label: 'Miner guide: Set the wallet that earns pool rewards', href: '/docs/miner#4-set-the-wallet-that-earns-pool-rewards' },
+            link: { label: 'Miner guide: Run setup', href: '/docs/miner#2-run-setup' },
         },
         {
             title: 'Until settlement v2 starts, at most 1,500 miners are paid each epoch.',

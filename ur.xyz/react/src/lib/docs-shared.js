@@ -15,6 +15,33 @@ export const HIDDEN_DOC_SLUGS = new Set([]);
 // listed after them, so a new document is never silently missing.
 export const DOC_ORDER = Object.freeze(['miner', 'validator', 'operator', 'litepaper']);
 
+// A role guide split over several pages: the guide itself (its README, the
+// overview and quick start) and its chapters, docs/<guide>/<chapter>.md, in
+// reading order. The sidebar lists the chapters as their own group under the
+// guide's label; the docs landing lists the guide alone, and the llms files
+// follow each guide with its chapters.
+export const DOC_CHAPTERS = Object.freeze({
+    miner: Object.freeze({
+        label: 'Miner guide',
+        chapters: Object.freeze(['install', 'run', 'updates', 'rewards', 'troubleshooting', 'advanced', 'reference']),
+    }),
+});
+
+/** The chapter slugs of a guide, in reading order: "miner/install", … (none for a single-page guide). */
+export function chapterSlugs(guide) {
+    return (DOC_CHAPTERS[guide]?.chapters || []).map(chapter => `${guide}/${chapter}`);
+}
+
+/** True for a guide's chapter, which the docs landing does not list on its own. */
+export function isChapterSlug(slug) {
+    return Object.keys(DOC_CHAPTERS).some(guide => chapterSlugs(guide).includes(slug));
+}
+
+/** `slugs`, each guide followed by its chapters: the reading order of the corpus. */
+export function withChapters(slugs) {
+    return slugs.flatMap(slug => [slug, ...chapterSlugs(slug)]);
+}
+
 // The day each document was first published at its URL, for its TechArticle
 // datePublished; a document's front matter may set `published` instead. From
 // the git history: the role guides replaced the provider guide on 2026-09-26,
