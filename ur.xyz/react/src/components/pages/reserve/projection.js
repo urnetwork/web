@@ -73,3 +73,14 @@ export function observedInflow(live, days = 7) {
     if (span <= 0) return null;
     return { perDay: (tail[tail.length - 1].alpha - tail[0].alpha) / span, days: Math.round(span) };
 }
+
+/**
+ * Receipts and payments per sample of the live history: [{ date, received, spent }].
+ * The first sample has no earlier one to compare with, so it is left out.
+ */
+export function dailyFlows(live) {
+    return live.slice(1).map((s, i) => {
+        const delta = s.alpha - live[i].alpha;
+        return { date: s.date, received: Math.max(0, delta), spent: Math.max(0, -delta) };
+    });
+}

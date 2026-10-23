@@ -7,7 +7,8 @@ import XYChart from './reserve/XYChart';
 import SplitBar from './reserve/SplitBar';
 import { PRICE_HOSTS, PriceNote, UnitToggle, useDenom } from './reserve/Denom';
 import { compact, whole, alpha as fmtAlpha, usd as fmtUsd, pct, shortDate, shortDateYear, monthLabel, monthLong, isoDay, timeUtc, daysBetween } from './reserve/format';
-import { projectBalance, spliceLive, flowsOf, observedInflow, monthlyFlows } from './reserve/projection';
+import { projectBalance, spliceLive, flowsOf, observedInflow, monthlyFlows, dailyFlows } from './reserve/projection';
+import { RANGES, RangeToggle, ExpandButton } from './reserve/ChartControls';
 import { inflowPerDay, momentumOf } from './reserve/momentum';
 import './Reserve.css';
 
@@ -91,6 +92,10 @@ export default function ReservePage() {
     useEffect(() => { setToday(isoDay(Date.now())); }, [updatedAt]);
     // α or USD; the USD path is reserve/Denom.jsx
     const denom = useDenom();
+    // the charts' window (7D | 30D | All) and the one card widened to the full row
+    const [range, setRange] = useState('all');
+    const [expanded, setExpanded] = useState(null);
+    const toggleExpanded = (id) => setExpanded((e) => (e === id ? null : id));
 
     // the wallet's Copy button
     const [copied, setCopied] = useState(false);
@@ -269,6 +274,42 @@ export default function ReservePage() {
         : 'Every month is projected until the reserve receives emission.';
     const monthAria = `Monthly inflow and program spend, ${unitWord}: ${months.length} months from ${months.length ? monthLong(months[0].month) : ''}${months.length ? ` to ${monthLong(months[months.length - 1].month)}` : ''}${chart.livePts.length ? ', received and spent from the chain, then projected' : ', all projected'}. Arrow keys read each month.`;
 
+    // ── the 7D / 30D windows: the trailing days of the live history, no projection ──
+    const rangeDays = RANGES.find((r) => r.id === range)?.days ?? null;
+    const canWindow = historyReady && chart.livePts.length > 1;
+    const windowed = rangeDays != null && canWindow;
+    const windowPts = windowed ? chart.livePts.slice(-(rangeDays + 1)) : [];
+    const windowSpan = windowed ? daysBetween(windowPts[0].date, windowPts[windowPts.length - 1].date) : 0;
+    // fewer days of history than the window asks for: say how many there are
+    const windowWord = `last ${windowSpan} day${windowSpan === 1 ? '' : 's'}`;
+    const windowChange = windowed ? windowPts[windowPts.length - 1].alpha - windowPts[0].alpha : 0;
+    const days = windowed ? dailyFlows(windowPts) : [];
+    const dayTotals = days.reduce((t, d) => ({ received: t.received + d.received, spent: t.spent + d.spent }), { received: 0, spent: 0 });
+    const windowBalance = {
+        label: `Reserve balance · ${windowWord}`,
+        legend: [{ name: 'Live balance', kind: 'line', color: 'var(--rv-live)' }],
+        dim: ` ${windowChange >= 0 ? '+' : '−'}${denom.short(Math.abs(windowChange))} over the ${windowWord}`,
+        labels: windowPts.map((p) => shortDate(p.date)),
+        series: [{ name: 'Live balance', color: 'var(--rv-live)', type: 'area', values: windowPts.map((p) => sc(p.alpha)) }],
+        aria: `Reserve balance, ${unitWord}, over the ${windowWord}, read from the chain. Arrow keys read each day.`,
+        note: 'Live balance sampled daily from finalized chain state.',
+        rows: windowPts.map((p, i) => ({ date: p.date, alpha: p.alpha, change: i === 0 ? null : p.alpha - windowPts[i - 1].alpha, kind: 'live' })),
+    };
+    const windowFlows = {
+        label: 'Daily inflow · program spend',
+        legend: [{ name: 'Received', kind: 'rect', color: 'var(--rv-live)' }, { name: 'Spent', kind: 'rect', color: 'var(--rv-gray-1)' }],
+        head: [`${denom.amount(dayTotals.received)} in`, ` → ${denom.amount(dayTotals.spent)} to programs, ${windowWord}`],
+        labels: days.map((d) => shortDate(d.date)),
+        tipLabels: days.map((d) => shortDateYear(d.date)),
+        series: [
+            { name: 'Received', color: 'var(--rv-live)', type: 'bar', stack: 'day', values: days.map((d) => denom.scale(d.received)) },
+            { name: 'Spent', color: 'var(--rv-gray-1)', type: 'bar', stack: 'day', values: days.map((d) => -denom.scale(d.spent)), fmt: (v) => denom.fmt(-v) },
+        ],
+        aria: `Daily inflow and program spend, ${unitWord}, over the ${windowWord}, read from the chain. Arrow keys read each day.`,
+        note: 'Receipts and payments are the rises and falls between daily samples of the chain.',
+    };
+    const chartHeight = (id) => (expanded === id ? 420 : undefined);
+
     return (
         <div className="reserve-page">
             <header className="reserve-hero reserve-shell">
@@ -351,39 +392,59 @@ export default function ReservePage() {
                             : `What the policy implies until the reserve receives emission: miner emissions × (1 − momentum), with momentum at ${momentumBasis}, and no programs paid.`}
                     </p>
 
+                    {canWindow && (
+                        <div className="reserve-chart-bar">
+                            <RangeToggle range={range} onChange={setRange} />
+                        </div>
+                    )}
                     <div className="reserve-charts">
-                        <div className="reserve-card reserve-chart-card">
+                        <div className={`reserve-card reserve-chart-card${expanded === 'balance' ? ' is-expanded' : ''}`}>
                             <div className="reserve-card-head">
-                                <span className="reserve-card-label">{balanceLabel}</span>
-                                <Legend items={balanceLegend} />
+                                <span className="reserve-card-label">{windowed ? windowBalance.label : balanceLabel}</span>
+                                <ExpandButton expanded={expanded === 'balance'} onToggle={() => toggleExpanded('balance')} label="the balance chart" />
                             </div>
+                            <div className="reserve-card-legend"><Legend items={windowed ? windowBalance.legend : balanceLegend} /></div>
                             <p className="reserve-card-num">
                                 <span>{snapshot ? denom.amount(snapshot.alpha) : '—'}</span>
-                                {end && chart.projected.length > 0 && <span className="is-dim"> → {denom.short(end.alpha)} by {dateLabel(end.date)}</span>}
+                                {windowed && <span className="is-dim">{windowBalance.dim}</span>}
+                                {!windowed && end && chart.projected.length > 0 && <span className="is-dim"> → {denom.short(end.alpha)} by {dateLabel(end.date)}</span>}
                             </p>
                             {chart.points.length === 0 && <p className="reserve-chart-note">Nothing to chart yet: the reserve has received no emission.</p>}
-                            {chart.points.length > 0 && (
+                            {windowed && (
                                 <XYChart
+                                    key={`balance-${range}`}
+                                    labels={windowBalance.labels}
+                                    series={windowBalance.series}
+                                    fmt={denom.fmt}
+                                    axisFmt={denom.axis}
+                                    height={chartHeight('balance')}
+                                    aria={windowBalance.aria}
+                                />
+                            )}
+                            {!windowed && chart.points.length > 0 && (
+                                <XYChart
+                                    key="balance-all"
                                     labels={chart.points.map((p) => dateLabel(p.date))}
                                     series={balanceSeries}
                                     marks={todayMarks}
                                     fmt={denom.fmt}
                                     axisFmt={denom.axis}
+                                    height={chartHeight('balance')}
                                     aria={balanceAria}
                                 />
                             )}
                             <p className="reserve-card-note">
-                                {balanceNote}
+                                {windowed ? windowBalance.note : balanceNote}
                                 {live && !historyReady ? ' Reading the balance history…' : ''}
                             </p>
-                            {balanceRows.length > 0 && (
+                            {(windowed ? windowBalance.rows : balanceRows).length > 0 && (
                                 <details className="reserve-table">
                                     <summary><span>Show as a table · <Alpha /></span></summary>
                                     <div className="reserve-table-scroll">
                                         <table>
                                             <thead><tr><th scope="col">Day</th><th scope="col">Balance</th><th scope="col">Change</th><th scope="col">Basis</th></tr></thead>
                                             <tbody>
-                                                {balanceRows.map((r) => (
+                                                {(windowed ? windowBalance.rows : balanceRows).map((r) => (
                                                     <tr key={`${r.kind}-${r.date}`}>
                                                         <td>{shortDateYear(r.date)}</td>
                                                         <td>{fmtAlpha(r.alpha, 1)}</td>
@@ -398,28 +459,62 @@ export default function ReservePage() {
                             )}
                         </div>
 
-                        <div className="reserve-card reserve-chart-card">
+                        <div className={`reserve-card reserve-chart-card${expanded === 'flows' ? ' is-expanded' : ''}`}>
                             <div className="reserve-card-head">
-                                <span className="reserve-card-label">Monthly inflow · program spend</span>
-                                <Legend items={monthLegend} />
+                                <span className="reserve-card-label">{windowed ? windowFlows.label : 'Monthly inflow · program spend'}</span>
+                                <ExpandButton expanded={expanded === 'flows'} onToggle={() => toggleExpanded('flows')} label="the inflow chart" />
                             </div>
+                            <div className="reserve-card-legend"><Legend items={windowed ? windowFlows.legend : monthLegend} /></div>
                             <p className="reserve-card-num">
-                                <span>{monthHead[0]}</span>
-                                {monthHead[1] && <span className="is-dim">{monthHead[1]}</span>}
+                                <span>{windowed ? windowFlows.head[0] : monthHead[0]}</span>
+                                {(windowed ? windowFlows.head[1] : monthHead[1]) && <span className="is-dim">{windowed ? windowFlows.head[1] : monthHead[1]}</span>}
                             </p>
-                            {months.length === 0 && <p className="reserve-chart-note">Nothing to chart yet: the reserve has received no emission.</p>}
-                            {months.length > 0 && (
+                            {!windowed && months.length === 0 && <p className="reserve-chart-note">Nothing to chart yet: the reserve has received no emission.</p>}
+                            {windowed && (
                                 <XYChart
+                                    key={`flows-${range}`}
+                                    labels={windowFlows.labels}
+                                    tipLabels={windowFlows.tipLabels}
+                                    series={windowFlows.series}
+                                    fmt={denom.fmt}
+                                    axisFmt={denom.axis}
+                                    height={chartHeight('flows')}
+                                    aria={windowFlows.aria}
+                                />
+                            )}
+                            {!windowed && months.length > 0 && (
+                                <XYChart
+                                    key="flows-all"
                                     labels={months.map((m) => monthLabel(m.month))}
                                     tipLabels={months.map((m) => monthLong(m.month))}
                                     series={monthSeries}
                                     fmt={denom.fmt}
                                     axisFmt={denom.axis}
+                                    height={chartHeight('flows')}
                                     aria={monthAria}
                                 />
                             )}
-                            <p className="reserve-card-note">{monthNote}</p>
-                            {months.length > 0 && (
+                            <p className="reserve-card-note">{windowed ? windowFlows.note : monthNote}</p>
+                            {windowed && days.length > 0 && (
+                                <details className="reserve-table">
+                                    <summary><span>Show as a table · <Alpha /></span></summary>
+                                    <div className="reserve-table-scroll">
+                                        <table>
+                                            <thead><tr><th scope="col">Day</th><th scope="col">Received</th><th scope="col">Spent</th></tr></thead>
+                                            <tbody>
+                                                {days.map((d) => (
+                                                    <tr key={d.date}>
+                                                        <td>{shortDateYear(d.date)}</td>
+                                                        <td>{d.received ? fmtAlpha(d.received, 1) : '—'}</td>
+                                                        <td>{d.spent ? fmtAlpha(d.spent, 1) : '—'}</td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </details>
+                            )}
+                            {!windowed && months.length > 0 && (
                                 <details className="reserve-table">
                                     <summary><span>Show as a table · <Alpha /></span></summary>
                                     <div className="reserve-table-scroll">
