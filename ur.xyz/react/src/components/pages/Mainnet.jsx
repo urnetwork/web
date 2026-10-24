@@ -67,10 +67,10 @@ export default function MainnetPage({ updated = null, summary = null }) {
                     SN25 pays providers by payout epoch. These are UR's settlement epochs, not the chain's 72-minute tempo: epoch 0 lasted one day, and each later epoch lasts 7 days (50,400 blocks).
                 </p>
                 <p>
-                    Version 1 launched on October 8 and settles epochs 1 and 2. It pays only the providers the validator has measured, and that measurement is capped at about 1,500 providers an epoch, so most miners receive no version 1 share.
+                    Version 1 launched on October 8 and settles epochs 1 to 3. It pays only the providers the validator has measured, and that measurement is capped at about 1,500 providers an epoch, so most miners receive no version 1 share.
                 </p>
                 <p>
-                    Settlement v2 pays by usage and removes that cap. It is planned to take over from epoch 3, which begins on October 23. Epoch 2 still closes on version 1, so the last version 1 claims open no earlier than October 25, and the first settlement v2 claims no earlier than November 1.
+                    Settlement v2 pays by usage and removes that cap. It was planned to take over from epoch 3, but its pool was not registered before epoch 3 began on October 23, so version 1 settles epoch 3 too. Settlement v2 is now targeting epoch 4, starting around October 30 at 18:25 UTC, pending final production checks and the on-chain pool registration before that epoch starts. The first v2 epoch would finish around November 6, with the first v2 claims no earlier than November 8, after the root is submitted and its challenge period ends. These dates are estimates from block production, and activation is confirmed only once the registration has finalized.
                 </p>
                 <ol className="mainnet-epochs" aria-label="Payout epochs">
                     {mainnetEpochs.map((epoch) => {

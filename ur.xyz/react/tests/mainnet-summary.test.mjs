@@ -52,14 +52,14 @@ test('the bands are the data\'s epochs, which agree with the epoch clock, then a
         close(band.hours, (band.endMs - band.startMs) / HOUR, `epoch ${epoch.number} hours`);
     }
     // epoch 0 is a day, the others a week: the bands' shares of the axis
-    assert.deepEqual(model.bands.map((b) => Math.round(b.hours)), [24, 168, 168, 168, 52]);
-    assert.deepEqual(model.bands.map((b) => b.short || b.name), ['E0', 'Epoch 1', 'Epoch 2', 'Epoch 3', 'After']);
+    assert.deepEqual(model.bands.map((b) => Math.round(b.hours)), [24, 168, 168, 168, 168, 52]);
+    assert.deepEqual(model.bands.map((b) => b.short || b.name), ['E0', 'Epoch 1', 'Epoch 2', 'Epoch 3', 'Epoch 4', 'After']);
     assert.equal(model.bands[0].name, 'Epoch 0', 'a screen reader reads the full name');
     // a week's days; epoch 0's first day, as the sn ribbon gives it; the tail's first day
-    assert.deepEqual(model.bands.map((b) => b.days), ['Oct 8', 'Oct 9–16', 'Oct 16–23', 'Oct 23–30', 'Oct 30']);
-    // version 1 settles epochs 0 to 2; settlement v2 epoch 3, from block 9,348,028, and what follows
-    assert.deepEqual(model.bands.map((b) => b.settlement), ['v1', 'v1', 'v1', 'v2', 'v2']);
-    assert.equal(mainnetEpochs[3].start.block, 9_348_028);
+    assert.deepEqual(model.bands.map((b) => b.days), ['Oct 8', 'Oct 9–16', 'Oct 16–23', 'Oct 23–30', 'Oct 30 – Nov 6', 'Nov 6']);
+    // version 1 settles epochs 0 to 3; settlement v2 is targeted from epoch 4, block 9,398,428, and what follows
+    assert.deepEqual(model.bands.map((b) => b.settlement), ['v1', 'v1', 'v1', 'v1', 'v2', 'v2']);
+    assert.equal(mainnetEpochs[4].start.block, 9_398_428);
     // the tail runs from the last epoch's end to the end of the last key milestone
     const tail = model.bands.at(-1);
     assert.equal(tail.tail, true);
@@ -76,13 +76,12 @@ test('the key milestones are marked: the ones the sn summary marks, numbered in 
     const keyed = events.filter((e) => e.key).map((e) => e.id);
     assert.deepEqual(keyed, [
         'v1-contracts-deployed', 'epoch-1-begins', 'last-usdc-payout-batch', 'v2-contracts-deployed',
-        'fp2-modern-provider-gate', 'v2-pool-registration-window', 'v2-pool-registered',
-        'settlement-v2-active', 'first-v2-claim',
+        'v2-pool-registered', 'settlement-v2-active', 'fp2-modern-provider-gate', 'first-v2-claim',
     ]);
-    // the registration window is a day: a span; the others are numbered points
-    assert.deepEqual(model.spans.map((s) => s.id), ['v2-pool-registration-window']);
-    assert.deepEqual(model.markers.map((m) => m.id), keyed.filter((id) => id !== 'v2-pool-registration-window'));
-    assert.deepEqual(model.markers.map((m) => m.n), [1, 2, 3, 4, 5, 6, 7, 8]);
+    // the pending registration runs until epoch 4: a span; the others are numbered points
+    assert.deepEqual(model.spans.map((s) => s.id), ['v2-pool-registered']);
+    assert.deepEqual(model.markers.map((m) => m.id), keyed.filter((id) => id !== 'v2-pool-registered'));
+    assert.deepEqual(model.markers.map((m) => m.n), [1, 2, 3, 4, 5, 6, 7]);
     for (const item of [...model.markers, ...model.spans]) {
         const event = byId(item.id);
         assert.ok(event, `${item.id} is a milestone, so its link lands on it`);
@@ -110,21 +109,22 @@ test('a marker sits in the band of its date, as far through it as its date is', 
     assert.deepEqual([marker('v1-contracts-deployed').band, marker('v1-contracts-deployed').at], [0, 0]);
     // epoch 1 and settlement v2 begin their bands
     assert.deepEqual([marker('epoch-1-begins').band, marker('epoch-1-begins').at], [1, 0]);
-    assert.deepEqual([marker('settlement-v2-active').band, marker('settlement-v2-active').at], [3, 0]);
-    // the gate turns on at 00:00 UTC on Oct 21, 4 days 5 h 51 min into epoch 2
-    assert.equal(marker('fp2-modern-provider-gate').band, 2);
-    close(marker('fp2-modern-provider-gate').at, (utc(2026, 9, 21) - utc(2026, 9, 16, 18, 9)) / (7 * DAY), 'the gate');
+    assert.deepEqual([marker('settlement-v2-active').band, marker('settlement-v2-active').at], [4, 0]);
+    // the gate turns on at 00:00 UTC on Nov 4, 4 days 5 h 35 min into epoch 4
+    assert.equal(marker('fp2-modern-provider-gate').band, 4);
+    close(marker('fp2-modern-provider-gate').at, (utc(2026, 10, 4) - utc(2026, 9, 30, 18, 25)) / (7 * DAY), 'the gate');
     // the last USDC batch, a day, at its midday
     close(marker('last-usdc-payout-batch').at, (utc(2026, 9, 11, 12) - utc(2026, 9, 9, 18, 9)) / (7 * DAY), 'the batch');
     // the first v2 claim, 48 of the tail's 52 hours in
-    assert.equal(marker('first-v2-claim').band, 4);
+    assert.equal(marker('first-v2-claim').band, 5);
     close(marker('first-v2-claim').at, 48 / 52, 'the first v2 claim');
-    // the registration window, the sixth day of epoch 2, as on the sn ribbon (71.43% + 14.29%)
-    const window = model.spans[0];
-    assert.equal(window.segments.length, 1);
-    assert.equal(window.segments[0].band, 2);
-    close(window.segments[0].from, 5 / 7, 'window from');
-    close(window.segments[0].to, 6 / 7, 'window to');
+    // the pending registration, from the October 24 reading to a minute before epoch 4
+    const pending = model.spans[0];
+    assert.equal(pending.segments.length, 1);
+    assert.equal(pending.segments[0].band, 3);
+    const epoch3 = model.bands[3];
+    close(pending.segments[0].from, (utc(2026, 9, 24, 16, 40) - epoch3.startMs) / (epoch3.endMs - epoch3.startMs), 'pending from');
+    close(pending.segments[0].to, (utc(2026, 9, 30, 18, 24) - epoch3.startMs) / (epoch3.endMs - epoch3.startMs), 'pending to');
 });
 
 test('markers in one lane are far enough apart never to overlap', () => {
@@ -136,20 +136,20 @@ test('markers in one lane are far enough apart never to overlap', () => {
             assert.ok(times[i] - times[i - 1] >= LANE_GAP_MS, `lane ${lane}: markers ${(times[i] - times[i - 1]) / DAY} days apart`);
         }
     }
-    // the pool registration, 19 hours after the gate, drops to the second lane
-    assert.equal(marker('fp2-modern-provider-gate').lane, 1);
-    assert.equal(marker('v2-pool-registered').lane, 2);
+    // the first payout epoch, 1 day after the deployment, drops to the second lane
+    assert.equal(marker('v1-contracts-deployed').lane, 1);
+    assert.equal(marker('epoch-1-begins').lane, 2);
 });
 
 test('the text: what a screen reader reads, the key dates\' days and the legend', () => {
-    assert.equal(marker('fp2-modern-provider-gate').label, '5. Modern provider gate turns on, Wed Oct 21 · 00:00 UTC, Scheduled');
+    assert.equal(marker('fp2-modern-provider-gate').label, '6. Modern provider gate turns on, Wed Nov 4 · 00:00 UTC, Scheduled');
     assert.equal(marker('v1-contracts-deployed').label, '1. Version 1 contracts deployed, Thu Oct 8 · 17:59–18:16 UTC, Done');
-    assert.equal(marker('settlement-v2-active').label, '7. Settlement v2 active: epoch 3 begins, Fri Oct 23 · ≈18:09 UTC, Scheduled');
-    assert.deepEqual(model.markers.map((m) => m.day), ['Oct 8', 'Oct 9', 'Oct 11', '≈ Oct 17', 'Oct 21', 'Oct 21', 'Oct 23', 'Nov 1']);
+    assert.equal(marker('settlement-v2-active').label, '5. Target: settlement v2 active, epoch 4 begins, Fri Oct 30 · ≈18:25 UTC, Planned');
+    assert.deepEqual(model.markers.map((m) => m.day), ['Oct 8', 'Oct 9', 'Oct 11', '≈ Oct 17', 'Oct 30', 'Nov 4', 'Nov 8']);
     assert.deepEqual(model.markers.map((m) => m.dateTime), model.markers.map((m) => byId(m.id).date.split('/')[0]));
-    const window = model.spans[0];
-    assert.equal(window.days, 'Oct 21–22');
-    assert.equal(window.label, 'Settlement v2 pool registration window, Wed Oct 21 · ≈18:09 → Thu Oct 22 · ≈18:09 UTC, Scheduled');
+    const pending = model.spans[0];
+    assert.equal(pending.days, 'Oct 24–30');
+    assert.equal(pending.label, 'Settlement v2 pool registration, pending, Sat Oct 24 · ≈16:40 → Fri Oct 30 · ≈18:24 UTC, Planned');
     assert.deepEqual(model.settlements, [{ settlement: 'v1', label: 'Version 1' }, { settlement: 'v2', label: 'Settlement v2' }]);
     assert.deepEqual(model.looks, [{ look: 'filled', label: 'Done' }, { look: 'outlined', label: 'Scheduled or planned' }]);
     // the model is plain data, for the static page to hand to its island
@@ -169,23 +169,23 @@ test('now: none until the browser\'s clock runs, then where the epoch clock puts
     assert.equal(now.pin.progress, now.pin.at);
     assert.equal(now.pin.text, 'Thu Oct 15 · 05:06 UTC');
     assert.equal(now.pin.flip, false);
-    assert.deepEqual(now.elapsed, [1, now.pin.at, 0, 0, 0]);
+    assert.deepEqual(now.elapsed, [1, now.pin.at, 0, 0, 0, 0]);
 
-    // settlement v2's first second: the start of epoch 3's band
-    const v2 = axisNow(model, utc(2026, 9, 23, 18, 9));
-    assert.deepEqual([v2.pin.band, v2.pin.at, v2.pin.epoch], [3, 0, 3]);
-    assert.deepEqual(v2.elapsed, [1, 1, 1, 0, 0]);
+    // epoch 3's first second: the start of its band
+    const three = axisNow(model, utc(2026, 9, 23, 18, 9));
+    assert.deepEqual([three.pin.band, three.pin.at, three.pin.epoch], [3, 0, 3]);
+    assert.deepEqual(three.elapsed, [1, 1, 1, 0, 0, 0]);
 
-    // in the tail: epoch 4 by the clock, placed by the tail's own span, its label to the left
-    const tail = axisNow(model, utc(2026, 9, 31));
-    assert.equal(tail.pin.band, 4);
-    assert.equal(tail.pin.epoch, 4);
-    close(tail.pin.at, (utc(2026, 9, 31) - utc(2026, 9, 30, 18, 9)) / (52 * HOUR), 'tail');
+    // in the tail: epoch 5 by the clock, placed by the tail's own span, its label to the left
+    const tail = axisNow(model, utc(2026, 10, 7));
+    assert.equal(tail.pin.band, 5);
+    assert.equal(tail.pin.epoch, 5);
+    close(tail.pin.at, (utc(2026, 10, 7) - utc(2026, 10, 6, 18, 25)) / (52 * HOUR), 'tail');
     assert.equal(tail.pin.flip, true);
 
     // off the axis: no pin, and the bands all ahead or all past
-    assert.deepEqual(axisNow(model, utc(2026, 9, 8, 12)), { pin: null, elapsed: [0, 0, 0, 0, 0] });
-    assert.deepEqual(axisNow(model, utc(2026, 10, 2)), { pin: null, elapsed: [1, 1, 1, 1, 1] });
+    assert.deepEqual(axisNow(model, utc(2026, 9, 8, 12)), { pin: null, elapsed: [0, 0, 0, 0, 0, 0] });
+    assert.deepEqual(axisNow(model, utc(2026, 10, 10)), { pin: null, elapsed: [1, 1, 1, 1, 1, 1] });
 });
 
 test('a key interval of half a day or more is a span, cut at the bands it crosses; anything else a marker', () => {
@@ -211,7 +211,7 @@ test('a key interval of half a day or more is a span, cut at the bands it crosse
     // days run to the end of the last one
     assert.equal(c.days, 'Oct 18–19');
     close(c.segments[0].to, (utc(2026, 9, 20) - utc(2026, 9, 16, 18, 9)) / (7 * DAY), 'c to');
-    // no milestone runs past epoch 3: no tail
+    // no milestone runs past epoch 4: no tail
     assert.equal(m.bands.some((x) => x.tail), false);
     assert.equal(m.endMs, Date.parse(mainnetEpochs.at(-1).end.time));
     // a milestone in progress is drawn filled and ringed
