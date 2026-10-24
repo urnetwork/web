@@ -13,8 +13,11 @@
  * into time from one anchor: block 9,247,228, where epoch 1 starts, has the
  * timestamp 2026-10-09 18:09:00 UTC on Finney, and each later block counts
  * 12 seconds. From the anchor to block 9,286,515 (2026-10-15 05:06:36 UTC)
- * blocks averaged 12.0003 seconds, so a projected end drifts by seconds a
- * week, not minutes. An operator feed that reports its epoch takes
+ * blocks averaged 12.0003 seconds, but by finalized block 9,354,702
+ * (2026-10-24 16:40:12 UTC) the chain ran 16 minutes behind that projection.
+ * So from block 9,354,702 on, times are projected from it instead, the basis
+ * of the sn repo's timeline update (mainnet/TIMELINE-UPDATE.md): epoch 4
+ * starts at about 18:25 UTC on October 30, not 18:09. An operator feed that reports its epoch takes
  * precedence (feedEpoch): its bounds come from the chain.
  */
 export const EPOCH_ZERO_START_BLOCK = 9_240_028;
@@ -25,6 +28,9 @@ export const BLOCK_SECONDS = 12;
 export const EPOCH_ZERO_START_MS = Date.UTC(2026, 9, 8, 18, 8, 12);
 /** Block 9,247,228's timestamp: epoch 1 starts. The anchor. */
 export const EPOCH_ONE_START_MS = Date.UTC(2026, 9, 9, 18, 9, 0);
+/** A later finalized block and its timestamp: the anchor from this block on. */
+export const LATEST_ANCHOR_BLOCK = 9_354_702;
+export const LATEST_ANCHOR_MS = Date.UTC(2026, 9, 24, 16, 40, 12);
 
 const BLOCK_MS = BLOCK_SECONDS * 1000;
 const EPOCH_MS = EPOCH_BLOCKS * BLOCK_MS;
@@ -37,9 +43,16 @@ export function epochEndBlock(n) {
     return n === 0 ? EPOCH_ONE_START_BLOCK : epochStartBlock(n) + EPOCH_BLOCKS;
 }
 
-/** When the chain reaches `block`, projected from the anchor at 12 s a block. */
+/** When the chain reaches `block`, projected from the latest anchor at or before it, at 12 s a block. */
 export function blockTimeMs(block) {
+    if (block >= LATEST_ANCHOR_BLOCK) return LATEST_ANCHOR_MS + (block - LATEST_ANCHOR_BLOCK) * BLOCK_MS;
     return EPOCH_ONE_START_MS + (block - EPOCH_ONE_START_BLOCK) * BLOCK_MS;
+}
+
+/** The block the chain is at, by the same anchors: the inverse of blockTimeMs. */
+function blockAt(nowMs) {
+    if (nowMs >= LATEST_ANCHOR_MS) return LATEST_ANCHOR_BLOCK + Math.floor((nowMs - LATEST_ANCHOR_MS) / BLOCK_MS);
+    return Math.min(LATEST_ANCHOR_BLOCK - 1, EPOCH_ONE_START_BLOCK + Math.floor((nowMs - EPOCH_ONE_START_MS) / BLOCK_MS));
 }
 
 /** Epoch n: { number, startBlock, endBlock, startMs, endMs }. */
@@ -60,7 +73,7 @@ export function epochBounds(n) {
 export function epochAt(nowMs) {
     if (!Number.isFinite(nowMs) || nowMs < EPOCH_ZERO_START_MS) return null;
     if (nowMs < EPOCH_ONE_START_MS) return epochBounds(0);
-    return epochBounds(1 + Math.floor((nowMs - EPOCH_ONE_START_MS) / EPOCH_MS));
+    return epochBounds(1 + Math.floor((blockAt(nowMs) - EPOCH_ONE_START_BLOCK) / EPOCH_BLOCKS));
 }
 
 /** 0 → 1 through `epoch` at nowMs. */

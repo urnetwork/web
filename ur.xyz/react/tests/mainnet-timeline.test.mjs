@@ -203,8 +203,8 @@ test('the epochs are contiguous, and each lasts its number of blocks', () => {
         const start = Date.parse(epoch.start.time);
         const end = Date.parse(epoch.end.time);
         assert.ok(Number.isFinite(start) && Number.isFinite(end) && end > start, `epoch ${epoch.number}: times`);
-        // block times wander; a boundary is within ten minutes of 12 s a block
-        assert.ok(Math.abs((end - start) / 1000 - blocks * SECONDS_PER_BLOCK) <= 600, `epoch ${epoch.number}: ${blocks} blocks in ${(end - start) / 1000} s`);
+        // block times wander: within twenty minutes of 12 s a block (epoch 3 ran about 16 minutes long)
+        assert.ok(Math.abs((end - start) / 1000 - blocks * SECONDS_PER_BLOCK) <= 1200, `epoch ${epoch.number}: ${blocks} blocks in ${(end - start) / 1000} s`);
         if (index > 0) {
             const previous = mainnetEpochs[index - 1];
             assert.equal(epoch.start.block, previous.end.block, `epoch ${epoch.number} starts where ${previous.number} ends`);
@@ -226,13 +226,14 @@ test('a milestone is grouped by the epoch it ends in, a day counting from its st
         { id: 'd', date: '2026-10-09T18:09:00Z' },
         { id: 'e', date: '2026-10-16T18:09:00Z/2026-10-16T18:33:00Z' },
         { id: 'f', date: '2026-10-23T18:09:00Z' },
-        { id: 'g', date: '2026-10-30T18:09:00Z/2026-10-30T22:09:00Z' },
+        { id: 'g', date: '2026-10-30T18:25:00Z/2026-10-30T22:25:00Z' },
+        { id: 'i', date: '2026-11-06T18:25:00Z/2026-11-06T22:25:00Z' },
         { id: 'h', date: 'not a date' },
     ];
     const groups = groupByEpoch(fixture, epochs, { before: { title: 'Before launch' }, after: { summary: 'After' } });
     const where = Object.fromEntries(groups.flatMap((g) => g.events.map((e) => [e.id, g.id])));
-    assert.deepEqual(where, { a: 'before-launch', b: 'epoch-0', c: 'epoch-0', d: 'epoch-1', e: 'epoch-2', f: 'epoch-3', g: 'after-epoch-3' });
-    assert.deepEqual(groups.map((g) => g.title), ['Before launch', 'Epoch 0', 'Epoch 1', 'Epoch 2', 'Epoch 3', 'After epoch 3']);
+    assert.deepEqual(where, { a: 'before-launch', b: 'epoch-0', c: 'epoch-0', d: 'epoch-1', e: 'epoch-2', f: 'epoch-3', g: 'epoch-4', i: 'after-epoch-4' });
+    assert.deepEqual(groups.map((g) => g.title), ['Before launch', 'Epoch 0', 'Epoch 1', 'Epoch 2', 'Epoch 3', 'Epoch 4', 'After epoch 4']);
 
     // the real milestones all land in a group, in the order the data lists them
     const real = groupByEpoch(events, epochs);
@@ -246,18 +247,17 @@ test('the box at the top gives the timeline\'s dates, and links only pages the s
     assert.equal(mainnetActions.steps.length, 3);
     // the old miner is deprioritized when the modern provider gate turns on
     const gate = events.find((e) => e.id === 'fp2-modern-provider-gate');
-    assert.equal(gate.date, '2026-10-21T00:00:00Z');
-    assert.match(text(install), /October 21, 2026/);
-    assert.match(text(install), /From 00:00 UTC on October 21/);
-    // epoch 2 runs October 16 to 23; epoch 3, where settlement v2 starts, at about 18:09 on October 23
-    const [, , epoch2, epoch3] = mainnetEpochs;
-    assert.equal(epoch2.start.time.slice(0, 10), '2026-10-16');
-    assert.equal(epoch2.end.time.slice(0, 10), '2026-10-23');
-    assert.match(text(payments), /Epoch 2 \(October 16 to 23\)/);
-    assert.equal(epoch3.settlement, 'v2');
-    assert.equal(epoch3.start.time, '2026-10-23T18:09:00Z');
-    assert.match(text(payments), /epoch 3, about October 23, 18:09 UTC/);
-    assert.equal(events.find((e) => e.id === 'settlement-v2-active').date, epoch3.start.time);
+    assert.equal(gate.date, '2026-11-04T00:00:00Z');
+    assert.match(text(install), /November 4, 2026/);
+    assert.match(text(install), /From 00:00 UTC on November 4/);
+    // epoch 3 stays on version 1; settlement v2 targets epoch 4, at about 18:25 on October 30
+    const [, , , epoch3, epoch4] = mainnetEpochs;
+    assert.equal(epoch3.settlement, 'v1');
+    assert.match(text(payments), /Epoch 3 is still paid by version 1/);
+    assert.equal(epoch4.settlement, 'v2');
+    assert.equal(epoch4.start.time, '2026-10-30T18:25:00Z');
+    assert.match(text(payments), /epoch 4, from about October 30, 18:25 UTC/);
+    assert.equal(events.find((e) => e.id === 'settlement-v2-active').date, epoch4.start.time);
     // links: the miner guide's own sections, and the operators' apps
     const guide = fs.readFileSync(path.join(__dirname, '../../docs/miner/README.md'), 'utf8');
     const slug = (heading) => heading.toLowerCase().replace(/[^a-z0-9 -]/g, '').trim().replace(/\s+/g, '-');
@@ -269,5 +269,5 @@ test('the box at the top gives the timeline\'s dates, and links only pages the s
     }
     assert.equal(payments.link, undefined);
     assert.deepEqual(mainnetActions.closing.filter((run) => run.href).map((run) => [run.text, run.href]), [['the apps', '/operators']]);
-    assert.match(mainnetActions.closing.map((run) => run.text).join(''), /^After epoch 3, the subnet is set up to run itself and scale to millions of miners\. New miners can participate in Bittensor from the apps with zero Bittensor experience\.$/);
+    assert.match(mainnetActions.closing.map((run) => run.text).join(''), /^Once settlement v2 is active, the subnet is set up to run itself and scale to millions of miners\. New miners can participate in Bittensor from the apps with zero Bittensor experience\.$/);
 });

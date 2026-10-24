@@ -181,13 +181,13 @@
     {
       "id": "v2-contracts-deployed",
       "date": "2026-10-17",
-      "status": "planned",
+      "status": "done",
       "key": true,
       "approximate": true,
       "title": "Settlement v2 contracts deployed",
-      "detail": "After the validator starts, vault2, which holds the funds, and STSettlement2 go on chain beside the unchanged version 1 contracts.",
+      "detail": "vault2, which holds the funds, and STSettlement2 are on chain beside the unchanged version 1 contracts. Deploying them does not activate settlement v2: the v2 pool must also be registered.",
       "sources": [
-        { "label": "vault2", "kind": "evm_address", "ref": "" },
+        { "label": "vault2", "kind": "evm_address", "ref": "0xe4865eb1bebdf5c6a10c9d37f3ccdd59aee8f20c" },
         { "label": "STSettlement2", "kind": "evm_address", "ref": "" },
         { "label": "STSettlement2 implementation", "kind": "evm_address", "ref": "" },
         { "label": "vault2 created", "kind": "evm_tx", "ref": "" },
@@ -225,64 +225,87 @@
       "sources": []
     },
     {
-      "id": "fp2-modern-provider-gate",
-      "date": "2026-10-21T00:00:00Z",
-      "status": "scheduled",
-      "key": true,
-      "approximate": false,
-      "title": "Modern provider gate turns on",
-      "detail": "Quality and Speed admit only providers verified as modern. The gate turns on automatically at 00:00 UTC, as decided on October 15, and it can be postponed.",
-      "sources": []
-    },
-    {
       "id": "v2-pool-registration-window",
       "date": "2026-10-21T18:09:00Z/2026-10-22T18:09:00Z",
-      "status": "scheduled",
-      "key": true,
-      "title": "Settlement v2 pool registration window",
-      "detail": "Blocks 9,333,628 to 9,340,828. The v2 pool must register in this window to activate in epoch 3.",
+      "status": "done",
+      "title": "Settlement v2 not registered for epoch 3",
+      "detail": "No v2 pool was registered in the window, blocks 9,333,628 to 9,340,828, so epoch 3 stays on version 1. Registration cannot activate an epoch that has already begun.",
       "sources": []
     },
     {
-      "id": "v2-pool-registered",
-      "date": "2026-10-21T19:00:00Z/2026-10-21T22:00:00Z",
-      "status": "planned",
-      "key": true,
-      "title": "Settlement v2 pool registered",
-      "detail": "The governance Safe registers the v2 pool for epoch 3. This is the activation.",
-      "sources": [
-        { "label": "Registration through the governance Safe", "kind": "evm_tx", "ref": "" }
-      ]
-    },
-    {
-      "id": "settlement-v2-active",
+      "id": "epoch-3-begins-on-v1",
       "date": "2026-10-23T18:09:00Z",
-      "status": "scheduled",
-      "key": true,
-      "title": "Settlement v2 active: epoch 3 begins",
-      "detail": "From block 9,348,028, the validator weights the v2 pool. Epoch 2 still closes on version 1, with its payout root due by around 22:09 UTC.",
+      "status": "done",
+      "approximate": true,
+      "title": "Epoch 3 begins on version 1",
+      "detail": "Epoch 3 starts at block 9,348,028 without a v2 pool registered, so version 1 settles it. Epoch 2 closes on version 1, with its payout root due by around 22:09 UTC.",
       "sources": [
-        { "label": "Epoch 3's first block, 9,348,028", "kind": "evm_block", "ref": "" },
+        { "label": "Epoch 3's first block, 9,348,028", "kind": "evm_block", "ref": "9348028" },
         { "label": "Epoch 2 close", "kind": "evm_tx", "ref": "" },
         { "label": "Epoch 2 payout root", "kind": "evm_tx", "ref": "" }
       ]
     },
     {
+      "id": "v2-pool-registered",
+      "date": "2026-10-24T16:40:00Z/2026-10-30T18:24:00Z",
+      "status": "planned",
+      "key": true,
+      "title": "Settlement v2 pool registration, pending",
+      "detail": "The governance Safe registers the v2 pool for epoch 4, after the final production checks. This is the activation, and it must finalize before block 9,398,428. At finalized block 9,354,702, on October 24 at 16:40 UTC, the pool was not yet registered.",
+      "sources": [
+        { "label": "Registration through the governance Safe", "kind": "evm_tx", "ref": "" }
+      ],
+      "approximate": true
+    },
+    {
       "id": "last-v1-claims",
       "date": "2026-10-25T18:09:00Z",
       "status": "scheduled",
-      "title": "Last version 1 claims (epoch 2)",
+      "title": "Version 1 claims (epoch 2)",
       "detail": "The epoch 2 payout root can finalize from block 9,362,428 at the earliest. The same version 1 limit applies.",
       "sources": [
         { "label": "Epoch 2 finalized", "kind": "evm_tx", "ref": "" }
       ]
     },
     {
-      "id": "first-v2-close-and-commit",
-      "date": "2026-10-30T18:09:00Z/2026-10-30T22:09:00Z",
+      "id": "settlement-v2-active",
+      "date": "2026-10-30T18:25:00Z",
+      "status": "planned",
+      "key": true,
+      "title": "Target: settlement v2 active, epoch 4 begins",
+      "detail": "From block 9,398,428, if the v2 pool registration has finalized by then. If it has not, epoch 4 also stays on version 1, and a new date will be set. Epoch 3 still closes on version 1, with its payout root due by around 22:25 UTC.",
+      "sources": [
+        { "label": "Epoch 4's first block, 9,398,428", "kind": "evm_block", "ref": "" },
+        { "label": "Epoch 3 close", "kind": "evm_tx", "ref": "" },
+        { "label": "Epoch 3 payout root", "kind": "evm_tx", "ref": "" }
+      ]
+    },
+    {
+      "id": "last-v1-claims-epoch-3",
+      "date": "2026-11-01T18:25:00Z",
       "status": "scheduled",
+      "title": "Last version 1 claims (epoch 3), if v2 starts with epoch 4",
+      "detail": "The epoch 3 payout root can finalize from block 9,412,828 at the earliest. The same version 1 limit applies.",
+      "sources": [
+        { "label": "Epoch 3 finalized", "kind": "evm_tx", "ref": "" }
+      ]
+    },
+    {
+      "id": "fp2-modern-provider-gate",
+      "date": "2026-11-04T00:00:00Z",
+      "status": "scheduled",
+      "key": true,
+      "approximate": false,
+      "title": "Modern provider gate turns on",
+      "detail": "Quality and Speed admit only providers verified as modern. The gate turns on automatically at 00:00 UTC, two weeks later than the October 21 first planned.",
+      "sources": []
+    },
+    {
+      "id": "first-v2-close-and-commit",
+      "date": "2026-11-06T18:25:00Z/2026-11-06T22:25:00Z",
+      "status": "planned",
       "title": "First settlement v2 close and commit",
-      "detail": "The first v2 close window opens at block 9,398,428, and the first v2 ledger root is due by block 9,399,628.",
+      "detail": "If settlement v2 starts with epoch 4: epoch 4 ends at block 9,448,828, and the first v2 ledger root is due by block 9,450,028.",
       "sources": [
         { "label": "First v2 close", "kind": "evm_tx", "ref": "" },
         { "label": "First v2 ledger root", "kind": "evm_tx", "ref": "" },
@@ -291,11 +314,11 @@
     },
     {
       "id": "first-v2-claim",
-      "date": "2026-11-01T18:09:00Z/2026-11-01T22:09:00Z",
-      "status": "scheduled",
+      "date": "2026-11-08T18:25:00Z/2026-11-08T22:25:00Z",
+      "status": "planned",
       "key": true,
-      "title": "First settlement v2 claim",
-      "detail": "The first v2 root can finalize 14,400 blocks after its commit, from block 9,412,828 at the earliest, and the first claims follow.",
+      "title": "First settlement v2 claims, earliest",
+      "detail": "The first v2 root can finalize 14,400 blocks after its commit, from block 9,463,228 to 9,464,428 at the earliest, and claims follow once it has. Open challenges, a late or invalid root, or delayed finalization can push claims later.",
       "sources": [
         { "label": "First v2 root finalized", "kind": "evm_tx", "ref": "" },
         { "label": "First v2 claim", "kind": "evm_tx", "ref": "" }

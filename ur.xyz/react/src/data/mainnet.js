@@ -16,7 +16,8 @@
  * that block's timestamp once the block exists, and until then a projection
  * from the block number (`projected`), which the page marks with ≈.
  * `settlement` is what pays the epoch: 'v1' (version 1) or 'v2' (settlement
- * v2, from epoch 3).
+ * v2, targeted from epoch 4: epoch 3 began before the v2 pool was registered,
+ * so it stays on version 1; sn mainnet/TIMELINE-UPDATE.md).
  *
  * Plain data with no imports: the page, the SPA and the node test
  * (tests/mainnet-timeline.test.mjs) all read it.
@@ -40,16 +41,23 @@ export const mainnetEpochs = [
     {
         number: 2,
         settlement: 'v1',
-        summary: 'The last version 1 epoch',
+        summary: 'Version 1',
         start: { block: 9297628, time: '2026-10-16T18:09:00Z', projected: true },
         end: { block: 9348028, time: '2026-10-23T18:09:00Z', projected: true },
     },
     {
         number: 3,
-        settlement: 'v2',
-        summary: 'The first settlement v2 epoch',
+        settlement: 'v1',
+        summary: 'Version 1: the v2 pool was not registered in time',
         start: { block: 9348028, time: '2026-10-23T18:09:00Z', projected: true },
-        end: { block: 9398428, time: '2026-10-30T18:09:00Z', projected: true },
+        end: { block: 9398428, time: '2026-10-30T18:25:00Z', projected: true },
+    },
+    {
+        number: 4,
+        settlement: 'v2',
+        summary: 'Target: the first settlement v2 epoch',
+        start: { block: 9398428, time: '2026-10-30T18:25:00Z', projected: true },
+        end: { block: 9448828, time: '2026-11-06T18:25:00Z', projected: true },
     },
 ];
 
@@ -62,17 +70,16 @@ export const SECONDS_PER_BLOCK = 12;
 
 // The box at the top of the page: what miners need to do now. Its dates are
 // the milestones' (tests/mainnet-timeline.test.mjs holds them together): the
-// modern provider gate at 00:00 UTC on October 21, epoch 2 from October 16 to
-// 23, and epoch 3, where settlement v2 starts, at about 18:09 UTC on October
-// 23. A link goes only to a page the site has: the miner guide's install and
+// modern provider gate at 00:00 UTC on November 4, and epoch 4, where
+// settlement v2 is targeted to start, at about 18:25 UTC on October 30. A link goes only to a page the site has: the miner guide's install and
 // wallet sections, and the operators' apps on /operators.
 export const mainnetActions = {
     headline: 'Mainnet is live!',
     title: 'What miners need to do',
     steps: [
         {
-            title: 'Install the new miner before October 21, 2026.',
-            detail: 'From 00:00 UTC on October 21, the old miner will be deprioritized.',
+            title: 'Install the new miner before November 4, 2026.',
+            detail: 'From 00:00 UTC on November 4, the old miner will be deprioritized.',
             link: { label: 'Miner guide: Install', href: '/docs/miner#1-install' },
         },
         {
@@ -82,12 +89,12 @@ export const mainnetActions = {
         },
         {
             title: 'Until settlement v2 starts, at most 1,500 miners are paid each epoch.',
-            detail: 'Epoch 2 (October 16 to 23) is a ramp-up week. Full payments start with epoch 3, about October 23, 18:09 UTC.',
+            detail: 'Settlement v2 is targeting epoch 4, from about October 30, 18:25 UTC, pending final production checks and the on-chain pool registration before that epoch starts. Epoch 3 is still paid by version 1.',
         },
     ],
     // the closing paragraph, in runs; a run with an href is a link
     closing: [
-        { text: 'After epoch 3, the subnet is set up to run itself and scale to millions of miners. New miners can participate in Bittensor from ' },
+        { text: 'Once settlement v2 is active, the subnet is set up to run itself and scale to millions of miners. New miners can participate in Bittensor from ' },
         { text: 'the apps', href: '/operators' },
         { text: ' with zero Bittensor experience.' },
     ],
